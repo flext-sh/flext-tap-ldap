@@ -21,7 +21,7 @@ from tap_ldap.streams import LDAPStream
 
 # Import from ldap-core-shared
 try:
-    from ldap_core_shared.utils.simple_dn_utils import simple_parse_dn
+    from flext_ldap.utils.simple_dn_utils import simple_parse_dn
 
     LDAP_CORE_AVAILABLE = True
 except ImportError as e:

@@ -222,7 +222,7 @@ class LDAPSingerPatterns:
 
 - **ldap-core-shared**: Shared LDAP models and utilities
 - **target-ldap**: Round-trip synchronization capabilities
-- **flx-ldap**: Advanced LDAP migration features
+- **flext-ldap**: Advanced LDAP migration features
 - **algar-oud-mig**: Migration project data source
 
 ### **Enterprise LDAP Integration**
