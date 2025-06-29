@@ -1,0 +1,31 @@
+# Base organizational units
+dn: ou=users,dc=test,dc=com
+objectClass: organizationalUnit
+ou: users
+description: User accounts
+
+dn: ou=groups,dc=test,dc=com
+objectClass: organizationalUnit
+ou: groups
+description: Group definitions
+
+dn: ou=departments,dc=test,dc=com
+objectClass: organizationalUnit
+ou: departments
+description: Organizational departments
+
+# Departments
+dn: ou=engineering,ou=departments,dc=test,dc=com
+objectClass: organizationalUnit
+ou: engineering
+description: Engineering Department
+
+dn: ou=sales,ou=departments,dc=test,dc=com
+objectClass: organizationalUnit
+ou: sales
+description: Sales Department
+
+dn: ou=hr,ou=departments,dc=test,dc=com
+objectClass: organizationalUnit
+ou: hr
+description: Human Resources Department

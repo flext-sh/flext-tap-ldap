@@ -1,0 +1,173 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.8.4
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
+      - name: Install project
+        run: poetry install --no-interaction
+
+      - name: Code Quality Checks
+        run: |
+          poetry run make lint
+          poetry run make type-check
+          poetry run make format-check
+
+      - name: Security Check
+        run: poetry run make security
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
+    services:
+      ldap:
+        image: osixia/openldap:1.5.0
+        env:
+          LDAP_ORGANISATION: "Test Company"
+          LDAP_DOMAIN: "test.com"
+          LDAP_BASE_DN: "dc=test,dc=com"
+          LDAP_ADMIN_PASSWORD: "admin_password"
+          LDAP_READONLY_USER: "true"
+          LDAP_READONLY_USER_USERNAME: "readonly"
+          LDAP_READONLY_USER_PASSWORD: "readonly_password"
+        ports:
+          - 1389:389
+        options: >-
+          --health-cmd "ldapsearch -x -H ldap://localhost -b dc=test,dc=com -D cn=admin,dc=test,dc=com -w admin_password"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.8.4
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
+      - name: Install project
+        run: poetry install --no-interaction
+
+      - name: Wait for LDAP
+        run: |
+          timeout 60 bash -c 'until ldapsearch -x -H ldap://localhost:1389 -b dc=test,dc=com -D cn=admin,dc=test,dc=com -w admin_password; do sleep 2; done'
+
+      - name: Run Tests
+        run: poetry run make test
+        env:
+          LDAP_HOST: localhost
+          LDAP_PORT: 1389
+          LDAP_BIND_DN: "cn=admin,dc=test,dc=com"
+          LDAP_PASSWORD: admin_password
+          LDAP_BASE_DN: "dc=test,dc=com"
+
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: true
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.8.4
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --with e2e
+
+      - name: Run E2E Tests
+        run: poetry run make test-e2e
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [quality, test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.8.4
+
+      - name: Build package
+        run: poetry build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/

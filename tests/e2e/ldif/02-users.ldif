@@ -1,0 +1,100 @@
+# Test users
+dn: uid=john.doe,ou=users,dc=test,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: john.doe
+cn: John Doe
+sn: Doe
+givenName: John
+mail: john.doe@test.com
+userPassword: {SSHA}x+wnyY9qS7TCSSdg1CtNyJr8FtNFh2RF
+employeeNumber: 1001
+employeeType: active
+departmentNumber: engineering
+telephoneNumber: +1-555-1234
+mobile: +1-555-5678
+
+dn: uid=jane.smith,ou=users,dc=test,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: jane.smith
+cn: Jane Smith
+sn: Smith
+givenName: Jane
+mail: jane.smith@test.com
+userPassword: {SSHA}x+wnyY9qS7TCSSdg1CtNyJr8FtNFh2RF
+employeeNumber: 1002
+employeeType: active
+departmentNumber: sales
+telephoneNumber: +1-555-2345
+mobile: +1-555-6789
+
+dn: uid=bob.wilson,ou=users,dc=test,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: bob.wilson
+cn: Bob Wilson
+sn: Wilson
+givenName: Bob
+mail: bob.wilson@test.com
+userPassword: {SSHA}x+wnyY9qS7TCSSdg1CtNyJr8FtNFh2RF
+employeeNumber: 1003
+employeeType: active
+departmentNumber: engineering
+telephoneNumber: +1-555-3456
+mobile: +1-555-7890
+
+dn: uid=alice.johnson,ou=users,dc=test,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: alice.johnson
+cn: Alice Johnson
+sn: Johnson
+givenName: Alice
+mail: alice.johnson@test.com
+userPassword: {SSHA}x+wnyY9qS7TCSSdg1CtNyJr8FtNFh2RF
+employeeNumber: 1004
+employeeType: active
+departmentNumber: hr
+telephoneNumber: +1-555-4567
+mobile: +1-555-8901
+
+dn: uid=charlie.brown,ou=users,dc=test,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: charlie.brown
+cn: Charlie Brown
+sn: Brown
+givenName: Charlie
+mail: charlie.brown@test.com
+userPassword: {SSHA}x+wnyY9qS7TCSSdg1CtNyJr8FtNFh2RF
+employeeNumber: 1005
+employeeType: inactive
+departmentNumber: sales
+telephoneNumber: +1-555-5678
+mobile: +1-555-9012
+
+# Service accounts
+dn: uid=svc-app1,ou=users,dc=test,dc=com
+objectClass: account
+objectClass: simpleSecurityObject
+uid: svc-app1
+userPassword: {SSHA}x+wnyY9qS7TCSSdg1CtNyJr8FtNFh2RF
+description: Service account for Application 1
+
+dn: uid=svc-app2,ou=users,dc=test,dc=com
+objectClass: account
+objectClass: simpleSecurityObject
+uid: svc-app2
+userPassword: {SSHA}x+wnyY9qS7TCSSdg1CtNyJr8FtNFh2RF
+description: Service account for Application 2
