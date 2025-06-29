@@ -1,0 +1,48 @@
+# Groups
+dn: cn=engineering-team,ou=groups,dc=test,dc=com
+objectClass: groupOfNames
+cn: engineering-team
+description: Engineering Team Members
+member: uid=john.doe,ou=users,dc=test,dc=com
+member: uid=bob.wilson,ou=users,dc=test,dc=com
+
+dn: cn=sales-team,ou=groups,dc=test,dc=com
+objectClass: groupOfNames
+cn: sales-team
+description: Sales Team Members
+member: uid=jane.smith,ou=users,dc=test,dc=com
+member: uid=charlie.brown,ou=users,dc=test,dc=com
+
+dn: cn=hr-team,ou=groups,dc=test,dc=com
+objectClass: groupOfNames
+cn: hr-team
+description: HR Team Members
+member: uid=alice.johnson,ou=users,dc=test,dc=com
+
+dn: cn=managers,ou=groups,dc=test,dc=com
+objectClass: groupOfNames
+cn: managers
+description: Company Managers
+member: uid=john.doe,ou=users,dc=test,dc=com
+member: uid=jane.smith,ou=users,dc=test,dc=com
+member: uid=alice.johnson,ou=users,dc=test,dc=com
+
+dn: cn=developers,ou=groups,dc=test,dc=com
+objectClass: groupOfNames
+cn: developers
+description: Software Developers
+member: uid=john.doe,ou=users,dc=test,dc=com
+member: uid=bob.wilson,ou=users,dc=test,dc=com
+
+dn: cn=REDACTED_LDAP_BIND_PASSWORDs,ou=groups,dc=test,dc=com
+objectClass: groupOfNames
+cn: REDACTED_LDAP_BIND_PASSWORDs
+description: System Administrators
+member: uid=john.doe,ou=users,dc=test,dc=com
+
+dn: cn=service-accounts,ou=groups,dc=test,dc=com
+objectClass: groupOfNames
+cn: service-accounts
+description: Service Accounts
+member: uid=svc-app1,ou=users,dc=test,dc=com
+member: uid=svc-app2,ou=users,dc=test,dc=com

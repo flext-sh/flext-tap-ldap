@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  openldap:
+    image: osixia/openldap:1.5.0
+    container_name: tap-ldap-test
+    environment:
+      LDAP_ORGANISATION: "Test Company"
+      LDAP_DOMAIN: "test.com"
+      LDAP_BASE_DN: "dc=test,dc=com"
+      LDAP_ADMIN_PASSWORD: "REDACTED_LDAP_BIND_PASSWORD_password"
+      LDAP_CONFIG_PASSWORD: "config_password"
+      LDAP_RFC2307BIS_SCHEMA: "true"
+      LDAP_TLS: "false"
+    ports:
+      - "10389:389"
+      - "10636:636"
+    volumes:
+      - ./tests/e2e/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    command: --copy-service --loglevel debug
+    networks:
+      - ldap-network
+
+  phpldapREDACTED_LDAP_BIND_PASSWORD:
+    image: osixia/phpldapREDACTED_LDAP_BIND_PASSWORD:0.9.0
+    container_name: tap-ldap-REDACTED_LDAP_BIND_PASSWORD
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: "openldap"
+      PHPLDAPADMIN_HTTPS: "false"
+    ports:
+      - "10080:80"
+    depends_on:
+      - openldap
+    networks:
+      - ldap-network
+
+networks:
+  ldap-network:
+    driver: bridge

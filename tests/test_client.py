@@ -1,0 +1,163 @@
+"""Tests for LDAP client."""
+
+from __future__ import annotations
+
+from unittest.mock import MagicMock, patch
+
+import pytest
+from ldap3.core.exceptions import LDAPException
+
+from tap_ldap.client import LDAPClient
+
+
+class TestLDAPClient:
+    """Unit tests for LDAPClient."""
+
+    @pytest.fixture
+    def client(self) -> LDAPClient:
+        """Get test client."""
+        return LDAPClient(
+            host="test.ldap.com",
+            port=389,
+            bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
+            password="test_password",
+            use_ssl=False,
+            timeout=30,
+            page_size=1000,
+        )
+
+    def test_client_initialization(self, client: LDAPClient) -> None:
+        """Test client initialization."""
+        assert client.host == "test.ldap.com"
+        assert client.port == 389
+        assert client.bind_dn == "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com"
+        assert client.password == "test_password"
+        assert not client.use_ssl
+        assert client.timeout == 30
+        assert client.page_size == 1000
+
+    def test_server_uri(self, client: LDAPClient) -> None:
+        """Test server URI generation."""
+        assert client.server_uri == "ldap://test.ldap.com:389"
+
+        # Test with SSL
+        client.use_ssl = True
+        assert client.server_uri == "ldaps://test.ldap.com:389"
+
+    @patch("tap_ldap.client.Connection")
+    @patch("tap_ldap.client.Server")
+    def test_get_connection(
+        self,
+        mock_server_class: MagicMock,
+        mock_connection_class: MagicMock,
+        client: LDAPClient,
+    ) -> None:
+        """Test connection context manager."""
+        mock_server = MagicMock()
+        mock_server_class.return_value = mock_server
+
+        mock_connection = MagicMock()
+        mock_connection.bound = True
+        mock_connection_class.return_value = mock_connection
+
+        with client.get_connection() as conn:
+            assert conn == mock_connection
+
+        # Verify connection was created correctly
+        mock_server_class.assert_called_once_with(
+            "test.ldap.com",
+            port=389,
+            use_ssl=False,
+            get_info=True,  # ALL constant
+            connect_timeout=30,
+        )
+
+        mock_connection_class.assert_called_once_with(
+            mock_server,
+            user="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
+            password="test_password",
+            authentication=1,  # SIMPLE constant
+            auto_bind=True,
+            raise_exceptions=True,
+        )
+
+        # Verify unbind was called
+        mock_connection.unbind.assert_called_once()
+
+    @patch("tap_ldap.client.Connection")
+    @patch("tap_ldap.client.Server")
+    def test_search(
+        self,
+        mock_server_class: MagicMock,
+        mock_connection_class: MagicMock,
+        client: LDAPClient,
+    ) -> None:
+        """Test LDAP search."""
+        # Setup mocks
+        mock_entry = MagicMock()
+        mock_entry.entry_dn = "uid=jdoe,ou=users,dc=test,dc=com"
+
+        # Mock attribute access
+        mock_attr = MagicMock()
+        mock_attr.key = "uid"
+        mock_attr.values = ["jdoe"]
+
+        mock_entry.__iter__ = MagicMock(return_value=iter([mock_attr]))
+
+        mock_connection = MagicMock()
+        mock_connection.bound = True
+        mock_connection.entries = [mock_entry]
+        mock_connection.result = {"controls": {}}
+        mock_connection_class.return_value = mock_connection
+
+        # Perform search
+        results = list(
+            client.search(
+                base_dn="dc=test,dc=com",
+                search_filter="(uid=jdoe)",
+                attributes=["uid", "cn", "mail"],
+            ),
+        )
+
+        # Verify results
+        assert len(results) == 1
+        assert results[0]["dn"] == "uid=jdoe,ou=users,dc=test,dc=com"
+        assert results[0]["attributes"]["uid"] == "jdoe"
+
+        # Verify search was called correctly
+        mock_connection.search.assert_called_with(
+            search_base="dc=test,dc=com",
+            search_filter="(uid=jdoe)",
+            search_scope=2,  # SUBTREE
+            attributes=["uid", "cn", "mail"],
+            paged_size=1000,
+        )
+
+    @patch("tap_ldap.client.Connection")
+    @patch("tap_ldap.client.Server")
+    def test_test_connection_success(
+        self,
+        mock_server_class: MagicMock,
+        mock_connection_class: MagicMock,
+        client: LDAPClient,
+    ) -> None:
+        """Test successful connection test."""
+        mock_connection = MagicMock()
+        mock_connection.bound = True
+        mock_connection.result = {"result": 0}
+        mock_connection_class.return_value = mock_connection
+
+        assert client.test_connection() is True
+
+    @patch("tap_ldap.client.Connection")
+    @patch("tap_ldap.client.Server")
+    def test_test_connection_failure(
+        self,
+        mock_server_class: MagicMock,
+        mock_connection_class: MagicMock,
+        client: LDAPClient,
+    ) -> None:
+        """Test failed connection test."""
+        mock_connection_class.side_effect = LDAPException("Connection failed")
+
+        assert client.test_connection() is False
