@@ -5,7 +5,9 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Any
 from unittest.mock import MagicMock, patch
+
 import pytest
+
 from tap_ldap.streams import (
     CustomStream,
     GroupsStream,

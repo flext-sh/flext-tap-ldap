@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 from singer_sdk import typing as th
 from singer_sdk.streams import Stream
+
 from tap_ldap.client import LDAPClient
 
 if TYPE_CHECKING:
