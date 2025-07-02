@@ -7,12 +7,14 @@ which is critical for the brutal simplification migration project.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
+
+import operator
 
 from singer_sdk import typing as th
 
@@ -123,7 +125,7 @@ class LDIFStream(LDAPStream):
 
     def get_records(
         self,
-        context: Mapping[str, Any] | None = None,  # noqa: ARG002
+        context: Mapping[str, Any] | None = None,
     ) -> Iterable[dict[str, Any]]:
         """Get records from LDIF files.
 
@@ -137,7 +139,7 @@ class LDIFStream(LDAPStream):
 
         """
         ldif_files = self._get_ldif_files()
-        processing_timestamp = datetime.now(timezone.utc)
+        processing_timestamp = datetime.now(UTC)
         migration_batch = self.config.get(
             "migration_batch",
             f"batch_{processing_timestamp.strftime('%Y%m%d_%H%M%S')}",
@@ -434,7 +436,7 @@ class LDIFAnalysisStream(LDAPStream):
 
     def get_records(
         self,
-        context: Mapping[str, Any] | None = None,  # noqa: ARG002
+        context: Mapping[str, Any] | None = None,
     ) -> Iterable[dict[str, Any]]:
         """Get LDIF analysis records.
 
@@ -448,7 +450,7 @@ class LDIFAnalysisStream(LDAPStream):
 
         """
         ldif_files = self._get_ldif_files()
-        analysis_timestamp = datetime.now(timezone.utc)
+        analysis_timestamp = datetime.now(UTC)
 
         for file_path in ldif_files:
             try:
@@ -554,7 +556,7 @@ class LDIFAnalysisStream(LDAPStream):
             "attributes_summary": {
                 "total_attributes": len(attributes_used),
                 "most_common": dict(
-                    sorted(attributes_used.items(), key=lambda x: x[1], reverse=True)[
+                    sorted(attributes_used.items(), key=operator.itemgetter(1), reverse=True)[
                         :10
                     ],
                 ),
@@ -607,12 +609,7 @@ class LDIFAnalysisStream(LDAPStream):
         if validation_errors > 0:
             error_rate = (validation_errors / total_entries) * 100
             if error_rate > 10:
-                recommendations.append(
-                    f"High validation error rate ({error_rate:.1f}%) - review data quality",
-                )
-                recommendations.append(
-                    f"Some validation errors ({error_rate:.1f}%) - minor cleanup needed",
-                )
+                recommendations.extend((f"High validation error rate ({error_rate:.1f}%) - review data quality", f"Some validation errors ({error_rate:.1f}%) - minor cleanup needed"))
 
         # Check for complex hierarchy
         max_users = entry_types.get("user", 0)

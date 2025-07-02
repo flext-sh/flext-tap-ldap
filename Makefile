@@ -1,191 +1,291 @@
-.PHONY: help install install-dev test test-unit test-integration test-e2e lint format format-check type-check security clean build publish docs serve-docs docker-test docker-clean pre-commit all
+# =============================================================================
+# FLEXT TAP LDAP - MAKEFILE
+# PEP Strict Compliance with Poetry Build System - Singer Tap
+# =============================================================================
 
-# Configuration
-PYTHON := python
-POETRY := poetry
+.DEFAULT_GOAL := help
+SHELL := /bin/bash
+
+# Project Configuration
+PROJECT_NAME := flext-tap-ldap
+PYTHON_VERSION := 3.13
 SOURCE_DIR := src
-TEST_DIR := tests
-PACKAGE_NAME := tap_ldap
+TESTS_DIR := tests
+REPORTS_DIR := reports
+MODULE_NAME := tap_ldap
 
 # Colors for output
-BLUE := \033[34m
-GREEN := \033[32m
-YELLOW := \033[33m
-RED := \033[31m
-RESET := \033[0m
+CYAN := \033[0;36m
+GREEN := \033[0;32m
+YELLOW := \033[1;33m
+RED := \033[0;31m
+NC := \033[0m # No Color
 
-# Default target
+# =============================================================================
+# HELP SYSTEM
+# =============================================================================
+
+.PHONY: help
 help: ## Show this help message
-	@echo "$(BLUE)Available targets:$(RESET)"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-20s$(RESET) %s\n", $$1, $$2}'
+	@echo -e "$(CYAN)$(PROJECT_NAME) - Singer Tap Development Commands$(NC)"
+	@echo -e "$(CYAN)===============================================$(NC)"
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "$(GREEN)%-20s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-# Installation targets
-install: ## Install package dependencies
-	@echo "$(BLUE)Installing dependencies...$(RESET)"
-	$(POETRY) install
+# =============================================================================
+# ENVIRONMENT SETUP
+# =============================================================================
 
-install-dev: ## Install package with development dependencies
-	@echo "$(BLUE)Installing development dependencies...$(RESET)"
-	$(POETRY) install --with dev
+.PHONY: install
+install: ## Install project dependencies with Poetry
+	@echo -e "$(CYAN)Installing project dependencies...$(NC)"
+	poetry install --all-extras
+	poetry run pre-commit install
+	@echo -e "$(GREEN)✓ Installation complete$(NC)"
 
-install-e2e: ## Install package with E2E testing dependencies
-	@echo "$(BLUE)Installing E2E testing dependencies...$(RESET)"
-	$(POETRY) install --with dev,e2e
+.PHONY: install-dev
+install-dev: ## Install development dependencies
+	@echo -e "$(CYAN)Installing development dependencies...$(NC)"
+	poetry install --with dev,security,build,test
+	poetry run pre-commit install
+	@echo -e "$(GREEN)✓ Development installation complete$(NC)"
 
-install-all: ## Install all dependencies
-	@echo "$(BLUE)Installing all dependencies...$(RESET)"
-	$(POETRY) install --with dev,e2e
+.PHONY: update
+update: ## Update all dependencies
+	@echo -e "$(CYAN)Updating dependencies...$(NC)"
+	poetry update
+	@echo -e "$(GREEN)✓ Dependencies updated$(NC)"
 
-# Testing targets
-test: test-unit test-integration ## Run all tests
-	@echo "$(GREEN)All tests completed!$(RESET)"
+.PHONY: lock
+lock: ## Generate poetry.lock file
+	@echo -e "$(CYAN)Generating lock file...$(NC)"
+	poetry lock --no-update
+	@echo -e "$(GREEN)✓ Lock file generated$(NC)"
 
-test-unit: ## Run unit tests
-	@echo "$(BLUE)Running unit tests...$(RESET)"
-	$(POETRY) run pytest $(TEST_DIR)/unit -v --cov=$(SOURCE_DIR)/$(PACKAGE_NAME) --cov-report=term-missing --cov-report=html --cov-report=xml
+# =============================================================================
+# CODE QUALITY - PEP STRICT COMPLIANCE
+# =============================================================================
 
-test-integration: ## Run integration tests
-	@echo "$(BLUE)Running integration tests...$(RESET)"
-	$(POETRY) run pytest $(TEST_DIR)/integration -v --cov=$(SOURCE_DIR)/$(PACKAGE_NAME) --cov-append --cov-report=term-missing
+.PHONY: format
+format: ## Format code with black and isort
+	@echo -e "$(CYAN)Formatting code...$(NC)"
+	poetry run black $(SOURCE_DIR) $(TESTS_DIR)
+	poetry run isort $(SOURCE_DIR) $(TESTS_DIR)
+	@echo -e "$(GREEN)✓ Code formatted$(NC)"
 
-test-e2e: ## Run E2E tests with Docker
-	@echo "$(BLUE)Running E2E tests...$(RESET)"
-	$(POETRY) run pytest $(TEST_DIR)/e2e -v --tb=short
+.PHONY: lint
+lint: ## Run all linters (ruff, mypy, bandit)
+	@echo -e "$(CYAN)Running linters...$(NC)"
+	poetry run ruff check $(SOURCE_DIR) $(TESTS_DIR)
+	poetry run mypy $(SOURCE_DIR)
+	poetry run bandit -r $(SOURCE_DIR)
+	@echo -e "$(GREEN)✓ Linting complete$(NC)"
 
-test-coverage: ## Run tests with coverage report
-	@echo "$(BLUE)Running tests with coverage...$(RESET)"
-	$(POETRY) run pytest $(TEST_DIR) -v --cov=$(SOURCE_DIR)/$(PACKAGE_NAME) --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=90
+.PHONY: lint-fix
+lint-fix: ## Run linters with auto-fix
+	@echo -e "$(CYAN)Running linters with auto-fix...$(NC)"
+	poetry run ruff check --fix $(SOURCE_DIR) $(TESTS_DIR)
+	poetry run black $(SOURCE_DIR) $(TESTS_DIR)
+	poetry run isort $(SOURCE_DIR) $(TESTS_DIR)
+	@echo -e "$(GREEN)✓ Linting and formatting complete$(NC)"
 
-# Code quality targets
-lint: ## Run linting (ruff + additional checks)
-	@echo "$(BLUE)Running linter...$(RESET)"
-	$(POETRY) run ruff check $(SOURCE_DIR) $(TEST_DIR)
-	$(POETRY) run ruff format --check $(SOURCE_DIR) $(TEST_DIR)
-
-format: ## Format code with ruff and black
-	@echo "$(BLUE)Formatting code...$(RESET)"
-	$(POETRY) run ruff format $(SOURCE_DIR) $(TEST_DIR)
-	$(POETRY) run ruff check --fix $(SOURCE_DIR) $(TEST_DIR)
-
-format-check: ## Check code formatting
-	@echo "$(BLUE)Checking code formatting...$(RESET)"
-	$(POETRY) run ruff format --check $(SOURCE_DIR) $(TEST_DIR)
-
+.PHONY: type-check
 type-check: ## Run type checking with mypy
-	@echo "$(BLUE)Running type checker...$(RESET)"
-	$(POETRY) run mypy $(SOURCE_DIR)
+	@echo -e "$(CYAN)Running type checks...$(NC)"
+	poetry run mypy $(SOURCE_DIR)
+	@echo -e "$(GREEN)✓ Type checking complete$(NC)"
 
+.PHONY: security
 security: ## Run security checks
-	@echo "$(BLUE)Running security checks...$(RESET)"
-	$(POETRY) run bandit -r $(SOURCE_DIR) -f json -o bandit-report.json || true
-	$(POETRY) run safety check
+	@echo -e "$(CYAN)Running security checks...$(NC)"
+	poetry run bandit -r $(SOURCE_DIR)
+	poetry run safety check
+	@echo -e "$(GREEN)✓ Security checks complete$(NC)"
 
-# Singer SDK specific targets
-discover: ## Run tap discovery
-	@echo "$(BLUE)Running tap discovery...$(RESET)"
-	$(POETRY) run tap-ldap --config config.example.json --discover
+# =============================================================================
+# TESTING
+# =============================================================================
 
-extract: ## Run tap extraction (requires config.json)
-	@echo "$(BLUE)Running tap extraction...$(RESET)"
-	$(POETRY) run tap-ldap --config config.json --catalog catalog.json
+.PHONY: test
+test: ## Run all tests with coverage
+	@echo -e "$(CYAN)Running tests...$(NC)"
+	mkdir -p $(REPORTS_DIR)
+	poetry run pytest
+	@echo -e "$(GREEN)✓ Tests complete$(NC)"
 
-validate-config: ## Validate configuration file
-	@echo "$(BLUE)Validating configuration...$(RESET)"
-	$(POETRY) run tap-ldap --config config.json --test
+.PHONY: test-unit
+test-unit: ## Run unit tests only
+	@echo -e "$(CYAN)Running unit tests...$(NC)"
+	poetry run pytest -m "unit" -v
+	@echo -e "$(GREEN)✓ Unit tests complete$(NC)"
 
-# Development targets
-clean: ## Clean build artifacts and cache
-	@echo "$(BLUE)Cleaning build artifacts...$(RESET)"
+.PHONY: test-integration
+test-integration: ## Run integration tests only
+	@echo -e "$(CYAN)Running integration tests...$(NC)"
+	poetry run pytest -m "integration" -v
+	@echo -e "$(GREEN)✓ Integration tests complete$(NC)"
+
+.PHONY: test-singer
+test-singer: ## Run Singer protocol tests only
+	@echo -e "$(CYAN)Running Singer tests...$(NC)"
+	poetry run pytest -m "singer" -v
+	@echo -e "$(GREEN)✓ Singer tests complete$(NC)"
+
+.PHONY: test-ldap
+test-ldap: ## Run LDAP tests only
+	@echo -e "$(CYAN)Running LDAP tests...$(NC)"
+	poetry run pytest -m "ldap" -v
+	@echo -e "$(GREEN)✓ LDAP tests complete$(NC)"
+
+.PHONY: test-tap
+test-tap: ## Run tap tests only
+	@echo -e "$(CYAN)Running tap tests...$(NC)"
+	poetry run pytest -m "tap" -v
+	@echo -e "$(GREEN)✓ Tap tests complete$(NC)"
+
+.PHONY: test-e2e
+test-e2e: ## Run end-to-end tests only
+	@echo -e "$(CYAN)Running E2E tests...$(NC)"
+	poetry run pytest -m "e2e" -v
+	@echo -e "$(GREEN)✓ E2E tests complete$(NC)"
+
+.PHONY: test-watch
+test-watch: ## Run tests in watch mode
+	@echo -e "$(CYAN)Running tests in watch mode...$(NC)"
+	poetry run pytest-watch
+
+.PHONY: coverage
+coverage: ## Generate coverage report
+	@echo -e "$(CYAN)Generating coverage report...$(NC)"
+	mkdir -p $(REPORTS_DIR)
+	poetry run pytest --cov=$(SOURCE_DIR) --cov-report=html:$(REPORTS_DIR)/coverage --cov-report=term-missing
+	@echo -e "$(GREEN)✓ Coverage report generated: $(REPORTS_DIR)/coverage/index.html$(NC)"
+
+# =============================================================================
+# SINGER TAP OPERATIONS
+# =============================================================================
+
+.PHONY: tap-discover
+tap-discover: ## Discover LDAP schema
+	@echo -e "$(CYAN)Discovering LDAP schema...$(NC)"
+	poetry run tap-ldap --config config.json --discover > catalog.json
+	@echo -e "$(GREEN)✓ Schema discovery complete$(NC)"
+
+.PHONY: tap-test
+tap-test: ## Test LDAP connection
+	@echo -e "$(CYAN)Testing LDAP connection...$(NC)"
+	poetry run tap-ldap --config config.json --test
+	@echo -e "$(GREEN)✓ Connection test complete$(NC)"
+
+.PHONY: tap-run
+tap-run: ## Run tap extraction
+	@echo -e "$(CYAN)Running tap extraction...$(NC)"
+	poetry run tap-ldap --config config.json --catalog catalog.json
+	@echo -e "$(GREEN)✓ Extraction complete$(NC)"
+
+.PHONY: tap-state
+tap-state: ## Run tap with state
+	@echo -e "$(CYAN)Running tap with state...$(NC)"
+	poetry run tap-ldap --config config.json --catalog catalog.json --state state.json
+	@echo -e "$(GREEN)✓ Extraction with state complete$(NC)"
+
+.PHONY: tap-validate
+tap-validate: ## Validate tap configuration
+	@echo -e "$(CYAN)Validating tap configuration...$(NC)"
+	poetry run python -m $(MODULE_NAME).cli validate --config config.json
+	@echo -e "$(GREEN)✓ Configuration validation complete$(NC)"
+
+# =============================================================================
+# BUILD AND DISTRIBUTION
+# =============================================================================
+
+.PHONY: build
+build: clean ## Build the package
+	@echo -e "$(CYAN)Building package...$(NC)"
+	poetry build
+	@echo -e "$(GREEN)✓ Package built$(NC)"
+
+.PHONY: publish-test
+publish-test: build ## Publish to TestPyPI
+	@echo -e "$(CYAN)Publishing to TestPyPI...$(NC)"
+	poetry publish --repository testpypi
+	@echo -e "$(GREEN)✓ Published to TestPyPI$(NC)"
+
+.PHONY: publish
+publish: build ## Publish to PyPI
+	@echo -e "$(CYAN)Publishing to PyPI...$(NC)"
+	poetry publish
+	@echo -e "$(GREEN)✓ Published to PyPI$(NC)"
+
+# =============================================================================
+# CI/CD PIPELINE COMMANDS
+# =============================================================================
+
+.PHONY: ci-check
+ci-check: install-dev lint security test ## Run all CI checks
+	@echo -e "$(GREEN)✓ All CI checks passed$(NC)"
+
+.PHONY: pre-commit
+pre-commit: ## Run pre-commit hooks
+	@echo -e "$(CYAN)Running pre-commit hooks...$(NC)"
+	poetry run pre-commit run --all-files
+	@echo -e "$(GREEN)✓ Pre-commit hooks complete$(NC)"
+
+# =============================================================================
+# CLEANUP
+# =============================================================================
+
+.PHONY: clean
+clean: ## Clean build artifacts and cache files
+	@echo -e "$(CYAN)Cleaning build artifacts...$(NC)"
 	rm -rf build/
 	rm -rf dist/
 	rm -rf *.egg-info/
-	rm -rf .coverage
-	rm -rf htmlcov/
 	rm -rf .pytest_cache/
 	rm -rf .mypy_cache/
 	rm -rf .ruff_cache/
-	rm -f coverage.xml
-	rm -f bandit-report.json
-	find . -type d -name __pycache__ -exec rm -rf {} +
+	rm -rf $(REPORTS_DIR)/
+	rm -f catalog.json
+	rm -f schema.json
+	rm -f state.json
+	rm -f messages.jsonl
+	find . -type d -name __pycache__ -delete
 	find . -type f -name "*.pyc" -delete
+	find . -type f -name "*.pyo" -delete
+	find . -type f -name "*.pyd" -delete
+	find . -type f -name ".coverage" -delete
+	find . -type f -name "coverage.xml" -delete
+	@echo -e "$(GREEN)✓ Cleanup complete$(NC)"
 
-build: ## Build package
-	@echo "$(BLUE)Building package...$(RESET)"
-	$(POETRY) build
+# =============================================================================
+# QUALITY GATES FOR CI/CD
+# =============================================================================
 
-publish: ## Publish package to PyPI
-	@echo "$(BLUE)Publishing package...$(RESET)"
-	$(POETRY) publish
+.PHONY: quality-gate
+quality-gate: ## Quality gate for CI/CD (strict)
+	@echo -e "$(CYAN)Running quality gate...$(NC)"
+	$(MAKE) format
+	$(MAKE) lint
+	$(MAKE) type-check
+	$(MAKE) security
+	$(MAKE) test
+	$(MAKE) tap-test
+	@echo -e "$(GREEN)✓ Quality gate passed$(NC)"
 
-publish-test: ## Publish package to Test PyPI
-	@echo "$(BLUE)Publishing package to Test PyPI...$(RESET)"
-	$(POETRY) publish --repository testpypi
+# =============================================================================
+# INFORMATION
+# =============================================================================
 
-# Docker targets
-docker-test: ## Run tests in Docker environment
-	@echo "$(BLUE)Starting Docker test environment...$(RESET)"
-	docker-compose -f docker-compose.yml up -d
-	@echo "$(YELLOW)Waiting for services to be ready...$(RESET)"
-	sleep 10
-	$(POETRY) run pytest $(TEST_DIR)/e2e -v
-	docker-compose -f docker-compose.yml down -v
-
-docker-clean: ## Clean Docker environment
-	@echo "$(BLUE)Cleaning Docker environment...$(RESET)"
-	docker-compose -f docker-compose.yml down -v --remove-orphans
-	docker system prune -f
-
-# Pre-commit and CI targets
-pre-commit: format lint type-check security test-unit ## Run pre-commit checks
-	@echo "$(GREEN)Pre-commit checks completed!$(RESET)"
-
-ci: install-dev pre-commit test-coverage ## Run CI pipeline
-	@echo "$(GREEN)CI pipeline completed!$(RESET)"
-
-# Convenience targets
-all: clean install-dev pre-commit test build ## Run complete development cycle
-	@echo "$(GREEN)Complete development cycle finished!$(RESET)"
-
-check: lint type-check security ## Run all code quality checks
-	@echo "$(GREEN)Code quality checks completed!$(RESET)"
-
-dev-setup: install-dev ## Setup development environment
-	@echo "$(BLUE)Setting up development environment...$(RESET)"
-	$(POETRY) install --with dev,e2e
-	@echo "$(GREEN)Development environment ready!$(RESET)"
-	@echo "$(YELLOW)Next steps:$(RESET)"
-	@echo "  1. Copy config.example.json to config.json and update with your LDAP settings"
-	@echo "  2. Run 'make discover' to test your configuration"
-	@echo "  3. Run 'make test' to ensure everything works"
-
-# Poetry specific targets
-poetry-lock: ## Update poetry.lock file
-	@echo "$(BLUE)Updating poetry.lock...$(RESET)"
-	$(POETRY) lock
-
-poetry-update: ## Update dependencies
-	@echo "$(BLUE)Updating dependencies...$(RESET)"
-	$(POETRY) update
-
-poetry-show: ## Show dependency tree
-	@echo "$(BLUE)Dependency tree:$(RESET)"
-	$(POETRY) show --tree
-
-poetry-export: ## Export requirements.txt
-	@echo "$(BLUE)Exporting requirements.txt...$(RESET)"
-	$(POETRY) export -f requirements.txt --output requirements.txt --without-hashes
-
-# Debug targets
-debug-env: ## Show environment information
-	@echo "$(BLUE)Environment Information:$(RESET)"
-	@echo "Python: $$($(PYTHON) --version)"
-	@echo "Poetry: $$($(POETRY) --version)"
-	@echo "Package: $(PACKAGE_NAME)"
-	@echo "Source: $(SOURCE_DIR)"
-	@echo "Tests: $(TEST_DIR)"
-
-# Example configuration
-example-config: ## Create example configuration file
-	@echo "$(BLUE)Creating example configuration...$(RESET)"
-	@echo '{\n  "host": "ldap.example.com",\n  "port": 389,\n  "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=example,dc=com",\n  "password": "your_password",\n  "base_dn": "dc=example,dc=com",\n  "use_ssl": false,\n  "page_size": 1000,\n  "user_filter": "(objectClass=inetOrgPerson)",\n  "group_filter": "(objectClass=groupOfNames)"\n}' > config.example.json
-	@echo "$(GREEN)Example configuration created: config.example.json$(RESET)"
+.PHONY: info
+info: ## Show project information
+	@echo -e "$(CYAN)Project Information$(NC)"
+	@echo -e "$(CYAN)==================$(NC)"
+	@echo -e "Project: $(PROJECT_NAME)"
+	@echo -e "Python Version: $(PYTHON_VERSION)"
+	@echo -e "Source Directory: $(SOURCE_DIR)"
+	@echo -e "Tests Directory: $(TESTS_DIR)"
+	@echo -e "Reports Directory: $(REPORTS_DIR)"
+	@echo -e "Module Name: $(MODULE_NAME)"
+	@echo ""
+	@poetry env info
+	@echo ""
+	@poetry show --tree
