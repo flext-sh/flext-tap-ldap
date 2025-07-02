@@ -460,7 +460,7 @@ environments:
 | ---------------------------------------- | --------------- | ------------------------- |
 | [ldap-core-shared](../ldap-core-shared/) | Shared models   | LDAP domain models        |
 | [target-ldap](../target-ldap/)           | Round-trip sync | Directory synchronization |
-| [flext-ldap](../flext-ldap/)                 | Migration tools | Directory migration       |
+| [flext-ldap](../flext-ldap/)             | Migration tools | Directory migration       |
 
 ---
 

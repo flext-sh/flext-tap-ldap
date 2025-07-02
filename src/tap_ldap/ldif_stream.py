@@ -178,7 +178,7 @@ class LDIFStream(LDAPStream):
         ldif_paths = self.config.get("ldif_files", [])
         ldif_directory = self.config.get("ldif_directory")
 
-        files: list = []
+        files: list[Any] = []
 
         # Add explicit file paths
         for file_path in ldif_paths:
@@ -483,10 +483,10 @@ class LDIFAnalysisStream(LDAPStream):
         logger.info("Analyzing LDIF file: %s", file_path)
 
         # Initialize counters
-        entry_types: dict = {}
-        object_classes: dict = {}
-        hierarchy_levels: dict = {}
-        attributes_used: dict = {}
+        entry_types: dict[str, Any] = {}
+        object_classes: dict[str, Any] = {}
+        hierarchy_levels: dict[str, Any] = {}
+        attributes_used: dict[str, Any] = {}
         total_entries = 0
         validation_errors = 0
         validation_warnings = 0
@@ -590,7 +590,7 @@ class LDIFAnalysisStream(LDAPStream):
             List of recommendations
 
         """
-        recommendations: list = []
+        recommendations: list[Any] = []
 
         # Check for Oracle-specific objects
         oracle_objects = sum(

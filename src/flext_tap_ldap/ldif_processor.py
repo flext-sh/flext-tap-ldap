@@ -537,7 +537,7 @@ class LDIFTransformer:
             Transformed LDIFEntry
 
         """
-        new_attributes: dict = {}
+        new_attributes: dict[str, Any] = {}
 
         for attr_name, values in entry.attributes.items():
             new_name = mappings.get(attr_name, attr_name)
