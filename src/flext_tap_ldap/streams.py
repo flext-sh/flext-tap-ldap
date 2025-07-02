@@ -7,7 +7,7 @@ data from LDAP directories.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, ClassVar
 
 if TYPE_CHECKING:
@@ -57,7 +57,7 @@ class LDAPStream(Stream):
 
     def get_records(
         self,
-        context: Mapping[str, Any] | None = None,  # noqa: ARG002
+        context: Mapping[str, Any] | None = None,
     ) -> Iterable[dict[str, Any]]:
         """Get records from LDAP.
 
@@ -315,7 +315,7 @@ class SchemaStream(LDAPStream):
 
     def get_records(
         self,
-        context: Mapping[str, Any] | None = None,  # noqa: ARG002
+        context: Mapping[str, Any] | None = None,
     ) -> Iterable[dict[str, Any]]:
         """Get schema records from LDAP.
 
@@ -329,7 +329,7 @@ class SchemaStream(LDAPStream):
 
         """
         schema_info = self.client.get_schema()
-        extracted_at = datetime.now(timezone.utc).isoformat()
+        extracted_at = datetime.now(UTC).isoformat()
 
         # Process object classes
         for oc_def in schema_info.get("object_classes", []):

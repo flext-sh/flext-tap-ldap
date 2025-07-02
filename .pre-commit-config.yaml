@@ -1,4 +1,4 @@
-# Pre-commit configuration - PyAuto Enterprise Standards
+# Pre-commit configuration - FLEXT Tap LDAP
 # See https://pre-commit.com for more information
 
 repos:
@@ -20,7 +20,7 @@ repos:
     rev: 24.10.0
     hooks:
       - id: black
-        language_version: python3.9
+        language_version: python3.13
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.8.6
@@ -33,7 +33,21 @@ repos:
     rev: v1.16.0
     hooks:
       - id: mypy
-        additional_dependencies: [types-python-dateutil]
+        additional_dependencies:
+          [
+            types-python-dateutil,
+            types-requests,
+            types-setuptools,
+            pydantic,
+            pydantic-settings,
+            singer-python,
+            ldap3,
+            structlog,
+            click,
+            tenacity,
+            cryptography,
+            orjson,
+          ]
         args: [--strict, --ignore-missing-imports]
 
   - repo: https://github.com/PyCQA/bandit
