@@ -6,7 +6,6 @@ from pathlib import Path
 from textwrap import dedent
 
 import pytest
-
 from tap_ldap.ldif_processor import LDIFEntry, LDIFProcessor, LDIFValidator
 
 

@@ -189,11 +189,11 @@ class LDAPClient:
     def get_connection(self) -> Generator[Connection]:
         """Get enterprise LDAP connection with retry and pooling.
 
-        Yields
+        Yields:
         ------
             Active LDAP connection with enterprise features
 
-        Raises
+        Raises:
         ------
             LDAPException: If connection fails after retries
 
@@ -302,11 +302,11 @@ class LDAPClient:
     def get_schema(self) -> dict[str, Any]:
         """Retrieve LDAP schema information.
 
-        Returns
+        Returns:
         -------
             Dict containing schema information
 
-        Raises
+        Raises:
         ------
             LDAPException: If schema retrieval fails
 
@@ -349,7 +349,7 @@ class LDAPClient:
     def test_connection(self) -> bool:
         """Test LDAP connection.
 
-        Returns
+        Returns:
         -------
             True if connection successful, False otherwise
 

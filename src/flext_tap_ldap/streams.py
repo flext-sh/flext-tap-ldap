@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 
 from singer_sdk import typing as th
 from singer_sdk.streams import Stream
-
 from tap_ldap.client import LDAPClient
 
 if TYPE_CHECKING:
@@ -84,7 +83,7 @@ class LDAPStream(Stream):
     def get_search_filter(self) -> str:
         """Get LDAP search filter for this stream.
 
-        Returns
+        Returns:
         -------
             LDAP filter string
 
@@ -94,7 +93,7 @@ class LDAPStream(Stream):
     def get_attributes(self) -> list[str] | None:
         """Get list of attributes to retrieve.
 
-        Returns
+        Returns:
         -------
             List of attribute names or None for all
 

@@ -13,7 +13,7 @@ __version__ = "0.5.0"
 
 # Import principais classes se existirem
 try:
-    from .tap import TapLDAP
+    from flext_tap_ldap.tap import TapLDAP
 except ImportError:
     TapLDAP = None
 

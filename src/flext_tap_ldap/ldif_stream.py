@@ -17,7 +17,6 @@ if TYPE_CHECKING:
 import operator
 
 from singer_sdk import typing as th
-
 from tap_ldap.ldif_processor import LDIFProcessor, LDIFTransformer, LDIFValidator
 from tap_ldap.streams import LDAPStream
 
@@ -172,7 +171,7 @@ class LDIFStream(LDAPStream):
     def _get_ldif_files(self) -> list[Path]:
         """Get list of LDIF files to process.
 
-        Returns
+        Returns:
         -------
             List of LDIF file paths
 

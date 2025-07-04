@@ -6,7 +6,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from ldap3.core.exceptions import LDAPException
-
 from tap_ldap.client import LDAPClient
 
 

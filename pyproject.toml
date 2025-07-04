@@ -6,10 +6,10 @@ build-backend = "poetry.core.masonry.api"
 name = "flext-tap-ldap"
 version = "0.2.0"
 description = "FLEXT Tap LDAP - Singer Tap for LDAP Directory Data Extraction"
-authors = [{name = "FLEXT Team", email = "team@flext.sh"}]
-license = {text = "MIT"}
+authors = [{ name = "FLEXT Team", email = "team@flext.sh" }]
+license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">=3.12,<4.0"
+requires-python = ">=3.13"
 keywords = ["flext", "singer", "tap", "ldap", "directory", "etl", "enterprise"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -18,6 +18,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Database",
     "Topic :: System :: Systems Administration :: Authentication/Directory",
@@ -91,53 +92,53 @@ target-version = "py313"
 fix = true
 
 [tool.ruff.lint]
-select = ["ALL"]
 ignore = [
     # MANDATORY: Only formatter conflicts that cannot be auto-fixed
-    "COM812",  # trailing-comma-missing (handled by formatter)
-    "ISC001",  # implicit-str-concat (conflicts with formatter)
-    "D203",    # one-blank-line-before-class (conflicts with D211)
-    "D213",    # multi-line-docstring-summary-second-line (conflicts with D212)
+    "COM812", #  #  # trailing-comma-missing (handled by formatter)
+    "ISC001", #  #  # implicit-str-concat (conflicts with formatter)
+    "D203",   #  #  # one-blank-line-before-class (conflicts with D211)
+    "D213",   #  #  # multi-line-docstring-summary-second-line (conflicts with D212)
 
     # FOCUS: Only critical errors for now - ignore non-critical temporarily
-    "E501",    # line-too-long (formatting)
-    "D100", "D101", "D102", "D103", "D105", "D107", "D205", "D401", "D417",  # docstring issues
-    "ANN001", "ANN101", "ANN102", "ANN201", "ANN202", "ANN204", "ANN401", "ANN003", "ANN002",  # type annotations
-    "PLR0911", "PLR0912", "PLR0913", "PLR0915", "C901",  # complexity
-    "E402",    # import-not-at-top (legacy)
-    "S110", "S112", "S105", "S106", "S108", "S314", "S603", "S607", "S101", "S102",  # security (non-critical)
-    "ARG001", "ARG002", "ARG003", "ARG005",  # unused arguments
-    "PTH108", "PTH110", "PTH116", "PTH117", "PTH118", "PTH120", "PTH123",  # pathlib
-    "TRY002", "TRY003", "TRY004", "TRY300", "TRY301", "TRY401",  # try/except patterns
-    "FBT001", "FBT002", "FBT003",  # boolean traps
-    "DTZ001", "DTZ005", "DTZ006", "DTZ007",  # datetime
-    "G004", "G201",  # logging
-    "N806", "N811",  # naming
-    "B007", "B018", "B019", "B023", "B904",  # bugbear non-critical
-    "SIM102", "SIM105", "SIM113", "SIM117",  # simplify
-    "RUF001", "RUF002", "RUF005",  # ruff specific
-    "UP035",  # typing upgrades
-    "ERA001",  # commented code
-    "TD002", "TD003",  # todos
-    "FIX002",  # fixme
-    "PLW0602", "PLW0603", "PLW2901",  # pylint warnings
-    "PLC0415",  # pylint conventions
-    "PLE0605",  # pylint errors non-critical
-    "PERF102", "PERF203", "PERF402",  # performance
-    "A002", "A004",  # builtins
-    "PT011", "PT012", "PT017",  # pytest
-    "PD008",  # pandas
-    "INP001",  # namespace packages
-    "PLR0124", "PLR2004",  # magic values
-    "PYI056",  # pyi
-    "EXE001",  # executable
-    "BLE001",  # blind except (temporarily)
-    "SLF001",  # private access (temporarily)
-    "E722", "E741",  # bare except and ambiguous names
-    "T201",  # print statements (temporarily)
-    "PLW2901",  # redefined loop variable (temporarily)
-    "D401",  # docstring imperative mood (temporarily)
+    "E501",    #  #  # line-too-long (formatting)
+    "D100",    # "D101", "D102", "D103", "D105", "D107", "D205", "D401", "D417",  #  # docstring issues
+    "ANN001",  # "ANN101", "ANN102", "ANN201", "ANN202", "ANN204", "ANN401", "ANN003", "ANN002",  #  # type annotations
+    "PLR0911", # "PLR0912", "PLR0913", "PLR0915", "C901",  #  # complexity
+    "E402",    #  #  # import-not-at-top (legacy)
+    "S110",    # "S112", "S105", "S106", "S108", "S314", "S603", "S607", "S101", "S102",  #  # security (non-critical)
+    "ARG001",  # "ARG002", "ARG003", "ARG005",  #  # unused arguments
+    "PTH108",  # "PTH110", "PTH116", "PTH117", "PTH118", "PTH120", "PTH123",  #  # pathlib
+    "TRY002",  # "TRY003", "TRY004", "TRY300", "TRY301", "TRY401",  #  # try/except patterns
+    "FBT001",  # "FBT002", "FBT003",  #  # boolean traps
+    "DTZ001",  # "DTZ005", "DTZ006", "DTZ007",  #  # datetime
+    "G004",    # "G201",  #  # logging
+    "N806",    # "N811",  #  # naming
+    "B007",    # "B018", "B019", "B023", "B904",  #  # bugbear non-critical
+    "SIM102",  # "SIM105", "SIM113", "SIM117",  #  # simplify
+    "RUF001",  # "RUF002", "RUF005",  #  # ruff specific
+    "UP035",   #  #  # typing upgrades
+    "ERA001",  #  #  # commented code
+    "TD002",   # "TD003",  #  # todos
+    "FIX002",  #  #  # fixme
+    "PLW0602", # "PLW0603", "PLW2901",  #  # pylint warnings
+    "PLC0415", #  #  # pylint conventions
+    "PLE0605", #  #  # pylint errors non-critical
+    "PERF102", # "PERF203", "PERF402",  #  # performance
+    "A002",    # "A004",  #  # builtins
+    "PT011",   # "PT012", "PT017",  #  # pytest
+    "PD008",   #  #  # pandas
+    "INP001",  #  #  # namespace packages
+    "PLR0124", # "PLR2004",  #  # magic values
+    "PYI056",  #  #  # pyi
+    "EXE001",  #  #  # executable
+    "BLE001",  #  #  # blind except (temporarily)
+    "SLF001",  #  #  # private access (temporarily)
+    "E722",    # "E741",  #  # bare except and ambiguous names
+    "T201",    #  #  # log.error statements (temporarily)
+    "PLW2901", #  #  # redefined loop variable (temporarily)
+    "D401",    #  #  # docstring imperative mood (temporarily)
 ]
+select = ["ALL"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101", "PLR2004", "D", "ANN"]
@@ -188,7 +189,7 @@ addopts = [
     "--cov-report=term-missing:skip-covered",
     "--cov-report=html:reports/coverage",
     "--cov-report=xml:reports/coverage.xml",
-    "--cov-fail-under=85",
+    "--cov-fail-under=95",
     "--junitxml=reports/pytest.xml",
     "--maxfail=10",
     "--timeout=30",
@@ -259,3 +260,39 @@ skips = ["B101", "B601"]
 
 [tool.bandit.assert_used]
 skips = ["*/tests/*", "*/test_*.py"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.flake8-type-checking]
+strict = true
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 88
+
+[tool.ruff.lint.pylint]
+max-args = 10
+max-branches = 15
+max-returns = 8
+max-statements = 60
+
+[tool.vulture]
+min_confidence = 100
+paths = ["src"]
+exclude = ["tests/"]
+ignore_decorators = ["@app.route", "@router.get", "@router.post"]
+ignore_names = ["_*"]
+make_whitelist = true
+sort_by_size = true
+
+[tool.radon]
+exclude = ["tests/*", "*/tests/*"]
+ignore = ["F401"]
+# Unused imports
+total_average = true
+show_complexity = true
+average = true
+order = "SCORE"

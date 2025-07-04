@@ -4,15 +4,15 @@ from __future__ import annotations
 
 import json
 from typing import TYPE_CHECKING, Any
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 from click.testing import CliRunner
-
 from tap_ldap.tap import TapLDAP
 
 if TYPE_CHECKING:
     from pathlib import Path
+    from unittest.mock import Mock
 
 
 class TestTapLDAPIntegration:

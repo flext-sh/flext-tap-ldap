@@ -74,7 +74,7 @@ class LDIFEntry:
     def to_dict(self) -> dict[str, Any]:
         """Convert entry to dictionary format.
 
-        Returns
+        Returns:
         -------
             Dictionary representation of the entry
 
@@ -396,7 +396,7 @@ class LDIFProcessor:
     def get_statistics(self) -> dict[str, Any]:
         """Get processing statistics.
 
-        Returns
+        Returns:
         -------
             Dictionary with processing statistics
 
@@ -479,7 +479,7 @@ class LDIFValidator:
     def get_validation_results(self) -> dict[str, Any]:
         """Get validation results.
 
-        Returns
+        Returns:
         -------
             Dictionary with validation results
 
