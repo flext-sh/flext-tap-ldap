@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 from ldap3 import MOCK_SYNC, Connection, Server
-
 from tap_ldap.client import LDAPClient
 
 if TYPE_CHECKING:

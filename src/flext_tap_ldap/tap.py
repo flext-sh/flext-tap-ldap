@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, Any, ClassVar
 
 from singer_sdk import Tap
 from singer_sdk import typing as th
-
 from tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
 from tap_ldap.streams import (
     CustomStream,
@@ -187,7 +186,7 @@ class TapLDAP(Tap):
     def discover_streams(self) -> list[Stream]:
         """Discover available streams.
 
-        Returns
+        Returns:
         -------
             List of discovered Stream instances
 
