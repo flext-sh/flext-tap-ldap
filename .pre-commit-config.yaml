@@ -40,7 +40,6 @@ repos:
             types-setuptools,
             pydantic,
             pydantic-settings,
-            singer-python,
             ldap3,
             structlog,
             click,
