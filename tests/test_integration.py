@@ -1,4 +1,4 @@
-"""Integration tests for tap-ldap."""
+"""Integration tests for tap-ldap.
 
 from __future__ import annotations
 
@@ -11,37 +11,36 @@ from click.testing import CliRunner
 from tap_ldap.tap import TapLDAP
 
 if TYPE_CHECKING:
-    from pathlib import Path
+            from pathlib import Path
     from unittest.mock import Mock
 
 
 class TestTapLDAPIntegration:
-    """Integration tests for tap-ldap."""
+         """Integration tests for tap-ldap."""
 
     @pytest.fixture
     def runner(self) -> CliRunner:
-        """Create CLI runner."""
-        return CliRunner()
+            return CliRunner()
 
     @pytest.fixture
-    def config_file(self, tmp_path: Path, mock_ldap_config: dict[str, Any]) -> Path:
-        """Create config file."""
+    def config_file(self, tmp_path:
+        Path, mock_ldap_config: dict[str, Any]) -> Path:
         config_path = tmp_path / "config.json"
         with open(config_path, "w", encoding="utf-8") as f:
             json.dump(mock_ldap_config, f)
         return config_path
 
     @pytest.fixture
-    def catalog_file(self, tmp_path: Path, sample_catalog: dict[str, Any]) -> Path:
-        """Create catalog file."""
+    def catalog_file(self, tmp_path:
+        Path, sample_catalog: dict[str, Any]) -> Path:
         catalog_path = tmp_path / "catalog.json"
         with open(catalog_path, "w", encoding="utf-8") as f:
             json.dump(sample_catalog, f)
         return catalog_path
 
     @pytest.fixture
-    def state_file(self, tmp_path: Path, sample_state: dict[str, Any]) -> Path:
-        """Create state file."""
+    def state_file(self, tmp_path:
+        Path, sample_state: dict[str, Any]) -> Path:
         state_path = tmp_path / "state.json"
         with open(state_path, "w", encoding="utf-8") as f:
             json.dump(sample_state, f)
@@ -49,14 +48,13 @@ class TestTapLDAPIntegration:
 
     @patch("tap_ldap.client.Connection")
     @patch("tap_ldap.client.Server")
-    def test_discovery_mode(
-        self,
-        mock_server: Mock,
+    def test_discovery_mode(self,
+        mock_server:
+        Mock,
         mock_connection: Mock,
         runner: CliRunner,
         config_file: Path,
     ) -> None:
-        """Test discovery mode."""
         # Mock connection
         mock_conn_instance = mock_connection.return_value
         mock_conn_instance.bound = True
@@ -84,15 +82,14 @@ class TestTapLDAPIntegration:
 
     @patch("tap_ldap.client.Connection")
     @patch("tap_ldap.client.Server")
-    def test_sync_mode(
-        self,
-        mock_server: Mock,
+    def test_sync_mode(self,
+        mock_server:
+            Mock,
         mock_connection: Mock,
         runner: CliRunner,
         config_file: Path,
         catalog_file: Path,
     ) -> None:
-        """Test sync mode."""
         # Mock connection and search results
         mock_conn_instance = mock_connection.return_value
         mock_conn_instance.bound = True
@@ -121,7 +118,7 @@ class TestTapLDAPIntegration:
 
         # Check output contains Singer messages
         lines = result.output.strip().split("\n")
-        messages = [json.loads(line) for line in lines if line]
+        messages = [json.loads(line) for line in lines if line]:
 
         # Should have schema and record messages
         message_types = {msg["type"] for msg in messages}
@@ -129,16 +126,15 @@ class TestTapLDAPIntegration:
 
     @patch("tap_ldap.client.Connection")
     @patch("tap_ldap.client.Server")
-    def test_incremental_sync(
-        self,
-        mock_server: Mock,
+    def test_incremental_sync(self,
+        mock_server:
+            Mock,
         mock_connection: Mock,
         runner: CliRunner,
         config_file: Path,
         catalog_file: Path,
         state_file: Path,
     ) -> None:
-        """Test incremental sync with state."""
         # Mock connection
         mock_conn_instance = mock_connection.return_value
         mock_conn_instance.bound = True
@@ -166,20 +162,20 @@ class TestTapLDAPIntegration:
         if search_calls:
             # Check that modifyTimestamp filter was included
             for call in search_calls:
-                filter_arg = call[1].get("search_filter", "")
+            filter_arg = call[1].get("search_filter", "")
                 if "inetOrgPerson" in filter_arg:
-                    # Should include timestamp filter for incremental
+            # Should include timestamp filter for incremental
                     assert "modifyTimestamp>=" in filter_arg or result.exit_code == 0
 
-    def test_custom_streams_config(self, runner: CliRunner, tmp_path: Path) -> None:
-        """Test configuration with custom streams."""
+    def test_custom_streams_config(self, runner:
+            CliRunner, tmp_path: Path) -> None:
         config = {
             "host": "test.ldap.com",
             "base_dn": "dc=test,dc=com",
             "custom_streams": [
                 {
                     "name": "service_accounts",
-                    "search_filter": "(&(objectClass=account)(uid=svc-*))",
+                    "search_filter": "(&(object_class=account)(uid=svc-*))",
                     "primary_keys": ["dn"],
                     "schema": {
                         "properties": {
@@ -209,8 +205,8 @@ class TestTapLDAPIntegration:
         stream_names = [s["tap_stream_id"] for s in catalog["streams"]]
         assert "service_accounts" in stream_names
 
-    def test_error_handling(self, runner: CliRunner, tmp_path: Path) -> None:
-        """Test error handling."""
+    def test_error_handling(self, runner:
+            CliRunner, tmp_path: Path) -> None:
         # Test with invalid config
         config_file = tmp_path / "bad_config.json"
         with open(config_file, "w", encoding="utf-8") as f:
@@ -225,15 +221,14 @@ class TestTapLDAPIntegration:
 
     @patch("tap_ldap.client.Connection")
     @patch("tap_ldap.client.Server")
-    def test_pagination_handling(
-        self,
-        mock_server: Mock,
+    def test_pagination_handling(self,
+        mock_server:
+        Mock,
         mock_connection: Mock,
         runner: CliRunner,
         config_file: Path,
         catalog_file: Path,
     ) -> None:
-        """Test pagination handling."""
         # Mock connection with pagination
         mock_conn_instance = mock_connection.return_value
         mock_conn_instance.bound = True
@@ -248,7 +243,8 @@ class TestTapLDAPIntegration:
             "MockEntry",
             (),
             {
-                "entry_dn": "uid=user1,ou=users,dc=test,dc=com",
+                "entry_dn":
+             "uid=user1,ou=users,dc=test,dc=com",
                 "__iter__": lambda self: iter([]),
             },
         )()
@@ -265,11 +261,12 @@ class TestTapLDAPIntegration:
         # Set up pagination responses
         call_count = 0
 
-        def side_effect(*args: object, **kwargs: object) -> bool:
-            nonlocal call_count
+        def side_effect(*args:
+        object, **kwargs: object) -> bool:
+        nonlocal call_count
             call_count += 1
             if call_count == 1:
-                mock_conn_instance.entries = [mock_entry1]
+            mock_conn_instance.entries = [mock_entry1]
                 mock_conn_instance.result = {
                     "controls": {
                         "1.2.840.113556.1.4.319": {"value": {"cookie": b"page1"}},

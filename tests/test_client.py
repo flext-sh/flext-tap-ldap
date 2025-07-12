@@ -1,11 +1,13 @@
-"""Tests for LDAP client."""
+"""Tests for LDAP client.
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import pytest
 from ldap3.core.exceptions import LDAPException
+
 from tap_ldap.client import LDAPClient
 
 
@@ -14,7 +16,6 @@ class TestLDAPClient:
 
     @pytest.fixture
     def client(self) -> LDAPClient:
-        """Get test client."""
         return LDAPClient(
             host="test.ldap.com",
             port=389,
@@ -25,8 +26,8 @@ class TestLDAPClient:
             page_size=1000,
         )
 
-    def test_client_initialization(self, client: LDAPClient) -> None:
-        """Test client initialization."""
+    def test_client_initialization(self, client:
+        LDAPClient) -> None:
         assert client.host == "test.ldap.com"
         assert client.port == 389
         assert client.bind_dn == "cn=admin,dc=test,dc=com"
@@ -35,8 +36,8 @@ class TestLDAPClient:
         assert client.timeout == 30
         assert client.page_size == 1000
 
-    def test_server_uri(self, client: LDAPClient) -> None:
-        """Test server URI generation."""
+    def test_server_uri(self, client:
+        LDAPClient) -> None:
         assert client.server_uri == "ldap://test.ldap.com:389"
 
         # Test with SSL
@@ -45,13 +46,12 @@ class TestLDAPClient:
 
     @patch("tap_ldap.client.Connection")
     @patch("tap_ldap.client.Server")
-    def test_get_connection(
-        self,
-        mock_server_class: MagicMock,
+    def test_get_connection(self,
+        mock_server_class:
+        MagicMock,
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
-        """Test connection context manager."""
         mock_server = MagicMock()
         mock_server_class.return_value = mock_server
 
@@ -85,13 +85,12 @@ class TestLDAPClient:
 
     @patch("tap_ldap.client.Connection")
     @patch("tap_ldap.client.Server")
-    def test_search(
-        self,
-        mock_server_class: MagicMock,
+    def test_search(self,
+        mock_server_class:
+            MagicMock,
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
-        """Test LDAP search."""
         # Setup mocks
         mock_entry = MagicMock()
         mock_entry.entry_dn = "uid=jdoe,ou=users,dc=test,dc=com"
@@ -134,13 +133,12 @@ class TestLDAPClient:
 
     @patch("tap_ldap.client.Connection")
     @patch("tap_ldap.client.Server")
-    def test_test_connection_success(
-        self,
-        mock_server_class: MagicMock,
+    def test_test_connection_success(self,
+        mock_server_class:
+        MagicMock,
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
-        """Test successful connection test."""
         mock_connection = MagicMock()
         mock_connection.bound = True
         mock_connection.result = {"result": 0}
@@ -150,13 +148,12 @@ class TestLDAPClient:
 
     @patch("tap_ldap.client.Connection")
     @patch("tap_ldap.client.Server")
-    def test_test_connection_failure(
-        self,
-        mock_server_class: MagicMock,
+    def test_test_connection_failure(self,
+        mock_server_class:
+        MagicMock,
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
-        """Test failed connection test."""
         mock_connection_class.side_effect = LDAPException("Connection failed")
 
         assert client.test_connection() is False

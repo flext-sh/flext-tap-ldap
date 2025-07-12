@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
+from typing import Any
 
 import pytest
-from ldap3 import MOCK_SYNC, Connection, Server
+from ldap3 import MOCK_SYNC
+from ldap3 import Connection
+from ldap3 import Server
 from tap_ldap.client import LDAPClient
 
 if TYPE_CHECKING:
@@ -14,7 +17,6 @@ if TYPE_CHECKING:
 
 @pytest.fixture
 def mock_ldap_config() -> dict[str, Any]:
-    """Provide test LDAP configuration."""
     return {
         "host": "test.ldap.com",
         "port": 389,
@@ -24,14 +26,13 @@ def mock_ldap_config() -> dict[str, Any]:
         "use_ssl": False,
         "timeout": 30,
         "page_size": 100,
-        "user_filter": "(objectClass=inetOrgPerson)",
-        "group_filter": "(objectClass=groupOfNames)",
+        "user_filter": "(object_class=inetOrgPerson)",
+        "group_filter": "(object_class=groupOfNames)",
     }
 
 
 @pytest.fixture
 def mock_ldap_connection() -> Generator[Connection]:
-    """Create mock LDAP connection with test data."""
     # Create mock server and connection
     server = Server("test.ldap.com", get_info=MOCK_SYNC)
     connection = Connection(server, client_strategy=MOCK_SYNC, auto_bind=True)
@@ -119,13 +120,11 @@ def mock_ldap_connection() -> Generator[Connection]:
 
 @pytest.fixture
 def mock_ldap_client(mock_ldap_config: dict[str, Any]) -> LDAPClient:
-    """Create mock LDAP client."""
     return LDAPClient(**mock_ldap_config)
 
 
 @pytest.fixture
 def sample_catalog() -> dict[str, Any]:
-    """Provide sample Singer catalog."""
     return {
         "streams": [
             {
@@ -180,7 +179,6 @@ def sample_catalog() -> dict[str, Any]:
 
 @pytest.fixture
 def sample_state() -> dict[str, Any]:
-    """Provide sample Singer state."""
     return {
         "bookmarks": {
             "users": {

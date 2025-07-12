@@ -1,28 +1,28 @@
-"""Tests for LDIF stream functionality."""
+"""Tests for LDIF stream functionality.
 
 from __future__ import annotations
 
 from textwrap import dedent
 from typing import TYPE_CHECKING
 
-from tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
+from tap_ldap.ldif_stream import LDIFAnalysisStream
+from tap_ldap.ldif_stream import LDIFStream
 from tap_ldap.tap import TapLDAP
 
 if TYPE_CHECKING:
-    from pathlib import Path
+            from pathlib import Path
 
 
 class TestLDIFStream:
-    """Test LDIF stream functionality."""
+         """Test LDIF stream functionality."""
 
-    def create_test_tap(self, config: dict) -> TapLDAP:
-        """Create a test tap with given config."""
+    def create_test_tap(self, config:
+        dict) -> TapLDAP:
         tap = TapLDAP()
         tap._config = config
         return tap
 
     def test_ldif_stream_initialization(self) -> None:
-        """Test LDIF stream initialization."""
         config = {
             "host": "localhost",
             "base_dn": "dc=example,dc=com",
@@ -37,14 +37,14 @@ class TestLDIFStream:
         assert stream.primary_keys == ["dn", "source_file"]
         assert stream.replication_key == "processing_timestamp"
 
-    def test_ldif_stream_get_ldif_files_from_list(self, tmp_path: Path) -> None:
-        """Test getting LDIF files from explicit list."""
+    def test_ldif_stream_get_ldif_files_from_list(self, tmp_path:
+        Path) -> None:
         # Create test LDIF files
         ldif1 = tmp_path / "test1.ldif"
-        ldif1.write_text("dn: cn=test1,dc=example,dc=com\ncn: test1\n")
+        ldif1.write_text("dn: cn =test1,dc=example,dc=com\ncn: test1\n")
 
         ldif2 = tmp_path / "test2.ldif"
-        ldif2.write_text("dn: cn=test2,dc=example,dc=com\ncn: test2\n")
+        ldif2.write_text("dn: cn =test2,dc=example,dc=com\ncn: test2\n")
 
         config = {
             "host": "localhost",
@@ -61,19 +61,20 @@ class TestLDIFStream:
         assert ldif1 in files
         assert ldif2 in files
 
-    def test_ldif_stream_get_ldif_files_from_directory(self, tmp_path: Path) -> None:
-        """Test getting LDIF files from directory."""
+    def test_ldif_stream_get_ldif_files_from_directory(self, tmp_path:
+        Path) -> None:
         # Create test LDIF files in directory
         (tmp_path / "file1.ldif").write_text(
-            "dn: cn=file1,dc=example,dc=com\ncn: file1\n",
+            "dn: cn =file1,dc=example,dc=com\ncn: file1\n",
         )
         (tmp_path / "file2.ldif").write_text(
-            "dn: cn=file2,dc=example,dc=com\ncn: file2\n",
+            "dn: cn =file2,dc=example,dc=com\ncn: file2\n",
         )
-        (tmp_path / "other.txt").write_text("not an ldif file")
+        (tmp_path / "other.txt").write_text("not an ldif file"):
 
         config = {
-            "host": "localhost",
+            "host":
+             "localhost",
             "base_dn": "dc=example,dc=com",
             "enable_ldif_streams": True,
             "ldif_directory": str(tmp_path),
@@ -89,21 +90,21 @@ class TestLDIFStream:
         assert "file2.ldif" in file_names
         assert "other.txt" not in file_names
 
-    def test_ldif_stream_process_records(self, tmp_path: Path) -> None:
-        """Test processing LDIF records."""
+    def test_ldif_stream_process_records(self, tmp_path:
+            Path) -> None:
         ldif_content = dedent(
             """
-            dn: cn=john,ou=users,dc=example,dc=com
+            dn: cn =john,ou=users,dc=example,dc=com
             cn: john
             objectClass: person
             objectClass: inetOrgPerson
             mail: john@example.com
 
-            dn: cn=jane,ou=users,dc=example,dc=com
+            dn: cn =jane,ou=users,dc=example,dc=com
             cn: jane
             objectClass: person
             mail: jane@example.com
-        """,
+        ,"""
         ).strip()
 
         ldif_file = tmp_path / "test.ldif"
@@ -142,7 +143,6 @@ class TestLDIFStream:
         assert record2["entry_type"] == "user"
 
     def test_ldif_stream_classify_entry_types(self) -> None:
-        """Test entry type classification."""
         config = {
             "host": "localhost",
             "base_dn": "dc=example,dc=com",
@@ -172,22 +172,17 @@ class TestLDIFStream:
         # Test other
         assert stream._classify_entry_type(["unknownClass"]) == "other"
 
-    def test_ldif_stream_error_handling(self, tmp_path: Path) -> None:
-        """Test LDIF stream error handling."""
+    def test_ldif_stream_error_handling(self, tmp_path:
+        Path) -> None:
         # Create LDIF with some invalid content
         ldif_content = dedent(
             """
-            dn: cn=valid,dc=example,dc=com
+            dn: cn =valid,dc=example,dc=com
             cn: valid
-            objectClass: person
-
-            invalid line without dn
-            cn: should_be_skipped
-
-            dn: cn=another_valid,dc=example,dc=com
+            objectClass =another_valid,dc=example,dc=com
             cn: another_valid
             objectClass: person
-        """,
+        ,"""
         ).strip()
 
         ldif_file = tmp_path / "test_with_errors.ldif"
@@ -212,16 +207,15 @@ class TestLDIFStream:
 
 
 class TestLDIFAnalysisStream:
-    """Test LDIF analysis stream functionality."""
+         """Test LDIF analysis stream functionality."""
 
-    def create_test_tap(self, config: dict) -> TapLDAP:
-        """Create a test tap with given config."""
+    def create_test_tap(self, config:
+        dict) -> TapLDAP:
         tap = TapLDAP()
         tap._config = config
         return tap
 
     def test_ldif_analysis_stream_initialization(self) -> None:
-        """Test LDIF analysis stream initialization."""
         config = {
             "host": "localhost",
             "base_dn": "dc=example,dc=com",
@@ -234,34 +228,29 @@ class TestLDIFAnalysisStream:
         assert stream.name == "ldif_analysis"
         assert stream.primary_keys == ["source_file"]
 
-    def test_ldif_analysis_stream_analyze_file(self, tmp_path: Path) -> None:
-        """Test LDIF file analysis."""
+    def test_ldif_analysis_stream_analyze_file(self, tmp_path:
+        Path) -> None:
         ldif_content = dedent(
             """
-            dn: dc=example,dc=com
+            dn: dc =example,dc=com
             dc: example
-            objectClass: domain
-
-            dn: ou=users,dc=example,dc=com
+            objectClass =users,dc=example,dc=com
             ou: users
-            objectClass: organizationalUnit
-
-            dn: cn=john,ou=users,dc=example,dc=com
+            objectClass =john,ou=users,dc=example,dc=com
             cn: john
             objectClass: person
             objectClass: inetOrgPerson
             mail: john@example.com
 
-            dn: cn=jane,ou=users,dc=example,dc=com
+            dn: cn =jane,ou=users,dc=example,dc=com
             cn: jane
             objectClass: person
             mail: jane@example.com
 
-            dn: cn=admins,ou=groups,dc=example,dc=com
+            dn: cn =admins,ou=groups,dc=example,dc=com
             cn: admins
-            objectClass: groupOfNames
-            member: cn=john,ou=users,dc=example,dc=com
-        """,
+            objectClass =john,ou=users,dc=example,dc=com
+        ,"""
         ).strip()
 
         ldif_file = tmp_path / "analysis_test.ldif"
@@ -314,20 +303,17 @@ class TestLDIFAnalysisStream:
         # Should have recommendations
         assert isinstance(analysis["recommendations"], list)
 
-    def test_ldif_analysis_recommendations(self, tmp_path: Path) -> None:
-        """Test LDIF analysis recommendations generation."""
+    def test_ldif_analysis_recommendations(self, tmp_path:
+        Path) -> None:
         # Create LDIF with Oracle-specific objects
         ldif_content = dedent(
             """
-            dn: cn=oracle_user,ou=users,dc=example,dc=com
+            dn: cn =oracle_user,ou=users,dc=example,dc=com
             cn: oracle_user
-            objectClass: orclUser
-            objectClass: person
-
-            dn: cn=oracle_group,ou=groups,dc=example,dc=com
+            objectClass =oracle_group,ou=groups,dc=example,dc=com
             cn: oracle_group
             objectClass: orclGroup
-        """,
+        ,"""
         ).strip()
 
         ldif_file = tmp_path / "oracle_test.ldif"
@@ -351,8 +337,8 @@ class TestLDIFAnalysisStream:
         oracle_recommendation = any("Oracle-specific" in rec for rec in recommendations)
         assert oracle_recommendation
 
-    def test_ldif_analysis_large_dataset_recommendations(self, tmp_path: Path) -> None:
-        """Test recommendations for large datasets."""
+    def test_ldif_analysis_large_dataset_recommendations(self, tmp_path:
+            Path) -> None:
         config = {
             "host": "localhost",
             "base_dn": "dc=example,dc=com",
@@ -377,10 +363,9 @@ class TestLDIFAnalysisStream:
 
 
 class TestTapLDAPLDIFIntegration:
-    """Test integration of LDIF streams with TapLDAP."""
+             """Test integration of LDIF streams with TapLDAP."""
 
     def test_tap_discovers_ldif_streams_when_enabled(self) -> None:
-        """Test that tap discovers LDIF streams when enabled."""
         config = {
             "host": "localhost",
             "base_dn": "dc=example,dc=com",
@@ -397,8 +382,7 @@ class TestTapLDAPLDIFIntegration:
         assert "ldif_analysis" in stream_names
 
     def test_tap_discovers_standard_streams_when_ldif_disabled(self) -> None:
-        """Test that tap discovers standard streams when LDIF is disabled."""
-        config = {
+            config = {
             "host": "localhost",
             "base_dn": "dc=example,dc=com",
             "enable_ldif_streams": False,

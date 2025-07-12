@@ -1,20 +1,21 @@
-"""Tests for tap-ldap streams."""
+"""Tests for tap-ldap streams.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC
+from datetime import datetime
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import pytest
-from tap_ldap.streams import (
-    CustomStream,
-    GroupsStream,
-    LDAPStream,
-    OrganizationalUnitsStream,
-    SchemaStream,
-    UsersStream,
-)
+
+from tap_ldap.streams import CustomStream
+from tap_ldap.streams import GroupsStream
+from tap_ldap.streams import LDAPStream
+from tap_ldap.streams import OrganizationalUnitsStream
+from tap_ldap.streams import SchemaStream
+from tap_ldap.streams import UsersStream
 from tap_ldap.tap import TapLDAP
 
 
@@ -22,20 +23,20 @@ class TestLDAPStream:
     """Test base LDAP stream."""
 
     @pytest.fixture
-    def tap(self, mock_ldap_config: dict[str, Any]) -> TapLDAP:
-        """Create test tap instance."""
+    def tap(self, mock_ldap_config:
+        dict[str, Any]) -> TapLDAP:
         return TapLDAP(config=mock_ldap_config)
 
-    def test_ldap_stream_initialization(self, tap: TapLDAP) -> None:
-        """Test LDAP stream initialization."""
+    def test_ldap_stream_initialization(self, tap:
+        TapLDAP) -> None:
         stream = LDAPStream(tap, name="test_stream")
 
         assert stream.tap_name == "tap-ldap"
         assert stream.name == "test_stream"
         assert stream.logger is not None
 
-    def test_get_dn_from_record(self, tap: TapLDAP) -> None:
-        """Test DN extraction from record."""
+    def test_get_dn_from_record(self, tap:
+        TapLDAP) -> None:
         stream = LDAPStream(tap, name="test_stream")
 
         # Test explicit DN
@@ -48,8 +49,8 @@ class TestLDAPStream:
         dn = stream.get_dn_from_record(record)
         assert dn == "cn=testgroup,dc=test,dc=com"
 
-    def test_transform_record(self, tap: TapLDAP) -> None:
-        """Test record transformation."""
+    def test_transform_record(self, tap:
+        TapLDAP) -> None:
         stream = LDAPStream(tap, name="test_stream")
 
         entry = {
@@ -73,39 +74,38 @@ class TestUsersStream:
     """Test users stream."""
 
     @pytest.fixture
-    def users_stream(self, mock_ldap_config: dict[str, Any]) -> UsersStream:
-        """Create users stream."""
+    def users_stream(self, mock_ldap_config:
+        dict[str, Any]) -> UsersStream:
         tap = TapLDAP(config=mock_ldap_config)
         return UsersStream(tap)
 
-    def test_users_stream_properties(self, users_stream: UsersStream) -> None:
-        """Test users stream properties."""
+    def test_users_stream_properties(self, users_stream:
+        UsersStream) -> None:
         assert users_stream.name == "users"
         assert users_stream.primary_keys == ["dn"]
         assert users_stream.replication_key == "modifyTimestamp"
         assert "uid" in users_stream.schema["properties"]
         assert "mail" in users_stream.schema["properties"]
 
-    def test_get_search_filter(self, users_stream: UsersStream) -> None:
-        """Test search filter generation."""
+    def test_get_search_filter(self, users_stream:
+        UsersStream) -> None:
         # Basic filter
         filter_str = users_stream.get_search_filter()
-        assert filter_str == "(objectClass=inetOrgPerson)"
+        assert filter_str == "(object_class=inetOrgPerson)"
 
         # With replication key
         with patch.object(users_stream, "get_starting_timestamp") as mock_timestamp:
             mock_timestamp.return_value = datetime(2024, 1, 1, tzinfo=UTC)
             filter_str = users_stream.get_search_filter()
             assert "(modifyTimestamp>=" in filter_str
-            assert "(objectClass=inetOrgPerson)" in filter_str
+            assert "(object_class=inetOrgPerson)" in filter_str
 
     @patch("tap_ldap.streams.LDAPClient")
-    def test_get_records(
-        self,
-        mock_client_class: MagicMock,
+    def test_get_records(self,
+        mock_client_class:
+        MagicMock,
         users_stream: UsersStream,
     ) -> None:
-        """Test record extraction."""
         # Mock client and search results
         mock_client = MagicMock()
         mock_client.search.return_value = [
@@ -116,7 +116,7 @@ class TestUsersStream:
                     "cn": "John Doe",
                     "mail": "jdoe@test.com",
                 },
-            }
+            },
         ]
         users_stream._client = mock_client
 
@@ -130,7 +130,7 @@ class TestUsersStream:
         # Verify search was called correctly
         mock_client.search.assert_called_once_with(
             base_dn="dc=test,dc=com",
-            search_filter="(objectClass=inetOrgPerson)",
+            search_filter="(object_class=inetOrgPerson)",
             attributes=[
                 "uid",
                 "cn",
@@ -150,36 +150,36 @@ class TestGroupsStream:
     """Test groups stream."""
 
     @pytest.fixture
-    def groups_stream(self, mock_ldap_config: dict[str, Any]) -> GroupsStream:
-        """Create groups stream."""
+    def groups_stream(self, mock_ldap_config:
+        dict[str, Any]) -> GroupsStream:
         tap = TapLDAP(config=mock_ldap_config)
         return GroupsStream(tap)
 
-    def test_groups_stream_properties(self, groups_stream: GroupsStream) -> None:
-        """Test groups stream properties."""
+    def test_groups_stream_properties(self, groups_stream:
+        GroupsStream) -> None:
         assert groups_stream.name == "groups"
         assert groups_stream.primary_keys == ["dn"]
         assert groups_stream.replication_key == "modifyTimestamp"
         assert "cn" in groups_stream.schema["properties"]
         assert "member" in groups_stream.schema["properties"]
 
-    def test_get_search_filter(self, groups_stream: GroupsStream) -> None:
-        """Test search filter generation."""
+    def test_get_search_filter(self, groups_stream:
+        GroupsStream) -> None:
         filter_str = groups_stream.get_search_filter()
-        assert filter_str == "(objectClass=groupOfNames)"
+        assert filter_str == "(object_class=groupOfNames)"
 
 
 class TestOrganizationalUnitsStream:
     """Test organizational units stream."""
 
     @pytest.fixture
-    def ou_stream(self, mock_ldap_config: dict[str, Any]) -> OrganizationalUnitsStream:
-        """Create OU stream."""
+    def ou_stream(self, mock_ldap_config:
+        dict[str, Any]) -> OrganizationalUnitsStream:
         tap = TapLDAP(config=mock_ldap_config)
         return OrganizationalUnitsStream(tap)
 
-    def test_ou_stream_properties(self, ou_stream: OrganizationalUnitsStream) -> None:
-        """Test OU stream properties."""
+    def test_ou_stream_properties(self, ou_stream:
+        OrganizationalUnitsStream) -> None:
         assert ou_stream.name == "organizational_units"
         assert ou_stream.primary_keys == ["dn"]
         assert "ou" in ou_stream.schema["properties"]
@@ -190,24 +190,23 @@ class TestSchemaStream:
     """Test schema stream."""
 
     @pytest.fixture
-    def schema_stream(self, mock_ldap_config: dict[str, Any]) -> SchemaStream:
-        """Create schema stream."""
+    def schema_stream(self, mock_ldap_config:
+        dict[str, Any]) -> SchemaStream:
         tap = TapLDAP(config=mock_ldap_config)
         return SchemaStream(tap)
 
-    def test_schema_stream_properties(self, schema_stream: SchemaStream) -> None:
-        """Test schema stream properties."""
+    def test_schema_stream_properties(self, schema_stream:
+        SchemaStream) -> None:
         assert schema_stream.name == "schema"
         assert schema_stream.primary_keys == ["type", "name"]
         assert "definition" in schema_stream.schema["properties"]
 
     @patch("tap_ldap.streams.LDAPClient")
-    def test_get_records(
-        self,
-        mock_client_class: MagicMock,
+    def test_get_records(self,
+        mock_client_class:
+        MagicMock,
         schema_stream: SchemaStream,
     ) -> None:
-        """Test schema extraction."""
         # Mock schema response
         mock_client = MagicMock()
         mock_client.get_schema.return_value = {
@@ -229,8 +228,8 @@ class TestSchemaStream:
         assert records[1]["type"] == "attributeType"
         assert records[1]["name"] == "cn"
 
-    def test_extract_schema_name(self, schema_stream: SchemaStream) -> None:
-        """Test schema name extraction."""
+    def test_extract_schema_name(self, schema_stream:
+        SchemaStream) -> None:
         definition = "( 2.5.6.6 NAME 'person' SUP top STRUCTURAL )"
         name = schema_stream._extract_schema_name(definition)
         assert name == "person"
@@ -245,12 +244,12 @@ class TestCustomStream:
     """Test custom stream functionality."""
 
     @pytest.fixture
-    def tap(self, mock_ldap_config: dict[str, Any]) -> TapLDAP:
-        """Create test tap instance."""
+    def tap(self, mock_ldap_config:
+        dict[str, Any]) -> TapLDAP:
         return TapLDAP(config=mock_ldap_config)
 
-    def test_custom_stream_creation(self, tap: TapLDAP) -> None:
-        """Test custom stream creation."""
+    def test_custom_stream_creation(self, tap:
+        TapLDAP) -> None:
         schema_props = {
             "dn": {"type": "string"},
             "uid": {"type": "string"},
@@ -260,14 +259,14 @@ class TestCustomStream:
         stream = CustomStream(
             tap=tap,
             name="service_accounts",
-            search_filter="(&(objectClass=account)(uid=svc-*))",
+            search_filter="(&(object_class=account)(uid=svc-*))",
             schema_properties=schema_props,
             primary_keys=["uid"],
             replication_key="modifyTimestamp",
         )
 
         assert stream.name == "service_accounts"
-        assert stream.get_search_filter() == "(&(objectClass=account)(uid=svc-*))"
+        assert stream.get_search_filter() == "(&(object_class=account)(uid=svc-*))"
         assert stream.primary_keys == ["uid"]
         assert stream.replication_key == "modifyTimestamp"
         assert "accountType" in stream.schema["properties"]

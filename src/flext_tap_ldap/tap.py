@@ -6,21 +6,24 @@ This module implements the main tap class for LDAP data extraction.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING
+from typing import Any
+from typing import ClassVar
 
 from singer_sdk import Tap
 from singer_sdk import typing as th
-from tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
-from tap_ldap.streams import (
-    CustomStream,
-    GroupsStream,
-    OrganizationalUnitsStream,
-    SchemaStream,
-    UsersStream,
-)
+
+from flext_tap_ldap.config import TapLDAPConfig
+from flext_tap_ldap.ldif_stream import LDIFAnalysisStream
+from flext_tap_ldap.ldif_stream import LDIFStream
+from flext_tap_ldap.streams import CustomStream
+from flext_tap_ldap.streams import GroupsStream
+from flext_tap_ldap.streams import OrganizationalUnitsStream
+from flext_tap_ldap.streams import SchemaStream
+from flext_tap_ldap.streams import UsersStream
 
 if TYPE_CHECKING:
-    from singer_sdk.streams import Stream
+            from singer_sdk.streams import Stream
 
 
 logger = logging.getLogger(__name__)
@@ -30,7 +33,9 @@ class TapLDAP(Tap):
     """Singer tap for LDAP data extraction."""
 
     name = "tap-ldap"
+    config_class = TapLDAPConfig
 
+    # Keep the jsonschema for backward compatibility
     config_jsonschema: ClassVar[dict[str, Any]] = th.PropertiesList(
         th.Property(
             "host",
@@ -82,13 +87,13 @@ class TapLDAP(Tap):
         th.Property(
             "user_filter",
             th.StringType,
-            default="(objectClass=inetOrgPerson)",
+            default="(object_class=inetOrgPerson)",
             description="LDAP filter for user entries",
         ),
         th.Property(
             "group_filter",
             th.StringType,
-            default="(objectClass=groupOfNames)",
+            default="(object_class=groupOfNames)",
             description="LDAP filter for group entries",
         ),
         th.Property(
@@ -184,16 +189,20 @@ class TapLDAP(Tap):
     ).to_dict()
 
     def discover_streams(self) -> list[Stream]:
-        """Discover available streams.
-
-        Returns:
-        -------
-            List of discovered Stream instances
-
-        """
+        """Discover available streams."""
         streams: list[Stream] = []
 
-        # Add LDIF streams if enabled (for brutal simplification)
+        # Standard LDAP streams (always available)
+        streams.extend(
+            [
+                UsersStream(self),
+                GroupsStream(self),
+                OrganizationalUnitsStream(self),
+                SchemaStream(self),
+            ],
+        )
+
+        # Add LDIF streams if enabled
         if self.config.get("enable_ldif_streams", False):
             streams.extend(
                 [
@@ -201,17 +210,8 @@ class TapLDAP(Tap):
                     LDIFAnalysisStream(self),
                 ],
             )
-            # Standard LDAP streams
-            streams.extend(
-                [
-                    UsersStream(self),
-                    GroupsStream(self),
-                    OrganizationalUnitsStream(self),
-                    SchemaStream(self),
-                ],
-            )
 
-        # Add custom streams if configured
+        # Add custom streams if configured:
         custom_streams_config = self.config.get("custom_streams", [])
         for custom_config in custom_streams_config:
             stream = CustomStream(
@@ -227,5 +227,10 @@ class TapLDAP(Tap):
         return streams
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Main entry point for the tap."""
     TapLDAP.cli()
+
+
+if __name__ == "__main__":
+    main()
