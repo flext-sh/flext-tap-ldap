@@ -11,7 +11,7 @@ from typing import Any
 from typing import ClassVar
 
 from singer_sdk import Tap
-from singer_sdk import typing as th
+from singer_sdk import singer_typing as th
 
 from flext_tap_ldap.config import TapLDAPConfig
 from flext_tap_ldap.ldif_stream import LDIFAnalysisStream

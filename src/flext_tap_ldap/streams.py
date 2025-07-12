@@ -6,7 +6,7 @@ Zero tolerance implementation with proper Singer SDK integration.
 from __future__ import annotations
 
 from singer_sdk import Stream
-from singer_sdk import typing as th
+from singer_sdk import singer_typing as th
 
 
 class LDAPBaseStream(Stream):
