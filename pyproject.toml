@@ -32,7 +32,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Database",
     "Topic :: System :: Systems Administration :: Authentication/Directory",
-    "Framework :: Singer",
+    "Topic :: System :: Systems Administration :: Authentication/Directory :: LDAP",
     "Typing :: Typed",
 ]
 
