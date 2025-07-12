@@ -161,7 +161,7 @@ class TestLDIFProcessor:
     @pytest.fixture
     def ldif_file(self, sample_ldif_content: str) -> Path:
         """Create temporary LDIF file for testing."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".ldif", delete=False) as f:
+        with tempfile.NamedTemporaryFile(encoding="utf-8", mode="w", suffix=".ldif", delete=False) as f:
             f.write(sample_ldif_content)
             return Path(f.name)
 
