@@ -113,16 +113,32 @@ class LDAPUser(LDAPEntry):
     cn: str | None = Field(None, description="Common name")
     sn: str | None = Field(None, description="Surname")
     given_name: str | None = Field(None, description="Given name")
+    display_name: str | None = Field(None, description="Display name")
     mail: str | None = Field(None, description="Email address")
+    telephone_number: str | None = Field(None, description="Telephone number")
+    mobile: str | None = Field(None, description="Mobile number")
     employee_number: str | None = Field(None, description="Employee number")
+    employee_type: str | None = Field(None, description="Employee type")
     department: str | None = Field(None, description="Department")
     title: str | None = Field(None, description="Job title")
     manager: str | None = Field(None, description="Manager DN")
+    home_directory: str | None = Field(None, description="Home directory")
+    login_shell: str | None = Field(None, description="Login shell")
 
     @classmethod
     def from_entry(cls, entry: Any) -> LDAPUser:
         """Create LDAPUser from LDAP entry."""
         return cls(
+            # Required fields from LDAPEntry
+            dn=entry.get("dn", ""),
+            object_classes=entry.get("objectClass", []),
+            # Optional metadata fields from LDAPEntry
+            created_at=None,
+            modified_at=None,
+            created_by=None,
+            modified_by=None,
+            change_type=None,
+            # LDAPUser specific fields
             uid=entry.get("uid", [None])[0],
             cn=entry.get("cn", [None])[0],
             sn=entry.get("sn", [None])[0],
@@ -153,18 +169,35 @@ class LDAPGroup(LDAPEntry):
     cn: str | None = Field(None, description="Group name")
     description: str | None = Field(None, description="Group description")
     members: list[str] = Field(default_factory=list, description="Member DNs")
+    unique_members: list[str] = Field(
+        default_factory=list,
+        description="Unique member DNs",
+    )
+    gid_number: str | None = Field(None, description="Group ID number")
     owner: str | None = Field(None, description="Group owner DN")
+    create_timestamp: str | None = Field(None, description="Creation timestamp")
+    modify_timestamp: str | None = Field(None, description="Modification timestamp")
 
     @classmethod
     def from_entry(cls, entry: Any) -> LDAPGroup:
         """Create LDAPGroup from LDAP entry."""
         return cls(
+            # Required fields from LDAPEntry
+            dn=entry.get("dn", ""),
+            object_classes=entry.get("objectClass", []),
+            # Optional metadata fields from LDAPEntry
+            created_at=None,
+            modified_at=None,
+            created_by=None,
+            modified_by=None,
+            change_type=None,
+            # LDAPGroup specific fields
             cn=entry.get("cn", [None])[0],
             description=entry.get("description", [None])[0],
             members=entry.get("member", []),
             unique_members=entry.get("uniqueMember", []),
             gid_number=entry.get("gidNumber", [None])[0],
-            object_classes=entry.get("objectClass", []),
+            owner=None,
             create_timestamp=entry.get("createTimestamp", [None])[0],
             modify_timestamp=entry.get("modifyTimestamp", [None])[0],
         )
