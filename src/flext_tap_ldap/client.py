@@ -1,20 +1,18 @@
-from typing import Any
+"""LDAP client for flext-tap-ldap using flext-core patterns.
 
-"""Enterprise LDAP client implementation for tap-ldap.
-
-This module provides the comprehensive LDAP client that handles connections,
-operations, and enterprise features for extracting data from LDAP directories.  Includes Oracle OID/OUD support, SSH tunneling, SSL/TLS, and connection pooling.  """
+Copyright (c) 2025 Flext. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
+import logging
 import ssl
 import time
-from collections.abc import Generator
-from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
-from datetime import time
 from typing import TYPE_CHECKING
+from typing import Any
 
 import ldap3
 from ldap3 import ALL
@@ -22,17 +20,16 @@ from ldap3 import SAFE_SYNC
 from ldap3 import SIMPLE
 from ldap3 import Connection
 from ldap3 import Server
-from ldap3 import Tls
+
 from ldap3.core.exceptions import LDAPException
+from ldap3 import Tls
 from ldap3.utils.conv import escape_filter_chars
 
 if TYPE_CHECKING:
     from collections.abc import Generator
     from collections.abc import Iterator
 
-from flext_observability.logging import get_logger
-
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class LDAPClient:
@@ -58,6 +55,26 @@ class LDAPClient:
         client_cert_file: str | None = None,
         client_key_file: str | None = None,
     ) -> None:
+        """Initialize LDAP client.
+
+        Args:
+            host: LDAP server host
+            port: LDAP server port
+            bind_dn: Bind DN for authentication
+            password: Password for authentication
+            use_ssl: Whether to use SSL/TLS
+            timeout: Connection timeout
+            page_size: Page size for search operations
+            pool_size: Maximum number of connections in pool
+            pool_keepalive: Keepalive time for connections in pool
+            auto_retry: Whether to automatically retry failed operations
+            max_retries: Maximum number of retries for failed operations
+            retry_delay: Delay between retries
+            validate_certificates: Whether to validate certificates
+            ca_certs_file: Path to CA certificates file
+            client_cert_file: Path to client certificate file
+            client_key_file: Path to client key file
+        """
         self.host = host
         self.port = port
         self.bind_dn = bind_dn
@@ -75,7 +92,9 @@ class LDAPClient:
         self.client_cert_file = client_cert_file
         self.client_key_file = client_key_file
 
-        self._connection_pool: list[Connection] = []  # TODO: Initialize in __post_init__
+        self._connection_pool: list[Connection] = (
+            []
+        )  # TODO: Initialize in __post_init__
         self._pool_lock = ThreadPoolExecutor(max_workers=1)
         self._server: Server | None = None
         self._tls_context: Tls | None = None
@@ -84,6 +103,7 @@ class LDAPClient:
         self._setup_server()
 
     def _setup_tls_context(self) -> None:
+        """Setup TLS context for LDAP connection."""
         if not self.use_ssl:
             return
 
@@ -104,6 +124,7 @@ class LDAPClient:
         self._tls_context = Tls(**tls_config)
 
     def _setup_server(self) -> None:
+        """Setup a new LDAP server."""
         self._server = Server(
             host=self.host,
             port=self.port,
@@ -114,6 +135,7 @@ class LDAPClient:
         )
 
     def _create_connection(self) -> Connection:
+        """Create a new LDAP connection."""
         if not self._server:
             self._setup_server()
 
@@ -131,6 +153,17 @@ class LDAPClient:
         )
 
     def _execute_with_retry(self, operation: Any, *args: Any, **kwargs: Any) -> Any:
+        """Execute an operation with retry.
+
+        Args:
+            operation: The operation to execute
+            *args: Positional arguments for the operation
+            **kwargs: Keyword arguments for the operation
+
+        Returns:
+            The result of the operation
+
+        """
         last_exception = None
 
         for attempt in range(self.max_retries + 1):
@@ -159,11 +192,23 @@ class LDAPClient:
 
     @property
     def server_uri(self) -> str:
+        """Get the server URI.
+
+        Returns:
+            The server URI
+
+        """
         protocol = "ldaps" if self.use_ssl else "ldap"
         return f"{protocol}://{self.host}:{self.port}"
 
     @contextmanager
     def get_connection(self) -> Generator[Connection]:
+        """Get a connection to the LDAP server.
+
+        Returns:
+            A connection to the LDAP server
+
+        """
         def _create_and_bind() -> ldap3.Connection:
             connection = self._create_connection()
             logger.info("Connected to LDAP server: %s", self.server_uri)
@@ -186,6 +231,19 @@ class LDAPClient:
         scope: str = "SUBTREE",
         size_limit: int = 0,
     ) -> Iterator[dict[str, Any]]:
+        """Search for entries in the LDAP server.
+
+        Args:
+            base_dn: The base DN to search from
+            search_filter: The search filter to use
+            attributes: The attributes to return
+            scope: The scope of the search
+            size_limit: The maximum number of entries to return
+
+        Returns:
+            An iterator of entries
+
+        """
         search_scope = getattr(ldap3, scope.upper(), ldap3.SUBTREE)
 
         with self.get_connection() as conn:
@@ -337,23 +395,31 @@ class LDAPClient:
                 obj_classes = [obj_classes]
 
             # Convert Oracle-specific object classes
-            if "orclContainer" in obj_classes and "organizationalUnit" not in obj_classes:
+            if (
+                "orclContainer" in obj_classes
+                and "organizationalUnit" not in obj_classes
+            ):
                 obj_classes.append("organizationalUnit")
                 attributes["objectClass"] = obj_classes
 
         return entry
 
     def get_naming_contexts(self) -> list[str]:
-        with self.get_connection() as conn:
-            conn.search(
-                search_base="",
-                search_filter="(object_class=*)",
-                search_scope=ldap3.BASE,
-                attributes=["namingContexts"],
-            )
-
-            if conn.entries:
-                return conn.entries[0].get("namingContexts", [])
+        """Get naming contexts from LDAP server."""
+        try:
+            with self.get_connection() as conn:
+                # Search for naming contexts
+                conn.search(
+                    "", "(objectClass=*)", ldap3.BASE, attributes=["namingContexts"]
+                )
+                if conn.entries:
+                    contexts = conn.entries[0].get("namingContexts", [])
+                    if isinstance(contexts, list):
+                        return [str(ctx) for ctx in contexts]
+                    return [str(contexts)]
+                return []
+        except Exception as e:
+            logger.error(f"Error getting naming contexts: {e}")
             return []
 
     def health_check(self) -> dict[str, Any]:

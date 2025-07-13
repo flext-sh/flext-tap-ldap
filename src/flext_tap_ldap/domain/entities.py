@@ -1,146 +1,52 @@
-from typing import Any
-
-"""Domain entities for FLEXT-TAP-LDAP v0.7.0.
-
-REFACTORED:
-            Using flext-core mixins and types - NO duplication.  Clean architecture with domain entities using enhanced mixins for code reduction.  """
+"""Domain entities for tap-ldap using flext-core patterns."""
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import Any
+from uuid import UUID
+from uuid import uuid4
 
+from pydantic import BaseModel
 from pydantic import Field
 
-from flext_core.domain.mixins import EntityMixin
-from flext_core.domain.mixins import MetadataMixin
-from flext_core.domain.mixins import StatusMixin
-from flext_core.domain.pydantic_base import DomainEntity
-from flext_core.domain.pydantic_base import DomainEvent
-from flext_core.domain.pydantic_base import Field
-from flext_core.domain.types import StrEnum
-
-if TYPE_CHECKING:
-            from uuid import UUID
+logger = logging.getLogger(__name__)
 
 
-class TapStatus(StrEnum):
-    """Tap execution status using flext-core StrEnum."""
+class LDAPConnection(BaseModel):
+    """LDAP connection entity."""
 
-    IDLE = "idle"
-    DISCOVERING = "discovering"
-    EXTRACTING = "extracting"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
-
-
-class StreamType(StrEnum):
-    """LDAP stream types using flext-core StrEnum."""
-
-    USERS = "users"
-    GROUPS = "groups"
-    ORGANIZATIONAL_UNITS = "organizational_units"
-    CUSTOM = "custom"
+    id: UUID = Field(default_factory=uuid4)
+    host: str
+    port: int
+    bind_dn: str | None = None
+    password: str | None = None
+    use_ssl: bool = False
+    timeout: int = 30
+    pool_size: int = 5
+    is_active: bool = True
+    last_tested: datetime | None = None
+    last_error: str | None = None
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
 
 
-class LDAPConnection(DomainEntity, EntityMixin):
-    """LDAP connection domain entity using enhanced mixins for code reduction."""
+class LDAPStream(BaseModel):
+    """LDAP stream entity."""
 
-    host: str = Field(..., min_length=1, max_length=255, description="LDAP server host")
-    port: int = Field(default=389, ge=1, le=65535, description="LDAP server port")
-
-    # Authentication
-    bind_dn: str | None = Field(None, description="Distinguished name for binding")
-    bind_password: str | None = Field(None, description="Password for LDAP authentication")
-    use_ssl: bool = Field(default=False, description="Use SSL/LDAPS")
-    use_tls: bool = Field(default=False, description="Use STARTTLS")
-
-    # Search configuration
-    base_dn: str = Field(..., min_length=1, description="Base DN for searches")
-    search_scope: str = Field(
-        default="subtree",
-        description="Search scope: base, onelevel, subtree",
-    )
-
-    # Connection settings
-    timeout: int = Field(
-        default=30,
-        ge=1,
-        le=300,
-        description="Connection timeout in seconds",
-    )
-    page_size: int = Field(
-        default=1000,
-        ge=1,
-        le=10000,
-        description="Page size for results",
-    )
-    max_retries: int = Field(
-        default=3,
-        ge=0,
-        le=10,
-        description="Maximum retry attempts",
-    )
-
-    # Connection state
-    last_tested: datetime | None = Field(None,
-        description="Last connection test timestamp",
-    )
-    last_error: str | None = Field(None, description="Last error message")
-
-    @property
-    def connection_string(self) -> str:
-        protocol = "ldaps" if self.use_ssl else "ldap"
-        return f"{protocol}://{self.host}:{self.port}"
-
-    def test_connection(self) -> None:
-        self.last_tested = datetime.now()
-
-
-class LDAPStream(DomainEntity, EntityMixin, MetadataMixin):
-    """LDAP stream domain entity using enhanced mixins for code reduction."""
-
-    connection_id: UUID = Field(..., description="Associated connection ID")
-    stream_type: StreamType = Field(
-        default=StreamType.CUSTOM,
-        description="Type of LDAP stream",
-    )
-
-    # LDAP query
-    search_filter: str = Field(..., min_length=1, description="LDAP search filter")
-    attributes: list[str] = Field(
-        default_factory=list,
-        description="Attributes to retrieve",
-    )
-
-    # Stream configuration
-    tap_stream_id: str = Field(..., min_length=1, description="Singer tap stream ID")
-    key_properties: list[str] = Field(
-        default_factory=list,
-        description="Primary key properties",
-    )
-    replication_method: str = Field(
-        default="FULL_TABLE",
-        description="Replication method",
-    )
-    replication_key: str | None = Field(None, description="Replication key field")
-
-    # Schema
-    schema: dict[str, Any] = Field(
-        default_factory=dict,
-        description="JSON schema for stream",
-    )
-
-    # Metrics
-    records_extracted: int = Field(
-        default=0,
-        ge=0,
-        description="Total records extracted",
-    )
-    last_extraction: datetime | None = Field(None,
-        description="Last extraction timestamp",
-    )
+    id: UUID = Field(default_factory=uuid4)
+    connection_id: UUID
+    stream_type: str
+    search_filter: str
+    attributes: list[str]
+    tap_stream_id: str
+    key_properties: list[str]
+    replication_method: str
+    replication_key: str | None = None
+    schema: dict[str, Any]
+    records_extracted: int = 0
+    last_extraction: datetime | None = None
 
     def update_schema(self, schema: dict[str, Any]) -> None:
         self.schema = schema
@@ -150,75 +56,47 @@ class LDAPStream(DomainEntity, EntityMixin, MetadataMixin):
         self.last_extraction = datetime.now()
 
 
-class TapExecution(DomainEntity, EntityMixin, StatusMixin):
-    """Tap execution domain entity using enhanced mixins for code reduction."""
+class TapExecution(BaseModel):
+    """Tap execution entity."""
 
-    connection_id: UUID = Field(..., description="Associated connection ID")
-
-    # Execution details
-    command: str = Field(..., min_length=1, description="Command executed")
-    tap_status: TapStatus = Field(
-        default=TapStatus.IDLE,
-        description="Execution status",
-    )
-
-    # Timing
-    started_at: datetime | None = Field(None, description="Execution start time")
-    completed_at: datetime | None = Field(None, description="Execution completion time")
-    duration_seconds: float | None = Field(None,
-        ge=0,
-        description="Duration in seconds",
-    )
-
-    # Configuration
-    config: dict[str, Any] = Field(
-        default_factory=dict,
-        description="Tap configuration",
-    )
-    catalog: dict[str, Any] = Field(default_factory=dict, description="Singer catalog")
-    state: dict[str, Any] = Field(default_factory=dict, description="Singer state")
-
-    # Results
-    records_extracted: int = Field(
-        default=0,
-        ge=0,
-        description="Total records extracted",
-    )
-    streams_processed: int = Field(
-        default=0,
-        ge=0,
-        description="Number of streams processed",
-    )
-
-    # Output
-    stdout: str | None = Field(None, description="Standard output")
-    stderr: str | None = Field(None, description="Standard error")
-    exit_code: int | None = Field(None, description="Process exit code")
-
-    # Error handling
-    error_message: str | None = Field(None, description="Error message if failed")
+    id: UUID = Field(default_factory=uuid4)
+    connection_id: UUID
+    command: str
+    tap_status: str
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    duration_seconds: float | None = None
+    config: dict[str, Any]
+    catalog: dict[str, Any]
+    state: dict[str, Any]
+    records_extracted: int = 0
+    streams_processed: int = 0
+    stdout: str | None = None
+    stderr: str | None = None
+    exit_code: int | None = None
+    error_message: str | None = None
 
     @property
     def is_completed(self) -> bool:
         return self.tap_status in {
-            TapStatus.COMPLETED,
-            TapStatus.FAILED,
-            TapStatus.CANCELLED,
+            "completed",
+            "failed",
+            "cancelled",
         }
 
     @property
     def is_successful(self) -> bool:
-        return self.tap_status == TapStatus.COMPLETED and self.exit_code == 0
+        return self.tap_status == "completed" and self.exit_code == 0
 
     def start_execution(self) -> None:
-        self.tap_status = TapStatus.DISCOVERING
+        self.tap_status = "discovering"
         self.started_at = datetime.now()
 
     def start_extraction(self) -> None:
-        self.tap_status = TapStatus.EXTRACTING
+        self.tap_status = "extracting"
 
     def complete_execution(self, exit_code: int, stdout: str | None = None, stderr: str | None = None) -> None:
-        self.tap_status = TapStatus.COMPLETED if exit_code == 0 else TapStatus.FAILED
+        self.tap_status = "completed" if exit_code == 0 else "failed"
         self.exit_code = exit_code
         self.completed_at = datetime.now()
         self.stdout = stdout
@@ -229,7 +107,7 @@ class TapExecution(DomainEntity, EntityMixin, StatusMixin):
             self.duration_seconds = duration.total_seconds()
 
     def cancel_execution(self) -> None:
-        self.tap_status = TapStatus.CANCELLED
+        self.tap_status = "cancelled"
         self.completed_at = datetime.now()
 
         if self.started_at:
@@ -241,36 +119,17 @@ class TapExecution(DomainEntity, EntityMixin, StatusMixin):
         self.streams_processed = streams_processed
 
 
-class LDAPRecord(DomainEntity, EntityMixin):
-    """LDAP record domain entity using enhanced mixins for code reduction."""
+class LDAPRecord(BaseModel):
+    """LDAP record entity."""
 
-    stream_id: UUID = Field(..., description="Associated stream ID")
-    execution_id: UUID = Field(..., description="Associated execution ID")
-
-    # LDAP attributes
-    dn: str = Field(..., min_length=1, description="Distinguished Name")
-    attributes: dict[str, Any] = Field(
-        default_factory=dict,
-        description="LDAP attributes",
-    )
-
-    # Record metadata
-    object_class: list[str] = Field(
-        default_factory=list,
-        description="LDAP object classes",
-    )
-
-    # Extraction metadata
-    extracted_at: datetime = Field(
-        default_factory=datetime.now,
-        description="Extraction timestamp",
-    )
-
-    # Singer protocol
-    singer_record: dict[str, Any] = Field(
-        default_factory=dict,
-        description="Singer format record",
-    )
+    id: UUID = Field(default_factory=uuid4)
+    stream_id: UUID
+    execution_id: UUID
+    dn: str
+    attributes: dict[str, Any]
+    object_class: list[str]
+    extracted_at: datetime = Field(default_factory=datetime.now)
+    singer_record: dict[str, Any]
 
     @property
     def rdn(self) -> str:
@@ -289,7 +148,7 @@ class LDAPRecord(DomainEntity, EntityMixin):
 
 
 # Domain Events using flext-core DomainEvent
-class TapExecutionStartedEvent(DomainEvent):
+class TapExecutionStartedEvent(BaseModel):
     """Event raised when tap execution starts."""
 
     execution_id: UUID
@@ -297,24 +156,24 @@ class TapExecutionStartedEvent(DomainEvent):
     command: str
 
 
-class TapExecutionCompletedEvent(DomainEvent):
+class TapExecutionCompletedEvent(BaseModel):
     """Event raised when tap execution completes."""
 
     execution_id: UUID
     connection_id: UUID | None = None
 
 
-class StreamDiscoveredEvent(DomainEvent):
+class StreamDiscoveredEvent(BaseModel):
     """Event raised when stream is discovered."""
 
     stream_id: UUID
     connection_id: UUID
     stream_name: str
-    stream_type: StreamType
+    stream_type: str
     schema: dict[str, Any]
 
 
-class RecordExtractedEvent(DomainEvent):
+class RecordExtractedEvent(BaseModel):
     """Event raised when record is extracted."""
 
     record_id: UUID
@@ -324,7 +183,7 @@ class RecordExtractedEvent(DomainEvent):
     attributes_count: int
 
 
-class ConnectionTestedEvent(DomainEvent):
+class ConnectionTestedEvent(BaseModel):
     """Event raised when connection is tested."""
 
     connection_id: UUID

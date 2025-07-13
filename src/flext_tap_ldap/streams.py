@@ -1,25 +1,36 @@
-"""Stream implementations for tap-ldap using flext-core patterns.
-
-Zero tolerance implementation with proper Singer SDK integration.
-"""
+"""LDAP streams for extracting data from LDAP directories."""
 
 from __future__ import annotations
+
+import logging
+from collections.abc import Iterable
+from collections.abc import Mapping
+from typing import TYPE_CHECKING
+from typing import Any
 
 from singer_sdk import Stream
 from singer_sdk import singer_typing as th
 
+if TYPE_CHECKING:
+    from flext_tap_ldap.tap import TapLDAP
+
+logger = logging.getLogger(__name__)
+
 
 class LDAPBaseStream(Stream):
-    """Base class for LDAP streams using flext-core patterns."""
+    """Base class for LDAP streams."""
 
-    def __init__(self, tap, **kwargs) -> None:
-        """Initialize LDAP stream."""
-        super().__init__(tap=tap, **kwargs)
+    def __init__(self, tap: TapLDAP, **kwargs: Any) -> None:
+        """Initialize the LDAP stream."""
+        super().__init__(tap, **kwargs)
+        self.tap = tap
 
-    def get_records(self, context: dict | None = None):
-        """Get records from LDAP - basic implementation for testing."""
-        # Basic implementation for testing - would be replaced with actual LDAP queries
-        yield {"id": f"test-{self.name}", "name": f"Test {self.name.replace('_', ' ').title()}"}
+    def get_records(self, context: Mapping[str, Any] | None = None) -> Iterable[dict[str, Any]]:
+        """Get records from LDAP."""
+        # This is a base implementation that yields empty records
+        # Subclasses should override this method
+        return []
+        yield from []  # Make it a generator
 
 
 class UsersStream(LDAPBaseStream):

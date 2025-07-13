@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import pytest
 from click.testing import CliRunner
-from tap_ldap.tap import TapLDAP
+from flext_tap_ldap.tap import TapLDAP
 
 if TYPE_CHECKING:
             from pathlib import Path

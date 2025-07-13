@@ -17,9 +17,9 @@ from flext_core.domain.types import ServiceResult
 
 # Test imports - skip if not available
 try:
-    from tap_ldap.ldif_processor import LDIFEntry
-    from tap_ldap.ldif_processor import LDIFProcessor
-    from tap_ldap.ldif_processor import LDIFValidator
+    from flext_tap_ldap.ldif_processor import LDIFEntry
+    from flext_tap_ldap.ldif_processor import LDIFProcessor
+    from flext_tap_ldap.ldif_processor import LDIFValidator
 except ImportError:
     pytest.skip("tap_ldap modules not available", allow_module_level=True)
 

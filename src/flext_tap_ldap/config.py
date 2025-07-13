@@ -115,24 +115,65 @@ class TapLDAPConfig(BaseSettings):
 
     @classmethod
     def create_with_defaults(cls, **overrides: Any) -> TapLDAPConfig:
-        """Create configuration with intelligent defaults."""
-        defaults = {
-            "connection": LDAPConnectionConfig(
-                host="localhost",
-                port=389,
-                base_dn="dc=example,dc=com",
-                use_ssl=False,
-                timeout=30,
-                page_size=1000,
-                user_filter="(objectClass=inetOrgPerson)",
-                group_filter="(objectClass=groupOfNames)",
-            ),
-            "ldif_processing": LDIFProcessingConfig(),
-            "project_name": "flext-tap-ldap",
-            "project_version": "0.7.0",
+        """Create config with intelligent defaults."""
+        defaults: dict[str, Any] = {
+            "ldap_connection": {
+                "host": "localhost",
+                "port": 389,
+                "bind_dn": None,
+                "password": None,
+                "use_ssl": False,
+                "timeout": 30,
+                "pool_size": 5,
+                "validate_certificates": True,
+                "ca_cert_file": None,
+                "client_cert_file": None,
+                "client_key_file": None,
+                "ssh_tunnel": {},
+                "oracle_oid_compatibility": False,
+                "retry_attempts": 3,
+                "connection_timeout": 10,
+                "read_timeout": 60,
+                "keep_alive": True,
+                "auto_reconnect": True,
+            },
+            "ldif_processing": {
+                "enabled": False,
+                "file_path": None,
+                "batch_size": 1000,
+                "skip_errors": False,
+                "encoding": "utf-8",
+                "max_file_size_mb": 100,
+                "validate_dn": True,
+                "include_metadata": True,
+                "parallel_processing": False,
+                "chunk_size": 10000,
+                "use_memory_mapping": False,
+                "progress_callback": None,
+            },
+            "stream_maps": {},
+            "stream_map_config": {},
+            "batch_size": 1000,
+            "streams": [],
         }
-        defaults.update(overrides)
-        return cls(**defaults)
+
+        # Apply overrides
+        for key, value in overrides.items():
+            if key in defaults:
+                if isinstance(defaults[key], dict) and isinstance(value, dict):
+                    defaults[key].update(value)
+                else:
+                    defaults[key] = value
+
+        # Create the config properly
+        return cls(
+            ldap_connection=defaults["ldap_connection"],
+            ldif_processing=defaults["ldif_processing"],
+            stream_maps=defaults["stream_maps"],
+            stream_map_config=defaults["stream_map_config"],
+            batch_size=defaults["batch_size"],
+            streams=defaults["streams"],
+        )
 
 
 # Export main configuration classes

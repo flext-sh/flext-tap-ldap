@@ -120,29 +120,30 @@ class LDAPUser(LDAPEntry):
     manager: str | None = Field(None, description="Manager DN")
 
     @classmethod
-    def from_entry(cls, entry: LDAPEntry) -> LDAPUser:
-        """Create LDAPUser from generic LDAP entry.
-
-        Args:
-            entry: Generic LDAP entry to convert.
-
-        Returns:
-            LDAPUser instance with extracted user attributes.
-
-        """
+    def from_entry(cls, entry: Any) -> LDAPUser:
+        """Create LDAPUser from LDAP entry."""
         return cls(
-            dn=entry.dn,
-            object_classes=entry.object_classes,
-            attributes=entry.attributes,
-            uid=entry.get_attribute("uid"),
-            cn=entry.get_attribute("cn"),
-            sn=entry.get_attribute("sn"),
-            given_name=entry.get_attribute("givenName"),
-            mail=entry.get_attribute("mail"),
-            employee_number=entry.get_attribute("employeeNumber"),
-            department=entry.get_attribute("department"),
-            title=entry.get_attribute("title"),
-            manager=entry.get_attribute("manager"),
+            uid=entry.get("uid", [None])[0],
+            cn=entry.get("cn", [None])[0],
+            sn=entry.get("sn", [None])[0],
+            given_name=entry.get("givenName", [None])[0],
+            display_name=entry.get("displayName", [None])[0],
+            mail=entry.get("mail", [None])[0],
+            telephone_number=entry.get("telephoneNumber", [None])[0],
+            mobile=entry.get("mobile", [None])[0],
+            department=entry.get("department", [None])[0],
+            title=entry.get("title", [None])[0],
+            manager=entry.get("manager", [None])[0],
+            employee_number=entry.get("employeeNumber", [None])[0],
+            employee_type=entry.get("employeeType", [None])[0],
+            home_directory=entry.get("homeDirectory", [None])[0],
+            login_shell=entry.get("loginShell", [None])[0],
+            uid_number=entry.get("uidNumber", [None])[0],
+            gid_number=entry.get("gidNumber", [None])[0],
+            description=entry.get("description", [None])[0],
+            object_classes=entry.get("objectClass", []),
+            create_timestamp=entry.get("createTimestamp", [None])[0],
+            modify_timestamp=entry.get("modifyTimestamp", [None])[0],
         )
 
 
@@ -155,30 +156,17 @@ class LDAPGroup(LDAPEntry):
     owner: str | None = Field(None, description="Group owner DN")
 
     @classmethod
-    def from_entry(cls, entry: LDAPEntry) -> LDAPGroup:
-        """Create LDAPGroup from generic LDAP entry.
-
-        Args:
-            entry: Generic LDAP entry to convert.
-
-        Returns:
-            LDAPGroup instance with extracted group attributes.
-
-        """
-        members = (
-            entry.get_attribute("member") or entry.get_attribute("uniqueMember") or []
-        )
-        if isinstance(members, str):
-            members = [members]
-
+    def from_entry(cls, entry: Any) -> LDAPGroup:
+        """Create LDAPGroup from LDAP entry."""
         return cls(
-            dn=entry.dn,
-            object_classes=entry.object_classes,
-            attributes=entry.attributes,
-            cn=entry.get_attribute("cn"),
-            description=entry.get_attribute("description"),
-            members=members,
-            owner=entry.get_attribute("owner"),
+            cn=entry.get("cn", [None])[0],
+            description=entry.get("description", [None])[0],
+            members=entry.get("member", []),
+            unique_members=entry.get("uniqueMember", []),
+            gid_number=entry.get("gidNumber", [None])[0],
+            object_classes=entry.get("objectClass", []),
+            create_timestamp=entry.get("createTimestamp", [None])[0],
+            modify_timestamp=entry.get("modifyTimestamp", [None])[0],
         )
 
 

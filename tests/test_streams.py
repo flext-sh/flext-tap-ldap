@@ -10,13 +10,13 @@ from unittest.mock import patch
 
 import pytest
 
-from tap_ldap.streams import CustomStream
-from tap_ldap.streams import GroupsStream
-from tap_ldap.streams import LDAPStream
-from tap_ldap.streams import OrganizationalUnitsStream
-from tap_ldap.streams import SchemaStream
-from tap_ldap.streams import UsersStream
-from tap_ldap.tap import TapLDAP
+from flext_tap_ldap.streams import CustomStream
+from flext_tap_ldap.streams import GroupsStream
+from flext_tap_ldap.streams import LDAPStream
+from flext_tap_ldap.streams import OrganizationalUnitsStream
+from flext_tap_ldap.streams import SchemaStream
+from flext_tap_ldap.streams import UsersStream
+from flext_tap_ldap.tap import TapLDAP
 
 
 class TestLDAPStream:
