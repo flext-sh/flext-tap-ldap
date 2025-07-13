@@ -5,9 +5,9 @@ from __future__ import annotations
 from textwrap import dedent
 from typing import TYPE_CHECKING
 
-from tap_ldap.ldif_stream import LDIFAnalysisStream
-from tap_ldap.ldif_stream import LDIFStream
-from tap_ldap.tap import TapLDAP
+from flext_tap_ldap.ldif_stream import LDIFAnalysisStream
+from flext_tap_ldap.ldif_stream import LDIFStream
+from flext_tap_ldap.tap import TapLDAP
 
 if TYPE_CHECKING:
             from pathlib import Path

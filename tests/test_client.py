@@ -1,4 +1,4 @@
-"""Tests for LDAP client.
+"""Tests for LDAP client."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from unittest.mock import patch
 import pytest
 from ldap3.core.exceptions import LDAPException
 
-from tap_ldap.client import LDAPClient
+from flext_tap_ldap.client import LDAPClient
 
 
 class TestLDAPClient:
@@ -44,8 +44,8 @@ class TestLDAPClient:
         client.use_ssl = True
         assert client.server_uri == "ldaps://test.ldap.com:389"
 
-    @patch("tap_ldap.client.Connection")
-    @patch("tap_ldap.client.Server")
+    @patch("flext_tap_ldap.client.Connection")
+    @patch("flext_tap_ldap.client.Server")
     def test_get_connection(self,
         mock_server_class:
         MagicMock,
@@ -83,8 +83,8 @@ class TestLDAPClient:
         # Verify unbind was called
         mock_connection.unbind.assert_called_once()
 
-    @patch("tap_ldap.client.Connection")
-    @patch("tap_ldap.client.Server")
+    @patch("flext_tap_ldap.client.Connection")
+    @patch("flext_tap_ldap.client.Server")
     def test_search(self,
         mock_server_class:
             MagicMock,
@@ -131,8 +131,8 @@ class TestLDAPClient:
             paged_size=1000,
         )
 
-    @patch("tap_ldap.client.Connection")
-    @patch("tap_ldap.client.Server")
+    @patch("flext_tap_ldap.client.Connection")
+    @patch("flext_tap_ldap.client.Server")
     def test_test_connection_success(self,
         mock_server_class:
         MagicMock,
@@ -146,8 +146,8 @@ class TestLDAPClient:
 
         assert client.test_connection() is True
 
-    @patch("tap_ldap.client.Connection")
-    @patch("tap_ldap.client.Server")
+    @patch("flext_tap_ldap.client.Connection")
+    @patch("flext_tap_ldap.client.Server")
     def test_test_connection_failure(self,
         mock_server_class:
         MagicMock,

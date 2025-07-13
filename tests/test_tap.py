@@ -8,7 +8,7 @@ from unittest.mock import patch
 import pytest
 from singer_sdk.testing import get_tap_test_class
 
-from tap_ldap.tap import TapLDAP
+from flext_tap_ldap.tap import TapLDAP
 
 # Basic tap tests
 TestTapLDAP = get_tap_test_class(

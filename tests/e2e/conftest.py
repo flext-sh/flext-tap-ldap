@@ -44,9 +44,8 @@ def sample_catalog() -> dict[str, Any]:
 
 
 @pytest.fixture(scope="session")
-def ldap_container(project_root:
-        Path) -> Iterator[None]:
-        compose_file = project_root / "docker-compose.yml"
+def ldap_container(project_root: Path) -> Iterator[None]:
+    compose_file = project_root / "docker-compose.yml"
 
     # Start containers
     logger.info("Starting OpenLDAP container...")
@@ -59,7 +58,7 @@ def ldap_container(project_root:
     # Wait for LDAP to be ready
     max_retries = 30
     for i in range(max_retries):
-            try:
+        try:
             server = Server("localhost", port=10389, get_info=ALL)
             conn = Connection(
                 server,
@@ -72,7 +71,7 @@ def ldap_container(project_root:
             break
         except Exception:
             if i == max_retries - 1:
-            logger.exception("LDAP container failed to start")
+                logger.exception("LDAP container failed to start")
                 raise
             logger.info("Waiting for LDAP container to be ready...")
             time.sleep(2)
@@ -89,9 +88,8 @@ def ldap_container(project_root:
 
 
 @pytest.fixture
-def ldap_connection(ldap_container:
-            Any) -> Generator[Connection]:
-        server = Server("localhost", port=10389, get_info=ALL)
+def ldap_connection(ldap_container: Any) -> Generator[Connection]:
+    server = Server("localhost", port=10389, get_info=ALL)
     conn = Connection(
         server,
         user="cn=admin,dc=test,dc=com",
@@ -103,9 +101,8 @@ def ldap_connection(ldap_container:
 
 
 @pytest.fixture
-def tap_config_file(tmp_path:
-        Path, ldap_container: Any) -> Path:
-        config = {
+def tap_config_file(tmp_path: Path, ldap_container: Any) -> Path:
+    config = {
         "host": "localhost",
         "port": 10389,
         "bind_dn": "cn=admin,dc=test,dc=com",
@@ -121,8 +118,7 @@ def tap_config_file(tmp_path:
 
 
 @pytest.fixture
-def catalog_file(tmp_path:
-        Path, sample_catalog: dict[str, Any]) -> Path:
-        catalog_file = tmp_path / "catalog.json"
+def catalog_file(tmp_path: Path, sample_catalog: dict[str, Any]) -> Path:
+    catalog_file = tmp_path / "catalog.json"
     catalog_file.write_text(json.dumps(sample_catalog, indent=2))
     return catalog_file
