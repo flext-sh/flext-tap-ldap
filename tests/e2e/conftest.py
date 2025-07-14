@@ -6,14 +6,18 @@ import json
 import subprocess
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
+from typing import Any
 
 import pytest
 import structlog
-from ldap3 import ALL, Connection, Server
+from ldap3 import ALL
+from ldap3 import Connection
+from ldap3 import Server
 
 if TYPE_CHECKING:
-            from collections.abc import Generator, Iterator
+            from collections.abc import Generator
+            from collections.abc import Iterator
 
 logger = structlog.get_logger()
 

@@ -167,12 +167,8 @@ class TapLDAPConfig(BaseSettings):
 
         # Create the config properly
         return cls(
-            ldap_connection=defaults["ldap_connection"],
+            connection=defaults["ldap_connection"],
             ldif_processing=defaults["ldif_processing"],
-            stream_maps=defaults["stream_maps"],
-            stream_map_config=defaults["stream_map_config"],
-            batch_size=defaults["batch_size"],
-            streams=defaults["streams"],
         )
 
 

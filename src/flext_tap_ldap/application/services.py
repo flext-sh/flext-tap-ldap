@@ -1,13 +1,13 @@
-from typing import Any
-
 """Application services for FLEXT-TAP-LDAP v0.7.0.
 
 REFACTORED:
-            Using flext-core service patterns - NO duplication.  Clean architecture with dependency injection and ServiceResult pattern.  """
+            Using flext-core service patterns - NO duplication.  Clean architecture with dependency injection and ServiceResult pattern.
+"""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from typing import Any
 
 from flext_core.config import injectable
 from flext_core.domain.types import ServiceResult
@@ -33,18 +33,12 @@ class LDAPConnectionService:
             from flext_tap_ldap.domain.entities import LDAPConnection
 
             connection = LDAPConnection(
-                name=f"LDAP connection to {host}:{port}",
-                description=f"Connection to {host}:{port} with base DN {base_dn}",
                 host=host,
                 port=port,
                 bind_dn=bind_dn,
-                bind_password=bind_password,
-                base_dn=base_dn,
+                password=bind_password,
                 use_ssl=use_ssl,
-                use_tls=use_tls,
                 timeout=timeout,
-                page_size=page_size,
-                max_retries=max_retries,
             )
 
             self._connections[connection.id] = connection

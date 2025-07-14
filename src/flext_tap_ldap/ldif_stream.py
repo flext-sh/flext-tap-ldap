@@ -11,8 +11,10 @@ try:
     from singer_sdk import Stream
 except ImportError:
     # Fallback for testing
+    from typing import Any
+
     th = None
-    Stream = object
+    StreamBase: type[Any] = object
 
 
 # Simple placeholder - this file has too many syntax errors to fix completely
@@ -20,7 +22,7 @@ except ImportError:
 class LDIFStream:
     """Placeholder LDIF stream - needs complete rewrite."""
 
-    def __init__(self, tap) -> None:
+    def __init__(self, tap: Any) -> None:
         self.tap = tap
 
     def _classify_entry_type(self, object_classes: list[str]) -> str:

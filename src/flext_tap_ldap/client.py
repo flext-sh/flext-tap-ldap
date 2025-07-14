@@ -20,9 +20,8 @@ from ldap3 import SAFE_SYNC
 from ldap3 import SIMPLE
 from ldap3 import Connection
 from ldap3 import Server
-
-from ldap3.core.exceptions import LDAPException
 from ldap3 import Tls
+from ldap3.core.exceptions import LDAPException
 from ldap3.utils.conv import escape_filter_chars
 
 if TYPE_CHECKING:
@@ -74,6 +73,7 @@ class LDAPClient:
             ca_certs_file: Path to CA certificates file
             client_cert_file: Path to client certificate file
             client_key_file: Path to client key file
+
         """
         self.host = host
         self.port = port
@@ -94,7 +94,7 @@ class LDAPClient:
 
         self._connection_pool: list[Connection] = (
             []
-        )  # TODO: Initialize in __post_init__
+        )  # TODO(marlonsc): Initialize in __post_init__
         self._pool_lock = ThreadPoolExecutor(max_workers=1)
         self._server: Server | None = None
         self._tls_context: Tls | None = None
@@ -103,7 +103,7 @@ class LDAPClient:
         self._setup_server()
 
     def _setup_tls_context(self) -> None:
-        """Setup TLS context for LDAP connection."""
+        """Setups an TLS context for LDAP connection."""
         if not self.use_ssl:
             return
 
@@ -124,7 +124,7 @@ class LDAPClient:
         self._tls_context = Tls(**tls_config)
 
     def _setup_server(self) -> None:
-        """Setup a new LDAP server."""
+        """Setups a new LDAP server."""
         self._server = Server(
             host=self.host,
             port=self.port,
@@ -135,7 +135,12 @@ class LDAPClient:
         )
 
     def _create_connection(self) -> Connection:
-        """Create a new LDAP connection."""
+        """Create a new LDAP connection.
+
+        Returns:
+            A new LDAP connection
+
+        """
         if not self._server:
             self._setup_server()
 
@@ -180,9 +185,8 @@ class LDAPClient:
                     time.sleep(self.retry_delay)
                     continue
                 logger.exception(
-                    "LDAP operation failed after %d retries: %s",
+                    "LDAP operation failed after %d retries.",
                     self.max_retries,
-                    e,
                 )
                 break
 
@@ -205,8 +209,8 @@ class LDAPClient:
     def get_connection(self) -> Generator[Connection]:
         """Get a connection to the LDAP server.
 
-        Returns:
-            A connection to the LDAP server
+        Yields:
+            A connection to the LDAP server.
 
         """
         def _create_and_bind() -> ldap3.Connection:
@@ -240,7 +244,7 @@ class LDAPClient:
             scope: The scope of the search
             size_limit: The maximum number of entries to return
 
-        Returns:
+        Yields:
             An iterator of entries
 
         """
@@ -303,6 +307,15 @@ class LDAPClient:
                 )
 
     def get_schema(self) -> dict[str, Any]:
+        """Get the schema from the LDAP server.
+
+        Raises:
+            LDAPException: If the schema cannot be retrieved
+
+        Returns:
+            A dictionary containing the schema
+
+        """
         with self.get_connection() as conn:
             # Get schema from DSE
             conn.search(
@@ -339,6 +352,12 @@ class LDAPClient:
             }
 
     def test_connection(self) -> bool:
+        """Test the connection to the LDAP server.
+
+        Returns:
+            True if the connection is successful, False otherwise
+
+        """
         try:
             with self.get_connection() as conn:
                 # Perform simple search to verify connection
@@ -350,8 +369,8 @@ class LDAPClient:
                     size_limit=1,
                 )
                 return bool(conn.result["result"] == 0)
-        except LDAPException as e:
-            logger.exception("Connection test failed: %s", e)
+        except LDAPException:
+            logger.exception("Connection test failed.")
             return False
 
     def search_with_oracle_support(
@@ -362,6 +381,18 @@ class LDAPClient:
         *,
         oracle_oid_mode: bool = False,
     ) -> Iterator[dict[str, Any]]:
+        """Search for entries in the LDAP server with Oracle support.
+
+        Args:
+            base_dn: The base DN to search from
+            search_filter: The search filter to use
+            attributes: The attributes to return
+            oracle_oid_mode: Whether to use Oracle OID mode
+
+        Yields:
+            An iterator of entries
+
+        """
         # Oracle-specific attribute handling
         oracle_attrs = ["orclPassword", "orclPasswordAttribute", "userPassword"]
 
@@ -405,12 +436,17 @@ class LDAPClient:
         return entry
 
     def get_naming_contexts(self) -> list[str]:
-        """Get naming contexts from LDAP server."""
+        """Get naming contexts from LDAP server.
+
+        Returns:
+            A list of naming contexts
+
+        """
         try:
             with self.get_connection() as conn:
                 # Search for naming contexts
                 conn.search(
-                    "", "(objectClass=*)", ldap3.BASE, attributes=["namingContexts"]
+                    "", "(objectClass=*)", ldap3.BASE, attributes=["namingContexts"],
                 )
                 if conn.entries:
                     contexts = conn.entries[0].get("namingContexts", [])
@@ -419,10 +455,16 @@ class LDAPClient:
                     return [str(contexts)]
                 return []
         except Exception as e:
-            logger.error(f"Error getting naming contexts: {e}")
+            logger.exception("Error getting naming contexts: %s", e)
             return []
 
     def health_check(self) -> dict[str, Any]:
+        """Check the health of the LDAP server.
+
+        Returns:
+            A dictionary containing the health status
+
+        """
         health = {
             "status": "unknown",
             "server_uri": self.server_uri,
