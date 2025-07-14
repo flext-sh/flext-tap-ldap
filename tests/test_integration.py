@@ -1,22 +1,24 @@
-"""Integration tests for tap-ldap.
+"""Integration tests for tap-ldap."""
 
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
+from typing import Any
 from unittest.mock import patch
 
-import pytest
 from click.testing import CliRunner
+
+import pytest
 from flext_tap_ldap.tap import TapLDAP
 
 if TYPE_CHECKING:
-            from pathlib import Path
+    from pathlib import Path
     from unittest.mock import Mock
 
 
 class TestTapLDAPIntegration:
-         """Integration tests for tap-ldap."""
+    """Integration tests for tap-ldap."""
 
     @pytest.fixture
     def runner(self) -> CliRunner:
@@ -118,7 +120,7 @@ class TestTapLDAPIntegration:
 
         # Check output contains Singer messages
         lines = result.output.strip().split("\n")
-        messages = [json.loads(line) for line in lines if line]:
+        messages = [json.loads(line) for line in lines if line]
 
         # Should have schema and record messages
         message_types = {msg["type"] for msg in messages}
@@ -162,10 +164,10 @@ class TestTapLDAPIntegration:
         if search_calls:
             # Check that modifyTimestamp filter was included
             for call in search_calls:
-            filter_arg = call[1].get("search_filter", "")
-                if "inetOrgPerson" in filter_arg:
-            # Should include timestamp filter for incremental
-                    assert "modifyTimestamp>=" in filter_arg or result.exit_code == 0
+                filter_arg = call[1].get("search_filter", "")
+            if "inetOrgPerson" in filter_arg:
+                # Should include timestamp filter for incremental
+                assert "modifyTimestamp>=" in filter_arg or result.exit_code == 0
 
     def test_custom_streams_config(self, runner:
             CliRunner, tmp_path: Path) -> None:
@@ -263,10 +265,10 @@ class TestTapLDAPIntegration:
 
         def side_effect(*args:
         object, **kwargs: object) -> bool:
-        nonlocal call_count
+            nonlocal call_count
             call_count += 1
             if call_count == 1:
-            mock_conn_instance.entries = [mock_entry1]
+                mock_conn_instance.entries = [mock_entry1]
                 mock_conn_instance.result = {
                     "controls": {
                         "1.2.840.113556.1.4.319": {"value": {"cookie": b"page1"}},

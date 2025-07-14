@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterable
-from collections.abc import Mapping
 from typing import TYPE_CHECKING
 from typing import Any
 
@@ -12,6 +10,9 @@ from singer_sdk import Stream
 from singer_sdk import singer_typing as th
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from collections.abc import Mapping
+
     from flext_tap_ldap.tap import TapLDAP
 
 logger = logging.getLogger(__name__)
