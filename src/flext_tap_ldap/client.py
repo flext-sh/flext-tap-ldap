@@ -16,7 +16,7 @@ from flext_ldap.client import LDAPClient as FlextLDAPClient
 from flext_ldap.config import LDAPConnectionConfig
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import AsyncGenerator, Iterator
 
 logger = logging.getLogger(__name__)
 
@@ -73,12 +73,15 @@ class LDAPClient:
         self._config = LDAPConnectionConfig(
             server=host,
             port=port,
-            bind_dn=bind_dn,
-            password=password,
             use_ssl=use_ssl,
-            timeout=timeout,
-            # Additional config mapping as needed
+            timeout_seconds=timeout,
+            pool_size=pool_size,
+            enable_connection_pooling=pool_keepalive > 0,
         )
+
+        # Store authentication parameters separately
+        self._bind_dn = bind_dn
+        self._password = password
 
         # Use REAL flext-ldap client - NO duplication
         self._flext_client = FlextLDAPClient(self._config)
@@ -101,7 +104,7 @@ class LDAPClient:
         attributes: list[str] | None = None,
         scope: str = "SUBTREE",
         size_limit: int = 0,
-    ) -> Iterator[dict[str, Any]]:
+    ) -> AsyncGenerator[dict[str, Any]]:
         """Search for entries using flext-ldap infrastructure.
 
         Args:
@@ -134,9 +137,9 @@ class LDAPClient:
                 attributes=attributes,
             )
 
-            if search_result.is_success and search_result.value:
+            if search_result.is_success and search_result.data:
                 entries_returned = 0
-                for entries_returned, entry_model in enumerate(search_result.value):
+                for entries_returned, entry_model in enumerate(search_result.data):
                     if size_limit > 0 and entries_returned >= size_limit:
                         break
 
@@ -207,7 +210,7 @@ class LDAPClient:
         # This is a simplified implementation - full async conversion would be ideal
         import asyncio
 
-        async def _async_search() -> Iterator[dict[str, Any]]:
+        async def _async_search() -> AsyncGenerator[dict[str, Any]]:
             async for entry in self.search(base_dn, search_filter, attributes):
                 if oracle_oid_mode:
                     yield self._process_oracle_entry(entry)
@@ -215,12 +218,15 @@ class LDAPClient:
                     yield entry
 
         # Convert async generator to sync for backward compatibility
+        async def _get_next_entry() -> dict[str, Any]:
+            return await anext(async_gen)
+
         loop = asyncio.new_event_loop()
         try:
             async_gen = _async_search()
             while True:
                 try:
-                    entry = loop.run_until_complete(anext(async_gen))
+                    entry = loop.run_until_complete(_get_next_entry())
                     yield entry
                 except StopAsyncIteration:
                     break

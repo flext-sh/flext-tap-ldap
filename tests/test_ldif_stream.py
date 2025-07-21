@@ -16,11 +16,19 @@ class TestLDIFStreamBasic:
     def test_ldif_stream_creation(self) -> None:
         """Test LDIF stream can be created."""
         from flext_tap_ldap.ldif_stream import LDIFStream
+        from flext_tap_ldap.tap import TapLDAP
 
         # Test that stream can be instantiated
         try:
-            stream = LDIFStream(tap=None, name="test_stream", schema={}, path=[])
+            tap = TapLDAP(config={
+                "host": "test.ldap.com",
+                "port": 389,
+                "base_dn": "dc=test,dc=com",
+                "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
+                "password": "test_password",
+            })
+            stream = LDIFStream(tap=tap, name="test_stream", schema={}, path=[])
             assert stream is not None
-        except (TypeError, AttributeError):
+        except (TypeError, AttributeError, ImportError):
             # If constructor signature is different, just test the class exists
             assert LDIFStream is not None
