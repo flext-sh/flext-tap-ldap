@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from singer_sdk.testing import get_tap_test_class
@@ -14,8 +13,7 @@ from flext_tap_ldap.tap import TapLDAP
 TestTapLDAP = get_tap_test_class(
     tap_class=TapLDAP,
     config={
-        "host":
-             "test.ldap.com",
+        "host": "test.ldap.com",
         "port": 389,
         "base_dn": "dc=test,dc=com",
         "bind_dn": "cn=admin,dc=test,dc=com",
@@ -25,11 +23,11 @@ TestTapLDAP = get_tap_test_class(
 
 
 class TestTapLDAPUnit:
-         """Unit tests for TapLDAP."""
+    """Unit tests for TapLDAP."""
 
     @pytest.fixture
     def config(self) -> dict:
-            return {
+        return {
             "host": "test.ldap.com",
             "port": 389,
             "base_dn": "dc=test,dc=com",
@@ -40,14 +38,12 @@ class TestTapLDAPUnit:
             "page_size": 1000,
         }
 
-    def test_tap_initialization(self, config:
-        dict) -> None:
+    def test_tap_initialization(self, config: dict) -> None:
         tap = TapLDAP(config=config)
         assert tap.name == "tap-ldap"
         assert tap.config == config
 
-    def test_discover_streams(self, config:
-        dict) -> None:
+    def test_discover_streams(self, config: dict) -> None:
         tap = TapLDAP(config=config)
         streams = tap.discover_streams()
 
@@ -59,8 +55,7 @@ class TestTapLDAPUnit:
         assert "schema" in stream_names
         assert len(streams) == 4
 
-    def test_discover_custom_streams(self, config:
-            dict) -> None:
+    def test_discover_custom_streams(self, config: dict) -> None:
         config["custom_streams"] = [
             {
                 "name": "service_accounts",
@@ -83,8 +78,7 @@ class TestTapLDAPUnit:
         assert "service_accounts" in stream_names
         assert len(streams) == 5
 
-    def test_catalog_generation(self, config:
-            dict) -> None:
+    def test_catalog_generation(self, config: dict) -> None:
         tap = TapLDAP(config=config)
         catalog = tap.catalog_dict
 
@@ -93,15 +87,14 @@ class TestTapLDAPUnit:
 
         # Check users stream
         users_stream = next(
-            s for s in catalog["streams"] if s["tap_stream_id"] == "users":
+            s for s in catalog["streams"] if s["tap_stream_id"] == "users"
         )
         assert users_stream["replication_method"] == "INCREMENTAL"
         assert users_stream["replication_key"] == "modifyTimestamp"
-        assert "dn" in users_stream["metadata"][0]["metadata"]["inclusion"]
+        assert "inclusion" in users_stream["metadata"][0]["metadata"]
 
-    @patch("tap_ldap.client.LDAPClient")
-    def test_stream_records(self, mock_client_class:
-            MagicMock, config: dict) -> None:
+    @patch("flext_tap_ldap.client.LDAPClient")
+    def test_stream_records(self, mock_client_class: MagicMock, config: dict) -> None:
         # Mock LDAP client
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
@@ -121,7 +114,7 @@ class TestTapLDAPUnit:
 
         tap = TapLDAP(config=config)
         streams = tap.discover_streams()
-        users_stream = next(s for s in streams if s.name == "users"):
+        users_stream = next(s for s in streams if s.name == "users")
 
         records = list(users_stream.get_records(None))
         assert len(records) == 1

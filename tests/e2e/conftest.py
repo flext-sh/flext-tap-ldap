@@ -6,30 +6,26 @@ import json
 import subprocess
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 import structlog
-from ldap3 import ALL
-from ldap3 import Connection
-from ldap3 import Server
+from ldap3 import ALL, Connection, Server
 
 if TYPE_CHECKING:
-            from collections.abc import Generator
-            from collections.abc import Iterator
+    from collections.abc import Generator, Iterator
 
 logger = structlog.get_logger()
 
 
 @pytest.fixture(scope="session")
 def project_root() -> Path:
-        return Path(__file__).parent.parent.parent
+    return Path(__file__).parent.parent.parent
 
 
 @pytest.fixture(scope="session")
 def sample_catalog() -> dict[str, Any]:
-        return {
+    return {
         "streams": [
             {
                 "tap_stream_id": "users",

@@ -6,8 +6,8 @@ REFACTORED:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-from typing import Any
+from datetime import datetime
+from typing import TYPE_CHECKING, Any
 
 from flext_core.config import injectable
 from flext_core.domain.types import ServiceResult
@@ -15,20 +15,38 @@ from flext_core.domain.types import ServiceResult
 if TYPE_CHECKING:
     from uuid import UUID
 
-    from flext_tap_ldap.domain.entities import LDAPConnection
-    from flext_tap_ldap.domain.entities import LDAPRecord
-    from flext_tap_ldap.domain.entities import LDAPStream
-    from flext_tap_ldap.domain.entities import TapExecution
+    from flext_tap_ldap.domain.entities import (
+        LDAPConnection,
+        LDAPRecord,
+        LDAPStream,
+        TapExecution,
+    )
 
 
-@injectable()
+@injectable
 class LDAPConnectionService:
     """Service for managing LDAP connections."""
 
     def __init__(self) -> None:
-        self._connections: dict[UUID, LDAPConnection] = {}  # TODO: Initialize in __post_init__
+        self._connections: dict[
+            UUID,
+            LDAPConnection,
+        ] = {}  # Initialized inline for immediate availability
 
-    async def create_connection(self, host: str, port: int = 389, bind_dn: str | None = None, bind_password: str | None = None, base_dn: str = "", use_ssl: bool = False, use_tls: bool = False, timeout: int = 30, page_size: int = 1000, max_retries: int = 3) -> ServiceResult[LDAPConnection]:
+    async def create_connection(
+        self,
+        host: str,
+        port: int = 389,
+        bind_dn: str | None = None,
+        bind_password: str | None = None,
+        *,
+        base_dn: str = "",
+        use_ssl: bool = False,
+        use_tls: bool = False,
+        timeout_seconds: int = 30,
+        page_size: int = 1000,
+        max_retries: int = 3,
+    ) -> ServiceResult[LDAPConnection]:
         try:
             from flext_tap_ldap.domain.entities import LDAPConnection
 
@@ -38,7 +56,7 @@ class LDAPConnectionService:
                 bind_dn=bind_dn,
                 password=bind_password,
                 use_ssl=use_ssl,
-                timeout=timeout,
+                timeout=timeout_seconds,
             )
 
             self._connections[connection.id] = connection
@@ -54,7 +72,7 @@ class LDAPConnectionService:
 
             # Here you would actually test the LDAP connection
             # For now, we just mark it as tested
-            connection.test_connection()
+            connection.last_tested = datetime.now()
             return ServiceResult.ok(True)
         except Exception as e:
             connection = self._connections.get(connection_id)
@@ -62,7 +80,10 @@ class LDAPConnectionService:
                 connection.last_error = str(e)
             return ServiceResult.fail(f"Failed to test connection: {e}")
 
-    async def get_connection(self, connection_id: UUID) -> ServiceResult[LDAPConnection | None]:
+    async def get_connection(
+        self,
+        connection_id: UUID,
+    ) -> ServiceResult[LDAPConnection | None]:
         try:
             connection = self._connections.get(connection_id)
             return ServiceResult.ok(connection)
@@ -77,33 +98,44 @@ class LDAPConnectionService:
             return ServiceResult.fail(f"Failed to list connections: {e}")
 
 
-@injectable()
+@injectable
 class LDAPStreamService:
     """Service for managing LDAP streams."""
 
     def __init__(self) -> None:
-        self._streams: dict[UUID, LDAPStream] = {}  # TODO: Initialize in __post_init__
+        self._streams: dict[
+            UUID,
+            LDAPStream,
+        ] = {}  # Initialized inline for immediate availability
 
-    async def create_stream(self, connection_id: UUID, stream_type: str, search_filter: str, attributes: list[str] | None = None, tap_stream_id: str | None = None, key_properties: list[str] | None = None, replication_method: str = "FULL_TABLE", replication_key: str | None = None) -> ServiceResult[LDAPStream]:
+    async def create_stream(
+        self,
+        connection_id: UUID,
+        stream_type: str,
+        search_filter: str,
+        attributes: list[str] | None = None,
+        tap_stream_id: str | None = None,
+        key_properties: list[str] | None = None,
+        replication_method: str = "FULL_TABLE",
+        replication_key: str | None = None,
+    ) -> ServiceResult[LDAPStream]:
         try:
             from flext_tap_ldap.domain.entities import LDAPStream
-            from flext_tap_ldap.domain.entities import StreamType
 
             # Generate tap_stream_id if not provided
             if not tap_stream_id:
                 tap_stream_id = f"{stream_type.lower()}_stream"
 
             stream = LDAPStream(
-                name=f"LDAP {stream_type} stream",
-                description=f"Extracts {stream_type} from LDAP",
                 connection_id=connection_id,
-                stream_type=StreamType(stream_type.lower()),
+                stream_type=stream_type.lower(),
                 search_filter=search_filter,
                 attributes=attributes or [],
                 tap_stream_id=tap_stream_id,
                 key_properties=key_properties or ["dn"],
                 replication_method=replication_method,
                 replication_key=replication_key,
+                stream_schema={},
             )
 
             self._streams[stream.id] = stream
@@ -140,7 +172,10 @@ class LDAPStreamService:
         except Exception as e:
             return ServiceResult.fail(f"Failed to get stream: {e}")
 
-    async def list_streams(self, connection_id: UUID | None = None) -> ServiceResult[list[LDAPStream]]:
+    async def list_streams(
+        self,
+        connection_id: UUID | None = None,
+    ) -> ServiceResult[list[LDAPStream]]:
         try:
             streams = list(self._streams.values())
 
@@ -152,22 +187,31 @@ class LDAPStreamService:
             return ServiceResult.fail(f"Failed to list streams: {e}")
 
 
-@injectable()
+@injectable
 class TapExecutionService:
     """Service for managing tap executions."""
 
     def __init__(self) -> None:
-        self._executions: dict[UUID, TapExecution] = {}  # TODO: Initialize in __post_init__
+        self._executions: dict[
+            UUID,
+            TapExecution,
+        ] = {}  # Initialized inline for immediate availability
 
-    async def create_execution(self, connection_id: UUID, command: str, config: dict[str, Any] | None = None, catalog: dict[str, Any] | None = None, state: dict[str, Any] | None = None) -> ServiceResult[TapExecution]:
+    async def create_execution(
+        self,
+        connection_id: UUID,
+        command: str,
+        config: dict[str, Any] | None = None,
+        catalog: dict[str, Any] | None = None,
+        state: dict[str, Any] | None = None,
+    ) -> ServiceResult[TapExecution]:
         try:
             from flext_tap_ldap.domain.entities import TapExecution
 
             execution = TapExecution(
-                name=f"Tap execution for connection {connection_id}",
-                description="LDAP data extraction execution",
                 connection_id=connection_id,
                 command=command,
+                tap_status="created",
                 config=config or {},
                 catalog=catalog or {},
                 state=state or {},
@@ -189,7 +233,13 @@ class TapExecutionService:
         except Exception as e:
             return ServiceResult.fail(f"Failed to start execution: {e}")
 
-    async def complete_execution(self, execution_id: UUID, exit_code: int, stdout: str | None = None, stderr: str | None = None) -> ServiceResult[TapExecution]:
+    async def complete_execution(
+        self,
+        execution_id: UUID,
+        exit_code: int,
+        stdout: str | None = None,
+        stderr: str | None = None,
+    ) -> ServiceResult[TapExecution]:
         try:
             execution = self._executions.get(execution_id)
             if not execution:
@@ -211,7 +261,12 @@ class TapExecutionService:
         except Exception as e:
             return ServiceResult.fail(f"Failed to cancel execution: {e}")
 
-    async def update_metrics(self, execution_id: UUID, records_extracted: int, streams_processed: int) -> ServiceResult[TapExecution]:
+    async def update_metrics(
+        self,
+        execution_id: UUID,
+        records_extracted: int,
+        streams_processed: int,
+    ) -> ServiceResult[TapExecution]:
         try:
             execution = self._executions.get(execution_id)
             if not execution:
@@ -222,14 +277,20 @@ class TapExecutionService:
         except Exception as e:
             return ServiceResult.fail(f"Failed to update metrics: {e}")
 
-    async def get_execution(self, execution_id: UUID) -> ServiceResult[TapExecution | None]:
+    async def get_execution(
+        self,
+        execution_id: UUID,
+    ) -> ServiceResult[TapExecution | None]:
         try:
             execution = self._executions.get(execution_id)
             return ServiceResult.ok(execution)
         except Exception as e:
             return ServiceResult.fail(f"Failed to get execution: {e}")
 
-    async def list_executions(self, connection_id: UUID | None = None) -> ServiceResult[list[TapExecution]]:
+    async def list_executions(
+        self,
+        connection_id: UUID | None = None,
+    ) -> ServiceResult[list[TapExecution]]:
         try:
             executions = list(self._executions.values())
 
@@ -238,7 +299,7 @@ class TapExecutionService:
 
             # Sort by started_at descending
             executions.sort(
-                key=lambda e: e.started_at or e.created_at,
+                key=lambda e: e.started_at or e.id.time_mid,
                 reverse=True,
             )
 
@@ -247,25 +308,34 @@ class TapExecutionService:
             return ServiceResult.fail(f"Failed to list executions: {e}")
 
 
-@injectable()
+@injectable
 class LDAPRecordService:
     """Service for managing LDAP records."""
 
     def __init__(self) -> None:
-        self._records: dict[UUID, LDAPRecord] = {}  # TODO: Initialize in __post_init__
+        self._records: dict[
+            UUID,
+            LDAPRecord,
+        ] = {}  # Initialized inline for immediate availability
 
-    async def create_record(self, stream_id: UUID, execution_id: UUID, dn: str, attributes: dict[str, Any], object_class: list[str] | None = None) -> ServiceResult[LDAPRecord]:
+    async def create_record(
+        self,
+        stream_id: UUID,
+        execution_id: UUID,
+        dn: str,
+        attributes: dict[str, Any],
+        object_class: list[str] | None = None,
+    ) -> ServiceResult[LDAPRecord]:
         try:
             from flext_tap_ldap.domain.entities import LDAPRecord
 
             record = LDAPRecord(
-                name=f"LDAP record {dn}",
-                description=f"Record from LDAP with DN {dn}",
                 stream_id=stream_id,
                 execution_id=execution_id,
                 dn=dn,
                 attributes=attributes,
                 object_class=object_class or [],
+                singer_record={},  # Will be set later
             )
 
             # Generate Singer record
@@ -283,7 +353,12 @@ class LDAPRecordService:
         except Exception as e:
             return ServiceResult.fail(f"Failed to get record: {e}")
 
-    async def list_records(self, stream_id: UUID | None = None, execution_id: UUID | None = None, limit: int = 100) -> ServiceResult[list[LDAPRecord]]:
+    async def list_records(
+        self,
+        stream_id: UUID | None = None,
+        execution_id: UUID | None = None,
+        limit: int = 100,
+    ) -> ServiceResult[list[LDAPRecord]]:
         try:
             records = list(self._records.values())
 
@@ -300,7 +375,11 @@ class LDAPRecordService:
         except Exception as e:
             return ServiceResult.fail(f"Failed to list records: {e}")
 
-    async def count_records(self, stream_id: UUID | None = None, execution_id: UUID | None = None) -> ServiceResult[int]:
+    async def count_records(
+        self,
+        stream_id: UUID | None = None,
+        execution_id: UUID | None = None,
+    ) -> ServiceResult[int]:
         try:
             records = list(self._records.values())
 

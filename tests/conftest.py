@@ -1,23 +1,30 @@
-"""Pytest configuration and fixtures for tap-ldap tests."""
+"""Pytest configuration and fixtures for flext-tap-ldap tests.
+
+Copyright (c) 2025 FLEXT Contributors
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-from typing import Any
+import os
+from typing import TYPE_CHECKING, Any
 
 import pytest
-from ldap3 import MOCK_SYNC
-from ldap3 import Connection
-from ldap3 import Server
+from ldap3 import MOCK_SYNC, Connection, Server
 
 from flext_tap_ldap.client import LDAPClient
 
 if TYPE_CHECKING:
     from collections.abc import Generator
 
+# Set test environment
+os.environ["FLEXT_ENV"] = "testing"
+os.environ["FLEXT_DEBUG"] = "true"
+
 
 @pytest.fixture
 def mock_ldap_config() -> dict[str, Any]:
+    """Mock LDAP configuration for testing."""
     return {
         "host": "test.ldap.com",
         "port": 389,
@@ -34,6 +41,7 @@ def mock_ldap_config() -> dict[str, Any]:
 
 @pytest.fixture
 def mock_ldap_connection() -> Generator[Connection]:
+    """Mock LDAP connection with test data."""
     # Create mock server and connection
     server = Server("test.ldap.com", get_info=MOCK_SYNC)
     connection = Connection(server, client_strategy=MOCK_SYNC, auto_bind=True)
@@ -121,11 +129,13 @@ def mock_ldap_connection() -> Generator[Connection]:
 
 @pytest.fixture
 def mock_ldap_client(mock_ldap_config: dict[str, Any]) -> LDAPClient:
+    """Mock LDAP client for testing."""
     return LDAPClient(**mock_ldap_config)
 
 
 @pytest.fixture
 def sample_catalog() -> dict[str, Any]:
+    """Sample Singer catalog for testing."""
     return {
         "streams": [
             {
@@ -180,6 +190,7 @@ def sample_catalog() -> dict[str, Any]:
 
 @pytest.fixture
 def sample_state() -> dict[str, Any]:
+    """Sample Singer state for testing."""
     return {
         "bookmarks": {
             "users": {
@@ -188,3 +199,54 @@ def sample_state() -> dict[str, Any]:
             },
         },
     }
+
+
+# Pytest configuration
+def pytest_configure(config: pytest.Config) -> None:
+    """Configure pytest with custom markers."""
+    config.addinivalue_line(
+        "markers",
+        "unit: mark test as unit test (fast, isolated)",
+    )
+    config.addinivalue_line(
+        "markers",
+        "integration: mark test as integration test (may require external services)",
+    )
+    config.addinivalue_line(
+        "markers",
+        "slow: mark test as slow running",
+    )
+    config.addinivalue_line(
+        "markers",
+        "ldap: mark test as LDAP-related",
+    )
+    config.addinivalue_line(
+        "markers",
+        "singer: mark test as Singer protocol-related",
+    )
+
+
+def pytest_collection_modifyitems(
+    config: pytest.Config,
+    items: list[pytest.Item],
+) -> None:
+    """Modify test collection to add markers based on test location."""
+    for item in items:
+        # Add unit marker to all tests in unit directory
+        if "/unit/" in str(item.fspath):
+            item.add_marker(pytest.mark.unit)
+        # Add integration marker to all tests in integration directory
+        elif "/integration/" in str(item.fspath):
+            item.add_marker(pytest.mark.integration)
+            item.add_marker(pytest.mark.slow)
+        # Add e2e marker to all tests in e2e directory
+        elif "/e2e/" in str(item.fspath):
+            item.add_marker(pytest.mark.slow)
+
+        # Add LDAP marker to LDAP-related tests
+        if "ldap" in item.name.lower():
+            item.add_marker(pytest.mark.ldap)
+
+        # Add Singer marker to Singer-related tests
+        if "singer" in item.name.lower() or "tap" in item.name.lower():
+            item.add_marker(pytest.mark.singer)

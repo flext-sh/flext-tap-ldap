@@ -5,11 +5,9 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 from typing import Any
-from uuid import UUID
-from uuid import uuid4
+from uuid import UUID, uuid4
 
-from pydantic import BaseModel
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
@@ -44,12 +42,12 @@ class LDAPStream(BaseModel):
     key_properties: list[str]
     replication_method: str
     replication_key: str | None = None
-    schema: dict[str, Any]
+    stream_schema: dict[str, Any]
     records_extracted: int = 0
     last_extraction: datetime | None = None
 
     def update_schema(self, schema: dict[str, Any]) -> None:
-        self.schema = schema
+        self.stream_schema = schema
 
     def record_extraction(self, record_count: int) -> None:
         self.records_extracted += record_count
@@ -95,7 +93,12 @@ class TapExecution(BaseModel):
     def start_extraction(self) -> None:
         self.tap_status = "extracting"
 
-    def complete_execution(self, exit_code: int, stdout: str | None = None, stderr: str | None = None) -> None:
+    def complete_execution(
+        self,
+        exit_code: int,
+        stdout: str | None = None,
+        stderr: str | None = None,
+    ) -> None:
         self.tap_status = "completed" if exit_code == 0 else "failed"
         self.exit_code = exit_code
         self.completed_at = datetime.now()
@@ -170,7 +173,7 @@ class StreamDiscoveredEvent(BaseModel):
     connection_id: UUID
     stream_name: str
     stream_type: str
-    schema: dict[str, Any]
+    stream_schema: dict[str, Any]
 
 
 class RecordExtractedEvent(BaseModel):

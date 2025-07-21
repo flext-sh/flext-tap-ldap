@@ -6,24 +6,22 @@ This module implements the main tap class for LDAP data extraction.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
-from typing import Any
-from typing import ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
-from singer_sdk import Tap
-from singer_sdk import singer_typing as th
+from singer_sdk import Tap, typing as th
 
 from flext_tap_ldap.config import TapLDAPConfig
-from flext_tap_ldap.ldif_stream import LDIFAnalysisStream
-from flext_tap_ldap.ldif_stream import LDIFStream
-from flext_tap_ldap.streams import CustomStream
-from flext_tap_ldap.streams import GroupsStream
-from flext_tap_ldap.streams import OrganizationalUnitsStream
-from flext_tap_ldap.streams import SchemaStream
-from flext_tap_ldap.streams import UsersStream
+from flext_tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
+from flext_tap_ldap.streams import (
+    CustomStream,
+    GroupsStream,
+    OrganizationalUnitsStream,
+    SchemaStream,
+    UsersStream,
+)
 
 if TYPE_CHECKING:
-            from singer_sdk.streams import Stream
+    from singer_sdk.streams import Stream
 
 
 logger = logging.getLogger(__name__)

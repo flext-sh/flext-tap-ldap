@@ -12,16 +12,18 @@ from textwrap import dedent
 from typing import Any
 
 import pytest
-
 from flext_core.domain.types import ServiceResult
 
-# Test imports - skip if not available
+# Test imports - handle gracefully if not available
 try:
-    from flext_tap_ldap.ldif_processor import LDIFEntry
-    from flext_tap_ldap.ldif_processor import LDIFProcessor
-    from flext_tap_ldap.ldif_processor import LDIFValidator
+    from flext_tap_ldap.ldif_processor import LDIFEntry, LDIFProcessor, LDIFValidator
+
+    LDIF_MODULES_AVAILABLE = True
 except ImportError:
-    pytest.skip("tap_ldap modules not available", allow_module_level=True)
+    LDIFEntry = None
+    LDIFProcessor = None
+    LDIFValidator = None
+    LDIF_MODULES_AVAILABLE = False
 
 
 class TestLDIFEntry:
@@ -51,6 +53,7 @@ class TestLDIFEntry:
         """Test successful LDIF entry validation."""
         entry = LDIFEntry("cn=valid,dc=example,dc=com")
         entry.add_attribute("cn", "valid")
+        entry.add_attribute("sn", "person")  # Required for inetOrgPerson
         entry.add_attribute("objectClass", "inetOrgPerson")
 
         assert entry.is_valid()
@@ -119,49 +122,55 @@ class TestLDIFEntry:
         assert entry.get_attribute("cn") == ["updated"]
 
 
+@pytest.fixture
+def sample_ldif_content() -> str:
+    """Sample LDIF content for testing."""
+    return dedent("""
+        dn: dc=example,dc=com
+        objectClass: top
+        objectClass: dcObject
+        objectClass: organization
+        o: Example Organization
+        dc: example
+
+        dn: ou=users,dc=example,dc=com
+        objectClass: top
+        objectClass: organizationalUnit
+        ou: users
+        description: Container for user accounts
+
+        dn: cn=john,ou=users,dc=example,dc=com
+        objectClass: top
+        objectClass: inetOrgPerson
+        cn: john
+        sn: doe
+        givenName: John
+        mail: john.doe@example.com
+        uid: jdoe
+        userPassword: {SSHA}encrypted_password_here
+
+        dn: cn=admin,ou=users,dc=example,dc=com
+        objectClass: top
+        objectClass: inetOrgPerson
+        cn: admin
+        sn: Administrator
+        mail: admin@example.com
+        uid: admin
+    """).strip()
+
+
 class TestLDIFProcessor:
     """Test LDIF processor functionality."""
 
     @pytest.fixture
-    def sample_ldif_content(self) -> str:
-        """Sample LDIF content for testing."""
-        return dedent("""
-            dn: dc=example,dc=com
-            objectClass: top
-            objectClass: dcObject
-            objectClass: organization
-            o: Example Organization
-            dc: example
-
-            dn: ou=users,dc=example,dc=com
-            objectClass: top
-            objectClass: organizationalUnit
-            ou: users
-            description: Container for user accounts
-
-            dn: cn=john,ou=users,dc=example,dc=com
-            objectClass: top
-            objectClass: inetOrgPerson
-            cn: john
-            sn: doe
-            givenName: John
-            mail: john.doe@example.com
-            uid: jdoe
-            userPassword: {SSHA}encrypted_password_here
-
-            dn: cn=admin,ou=users,dc=example,dc=com
-            objectClass: top
-            objectClass: inetOrgPerson
-            cn: admin
-            sn: Administrator
-            mail: admin@example.com
-            uid: admin
-        """).strip()
-
-    @pytest.fixture
     def ldif_file(self, sample_ldif_content: str) -> Path:
         """Create temporary LDIF file for testing."""
-        with tempfile.NamedTemporaryFile(encoding="utf-8", mode="w", suffix=".ldif", delete=False) as f:
+        with tempfile.NamedTemporaryFile(
+            encoding="utf-8",
+            mode="w",
+            suffix=".ldif",
+            delete=False,
+        ) as f:
             f.write(sample_ldif_content)
             return Path(f.name)
 
@@ -263,15 +272,17 @@ class TestLDIFProcessor:
 
         # Add 100 user entries
         for i in range(100):
-            large_ldif_parts.extend([
-                f"dn: uid=user{i:03d},dc=example,dc=com",
-                "objectClass: inetOrgPerson",
-                f"uid: user{i:03d}",
-                f"cn: User {i:03d}",
-                f"sn: User{i:03d}",
-                f"mail: user{i:03d}@example.com",
-                "",
-            ])
+            large_ldif_parts.extend(
+                [
+                    f"dn: uid=user{i:03d},dc=example,dc=com",
+                    "objectClass: inetOrgPerson",
+                    f"uid: user{i:03d}",
+                    f"cn: User {i:03d}",
+                    f"sn: User{i:03d}",
+                    f"mail: user{i:03d}@example.com",
+                    "",
+                ],
+            )
 
         large_ldif = "\n".join(large_ldif_parts)
 
@@ -320,8 +331,9 @@ class TestLDIFValidator:
     def test_validator_initialization(self) -> None:
         """Test LDIF validator initialization."""
         validator = LDIFValidator()
-        assert validator.validation_rules is not None
-        assert validator.error_count == 0
+        assert validator.validation_errors == []
+        assert validator.warnings == []
+        assert len(validator.validation_errors) == 0
 
     def test_validate_dn_format(self) -> None:
         """Test DN format validation."""
@@ -404,7 +416,9 @@ class TestLDIFValidator:
         assert "errors" in validation_report
 
         # Most entries should be valid
-        assert validation_report["valid_entries"] >= validation_report["invalid_entries"]
+        assert (
+            validation_report["valid_entries"] >= validation_report["invalid_entries"]
+        )
 
 
 class TestLDIFIntegration:
@@ -473,6 +487,7 @@ class TestLDIFIntegration:
 
         # Process and measure
         import time
+
         start_time = time.time()
 
         processor = LDIFProcessor()

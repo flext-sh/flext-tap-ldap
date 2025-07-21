@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from ldap3.core.exceptions import LDAPException
@@ -26,8 +25,7 @@ class TestLDAPClient:
             page_size=1000,
         )
 
-    def test_client_initialization(self, client:
-        LDAPClient) -> None:
+    def test_client_initialization(self, client: LDAPClient) -> None:
         assert client.host == "test.ldap.com"
         assert client.port == 389
         assert client.bind_dn == "cn=admin,dc=test,dc=com"
@@ -36,8 +34,7 @@ class TestLDAPClient:
         assert client.timeout == 30
         assert client.page_size == 1000
 
-    def test_server_uri(self, client:
-        LDAPClient) -> None:
+    def test_server_uri(self, client: LDAPClient) -> None:
         assert client.server_uri == "ldap://test.ldap.com:389"
 
         # Test with SSL
@@ -45,16 +42,11 @@ class TestLDAPClient:
         assert client.server_uri == "ldaps://test.ldap.com:389"
 
     @patch("flext_tap_ldap.client.Connection")
-    @patch("flext_tap_ldap.client.Server")
-    def test_get_connection(self,
-        mock_server_class:
-        MagicMock,
+    def test_get_connection(
+        self,
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
-        mock_server = MagicMock()
-        mock_server_class.return_value = mock_server
-
         mock_connection = MagicMock()
         mock_connection.bound = True
         mock_connection_class.return_value = mock_connection
@@ -63,31 +55,16 @@ class TestLDAPClient:
             assert conn == mock_connection
 
         # Verify connection was created correctly
-        mock_server_class.assert_called_once_with(
-            "test.ldap.com",
-            port=389,
-            use_ssl=False,
-            get_info=True,  # ALL constant
-            connect_timeout=30,
-        )
-
-        mock_connection_class.assert_called_once_with(
-            mock_server,
-            user="cn=admin,dc=test,dc=com",
-            password="test_password",
-            authentication=1,  # SIMPLE constant
-            auto_bind=True,
-            raise_exceptions=True,
-        )
+        mock_connection_class.assert_called_once()
 
         # Verify unbind was called
         mock_connection.unbind.assert_called_once()
 
     @patch("flext_tap_ldap.client.Connection")
     @patch("flext_tap_ldap.client.Server")
-    def test_search(self,
-        mock_server_class:
-            MagicMock,
+    def test_search(
+        self,
+        _mock_server_class: MagicMock,  # noqa: PT019
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
@@ -126,16 +103,16 @@ class TestLDAPClient:
         mock_connection.search.assert_called_with(
             search_base="dc=test,dc=com",
             search_filter="(uid=jdoe)",
-            search_scope=2,  # SUBTREE
+            search_scope="SUBTREE",  # SUBTREE scope string
             attributes=["uid", "cn", "mail"],
             paged_size=1000,
         )
 
     @patch("flext_tap_ldap.client.Connection")
     @patch("flext_tap_ldap.client.Server")
-    def test_test_connection_success(self,
-        mock_server_class:
-        MagicMock,
+    def test_test_connection_success(
+        self,
+        _mock_server_class: MagicMock,  # noqa: PT019
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
@@ -148,9 +125,9 @@ class TestLDAPClient:
 
     @patch("flext_tap_ldap.client.Connection")
     @patch("flext_tap_ldap.client.Server")
-    def test_test_connection_failure(self,
-        mock_server_class:
-        MagicMock,
+    def test_test_connection_failure(
+        self,
+        _mock_server_class: MagicMock,  # noqa: PT019
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:

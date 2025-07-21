@@ -12,9 +12,18 @@ Pattern: ETL Pipeline - Extract
 Dependencies: singer-sdk, ldap3
 """
 
-__version__ = "0.7.0"
+from __future__ import annotations
+
+import importlib.metadata
+
+try:
+    __version__ = importlib.metadata.version("flext-tap-ldap")
+except importlib.metadata.PackageNotFoundError:
+    __version__ = "0.0.0-dev"
+
+__version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 
 # Import main classes using flext-core patterns
 from flext_tap_ldap.tap import TapLDAP
 
-__all__ = ["TapLDAP", "__version__"]
+__all__ = ["TapLDAP", "__version__", "__version_info__"]

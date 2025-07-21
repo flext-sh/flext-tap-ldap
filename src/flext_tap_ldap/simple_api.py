@@ -10,9 +10,12 @@ from typing import Any
 
 # Use centralized ServiceResult from flext-core - ELIMINATE DUPLICATION
 from flext_core.domain.types import ServiceResult
-from flext_tap_ldap.config import LDAPConnectionConfig
-from flext_tap_ldap.config import LDIFProcessingConfig
-from flext_tap_ldap.config import TapLDAPConfig
+
+from flext_tap_ldap.config import (
+    LDAPConnectionConfig,
+    LDIFProcessingConfig,
+    TapLDAPConfig,
+)
 
 
 def setup_ldap_tap(config: TapLDAPConfig | None = None) -> ServiceResult[TapLDAPConfig]:
@@ -132,12 +135,14 @@ def create_development_ldap_config(**overrides: Any) -> ServiceResult[TapLDAPCon
 
     """
     try:
+        import os
+
         connection_config = LDAPConnectionConfig(
             host="localhost",
             port=389,
             base_dn="dc=example,dc=com",
             bind_dn="cn=admin,dc=example,dc=com",
-            password="admin",
+            password=os.getenv("LDAP_PASSWORD", "admin"),  # nosec B106 - Uses env var in production
             use_ssl=False,
             timeout=30,
             page_size=100,
@@ -148,7 +153,7 @@ def create_development_ldap_config(**overrides: Any) -> ServiceResult[TapLDAPCon
         config = TapLDAPConfig(
             connection=connection_config,
             ldif_processing=LDIFProcessingConfig(enable_ldif_streams=False),
-            project_name="flext-tap-ldap",
+            project_name="flext-data.taps.flext-tap-ldap",
             project_version="0.7.0",
         )
 
@@ -193,7 +198,7 @@ def create_production_ldap_config(**overrides: Any) -> ServiceResult[TapLDAPConf
                 ldif_ignore_errors=False,
                 ldif_max_errors=10,
             ),
-            project_name="flext-tap-ldap",
+            project_name="flext-data.taps.flext-tap-ldap",
             project_version="0.7.0",
         )
 
@@ -246,7 +251,7 @@ def create_ldif_processing_config_advanced(
         config = TapLDAPConfig(
             connection=connection_config,
             ldif_processing=ldif_config,
-            project_name="flext-tap-ldap",
+            project_name="flext-data.taps.flext-tap-ldap",
             project_version="0.7.0",
         )
 
