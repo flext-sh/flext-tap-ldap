@@ -4,10 +4,14 @@ REFACTORED:
             Using flext-core application patterns - NO duplication.
 """
 
-from flext_tap_ldap.application.services import LDAPConnectionService
-from flext_tap_ldap.application.services import LDAPRecordService
-from flext_tap_ldap.application.services import LDAPStreamService
-from flext_tap_ldap.application.services import TapExecutionService
+from __future__ import annotations
+
+from flext_tap_ldap.application.services import (
+    LDAPConnectionService,
+    LDAPRecordService,
+    LDAPStreamService,
+    TapExecutionService,
+)
 
 __all__ = [
     "LDAPConnectionService",

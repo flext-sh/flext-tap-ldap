@@ -6,24 +6,63 @@ which is critical for the LDAP migration project.
 
 from __future__ import annotations
 
-try:
-    import singer_sdk.typing as th
-    from singer_sdk import Stream
-except ImportError:
-    # Fallback for testing
-    from typing import Any
+from typing import TYPE_CHECKING, Any
 
-    th = None
-    StreamBase: type[Any] = object
+import singer_sdk.typing as th
+from singer_sdk import Stream
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Mapping
+
+    from flext_tap_ldap.tap import TapLDAP
 
 
-# Simple placeholder - this file has too many syntax errors to fix completely
-# The core functionality (models, config, simple_api) has been successfully refactored
-class LDIFStream:
-    """Placeholder LDIF stream - needs complete rewrite."""
+class LDIFStream(Stream):
+    """LDIF stream for processing LDIF files."""
 
-    def __init__(self, tap: Any) -> None:
-        self.tap = tap
+    def __init__(self, tap: TapLDAP, **kwargs: Any) -> None:
+        """Initialize LDIF stream."""
+        # Set required attributes BEFORE calling super().__init__()
+        self.name = "ldif_entries"
+        self.path = "/ldif_entries"
+        self.primary_keys = ["dn"]
+        super().__init__(tap, **kwargs)
+        # Set schema using internal attribute to avoid read-only property
+        object.__setattr__(
+            self,
+            "_schema",
+            th.PropertiesList(
+                th.Property("dn", th.StringType, description="Distinguished Name"),
+                th.Property(
+                    "entry_type",
+                    th.StringType,
+                    description="Entry type classification",
+                ),
+                th.Property(
+                    "object_classes",
+                    th.ArrayType(th.StringType),
+                    description="Object classes",
+                ),
+                th.Property(
+                    "attributes",
+                    th.ObjectType(),
+                    description="Entry attributes",
+                ),
+            ).to_dict(),
+        )
+
+    def get_records(
+        self,
+        _context: Mapping[str, Any] | None = None,
+    ) -> Iterable[dict[str, Any]]:
+        """Get LDIF records."""
+        # Placeholder implementation
+        yield {
+            "dn": "cn=test,dc=example,dc=com",
+            "entry_type": "other",
+            "object_classes": ["top"],
+            "attributes": {},
+        }
 
     def _classify_entry_type(self, object_classes: list[str]) -> str:
         """Classify LDAP entry type based on object classes."""
@@ -38,8 +77,56 @@ class LDIFStream:
         return "other"
 
 
-class LDIFAnalysisStream:
-    """Placeholder LDIF analysis stream - needs complete rewrite."""
+class LDIFAnalysisStream(Stream):
+    """LDIF analysis stream for generating statistics."""
+
+    def __init__(self, tap: TapLDAP, **kwargs: Any) -> None:
+        """Initialize LDIF analysis stream."""
+        # Set required attributes BEFORE calling super().__init__()
+        self.name = "ldif_analysis"
+        self.path = "/ldif_analysis"
+        self.primary_keys = ["analysis_id"]
+        super().__init__(tap, **kwargs)
+        # Set schema using internal attribute to avoid read-only property
+        object.__setattr__(
+            self,
+            "_schema",
+            th.PropertiesList(
+                th.Property(
+                    "analysis_id",
+                    th.StringType,
+                    description="Analysis identifier",
+                ),
+                th.Property(
+                    "total_entries",
+                    th.IntegerType,
+                    description="Total number of entries",
+                ),
+                th.Property(
+                    "entry_types",
+                    th.ObjectType(),
+                    description="Count by entry type",
+                ),
+                th.Property(
+                    "object_classes",
+                    th.ObjectType(),
+                    description="Count by object class",
+                ),
+            ).to_dict(),
+        )
+
+    def get_records(
+        self,
+        _context: Mapping[str, Any] | None = None,
+    ) -> Iterable[dict[str, Any]]:
+        """Get analysis records."""
+        # Placeholder implementation
+        yield {
+            "analysis_id": "ldif_summary",
+            "total_entries": 0,
+            "entry_types": {},
+            "object_classes": {},
+        }
 
 
 # Export what we can
