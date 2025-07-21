@@ -101,15 +101,19 @@ class LDIFEntry:
             oc_lower = oc.lower()
             if oc_lower == "inetorgperson":
                 if not self.get_attribute("cn"):
-                    errors.append({
-                        "code": "missing_cn",
-                        "message": "inetOrgPerson requires cn attribute",
-                    })
+                    errors.append(
+                        {
+                            "code": "missing_cn",
+                            "message": "inetOrgPerson requires cn attribute",
+                        },
+                    )
                 if not self.get_attribute("sn"):
-                    errors.append({
-                        "code": "missing_sn",
-                        "message": "inetOrgPerson requires sn attribute",
-                    })
+                    errors.append(
+                        {
+                            "code": "missing_sn",
+                            "message": "inetOrgPerson requires sn attribute",
+                        },
+                    )
 
         return errors
 
@@ -216,7 +220,9 @@ class LDIFProcessor:
                 raise ValueError(error_msg) from None
 
     def parse_content(
-        self, content: str, source_name: str = "content",
+        self,
+        content: str,
+        source_name: str = "content",
     ) -> Iterator[LDIFEntry]:
         lines = content.splitlines()
         yield from self._parse_lines(lines, source_name)
@@ -339,7 +345,7 @@ class LDIFProcessor:
                         import base64
 
                         attr_value = base64.b64decode(attr_value_b64).decode("utf-8")
-                        current_entry.attributes[attr_name] = attr_value
+                        current_entry.attributes[attr_name] = [attr_value]
                     except Exception as e:
                         error_msg = f"Line {line_number}: Failed to decode base64 value in {source_name}: {e}"
                         self._handle_error(error_msg)
@@ -406,7 +412,9 @@ class LDIFProcessor:
             return ServiceResult.fail(f"Failed to load LDIF file: {e}")
 
     def load_from_string(
-        self, content: str, source_name: str = "string",
+        self,
+        content: str,
+        source_name: str = "string",
     ) -> ServiceResult[str]:
         """Load LDIF entries from string and return as ServiceResult."""
         try:

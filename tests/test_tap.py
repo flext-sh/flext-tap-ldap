@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -26,7 +27,7 @@ class TestTapLDAPUnit:
     """Unit tests for TapLDAP."""
 
     @pytest.fixture
-    def config(self) -> dict:
+    def config(self) -> dict[str, Any]:
         return {
             "host": "test.ldap.com",
             "port": 389,
@@ -38,12 +39,12 @@ class TestTapLDAPUnit:
             "page_size": 1000,
         }
 
-    def test_tap_initialization(self, config: dict) -> None:
+    def test_tap_initialization(self, config: dict[str, Any]) -> None:
         tap = TapLDAP(config=config)
         assert tap.name == "tap-ldap"
         assert tap.config == config
 
-    def test_discover_streams(self, config: dict) -> None:
+    def test_discover_streams(self, config: dict[str, Any]) -> None:
         tap = TapLDAP(config=config)
         streams = tap.discover_streams()
 
@@ -55,7 +56,7 @@ class TestTapLDAPUnit:
         assert "schema" in stream_names
         assert len(streams) == 4
 
-    def test_discover_custom_streams(self, config: dict) -> None:
+    def test_discover_custom_streams(self, config: dict[str, Any]) -> None:
         config["custom_streams"] = [
             {
                 "name": "service_accounts",
@@ -78,7 +79,7 @@ class TestTapLDAPUnit:
         assert "service_accounts" in stream_names
         assert len(streams) == 5
 
-    def test_catalog_generation(self, config: dict) -> None:
+    def test_catalog_generation(self, config: dict[str, Any]) -> None:
         tap = TapLDAP(config=config)
         catalog = tap.catalog_dict
 
@@ -94,7 +95,7 @@ class TestTapLDAPUnit:
         assert "inclusion" in users_stream["metadata"][0]["metadata"]
 
     @patch("flext_tap_ldap.client.LDAPClient")
-    def test_stream_records(self, mock_client_class: MagicMock, config: dict) -> None:
+    def test_stream_records(self, mock_client_class: MagicMock, config: dict[str, Any]) -> None:
         # Mock LDAP client
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
@@ -116,7 +117,18 @@ class TestTapLDAPUnit:
         streams = tap.discover_streams()
         users_stream = next(s for s in streams if s.name == "users")
 
-        records = list(users_stream.get_records(None))
+        # Singer SDK get_records returns tuples (record, context) or just records
+        # We need to handle both cases
+        raw_records = list(users_stream.get_records(None))
+        records: list[dict[str, Any]] = []
+        for item in raw_records:
+            if isinstance(item, tuple):
+                record, _context = item
+                records.append(record)
+            else:
+                records.append(item)
+
         assert len(records) == 1
-        assert records[0]["dn"] == "uid=jdoe,ou=users,dc=test,dc=com"
-        assert records[0]["uid"] == "jdoe"
+        record = records[0]
+        assert record["dn"] == "uid=jdoe,ou=users,dc=test,dc=com"
+        assert record["uid"] == "jdoe"
