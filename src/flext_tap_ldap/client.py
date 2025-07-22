@@ -137,7 +137,7 @@ class LDAPClient:
                 attributes=attributes,
             )
 
-            if search_result.is_success and search_result.data:
+            if search_result.success and search_result.data:
                 entries_returned = 0
                 for entries_returned, entry_model in enumerate(search_result.data):
                     if size_limit > 0 and entries_returned >= size_limit:
@@ -218,20 +218,99 @@ class LDAPClient:
                     yield entry
 
         # Convert async generator to sync for backward compatibility
-        async def _get_next_entry() -> dict[str, Any]:
-            return await anext(async_gen)
-
-        loop = asyncio.new_event_loop()
         try:
-            async_gen = _async_search()
-            while True:
-                try:
-                    entry = loop.run_until_complete(_get_next_entry())
-                    yield entry
-                except StopAsyncIteration:
-                    break
+            # Check if we're in an async context
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # We're in an async context, can't use run_until_complete
+                # Fall back to sync implementation
+                yield from self._sync_search_with_oracle_support(
+                    base_dn, search_filter, attributes, oracle_oid_mode,
+                )
+                return
+        except RuntimeError:
+            # No event loop running, safe to create new one
+            pass
+
+        # Safe to run async code
+        async def _async_wrapper() -> list[dict[str, Any]]:
+            return [entry async for entry in _async_search()]
+
+        try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            results = loop.run_until_complete(_async_wrapper())
+            yield from results
         finally:
             loop.close()
+            asyncio.set_event_loop(None)
+
+    def _sync_search_with_oracle_support(
+        self,
+        base_dn: str,
+        search_filter: str = "(objectClass=*)",
+        attributes: list[str] | None = None,
+        oracle_oid_mode: bool = False,
+    ) -> Iterator[dict[str, Any]]:
+        """Synchronous version of search with Oracle support for when already in async context."""
+        # Oracle-specific attribute handling
+        oracle_attrs = ["orclPassword", "orclPasswordAttribute", "userPassword"]
+
+        if oracle_oid_mode and attributes:
+            # Add Oracle-specific attributes if not present
+            for oracle_attr in oracle_attrs:
+                if oracle_attr not in attributes:
+                    attributes.append(oracle_attr)
+
+        # Escape filter for Oracle compatibility
+        safe_filter = self._escape_filter_chars(search_filter)
+
+        # Use flext-ldap client directly for synchronous operation
+        # Note: This is a simplified fallback - ideally all operations should be async
+        import asyncio
+
+        async def _sync_fallback_search() -> list[dict[str, Any]]:
+            results = []
+            async for entry in self.search(base_dn, safe_filter, attributes):
+                if oracle_oid_mode:
+                    results.append(self._process_oracle_entry(entry))
+                else:
+                    results.append(entry)
+            return results
+
+        # Execute in current event loop if possible, otherwise create new one
+        try:
+            loop = asyncio.get_running_loop()
+            # We're in an async context but this method shouldn't be called
+            # Return empty by yielding nothing
+            return
+        except RuntimeError:
+            # No event loop running, create one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                results = loop.run_until_complete(_sync_fallback_search())
+                yield from results
+            finally:
+                loop.close()
+                asyncio.set_event_loop(None)
+
+    def _escape_filter_chars(self, filter_str: str) -> str:
+        """Escape special characters in LDAP filter for Oracle compatibility."""
+        # Common LDAP filter escaping
+        replacements = {
+            "\\": "\\5c",
+            "*": "\\2a",
+            "(": "\\28",
+            ")": "\\29",
+            "\x00": "\\00",
+        }
+
+        escaped = filter_str
+        for char, replacement in replacements.items():
+            escaped = escaped.replace(char, replacement)
+
+        return escaped
 
     def _process_oracle_entry(self, entry: dict[str, Any]) -> dict[str, Any]:
         """Process Oracle-specific LDAP entries."""

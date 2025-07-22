@@ -1,9 +1,8 @@
 """Pytest configuration and fixtures for flext-tap-ldap tests.
 
 Copyright (c) 2025 FLEXT Contributors
-SPDX-License-Identifier: MIT
+SPDX-License-Identifier: MIT.
 """
-
 from __future__ import annotations
 
 import os
@@ -16,7 +15,6 @@ from flext_tap_ldap.client import LDAPClient
 
 if TYPE_CHECKING:
     from collections.abc import Generator
-
 # Set test environment
 os.environ["FLEXT_ENV"] = "testing"
 os.environ["FLEXT_DEBUG"] = "true"
@@ -43,12 +41,10 @@ def mock_ldap_config() -> dict[str, Any]:
 def mock_ldap_connection() -> Generator[Connection]:
     """Mock LDAP connection with test data."""
     # Create mock server and connection
-    server = Server("test.ldap.com", get_info=MOCK_SYNC)
+    server = Server("test.ldap.com", get_info="NO_INFO")
     connection = Connection(server, client_strategy=MOCK_SYNC, auto_bind=True)
-
     # Add test entries
     connection.entries.clear()
-
     # Add base DN
     connection.strategy.add_entry(
         "dc=test,dc=com",
@@ -57,7 +53,6 @@ def mock_ldap_connection() -> Generator[Connection]:
             "dc": "test",
         },
     )
-
     # Add OUs
     connection.strategy.add_entry(
         "ou=users,dc=test,dc=com",
@@ -66,7 +61,6 @@ def mock_ldap_connection() -> Generator[Connection]:
             "ou": "users",
         },
     )
-
     connection.strategy.add_entry(
         "ou=groups,dc=test,dc=com",
         {
@@ -74,7 +68,6 @@ def mock_ldap_connection() -> Generator[Connection]:
             "ou": "groups",
         },
     )
-
     # Add users
     connection.strategy.add_entry(
         "uid=jdoe,ou=users,dc=test,dc=com",
@@ -90,7 +83,6 @@ def mock_ldap_connection() -> Generator[Connection]:
             "modifyTimestamp": "20240101120000Z",
         },
     )
-
     connection.strategy.add_entry(
         "uid=asmith,ou=users,dc=test,dc=com",
         {
@@ -105,7 +97,6 @@ def mock_ldap_connection() -> Generator[Connection]:
             "modifyTimestamp": "20240201120000Z",
         },
     )
-
     # Add groups
     connection.strategy.add_entry(
         "cn=developers,ou=groups,dc=test,dc=com",
@@ -121,10 +112,8 @@ def mock_ldap_connection() -> Generator[Connection]:
             "modifyTimestamp": "20240101120000Z",
         },
     )
-
     yield connection
-
-    connection.unbind()
+    connection.unbind()  # type: ignore[no-untyped-call]
 
 
 @pytest.fixture
@@ -242,11 +231,9 @@ def pytest_collection_modifyitems(
         # Add e2e marker to all tests in e2e directory
         elif "/e2e/" in str(item.fspath):
             item.add_marker(pytest.mark.slow)
-
         # Add LDAP marker to LDAP-related tests
         if "ldap" in item.name.lower():
             item.add_marker(pytest.mark.ldap)
-
         # Add Singer marker to Singer-related tests
         if "singer" in item.name.lower() or "tap" in item.name.lower():
             item.add_marker(pytest.mark.singer)

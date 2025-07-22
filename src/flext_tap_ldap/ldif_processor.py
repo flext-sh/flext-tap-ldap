@@ -13,8 +13,10 @@ from typing import TYPE_CHECKING, Any, ClassVar
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-from flext_core.domain.types import ServiceResult
-from flext_observability.logging import get_logger
+from flext_core.domain.shared_types import ServiceResult
+
+# Use simplified import from flext-observability root
+from flext_observability import get_logger
 
 logger = get_logger(__name__)
 
@@ -402,7 +404,7 @@ class LDIFProcessor:
             "error_messages": self.errors.copy(),
         }
 
-    def load_from_file(self, file_path: Path) -> ServiceResult[str]:
+    def load_from_file(self, file_path: Path) -> ServiceResult[Any]:
         """Load LDIF entries from file and return as ServiceResult."""
         try:
             self.entries = list(self.parse_file(file_path))
@@ -415,7 +417,7 @@ class LDIFProcessor:
         self,
         content: str,
         source_name: str = "string",
-    ) -> ServiceResult[str]:
+    ) -> ServiceResult[Any]:
         """Load LDIF entries from string and return as ServiceResult."""
         try:
             self.entries = list(self.parse_content(content, source_name))

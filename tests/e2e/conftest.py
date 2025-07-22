@@ -1,5 +1,4 @@
 """Pytest fixtures for E2E tests."""
-
 from __future__ import annotations
 
 import json
@@ -14,7 +13,6 @@ from ldap3 import ALL, Connection, Server
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterator
-
 logger = structlog.get_logger()
 
 
@@ -46,7 +44,6 @@ def sample_catalog() -> dict[str, Any]:
 @pytest.fixture(scope="session")
 def ldap_container(project_root: Path) -> Iterator[None]:
     compose_file = project_root / "docker-compose.yml"
-
     # Start containers
     logger.info("Starting OpenLDAP container...")
     subprocess.run(
@@ -54,7 +51,6 @@ def ldap_container(project_root: Path) -> Iterator[None]:
         check=True,
         cwd=str(project_root),
     )
-
     # Wait for LDAP to be ready
     max_retries = 30
     for i in range(max_retries):
@@ -66,7 +62,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
                 password="admin_password",
                 auto_bind=True,
             )
-            conn.unbind()
+            conn.unbind()  # type: ignore[no-untyped-call]
             logger.info("LDAP container is ready")
             break
         except Exception:
@@ -75,9 +71,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
                 raise
             logger.info("Waiting for LDAP container to be ready...")
             time.sleep(2)
-
     yield
-
     # Cleanup
     logger.info("Stopping OpenLDAP container...")
     subprocess.run(
@@ -97,7 +91,7 @@ def ldap_connection(ldap_container: Any) -> Generator[Connection]:
         auto_bind=True,
     )
     yield conn
-    conn.unbind()
+    conn.unbind()  # type: ignore[no-untyped-call]
 
 
 @pytest.fixture
@@ -111,7 +105,6 @@ def tap_config_file(tmp_path: Path, ldap_container: Any) -> Path:
         "timeout": 30,
         "page_size": 1000,
     }
-
     config_file = tmp_path / "tap_config.json"
     config_file.write_text(json.dumps(config, indent=2))
     return config_file

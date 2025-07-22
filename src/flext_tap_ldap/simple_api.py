@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Any
 
 # Use centralized ServiceResult from flext-core - ELIMINATE DUPLICATION
-from flext_core.domain.types import ServiceResult
+from flext_core.domain.shared_types import ServiceResult
 
 from flext_tap_ldap.config import (
     LDAPConnectionConfig,
@@ -18,7 +18,7 @@ from flext_tap_ldap.config import (
 )
 
 
-def setup_ldap_tap(config: TapLDAPConfig | None = None) -> ServiceResult[TapLDAPConfig]:
+def setup_ldap_tap(config: TapLDAPConfig | None = None) -> ServiceResult[Any]:
     """Setup LDAP tap with configuration.
 
     Args:
@@ -47,7 +47,7 @@ def create_ldap_connection_config(
     base_dn: str,
     port: int = 389,
     **kwargs: Any,
-) -> ServiceResult[LDAPConnectionConfig]:
+) -> ServiceResult[Any]:
     """Create LDAP connection configuration.
 
     Args:
@@ -74,7 +74,7 @@ def create_ldap_connection_config(
         return ServiceResult.fail(f"Failed to create LDAP connection config: {e}")
 
 
-def create_ldif_processing_config(**kwargs: Any) -> ServiceResult[LDIFProcessingConfig]:
+def create_ldif_processing_config(**kwargs: Any) -> ServiceResult[Any]:
     """Create LDIF processing configuration.
 
     Args:
@@ -92,7 +92,7 @@ def create_ldif_processing_config(**kwargs: Any) -> ServiceResult[LDIFProcessing
         return ServiceResult.fail(f"Failed to create LDIF processing config: {e}")
 
 
-def validate_ldap_config(config: TapLDAPConfig) -> ServiceResult[bool]:
+def validate_ldap_config(config: TapLDAPConfig) -> ServiceResult[Any]:
     """Validate LDAP tap configuration.
 
     Args:
@@ -115,7 +115,7 @@ def validate_ldap_config(config: TapLDAPConfig) -> ServiceResult[bool]:
 
         if config.connection.use_ssl and config.connection.port == 389:
             return ServiceResult.fail(
-                "SSL enabled but port is 389 (consider using port 636 for LDAPS)",
+                "SSL enabled but port is 389 (consider using port 636 for LDAPS)"
             )
 
         return ServiceResult.ok(True)
@@ -124,7 +124,7 @@ def validate_ldap_config(config: TapLDAPConfig) -> ServiceResult[bool]:
         return ServiceResult.fail(f"Configuration validation failed: {e}")
 
 
-def create_development_ldap_config(**overrides: Any) -> ServiceResult[TapLDAPConfig]:
+def create_development_ldap_config(**overrides: Any) -> ServiceResult[Any]:
     """Create development LDAP configuration with defaults.
 
     Args:
@@ -169,7 +169,7 @@ def create_development_ldap_config(**overrides: Any) -> ServiceResult[TapLDAPCon
         return ServiceResult.fail(f"Failed to create development config: {e}")
 
 
-def create_production_ldap_config(**overrides: Any) -> ServiceResult[TapLDAPConfig]:
+def create_production_ldap_config(**overrides: Any) -> ServiceResult[Any]:
     """Create production LDAP configuration with security defaults.
 
     Args:
@@ -218,7 +218,7 @@ def create_ldif_processing_config_advanced(
     ldif_directory: str | None = None,
     ldif_files: list[str] | None = None,
     **overrides: Any,
-) -> ServiceResult[TapLDAPConfig]:
+) -> ServiceResult[Any]:
     """Create LDIF processing configuration for migration scenarios.
 
     Args:

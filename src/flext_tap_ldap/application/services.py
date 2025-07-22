@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from flext_core.config import injectable
-from flext_core.domain.types import ServiceResult
+from flext_core.domain.shared_types import ServiceResult
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -46,7 +46,7 @@ class LDAPConnectionService:
         timeout_seconds: int = 30,
         page_size: int = 1000,
         max_retries: int = 3,
-    ) -> ServiceResult[LDAPConnection]:
+    ) -> ServiceResult[Any]:
         try:
             from flext_tap_ldap.domain.entities import LDAPConnection
 
@@ -64,7 +64,7 @@ class LDAPConnectionService:
         except Exception as e:
             return ServiceResult.fail(f"Failed to create connection: {e}")
 
-    async def test_connection(self, connection_id: UUID) -> ServiceResult[bool]:
+    async def test_connection(self, connection_id: UUID) -> ServiceResult[Any]:
         try:
             connection = self._connections.get(connection_id)
             if not connection:
@@ -83,14 +83,14 @@ class LDAPConnectionService:
     async def get_connection(
         self,
         connection_id: UUID,
-    ) -> ServiceResult[LDAPConnection | None]:
+    ) -> ServiceResult[Any]:
         try:
             connection = self._connections.get(connection_id)
             return ServiceResult.ok(connection)
         except Exception as e:
             return ServiceResult.fail(f"Failed to get connection: {e}")
 
-    async def list_connections(self) -> ServiceResult[list[LDAPConnection]]:
+    async def list_connections(self) -> ServiceResult[Any]:
         try:
             connections = list(self._connections.values())
             return ServiceResult.ok(connections)
@@ -118,7 +118,7 @@ class LDAPStreamService:
         key_properties: list[str] | None = None,
         replication_method: str = "FULL_TABLE",
         replication_key: str | None = None,
-    ) -> ServiceResult[LDAPStream]:
+    ) -> ServiceResult[Any]:
         try:
             from flext_tap_ldap.domain.entities import LDAPStream
 
@@ -143,7 +143,7 @@ class LDAPStreamService:
         except Exception as e:
             return ServiceResult.fail(f"Failed to create stream: {e}")
 
-    async def discover_schema(self, stream_id: UUID) -> ServiceResult[dict[str, Any]]:
+    async def discover_schema(self, stream_id: UUID) -> ServiceResult[Any]:
         try:
             stream = self._streams.get(stream_id)
             if not stream:
@@ -165,7 +165,7 @@ class LDAPStreamService:
         except Exception as e:
             return ServiceResult.fail(f"Failed to discover schema: {e}")
 
-    async def get_stream(self, stream_id: UUID) -> ServiceResult[LDAPStream | None]:
+    async def get_stream(self, stream_id: UUID) -> ServiceResult[Any]:
         try:
             stream = self._streams.get(stream_id)
             return ServiceResult.ok(stream)
@@ -175,7 +175,7 @@ class LDAPStreamService:
     async def list_streams(
         self,
         connection_id: UUID | None = None,
-    ) -> ServiceResult[list[LDAPStream]]:
+    ) -> ServiceResult[Any]:
         try:
             streams = list(self._streams.values())
 
@@ -204,7 +204,7 @@ class TapExecutionService:
         config: dict[str, Any] | None = None,
         catalog: dict[str, Any] | None = None,
         state: dict[str, Any] | None = None,
-    ) -> ServiceResult[TapExecution]:
+    ) -> ServiceResult[Any]:
         try:
             from flext_tap_ldap.domain.entities import TapExecution
 
@@ -222,7 +222,7 @@ class TapExecutionService:
         except Exception as e:
             return ServiceResult.fail(f"Failed to create execution: {e}")
 
-    async def start_execution(self, execution_id: UUID) -> ServiceResult[TapExecution]:
+    async def start_execution(self, execution_id: UUID) -> ServiceResult[Any]:
         try:
             execution = self._executions.get(execution_id)
             if not execution:
@@ -239,7 +239,7 @@ class TapExecutionService:
         exit_code: int,
         stdout: str | None = None,
         stderr: str | None = None,
-    ) -> ServiceResult[TapExecution]:
+    ) -> ServiceResult[Any]:
         try:
             execution = self._executions.get(execution_id)
             if not execution:
@@ -250,7 +250,7 @@ class TapExecutionService:
         except Exception as e:
             return ServiceResult.fail(f"Failed to complete execution: {e}")
 
-    async def cancel_execution(self, execution_id: UUID) -> ServiceResult[TapExecution]:
+    async def cancel_execution(self, execution_id: UUID) -> ServiceResult[Any]:
         try:
             execution = self._executions.get(execution_id)
             if not execution:
@@ -266,7 +266,7 @@ class TapExecutionService:
         execution_id: UUID,
         records_extracted: int,
         streams_processed: int,
-    ) -> ServiceResult[TapExecution]:
+    ) -> ServiceResult[Any]:
         try:
             execution = self._executions.get(execution_id)
             if not execution:
@@ -280,7 +280,7 @@ class TapExecutionService:
     async def get_execution(
         self,
         execution_id: UUID,
-    ) -> ServiceResult[TapExecution | None]:
+    ) -> ServiceResult[Any]:
         try:
             execution = self._executions.get(execution_id)
             return ServiceResult.ok(execution)
@@ -290,7 +290,7 @@ class TapExecutionService:
     async def list_executions(
         self,
         connection_id: UUID | None = None,
-    ) -> ServiceResult[list[TapExecution]]:
+    ) -> ServiceResult[Any]:
         try:
             executions = list(self._executions.values())
 
@@ -325,7 +325,7 @@ class LDAPRecordService:
         dn: str,
         attributes: dict[str, Any],
         object_class: list[str] | None = None,
-    ) -> ServiceResult[LDAPRecord]:
+    ) -> ServiceResult[Any]:
         try:
             from flext_tap_ldap.domain.entities import LDAPRecord
 
@@ -346,7 +346,7 @@ class LDAPRecordService:
         except Exception as e:
             return ServiceResult.fail(f"Failed to create record: {e}")
 
-    async def get_record(self, record_id: UUID) -> ServiceResult[LDAPRecord | None]:
+    async def get_record(self, record_id: UUID) -> ServiceResult[Any]:
         try:
             record = self._records.get(record_id)
             return ServiceResult.ok(record)
@@ -358,7 +358,7 @@ class LDAPRecordService:
         stream_id: UUID | None = None,
         execution_id: UUID | None = None,
         limit: int = 100,
-    ) -> ServiceResult[list[LDAPRecord]]:
+    ) -> ServiceResult[Any]:
         try:
             records = list(self._records.values())
 
@@ -379,7 +379,7 @@ class LDAPRecordService:
         self,
         stream_id: UUID | None = None,
         execution_id: UUID | None = None,
-    ) -> ServiceResult[int]:
+    ) -> ServiceResult[Any]:
         try:
             records = list(self._records.values())
 
