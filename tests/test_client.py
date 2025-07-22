@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -57,29 +57,31 @@ class TestLDAPClient:
     async def test_search_async(self, client: LDAPClient) -> None:
         """Test async search using flext-ldap infrastructure."""
         # Mock the flext-ldap client
-        with patch.object(client._flext_client, "search", new_callable=AsyncMock) as mock_search:
+        with patch.object(
+            client._flext_client, "search", new_callable=AsyncMock,
+        ) as mock_search:
             # Setup mock response
             from flext_core.domain.shared_types import ServiceResult
-            from flext_ldap.models import LDAPEntry
 
-            mock_entry = LDAPEntry(
-                dn="uid=jdoe,ou=users,dc=test,dc=com",
-                attributes={
+            mock_entry = {
+                "dn": "uid=jdoe,ou=users,dc=test,dc=com",
+                "attributes": {
                     "uid": ["jdoe"],
                     "cn": ["John Doe"],
-                    "mail": ["john.doe@example.com"]
-                }
-            )
+                    "mail": ["john.doe@example.com"],
+                },
+            }
             mock_search.return_value = ServiceResult.ok([mock_entry])
 
-            # Perform search
-            results: list[dict[str, Any]] = []
-            async for result in client.search(
-                base_dn="dc=test,dc=com",
-                search_filter="(uid=jdoe)",
-                attributes=["uid", "cn", "mail"],
-            ):
-                results.append(result)
+            # Perform search using async list comprehension for performance
+            results: list[dict[str, Any]] = [
+                result
+                async for result in client.search(
+                    base_dn="dc=test,dc=com",
+                    search_filter="(uid=jdoe)",
+                    attributes=["uid", "cn", "mail"],
+                )
+            ]
 
             # Verify results
             assert len(results) == 1
@@ -105,27 +107,40 @@ class TestLDAPClient:
         assert "response_time_ms" in health_result
         assert health_result["server_uri"] == "ldap://test.ldap.com:389"
 
-    @pytest.mark.asyncio
-    async def test_search_with_oracle_support(self, client: LDAPClient) -> None:
+    def test_search_with_oracle_support(self, client: LDAPClient) -> None:
         """Test search with Oracle OID support."""
-        # Mock the async search method
-        async def mock_async_search() -> AsyncGenerator[dict[str, Any]]:
-            yield {
-                "dn": "uid=jdoe,ou=users,dc=oracle,dc=com",
-                "attributes": {
-                    "uid": ["jdoe"],
-                    "orclPassword": ["hashed_password"],
-                    "objectClass": ["orclContainer"]
-                }
-            }
+        # Test the Oracle processing logic directly with mock data
+        mock_entry = {
+            "dn": "uid=jdoe,ou=users,dc=oracle,dc=com",
+            "attributes": {
+                "uid": ["jdoe"],
+                "orclPassword": ["hashed_password"],
+                "objectClass": ["orclContainer"],
+            },
+        }
+
+        # Test Oracle-specific processing directly
+        processed_entry = client._process_oracle_entry(mock_entry)
+
+        # Verify Oracle-specific processing occurred
+        assert "userPassword" in processed_entry["attributes"]
+        assert processed_entry["attributes"]["userPassword"] == ["hashed_password"]
+        assert "organizationalUnit" in processed_entry["attributes"]["objectClass"]
+
+        # Mock the search to return one entry and test full flow
+        async def mock_async_search(
+            *args: Any, **kwargs: Any,
+        ) -> AsyncGenerator[dict[str, Any]]:
+            yield mock_entry
 
         with patch.object(client, "search", mock_async_search):
-            # Test sync wrapper with Oracle OID mode
-            results = list(client.search_with_oracle_support(
-                base_dn="dc=oracle,dc=com",
-                search_filter="(uid=jdoe)",
-                oracle_oid_mode=True
-            ))
+            results = list(
+                client.search_with_oracle_support(
+                    base_dn="dc=oracle,dc=com",
+                    search_filter="(uid=jdoe)",
+                    oracle_oid_mode=True,
+                ),
+            )
 
             # Verify Oracle-specific processing occurred
             assert len(results) == 1

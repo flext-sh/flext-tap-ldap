@@ -12,6 +12,7 @@ from click.testing import CliRunner
 from flext_tap_ldap.tap import TapLDAP
 
 if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
     from pathlib import Path
     from unittest.mock import Mock
 
@@ -44,20 +45,16 @@ class TestTapLDAPIntegration:
             json.dump(sample_state, f)
         return state_path
 
-    @patch("flext_tap_ldap.client.Server")
-    @patch("flext_tap_ldap.client.Connection")
+    @patch("flext_ldap.client.LDAPClient")
     def test_discovery_mode(
         self,
-        mock_connection: Mock,
-        mock_server: Mock,
+        mock_ldap_client: Mock,
         runner: CliRunner,
         config_file: Path,
     ) -> None:
-        # Mock connection
-        mock_conn_instance = mock_connection.return_value
-        mock_conn_instance.bound = True
-        mock_conn_instance.search.return_value = True
-        mock_conn_instance.entries = []
+        # Mock flext-ldap client
+        mock_client_instance = mock_ldap_client.return_value
+        mock_client_instance.search.return_value.__aenter__.return_value = []
 
         result = runner.invoke(
             TapLDAP.cli,
@@ -78,33 +75,22 @@ class TestTapLDAPIntegration:
         assert "organizational_units" in stream_names
         assert "schema" in stream_names
 
-    @patch("flext_tap_ldap.client.Server")
-    @patch("flext_tap_ldap.client.Connection")
+    @patch("flext_ldap.client.LDAPClient")
     def test_sync_mode(
         self,
-        mock_connection: Mock,
-        mock_server: Mock,
+        mock_ldap_client: Mock,
         runner: CliRunner,
         config_file: Path,
         catalog_file: Path,
     ) -> None:
-        # Mock connection and search results
-        mock_conn_instance = mock_connection.return_value
-        mock_conn_instance.bound = True
-        mock_conn_instance.result = {"controls": {}}
-
-        # Mock search to return test data
-        mock_entry = type(
-            "MockEntry",
-            (),
+        # Mock flext-ldap client search results
+        mock_client_instance = mock_ldap_client.return_value
+        mock_client_instance.search.return_value.__aenter__.return_value = [
             {
-                "entry_dn": "uid=jdoe,ou=users,dc=test,dc=com",
-                "__iter__": lambda _: iter([]),
+                "dn": "uid=jdoe,ou=users,dc=test,dc=com",
+                "attributes": {"uid": "jdoe", "cn": "John Doe"},
             },
-        )()
-
-        mock_conn_instance.entries = [mock_entry]
-        mock_conn_instance.search.return_value = True
+        ]
 
         result = runner.invoke(
             TapLDAP.cli,
@@ -122,23 +108,18 @@ class TestTapLDAPIntegration:
         message_types = {msg["type"] for msg in messages}
         assert "SCHEMA" in message_types
 
-    @patch("flext_tap_ldap.client.Server")
-    @patch("flext_tap_ldap.client.Connection")
+    @patch("flext_ldap.client.LDAPClient")
     def test_incremental_sync(
         self,
-        mock_connection: Mock,
-        mock_server: Mock,
+        mock_ldap_client: Mock,
         runner: CliRunner,
         config_file: Path,
         catalog_file: Path,
         state_file: Path,
     ) -> None:
-        # Mock connection
-        mock_conn_instance = mock_connection.return_value
-        mock_conn_instance.bound = True
-        mock_conn_instance.result = {"controls": {}}
-        mock_conn_instance.entries = []
-        mock_conn_instance.search.return_value = True
+        # Mock flext-ldap client for incremental sync
+        mock_client_instance = mock_ldap_client.return_value
+        mock_client_instance.search.return_value.__aenter__.return_value = []
 
         result = runner.invoke(
             TapLDAP.cli,
@@ -156,7 +137,7 @@ class TestTapLDAPIntegration:
         assert result.exit_code == 0
 
         # Verify incremental filter was applied
-        search_calls = mock_conn_instance.search.call_args_list
+        search_calls = mock_client_instance.search.call_args_list
         if search_calls:
             # Check that modifyTimestamp filter was included
             for call in search_calls:
@@ -188,10 +169,10 @@ class TestTapLDAPIntegration:
         with open(config_file, "w", encoding="utf-8") as f:
             json.dump(config, f)
 
-        with (
-            patch("flext_tap_ldap.client.Connection"),
-            patch("flext_tap_ldap.client.Server"),
-        ):
+        with patch("flext_ldap.client.LDAPClient") as mock_ldap_client:
+            # Mock flext-ldap client
+            mock_client_instance = mock_ldap_client.return_value
+            mock_client_instance.search.return_value.__aenter__.return_value = []
             result = runner.invoke(
                 TapLDAP.cli,
                 ["--config", str(config_file), "--discover"],
@@ -239,62 +220,30 @@ class TestTapLDAPIntegration:
             f"Output: {all_output}, Exit code: {result.exit_code}"
         )
 
-    @patch("flext_tap_ldap.client.Server")
-    @patch("flext_tap_ldap.client.Connection")
+    @patch("flext_ldap.client.LDAPClient")
     def test_pagination_handling(
         self,
-        mock_connection: Mock,
-        mock_server: Mock,
+        mock_ldap_client: Mock,
         runner: CliRunner,
         config_file: Path,
         catalog_file: Path,
     ) -> None:
-        # Mock connection with pagination
-        mock_conn_instance = mock_connection.return_value
-        mock_conn_instance.bound = True
+        # Mock flext-ldap client for pagination testing
+        mock_client_instance = mock_ldap_client.return_value
 
-        # First page
-        mock_conn_instance.result = {
-            "controls": {"1.2.840.113556.1.4.319": {"value": {"cookie": b"page1"}}},
-        }
+        # Mock flext-ldap client search method with async context manager
 
-        # Mock entries for pagination
-        mock_entry1 = type(
-            "MockEntry",
-            (),
-            {
-                "entry_dn": "uid=user1,ou=users,dc=test,dc=com",
-                "__iter__": lambda _: iter([]),
-            },
-        )()
+        async def mock_search(*args: Any, **kwargs: Any) -> AsyncGenerator[dict[str, Any]]:
+            yield {
+                "dn": "uid=user1,ou=users,dc=test,dc=com",
+                "attributes": {"uid": "user1", "cn": "User One"},
+            }
+            yield {
+                "dn": "uid=user2,ou=users,dc=test,dc=com",
+                "attributes": {"uid": "user2", "cn": "User Two"},
+            }
 
-        mock_entry2 = type(
-            "MockEntry",
-            (),
-            {
-                "entry_dn": "uid=user2,ou=users,dc=test,dc=com",
-                "__iter__": lambda _: iter([]),
-            },
-        )()
-
-        # Set up pagination responses
-        call_count = 0
-
-        def side_effect(*args: object, **kwargs: object) -> bool:
-            nonlocal call_count
-            call_count += 1
-            if call_count == 1:
-                mock_conn_instance.entries = [mock_entry1]
-                mock_conn_instance.result = {
-                    "controls": {
-                        "1.2.840.113556.1.4.319": {"value": {"cookie": b"page1"}},
-                    },
-                }
-                mock_conn_instance.entries = [mock_entry2]
-                mock_conn_instance.result = {"controls": {}}
-            return True
-
-        mock_conn_instance.search.side_effect = side_effect
+        mock_client_instance.search = mock_search
 
         result = runner.invoke(
             TapLDAP.cli,

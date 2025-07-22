@@ -12,7 +12,7 @@ from textwrap import dedent
 from typing import Any
 
 import pytest
-from flext_core.domain.types import ServiceResult
+from flext_core.domain.shared_types import ServiceResult
 
 # Test imports - handle gracefully if not available
 try:
@@ -199,7 +199,7 @@ class TestLDIFProcessor:
         result = processor.load_from_file(ldif_file)
 
         assert isinstance(result, ServiceResult)
-        assert result.is_success
+        assert result.success
         assert len(processor.entries) == 4  # 4 entries in sample
         assert processor.stats["total_entries"] == 4
 
@@ -211,7 +211,7 @@ class TestLDIFProcessor:
         processor = LDIFProcessor()
         result = processor.load_from_string(sample_ldif_content)
 
-        assert result.is_success
+        assert result.success
         assert len(processor.entries) == 4
         assert processor.stats["total_entries"] == 4
 
@@ -268,7 +268,7 @@ class TestLDIFProcessor:
         result = processor.load_from_string(invalid_ldif)
 
         # Should load but with validation warnings
-        assert result.is_success
+        assert result.success
         assert processor.stats["invalid_entries"] > 0
 
     def test_large_ldif_processing(self) -> None:
@@ -300,7 +300,7 @@ class TestLDIFProcessor:
         processor = LDIFProcessor()
         result = processor.load_from_string(large_ldif)
 
-        assert result.is_success
+        assert result.success
         assert len(processor.entries) == 101  # 1 root + 100 users
         assert processor.stats["total_entries"] == 101
 
@@ -440,7 +440,7 @@ class TestLDIFIntegration:
         # Step 1: Load LDIF
         processor = LDIFProcessor()
         load_result = processor.load_from_string(sample_ldif_content)
-        assert load_result.is_success
+        assert load_result.success
 
         # Step 2: Validate entries
         validator = LDIFValidator()
@@ -467,14 +467,14 @@ class TestLDIFIntegration:
 
         # Test with non-existent file
         result = processor.load_from_file(Path("/nonexistent/file.ldif"))
-        assert not result.is_success
+        assert not result.success
         assert result.error is not None
         assert "file not found" in result.error.lower()
 
         # Test with malformed LDIF
         malformed_ldif = "this is not valid LDIF content"
         result = processor.load_from_string(malformed_ldif)
-        assert result.is_success  # Should parse but with errors
+        assert result.success  # Should parse but with errors
         assert processor.stats["invalid_entries"] > 0
 
     @pytest.mark.slow
@@ -507,7 +507,7 @@ class TestLDIFIntegration:
 
         processing_time = time.time() - start_time
 
-        assert result.is_success
+        assert result.success
         assert len(processor.entries) == 1000
         assert processing_time < 10.0  # Should complete within 10 seconds
 
