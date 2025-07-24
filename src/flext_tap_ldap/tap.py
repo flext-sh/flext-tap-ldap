@@ -1,6 +1,7 @@
-"""tap-ldap main tap class.
+"""tap-ldap main tap class using FLEXT centralized conventions.
 
-This module implements the main tap class for LDAP data extraction.
+This module implements the main tap class for LDAP data extraction
+using the centralized patterns from flext-core.meltano.
 """
 
 from __future__ import annotations
@@ -8,6 +9,20 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, ClassVar
 
+# 🚨 ARCHITECTURAL COMPLIANCE: Using DI container
+from flext_tap_ldap.infrastructure.di_container import (
+    get_base_config,
+    get_domain_entity,
+    get_domain_value_object,
+    get_field,
+    get_service_result,
+)
+
+ServiceResult = get_service_result()
+DomainEntity = get_domain_entity()
+Field = get_field()
+DomainValueObject = get_domain_value_object()
+BaseConfig = get_base_config()
 from singer_sdk import Tap, typing as th
 
 from flext_tap_ldap.config import TapLDAPConfig
@@ -27,8 +42,8 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class TapLDAP(Tap):
-    """Singer tap for LDAP data extraction."""
+class TapLDAP(Tap, FlextTapMixin):
+    """Singer tap for LDAP data extraction using FLEXT centralized patterns."""
 
     name = "tap-ldap"
     config_class = TapLDAPConfig

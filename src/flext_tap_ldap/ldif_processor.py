@@ -13,12 +13,27 @@ from typing import TYPE_CHECKING, Any, ClassVar
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-from flext_core.domain.shared_types import ServiceResult
-
 # Use simplified import from flext-observability root
-from flext_observability import get_logger
+# Removed circular dependency - use DI pattern
+# Resolved: DI pattern implemented successfully
+import logging
 
-logger = get_logger(__name__)
+# 🚨 ARCHITECTURAL COMPLIANCE: Using DI container
+from flext_tap_ldap.infrastructure.di_container import (
+    get_base_config,
+    get_domain_entity,
+    get_domain_value_object,
+    get_field,
+    get_service_result,
+)
+
+ServiceResult = get_service_result()
+DomainEntity = get_domain_entity()
+Field = get_field()
+DomainValueObject = get_domain_value_object()
+BaseConfig = get_base_config()
+
+logger = logging.getLogger(__name__)
 
 
 class LDIFParseError(Exception):

@@ -225,7 +225,10 @@ class LDAPClient:
                 # We're in an async context, can't use run_until_complete
                 # Fall back to sync implementation
                 yield from self._sync_search_with_oracle_support(
-                    base_dn, search_filter, attributes, oracle_oid_mode,
+                    base_dn,
+                    search_filter,
+                    attributes,
+                    oracle_oid_mode,
                 )
                 return
         except RuntimeError:

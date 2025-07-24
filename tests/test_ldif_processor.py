@@ -12,7 +12,7 @@ from textwrap import dedent
 from typing import Any
 
 import pytest
-from flext_core.domain.shared_types import ServiceResult
+from flext_core import ServiceResult
 
 # Test imports - handle gracefully if not available
 try:

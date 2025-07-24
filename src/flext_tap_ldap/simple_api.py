@@ -9,7 +9,20 @@ from __future__ import annotations
 from typing import Any
 
 # Use centralized ServiceResult from flext-core - ELIMINATE DUPLICATION
-from flext_core.domain.shared_types import ServiceResult
+# 🚨 ARCHITECTURAL COMPLIANCE: Using DI container
+from flext_tap_ldap.infrastructure.di_container import (
+    get_base_config,
+    get_domain_entity,
+    get_domain_value_object,
+    get_field,
+    get_service_result,
+)
+
+ServiceResult = get_service_result()
+DomainEntity = get_domain_entity()
+Field = get_field()
+DomainValueObject = get_domain_value_object()
+BaseConfig = get_base_config()
 
 from flext_tap_ldap.config import (
     LDAPConnectionConfig,
@@ -142,7 +155,9 @@ def create_development_ldap_config(**overrides: Any) -> ServiceResult[Any]:
             port=389,
             base_dn="dc=example,dc=com",
             bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=example,dc=com",
-            password=os.getenv("LDAP_PASSWORD", "REDACTED_LDAP_BIND_PASSWORD"),  # nosec B106 - Uses env var in production
+            password=os.getenv(
+                "LDAP_PASSWORD", "REDACTED_LDAP_BIND_PASSWORD"
+            ),  # nosec B106 - Uses env var in production
             use_ssl=False,
             timeout=30,
             page_size=100,
