@@ -61,7 +61,7 @@ class TestLDAPClient:
             client._flext_client, "search", new_callable=AsyncMock,
         ) as mock_search:
             # Setup mock response
-            from flext_core.domain.shared_types import ServiceResult
+            from flext_core import ServiceResult
 
             mock_entry = {
                 "dn": "uid=jdoe,ou=users,dc=test,dc=com",
