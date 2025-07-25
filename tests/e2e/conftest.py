@@ -63,7 +63,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
                 password="admin_password",
                 auto_bind=True,
             )
-            conn.unbind()  # type: ignore[no-untyped-call]
+            conn.unbind()
             logger.info("LDAP container is ready")
             break
         except Exception:
@@ -92,7 +92,7 @@ def ldap_connection(ldap_container: Any) -> Generator[Connection]:
         auto_bind=True,
     )
     yield conn
-    conn.unbind()  # type: ignore[no-untyped-call]
+    conn.unbind()
 
 
 @pytest.fixture

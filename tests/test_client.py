@@ -58,10 +58,12 @@ class TestLDAPClient:
         """Test async search using flext-ldap infrastructure."""
         # Mock the flext-ldap client
         with patch.object(
-            client._flext_client, "search", new_callable=AsyncMock,
+            client._flext_client,
+            "search",
+            new_callable=AsyncMock,
         ) as mock_search:
             # Setup mock response
-            from flext_core import ServiceResult
+            from flext_core import FlextResult
 
             mock_entry = {
                 "dn": "uid=jdoe,ou=users,dc=test,dc=com",
@@ -71,7 +73,7 @@ class TestLDAPClient:
                     "mail": ["john.doe@example.com"],
                 },
             }
-            mock_search.return_value = ServiceResult.ok([mock_entry])
+            mock_search.return_value = FlextResult.ok([mock_entry])
 
             # Perform search using async list comprehension for performance
             results: list[dict[str, Any]] = [
@@ -129,7 +131,8 @@ class TestLDAPClient:
 
         # Mock the search to return one entry and test full flow
         async def mock_async_search(
-            *args: Any, **kwargs: Any,
+            *args: Any,
+            **kwargs: Any,
         ) -> AsyncGenerator[dict[str, Any]]:
             yield mock_entry
 

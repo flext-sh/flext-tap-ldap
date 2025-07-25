@@ -12,11 +12,15 @@ from textwrap import dedent
 from typing import Any
 
 import pytest
-from flext_core import ServiceResult
+from flext_core import FlextResult
 
 # Test imports - handle gracefully if not available
 try:
-    from flext_tap_ldap.ldif_processor import LDIFEntry, LDIFProcessor, LDIFValidator
+    from flext_tap_ldap.ldif_processor import (
+        FlextLDIFProcessor,
+        LDIFEntry,
+        LDIFValidator,
+    )
 
     LDIF_MODULES_AVAILABLE = True
 except ImportError:
@@ -25,13 +29,13 @@ except ImportError:
 
     if TYPE_CHECKING:
         from flext_tap_ldap.ldif_processor import (
+            FlextLDIFProcessor,
             LDIFEntry,
-            LDIFProcessor,
             LDIFValidator,
         )
     else:
         LDIFEntry = type("LDIFEntry", (), {})
-        LDIFProcessor = type("LDIFProcessor", (), {})
+        FlextLDIFProcessor = type("FlextLDIFProcessor", (), {})
         LDIFValidator = type("LDIFValidator", (), {})
 
     LDIF_MODULES_AVAILABLE = False
@@ -187,7 +191,7 @@ class TestLDIFProcessor:
 
     def test_processor_initialization(self) -> None:
         """Test LDIF processor initialization."""
-        processor = LDIFProcessor()
+        processor = FlextLDIFProcessor()
         assert processor.entries == []
         assert processor.stats["total_entries"] == 0
         assert processor.stats["valid_entries"] == 0
@@ -195,10 +199,10 @@ class TestLDIFProcessor:
 
     def test_load_from_file(self, ldif_file: Path) -> None:
         """Test loading LDIF from file."""
-        processor = LDIFProcessor()
+        processor = FlextLDIFProcessor()
         result = processor.load_from_file(ldif_file)
 
-        assert isinstance(result, ServiceResult)
+        assert isinstance(result, FlextResult)
         assert result.success
         assert len(processor.entries) == 4  # 4 entries in sample
         assert processor.stats["total_entries"] == 4
@@ -208,7 +212,7 @@ class TestLDIFProcessor:
 
     def test_load_from_string(self, sample_ldif_content: str) -> None:
         """Test loading LDIF from string content."""
-        processor = LDIFProcessor()
+        processor = FlextLDIFProcessor()
         result = processor.load_from_string(sample_ldif_content)
 
         assert result.success
@@ -217,7 +221,7 @@ class TestLDIFProcessor:
 
     def test_filter_entries_by_objectclass(self, sample_ldif_content: str) -> None:
         """Test filtering entries by object class."""
-        processor = LDIFProcessor()
+        processor = FlextLDIFProcessor()
         processor.load_from_string(sample_ldif_content)
 
         # Filter for inetOrgPerson objects
@@ -230,7 +234,7 @@ class TestLDIFProcessor:
 
     def test_filter_entries_by_dn_pattern(self, sample_ldif_content: str) -> None:
         """Test filtering entries by DN pattern."""
-        processor = LDIFProcessor()
+        processor = FlextLDIFProcessor()
         processor.load_from_string(sample_ldif_content)
 
         # Filter entries under users OU
@@ -243,7 +247,7 @@ class TestLDIFProcessor:
 
     def test_export_to_singer_format(self, sample_ldif_content: str) -> None:
         """Test exporting LDIF data to Singer format."""
-        processor = LDIFProcessor()
+        processor = FlextLDIFProcessor()
         processor.load_from_string(sample_ldif_content)
 
         singer_records = processor.to_singer_format("users")
@@ -264,7 +268,7 @@ class TestLDIFProcessor:
             # No cn attribute provided
         """).strip()
 
-        processor = LDIFProcessor()
+        processor = FlextLDIFProcessor()
         result = processor.load_from_string(invalid_ldif)
 
         # Should load but with validation warnings
@@ -297,7 +301,7 @@ class TestLDIFProcessor:
 
         large_ldif = "\n".join(large_ldif_parts)
 
-        processor = LDIFProcessor()
+        processor = FlextLDIFProcessor()
         result = processor.load_from_string(large_ldif)
 
         assert result.success
@@ -321,7 +325,7 @@ class TestLDIFProcessor:
         expected_count: int,
     ) -> None:
         """Test various filtering methods with parameterized inputs."""
-        processor = LDIFProcessor()
+        processor = FlextLDIFProcessor()
         processor.load_from_string(sample_ldif_content)
 
         if filter_type == "objectclass":
@@ -415,7 +419,7 @@ class TestLDIFValidator:
 
     def test_batch_validation(self, sample_ldif_content: str) -> None:
         """Test batch validation of multiple entries."""
-        processor = LDIFProcessor()
+        processor = FlextLDIFProcessor()
         processor.load_from_string(sample_ldif_content)
 
         validator = LDIFValidator()
@@ -438,7 +442,7 @@ class TestLDIFIntegration:
     def test_end_to_end_processing(self, sample_ldif_content: str) -> None:
         """Test complete LDIF processing workflow."""
         # Step 1: Load LDIF
-        processor = LDIFProcessor()
+        processor = FlextLDIFProcessor()
         load_result = processor.load_from_string(sample_ldif_content)
         assert load_result.success
 
@@ -463,7 +467,7 @@ class TestLDIFIntegration:
 
     def test_error_handling_workflow(self) -> None:
         """Test error handling in LDIF processing workflow."""
-        processor = LDIFProcessor()
+        processor = FlextLDIFProcessor()
 
         # Test with non-existent file
         result = processor.load_from_file(Path("/nonexistent/file.ldif"))
@@ -502,7 +506,7 @@ class TestLDIFIntegration:
 
         start_time = time.time()
 
-        processor = LDIFProcessor()
+        processor = FlextLDIFProcessor()
         result = processor.load_from_string(large_ldif)
 
         processing_time = time.time() - start_time

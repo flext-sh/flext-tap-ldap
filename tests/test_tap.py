@@ -6,7 +6,8 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-from singer_sdk.testing import get_tap_test_class
+# MIGRATED: from singer_sdk.testing import get_tap_test_class -> use flext_meltano
+from flext_meltano import get_tap_test_class
 
 from flext_tap_ldap.tap import TapLDAP
 
@@ -95,7 +96,9 @@ class TestTapLDAPUnit:
         assert "inclusion" in users_stream["metadata"][0]["metadata"]
 
     @patch("flext_tap_ldap.client.LDAPClient")
-    def test_stream_records(self, mock_client_class: MagicMock, config: dict[str, Any]) -> None:
+    def test_stream_records(
+        self, mock_client_class: MagicMock, config: dict[str, Any],
+    ) -> None:
         # Mock LDAP client
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client

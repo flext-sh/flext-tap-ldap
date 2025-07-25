@@ -114,7 +114,7 @@ def mock_ldap_connection() -> Generator[Connection]:
         },
     )
     yield connection
-    connection.unbind()  # type: ignore[no-untyped-call]
+    connection.unbind()
 
 
 @pytest.fixture

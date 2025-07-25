@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-import logging
 from datetime import datetime
 from typing import Any
 from uuid import UUID, uuid4
 
+from flext_core import get_logger
 from pydantic import BaseModel, Field
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class LDAPConnection(BaseModel):

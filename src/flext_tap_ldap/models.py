@@ -4,27 +4,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-# 🚨 ARCHITECTURAL COMPLIANCE: Using DI container
-from flext_tap_ldap.infrastructure.di_container import (
-    get_base_config,
-    get_domain_entity,
-    get_domain_value_object,
-    get_field,
-    get_service_result,
-)
-
-ServiceResult = get_service_result()
-DomainEntity = get_domain_entity()
-Field = get_field()
-DomainValueObject = get_domain_value_object()
-BaseConfig = get_base_config()
+# Import from flext-core for foundational patterns (standardized)
+from flext_core import FlextValueObject as FlextDomainBaseModel
 from pydantic import Field
 
 if TYPE_CHECKING:
     from datetime import datetime
 
 
-class LDAPAttribute(DomainBaseModel):
+class LDAPAttribute(FlextDomainBaseModel):
     """Represents an LDAP attribute with its values."""
 
     name: str = Field(..., description="Attribute name")
@@ -55,7 +43,7 @@ class LDAPAttribute(DomainBaseModel):
         return len(self.values) > 1
 
 
-class LDAPEntry(DomainBaseModel):
+class LDAPEntry(FlextDomainBaseModel):
     """Represents an LDAP entry."""
 
     dn: str = Field(..., description="Distinguished Name", alias="id")
@@ -208,7 +196,7 @@ class LDAPGroup(LDAPEntry):
         )
 
 
-class LDAPSchema(DomainBaseModel):
+class LDAPSchema(FlextDomainBaseModel):
     """Represents LDAP schema information."""
 
     object_classes: list[str] = Field(
