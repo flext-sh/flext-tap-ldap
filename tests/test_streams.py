@@ -35,13 +35,15 @@ class TestStreamsBasic:
 
         # Create a proper tap instance for testing
         try:
-            tap = TapLDAP(config={
-                "host": "test.ldap.com",
-                "port": 389,
-                "base_dn": "dc=test,dc=com",
-                "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-                "password": "test_password",
-            })
+            tap = TapLDAP(
+                config={
+                    "host": "test.ldap.com",
+                    "port": 389,
+                    "base_dn": "dc=test,dc=com",
+                    "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
+                    "password": "test_password",
+                },
+            )
             stream = UsersStream(tap=tap)
             assert stream is not None
             assert stream.name == "users"

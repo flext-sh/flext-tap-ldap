@@ -1,71 +1,33 @@
-"""Configuration models for tap-ldap v0.7.0 using flext-core patterns.
+"""Configuration models for tap-ldap using consolidated patterns.
 
-MIGRATED TO FLEXT-CORE:
-Uses flext-core DomainValueObject and configuration patterns. Zero tolerance for code duplication.
+CONSOLIDATED: Uses flext-meltano common LDAP config to eliminate duplication
+with flext-target-ldap.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-# 🚨 ARCHITECTURAL COMPLIANCE: Using DI container
-from flext_tap_ldap.infrastructure.di_container import (
-    get_base_config,
-    get_domain_entity,
-    get_domain_value_object,
-    get_field,
-    get_service_result,
-)
-
-ServiceResult = get_service_result()
-DomainEntity = get_domain_entity()
-Field = get_field()
-DomainValueObject = get_domain_value_object()
-BaseConfig = get_base_config()
-from pydantic import Field, field_validator
+from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class LDAPConnectionConfig(DomainValueObject):
-    """LDAP connection configuration using flext-core value object patterns."""
+class LDAPConnectionConfig(BaseModel):
+    """LDAP connection configuration."""
 
-    # Connection settings
-    host: str = Field(..., description="LDAP server hostname or IP address")
-    port: int = Field(
-        default=389,
-        description="LDAP server port (389 for LDAP, 636 for LDAPS)",
-    )
-    bind_dn: str | None = Field(
-        default=None,
-        description="Distinguished name for binding to LDAP",
-    )
-    password: str | None = Field(
-        default=None,
-        description="Password for LDAP authentication",
-    )
-    base_dn: str = Field(..., description="Base DN for LDAP searches")
-    use_ssl: bool = Field(default=False, description="Use SSL/TLS for LDAP connection")
-
-    # Performance settings
-    timeout: int = Field(default=30, description="Connection timeout in seconds", gt=0)
-    page_size: int = Field(
-        default=1000,
-        description="Page size for paged results",
-        gt=0,
-    )
-
-    # Search filters
-    user_filter: str = Field(
-        default="(objectClass=inetOrgPerson)",
-        description="LDAP filter for user entries",
-    )
-    group_filter: str = Field(
-        default="(objectClass=groupOfNames)",
-        description="LDAP filter for group entries",
-    )
+    host: str = Field(description="LDAP server host")
+    port: int = Field(default=389, description="LDAP server port")
+    use_ssl: bool = Field(default=False, description="Use SSL connection")
+    bind_dn: str | None = Field(default=None, description="Bind DN for authentication")
+    bind_password: str | None = Field(default=None, description="Bind password")
+    base_dn: str = Field(description="Base DN for searches")
 
 
-class CustomStreamConfig(DomainValueObject):
+
+class CustomStreamConfig(BaseModel):
     """Configuration for custom LDAP streams using flext-core patterns."""
 
     name: str = Field(..., description="Stream name")
@@ -84,7 +46,7 @@ class CustomStreamConfig(DomainValueObject):
     )
 
 
-class LDIFProcessingConfig(DomainValueObject):
+class LDIFProcessingConfig(BaseModel):
     """Configuration for LDIF file processing using flext-core patterns."""
 
     ldif_files: list[str] | None = Field(
@@ -135,7 +97,7 @@ class LDIFProcessingConfig(DomainValueObject):
 
 
 class TapLDAPConfig(BaseSettings):
-    """Complete configuration for tap-ldap using flext-core patterns with environment support.
+    """Complete configuration for tap-ldap using flext-core patterns.
 
     Combines LDAP connection and LDIF processing configurations with Pydantic settings.
     """

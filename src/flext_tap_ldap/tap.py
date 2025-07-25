@@ -6,24 +6,15 @@ using the centralized patterns from flext-core.meltano.
 
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING, Any, ClassVar
 
-# 🚨 ARCHITECTURAL COMPLIANCE: Using DI container
-from flext_tap_ldap.infrastructure.di_container import (
-    get_base_config,
-    get_domain_entity,
-    get_domain_value_object,
-    get_field,
-    get_service_result,
-)
+from flext_core import get_logger
 
-ServiceResult = get_service_result()
-DomainEntity = get_domain_entity()
-Field = get_field()
-DomainValueObject = get_domain_value_object()
-BaseConfig = get_base_config()
-from singer_sdk import Tap, typing as th
+# MIGRATED: Use centralized Singer SDK from flext-meltano
+from flext_meltano import th
+
+# Import from flext-core for foundational patterns (standardized)
+from flext_meltano.singer import FlextMeltanoTap as Tap
 
 from flext_tap_ldap.config import TapLDAPConfig
 from flext_tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
@@ -36,16 +27,17 @@ from flext_tap_ldap.streams import (
 )
 
 if TYPE_CHECKING:
-    from singer_sdk.streams import Stream
+    # MIGRATED: Use centralized Singer SDK from flext-meltano
+    from flext_meltano import Stream
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
-class TapLDAP(Tap, FlextTapMixin):
+class FlextTapLDAP(Tap):
     """Singer tap for LDAP data extraction using FLEXT centralized patterns."""
 
-    name = "tap-ldap"
+    name: str = "tap-ldap"
     config_class = TapLDAPConfig
 
     # Keep the jsonschema for backward compatibility
@@ -242,7 +234,7 @@ class TapLDAP(Tap, FlextTapMixin):
 
 def main() -> None:
     """Main entry point for the tap."""
-    TapLDAP.cli()
+    FlextTapLDAP.cli()
 
 
 if __name__ == "__main__":

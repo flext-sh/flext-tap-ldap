@@ -45,7 +45,7 @@ class TestTapLDAPIntegration:
             json.dump(sample_state, f)
         return state_path
 
-    @patch("flext_ldap.client.LDAPClient")
+    @patch("flext_tap_ldap.client.LDAPClient")
     def test_discovery_mode(
         self,
         mock_ldap_client: Mock,
@@ -75,7 +75,7 @@ class TestTapLDAPIntegration:
         assert "organizational_units" in stream_names
         assert "schema" in stream_names
 
-    @patch("flext_ldap.client.LDAPClient")
+    @patch("flext_tap_ldap.client.LDAPClient")
     def test_sync_mode(
         self,
         mock_ldap_client: Mock,
@@ -108,7 +108,7 @@ class TestTapLDAPIntegration:
         message_types = {msg["type"] for msg in messages}
         assert "SCHEMA" in message_types
 
-    @patch("flext_ldap.client.LDAPClient")
+    @patch("flext_tap_ldap.client.LDAPClient")
     def test_incremental_sync(
         self,
         mock_ldap_client: Mock,
@@ -169,7 +169,7 @@ class TestTapLDAPIntegration:
         with open(config_file, "w", encoding="utf-8") as f:
             json.dump(config, f)
 
-        with patch("flext_ldap.client.LDAPClient") as mock_ldap_client:
+        with patch("flext_tap_ldap.client.LDAPClient") as mock_ldap_client:
             # Mock flext-ldap client
             mock_client_instance = mock_ldap_client.return_value
             mock_client_instance.search.return_value.__aenter__.return_value = []
@@ -220,7 +220,7 @@ class TestTapLDAPIntegration:
             f"Output: {all_output}, Exit code: {result.exit_code}"
         )
 
-    @patch("flext_ldap.client.LDAPClient")
+    @patch("flext_tap_ldap.client.LDAPClient")
     def test_pagination_handling(
         self,
         mock_ldap_client: Mock,
@@ -233,7 +233,9 @@ class TestTapLDAPIntegration:
 
         # Mock flext-ldap client search method with async context manager
 
-        async def mock_search(*args: Any, **kwargs: Any) -> AsyncGenerator[dict[str, Any]]:
+        async def mock_search(
+            *args: Any, **kwargs: Any,
+        ) -> AsyncGenerator[dict[str, Any]]:
             yield {
                 "dn": "uid=user1,ou=users,dc=test,dc=com",
                 "attributes": {"uid": "user1", "cn": "User One"},

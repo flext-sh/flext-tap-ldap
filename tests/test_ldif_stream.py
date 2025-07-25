@@ -20,13 +20,15 @@ class TestLDIFStreamBasic:
 
         # Test that stream can be instantiated
         try:
-            tap = TapLDAP(config={
-                "host": "test.ldap.com",
-                "port": 389,
-                "base_dn": "dc=test,dc=com",
-                "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-                "password": "test_password",
-            })
+            tap = TapLDAP(
+                config={
+                    "host": "test.ldap.com",
+                    "port": 389,
+                    "base_dn": "dc=test,dc=com",
+                    "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
+                    "password": "test_password",
+                },
+            )
             stream = LDIFStream(tap=tap, name="test_stream", schema={}, path=[])
             assert stream is not None
         except (TypeError, AttributeError, ImportError):

@@ -1,28 +1,17 @@
 """Simple API for LDAP tap setup and operations using flext-core patterns.
 
 MIGRATED TO FLEXT-CORE:
-Provides enterprise-ready setup utilities with ServiceResult pattern support.
+Provides enterprise-ready setup utilities with FlextResult pattern support.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-# Use centralized ServiceResult from flext-core - ELIMINATE DUPLICATION
-# 🚨 ARCHITECTURAL COMPLIANCE: Using DI container
-from flext_tap_ldap.infrastructure.di_container import (
-    get_base_config,
-    get_domain_entity,
-    get_domain_value_object,
-    get_field,
-    get_service_result,
+# Import from flext-core for foundational patterns (standardized)
+from flext_core import (
+    FlextResult,
 )
-
-ServiceResult = get_service_result()
-DomainEntity = get_domain_entity()
-Field = get_field()
-DomainValueObject = get_domain_value_object()
-BaseConfig = get_base_config()
 
 from flext_tap_ldap.config import (
     LDAPConnectionConfig,
@@ -31,14 +20,14 @@ from flext_tap_ldap.config import (
 )
 
 
-def setup_ldap_tap(config: TapLDAPConfig | None = None) -> ServiceResult[Any]:
+def setup_ldap_tap(config: TapLDAPConfig | None = None) -> FlextResult[Any]:
     """Setup LDAP tap with configuration.
 
     Args:
         config: Optional configuration. If None, creates defaults.
 
     Returns:
-        ServiceResult with TapLDAPConfig or error message.
+        FlextResult with TapLDAPConfig or error message.
 
     """
     try:
@@ -49,18 +38,18 @@ def setup_ldap_tap(config: TapLDAPConfig | None = None) -> ServiceResult[Any]:
         # Validate configuration
         config.model_validate(config.model_dump())
 
-        return ServiceResult.ok(config)
+        return FlextResult.ok(config)
 
     except Exception as e:
-        return ServiceResult.fail(f"Failed to setup LDAP tap: {e}")
+        return FlextResult.fail(f"Failed to setup LDAP tap: {e}")
 
 
 def create_ldap_connection_config(
     host: str,
     base_dn: str,
     port: int = 389,
-    **kwargs: Any,
-) -> ServiceResult[Any]:
+    **kwargs: object,
+) -> FlextResult[Any]:
     """Create LDAP connection configuration.
 
     Args:
@@ -70,7 +59,7 @@ def create_ldap_connection_config(
         **kwargs: Additional configuration parameters
 
     Returns:
-        ServiceResult with LDAPConnectionConfig or error message.
+        FlextResult with LDAPConnectionConfig or error message.
 
     """
     try:
@@ -81,38 +70,38 @@ def create_ldap_connection_config(
             **kwargs,
         )
 
-        return ServiceResult.ok(config)
+        return FlextResult.ok(config)
 
     except Exception as e:
-        return ServiceResult.fail(f"Failed to create LDAP connection config: {e}")
+        return FlextResult.fail(f"Failed to create LDAP connection config: {e}")
 
 
-def create_ldif_processing_config(**kwargs: Any) -> ServiceResult[Any]:
+def create_ldif_processing_config(**kwargs: object) -> FlextResult[Any]:
     """Create LDIF processing configuration.
 
     Args:
         **kwargs: LDIF processing parameters
 
     Returns:
-        ServiceResult with LDIFProcessingConfig or error message.
+        FlextResult with LDIFProcessingConfig or error message.
 
     """
     try:
         config = LDIFProcessingConfig(**kwargs)
-        return ServiceResult.ok(config)
+        return FlextResult.ok(config)
 
     except Exception as e:
-        return ServiceResult.fail(f"Failed to create LDIF processing config: {e}")
+        return FlextResult.fail(f"Failed to create LDIF processing config: {e}")
 
 
-def validate_ldap_config(config: TapLDAPConfig) -> ServiceResult[Any]:
+def validate_ldap_config(config: TapLDAPConfig) -> FlextResult[Any]:
     """Validate LDAP tap configuration.
 
     Args:
         config: Configuration to validate
 
     Returns:
-        ServiceResult with validation success or error message.
+        FlextResult with validation success or error message.
 
     """
     try:
@@ -121,30 +110,30 @@ def validate_ldap_config(config: TapLDAPConfig) -> ServiceResult[Any]:
 
         # Additional business rule validations
         if config.connection.port <= 0 or config.connection.port > 65535:
-            return ServiceResult.fail("Port must be between 1 and 65535")
+            return FlextResult.fail("Port must be between 1 and 65535")
 
         if not config.connection.base_dn:
-            return ServiceResult.fail("Base DN is required")
+            return FlextResult.fail("Base DN is required")
 
         if config.connection.use_ssl and config.connection.port == 389:
-            return ServiceResult.fail(
-                "SSL enabled but port is 389 (consider using port 636 for LDAPS)"
+            return FlextResult.fail(
+                "SSL enabled but port is 389 (consider using port 636 for LDAPS)",
             )
 
-        return ServiceResult.ok(True)
+        return FlextResult.ok(True)
 
     except Exception as e:
-        return ServiceResult.fail(f"Configuration validation failed: {e}")
+        return FlextResult.fail(f"Configuration validation failed: {e}")
 
 
-def create_development_ldap_config(**overrides: Any) -> ServiceResult[Any]:
+def create_development_ldap_config(**overrides: Any) -> FlextResult[Any]:
     """Create development LDAP configuration with defaults.
 
     Args:
         **overrides: Configuration overrides
 
     Returns:
-        ServiceResult with TapLDAPConfig for development use.
+        FlextResult with TapLDAPConfig for development use.
 
     """
     try:
@@ -153,16 +142,13 @@ def create_development_ldap_config(**overrides: Any) -> ServiceResult[Any]:
         connection_config = LDAPConnectionConfig(
             host="localhost",
             port=389,
-            base_dn="dc=example,dc=com",
-            bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=example,dc=com",
-            password=os.getenv(
-                "LDAP_PASSWORD", "REDACTED_LDAP_BIND_PASSWORD"
-            ),  # nosec B106 - Uses env var in production
             use_ssl=False,
-            timeout=30,
-            page_size=100,
-            user_filter="(objectClass=person)",
-            group_filter="(objectClass=groupOfNames)",
+            bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=example,dc=com",
+            bind_password=os.getenv(
+                "LDAP_PASSWORD",
+                "REDACTED_LDAP_BIND_PASSWORD",
+            ),  # nosec B106 - Uses env var in production
+            base_dn="dc=example,dc=com",
         )
 
         config = TapLDAPConfig(
@@ -178,32 +164,30 @@ def create_development_ldap_config(**overrides: Any) -> ServiceResult[Any]:
             config_dict.update(overrides)
             config = TapLDAPConfig(**config_dict)
 
-        return ServiceResult.ok(config)
+        return FlextResult.ok(config)
 
     except Exception as e:
-        return ServiceResult.fail(f"Failed to create development config: {e}")
+        return FlextResult.fail(f"Failed to create development config: {e}")
 
 
-def create_production_ldap_config(**overrides: Any) -> ServiceResult[Any]:
+def create_production_ldap_config(**overrides: Any) -> FlextResult[Any]:
     """Create production LDAP configuration with security defaults.
 
     Args:
         **overrides: Configuration overrides
 
     Returns:
-        ServiceResult with TapLDAPConfig for production use.
+        FlextResult with TapLDAPConfig for production use.
 
     """
     try:
         connection_config = LDAPConnectionConfig(
             host="ldap.company.com",
             port=636,
-            base_dn="dc=company,dc=com",
             use_ssl=True,
-            timeout=60,
-            page_size=1000,
-            user_filter="(objectClass=inetOrgPerson)",
-            group_filter="(objectClass=groupOfNames)",
+            bind_dn="",  # Should be configured via environment
+            bind_password="",  # Should be configured via environment
+            base_dn="dc=company,dc=com",
         )
 
         config = TapLDAPConfig(
@@ -223,17 +207,17 @@ def create_production_ldap_config(**overrides: Any) -> ServiceResult[Any]:
             config_dict.update(overrides)
             config = TapLDAPConfig(**config_dict)
 
-        return ServiceResult.ok(config)
+        return FlextResult.ok(config)
 
     except Exception as e:
-        return ServiceResult.fail(f"Failed to create production config: {e}")
+        return FlextResult.fail(f"Failed to create production config: {e}")
 
 
 def create_ldif_processing_config_advanced(
     ldif_directory: str | None = None,
     ldif_files: list[str] | None = None,
     **overrides: Any,
-) -> ServiceResult[Any]:
+) -> FlextResult[Any]:
     """Create LDIF processing configuration for migration scenarios.
 
     Args:
@@ -242,7 +226,7 @@ def create_ldif_processing_config_advanced(
         **overrides: Additional configuration overrides
 
     Returns:
-        ServiceResult with TapLDAPConfig optimized for LDIF processing.
+        FlextResult with TapLDAPConfig optimized for LDIF processing.
 
     """
     try:
@@ -276,15 +260,15 @@ def create_ldif_processing_config_advanced(
             config_dict.update(overrides)
             config = TapLDAPConfig(**config_dict)
 
-        return ServiceResult.ok(config)
+        return FlextResult.ok(config)
 
     except Exception as e:
-        return ServiceResult.fail(f"Failed to create LDIF processing config: {e}")
+        return FlextResult.fail(f"Failed to create LDIF processing config: {e}")
 
 
 # Export main API functions
 __all__ = [
-    "ServiceResult",
+    "FlextResult",
     "create_development_ldap_config",
     "create_ldap_connection_config",
     "create_ldif_processing_config",

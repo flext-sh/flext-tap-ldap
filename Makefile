@@ -1,409 +1,417 @@
-# FLEXT TAP LDAP - LDAP Directory Singer Tap
-# =========================================
-# Enterprise-grade Singer tap for LDAP directory data extraction
-# Python 3.13 + Singer SDK + LDAP + FLEXT Core + Zero Tolerance Quality Gates
+# =============================================================================
+# FLEXT-TAP-LDAP - PROJECT MAKEFILE
+# =============================================================================
+# Enterprise Singer Tap for LDAP Directory with Clean Architecture + DDD + Zero Tolerance Quality
+# Python 3.13 + Singer SDK + LDAP + Oracle OID Integration
+# =============================================================================
 
-.PHONY: help check validate test lint type-check security format format-check fix
-.PHONY: install dev-install setup pre-commit build clean
-.PHONY: coverage coverage-html test-unit test-integration test-singer
-.PHONY: deps-update deps-audit deps-tree deps-outdated
-.PHONY: discover run validate-config catalog sync
-.PHONY: ldap-test ldap-discover ldap-query ldap-performance
+# Project Configuration
+PROJECT_NAME := flext-tap-ldap
+PROJECT_TYPE := meltano-plugin
+PYTHON_VERSION := 3.13
+POETRY := poetry
+SRC_DIR := src
+TESTS_DIR := tests
+DOCS_DIR := docs
 
-# ============================================================================
-# 🎯 HELP & INFORMATION
-# ============================================================================
+# Quality Gates Configuration
+MIN_COVERAGE := 90
+MYPY_STRICT := true
+RUFF_CONFIG := pyproject.toml
+PEP8_LINE_LENGTH := 79
 
-help: ## Show this help message
-	@echo "🎯 FLEXT TAP LDAP - LDAP Directory Singer Tap"
-	@echo "============================================"
-	@echo "🎯 Singer SDK + LDAP + FLEXT Core + Python 3.13"
+# Singer Configuration
+TAP_CONFIG := config.json
+TAP_CATALOG := catalog.json
+TAP_STATE := state.json
+
+# Export environment variables
+export PYTHON_VERSION
+export MIN_COVERAGE
+export MYPY_STRICT
+export TAP_CONFIG
+export TAP_CATALOG
+
+# =============================================================================
+# HELP & INFORMATION
+# =============================================================================
+
+.PHONY: help
+help: ## Show available commands
+	@echo "$(PROJECT_NAME) - Singer Tap for LDAP Directory"
+	@echo "==============================================="
 	@echo ""
-	@echo "📦 Enterprise-grade LDAP directory tap for Singer protocol"
-	@echo "🔒 Zero tolerance quality gates with LDAP integration"
-	@echo "🧪 90%+ test coverage requirement with Oracle OID support"
+	@echo "📋 AVAILABLE COMMANDS:"
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-18s %s\\n", $$1, $$2}' $(MAKEFILE_LIST)
 	@echo ""
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\\033[36m%-20s\\033[0m %s\\n", $$1, $$2}'
+	@echo "🔧 PROJECT INFO:"
+	@echo "  Type: $(PROJECT_TYPE)"
+	@echo "  Python: $(PYTHON_VERSION)"
+	@echo "  Coverage: $(MIN_COVERAGE)%"
+	@echo "  Line Length: $(PEP8_LINE_LENGTH)"
 
-# ============================================================================
-# 🎯 CORE QUALITY GATES - ZERO TOLERANCE
-# ============================================================================
+.PHONY: info
+info: ## Show project information
+	@echo "Project Information"
+	@echo "=================="
+	@echo "Name: $(PROJECT_NAME)"
+	@echo "Type: $(PROJECT_TYPE)"
+	@echo "Python Version: $(PYTHON_VERSION)"
+	@echo "Source Directory: $(SRC_DIR)"
+	@echo "Tests Directory: $(TESTS_DIR)"
+	@echo "Quality Standards: Zero Tolerance"
+	@echo "Architecture: Clean Architecture + DDD + Singer SDK"
 
-validate: lint type-check security test ## STRICT compliance validation (all must pass)
-	@echo "✅ ALL QUALITY GATES PASSED - FLEXT TAP LDAP COMPLIANT"
+# =============================================================================
+# INSTALLATION & SETUP
+# =============================================================================
 
-check: lint type-check test ## Essential quality checks (pre-commit standard)
-	@echo "✅ Essential checks passed"
+.PHONY: install
+install: ## Install project dependencies
+	@echo "📦 Installing $(PROJECT_NAME) dependencies..."
+	@$(POETRY) install
 
-lint: ## Ruff linting (17 rule categories, ALL enabled)
-	@echo "🔍 Running ruff linter (ALL rules enabled)..."
-	@poetry run ruff check src/ tests/ --fix --unsafe-fixes
-	@echo "✅ Linting complete"
+.PHONY: install-dev
+install-dev: ## Install development dependencies
+	@echo "📦 Installing development dependencies..."
+	@$(POETRY) install --with dev,test,docs
 
-type-check: ## MyPy strict mode type checking (zero errors tolerated)
-	@echo "🛡️ Running MyPy strict type checking..."
-	@poetry run mypy src/ tests/ --strict
-	@echo "✅ Type checking complete"
+.PHONY: setup
+setup: ## Complete project setup
+	@echo "🚀 Setting up $(PROJECT_NAME)..."
+	@make install-dev
+	@make pre-commit-install
+	@echo "✅ Setup complete"
 
-security: ## Security scans (bandit + pip-audit + secrets)
-	@echo "🔒 Running security scans..."
-	@poetry run bandit -r src/ --severity-level medium --confidence-level medium
-	@poetry run pip-audit --ignore-vuln PYSEC-2022-42969
-	@poetry run detect-secrets scan --all-files
-	@echo "✅ Security scans complete"
+.PHONY: pre-commit-install
+pre-commit-install: ## Install pre-commit hooks
+	@echo "🔧 Installing pre-commit hooks..."
+	@$(POETRY) run pre-commit install
+	@$(POETRY) run pre-commit autoupdate
 
-format: ## Format code with ruff
+# =============================================================================
+# QUALITY GATES & VALIDATION
+# =============================================================================
+
+.PHONY: validate
+validate: ## Run complete validation (quality gate)
+	@echo "🔍 Running complete validation for $(PROJECT_NAME)..."
+	@make lint
+	@make type-check
+	@make security
+	@make test
+	@make pep8-check
+	@echo "✅ Validation complete"
+
+.PHONY: check
+check: ## Quick health check
+	@echo "🏥 Running health check..."
+	@make lint
+	@make type-check
+	@echo "✅ Health check complete"
+
+.PHONY: lint
+lint: ## Run code linting
+	@echo "🧹 Running linting..."
+	@$(POETRY) run ruff check $(SRC_DIR) $(TESTS_DIR)
+
+.PHONY: format
+format: ## Format code
 	@echo "🎨 Formatting code..."
-	@poetry run ruff format src/ tests/
-	@echo "✅ Formatting complete"
+	@$(POETRY) run ruff format $(SRC_DIR) $(TESTS_DIR)
 
-format-check: ## Check formatting without fixing
+.PHONY: format-check
+format-check: ## Check code formatting
 	@echo "🎨 Checking code formatting..."
-	@poetry run ruff format src/ tests/ --check
-	@echo "✅ Format check complete"
+	@$(POETRY) run ruff format --check $(SRC_DIR) $(TESTS_DIR)
 
-fix: format lint ## Auto-fix all issues (format + imports + lint)
-	@echo "🔧 Auto-fixing all issues..."
-	@poetry run ruff check src/ tests/ --fix --unsafe-fixes
-	@echo "✅ All auto-fixes applied"
+.PHONY: type-check
+type-check: ## Run type checking
+	@echo "🔍 Running type checking..."
+	@$(POETRY) run mypy $(SRC_DIR) --strict
 
-# ============================================================================
-# 🧪 TESTING - 90% COVERAGE MINIMUM
-# ============================================================================
+.PHONY: security
+security: ## Run security scanning
+	@echo "🔒 Running security scanning..."
+	@$(POETRY) run bandit -r $(SRC_DIR)
+	@$(POETRY) run pip-audit
 
-test: ## Run tests with coverage (90% minimum required)
+.PHONY: pep8-check
+pep8-check: ## Check PEP8 compliance
+	@echo "📏 Checking PEP8 compliance..."
+	@$(POETRY) run ruff check $(SRC_DIR) $(TESTS_DIR) --select E,W
+	@echo "✅ PEP8 check complete"
+
+.PHONY: fix
+fix: ## Auto-fix code issues
+	@echo "🔧 Auto-fixing code issues..."
+	@$(POETRY) run ruff check $(SRC_DIR) $(TESTS_DIR) --fix
+	@make format
+
+# =============================================================================
+# TESTING
+# =============================================================================
+
+.PHONY: test
+test: ## Run all tests with coverage
 	@echo "🧪 Running tests with coverage..."
-	@poetry run pytest tests/ -v --cov=src/flext_tap_ldap --cov-report=term-missing --cov-fail-under=90
-	@echo "✅ Tests complete"
+	@$(POETRY) run pytest $(TESTS_DIR) --cov=$(SRC_DIR) --cov-report=term-missing --cov-fail-under=$(MIN_COVERAGE)
 
+.PHONY: test-unit
 test-unit: ## Run unit tests only
 	@echo "🧪 Running unit tests..."
-	@poetry run pytest tests/unit/ -v
-	@echo "✅ Unit tests complete"
+	@$(POETRY) run pytest $(TESTS_DIR) -m "not integration" -v
 
+.PHONY: test-integration
 test-integration: ## Run integration tests only
 	@echo "🧪 Running integration tests..."
-	@poetry run pytest tests/integration/ -v
-	@echo "✅ Integration tests complete"
+	@$(POETRY) run pytest $(TESTS_DIR) -m integration -v
 
-test-singer: ## Run Singer protocol tests
+.PHONY: test-singer
+test-singer: ## Run Singer-specific tests
 	@echo "🧪 Running Singer protocol tests..."
-	@poetry run pytest tests/singer/ -v
-	@echo "✅ Singer tests complete"
+	@$(POETRY) run pytest $(TESTS_DIR) -m singer -v
 
-test-ldap: ## Run LDAP-specific tests
-	@echo "🧪 Running LDAP-specific tests..."
-	@poetry run pytest tests/ -m "ldap" -v
-	@echo "✅ LDAP tests complete"
+.PHONY: test-fast
+test-fast: ## Run tests without coverage
+	@echo "🧪 Running fast tests..."
+	@$(POETRY) run pytest $(TESTS_DIR) -v
 
-test-oracle-oid: ## Run Oracle OID tests
-	@echo "🧪 Running Oracle OID tests..."
-	@poetry run pytest tests/ -m "oracle_oid" -v
-	@echo "✅ Oracle OID tests complete"
-
-coverage: ## Generate detailed coverage report
+.PHONY: coverage
+coverage: ## Generate coverage report
 	@echo "📊 Generating coverage report..."
-	@poetry run pytest tests/ --cov=src/flext_tap_ldap --cov-report=term-missing --cov-report=html
-	@echo "✅ Coverage report generated in htmlcov/"
+	@$(POETRY) run pytest $(TESTS_DIR) --cov=$(SRC_DIR) --cov-report=html --cov-report=xml
 
-coverage-html: coverage ## Generate HTML coverage report
-	@echo "📊 Opening coverage report..."
-	@python -m webbrowser htmlcov/index.html
+.PHONY: coverage-html
+coverage-html: ## Generate HTML coverage report
+	@echo "📊 Generating HTML coverage report..."
+	@$(POETRY) run pytest $(TESTS_DIR) --cov=$(SRC_DIR) --cov-report=html
+	@echo "📊 Coverage report: htmlcov/index.html"
 
-# ============================================================================
-# 🚀 DEVELOPMENT SETUP
-# ============================================================================
+# =============================================================================
+# SINGER TAP OPERATIONS
+# =============================================================================
 
-setup: install pre-commit ## Complete development setup
-	@echo "🎯 Development setup complete!"
+.PHONY: discover
+discover: ## Run tap discovery mode
+	@echo "🔍 Running tap discovery..."
+	@$(POETRY) run tap-ldap --config $(TAP_CONFIG) --discover > $(TAP_CATALOG)
+	@echo "✅ Catalog generated: $(TAP_CATALOG)"
 
-install: ## Install dependencies with Poetry
-	@echo "📦 Installing dependencies..."
-	@poetry install --all-extras --with dev,test,docs,security
-	@echo "✅ Dependencies installed"
+.PHONY: run
+run: ## Run tap extraction
+	@echo "🎯 Running tap extraction..."
+	@$(POETRY) run tap-ldap --config $(TAP_CONFIG) --catalog $(TAP_CATALOG) --state $(TAP_STATE)
 
-dev-install: install ## Install in development mode
-	@echo "🔧 Setting up development environment..."
-	@poetry install --all-extras --with dev,test,docs,security
-	@poetry run pre-commit install
-	@echo "✅ Development environment ready"
+.PHONY: validate-config
+validate-config: ## Validate tap configuration
+	@echo "🔍 Validating tap configuration..."
+	@$(POETRY) run python -c "import json; json.load(open('$(TAP_CONFIG)'))"
+	@echo "✅ Configuration valid"
 
-pre-commit: ## Setup pre-commit hooks
-	@echo "🎣 Setting up pre-commit hooks..."
-	@poetry run pre-commit install
-	@poetry run pre-commit run --all-files || true
-	@echo "✅ Pre-commit hooks installed"
+.PHONY: catalog
+catalog: discover ## Alias for discover
 
-# ============================================================================
-# 🎯 SINGER TAP OPERATIONS
-# ============================================================================
+.PHONY: sync
+sync: run ## Alias for run
 
-discover: ## Run Singer discovery mode
-	@echo "🎵 Running Singer discovery..."
-	@poetry run tap-ldap --config tests/fixtures/config/tap_config.json --discover
-	@echo "✅ Discovery complete"
+# =============================================================================
+# LDAP OPERATIONS
+# =============================================================================
 
-run: ## Run Singer tap extraction
-	@echo "🎵 Running Singer tap extraction..."
-	@poetry run tap-ldap --config tests/fixtures/config/tap_config.json --catalog tests/fixtures/catalog/catalog.json
-	@echo "✅ Extraction complete"
+.PHONY: ldap-test
+ldap-test: ## Test LDAP connection
+	@echo "🔗 Testing LDAP connection..."
+	@$(POETRY) run python -c "from flext_tap_ldap.client import test_connection; test_connection()"
 
-run-debug: ## Run Singer tap with debug logging
-	@echo "🎵 Running Singer tap with debug..."
-	@poetry run tap-ldap --config tests/fixtures/config/tap_config.json --catalog tests/fixtures/catalog/catalog.json --log-level DEBUG
-	@echo "✅ Debug extraction complete"
-
-validate-config: ## Validate Singer configuration
-	@echo "🔍 Validating Singer configuration..."
-	@poetry run tap-ldap --config tests/fixtures/config/tap_config.json --validate-config
-	@echo "✅ Configuration validated"
-
-catalog: ## Generate Singer catalog
-	@echo "🎵 Generating Singer catalog..."
-	@poetry run tap-ldap --config tests/fixtures/config/tap_config.json --discover > catalog.json
-	@echo "✅ Catalog generated: catalog.json"
-
-sync: ## Run incremental sync
-	@echo "🎵 Running incremental sync..."
-	@poetry run tap-ldap --config tests/fixtures/config/tap_config.json --catalog tests/fixtures/catalog/catalog.json --state tests/fixtures/state/state.json
-	@echo "✅ Incremental sync complete"
-
-test-connection: ## Test LDAP connection
-	@echo "🔌 Testing LDAP connection..."
-	@poetry run tap-ldap --config tests/fixtures/config/tap_config.json --test-connection
-	@echo "✅ Connection test complete"
-
-# ============================================================================
-# 📁 LDAP OPERATIONS
-# ============================================================================
-
-ldap-test: ## Test LDAP connectivity
-	@echo "📁 Testing LDAP connectivity..."
-	@poetry run python -c "from flext_tap_ldap.client import LDAPClient; import json; config = json.load(open('tests/fixtures/config/tap_config.json')); client = LDAPClient(**config['ldap']); print('Testing connection...'); conn = client.get_connection(); print('✅ Connected!' if conn else '❌ Failed')"
-	@echo "✅ LDAP connectivity test complete"
-
+.PHONY: ldap-discover
 ldap-discover: ## Discover LDAP schema
-	@echo "📁 Discovering LDAP schema..."
-	@poetry run python scripts/discover_ldap_schema.py
-	@echo "✅ LDAP schema discovery complete"
+	@echo "🔍 Discovering LDAP schema..."
+	@$(POETRY) run python -c "from flext_tap_ldap.discovery import discover_schema; discover_schema()"
 
-ldap-query: ## Test LDAP query operations
-	@echo "📁 Testing LDAP query operations..."
-	@poetry run python scripts/test_ldap_queries.py
-	@echo "✅ LDAP query operations test complete"
+.PHONY: ldap-query
+ldap-query: ## Run test LDAP query
+	@echo "🔍 Running test LDAP query..."
+	@$(POETRY) run python -c "from flext_tap_ldap.client import test_query; test_query()"
 
-ldap-performance: ## Run LDAP performance tests
-	@echo "⚡ Running LDAP performance tests..."
-	@poetry run pytest tests/performance/ -v --benchmark-only
-	@echo "✅ LDAP performance tests complete"
+.PHONY: ldap-performance
+ldap-performance: ## Run LDAP performance test
+	@echo "⚡ Running LDAP performance test..."
+	@$(POETRY) run python -c "from flext_tap_ldap.performance import run_performance_test; run_performance_test()"
 
-ldap-browse: ## Browse LDAP directory structure
-	@echo "📁 Browsing LDAP directory structure..."
-	@poetry run python scripts/browse_ldap_structure.py
-	@echo "✅ LDAP directory browsing complete"
+# =============================================================================
+# BUILD & DISTRIBUTION
+# =============================================================================
 
-ldap-users: ## Extract user data from LDAP
-	@echo "👥 Extracting user data from LDAP..."
-	@poetry run tap-ldap --config tests/fixtures/config/tap_config.json --catalog tests/fixtures/catalog/users_catalog.json
-	@echo "✅ User data extraction complete"
+.PHONY: build
+build: ## Build distribution packages
+	@echo "🏗️ Building $(PROJECT_NAME)..."
+	@$(POETRY) build
 
-ldap-groups: ## Extract group data from LDAP
-	@echo "👥 Extracting group data from LDAP..."
-	@poetry run tap-ldap --config tests/fixtures/config/tap_config.json --catalog tests/fixtures/catalog/groups_catalog.json
-	@echo "✅ Group data extraction complete"
+.PHONY: build-clean
+build-clean: ## Clean build and rebuild
+	@echo "🏗️ Clean build..."
+	@make clean
+	@make build
 
-# ============================================================================
-# 🏢 ORACLE OID OPERATIONS
-# ============================================================================
+.PHONY: publish-test
+publish-test: ## Publish to test PyPI
+	@echo "📦 Publishing to test PyPI..."
+	@$(POETRY) publish --repository testpypi
 
-oracle-oid-test: ## Test Oracle OID connectivity
-	@echo "🏢 Testing Oracle OID connectivity..."
-	@poetry run python scripts/test_oracle_oid.py
-	@echo "✅ Oracle OID connectivity test complete"
+.PHONY: publish
+publish: ## Publish to PyPI
+	@echo "📦 Publishing to PyPI..."
+	@$(POETRY) publish
 
-oracle-oid-schema: ## Discover Oracle OID schema
-	@echo "🏢 Discovering Oracle OID schema..."
-	@poetry run python scripts/discover_oracle_oid_schema.py
-	@echo "✅ Oracle OID schema discovery complete"
+# =============================================================================
+# DOCUMENTATION
+# =============================================================================
 
-oracle-oid-extract: ## Extract data from Oracle OID
-	@echo "🏢 Extracting data from Oracle OID..."
-	@poetry run tap-ldap --config tests/fixtures/config/oracle_oid_config.json --catalog tests/fixtures/catalog/oracle_oid_catalog.json
-	@echo "✅ Oracle OID data extraction complete"
+.PHONY: docs
+docs: ## Build documentation
+	@echo "📚 Building documentation..."
+	@$(POETRY) run mkdocs build
 
-oracle-oid-users: ## Extract users from Oracle OID
-	@echo "🏢 Extracting users from Oracle OID..."
-	@poetry run python scripts/extract_oracle_oid_users.py
-	@echo "✅ Oracle OID users extraction complete"
+.PHONY: docs-serve
+docs-serve: ## Serve documentation locally
+	@echo "📚 Serving documentation..."
+	@$(POETRY) run mkdocs serve
 
-oracle-oid-containers: ## Extract containers from Oracle OID
-	@echo "🏢 Extracting containers from Oracle OID..."
-	@poetry run python scripts/extract_oracle_oid_containers.py
-	@echo "✅ Oracle OID containers extraction complete"
+.PHONY: docs-deploy
+docs-deploy: ## Deploy documentation
+	@echo "📚 Deploying documentation..."
+	@$(POETRY) run mkdocs gh-deploy
 
-# ============================================================================
-# 📦 BUILD & DISTRIBUTION
-# ============================================================================
+# =============================================================================
+# DEPENDENCY MANAGEMENT
+# =============================================================================
 
-build: clean ## Build distribution packages
-	@echo "🔨 Building distribution..."
-	@poetry build
-	@echo "✅ Build complete - packages in dist/"
+.PHONY: deps-update
+deps-update: ## Update dependencies
+	@echo "🔄 Updating dependencies..."
+	@$(POETRY) update
 
-# ============================================================================
-# 🧹 CLEANUP
-# ============================================================================
+.PHONY: deps-show
+deps-show: ## Show dependency tree
+	@echo "📋 Showing dependency tree..."
+	@$(POETRY) show --tree
 
-clean: ## Remove all artifacts
-	@echo "🧹 Cleaning up..."
+.PHONY: deps-audit
+deps-audit: ## Audit dependencies for security
+	@echo "🔍 Auditing dependencies..."
+	@$(POETRY) run pip-audit
+
+.PHONY: deps-export
+deps-export: ## Export requirements.txt
+	@echo "📄 Exporting requirements..."
+	@$(POETRY) export -f requirements.txt --output requirements.txt
+	@$(POETRY) export -f requirements.txt --dev --output requirements-dev.txt
+
+# =============================================================================
+# DEVELOPMENT TOOLS
+# =============================================================================
+
+.PHONY: shell
+shell: ## Open Python shell with project loaded
+	@echo "🐍 Opening Python shell..."
+	@$(POETRY) run python
+
+.PHONY: notebook
+notebook: ## Start Jupyter notebook
+	@echo "📓 Starting Jupyter notebook..."
+	@$(POETRY) run jupyter lab
+
+.PHONY: pre-commit
+pre-commit: ## Run pre-commit hooks
+	@echo "🔍 Running pre-commit hooks..."
+	@$(POETRY) run pre-commit run --all-files
+
+# =============================================================================
+# MAINTENANCE & CLEANUP
+# =============================================================================
+
+.PHONY: clean
+clean: ## Clean build artifacts and cache
+	@echo "🧹 Cleaning build artifacts..."
 	@rm -rf build/
 	@rm -rf dist/
 	@rm -rf *.egg-info/
-	@rm -rf .coverage
+	@rm -rf .pytest_cache/
 	@rm -rf htmlcov/
-	@rm -rf catalog.json
-	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-	@find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
-	@find . -type d -name ".mypy_cache" -exec rm -rf {} + 2>/dev/null || true
-	@find . -type d -name ".ruff_cache" -exec rm -rf {} + 2>/dev/null || true
+	@rm -rf .coverage
+	@rm -rf .mypy_cache/
+	@rm -rf .ruff_cache/
+	@rm -rf $(TAP_CATALOG)
+	@rm -rf $(TAP_STATE)
+	@find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
-	@echo "✅ Cleanup complete"
 
-# ============================================================================
-# 📊 DEPENDENCY MANAGEMENT
-# ============================================================================
+.PHONY: clean-all
+clean-all: clean ## Deep clean including virtual environment
+	@echo "🧹 Deep cleaning..."
+	@rm -rf .venv/
 
-deps-update: ## Update all dependencies
-	@echo "🔄 Updating dependencies..."
-	@poetry update
-	@echo "✅ Dependencies updated"
+.PHONY: reset
+reset: clean-all ## Reset project to clean state
+	@echo "🔄 Resetting project..."
+	@make setup
 
-deps-audit: ## Audit dependencies for vulnerabilities
-	@echo "🔍 Auditing dependencies..."
-	@poetry run pip-audit
-	@echo "✅ Dependency audit complete"
+# =============================================================================
+# DIAGNOSTICS & TROUBLESHOOTING
+# =============================================================================
 
-deps-tree: ## Show dependency tree
-	@echo "🌳 Dependency tree:"
-	@poetry show --tree
+.PHONY: diagnose
+diagnose: ## Run project diagnostics
+	@echo "🔬 Running project diagnostics..."
+	@echo "Python version: $$(python --version)"
+	@echo "Poetry version: $$($(POETRY) --version)"
+	@echo "Singer SDK status: $$($(POETRY) run python -c 'import singer_sdk; print(singer_sdk.__version__)')"
+	@echo "Project info:"
+	@$(POETRY) show --no-dev
+	@echo "Environment status:"
+	@$(POETRY) env info
 
-deps-outdated: ## Show outdated dependencies
-	@echo "📋 Outdated dependencies:"
-	@poetry show --outdated
+.PHONY: doctor
+doctor: ## Check project health
+	@echo "👩‍⚕️ Checking project health..."
+	@make diagnose
+	@make check
+	@echo "✅ Health check complete"
 
-# ============================================================================
-# 🔧 ENVIRONMENT CONFIGURATION
-# ============================================================================
+# =============================================================================
+# CONVENIENCE ALIASES
+# =============================================================================
 
-# Python settings
-PYTHON := python3.13
-export PYTHONPATH := $(PWD)/src:$(PYTHONPATH)
-export PYTHONDONTWRITEBYTECODE := 1
-export PYTHONUNBUFFERED := 1
+.PHONY: t
+t: test ## Alias for test
 
-# LDAP Tap settings
-export TAP_LDAP_HOST := localhost
-export TAP_LDAP_PORT := 389
-export TAP_LDAP_USE_SSL := false
-export TAP_LDAP_BASE_DN := dc=test,dc=com
+.PHONY: l
+l: lint ## Alias for lint
 
-# Singer settings
-export SINGER_LOG_LEVEL := INFO
-export SINGER_BATCH_SIZE := 1000
-export SINGER_MAX_BATCH_AGE := 300
+.PHONY: f
+f: format ## Alias for format
 
-# Oracle OID settings
-export TAP_LDAP_ORACLE_OID_MODE := false
-export TAP_LDAP_ORACLE_COMPATIBILITY := true
+.PHONY: tc
+tc: type-check ## Alias for type-check
 
-# Performance settings
-export TAP_LDAP_PAGE_SIZE := 1000
-export TAP_LDAP_TIMEOUT := 30
-export TAP_LDAP_MAX_RETRIES := 3
+.PHONY: c
+c: clean ## Alias for clean
 
-# Poetry settings
-export POETRY_VENV_IN_PROJECT := false
-export POETRY_CACHE_DIR := $(HOME)/.cache/pypoetry
+.PHONY: i
+i: install ## Alias for install
 
-# Quality gate settings
-export MYPY_CACHE_DIR := .mypy_cache
-export RUFF_CACHE_DIR := .ruff_cache
+.PHONY: v
+v: validate ## Alias for validate
 
-# ============================================================================
-# 📝 PROJECT METADATA
-# ============================================================================
+.PHONY: d
+d: discover ## Alias for discover
 
-# Project information
-PROJECT_NAME := flext-tap-ldap
-PROJECT_VERSION := $(shell poetry version -s)
-PROJECT_DESCRIPTION := FLEXT TAP LDAP - LDAP Directory Singer Tap
+.PHONY: r
+r: run ## Alias for run
+
+# =============================================================================
+# Default target
+# =============================================================================
 
 .DEFAULT_GOAL := help
-
-# ============================================================================
-# 🎯 SINGER SPECIFIC COMMANDS
-# ============================================================================
-
-singer-about: ## Show Singer tap about information
-	@echo "🎵 Singer tap about information..."
-	@poetry run tap-ldap --about
-	@echo "✅ About information displayed"
-
-singer-config-sample: ## Generate Singer config sample
-	@echo "🎵 Generating Singer config sample..."
-	@poetry run tap-ldap --config-sample > config_sample.json
-	@echo "✅ Config sample generated: config_sample.json"
-
-singer-schema: ## Validate Singer schema
-	@echo "🎵 Validating Singer schema..."
-	@poetry run tap-ldap --config tests/fixtures/config/tap_config.json --discover --validate-schema
-	@echo "✅ Singer schema validation complete"
-
-singer-test-streams: ## Test Singer streams
-	@echo "🎵 Testing Singer streams..."
-	@poetry run pytest tests/singer/test_streams.py -v
-	@echo "✅ Singer streams tests complete"
-
-# ============================================================================
-# 🔍 STREAM TESTING
-# ============================================================================
-
-test-users-stream: ## Test users stream
-	@echo "👥 Testing users stream..."
-	@poetry run python scripts/test_users_stream.py
-	@echo "✅ Users stream test complete"
-
-test-groups-stream: ## Test groups stream
-	@echo "👥 Testing groups stream..."
-	@poetry run python scripts/test_groups_stream.py
-	@echo "✅ Groups stream test complete"
-
-test-ous-stream: ## Test organizational units stream
-	@echo "🏢 Testing organizational units stream..."
-	@poetry run python scripts/test_ous_stream.py
-	@echo "✅ OUs stream test complete"
-
-test-all-streams: test-users-stream test-groups-stream test-ous-stream ## Test all streams
-	@echo "✅ All streams testing complete"
-
-# ============================================================================
-# 🎯 FLEXT ECOSYSTEM INTEGRATION
-# ============================================================================
-
-ecosystem-check: ## Verify FLEXT ecosystem compatibility
-	@echo "🌐 Checking FLEXT ecosystem compatibility..."
-	@echo "📦 Singer project: $(PROJECT_NAME) v$(PROJECT_VERSION)"
-	@echo "🏗️ Architecture: Singer Tap + LDAP"
-	@echo "🐍 Python: 3.13"
-	@echo "🔗 Framework: FLEXT Core + Singer SDK"
-	@echo "📊 Quality: Zero tolerance enforcement"
-	@echo "✅ Ecosystem compatibility verified"
-
-workspace-info: ## Show workspace integration info
-	@echo "🏢 FLEXT Workspace Integration"
-	@echo "==============================="
-	@echo "📁 Project Path: $(PWD)"
-	@echo "🏆 Role: LDAP Directory Singer Tap"
-	@echo "🔗 Dependencies: flext-core, flext-observability, singer-sdk"
-	@echo "📦 Provides: LDAP directory data extraction capabilities"
-	@echo "🎯 Standards: Enterprise LDAP integration patterns"

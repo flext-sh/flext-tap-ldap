@@ -13,27 +13,12 @@ from typing import TYPE_CHECKING, Any, ClassVar
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-# Use simplified import from flext-observability root
-# Removed circular dependency - use DI pattern
-# Resolved: DI pattern implemented successfully
-import logging
-
-# 🚨 ARCHITECTURAL COMPLIANCE: Using DI container
-from flext_tap_ldap.infrastructure.di_container import (
-    get_base_config,
-    get_domain_entity,
-    get_domain_value_object,
-    get_field,
-    get_service_result,
+from flext_core import (
+    FlextResult,
+    get_logger,
 )
 
-ServiceResult = get_service_result()
-DomainEntity = get_domain_entity()
-Field = get_field()
-DomainValueObject = get_domain_value_object()
-BaseConfig = get_base_config()
-
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class LDIFParseError(Exception):
@@ -185,7 +170,7 @@ class LDIFEntry:
             self.attributes[name] = [value]
 
 
-class LDIFProcessor:
+class FlextLDIFProcessor:
     """LDIF file processor with comprehensive parsing capabilities."""
 
     # Common LDIF line patterns
@@ -219,13 +204,13 @@ class LDIFProcessor:
             msg = f"LDIF file not found: {file_path}"
             raise ValueError(msg)
 
-        logger.info("Starting LDIF parsing: %s", file_path)
+        logger.info(f"Starting LDIF parsing: {file_path}")
         try:
             with Path(file_path).open(encoding="utf-8") as f:
                 yield from self._parse_lines(f.readlines(), str(file_path))
         except UnicodeDecodeError:
             # Try with latin-1 encoding if UTF-8 fails
-            logger.warning("UTF-8 decoding failed, trying latin-1 for: %s", file_path)
+            logger.warning(f"UTF-8 decoding failed, trying latin-1 for: {file_path}")
             with Path(file_path).open(encoding="latin-1") as f:
                 yield from self._parse_lines(f.readlines(), str(file_path))
         except Exception as e:
@@ -309,10 +294,8 @@ class LDIFProcessor:
             self.processed_entries += 1
 
         logger.info(
-            "LDIF parsing completed: %d entries processed, %d skipped, %d errors",
-            self.processed_entries,
-            self.skipped_entries,
-            len(self.errors),
+            f"LDIF parsing completed: {self.processed_entries} entries processed, "
+            f"{self.skipped_entries} skipped, {len(self.errors)} errors"
         )
 
     def _process_line(
@@ -419,27 +402,27 @@ class LDIFProcessor:
             "error_messages": self.errors.copy(),
         }
 
-    def load_from_file(self, file_path: Path) -> ServiceResult[Any]:
-        """Load LDIF entries from file and return as ServiceResult."""
+    def load_from_file(self, file_path: Path) -> FlextResult[Any]:
+        """Load LDIF entries from file and return as FlextResult."""
         try:
             self.entries = list(self.parse_file(file_path))
             self._update_stats()
-            return ServiceResult.ok("LDIF file loaded successfully")
+            return FlextResult.ok("LDIF file loaded successfully")
         except Exception as e:
-            return ServiceResult.fail(f"Failed to load LDIF file: {e}")
+            return FlextResult.fail(f"Failed to load LDIF file: {e}")
 
     def load_from_string(
         self,
         content: str,
         source_name: str = "string",
-    ) -> ServiceResult[Any]:
-        """Load LDIF entries from string and return as ServiceResult."""
+    ) -> FlextResult[Any]:
+        """Load LDIF entries from string and return as FlextResult."""
         try:
             self.entries = list(self.parse_content(content, source_name))
             self._update_stats()
-            return ServiceResult.ok("LDIF content loaded successfully")
+            return FlextResult.ok("LDIF content loaded successfully")
         except Exception as e:
-            return ServiceResult.fail(f"Failed to load LDIF content: {e}")
+            return FlextResult.fail(f"Failed to load LDIF content: {e}")
 
     def _update_stats(self) -> None:
         """Update statistics based on loaded entries."""
@@ -469,7 +452,7 @@ class LDIFProcessor:
         return [entry for entry in self.entries if entry.has_object_class(object_class)]
 
     def filter_by_dn_pattern(self, dn_pattern: str) -> list[LDIFEntry]:
-        """Filter entries by DN pattern - entries that are under (child of) the pattern."""
+        """Filter entries by DN pattern - entries under the pattern."""
         return [
             entry
             for entry in self.entries
@@ -585,7 +568,7 @@ class LDIFValidator:
         if current_part:
             components.append(current_part.strip())
 
-        # Each component must have the format attribute=value with non-empty attribute and value
+        # Each component must have format attribute=value with non-empty parts
         for component in components:
             if not component or "=" not in component:
                 return False

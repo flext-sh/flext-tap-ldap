@@ -2,23 +2,25 @@
 
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING, Any
 
-from singer_sdk import Stream, typing as th
+from flext_core import get_logger
+
+# MIGRATED: Use centralized Singer SDK from flext-meltano
+from flext_meltano import Stream, th
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
 
-    from flext_tap_ldap.tap import TapLDAP
+    from flext_tap_ldap.tap import FlextTapLDAP
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class LDAPBaseStream(Stream):
     """Base class for LDAP streams."""
 
-    def __init__(self, tap: TapLDAP, **kwargs: Any) -> None:
+    def __init__(self, tap: FlextTapLDAP, **kwargs: object) -> None:
         """Initialize the LDAP stream."""
         super().__init__(tap, **kwargs)
         self.tap = tap
@@ -40,7 +42,7 @@ class UsersStream(LDAPBaseStream):
     replication_method = "INCREMENTAL"
     replication_key = "modifyTimestamp"
 
-    def __init__(self, tap: TapLDAP, **kwargs: Any) -> None:
+    def __init__(self, tap: FlextTapLDAP, **kwargs: object) -> None:
         """Initialize users stream."""
         # Set required attributes BEFORE calling super().__init__()
         self.name = "users"
@@ -100,7 +102,7 @@ class UsersStream(LDAPBaseStream):
 class GroupsStream(LDAPBaseStream):
     """Stream for LDAP groups."""
 
-    def __init__(self, tap: TapLDAP, **kwargs: Any) -> None:
+    def __init__(self, tap: FlextTapLDAP, **kwargs: object) -> None:
         """Initialize groups stream."""
         # Set required attributes BEFORE calling super().__init__()
         self.name = "groups"
@@ -150,7 +152,7 @@ class GroupsStream(LDAPBaseStream):
 class OrganizationalUnitsStream(LDAPBaseStream):
     """Stream for organizational units."""
 
-    def __init__(self, tap: TapLDAP, **kwargs: Any) -> None:
+    def __init__(self, tap: FlextTapLDAP, **kwargs: object) -> None:
         """Initialize organizational units stream."""
         # Set required attributes BEFORE calling super().__init__()
         self.name = "organizational_units"
@@ -192,7 +194,7 @@ class OrganizationalUnitsStream(LDAPBaseStream):
 class SchemaStream(LDAPBaseStream):
     """Stream for LDAP schema."""
 
-    def __init__(self, tap: TapLDAP, **kwargs: Any) -> None:
+    def __init__(self, tap: FlextTapLDAP, **kwargs: object) -> None:
         """Initialize schema stream."""
         # Set required attributes BEFORE calling super().__init__()
         self.name = "schema"
@@ -235,13 +237,13 @@ class CustomStream(LDAPBaseStream):
 
     def __init__(
         self,
-        tap: TapLDAP,
+        tap: FlextTapLDAP,
         name: str,
         search_filter: str,
         schema_properties: dict[str, Any],
         primary_keys: list[str] | None = None,
         replication_key: str | None = None,
-        **kwargs: Any,
+        **kwargs: object,
     ) -> None:
         """Initialize custom stream."""
         self.name = name

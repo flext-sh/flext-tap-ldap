@@ -8,19 +8,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-import singer_sdk.typing as th
-from singer_sdk import Stream
+# MIGRATED: Use centralized Singer SDK from flext-meltano
+from flext_meltano import Stream, th
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
 
-    from flext_tap_ldap.tap import TapLDAP
+    from flext_tap_ldap.tap import FlextTapLDAP
 
 
 class LDIFStream(Stream):
     """LDIF stream for processing LDIF files."""
 
-    def __init__(self, tap: TapLDAP, **kwargs: Any) -> None:
+    def __init__(self, tap: FlextTapLDAP, **kwargs: object) -> None:
         """Initialize LDIF stream."""
         # Set required attributes BEFORE calling super().__init__()
         self.name = "ldif_entries"
@@ -80,7 +80,7 @@ class LDIFStream(Stream):
 class LDIFAnalysisStream(Stream):
     """LDIF analysis stream for generating statistics."""
 
-    def __init__(self, tap: TapLDAP, **kwargs: Any) -> None:
+    def __init__(self, tap: FlextTapLDAP, **kwargs: object) -> None:
         """Initialize LDIF analysis stream."""
         # Set required attributes BEFORE calling super().__init__()
         self.name = "ldif_analysis"
