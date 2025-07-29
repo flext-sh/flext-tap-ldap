@@ -52,15 +52,19 @@ def create_ldap_connection_config(
     host: str,
     base_dn: str,
     port: int = 389,
-    **kwargs: object,
-) -> FlextResult[Any]:
+    use_ssl: bool = False,
+    bind_dn: str | None = None,
+    bind_password: str | None = None,
+) -> FlextResult[LDAPConnectionConfig]:
     """Create LDAP connection configuration.
 
     Args:
         host: LDAP server hostname
         base_dn: Base DN for searches
         port: LDAP server port (default 389)
-        **kwargs: Additional configuration parameters
+        use_ssl: Use SSL connection (default False)
+        bind_dn: Bind DN for authentication
+        bind_password: Bind password
 
     Returns:
         FlextResult with LDAPConnectionConfig or error message.
@@ -71,7 +75,9 @@ def create_ldap_connection_config(
             host=host,
             base_dn=base_dn,
             port=port,
-            **kwargs,
+            use_ssl=use_ssl,
+            bind_dn=bind_dn,
+            bind_password=bind_password,
         )
 
         return FlextResult.ok(config)
@@ -80,18 +86,52 @@ def create_ldap_connection_config(
         return FlextResult.fail(f"Failed to create LDAP connection config: {e}")
 
 
-def create_ldif_processing_config(**kwargs: object) -> FlextResult[Any]:
+def create_ldif_processing_config(
+    ldif_files: list[str] | None = None,
+    ldif_directory: str | None = None,
+    ldif_file_pattern: str = "*.ldif",
+    ldif_ignore_errors: bool = True,
+    ldif_max_errors: int = 100,
+    ldif_ignore_file_errors: bool = True,
+    ldif_ignore_entry_errors: bool = True,
+    ldif_apply_transformations: bool = False,
+    ldif_transformation_rules: dict[str, Any] | None = None,
+    migration_batch: str | None = None,
+    enable_ldif_streams: bool = False,
+) -> FlextResult[LDIFProcessingConfig]:
     """Create LDIF processing configuration.
 
     Args:
-        **kwargs: LDIF processing parameters
+        ldif_files: List of LDIF files to process
+        ldif_directory: Directory containing LDIF files
+        ldif_file_pattern: File pattern for LDIF files in directory
+        ldif_ignore_errors: Continue processing on LDIF parsing errors
+        ldif_max_errors: Maximum number of parsing errors before stopping
+        ldif_ignore_file_errors: Continue processing if a file fails completely
+        ldif_ignore_entry_errors: Continue processing if an entry fails
+        ldif_apply_transformations: Apply transformation rules to LDIF entries
+        ldif_transformation_rules: Transformation rules for LDIF processing
+        migration_batch: Migration batch identifier for tracking
+        enable_ldif_streams: Enable LDIF processing streams
 
     Returns:
         FlextResult with LDIFProcessingConfig or error message.
 
     """
     try:
-        config = LDIFProcessingConfig(**kwargs)
+        config = LDIFProcessingConfig(
+            ldif_files=ldif_files,
+            ldif_directory=ldif_directory,
+            ldif_file_pattern=ldif_file_pattern,
+            ldif_ignore_errors=ldif_ignore_errors,
+            ldif_max_errors=ldif_max_errors,
+            ldif_ignore_file_errors=ldif_ignore_file_errors,
+            ldif_ignore_entry_errors=ldif_ignore_entry_errors,
+            ldif_apply_transformations=ldif_apply_transformations,
+            ldif_transformation_rules=ldif_transformation_rules,
+            migration_batch=migration_batch,
+            enable_ldif_streams=enable_ldif_streams,
+        )
         return FlextResult.ok(config)
 
     except (RuntimeError, ValueError, TypeError) as e:

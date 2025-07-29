@@ -11,10 +11,7 @@ from typing import TYPE_CHECKING, Any, ClassVar
 from flext_core import get_logger
 
 # MIGRATED: Use centralized Singer SDK from flext-meltano
-from flext_meltano import th
-
-# Import from flext-core for foundational patterns (standardized)
-from flext_meltano.singer import FlextMeltanoTap as Tap
+from flext_meltano import Tap, singer_typing as th
 
 from flext_tap_ldap.config import TapLDAPConfig
 from flext_tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
