@@ -1,8 +1,5 @@
 """LDIF processing utilities for tap-ldap.
 
-# Constants
-EXPECTED_BULK_SIZE = 2
-
 This module provides comprehensive LDIF file processing capabilities
 for the brutal simplification migration project.
 """
@@ -20,6 +17,9 @@ from flext_core import (
     FlextResult,
     get_logger,
 )
+
+# Constants
+EXPECTED_BULK_SIZE = 2
 
 logger = get_logger(__name__)
 

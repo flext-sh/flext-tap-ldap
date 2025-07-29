@@ -76,7 +76,7 @@ class LDAPEntry(FlextDomainBaseModel):
         """
         return self.dn
 
-    def get_attribute(self, name: str) -> object | None:
+    def get_attribute(self, name: str) -> Any | None:
         """Get attribute value by name (case-insensitive).
 
         Args:

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 from flext_core import get_logger
 
 # MIGRATED: Use centralized Singer SDK from flext-meltano
-from flext_meltano import Stream, th
+from flext_meltano import Stream, singer_typing as th
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -20,9 +20,9 @@ logger = get_logger(__name__)
 class LDAPBaseStream(Stream):
     """Base class for LDAP streams."""
 
-    def __init__(self, tap: FlextTapLDAP, **kwargs: object) -> None:
+    def __init__(self, tap: FlextTapLDAP, name: str | None = None, schema: dict[str, Any] | None = None) -> None:
         """Initialize the LDAP stream."""
-        super().__init__(tap, **kwargs)
+        super().__init__(tap, name=name, schema=schema)
         self.tap = tap
 
     def get_records(
@@ -42,13 +42,13 @@ class UsersStream(LDAPBaseStream):
     replication_method = "INCREMENTAL"
     replication_key = "modifyTimestamp"
 
-    def __init__(self, tap: FlextTapLDAP, **kwargs: object) -> None:
+    def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize users stream."""
         # Set required attributes BEFORE calling super().__init__()
         self.name = "users"
         self.path = "/users"
         self.primary_keys = ["dn"]
-        super().__init__(tap, **kwargs)
+        super().__init__(tap, name=self.name, schema=self.schema)
 
     schema = th.PropertiesList(
         th.Property("dn", th.StringType, description="Distinguished Name"),
@@ -102,13 +102,13 @@ class UsersStream(LDAPBaseStream):
 class GroupsStream(LDAPBaseStream):
     """Stream for LDAP groups."""
 
-    def __init__(self, tap: FlextTapLDAP, **kwargs: object) -> None:
+    def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize groups stream."""
         # Set required attributes BEFORE calling super().__init__()
         self.name = "groups"
         self.path = "/groups"
         self.primary_keys = ["dn"]
-        super().__init__(tap, **kwargs)
+        super().__init__(tap, name=self.name, schema=self.schema)
 
     schema = th.PropertiesList(
         th.Property("dn", th.StringType, description="Distinguished Name"),
@@ -152,13 +152,13 @@ class GroupsStream(LDAPBaseStream):
 class OrganizationalUnitsStream(LDAPBaseStream):
     """Stream for organizational units."""
 
-    def __init__(self, tap: FlextTapLDAP, **kwargs: object) -> None:
+    def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize organizational units stream."""
         # Set required attributes BEFORE calling super().__init__()
         self.name = "organizational_units"
         self.path = "/organizational_units"
         self.primary_keys = ["dn"]
-        super().__init__(tap, **kwargs)
+        super().__init__(tap, name=self.name, schema=self.schema)
 
     schema = th.PropertiesList(
         th.Property("dn", th.StringType, description="Distinguished Name"),
@@ -194,13 +194,13 @@ class OrganizationalUnitsStream(LDAPBaseStream):
 class SchemaStream(LDAPBaseStream):
     """Stream for LDAP schema."""
 
-    def __init__(self, tap: FlextTapLDAP, **kwargs: object) -> None:
+    def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize schema stream."""
         # Set required attributes BEFORE calling super().__init__()
         self.name = "schema"
         self.path = "/schema"
         self.primary_keys = ["name"]
-        super().__init__(tap, **kwargs)
+        super().__init__(tap, name=self.name, schema=self.schema)
 
     schema = th.PropertiesList(
         th.Property("name", th.StringType, description="Schema element name"),
@@ -243,7 +243,6 @@ class CustomStream(LDAPBaseStream):
         schema_properties: dict[str, Any],
         primary_keys: list[str] | None = None,
         replication_key: str | None = None,
-        **kwargs: object,
     ) -> None:
         """Initialize custom stream."""
         self.name = name
@@ -276,9 +275,9 @@ class CustomStream(LDAPBaseStream):
             )
 
         # Set schema using internal attribute BEFORE calling super().__init__()
-        object.__setattr__(self, "_schema", th.PropertiesList(*properties).to_dict())
+        schema_dict = th.PropertiesList(*properties).to_dict()
         # Now call super().__init__()
-        super().__init__(tap=tap, **kwargs)
+        super().__init__(tap=tap, name=name, schema=schema_dict)
 
 
 __all__ = [

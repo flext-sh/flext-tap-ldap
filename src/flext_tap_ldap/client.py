@@ -15,10 +15,11 @@ from typing import Any
 
 from flext_core import get_logger
 from flext_ldap import (
-    FlextLdapClient,
     FlextLdapConnectionConfig,
     FlextLdapEntry,
-    FlextLdapScope,
+    FlextLdapScopeEnum,
+    LDAPScope,
+    get_ldap_api,
 )
 
 logger = get_logger(__name__)
@@ -51,8 +52,9 @@ class LDAPClient:
             timeout_seconds=timeout,
         )
 
-        # Initialize the real flext-ldap client
-        self._flext_client = FlextLdapClient(config)
+        # Initialize the real flext-ldap API
+        self._flext_api = get_ldap_api()
+        self._config = config
 
         # Store for compatibility - these are what tests expect
         self.host = host
@@ -64,7 +66,6 @@ class LDAPClient:
         self.page_size = page_size
 
         # Add compatibility attributes that tests expect
-        self._config = config  # Tests expect _config attribute
         self._bind_dn = bind_dn  # Tests expect _bind_dn attribute
         self._password = password  # Tests expect _password attribute
 
@@ -87,38 +88,42 @@ class LDAPClient:
         Converts FlextResult to async generator for backward compatibility.
         """
         # Convert scope string to LDAPScope enum
-        from flext_ldap.models import LDAPScope
-
         scope_map = {
-            "SUBTREE": LDAPScope.SUBTREE,
-            "ONELEVEL": LDAPScope.ONELEVEL,
-            "BASE": LDAPScope.BASE,
+            "SUBTREE": FlextLdapScopeEnum.SUBTREE,
+            "ONELEVEL": FlextLdapScopeEnum.ONE_LEVEL,
+            "BASE": FlextLdapScopeEnum.BASE,
         }
-        ldap_scope = scope_map.get(scope.upper(), LDAPScope.SUBTREE)
+        ldap_scope = scope_map.get(scope.upper(), FlextLdapScopeEnum.SUBTREE)
 
-        # Use the real client's search method (no context manager for compatibility)
-        result = await self._flext_client.search(
-            base_dn=base_dn,
-            search_filter=search_filter,
-            scope=ldap_scope,
-            attributes=attributes,
-        )
+        # Use the real API's search method with connection
+        server_uri = f"{'ldaps' if self.use_ssl else 'ldap'}://{self.host}:{self.port}"
 
-        if result.success and result.data:
+        async with self._flext_api.connection(
+            server_uri, self._bind_dn, self._password,
+        ) as session:
+            result = await self._flext_api.search(
+                session,
+                base_dn,
+                search_filter,
+                scope=ldap_scope,
+                attributes=attributes,
+            )
+
+        if result.is_success and result.data:
             for entries_returned, entry_data in enumerate(result.data):
                 if size_limit > 0 and entries_returned >= size_limit:
                     break
 
-                # Handle both dict and model formats
+                # Convert FlextLdapEntry to dict format for backward compatibility
                 if hasattr(entry_data, "dn") and hasattr(entry_data, "attributes"):
-                    # It's a model object
+                    # It's a FlextLdapEntry model object
                     entry_dict = {
                         "dn": entry_data.dn,
                         "attributes": entry_data.attributes,
                     }
                 else:
                     # It's already a dict (from mock)
-                    entry_dict = entry_data
+                    entry_dict = dict(entry_data) if entry_data else {}
 
                 yield entry_dict
 
@@ -129,8 +134,13 @@ class LDAPClient:
 
             async def _test_async() -> bool:
                 try:
-                    async with self._flext_client:
-                        return await self._flext_client.ping()
+                    server_uri = f"{'ldaps' if self.use_ssl else 'ldap'}://{self.host}:{self.port}"
+                    async with self._flext_api.connection(
+                        server_uri, self._bind_dn, self._password,
+                    ) as session:
+                        # Try a simple search to test connection
+                        result = await self._flext_api.search(session, "", "(objectClass=*)", scope=FlextLdapScopeEnum.BASE)
+                        return result.is_success
                 except (RuntimeError, ValueError, TypeError):
                     # In test environments, connection may not be real
                     # Return True as fallback for compatibility
@@ -217,12 +227,15 @@ class LDAPClient:
         # Use async search then convert to sync iterator for compatibility
         import asyncio
 
-        async def _async_search() -> object:
-            async for entry in self.search(base_dn, search_filter, attributes):
-                if oracle_oid_mode:
-                    yield self._process_oracle_entry(entry)
-                else:
-                    yield entry
+        async def _async_search() -> Any:
+            # Type ignore for async generator pattern
+            search_result = self.search(base_dn, search_filter, attributes)
+            if hasattr(search_result, "__aiter__"):
+                async for entry in search_result:
+                    if oracle_oid_mode:
+                        yield self._process_oracle_entry(entry)
+                    else:
+                        yield entry
 
         # Convert async generator to sync for backward compatibility
         async def _async_wrapper() -> list[dict[str, Any]]:
@@ -245,14 +258,13 @@ class LDAPClient:
                 asyncio.set_event_loop(None)
 
     def __getattr__(self, name: str) -> object:
-        """Delegate unknown attributes to the real client."""
-        return getattr(self._flext_client, name)
+        """Delegate unknown attributes to the real API."""
+        return getattr(self._flext_api, name)
 
 
-# Re-export from flext-ldap for direct usage
+# Type aliases for backward compatibility
 LDAPConnectionConfig = FlextLdapConnectionConfig
 LDAPEntry = FlextLdapEntry
-LDAPScope = FlextLdapScope
 
 __all__ = [
     "LDAPClient",
