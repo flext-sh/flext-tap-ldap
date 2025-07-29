@@ -1,5 +1,10 @@
 """Tests for LDIF stream functionality."""
 
+from flext_tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
+from flext_tap_ldap.ldif_stream import LDIFStream
+from flext_tap_ldap.tap import TapLDAP
+
+
 from __future__ import annotations
 
 
@@ -8,15 +13,15 @@ class TestLDIFStreamBasic:
 
     def test_imports(self) -> None:
         """Test that LDIF stream modules can be imported."""
-        from flext_tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
+
 
         assert LDIFStream is not None
         assert LDIFAnalysisStream is not None
 
     def test_ldif_stream_creation(self) -> None:
         """Test LDIF stream can be created."""
-        from flext_tap_ldap.ldif_stream import LDIFStream
-        from flext_tap_ldap.tap import TapLDAP
+
+
 
         # Test that stream can be instantiated
         try:

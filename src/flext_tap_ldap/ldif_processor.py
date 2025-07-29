@@ -1,5 +1,8 @@
 """LDIF processing utilities for tap-ldap.
 
+# Constants
+EXPECTED_BULK_SIZE = 2
+
 This module provides comprehensive LDIF file processing capabilities
 for the brutal simplification migration project.
 """
@@ -213,7 +216,7 @@ class FlextLDIFProcessor:
             logger.warning(f"UTF-8 decoding failed, trying latin-1 for: {file_path}")
             with Path(file_path).open(encoding="latin-1") as f:
                 yield from self._parse_lines(f.readlines(), str(file_path))
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             error_msg = f"Failed to parse LDIF file {file_path}: {e}"
             if self.ignore_errors:
                 logger.exception(error_msg)
@@ -295,7 +298,7 @@ class FlextLDIFProcessor:
 
         logger.info(
             f"LDIF parsing completed: {self.processed_entries} entries processed, "
-            f"{self.skipped_entries} skipped, {len(self.errors)} errors"
+            f"{self.skipped_entries} skipped, {len(self.errors)} errors",
         )
 
     def _process_line(
@@ -338,7 +341,7 @@ class FlextLDIFProcessor:
             # Check for base64 encoded attribute (indicated by ::)
             if "::" in line:
                 parts = line.split("::", 1)
-                if len(parts) == 2:
+                if len(parts) == EXPECTED_BULK_SIZE:
                     attr_name = parts[0].strip()
                     attr_value_b64 = parts[1].strip()
                     try:
@@ -346,7 +349,7 @@ class FlextLDIFProcessor:
 
                         attr_value = base64.b64decode(attr_value_b64).decode("utf-8")
                         current_entry.attributes[attr_name] = [attr_value]
-                    except Exception as e:
+                    except (RuntimeError, ValueError, TypeError) as e:
                         error_msg = f"Line {line_number}: Failed to decode base64 value in {source_name}: {e}"
                         self._handle_error(error_msg)
                         return current_entry
@@ -370,7 +373,7 @@ class FlextLDIFProcessor:
             self._handle_error(error_msg)
             return current_entry
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             error_msg = (
                 f"Line {line_number}: Error processing line in {source_name}: {e}"
             )
@@ -408,7 +411,7 @@ class FlextLDIFProcessor:
             self.entries = list(self.parse_file(file_path))
             self._update_stats()
             return FlextResult.ok("LDIF file loaded successfully")
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to load LDIF file: {e}")
 
     def load_from_string(
@@ -421,7 +424,7 @@ class FlextLDIFProcessor:
             self.entries = list(self.parse_content(content, source_name))
             self._update_stats()
             return FlextResult.ok("LDIF content loaded successfully")
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to load LDIF content: {e}")
 
     def _update_stats(self) -> None:
@@ -574,7 +577,7 @@ class LDIFValidator:
                 return False
 
             parts = component.split("=", 1)
-            if len(parts) != 2:
+            if len(parts) != EXPECTED_BULK_SIZE:
                 return False
 
             attr_name = parts[0].strip()
@@ -621,7 +624,6 @@ class LDIFValidator:
             return "@" in attr_value and "." in attr_value.split("@")[-1]
         if attr_lower == "telephonenumber":
             # Simple phone validation - allow digits, spaces, dashes, plus
-            import re
 
             phone_pattern = r"^[\d\s\-\+\(\)\.]+$"
             return bool(re.match(phone_pattern, attr_value))

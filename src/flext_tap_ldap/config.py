@@ -26,7 +26,6 @@ class LDAPConnectionConfig(BaseModel):
     base_dn: str = Field(description="Base DN for searches")
 
 
-
 class CustomStreamConfig(BaseModel):
     """Configuration for custom LDAP streams using flext-core patterns."""
 

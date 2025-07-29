@@ -1,11 +1,15 @@
 """Simple API for LDAP tap setup and operations using flext-core patterns.
 
+# Constants
+EXPECTED_DATA_COUNT = 3
+
 MIGRATED TO FLEXT-CORE:
 Provides enterprise-ready setup utilities with FlextResult pattern support.
 """
 
 from __future__ import annotations
 
+import os
 from typing import Any
 
 # Import from flext-core for foundational patterns (standardized)
@@ -40,7 +44,7 @@ def setup_ldap_tap(config: TapLDAPConfig | None = None) -> FlextResult[Any]:
 
         return FlextResult.ok(config)
 
-    except Exception as e:
+    except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Failed to setup LDAP tap: {e}")
 
 
@@ -72,7 +76,7 @@ def create_ldap_connection_config(
 
         return FlextResult.ok(config)
 
-    except Exception as e:
+    except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Failed to create LDAP connection config: {e}")
 
 
@@ -90,7 +94,7 @@ def create_ldif_processing_config(**kwargs: object) -> FlextResult[Any]:
         config = LDIFProcessingConfig(**kwargs)
         return FlextResult.ok(config)
 
-    except Exception as e:
+    except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Failed to create LDIF processing config: {e}")
 
 
@@ -122,7 +126,7 @@ def validate_ldap_config(config: TapLDAPConfig) -> FlextResult[Any]:
 
         return FlextResult.ok(True)
 
-    except Exception as e:
+    except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Configuration validation failed: {e}")
 
 
@@ -137,7 +141,6 @@ def create_development_ldap_config(**overrides: Any) -> FlextResult[Any]:
 
     """
     try:
-        import os
 
         connection_config = LDAPConnectionConfig(
             host="localhost",
@@ -166,7 +169,7 @@ def create_development_ldap_config(**overrides: Any) -> FlextResult[Any]:
 
         return FlextResult.ok(config)
 
-    except Exception as e:
+    except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Failed to create development config: {e}")
 
 
@@ -209,14 +212,14 @@ def create_production_ldap_config(**overrides: Any) -> FlextResult[Any]:
 
         return FlextResult.ok(config)
 
-    except Exception as e:
+    except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Failed to create production config: {e}")
 
 
 def create_ldif_processing_config_advanced(
     ldif_directory: str | None = None,
     ldif_files: list[str] | None = None,
-    **overrides: Any,
+    **overrides: object,
 ) -> FlextResult[Any]:
     """Create LDIF processing configuration for migration scenarios.
 
@@ -262,7 +265,7 @@ def create_ldif_processing_config_advanced(
 
         return FlextResult.ok(config)
 
-    except Exception as e:
+    except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Failed to create LDIF processing config: {e}")
 
 

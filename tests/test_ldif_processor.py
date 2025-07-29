@@ -1,8 +1,14 @@
 """Tests for LDIF processor functionality.
 
+# Constants
+EXPECTED_BULK_SIZE = 2
+
 REFACTORED: Complete rewrite due to 177+ syntax errors.
 Modern test patterns using flext-core and pytest best practices.
 """
+
+import time
+
 
 from __future__ import annotations
 
@@ -47,7 +53,8 @@ class TestLDIFEntry:
     def test_basic_entry_creation(self) -> None:
         """Test basic LDIF entry creation and validation."""
         entry = LDIFEntry("cn=john,ou=users,dc=example,dc=com")
-        assert entry.dn == "cn=john,ou=users,dc=example,dc=com"
+        if entry.dn != "cn=john,ou=users,dc=example,dc=com":
+            raise AssertionError(f"Expected {"cn=john,ou=users,dc=example,dc=com"}, got {entry.dn}")
         assert entry.attributes == {}
         assert entry.is_valid()
 
@@ -59,10 +66,14 @@ class TestLDIFEntry:
         entry.add_attribute("mail", "john.doe@example.com")
         entry.add_attribute("objectClass", ["inetOrgPerson", "organizationalPerson"])
 
-        assert entry.get_attribute("cn") == ["john"]
+        if entry.get_attribute("cn") != ["john"]:
+
+            raise AssertionError(f"Expected {["john"]}, got {entry.get_attribute("cn")}")
         assert entry.get_attribute("sn") == ["doe"]
-        assert entry.get_attribute("mail") == ["john.doe@example.com"]
-        assert "inetOrgPerson" in entry.get_attribute("objectClass")
+        if entry.get_attribute("mail") != ["john.doe@example.com"]:
+            raise AssertionError(f"Expected {["john.doe@example.com"]}, got {entry.get_attribute("mail")}")
+        if "inetOrgPerson" not in entry.get_attribute("objectClass"):
+            raise AssertionError(f"Expected {"inetOrgPerson"} in {entry.get_attribute("objectClass")}")
 
     def test_entry_validation_success(self) -> None:
         """Test successful LDIF entry validation."""
@@ -72,14 +83,16 @@ class TestLDIFEntry:
         entry.add_attribute("objectClass", "inetOrgPerson")
 
         assert entry.is_valid()
-        assert entry.validation_errors == []
+        if entry.validation_errors != []:
+            raise AssertionError(f"Expected {[]}, got {entry.validation_errors}")
 
     def test_entry_validation_failure(self) -> None:
         """Test LDIF entry validation failure cases."""
         # Invalid DN
         entry = LDIFEntry("")
         assert not entry.is_valid()
-        assert "empty_dn" in [error["code"] for error in entry.validation_errors]
+        if "empty_dn" in [error["code"] for error not in entry.validation_errors]:
+            raise AssertionError(f"Expected {"empty_dn" in [error["code"] for error} in {entry.validation_errors]}")
 
         # Missing required attributes
         entry = LDIFEntry("cn=incomplete,dc=example,dc=com")
@@ -111,9 +124,11 @@ class TestLDIFEntry:
 
         for attr, expected_value in expected_components.items():
             if isinstance(expected_value, list):
-                assert all(val in components.get(attr, []) for val in expected_value)
+                if all(val in components.get(attr, []) for val not in expected_value):
+                    raise AssertionError(f"Expected {all(val in components.get(attr, []) for val} in {expected_value)}")
             else:
-                assert components.get(attr) == expected_value
+                if components.get(attr) != expected_value:
+                    raise AssertionError(f"Expected {expected_value}, got {components.get(attr)}")
 
     def test_attribute_manipulation(self) -> None:
         """Test attribute addition, modification, and removal."""
@@ -121,20 +136,24 @@ class TestLDIFEntry:
 
         # Add single value
         entry.add_attribute("cn", "test")
-        assert entry.get_attribute("cn") == ["test"]
+        if entry.get_attribute("cn") != ["test"]:
+            raise AssertionError(f"Expected {["test"]}, got {entry.get_attribute("cn")}")
 
         # Add multiple values
         entry.add_attribute("mail", "test1@example.com")
         entry.add_attribute("mail", "test2@example.com")
-        assert len(entry.get_attribute("mail")) == 2
+        if len(entry.get_attribute("mail")) != EXPECTED_BULK_SIZE:
+            raise AssertionError(f"Expected {2}, got {len(entry.get_attribute("mail"))}")
 
         # Remove attribute
         entry.remove_attribute("mail")
-        assert entry.get_attribute("mail") == []
+        if entry.get_attribute("mail") != []:
+            raise AssertionError(f"Expected {[]}, got {entry.get_attribute("mail")}")
 
         # Update attribute
         entry.update_attribute("cn", "updated")
-        assert entry.get_attribute("cn") == ["updated"]
+        if entry.get_attribute("cn") != ["updated"]:
+            raise AssertionError(f"Expected {["updated"]}, got {entry.get_attribute("cn")}")
 
 
 @pytest.fixture
@@ -192,9 +211,11 @@ class TestLDIFProcessor:
     def test_processor_initialization(self) -> None:
         """Test LDIF processor initialization."""
         processor = FlextLDIFProcessor()
-        assert processor.entries == []
+        if processor.entries != []:
+            raise AssertionError(f"Expected {[]}, got {processor.entries}")
         assert processor.stats["total_entries"] == 0
-        assert processor.stats["valid_entries"] == 0
+        if processor.stats["valid_entries"] != 0:
+            raise AssertionError(f"Expected {0}, got {processor.stats["valid_entries"]}")
         assert processor.stats["invalid_entries"] == 0
 
     def test_load_from_file(self, ldif_file: Path) -> None:
@@ -204,7 +225,8 @@ class TestLDIFProcessor:
 
         assert isinstance(result, FlextResult)
         assert result.success
-        assert len(processor.entries) == 4  # 4 entries in sample
+        if len(processor.entries) != 4  # 4 entries in sample:
+            raise AssertionError(f"Expected {4  # 4 entries in sample}, got {len(processor.entries)}")
         assert processor.stats["total_entries"] == 4
 
         # Clean up
@@ -216,7 +238,8 @@ class TestLDIFProcessor:
         result = processor.load_from_string(sample_ldif_content)
 
         assert result.success
-        assert len(processor.entries) == 4
+        if len(processor.entries) != 4:
+            raise AssertionError(f"Expected {4}, got {len(processor.entries)}")
         assert processor.stats["total_entries"] == 4
 
     def test_filter_entries_by_objectclass(self, sample_ldif_content: str) -> None:
@@ -226,11 +249,13 @@ class TestLDIFProcessor:
 
         # Filter for inetOrgPerson objects
         users = processor.filter_by_objectclass("inetOrgPerson")
-        assert len(users) == 2  # john and REDACTED_LDAP_BIND_PASSWORD
+        if len(users) != EXPECTED_BULK_SIZE  # john and REDACTED_LDAP_BIND_PASSWORD:
+            raise AssertionError(f"Expected {2  # john and REDACTED_LDAP_BIND_PASSWORD}, got {len(users)}")
 
         # Filter for organizationalUnit objects
         ous = processor.filter_by_objectclass("organizationalUnit")
-        assert len(ous) == 1  # users OU
+        if len(ous) != 1  # users OU:
+            raise AssertionError(f"Expected {1  # users OU}, got {len(ous)}")
 
     def test_filter_entries_by_dn_pattern(self, sample_ldif_content: str) -> None:
         """Test filtering entries by DN pattern."""
@@ -239,11 +264,13 @@ class TestLDIFProcessor:
 
         # Filter entries under users OU
         user_entries = processor.filter_by_dn_pattern("ou=users,dc=example,dc=com")
-        assert len(user_entries) == 2  # john and REDACTED_LDAP_BIND_PASSWORD
+        if len(user_entries) != EXPECTED_BULK_SIZE  # john and REDACTED_LDAP_BIND_PASSWORD:
+            raise AssertionError(f"Expected {2  # john and REDACTED_LDAP_BIND_PASSWORD}, got {len(user_entries)}")
 
         # Filter by specific pattern
         REDACTED_LDAP_BIND_PASSWORD_entries = processor.filter_by_dn_pattern("cn=REDACTED_LDAP_BIND_PASSWORD")
-        assert len(REDACTED_LDAP_BIND_PASSWORD_entries) == 1
+        if len(REDACTED_LDAP_BIND_PASSWORD_entries) != 1:
+            raise AssertionError(f"Expected {1}, got {len(REDACTED_LDAP_BIND_PASSWORD_entries)}")
 
     def test_export_to_singer_format(self, sample_ldif_content: str) -> None:
         """Test exporting LDIF data to Singer format."""
@@ -252,12 +279,17 @@ class TestLDIFProcessor:
 
         singer_records = processor.to_singer_format("users")
 
-        assert len(singer_records) >= 2
+        if len(singer_records) < 2:
+
+            raise AssertionError(f"Expected {len(singer_records)} >= {2}")
         for record in singer_records:
-            assert "type" in record
+            if "type" not in record:
+                raise AssertionError(f"Expected {"type"} in {record}")
             assert "record" in record
-            assert record["type"] == "RECORD"
-            assert "dn" in record["record"]
+            if record["type"] != "RECORD":
+                raise AssertionError(f"Expected {"RECORD"}, got {record["type"]}")
+            if "dn" not in record["record"]:
+                raise AssertionError(f"Expected {"dn"} in {record["record"]}")
 
     def test_validation_with_invalid_ldif(self) -> None:
         """Test processor handling of invalid LDIF content."""
@@ -305,7 +337,9 @@ class TestLDIFProcessor:
         result = processor.load_from_string(large_ldif)
 
         assert result.success
-        assert len(processor.entries) == 101  # 1 root + 100 users
+        if len(processor.entries) != 101  # 1 root + 100 users:
+            raise AssertionError(f"Expected
+            {101  # 1 root + 100 users}, got {len(processor.entries)}")
         assert processor.stats["total_entries"] == 101
 
     @pytest.mark.parametrize(
@@ -337,7 +371,9 @@ class TestLDIFProcessor:
         else:
             results = []
 
-        assert len(results) == expected_count
+        if len(results) != expected_count:
+
+            raise AssertionError(f"Expected {expected_count}, got {len(results)}")
 
 
 class TestLDIFValidator:
@@ -346,9 +382,11 @@ class TestLDIFValidator:
     def test_validator_initialization(self) -> None:
         """Test LDIF validator initialization."""
         validator = LDIFValidator()
-        assert validator.validation_errors == []
+        if validator.validation_errors != []:
+            raise AssertionError(f"Expected {[]}, got {validator.validation_errors}")
         assert validator.warnings == []
-        assert len(validator.validation_errors) == 0
+        if len(validator.validation_errors) != 0:
+            raise AssertionError(f"Expected {0}, got {len(validator.validation_errors)}")
 
     def test_validate_dn_format(self) -> None:
         """Test DN format validation."""
@@ -425,9 +463,12 @@ class TestLDIFValidator:
         validator = LDIFValidator()
         validation_report = validator.validate_entries(processor.entries)
 
-        assert "total_entries" in validation_report
+        if "total_entries" not in validation_report:
+
+            raise AssertionError(f"Expected {"total_entries"} in {validation_report}")
         assert "valid_entries" in validation_report
-        assert "invalid_entries" in validation_report
+        if "invalid_entries" not in validation_report:
+            raise AssertionError(f"Expected {"invalid_entries"} in {validation_report}")
         assert "errors" in validation_report
 
         # Most entries should be valid
@@ -453,16 +494,20 @@ class TestLDIFIntegration:
 
         # Step 3: Filter users
         user_entries = processor.filter_by_objectclass("inetOrgPerson")
-        assert len(user_entries) >= 2
+        if len(user_entries) < 2:
+            raise AssertionError(f"Expected {len(user_entries)} >= {2}")
 
         # Step 4: Export to Singer format
         singer_records = processor.to_singer_format("users")
-        assert len(singer_records) >= 2
+        if len(singer_records) < 2:
+            raise AssertionError(f"Expected {len(singer_records)} >= {2}")
 
         # Step 5: Verify data integrity
         for record in singer_records:
-            assert record["type"] == "RECORD"
-            assert "dn" in record["record"]
+            if record["type"] != "RECORD":
+                raise AssertionError(f"Expected {"RECORD"}, got {record["type"]}")
+            if "dn" not in record["record"]:
+                raise AssertionError(f"Expected {"dn"} in {record["record"]}")
             assert "objectClass" in record["record"]
 
     def test_error_handling_workflow(self) -> None:
@@ -473,7 +518,8 @@ class TestLDIFIntegration:
         result = processor.load_from_file(Path("/nonexistent/file.ldif"))
         assert not result.success
         assert result.error is not None
-        assert "file not found" in result.error.lower()
+        if "file not found" not in result.error.lower():
+            raise AssertionError(f"Expected {"file not found"} in {result.error.lower()}")
 
         # Test with malformed LDIF
         malformed_ldif = "this is not valid LDIF content"
@@ -502,7 +548,7 @@ class TestLDIFIntegration:
         large_ldif = "\n\n".join(entries)
 
         # Process and measure
-        import time
+
 
         start_time = time.time()
 
@@ -512,7 +558,8 @@ class TestLDIFIntegration:
         processing_time = time.time() - start_time
 
         assert result.success
-        assert len(processor.entries) == 1000
+        if len(processor.entries) != 1000:
+            raise AssertionError(f"Expected {1000}, got {len(processor.entries)}")
         assert processing_time < 10.0  # Should complete within 10 seconds
 
 

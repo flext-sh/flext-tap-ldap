@@ -9,6 +9,8 @@ while maintaining backward compatibility for existing tests and code.
 
 from __future__ import annotations
 
+import asyncio
+import time
 from typing import Any
 
 from flext_core import get_logger
@@ -79,7 +81,7 @@ class LDAPClient:
         attributes: list[str] | None = None,
         scope: str = "SUBTREE",
         size_limit: int = 0,
-    ) -> Any:
+    ) -> object:
         """Search for entries using flext-ldap infrastructure.
 
         Converts FlextResult to async generator for backward compatibility.
@@ -124,13 +126,12 @@ class LDAPClient:
         """Test the connection to the LDAP server for backward compatibility."""
         try:
             # Use async context for connection test
-            import asyncio
 
             async def _test_async() -> bool:
                 try:
                     async with self._flext_client:
                         return await self._flext_client.ping()
-                except Exception:
+                except (RuntimeError, ValueError, TypeError):
                     # In test environments, connection may not be real
                     # Return True as fallback for compatibility
                     return True
@@ -150,15 +151,13 @@ class LDAPClient:
                 finally:
                     loop.close()
                     asyncio.set_event_loop(None)
-        except Exception:
+        except (RuntimeError, ValueError, TypeError):
             # In test environments or when connection cannot be established,
             # return True for backward compatibility
             return True
 
     def health_check(self) -> dict[str, Any]:
         """Perform health check for backward compatibility."""
-        import time
-
         start_time = time.time()
         connection_result = self.test_connection()
         end_time = time.time()
@@ -204,7 +203,7 @@ class LDAPClient:
         attributes: list[str] | None = None,
         *,
         oracle_oid_mode: bool = False,
-    ) -> Any:
+    ) -> object:
         """Search with Oracle OID support for backward compatibility."""
         # Oracle-specific attribute handling
         oracle_attrs = ["orclPassword", "orclPasswordAttribute", "userPassword"]
@@ -218,7 +217,7 @@ class LDAPClient:
         # Use async search then convert to sync iterator for compatibility
         import asyncio
 
-        async def _async_search() -> Any:
+        async def _async_search() -> object:
             async for entry in self.search(base_dn, search_filter, attributes):
                 if oracle_oid_mode:
                     yield self._process_oracle_entry(entry)
@@ -245,7 +244,7 @@ class LDAPClient:
                 loop.close()
                 asyncio.set_event_loop(None)
 
-    def __getattr__(self, name: str) -> Any:
+    def __getattr__(self, name: str) -> object:
         """Delegate unknown attributes to the real client."""
         return getattr(self._flext_client, name)
 
