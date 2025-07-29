@@ -20,7 +20,6 @@ from __future__ import annotations
 from flext_meltano.taps.ldap import FlextTapLDAP, TapLDAPConfig
 
 # Backward compatibility aliases
-FlextTapLDAP = FlextTapLDAP
 FlextTapLDAPConfig = TapLDAPConfig
 LDAPTap = FlextTapLDAP
 TapConfig = TapLDAPConfig
@@ -29,7 +28,6 @@ __version__ = "0.8.0-wrapper"
 
 __all__ = [
     # Backward compatibility
-    "FlextTapLDAP",
     "FlextTapLDAP",
     "FlextTapLDAPConfig",
     "LDAPTap",

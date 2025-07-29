@@ -66,7 +66,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
             conn.unbind()
             logger.info("LDAP container is ready")
             break
-        except Exception:
+        except (RuntimeError, ValueError, TypeError):
             if i == max_retries - 1:
                 logger.exception("LDAP container failed to start")
                 raise
