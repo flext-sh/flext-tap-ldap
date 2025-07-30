@@ -6,7 +6,7 @@ Uses flext-core service patterns - NO duplication. Clean architecture.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 # Import from flext-core for foundational patterns (standardized)
@@ -73,7 +73,7 @@ class LDAPConnectionService:
 
             # Here you would actually test the LDAP connection
             # For now, we just mark it as tested
-            connection.last_tested = datetime.now()
+            connection.last_tested = datetime.now(UTC)
             return FlextResult.ok(True)
         except (RuntimeError, ValueError, TypeError) as e:
             connection = self._connections.get(connection_id)
