@@ -108,7 +108,9 @@ mail: john.doe@example.com
         assert processor is not None
 
     def test_parse_ldif_content(
-        self, processor: FlextLDIFProcessor, sample_ldif_content: str,
+        self,
+        processor: FlextLDIFProcessor,
+        sample_ldif_content: str,
     ) -> None:
         """Test parsing LDIF content."""
         result = FlextResult.success(list(processor.parse_content(sample_ldif_content)))
@@ -123,7 +125,10 @@ mail: john.doe@example.com
         assert first_entry.get_attribute("objectClass") == ["domain"]
 
     def test_parse_ldif_file(
-        self, processor: FlextLDIFProcessor, tmp_path: Any, sample_ldif_content: str,
+        self,
+        processor: FlextLDIFProcessor,
+        tmp_path: Any,
+        sample_ldif_content: str,
     ) -> None:
         """Test parsing LDIF file."""
         ldif_file = tmp_path / "test.ldif"

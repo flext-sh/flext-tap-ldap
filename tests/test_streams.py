@@ -91,7 +91,9 @@ class TestUsersStream:
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_users_stream_get_records(
-        self, mock_client_class: Mock, mock_tap: Mock,
+        self,
+        mock_client_class: Mock,
+        mock_tap: Mock,
     ) -> None:
         """Test users stream record retrieval."""
         # Mock LDAP client
@@ -290,7 +292,9 @@ class TestCustomStream:
     def test_custom_stream_with_minimal_config(self, mock_tap: Mock) -> None:
         """Test custom stream with minimal configuration."""
         stream = CustomStream(
-            tap=mock_tap, name="minimal_custom", search_filter="(objectClass=*)",
+            tap=mock_tap,
+            name="minimal_custom",
+            search_filter="(objectClass=*)",
         )
 
         assert stream is not None
@@ -354,7 +358,8 @@ class TestStreamIntegration:
         assert "schema" in stream_names
 
     def test_streams_with_custom_configuration(
-        self, tap_config: dict[str, Any],
+        self,
+        tap_config: dict[str, Any],
     ) -> None:
         """Test streams with custom configuration."""
         tap_config["custom_streams"] = [
