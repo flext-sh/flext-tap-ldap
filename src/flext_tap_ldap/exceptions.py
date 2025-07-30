@@ -176,7 +176,9 @@ class FlextTapLdapStreamError(FlextTapLdapError):
             context["stream_type"] = stream_type
 
         super().__init__(
-            f"LDAP tap stream: {message}", stream_name=stream_name, **context,
+            f"LDAP tap stream: {message}",
+            stream_name=stream_name,
+            **context,
         )
 
 
