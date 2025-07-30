@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime, timezone
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -51,7 +51,7 @@ class LDAPStream(BaseModel):
 
     def record_extraction(self, record_count: int) -> None:
         self.records_extracted += record_count
-        self.last_extraction = datetime.now()
+        self.last_extraction = datetime.now(UTC)
 
 
 class TapExecution(BaseModel):
@@ -88,7 +88,7 @@ class TapExecution(BaseModel):
 
     def start_execution(self) -> None:
         self.tap_status = "discovering"
-        self.started_at = datetime.now()
+        self.started_at = datetime.now(UTC)
 
     def start_extraction(self) -> None:
         self.tap_status = "extracting"
@@ -101,7 +101,7 @@ class TapExecution(BaseModel):
     ) -> None:
         self.tap_status = "completed" if exit_code == 0 else "failed"
         self.exit_code = exit_code
-        self.completed_at = datetime.now()
+        self.completed_at = datetime.now(UTC)
         self.stdout = stdout
         self.stderr = stderr
 
@@ -111,7 +111,7 @@ class TapExecution(BaseModel):
 
     def cancel_execution(self) -> None:
         self.tap_status = "cancelled"
-        self.completed_at = datetime.now()
+        self.completed_at = datetime.now(UTC)
 
         if self.started_at:
             duration = self.completed_at - self.started_at
