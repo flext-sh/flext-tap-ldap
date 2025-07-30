@@ -6,7 +6,7 @@ Uses flext-core service patterns - NO duplication. Clean architecture.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 # Import from flext-core for foundational patterns (standardized)

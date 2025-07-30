@@ -20,7 +20,12 @@ logger = get_logger(__name__)
 class LDAPBaseStream(Stream):
     """Base class for LDAP streams."""
 
-    def __init__(self, tap: FlextTapLDAP, name: str | None = None, schema: dict[str, Any] | None = None) -> None:
+    def __init__(
+        self,
+        tap: FlextTapLDAP,
+        name: str | None = None,
+        schema: dict[str, Any] | None = None,
+    ) -> None:
         """Initialize the LDAP stream."""
         super().__init__(tap, name=name, schema=schema)
         self.tap = tap
@@ -240,7 +245,7 @@ class CustomStream(LDAPBaseStream):
         tap: FlextTapLDAP,
         name: str,
         search_filter: str,
-        schema_properties: dict[str, Any],
+        schema_properties: dict[str, Any] | None = None,
         primary_keys: list[str] | None = None,
         replication_key: str | None = None,
     ) -> None:
@@ -255,7 +260,7 @@ class CustomStream(LDAPBaseStream):
         properties = [
             th.Property("dn", th.StringType, description="Distinguished Name"),
         ]
-        for prop_name, prop_config in schema_properties.items():
+        for prop_name, prop_config in (schema_properties or {}).items():
             prop_type: Any = th.StringType  # Default type
             if prop_config.get("type") == "array":
                 prop_type = th.ArrayType(th.StringType)

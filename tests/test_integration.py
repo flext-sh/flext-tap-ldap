@@ -9,7 +9,7 @@ from unittest.mock import patch
 import pytest
 from click.testing import CliRunner
 
-from flext_tap_ldap.tap import TapLDAP
+from flext_tap_ldap.tap import FlextTapLDAP
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from unittest.mock import Mock
 
 
-class TestTapLDAPIntegration:
+class TestFlextTapLDAPIntegration:
     """Integration tests for tap-ldap."""
 
     @pytest.fixture
@@ -57,27 +57,30 @@ class TestTapLDAPIntegration:
         mock_client_instance.search.return_value.__aenter__.return_value = []
 
         result = runner.invoke(
-            TapLDAP.cli,
+            FlextTapLDAP.cli,
             ["--config", str(config_file), "--discover"],
             catch_exceptions=False,
         )
 
         if result.exit_code != 0:
-
-            raise AssertionError(f"Expected {0}, got {result.exit_code}")
+            msg = f"Expected {0}, got {result.exit_code}"
+            raise AssertionError(msg)
 
         # Parse output as catalog
         catalog = json.loads(result.output)
         if "streams" not in catalog:
-            raise AssertionError(f"Expected {"streams"} in {catalog}")
+            msg = f"Expected {'streams'} in {catalog}"
+            raise AssertionError(msg)
 
         # Check default streams are discovered
         stream_names = [s["tap_stream_id"] for s in catalog["streams"]]
         if "users" not in stream_names:
-            raise AssertionError(f"Expected {"users"} in {stream_names}")
+            msg = f"Expected {'users'} in {stream_names}"
+            raise AssertionError(msg)
         assert "groups" in stream_names
         if "organizational_units" not in stream_names:
-            raise AssertionError(f"Expected {"organizational_units"} in {stream_names}")
+            msg = f"Expected {'organizational_units'} in {stream_names}"
+            raise AssertionError(msg)
         assert "schema" in stream_names
 
     @patch("flext_tap_ldap.client.LDAPClient")
@@ -98,14 +101,14 @@ class TestTapLDAPIntegration:
         ]
 
         result = runner.invoke(
-            TapLDAP.cli,
+            FlextTapLDAP.cli,
             ["--config", str(config_file), "--catalog", str(catalog_file)],
             catch_exceptions=False,
         )
 
         if result.exit_code != 0:
-
-            raise AssertionError(f"Expected {0}, got {result.exit_code}")
+            msg = f"Expected {0}, got {result.exit_code}"
+            raise AssertionError(msg)
 
         # Check output contains Singer messages
         lines = result.output.strip().split("\n")
@@ -114,7 +117,8 @@ class TestTapLDAPIntegration:
         # Should have schema and record messages
         message_types = {msg["type"] for msg in messages}
         if "SCHEMA" not in message_types:
-            raise AssertionError(f"Expected {"SCHEMA"} in {message_types}")
+            msg = f"Expected {'SCHEMA'} in {message_types}"
+            raise AssertionError(msg)
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_incremental_sync(
@@ -130,7 +134,7 @@ class TestTapLDAPIntegration:
         mock_client_instance.search.return_value.__aenter__.return_value = []
 
         result = runner.invoke(
-            TapLDAP.cli,
+            FlextTapLDAP.cli,
             [
                 "--config",
                 str(config_file),
@@ -143,8 +147,8 @@ class TestTapLDAPIntegration:
         )
 
         if result.exit_code != 0:
-
-            raise AssertionError(f"Expected {0}, got {result.exit_code}")
+            msg = f"Expected {0}, got {result.exit_code}"
+            raise AssertionError(msg)
 
         # Verify incremental filter was applied
         search_calls = mock_client_instance.search.call_args_list
@@ -155,7 +159,8 @@ class TestTapLDAPIntegration:
                 if "inetOrgPerson" in filter_arg:
                     # Should include timestamp filter for incremental
                     if "modifyTimestamp>=" in filter_arg or result.exit_code != 0:
-                        raise AssertionError(f"Expected {0}, got {"modifyTimestamp>=" in filter_arg or result.exit_code}")
+                        msg = f"Expected {0}, got {'modifyTimestamp>=' in filter_arg or result.exit_code}"
+                        raise AssertionError(msg)
 
     def test_custom_streams_config(self, runner: CliRunner, tmp_path: Path) -> None:
         config = {
@@ -185,20 +190,21 @@ class TestTapLDAPIntegration:
             mock_client_instance = mock_ldap_client.return_value
             mock_client_instance.search.return_value.__aenter__.return_value = []
             result = runner.invoke(
-                TapLDAP.cli,
+                FlextTapLDAP.cli,
                 ["--config", str(config_file), "--discover"],
                 catch_exceptions=False,
             )
 
         if result.exit_code != 0:
-
-            raise AssertionError(f"Expected {0}, got {result.exit_code}")
+            msg = f"Expected {0}, got {result.exit_code}"
+            raise AssertionError(msg)
 
         # Check custom stream is in catalog
         catalog = json.loads(result.output)
         stream_names = [s["tap_stream_id"] for s in catalog["streams"]]
         if "service_accounts" not in stream_names:
-            raise AssertionError(f"Expected {"service_accounts"} in {stream_names}")
+            msg = f"Expected {'service_accounts'} in {stream_names}"
+            raise AssertionError(msg)
 
     def test_error_handling(
         self,
@@ -212,7 +218,7 @@ class TestTapLDAPIntegration:
             json.dump({"invalid": "config"}, f)  # Missing required fields
 
         result = runner.invoke(
-            TapLDAP.cli,
+            FlextTapLDAP.cli,
             ["--config", str(config_file), "--discover"],
         )
 
@@ -248,7 +254,8 @@ class TestTapLDAPIntegration:
         # Mock flext-ldap client search method with async context manager
 
         async def mock_search(
-            *args: Any, **kwargs: Any,
+            *args: Any,
+            **kwargs: Any,
         ) -> AsyncGenerator[dict[str, Any]]:
             yield {
                 "dn": "uid=user1,ou=users,dc=test,dc=com",
@@ -262,13 +269,13 @@ class TestTapLDAPIntegration:
         mock_client_instance.search = mock_search
 
         result = runner.invoke(
-            TapLDAP.cli,
+            FlextTapLDAP.cli,
             ["--config", str(config_file), "--catalog", str(catalog_file)],
             catch_exceptions=False,
         )
 
         if result.exit_code != 0:
-
-            raise AssertionError(f"Expected {0}, got {result.exit_code}")
+            msg = f"Expected {0}, got {result.exit_code}"
+            raise AssertionError(msg)
         # Note: In test environment with hardcoded data, pagination doesn't occur
         # This test verifies the tap can handle pagination setup without errors

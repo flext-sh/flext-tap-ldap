@@ -99,7 +99,9 @@ class LDAPClient:
         server_uri = f"{'ldaps' if self.use_ssl else 'ldap'}://{self.host}:{self.port}"
 
         async with self._flext_api.connection(
-            server_uri, self._bind_dn, self._password,
+            server_uri,
+            self._bind_dn,
+            self._password,
         ) as session:
             result = await self._flext_api.search(
                 session,
@@ -136,10 +138,17 @@ class LDAPClient:
                 try:
                     server_uri = f"{'ldaps' if self.use_ssl else 'ldap'}://{self.host}:{self.port}"
                     async with self._flext_api.connection(
-                        server_uri, self._bind_dn, self._password,
+                        server_uri,
+                        self._bind_dn,
+                        self._password,
                     ) as session:
                         # Try a simple search to test connection
-                        result = await self._flext_api.search(session, "", "(objectClass=*)", scope=FlextLdapScopeEnum.BASE)
+                        result = await self._flext_api.search(
+                            session,
+                            "",
+                            "(objectClass=*)",
+                            scope=FlextLdapScopeEnum.BASE,
+                        )
                         return result.is_success
                 except (RuntimeError, ValueError, TypeError):
                     # In test environments, connection may not be real

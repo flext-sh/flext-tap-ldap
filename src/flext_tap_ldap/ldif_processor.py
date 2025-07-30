@@ -621,7 +621,7 @@ class LDIFValidator:
 
         if attr_lower == "mail":
             # Simple email validation
-            return "@" in attr_value and "." in attr_value.split("@")[-1]
+            return "@" in attr_value and "." in attr_value.rsplit("@", maxsplit=1)[-1]
         if attr_lower == "telephonenumber":
             # Simple phone validation - allow digits, spaces, dashes, plus
 

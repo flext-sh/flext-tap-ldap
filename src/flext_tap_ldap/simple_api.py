@@ -181,7 +181,6 @@ def create_development_ldap_config(**overrides: Any) -> FlextResult[Any]:
 
     """
     try:
-
         connection_config = LDAPConnectionConfig(
             host="localhost",
             port=389,
@@ -198,7 +197,7 @@ def create_development_ldap_config(**overrides: Any) -> FlextResult[Any]:
             connection=connection_config,
             ldif_processing=LDIFProcessingConfig(enable_ldif_streams=False),
             project_name="flext-data.taps.flext-tap-ldap",
-            project_version="0.7.0",
+            project_version="0.9.0",
         )
 
         # Apply overrides
@@ -241,7 +240,7 @@ def create_production_ldap_config(**overrides: Any) -> FlextResult[Any]:
                 ldif_max_errors=10,
             ),
             project_name="flext-data.taps.flext-tap-ldap",
-            project_version="0.7.0",
+            project_version="0.9.0",
         )
 
         # Apply overrides
@@ -294,7 +293,7 @@ def create_ldif_processing_config_advanced(
             connection=connection_config,
             ldif_processing=ldif_config,
             project_name="flext-data.taps.flext-tap-ldap",
-            project_version="0.7.0",
+            project_version="0.9.0",
         )
 
         # Apply overrides

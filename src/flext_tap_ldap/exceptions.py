@@ -84,7 +84,7 @@ class FlextTapLdapValidationError(FlextValidationError):
         **kwargs: object,
     ) -> None:
         """Initialize LDAP tap validation error with context."""
-        validation_details = {}
+        validation_details: dict[str, object] = {}
         if field is not None:
             validation_details["field"] = field
         if value is not None:
@@ -155,7 +155,7 @@ class FlextTapLdapSearchError(FlextTapLdapError):
         if search_filter is not None:
             context["search_filter"] = search_filter
 
-        super().__init__(f"LDAP tap search: {message}", **context)
+        super().__init__(f"LDAP tap search: {message}", stream_name=None, **context)
 
 
 class FlextTapLdapStreamError(FlextTapLdapError):
@@ -175,7 +175,9 @@ class FlextTapLdapStreamError(FlextTapLdapError):
         if stream_type is not None:
             context["stream_type"] = stream_type
 
-        super().__init__(f"LDAP tap stream: {message}", **context)
+        super().__init__(
+            f"LDAP tap stream: {message}", stream_name=stream_name, **context,
+        )
 
 
 __all__ = [
