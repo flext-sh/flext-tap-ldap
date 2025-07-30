@@ -9,6 +9,7 @@ FLEXT-TAP-LDAP is a Singer-compliant tap for extracting data from LDAP directori
 ## Key Architecture
 
 ### Design Patterns
+
 - **Clean Architecture**: Clear separation between domain, application, and infrastructure layers
 - **Domain-Driven Design**: Domain entities and services model the LDAP extraction business logic
 - **Singer SDK**: Standard data extraction protocol for ETL pipelines
@@ -16,6 +17,7 @@ FLEXT-TAP-LDAP is a Singer-compliant tap for extracting data from LDAP directori
 - **Dependency Injection**: Uses flext-core DI container for service management
 
 ### Core Components
+
 - **Domain Layer** (`src/flext_tap_ldap/domain/`): Entities like `LDAPConnection`, `LDAPStream`, `TapExecution`, `LDAPRecord`
 - **Application Services** (`src/flext_tap_ldap/application/`): Business logic services using FlextResult pattern
 - **Stream Classes** (`src/flext_tap_ldap/streams.py`): Singer streams for Users, Groups, OUs, Schema, and Custom queries
@@ -23,6 +25,7 @@ FLEXT-TAP-LDAP is a Singer-compliant tap for extracting data from LDAP directori
 - **LDIF Processing** (`src/flext_tap_ldap/ldif_stream.py`): Specialized streams for LDIF file processing
 
 ### Dependencies
+
 - **flext-core**: Foundation library with FlextResult, logging, DI container
 - **flext-meltano**: Centralized Singer SDK and common patterns
 - **flext-ldap**: LDAP connectivity infrastructure
@@ -31,6 +34,7 @@ FLEXT-TAP-LDAP is a Singer-compliant tap for extracting data from LDAP directori
 ## Development Commands
 
 ### Essential Commands
+
 ```bash
 # Complete project setup
 make setup                    # Install dependencies and pre-commit hooks
@@ -58,6 +62,7 @@ make validate-config          # Validate tap configuration JSON
 ```
 
 ### Development Workflow
+
 ```bash
 # Single test file
 pytest tests/test_streams.py -v
@@ -75,6 +80,7 @@ make coverage-html            # Generate HTML coverage report
 ```
 
 ### LDAP Testing Environment
+
 ```bash
 # Start test LDAP server
 docker-compose up -d openldap
@@ -133,6 +139,7 @@ poetry run tap-ldap --config config.json --discover
 ## Project Structure
 
 ### Source Organization
+
 ```
 src/flext_tap_ldap/
 ├── domain/
@@ -142,7 +149,7 @@ src/flext_tap_ldap/
 ├── infrastructure/           # External integrations (currently empty)
 ├── tap.py                    # Main FlextTapLDAP class
 ├── streams.py                # Singer stream implementations
-├── config.py                 # Pydantic configuration models  
+├── config.py                 # Pydantic configuration models
 ├── client.py                 # LDAP client wrapper
 ├── ldif_stream.py            # LDIF file processing streams
 ├── ldif_processor.py         # LDIF parsing utilities
@@ -150,6 +157,7 @@ src/flext_tap_ldap/
 ```
 
 ### Test Structure
+
 ```
 tests/
 ├── e2e/
@@ -164,11 +172,12 @@ tests/
 ## Configuration
 
 ### Standard LDAP Configuration
+
 ```json
 {
   "host": "localhost",
   "port": 389,
-  "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com", 
+  "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
   "password": "REDACTED_LDAP_BIND_PASSWORD_password",
   "base_dn": "dc=test,dc=com",
   "use_ssl": false,
@@ -178,6 +187,7 @@ tests/
 ```
 
 ### LDIF Processing Configuration
+
 ```json
 {
   "enable_ldif_streams": true,
@@ -190,7 +200,9 @@ tests/
 ```
 
 ### Custom Streams
+
 Define custom LDAP queries as streams:
+
 ```json
 {
   "custom_streams": [
@@ -201,8 +213,8 @@ Define custom LDAP queries as streams:
       "replication_key": "modifyTimestamp",
       "schema": {
         "properties": {
-          "department": {"type": "string"},
-          "employeeNumber": {"type": "string"}
+          "department": { "type": "string" },
+          "employeeNumber": { "type": "string" }
         }
       }
     }
@@ -213,6 +225,7 @@ Define custom LDAP queries as streams:
 ## Quality Standards
 
 ### Zero Tolerance Quality Gates
+
 - **Test Coverage**: Minimum 90% (enforced by pytest-cov)
 - **Type Safety**: Strict MyPy with no untyped code
 - **Linting**: Ruff with ALL rules enabled, minimal ignored rules
@@ -220,6 +233,7 @@ Define custom LDAP queries as streams:
 - **Pre-commit**: Automated quality checks on every commit
 
 ### Code Standards
+
 - **Python 3.13**: Latest Python with modern typing features
 - **Pydantic**: Strict data validation and configuration
 - **Async/Await**: Async patterns where beneficial
@@ -229,6 +243,7 @@ Define custom LDAP queries as streams:
 ## Singer Protocol Implementation
 
 ### Stream Types
+
 - **UsersStream**: Extract user accounts (`objectClass=inetOrgPerson`)
 - **GroupsStream**: Extract groups (`objectClass=groupOfNames`)
 - **OrganizationalUnitsStream**: Extract organizational units
@@ -238,11 +253,14 @@ Define custom LDAP queries as streams:
 - **LDIFAnalysisStream**: Analyze LDIF structure and content
 
 ### Replication Methods
+
 - **FULL_TABLE**: Complete data extraction (default)
 - **INCREMENTAL**: Based on `modifyTimestamp` where available
 
 ### Record Format
+
 All streams produce Singer RECORD messages with:
+
 - `dn`: Distinguished Name (primary key)
 - `objectClass`: Array of LDAP object classes
 - LDAP attributes as individual fields
@@ -251,6 +269,7 @@ All streams produce Singer RECORD messages with:
 ## Common Development Tasks
 
 ### Adding a New Stream
+
 1. Create stream class inheriting from `LDAPBaseStream`
 2. Define schema using `singer_typing` from flext-meltano
 3. Implement `get_records()` method
@@ -258,12 +277,14 @@ All streams produce Singer RECORD messages with:
 5. Add comprehensive tests
 
 ### Extending Configuration
+
 1. Update `TapLDAPConfig` in `config.py`
 2. Add Pydantic field with validation
 3. Update JSON schema in `tap.py`
 4. Update tests and documentation
 
 ### Adding Domain Logic
+
 1. Create or update entities in `domain/entities.py`
 2. Add business logic to application services
 3. Use FlextResult pattern for error handling
@@ -272,6 +293,7 @@ All streams produce Singer RECORD messages with:
 ## Docker Integration
 
 The project includes a complete Docker Compose setup for testing:
+
 - **OpenLDAP Server**: Test LDAP directory on port 10389
 - **phpLDAPREDACTED_LDAP_BIND_PASSWORD**: Web interface on port 10080
 - **Sample LDIF Data**: Pre-loaded test data in `tests/e2e/ldif/`
@@ -279,6 +301,7 @@ The project includes a complete Docker Compose setup for testing:
 ## Related Projects
 
 This tap integrates with the broader FLEXT ecosystem:
+
 - **flext-target-ldap**: Corresponding Singer target for loading data to LDAP
 - **flext-dbt-ldap**: DBT models for LDAP data transformation
 - **flext-meltano**: Orchestration and common Singer patterns

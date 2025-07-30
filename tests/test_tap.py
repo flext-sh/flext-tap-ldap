@@ -6,14 +6,15 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 # MIGRATED: from singer_sdk.testing import get_tap_test_class -> use flext_meltano
 from flext_meltano import get_tap_test_class
 
-from flext_tap_ldap.tap import TapLDAP
+from flext_tap_ldap.tap import FlextTapLDAP
 
 # Basic tap tests
-TestTapLDAP = get_tap_test_class(
-    tap_class=TapLDAP,
+TestFlextTapLDAP = get_tap_test_class(
+    tap_class=FlextTapLDAP,
     config={
         "host": "test.ldap.com",
         "port": 389,
@@ -24,8 +25,8 @@ TestTapLDAP = get_tap_test_class(
 )
 
 
-class TestTapLDAPUnit:
-    """Unit tests for TapLDAP."""
+class TestFlextTapLDAPUnit:
+    """Unit tests for FlextTapLDAP."""
 
     @pytest.fixture
     def config(self) -> dict[str, Any]:
@@ -41,25 +42,29 @@ class TestTapLDAPUnit:
         }
 
     def test_tap_initialization(self, config: dict[str, Any]) -> None:
-        tap = TapLDAP(config=config)
+        tap = FlextTapLDAP(config=config)
         if tap.name != "tap-ldap":
-            raise AssertionError(f"Expected {"tap-ldap"}, got {tap.name}")
+            msg = f"Expected {'tap-ldap'}, got {tap.name}"
+            raise AssertionError(msg)
         assert tap.config == config
 
     def test_discover_streams(self, config: dict[str, Any]) -> None:
-        tap = TapLDAP(config=config)
+        tap = FlextTapLDAP(config=config)
         streams = tap.discover_streams()
 
         # Check default streams
         stream_names = [s.name for s in streams]
         if "users" not in stream_names:
-            raise AssertionError(f"Expected {"users"} in {stream_names}")
+            msg = f"Expected {'users'} in {stream_names}"
+            raise AssertionError(msg)
         assert "groups" in stream_names
         if "organizational_units" not in stream_names:
-            raise AssertionError(f"Expected {"organizational_units"} in {stream_names}")
+            msg = f"Expected {'organizational_units'} in {stream_names}"
+            raise AssertionError(msg)
         assert "schema" in stream_names
         if len(streams) != 4:
-            raise AssertionError(f"Expected {4}, got {len(streams)}")
+            msg = f"Expected {4}, got {len(streams)}"
+            raise AssertionError(msg)
 
     def test_discover_custom_streams(self, config: dict[str, Any]) -> None:
         config["custom_streams"] = [
@@ -77,38 +82,45 @@ class TestTapLDAPUnit:
             },
         ]
 
-        tap = TapLDAP(config=config)
+        tap = FlextTapLDAP(config=config)
         streams = tap.discover_streams()
 
         stream_names = [s.name for s in streams]
         if "service_accounts" not in stream_names:
-            raise AssertionError(f"Expected {"service_accounts"} in {stream_names}")
+            msg = f"Expected {'service_accounts'} in {stream_names}"
+            raise AssertionError(msg)
         if len(streams) != 5:
-            raise AssertionError(f"Expected {5}, got {len(streams)}")
+            msg = f"Expected {5}, got {len(streams)}"
+            raise AssertionError(msg)
 
     def test_catalog_generation(self, config: dict[str, Any]) -> None:
-        tap = TapLDAP(config=config)
+        tap = FlextTapLDAP(config=config)
         catalog = tap.catalog_dict
 
         if "streams" not in catalog:
-
-            raise AssertionError(f"Expected {"streams"} in {catalog}")
+            msg = f"Expected {'streams'} in {catalog}"
+            raise AssertionError(msg)
         if len(catalog["streams"]) < 4:
-            raise AssertionError(f"Expected {len(catalog["streams"])} >= {4}")
+            msg = f"Expected {len(catalog['streams'])} >= {4}"
+            raise AssertionError(msg)
 
         # Check users stream
         users_stream = next(
             s for s in catalog["streams"] if s["tap_stream_id"] == "users"
         )
         if users_stream["replication_method"] != "INCREMENTAL":
-            raise AssertionError(f"Expected {"INCREMENTAL"}, got {users_stream["replication_method"]}")
+            msg = f"Expected {'INCREMENTAL'}, got {users_stream['replication_method']}"
+            raise AssertionError(msg)
         assert users_stream["replication_key"] == "modifyTimestamp"
         if "inclusion" not in users_stream["metadata"][0]["metadata"]:
-            raise AssertionError(f"Expected {"inclusion"} in {users_stream["metadata"][0]["metadata"]}")
+            msg = f"Expected {'inclusion'} in {users_stream['metadata'][0]['metadata']}"
+            raise AssertionError(msg)
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_stream_records(
-        self, mock_client_class: MagicMock, config: dict[str, Any],
+        self,
+        mock_client_class: MagicMock,
+        config: dict[str, Any],
     ) -> None:
         # Mock LDAP client
         mock_client = MagicMock()
@@ -127,7 +139,7 @@ class TestTapLDAPUnit:
             },
         ]
 
-        tap = TapLDAP(config=config)
+        tap = FlextTapLDAP(config=config)
         streams = tap.discover_streams()
         users_stream = next(s for s in streams if s.name == "users")
 
@@ -143,9 +155,10 @@ class TestTapLDAPUnit:
                 records.append(item)
 
         if len(records) != 1:
-
-            raise AssertionError(f"Expected {1}, got {len(records)}")
+            msg = f"Expected {1}, got {len(records)}"
+            raise AssertionError(msg)
         record = records[0]
         if record["dn"] != "uid=jdoe,ou=users,dc=test,dc=com":
-            raise AssertionError(f"Expected {"uid=jdoe,ou=users,dc=test,dc=com"}, got {record["dn"]}")
+            msg = f"Expected {'uid=jdoe,ou=users,dc=test,dc=com'}, got {record['dn']}"
+            raise AssertionError(msg)
         assert record["uid"] == "jdoe"

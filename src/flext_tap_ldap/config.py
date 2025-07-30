@@ -128,7 +128,7 @@ class TapLDAPConfig(BaseSettings):
         default="flext-data.taps.flext-tap-ldap",
         description="Project name",
     )
-    project_version: str = Field(default="0.7.0", description="Project version")
+    project_version: str = Field(default="0.9.0", description="Project version")
 
     # Custom streams
     custom_streams: list[dict[str, Any]] | None = Field(
