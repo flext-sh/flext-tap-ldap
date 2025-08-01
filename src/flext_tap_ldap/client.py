@@ -175,7 +175,7 @@ class LDAPClient:
             # return True for backward compatibility
             return True
 
-    def health_check(self) -> dict[str, Any]:
+    def health_check(self) -> dict[str, object]:
         """Perform health check for backward compatibility."""
         start_time = time.time()
         connection_result = self.test_connection()
@@ -190,7 +190,7 @@ class LDAPClient:
             "response_time_ms": response_time_ms,
         }
 
-    def _process_oracle_entry(self, entry: dict[str, Any]) -> dict[str, Any]:
+    def _process_oracle_entry(self, entry: dict[str, object]) -> dict[str, object]:
         """Process Oracle-specific LDAP entries for backward compatibility."""
         attributes = entry.get("attributes", {})
 
@@ -247,7 +247,7 @@ class LDAPClient:
                         yield entry
 
         # Convert async generator to sync for backward compatibility
-        async def _async_wrapper() -> list[dict[str, Any]]:
+        async def _async_wrapper() -> list[dict[str, object]]:
             return [entry async for entry in _async_search()]
 
         try:

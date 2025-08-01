@@ -39,7 +39,7 @@ class FlextTapLDAP(Tap):
     config_class = TapLDAPConfig
 
     # REAL DRY: Use centralized LDAP schema from flext-meltano instead of duplicating
-    config_jsonschema: ClassVar[dict[str, Any]] = create_ldap_tap_schema(
+    config_jsonschema: ClassVar[dict[str, object]] = create_ldap_tap_schema(
         # LDAP-specific additional properties for tap-ldap
         additional_properties=th.PropertiesList(
             th.Property(

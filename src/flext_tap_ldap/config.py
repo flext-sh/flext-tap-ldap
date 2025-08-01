@@ -39,7 +39,7 @@ class CustomStreamConfig(BaseModel):
         default=None,
         description="Replication key field",
     )
-    json_schema: dict[str, Any] | None = Field(
+    json_schema: dict[str, object] | None = Field(
         default=None,
         description="JSON schema for the stream",
     )
@@ -81,7 +81,7 @@ class LDIFProcessingConfig(BaseModel):
         default=False,
         description="Apply transformation rules to LDIF entries",
     )
-    ldif_transformation_rules: dict[str, Any] | None = Field(
+    ldif_transformation_rules: dict[str, object] | None = Field(
         default=None,
         description="Transformation rules for LDIF processing",
     )
@@ -131,7 +131,7 @@ class TapLDAPConfig(BaseSettings):
     project_version: str = Field(default="0.9.0", description="Project version")
 
     # Custom streams
-    custom_streams: list[dict[str, Any]] | None = Field(
+    custom_streams: list[dict[str, object]] | None = Field(
         default=None,
         description="Custom stream definitions",
     )
@@ -140,8 +140,8 @@ class TapLDAPConfig(BaseSettings):
     @classmethod
     def validate_custom_streams(
         cls,
-        v: list[dict[str, Any]] | None,
-    ) -> list[dict[str, Any]] | None:
+        v: list[dict[str, object]] | None,
+    ) -> list[dict[str, object]] | None:
         """Validate custom stream configurations."""
         if v is not None:
             # Validate each custom stream config
@@ -152,7 +152,7 @@ class TapLDAPConfig(BaseSettings):
     @classmethod
     def create_with_defaults(cls, **overrides: Any) -> TapLDAPConfig:
         """Create config with intelligent defaults."""
-        defaults: dict[str, Any] = {
+        defaults: dict[str, object] = {
             "ldap_connection": {
                 "host": "localhost",
                 "port": 389,

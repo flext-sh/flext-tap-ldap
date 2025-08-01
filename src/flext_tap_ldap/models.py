@@ -48,7 +48,7 @@ class LDAPEntry(FlextDomainBaseModel):
 
     dn: str = Field(..., description="Distinguished Name", alias="id")
     object_classes: list[str] = Field(..., description="Object classes")
-    attributes: dict[str, Any] = Field(
+    attributes: dict[str, object] = Field(
         default_factory=dict,
         description="Entry attributes",
     )

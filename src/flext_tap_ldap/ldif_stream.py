@@ -51,8 +51,8 @@ class LDIFStream(Stream):
 
     def get_records(
         self,
-        _context: Mapping[str, Any] | None = None,
-    ) -> Iterable[dict[str, Any]]:
+        _context: Mapping[str, object] | None = None,
+    ) -> Iterable[dict[str, object]]:
         """Get LDIF records."""
         # Placeholder implementation
         yield {
@@ -113,8 +113,8 @@ class LDIFAnalysisStream(Stream):
 
     def get_records(
         self,
-        _context: Mapping[str, Any] | None = None,
-    ) -> Iterable[dict[str, Any]]:
+        _context: Mapping[str, object] | None = None,
+    ) -> Iterable[dict[str, object]]:
         """Get analysis records."""
         # Placeholder implementation
         yield {

@@ -89,7 +89,7 @@ class TestLDAPClient:
             mock_search.return_value = FlextResult.ok([mock_entry])
 
             # Perform search using async list comprehension for performance
-            results: list[dict[str, Any]] = [
+            results: list[dict[str, object]] = [
                 result
                 async for result in client.search(
                     base_dn="dc=test,dc=com",
@@ -166,7 +166,7 @@ class TestLDAPClient:
         async def mock_async_search(
             *args: Any,
             **kwargs: Any,
-        ) -> AsyncGenerator[dict[str, Any]]:
+        ) -> AsyncGenerator[dict[str, object]]:
             yield mock_entry
 
         with patch.object(client, "search", mock_async_search):

@@ -29,7 +29,7 @@ class TestFlextTapLDAPUnit:
     """Unit tests for FlextTapLDAP."""
 
     @pytest.fixture
-    def config(self) -> dict[str, Any]:
+    def config(self) -> dict[str, object]:
         return {
             "host": "test.ldap.com",
             "port": 389,
@@ -41,14 +41,14 @@ class TestFlextTapLDAPUnit:
             "page_size": 1000,
         }
 
-    def test_tap_initialization(self, config: dict[str, Any]) -> None:
+    def test_tap_initialization(self, config: dict[str, object]) -> None:
         tap = FlextTapLDAP(config=config)
         if tap.name != "tap-ldap":
             msg = f"Expected {'tap-ldap'}, got {tap.name}"
             raise AssertionError(msg)
         assert tap.config == config
 
-    def test_discover_streams(self, config: dict[str, Any]) -> None:
+    def test_discover_streams(self, config: dict[str, object]) -> None:
         tap = FlextTapLDAP(config=config)
         streams = tap.discover_streams()
 
@@ -66,7 +66,7 @@ class TestFlextTapLDAPUnit:
             msg = f"Expected {4}, got {len(streams)}"
             raise AssertionError(msg)
 
-    def test_discover_custom_streams(self, config: dict[str, Any]) -> None:
+    def test_discover_custom_streams(self, config: dict[str, object]) -> None:
         config["custom_streams"] = [
             {
                 "name": "service_accounts",
@@ -93,7 +93,7 @@ class TestFlextTapLDAPUnit:
             msg = f"Expected {5}, got {len(streams)}"
             raise AssertionError(msg)
 
-    def test_catalog_generation(self, config: dict[str, Any]) -> None:
+    def test_catalog_generation(self, config: dict[str, object]) -> None:
         tap = FlextTapLDAP(config=config)
         catalog = tap.catalog_dict
 
@@ -120,7 +120,7 @@ class TestFlextTapLDAPUnit:
     def test_stream_records(
         self,
         mock_client_class: MagicMock,
-        config: dict[str, Any],
+        config: dict[str, object],
     ) -> None:
         # Mock LDAP client
         mock_client = MagicMock()
@@ -146,7 +146,7 @@ class TestFlextTapLDAPUnit:
         # Singer SDK get_records returns tuples (record, context) or just records
         # We need to handle both cases
         raw_records = list(users_stream.get_records(None))
-        records: list[dict[str, Any]] = []
+        records: list[dict[str, object]] = []
         for item in raw_records:
             if isinstance(item, tuple):
                 record, _context = item

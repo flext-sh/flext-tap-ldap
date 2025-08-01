@@ -95,7 +95,7 @@ def create_ldif_processing_config(
     ldif_ignore_file_errors: bool = True,
     ldif_ignore_entry_errors: bool = True,
     ldif_apply_transformations: bool = False,
-    ldif_transformation_rules: dict[str, Any] | None = None,
+    ldif_transformation_rules: dict[str, object] | None = None,
     migration_batch: str | None = None,
     enable_ldif_streams: bool = False,
 ) -> FlextResult[LDIFProcessingConfig]:
