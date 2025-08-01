@@ -1,41 +1,50 @@
-"""LDAP tap exception hierarchy using flext-core patterns.
+"""LDAP tap exception hierarchy using flext-core Singer base patterns.
 
 Copyright (c) 2025 FLEXT Contributors
 SPDX-License-Identifier: MIT
 
-Domain-specific exceptions for LDAP tap operations inheriting from flext-core.
+Domain-specific exceptions for LDAP tap operations inheriting from Singer base classes.
+Eliminates duplication by using centralized Singer exception patterns from flext-core.
 """
 
 from __future__ import annotations
 
-from flext_core.exceptions import (
-    FlextAuthenticationError,
-    FlextConfigurationError,
-    FlextConnectionError,
-    FlextError,
-    FlextProcessingError,
-    FlextValidationError,
+# 🚨 ARCHITECTURAL COMPLIANCE: Use Singer base exceptions to eliminate duplication
+from flext_core import (
+    FlextSingerAuthenticationError,
+    FlextSingerConfigurationError,
+    FlextSingerConnectionError,
+    FlextSingerProcessingError,
+    FlextSingerValidationError,
+    FlextTapError,
 )
 
 
-class FlextTapLdapError(FlextError):
+class FlextTapLdapError(FlextTapError):
     """Base exception for LDAP tap operations."""
 
     def __init__(
         self,
         message: str = "LDAP tap error",
+        ldap_server: str | None = None,
         stream_name: str | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize LDAP tap error with context."""
         context = kwargs.copy()
-        if stream_name is not None:
-            context["stream_name"] = stream_name
+        if ldap_server is not None:
+            context["ldap_server"] = ldap_server
 
-        super().__init__(message, error_code="LDAP_TAP_ERROR", context=context)
+        super().__init__(
+            message,
+            component_type="tap",
+            stream_name=stream_name,
+            source_system="ldap",
+            **context,
+        )
 
 
-class FlextTapLdapConnectionError(FlextConnectionError):
+class FlextTapLdapConnectionError(FlextSingerConnectionError):
     """LDAP tap connection errors."""
 
     def __init__(
@@ -43,6 +52,7 @@ class FlextTapLdapConnectionError(FlextConnectionError):
         message: str = "LDAP tap connection failed",
         ldap_server: str | None = None,
         port: int | None = None,
+        stream_name: str | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize LDAP tap connection error with context."""
@@ -52,16 +62,22 @@ class FlextTapLdapConnectionError(FlextConnectionError):
         if port is not None:
             context["port"] = port
 
-        super().__init__(f"LDAP tap connection: {message}", **context)
+        super().__init__(
+            f"LDAP tap connection: {message}",
+            component_type="tap",
+            stream_name=stream_name,
+            **context,
+        )
 
 
-class FlextTapLdapAuthenticationError(FlextAuthenticationError):
+class FlextTapLdapAuthenticationError(FlextSingerAuthenticationError):
     """LDAP tap authentication errors."""
 
     def __init__(
         self,
         message: str = "LDAP tap authentication failed",
         bind_dn: str | None = None,
+        stream_name: str | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize LDAP tap authentication error with context."""
@@ -69,10 +85,15 @@ class FlextTapLdapAuthenticationError(FlextAuthenticationError):
         if bind_dn is not None:
             context["bind_dn"] = bind_dn
 
-        super().__init__(f"LDAP tap auth: {message}", **context)
+        super().__init__(
+            f"LDAP tap auth: {message}",
+            component_type="tap",
+            stream_name=stream_name,
+            **context,
+        )
 
 
-class FlextTapLdapValidationError(FlextValidationError):
+class FlextTapLdapValidationError(FlextSingerValidationError):
     """LDAP tap validation errors."""
 
     def __init__(
@@ -81,6 +102,7 @@ class FlextTapLdapValidationError(FlextValidationError):
         field: str | None = None,
         value: object = None,
         entry_dn: str | None = None,
+        stream_name: str | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize LDAP tap validation error with context."""
@@ -96,18 +118,21 @@ class FlextTapLdapValidationError(FlextValidationError):
 
         super().__init__(
             f"LDAP tap validation: {message}",
+            component_type="tap",
+            stream_name=stream_name,
             validation_details=validation_details,
-            context=context,
+            **context,
         )
 
 
-class FlextTapLdapConfigurationError(FlextConfigurationError):
+class FlextTapLdapConfigurationError(FlextSingerConfigurationError):
     """LDAP tap configuration errors."""
 
     def __init__(
         self,
         message: str = "LDAP tap configuration error",
         config_key: str | None = None,
+        stream_name: str | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize LDAP tap configuration error with context."""
@@ -115,10 +140,15 @@ class FlextTapLdapConfigurationError(FlextConfigurationError):
         if config_key is not None:
             context["config_key"] = config_key
 
-        super().__init__(f"LDAP tap config: {message}", **context)
+        super().__init__(
+            f"LDAP tap config: {message}",
+            component_type="tap",
+            stream_name=stream_name,
+            **context,
+        )
 
 
-class FlextTapLdapProcessingError(FlextProcessingError):
+class FlextTapLdapProcessingError(FlextSingerProcessingError):
     """LDAP tap processing errors."""
 
     def __init__(
@@ -130,12 +160,15 @@ class FlextTapLdapProcessingError(FlextProcessingError):
     ) -> None:
         """Initialize LDAP tap processing error with context."""
         context = kwargs.copy()
-        if stream_name is not None:
-            context["stream_name"] = stream_name
         if record_number is not None:
             context["record_number"] = record_number
 
-        super().__init__(f"LDAP tap processing: {message}", **context)
+        super().__init__(
+            f"LDAP tap processing: {message}",
+            component_type="tap",
+            stream_name=stream_name,
+            **context,
+        )
 
 
 class FlextTapLdapSearchError(FlextTapLdapError):
