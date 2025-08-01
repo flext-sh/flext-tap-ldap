@@ -12,6 +12,7 @@ from flext_core import get_logger
 
 # MIGRATED: Use centralized Singer SDK from flext-meltano
 from flext_meltano import Tap, singer_typing as th
+from flext_meltano.common_schemas import create_ldap_tap_schema
 
 from flext_tap_ldap.config import TapLDAPConfig
 from flext_tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
@@ -37,157 +38,119 @@ class FlextTapLDAP(Tap):
     name: str = "tap-ldap"
     config_class = TapLDAPConfig
 
-    # Keep the jsonschema for backward compatibility
-    config_jsonschema: ClassVar[dict[str, Any]] = th.PropertiesList(
-        th.Property(
-            "host",
-            th.StringType,
-            required=True,
-            description="LDAP server hostname or IP address",
-        ),
-        th.Property(
-            "port",
-            th.IntegerType,
-            default=389,
-            description="LDAP server port (389 for LDAP, 636 for LDAPS)",
-        ),
-        th.Property(
-            "bind_dn",
-            th.StringType,
-            description="Distinguished name for binding to LDAP",
-        ),
-        th.Property(
-            "password",
-            th.StringType,
-            secret=True,
-            description="Password for LDAP authentication",
-        ),
-        th.Property(
-            "base_dn",
-            th.StringType,
-            required=True,
-            description="Base DN for LDAP searches",
-        ),
-        th.Property(
-            "use_ssl",
-            th.BooleanType,
-            default=False,
-            description="Use SSL/TLS for LDAP connection",
-        ),
-        th.Property(
-            "timeout",
-            th.IntegerType,
-            default=30,
-            description="Connection timeout in seconds",
-        ),
-        th.Property(
-            "page_size",
-            th.IntegerType,
-            default=1000,
-            description="Page size for paged results",
-        ),
-        th.Property(
-            "user_filter",
-            th.StringType,
-            default="(object_class=inetOrgPerson)",
-            description="LDAP filter for user entries",
-        ),
-        th.Property(
-            "group_filter",
-            th.StringType,
-            default="(object_class=groupOfNames)",
-            description="LDAP filter for group entries",
-        ),
-        th.Property(
-            "custom_streams",
-            th.ArrayType(
-                th.ObjectType(
-                    th.Property("name", th.StringType, required=True),
-                    th.Property("search_filter", th.StringType, required=True),
-                    th.Property("primary_keys", th.ArrayType(th.StringType)),
-                    th.Property("replication_key", th.StringType),
-                    th.Property(
-                        "schema",
-                        th.ObjectType(),
-                        description="JSON schema for the stream",
+    # REAL DRY: Use centralized LDAP schema from flext-meltano instead of duplicating
+    config_jsonschema: ClassVar[dict[str, Any]] = create_ldap_tap_schema(
+        # LDAP-specific additional properties for tap-ldap
+        additional_properties=th.PropertiesList(
+            th.Property(
+                "page_size",
+                th.IntegerType,
+                default=1000,
+                description="Page size for paged results",
+            ),
+            th.Property(
+                "user_filter",
+                th.StringType,
+                default="(object_class=inetOrgPerson)",
+                description="LDAP filter for user entries",
+            ),
+            th.Property(
+                "group_filter",
+                th.StringType,
+                default="(object_class=groupOfNames)",
+                description="LDAP filter for group entries",
+            ),
+            th.Property(
+                "custom_streams",
+                th.ArrayType(
+                    th.ObjectType(
+                        th.Property("name", th.StringType, required=True),
+                        th.Property("search_filter", th.StringType, required=True),
+                        th.Property("primary_keys", th.ArrayType(th.StringType)),
+                        th.Property("replication_key", th.StringType),
+                        th.Property(
+                            "schema",
+                            th.ObjectType(),
+                            description="JSON schema for the stream",
+                        ),
                     ),
                 ),
+                description="Custom stream definitions",
             ),
-            description="Custom stream definitions",
-        ),
-        th.Property(
-            "stream_maps",
-            th.ObjectType(),
-            description="Configuration for stream maps",
-        ),
-        th.Property(
-            "stream_map_settings",
-            th.ObjectType(),
-            description="Settings for stream maps",
-        ),
-        # LDIF Processing Configuration
-        th.Property(
-            "ldif_files",
-            th.ArrayType(th.StringType),
-            description="List of LDIF files to process",
-        ),
-        th.Property(
-            "ldif_directory",
-            th.StringType,
-            description="Directory containing LDIF files",
-        ),
-        th.Property(
-            "ldif_file_pattern",
-            th.StringType,
-            default="*.ldif",
-            description="File pattern for LDIF files in directory",
-        ),
-        th.Property(
-            "ldif_ignore_errors",
-            th.BooleanType,
-            default=True,
-            description="Continue processing on LDIF parsing errors",
-        ),
-        th.Property(
-            "ldif_max_errors",
-            th.IntegerType,
-            default=100,
-            description="Maximum number of parsing errors before stopping",
-        ),
-        th.Property(
-            "ldif_ignore_file_errors",
-            th.BooleanType,
-            default=True,
-            description="Continue processing if a file fails completely",
-        ),
-        th.Property(
-            "ldif_ignore_entry_errors",
-            th.BooleanType,
-            default=True,
-            description="Continue processing if an entry fails",
-        ),
-        th.Property(
-            "ldif_apply_transformations",
-            th.BooleanType,
-            default=False,
-            description="Apply transformation rules to LDIF entries",
-        ),
-        th.Property(
-            "ldif_transformation_rules",
-            th.ObjectType(),
-            description="Transformation rules for LDIF processing",
-        ),
-        th.Property(
-            "migration_batch",
-            th.StringType,
-            description="Migration batch identifier for tracking",
-        ),
-        th.Property(
-            "enable_ldif_streams",
-            th.BooleanType,
-            default=False,
-            description="Enable LDIF processing streams",
-        ),
+            th.Property(
+                "stream_maps",
+                th.ObjectType(),
+                description="Configuration for stream maps",
+            ),
+            th.Property(
+                "stream_map_settings",
+                th.ObjectType(),
+                description="Settings for stream maps",
+            ),
+            # LDIF Processing Configuration
+            th.Property(
+                "ldif_files",
+                th.ArrayType(th.StringType),
+                description="List of LDIF files to process",
+            ),
+            th.Property(
+                "ldif_directory",
+                th.StringType,
+                description="Directory containing LDIF files",
+            ),
+            th.Property(
+                "ldif_file_pattern",
+                th.StringType,
+                default="*.ldif",
+                description="File pattern for LDIF files in directory",
+            ),
+            th.Property(
+                "ldif_ignore_errors",
+                th.BooleanType,
+                default=True,
+                description="Continue processing on LDIF parsing errors",
+            ),
+            th.Property(
+                "ldif_max_errors",
+                th.IntegerType,
+                default=100,
+                description="Maximum number of parsing errors before stopping",
+            ),
+            th.Property(
+                "ldif_ignore_file_errors",
+                th.BooleanType,
+                default=True,
+                description="Continue processing if a file fails completely",
+            ),
+            th.Property(
+                "ldif_ignore_entry_errors",
+                th.BooleanType,
+                default=True,
+                description="Continue processing if an entry fails",
+            ),
+            th.Property(
+                "ldif_apply_transformations",
+                th.BooleanType,
+                default=False,
+                description="Apply transformation rules to LDIF entries",
+            ),
+            th.Property(
+                "ldif_transformation_rules",
+                th.ObjectType(),
+                description="Transformation rules for LDIF processing",
+            ),
+            th.Property(
+                "migration_batch",
+                th.StringType,
+                description="Migration batch identifier for tracking",
+            ),
+            th.Property(
+                "enable_ldif_streams",
+                th.BooleanType,
+                default=False,
+                description="Enable LDIF processing streams",
+            ),
+        )
     ).to_dict()
 
     def discover_streams(self) -> list[Stream]:
