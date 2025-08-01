@@ -200,9 +200,9 @@ class TapExecutionService:
         self,
         connection_id: UUID,
         command: str,
-        config: dict[str, Any] | None = None,
-        catalog: dict[str, Any] | None = None,
-        state: dict[str, Any] | None = None,
+        config: dict[str, object] | None = None,
+        catalog: dict[str, object] | None = None,
+        state: dict[str, object] | None = None,
     ) -> FlextResult[Any]:
         try:
             from flext_tap_ldap.domain.entities import TapExecution
@@ -321,7 +321,7 @@ class LDAPRecordService:
         stream_id: UUID,
         execution_id: UUID,
         dn: str,
-        attributes: dict[str, Any],
+        attributes: dict[str, object],
         object_class: list[str] | None = None,
     ) -> FlextResult[Any]:
         try:

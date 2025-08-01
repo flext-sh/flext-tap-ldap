@@ -25,21 +25,21 @@ class TestFlextTapLDAPIntegration:
         return CliRunner()
 
     @pytest.fixture
-    def config_file(self, tmp_path: Path, mock_ldap_config: dict[str, Any]) -> Path:
+    def config_file(self, tmp_path: Path, mock_ldap_config: dict[str, object]) -> Path:
         config_path = tmp_path / "config.json"
         with open(config_path, "w", encoding="utf-8") as f:
             json.dump(mock_ldap_config, f)
         return config_path
 
     @pytest.fixture
-    def catalog_file(self, tmp_path: Path, sample_catalog: dict[str, Any]) -> Path:
+    def catalog_file(self, tmp_path: Path, sample_catalog: dict[str, object]) -> Path:
         catalog_path = tmp_path / "catalog.json"
         with open(catalog_path, "w", encoding="utf-8") as f:
             json.dump(sample_catalog, f)
         return catalog_path
 
     @pytest.fixture
-    def state_file(self, tmp_path: Path, sample_state: dict[str, Any]) -> Path:
+    def state_file(self, tmp_path: Path, sample_state: dict[str, object]) -> Path:
         state_path = tmp_path / "state.json"
         with open(state_path, "w", encoding="utf-8") as f:
             json.dump(sample_state, f)
@@ -256,7 +256,7 @@ class TestFlextTapLDAPIntegration:
         async def mock_search(
             *args: Any,
             **kwargs: Any,
-        ) -> AsyncGenerator[dict[str, Any]]:
+        ) -> AsyncGenerator[dict[str, object]]:
             yield {
                 "dn": "uid=user1,ou=users,dc=test,dc=com",
                 "attributes": {"uid": "user1", "cn": "User One"},

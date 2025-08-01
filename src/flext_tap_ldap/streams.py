@@ -24,7 +24,7 @@ class LDAPBaseStream(Stream):
         self,
         tap: FlextTapLDAP,
         name: str | None = None,
-        schema: dict[str, Any] | None = None,
+        schema: dict[str, object] | None = None,
     ) -> None:
         """Initialize the LDAP stream."""
         super().__init__(tap, name=name, schema=schema)
@@ -32,8 +32,8 @@ class LDAPBaseStream(Stream):
 
     def get_records(
         self,
-        _context: Mapping[str, Any] | None = None,
-    ) -> Iterable[dict[str, Any]]:
+        _context: Mapping[str, object] | None = None,
+    ) -> Iterable[dict[str, object]]:
         """Get records from LDAP."""
         # This is a base implementation that yields empty records
         # Subclasses should override this method
@@ -86,8 +86,8 @@ class UsersStream(LDAPBaseStream):
 
     def get_records(
         self,
-        _context: Mapping[str, Any] | None = None,
-    ) -> Iterable[dict[str, Any]]:
+        _context: Mapping[str, object] | None = None,
+    ) -> Iterable[dict[str, object]]:
         """Get user records from LDAP server."""
         # For testing purposes, return a basic user entry
         yield {
@@ -139,8 +139,8 @@ class GroupsStream(LDAPBaseStream):
 
     def get_records(
         self,
-        _context: Mapping[str, Any] | None = None,
-    ) -> Iterable[dict[str, Any]]:
+        _context: Mapping[str, object] | None = None,
+    ) -> Iterable[dict[str, object]]:
         """Get group records from LDAP server."""
         # For testing purposes, return a basic group entry
         yield {
@@ -183,8 +183,8 @@ class OrganizationalUnitsStream(LDAPBaseStream):
 
     def get_records(
         self,
-        _context: Mapping[str, Any] | None = None,
-    ) -> Iterable[dict[str, Any]]:
+        _context: Mapping[str, object] | None = None,
+    ) -> Iterable[dict[str, object]]:
         """Get organizational unit records from LDAP server."""
         # For testing purposes, return a basic OU entry
         yield {
@@ -222,8 +222,8 @@ class SchemaStream(LDAPBaseStream):
 
     def get_records(
         self,
-        _context: Mapping[str, Any] | None = None,
-    ) -> Iterable[dict[str, Any]]:
+        _context: Mapping[str, object] | None = None,
+    ) -> Iterable[dict[str, object]]:
         """Get schema records from LDAP server."""
         # For testing purposes, return a basic schema entry
         # In real implementation, this would connect to LDAP and get schema
@@ -245,7 +245,7 @@ class CustomStream(LDAPBaseStream):
         tap: FlextTapLDAP,
         name: str,
         search_filter: str,
-        schema_properties: dict[str, Any] | None = None,
+        schema_properties: dict[str, object] | None = None,
         primary_keys: list[str] | None = None,
         replication_key: str | None = None,
     ) -> None:

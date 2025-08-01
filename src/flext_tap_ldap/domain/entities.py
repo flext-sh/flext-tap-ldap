@@ -42,11 +42,11 @@ class LDAPStream(BaseModel):
     key_properties: list[str]
     replication_method: str
     replication_key: str | None = None
-    stream_schema: dict[str, Any]
+    stream_schema: dict[str, object]
     records_extracted: int = 0
     last_extraction: datetime | None = None
 
-    def update_schema(self, schema: dict[str, Any]) -> None:
+    def update_schema(self, schema: dict[str, object]) -> None:
         self.stream_schema = schema
 
     def record_extraction(self, record_count: int) -> None:
@@ -64,9 +64,9 @@ class TapExecution(BaseModel):
     started_at: datetime | None = None
     completed_at: datetime | None = None
     duration_seconds: float | None = None
-    config: dict[str, Any]
-    catalog: dict[str, Any]
-    state: dict[str, Any]
+    config: dict[str, object]
+    catalog: dict[str, object]
+    state: dict[str, object]
     records_extracted: int = 0
     streams_processed: int = 0
     stdout: str | None = None
@@ -129,16 +129,16 @@ class LDAPRecord(BaseModel):
     stream_id: UUID
     execution_id: UUID
     dn: str
-    attributes: dict[str, Any]
+    attributes: dict[str, object]
     object_class: list[str]
     extracted_at: datetime = Field(default_factory=datetime.now)
-    singer_record: dict[str, Any]
+    singer_record: dict[str, object]
 
     @property
     def rdn(self) -> str:
         return self.dn.split(",")[0] if self.dn else ""
 
-    def to_singer_record(self) -> dict[str, Any]:
+    def to_singer_record(self) -> dict[str, object]:
         return {
             "type": "RECORD",
             "record": {
@@ -173,7 +173,7 @@ class StreamDiscoveredEvent(BaseModel):
     connection_id: UUID
     stream_name: str
     stream_type: str
-    stream_schema: dict[str, Any]
+    stream_schema: dict[str, object]
 
 
 class RecordExtractedEvent(BaseModel):

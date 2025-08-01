@@ -47,7 +47,7 @@ class LDIFEntry:
         object_classes = self.get_attribute("objectClass") or []
         return any(oc.lower() == object_class.lower() for oc in object_classes)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, object]:
         entry_dict = {
             "dn": self.dn,
             "attributes": self.attributes,
@@ -122,9 +122,9 @@ class LDIFEntry:
 
         return errors
 
-    def parse_dn(self) -> dict[str, Any]:
+    def parse_dn(self) -> dict[str, object]:
         """Parse DN into components."""
-        components: dict[str, Any] = {}
+        components: dict[str, object] = {}
 
         # Split DN by commas, but be careful about escaped commas
         parts = []
@@ -397,7 +397,7 @@ class FlextLDIFProcessor:
         else:
             raise ValueError(msg)
 
-    def get_statistics(self) -> dict[str, Any]:
+    def get_statistics(self) -> dict[str, object]:
         return {
             "processed_entries": self.processed_entries,
             "skipped_entries": self.skipped_entries,
@@ -470,7 +470,7 @@ class FlextLDIFProcessor:
         """Filter entries that have a specific attribute."""
         return [entry for entry in self.entries if entry.get_attribute(attr_name)]
 
-    def to_singer_format(self, stream_name: str) -> list[dict[str, Any]]:
+    def to_singer_format(self, stream_name: str) -> list[dict[str, object]]:
         """Convert LDIF entries to Singer record format."""
         records = []
 
@@ -588,7 +588,7 @@ class LDIFValidator:
 
         return True
 
-    def get_validation_results(self) -> dict[str, Any]:
+    def get_validation_results(self) -> dict[str, object]:
         return {
             "errors": self.validation_errors.copy(),
             "warnings": self.warnings.copy(),
@@ -631,7 +631,7 @@ class LDIFValidator:
         # Default: accept all other attributes
         return True
 
-    def validate_entries(self, entries: list[LDIFEntry]) -> dict[str, Any]:
+    def validate_entries(self, entries: list[LDIFEntry]) -> dict[str, object]:
         """Validate a list of LDIF entries."""
         valid_count = 0
         invalid_count = 0
@@ -655,7 +655,7 @@ class LDIFValidator:
 class LDIFTransformer:
     """Transform LDIF entries for target directory compatibility."""
 
-    def __init__(self, transformation_rules: dict[str, Any] | None = None) -> None:
+    def __init__(self, transformation_rules: dict[str, object] | None = None) -> None:
         self.transformation_rules = transformation_rules or {}
 
     def transform_entry(self, entry: LDIFEntry) -> LDIFEntry:
@@ -680,7 +680,7 @@ class LDIFTransformer:
             Transformed LDIFEntry
 
         """
-        new_attributes: dict[str, Any] = {}
+        new_attributes: dict[str, object] = {}
 
         for attr_name, values in entry.attributes.items():
             new_name = mappings.get(attr_name, attr_name)

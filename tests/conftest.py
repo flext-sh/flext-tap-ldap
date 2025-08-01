@@ -22,7 +22,7 @@ os.environ["FLEXT_DEBUG"] = "true"
 
 
 @pytest.fixture
-def mock_ldap_config() -> dict[str, Any]:
+def mock_ldap_config() -> dict[str, object]:
     """Mock LDAP configuration for testing."""
     return {
         "host": "test.ldap.com",
@@ -118,13 +118,13 @@ def mock_ldap_connection() -> Generator[Connection]:
 
 
 @pytest.fixture
-def mock_ldap_client(mock_ldap_config: dict[str, Any]) -> LDAPClient:
+def mock_ldap_client(mock_ldap_config: dict[str, object]) -> LDAPClient:
     """Mock LDAP client for testing."""
     return LDAPClient(**mock_ldap_config)
 
 
 @pytest.fixture
-def sample_catalog() -> dict[str, Any]:
+def sample_catalog() -> dict[str, object]:
     """Sample Singer catalog for testing."""
     return {
         "streams": [
@@ -179,7 +179,7 @@ def sample_catalog() -> dict[str, Any]:
 
 
 @pytest.fixture
-def sample_state() -> dict[str, Any]:
+def sample_state() -> dict[str, object]:
     """Sample Singer state for testing."""
     return {
         "bookmarks": {

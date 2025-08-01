@@ -331,7 +331,7 @@ class TestStreamIntegration:
     """Integration tests for stream functionality."""
 
     @pytest.fixture
-    def tap_config(self) -> dict[str, Any]:
+    def tap_config(self) -> dict[str, object]:
         """Standard tap configuration."""
         return {
             "host": "test.ldap.com",
@@ -344,7 +344,7 @@ class TestStreamIntegration:
             "page_size": 1000,
         }
 
-    def test_all_default_streams_creation(self, tap_config: dict[str, Any]) -> None:
+    def test_all_default_streams_creation(self, tap_config: dict[str, object]) -> None:
         """Test that all default streams can be created."""
         tap = FlextTapLDAP(config=tap_config)
         streams = tap.discover_streams()
@@ -359,7 +359,7 @@ class TestStreamIntegration:
 
     def test_streams_with_custom_configuration(
         self,
-        tap_config: dict[str, Any],
+        tap_config: dict[str, object],
     ) -> None:
         """Test streams with custom configuration."""
         tap_config["custom_streams"] = [
@@ -382,7 +382,7 @@ class TestStreamIntegration:
         custom_stream = next(s for s in streams if s.name == "custom_test_stream")
         assert isinstance(custom_stream, CustomStream)
 
-    def test_ldif_streams_when_enabled(self, tap_config: dict[str, Any]) -> None:
+    def test_ldif_streams_when_enabled(self, tap_config: dict[str, object]) -> None:
         """Test LDIF streams are included when enabled."""
         tap_config["enable_ldif_streams"] = True
 
