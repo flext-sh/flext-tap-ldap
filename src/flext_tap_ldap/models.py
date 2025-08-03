@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 # Import from flext-core for foundational patterns (standardized)
-from flext_core import FlextValueObject as FlextDomainBaseModel
+from flext_core import FlextResult, FlextValueObject as FlextDomainBaseModel
 from pydantic import Field
 
 if TYPE_CHECKING:
@@ -21,6 +21,11 @@ class LDAPAttribute(FlextDomainBaseModel):
         False,
         description="Whether the attribute contains binary data",
     )
+
+    def validate_domain_rules(self) -> FlextResult[None]:
+        """Validate domain-specific rules for LDAP attributes."""
+        # LDAP attributes can have any name and values
+        return FlextResult.ok(None)
 
     @property
     def single_value(self) -> str | None:
@@ -48,6 +53,14 @@ class LDAPEntry(FlextDomainBaseModel):
 
     dn: str = Field(..., description="Distinguished Name", alias="id")
     object_classes: list[str] = Field(..., description="Object classes")
+
+    def validate_domain_rules(self) -> FlextResult[None]:
+        """Validate domain-specific rules for LDAP entries."""
+        if not self.dn:
+            return FlextResult.fail("DN cannot be empty")
+        # Additional LDAP entry validation can be added here
+        return FlextResult.ok(None)
+
     attributes: dict[str, object] = Field(
         default_factory=dict,
         description="Entry attributes",
@@ -212,6 +225,11 @@ class LDAPSchema(FlextDomainBaseModel):
         default_factory=list,
         description="Naming contexts",
     )
+
+    def validate_domain_rules(self) -> FlextResult[None]:
+        """Validate domain-specific rules for LDAP schema."""
+        # Schema validation rules can be added here
+        return FlextResult.ok(None)
 
     @property
     def has_oracle_extensions(self) -> bool:

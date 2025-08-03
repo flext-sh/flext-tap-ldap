@@ -6,7 +6,7 @@ using the centralized patterns from flext-core.meltano.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from flext_core import get_logger
 
@@ -150,7 +150,7 @@ class FlextTapLDAP(Tap):
                 default=False,
                 description="Enable LDIF processing streams",
             ),
-        )
+        ),
     ).to_dict()
 
     def discover_streams(self) -> list[Stream]:
@@ -179,14 +179,16 @@ class FlextTapLDAP(Tap):
         # Add custom streams if configured:
         custom_streams_config = self.config.get("custom_streams", [])
         for custom_config in custom_streams_config:
-            stream = CustomStream(
-                tap=self,
+            from flext_tap_ldap.streams import CustomStreamParams
+
+            params = CustomStreamParams(
                 name=custom_config["name"],
                 search_filter=custom_config["search_filter"],
                 schema_properties=custom_config.get("schema", {}).get("properties", {}),
                 primary_keys=custom_config.get("primary_keys"),
                 replication_key=custom_config.get("replication_key"),
             )
+            stream = CustomStream(tap=self, params=params)
             streams.append(stream)
 
         return streams
