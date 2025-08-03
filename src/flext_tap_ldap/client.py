@@ -84,7 +84,7 @@ class LDAPClient:
 
         # Create flext-ldap configuration
         flext_config = FlextLdapConnectionConfig(
-            server=client_config.host,
+            host=client_config.host,
             port=client_config.port,
             use_ssl=client_config.use_ssl,
             timeout_seconds=client_config.timeout,
