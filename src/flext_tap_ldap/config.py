@@ -144,67 +144,70 @@ class TapLDAPConfig(BaseSettings):
     ) -> list[dict[str, object]] | None:
         """Validate custom stream configurations."""
         if v is not None:
-            # Validate each custom stream config
+            # Validate each custom stream config with proper type conversion
             for stream_config in v:
-                CustomStreamConfig(**stream_config)
+                try:
+                    # Convert dict[str, object] to proper types for validation
+                    config_data = {
+                        "name": str(stream_config.get("name", "")),
+                        "search_filter": str(stream_config.get("search_filter", "")),
+                        "primary_keys": stream_config.get("primary_keys"),
+                        "replication_key": stream_config.get("replication_key"),
+                        "json_schema": stream_config.get("json_schema"),
+                    }
+                    CustomStreamConfig(**config_data)  # type: ignore[arg-type]
+                except (ValueError, TypeError) as e:
+                    msg = f"Invalid custom stream config: {e}"
+                    raise ValueError(msg) from e
         return v
 
     @classmethod
     def create_with_defaults(cls, **overrides: Any) -> TapLDAPConfig:
         """Create config with intelligent defaults."""
-        defaults: dict[str, object] = {
-            "ldap_connection": {
-                "host": "localhost",
-                "port": 389,
-                "bind_dn": None,
-                "password": None,
-                "use_ssl": False,
-                "timeout": 30,
-                "pool_size": 5,
-                "validate_certificates": True,
-                "ca_cert_file": None,
-                "client_cert_file": None,
-                "client_key_file": None,
-                "ssh_tunnel": {},
-                "oracle_oid_compatibility": False,
-                "retry_attempts": 3,
-                "connection_timeout": 10,
-                "read_timeout": 60,
-                "keep_alive": True,
-                "auto_reconnect": True,
-            },
-            "ldif_processing": {
-                "enabled": False,
-                "file_path": None,
-                "batch_size": 1000,
-                "skip_errors": False,
-                "encoding": "utf-8",
-                "max_file_size_mb": 100,
-                "validate_dn": True,
-                "include_metadata": True,
-                "parallel_processing": False,
-                "chunk_size": 10000,
-                "use_memory_mapping": False,
-                "progress_callback": None,
-            },
-            "stream_maps": {},
-            "stream_map_config": {},
-            "batch_size": 1000,
-            "streams": [],
+        # Use proper typed defaults for LDAPConnectionConfig
+        ldap_defaults: dict[str, Any] = {
+            "host": "localhost",
+            "port": 389,
+            "bind_dn": None,
+            "bind_password": None,
+            "base_dn": "",
+            "use_ssl": False,
+            "use_tls": False,
+            "timeout_seconds": 30,
+            "page_size": 1000,
+            "max_retries": 3,
         }
 
-        # Apply overrides
-        for key, value in overrides.items():
-            if key in defaults:
-                if isinstance(defaults[key], dict) and isinstance(value, dict):
-                    defaults[key].update(value)
-                else:
-                    defaults[key] = value
+        # Use proper typed defaults for LDIFProcessingConfig
+        ldif_defaults: dict[str, Any] = {
+            "ldif_files": None,
+            "ldif_directory": None,
+            "ldif_file_pattern": "*.ldif",
+            "ldif_ignore_errors": True,
+            "ldif_max_errors": 100,
+            "ldif_ignore_file_errors": True,
+            "ldif_ignore_entry_errors": True,
+            "ldif_apply_transformations": False,
+            "ldif_transformation_rules": None,
+            "migration_batch": None,
+            "enable_ldif_streams": False,
+        }
 
-        # Create the config properly
+        # Apply overrides to connection config
+        if "connection" in overrides and isinstance(overrides["connection"], dict):
+            ldap_defaults.update(overrides["connection"])
+
+        # Apply overrides to LDIF config
+        if "ldif_processing" in overrides and isinstance(
+            overrides["ldif_processing"],
+            dict,
+        ):
+            ldif_defaults.update(overrides["ldif_processing"])
+
+        # Create properly typed config objects
         return cls(
-            connection=defaults["ldap_connection"],
-            ldif_processing=defaults["ldif_processing"],
+            connection=LDAPConnectionConfig(**ldap_defaults),
+            ldif_processing=LDIFProcessingConfig(**ldif_defaults),
         )
 
 

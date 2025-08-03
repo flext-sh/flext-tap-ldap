@@ -6,13 +6,84 @@ Uses flext-core service patterns - NO duplication. Clean architecture.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
+from uuid import UUID
 
 # Import from flext-core for foundational patterns (standardized)
 from flext_core import (
     FlextResult,
 )
+
+
+@dataclass
+class LDAPConnectionParams:
+    """Parameter object for LDAP connection creation.
+
+    Implements Parameter Object Pattern to reduce parameter count
+    and improve maintainability following SOLID principles.
+    """
+
+    host: str
+    port: int = 389
+    bind_dn: str | None = None
+    bind_password: str | None = None
+    base_dn: str = ""
+    use_ssl: bool = False
+    use_tls: bool = False
+    timeout_seconds: int = 30
+    page_size: int = 1000
+    max_retries: int = 3
+
+    def __post_init__(self) -> None:
+        """Validate connection parameters after initialization."""
+        if not self.host:
+            msg = "Host is required"
+            raise ValueError(msg)
+        if self.port <= 0 or self.port > 65535:
+            msg = "Port must be between 1 and 65535"
+            raise ValueError(msg)
+        if self.timeout_seconds <= 0:
+            msg = "Timeout must be positive"
+            raise ValueError(msg)
+        if self.page_size <= 0:
+            msg = "Page size must be positive"
+            raise ValueError(msg)
+        if self.max_retries < 0:
+            msg = "Max retries cannot be negative"
+            raise ValueError(msg)
+
+
+@dataclass
+class StreamCreationParams:
+    """Parameter object for LDAP stream creation.
+
+    Implements Parameter Object Pattern to reduce parameter count in create_stream method
+    following SOLID principles for better maintainability.
+    """
+
+    connection_id: UUID
+    stream_type: str
+    search_filter: str
+    attributes: list[str] | None = None
+    tap_stream_id: str | None = None
+    key_properties: list[str] | None = None
+    replication_method: str = "FULL_TABLE"
+    replication_key: str | None = None
+
+    def __post_init__(self) -> None:
+        """Validate stream creation parameters after initialization."""
+        if not self.stream_type:
+            msg = "Stream type is required"
+            raise ValueError(msg)
+        if not self.search_filter:
+            msg = "Search filter is required"
+            raise ValueError(msg)
+        if self.replication_method not in {"FULL_TABLE", "INCREMENTAL"}:
+            msg = "Replication method must be FULL_TABLE or INCREMENTAL"
+            raise ValueError(msg)
+
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -36,28 +107,24 @@ class LDAPConnectionService:
 
     async def create_connection(
         self,
-        host: str,
-        port: int = 389,
-        bind_dn: str | None = None,
-        bind_password: str | None = None,
-        *,
-        base_dn: str = "",
-        use_ssl: bool = False,
-        use_tls: bool = False,
-        timeout_seconds: int = 30,
-        page_size: int = 1000,
-        max_retries: int = 3,
+        params: LDAPConnectionParams,
     ) -> FlextResult[Any]:
+        """Create LDAP connection using parameter object pattern.
+
+        Refactored to use Parameter Object Pattern, reducing complexity
+        and improving maintainability following SOLID principles.
+        """
         try:
             from flext_tap_ldap.domain.entities import LDAPConnection
 
+            # Parameter Object Pattern eliminates complex parameter passing
             connection = LDAPConnection(
-                host=host,
-                port=port,
-                bind_dn=bind_dn,
-                password=bind_password,
-                use_ssl=use_ssl,
-                timeout=timeout_seconds,
+                host=params.host,
+                port=params.port,
+                bind_dn=params.bind_dn,
+                password=params.bind_password,
+                use_ssl=params.use_ssl,
+                timeout=params.timeout_seconds,
             )
 
             self._connections[connection.id] = connection
@@ -74,7 +141,7 @@ class LDAPConnectionService:
             # Here you would actually test the LDAP connection
             # For now, we just mark it as tested
             connection.last_tested = datetime.now(UTC)
-            return FlextResult.ok(True)
+            return FlextResult.ok(data=True)
         except (RuntimeError, ValueError, TypeError) as e:
             connection = self._connections.get(connection_id)
             if connection:
@@ -108,33 +175,29 @@ class LDAPStreamService:
             LDAPStream,
         ] = {}  # Initialized inline for immediate availability
 
-    async def create_stream(
-        self,
-        connection_id: UUID,
-        stream_type: str,
-        search_filter: str,
-        attributes: list[str] | None = None,
-        tap_stream_id: str | None = None,
-        key_properties: list[str] | None = None,
-        replication_method: str = "FULL_TABLE",
-        replication_key: str | None = None,
-    ) -> FlextResult[Any]:
+    async def create_stream(self, params: StreamCreationParams) -> FlextResult[Any]:
+        """Create LDAP stream using parameter object pattern.
+
+        Refactored to use Parameter Object Pattern to reduce parameter count
+        and improve maintainability following SOLID principles.
+        """
         try:
             from flext_tap_ldap.domain.entities import LDAPStream
 
             # Generate tap_stream_id if not provided
+            tap_stream_id = params.tap_stream_id
             if not tap_stream_id:
-                tap_stream_id = f"{stream_type.lower()}_stream"
+                tap_stream_id = f"{params.stream_type.lower()}_stream"
 
             stream = LDAPStream(
-                connection_id=connection_id,
-                stream_type=stream_type.lower(),
-                search_filter=search_filter,
-                attributes=attributes or [],
+                connection_id=params.connection_id,
+                stream_type=params.stream_type.lower(),
+                search_filter=params.search_filter,
+                attributes=params.attributes or [],
                 tap_stream_id=tap_stream_id,
-                key_properties=key_properties or ["dn"],
-                replication_method=replication_method,
-                replication_key=replication_key,
+                key_properties=params.key_properties or ["dn"],
+                replication_method=params.replication_method,
+                replication_key=params.replication_key,
                 stream_schema={},
             )
 

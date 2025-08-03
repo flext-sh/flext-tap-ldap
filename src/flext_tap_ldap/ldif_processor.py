@@ -48,9 +48,9 @@ class LDIFEntry:
         return any(oc.lower() == object_class.lower() for oc in object_classes)
 
     def to_dict(self) -> dict[str, object]:
-        entry_dict = {
+        entry_dict: dict[str, object] = {
             "dn": self.dn,
-            "attributes": self.attributes,
+            "attributes": dict(self.attributes),  # Convert to proper dict type
         }
 
         if self.change_type:
@@ -123,13 +123,20 @@ class LDIFEntry:
         return errors
 
     def parse_dn(self) -> dict[str, object]:
-        """Parse DN into components."""
-        components: dict[str, object] = {}
+        """Parse DN into components using Single Responsibility decomposition."""
+        dn_parts = self._split_dn_by_commas()
+        components = self._extract_key_value_pairs(dn_parts)
+        return self._normalize_multi_valued_attributes(components)
 
-        # Split DN by commas, but be careful about escaped commas
+    def _split_dn_by_commas(self) -> list[str]:
+        """Split DN by commas, handling escaped commas.
+
+        Single Responsibility: Handle only DN string splitting logic.
+        """
         parts = []
         current_part = ""
         i = 0
+
         while i < len(self.dn):
             if self.dn[i] == "," and (i == 0 or self.dn[i - 1] != "\\"):
                 parts.append(current_part.strip())
@@ -137,8 +144,18 @@ class LDIFEntry:
             else:
                 current_part += self.dn[i]
             i += 1
+
         if current_part:
             parts.append(current_part.strip())
+
+        return parts
+
+    def _extract_key_value_pairs(self, parts: list[str]) -> dict[str, object]:
+        """Extract key-value pairs from DN parts.
+
+        Single Responsibility: Handle only key-value extraction logic.
+        """
+        components: dict[str, object] = {}
 
         for part in parts:
             if "=" in part:
@@ -146,15 +163,43 @@ class LDIFEntry:
                 key = key.strip()
                 value = value.strip()
 
-                if key in components:
-                    if not isinstance(components[key], list):
-                        components[key] = [components[key]]
-                    components[key].append(value)
-                else:
-                    components[key] = value
+                components = self._add_component_value(components, key, value)
 
-        # Convert single-item values to lists for multi-valued attributes like 'dc'
-        for key in ["dc"]:
+        return components
+
+    def _add_component_value(
+        self,
+        components: dict[str, object],
+        key: str,
+        value: str,
+    ) -> dict[str, object]:
+        """Add a component value, handling multi-valued attributes.
+
+        Single Responsibility: Handle only component value addition logic.
+        """
+        if key in components:
+            if not isinstance(components[key], list):
+                components[key] = [components[key]]
+            # Type guard to ensure MyPy understands it's a list
+            current_val = components[key]
+            if isinstance(current_val, list):
+                current_val.append(value)
+        else:
+            components[key] = value
+
+        return components
+
+    def _normalize_multi_valued_attributes(
+        self,
+        components: dict[str, object],
+    ) -> dict[str, object]:
+        """Normalize known multi-valued attributes to list format.
+
+        Single Responsibility: Handle only multi-valued attribute normalization.
+        """
+        multi_valued_attrs = ["dc"]
+
+        for key in multi_valued_attrs:
             if key in components and not isinstance(components[key], list):
                 components[key] = [components[key]]
 
@@ -308,70 +353,54 @@ class FlextLDIFProcessor:
         line_number: int,
         source_name: str,
     ) -> LDIFEntry | None:
+        """Process LDIF line with reduced return complexity.
+
+        Refactored to use Chain of Responsibility Pattern
+        to eliminate multiple return statements following SOLID principles.
+        """
         try:
-            # Check for DN line (start of new entry)
-            dn_match = self.DN_PATTERN.match(line)
-            if dn_match:
-                # Yield previous entry if exists
-                if current_entry and current_entry.dn:
-                    return current_entry  # Caller will yield this
+            # Process line using chain of responsibility pattern
+            result = self._handle_dn_line(line, current_entry)
+            if result is not None:
+                return result
 
-                # Start new entry
-                dn = dn_match.group(1).strip()
-                return LDIFEntry(dn)
-
-            # Ensure we have an entry to work with
-            if not current_entry:
-                error_msg = f"Line {line_number}: Attribute line without DN in {source_name}: {line}"
-                self._handle_error(error_msg)
-                return None
-
-            # Check for changetype
-            changetype_match = self.CHANGETYPE_PATTERN.match(line)
-            if changetype_match:
-                current_entry.change_type = changetype_match.group(1).strip()
-                return current_entry
-
-            # Check for control
-            control_match = self.CONTROL_PATTERN.match(line)
-            if control_match:
-                current_entry.controls.append(control_match.group(1).strip())
-                return current_entry
-
-            # Check for base64 encoded attribute (indicated by ::)
-            if "::" in line:
-                parts = line.split("::", 1)
-                if len(parts) == EXPECTED_BULK_SIZE:
-                    attr_name = parts[0].strip()
-                    attr_value_b64 = parts[1].strip()
-                    try:
-                        import base64
-
-                        attr_value = base64.b64decode(attr_value_b64).decode("utf-8")
-                        current_entry.attributes[attr_name] = [attr_value]
-                    except (RuntimeError, ValueError, TypeError) as e:
-                        error_msg = f"Line {line_number}: Failed to decode base64 value in {source_name}: {e}"
-                        self._handle_error(error_msg)
-                        return current_entry
-
-                    self._add_attribute(current_entry, attr_name, attr_value)
-                    return current_entry
-
-            # Check for regular attribute
-            attr_match = self.ATTR_PATTERN.match(line)
-            if attr_match:
-                attr_name = attr_match.group(1).strip()
-                attr_value = attr_match.group(2).strip()
-
-                self._add_attribute(current_entry, attr_name, attr_value)
-                return current_entry
-
-            # Unrecognized line format
-            error_msg = (
-                f"Line {line_number}: Unrecognized line format in {source_name}: {line}"
+            result = self._handle_attribute_line_validation(
+                line,
+                current_entry,
+                line_number,
+                source_name,
             )
-            self._handle_error(error_msg)
-            return current_entry
+            if result is not None:
+                return result
+
+            result = self._handle_changetype_line(line, current_entry)
+            if result is not None:
+                return result
+
+            result = self._handle_control_line(line, current_entry)
+            if result is not None:
+                return result
+
+            result = self._handle_base64_attribute(
+                line,
+                current_entry,
+                line_number,
+                source_name,
+            )
+            if result is not None:
+                return result
+
+            result = self._handle_regular_attribute(line, current_entry)
+            if result is not None:
+                return result
+
+            # Default: unrecognized line format
+            return self._handle_unrecognized_line(
+                line,
+                current_entry,
+                line_number,
+                source_name,
+            )
 
         except (RuntimeError, ValueError, TypeError) as e:
             error_msg = (
@@ -379,6 +408,127 @@ class FlextLDIFProcessor:
             )
             self._handle_error(error_msg)
             return current_entry
+
+    def _handle_dn_line(
+        self,
+        line: str,
+        current_entry: LDIFEntry | None,
+    ) -> LDIFEntry | None:
+        """Handle DN line processing."""
+        dn_match = self.DN_PATTERN.match(line)
+        if not dn_match:
+            return None
+
+        # Return previous entry if exists (caller will yield this)
+        if current_entry and current_entry.dn:
+            return current_entry
+
+        # Start new entry
+        dn = dn_match.group(1).strip()
+        return LDIFEntry(dn)
+
+    def _handle_attribute_line_validation(
+        self,
+        line: str,
+        current_entry: LDIFEntry | None,
+        line_number: int,
+        source_name: str,
+    ) -> LDIFEntry | None:
+        """Validate that we have an entry for attribute lines."""
+        # Skip validation if it's a DN line (already handled)
+        if self.DN_PATTERN.match(line):
+            return None
+
+        if not current_entry:
+            error_msg = f"Line {line_number}: Attribute line without DN in {source_name}: {line}"
+            self._handle_error(error_msg)
+            return None  # Explicit None for attribute lines without DN
+
+        return None  # Continue processing
+
+    def _handle_changetype_line(
+        self,
+        line: str,
+        current_entry: LDIFEntry | None,
+    ) -> LDIFEntry | None:
+        """Handle changetype line processing."""
+        changetype_match = self.CHANGETYPE_PATTERN.match(line)
+        if not changetype_match or not current_entry:
+            return None
+
+        current_entry.change_type = changetype_match.group(1).strip()
+        return current_entry
+
+    def _handle_control_line(
+        self,
+        line: str,
+        current_entry: LDIFEntry | None,
+    ) -> LDIFEntry | None:
+        """Handle control line processing."""
+        control_match = self.CONTROL_PATTERN.match(line)
+        if not control_match or not current_entry:
+            return None
+
+        current_entry.controls.append(control_match.group(1).strip())
+        return current_entry
+
+    def _handle_base64_attribute(
+        self,
+        line: str,
+        current_entry: LDIFEntry | None,
+        line_number: int,
+        source_name: str,
+    ) -> LDIFEntry | None:
+        """Handle base64 encoded attribute processing."""
+        if "::" not in line or not current_entry:
+            return None
+
+        parts = line.split("::", 1)
+        if len(parts) != EXPECTED_BULK_SIZE:
+            return None
+
+        attr_name = parts[0].strip()
+        attr_value_b64 = parts[1].strip()
+
+        try:
+            import base64
+
+            attr_value = base64.b64decode(attr_value_b64).decode("utf-8")
+            self._add_attribute(current_entry, attr_name, attr_value)
+        except (RuntimeError, ValueError, TypeError) as e:
+            error_msg = f"Line {line_number}: Failed to decode base64 value in {source_name}: {e}"
+            self._handle_error(error_msg)
+
+        return current_entry
+
+    def _handle_regular_attribute(
+        self,
+        line: str,
+        current_entry: LDIFEntry | None,
+    ) -> LDIFEntry | None:
+        """Handle regular attribute processing."""
+        attr_match = self.ATTR_PATTERN.match(line)
+        if not attr_match or not current_entry:
+            return None
+
+        attr_name = attr_match.group(1).strip()
+        attr_value = attr_match.group(2).strip()
+        self._add_attribute(current_entry, attr_name, attr_value)
+        return current_entry
+
+    def _handle_unrecognized_line(
+        self,
+        line: str,
+        current_entry: LDIFEntry | None,
+        line_number: int,
+        source_name: str,
+    ) -> LDIFEntry | None:
+        """Handle unrecognized line format."""
+        error_msg = (
+            f"Line {line_number}: Unrecognized line format in {source_name}: {line}"
+        )
+        self._handle_error(error_msg)
+        return current_entry
 
     def _add_attribute(self, entry: LDIFEntry, name: str, value: str) -> None:
         if name not in entry.attributes:
@@ -472,16 +622,23 @@ class FlextLDIFProcessor:
 
     def to_singer_format(self, stream_name: str) -> list[dict[str, object]]:
         """Convert LDIF entries to Singer record format."""
-        records = []
+        records: list[dict[str, object]] = []
 
         for entry in self.entries:
-            record = {
+            # Convert attributes to object type for MyPy compatibility
+            record_attributes: dict[str, object] = {"dn": entry.dn}
+            for attr_name, attr_values in entry.attributes.items():
+                # Ensure attr_values is properly typed as object
+                record_attributes[attr_name] = (
+                    attr_values
+                    if isinstance(attr_values, (list, str))
+                    else list(attr_values)
+                )
+
+            record: dict[str, object] = {
                 "type": "RECORD",
                 "stream": stream_name,
-                "record": {
-                    "dn": entry.dn,
-                    **dict(entry.attributes.items()),
-                },
+                "record": record_attributes,
             }
             records.append(record)
 
@@ -680,7 +837,7 @@ class LDIFTransformer:
             Transformed LDIFEntry
 
         """
-        new_attributes: dict[str, object] = {}
+        new_attributes: dict[str, list[str]] = {}
 
         for attr_name, values in entry.attributes.items():
             new_name = mappings.get(attr_name, attr_name)

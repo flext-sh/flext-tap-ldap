@@ -10,6 +10,7 @@ Provides enterprise-ready setup utilities with FlextResult pattern support.
 from __future__ import annotations
 
 import os
+from dataclasses import dataclass, field
 from typing import Any
 
 # Import from flext-core for foundational patterns (standardized)
@@ -22,6 +23,89 @@ from flext_tap_ldap.config import (
     LDIFProcessingConfig,
     TapLDAPConfig,
 )
+
+
+@dataclass
+class LDIFConfigBuilder:
+    """Builder for LDIF processing configuration.
+
+    Implements Builder Pattern to eliminate parameter proliferation
+    following Interface Segregation Principle.
+    """
+
+    ldif_files: list[str] = field(default_factory=list)
+    ldif_directory: str | None = None
+    ldif_file_pattern: str = "*.ldif"
+    ldif_ignore_errors: bool = True
+    ldif_max_errors: int = 100
+    ldif_ignore_file_errors: bool = True
+    ldif_ignore_entry_errors: bool = True
+    ldif_apply_transformations: bool = False
+    ldif_transformation_rules: dict[str, object] = field(default_factory=dict)
+    migration_batch: str | None = None
+    enable_ldif_streams: bool = False
+
+    def with_files(self, files: list[str]) -> LDIFConfigBuilder:
+        """Set LDIF files to process."""
+        self.ldif_files = files
+        return self
+
+    def with_directory(self, directory: str) -> LDIFConfigBuilder:
+        """Set LDIF directory to scan."""
+        self.ldif_directory = directory
+        return self
+
+    def with_pattern(self, pattern: str) -> LDIFConfigBuilder:
+        """Set file pattern for scanning."""
+        self.ldif_file_pattern = pattern
+        return self
+
+    def with_error_handling(
+        self,
+        ignore_errors: bool = True,
+        max_errors: int = 100,
+    ) -> LDIFConfigBuilder:
+        """Configure error handling behavior."""
+        self.ldif_ignore_errors = ignore_errors
+        self.ldif_max_errors = max_errors
+        return self
+
+    def with_transformations(
+        self,
+        enable: bool = True,
+        rules: dict[str, object] | None = None,
+    ) -> LDIFConfigBuilder:
+        """Configure transformation settings."""
+        self.ldif_apply_transformations = enable
+        if rules:
+            self.ldif_transformation_rules = rules
+        return self
+
+    def with_migration_batch(self, batch_name: str) -> LDIFConfigBuilder:
+        """Set migration batch identifier."""
+        self.migration_batch = batch_name
+        return self
+
+    def build(self) -> FlextResult[LDIFProcessingConfig]:
+        """Build the LDIF processing configuration."""
+        try:
+            return FlextResult.ok(
+                LDIFProcessingConfig(
+                    ldif_files=self.ldif_files,
+                    ldif_directory=self.ldif_directory,
+                    ldif_file_pattern=self.ldif_file_pattern,
+                    ldif_ignore_errors=self.ldif_ignore_errors,
+                    ldif_max_errors=self.ldif_max_errors,
+                    ldif_ignore_file_errors=self.ldif_ignore_file_errors,
+                    ldif_ignore_entry_errors=self.ldif_ignore_entry_errors,
+                    ldif_apply_transformations=self.ldif_apply_transformations,
+                    ldif_transformation_rules=self.ldif_transformation_rules,
+                    migration_batch=self.migration_batch,
+                    enable_ldif_streams=self.enable_ldif_streams,
+                ),
+            )
+        except (RuntimeError, ValueError, TypeError) as e:
+            return FlextResult.fail(f"Failed to build LDIF processing config: {e}")
 
 
 def setup_ldap_tap(config: TapLDAPConfig | None = None) -> FlextResult[Any]:
@@ -101,6 +185,9 @@ def create_ldif_processing_config(
 ) -> FlextResult[LDIFProcessingConfig]:
     """Create LDIF processing configuration.
 
+    REFACTORED: Now uses Builder Pattern internally to eliminate parameter proliferation.
+    Maintains backward compatibility while providing cleaner internal implementation.
+
     Args:
         ldif_files: List of LDIF files to process
         ldif_directory: Directory containing LDIF files
@@ -118,24 +205,36 @@ def create_ldif_processing_config(
         FlextResult with LDIFProcessingConfig or error message.
 
     """
-    try:
-        config = LDIFProcessingConfig(
-            ldif_files=ldif_files,
-            ldif_directory=ldif_directory,
-            ldif_file_pattern=ldif_file_pattern,
-            ldif_ignore_errors=ldif_ignore_errors,
-            ldif_max_errors=ldif_max_errors,
-            ldif_ignore_file_errors=ldif_ignore_file_errors,
-            ldif_ignore_entry_errors=ldif_ignore_entry_errors,
-            ldif_apply_transformations=ldif_apply_transformations,
-            ldif_transformation_rules=ldif_transformation_rules,
-            migration_batch=migration_batch,
-            enable_ldif_streams=enable_ldif_streams,
-        )
-        return FlextResult.ok(config)
+    # Use Builder Pattern to construct configuration
+    builder = LDIFConfigBuilder()
 
-    except (RuntimeError, ValueError, TypeError) as e:
-        return FlextResult.fail(f"Failed to create LDIF processing config: {e}")
+    if ldif_files:
+        builder.with_files(ldif_files)
+
+    if ldif_directory:
+        builder.with_directory(ldif_directory)
+
+    if ldif_file_pattern != "*.ldif":
+        builder.with_pattern(ldif_file_pattern)
+
+    if not ldif_ignore_errors or ldif_max_errors != 100:
+        builder.with_error_handling(ldif_ignore_errors, ldif_max_errors)
+
+    if ldif_apply_transformations or ldif_transformation_rules:
+        builder.with_transformations(
+            ldif_apply_transformations,
+            ldif_transformation_rules,
+        )
+
+    if migration_batch:
+        builder.with_migration_batch(migration_batch)
+
+    # Set specific fields not covered by fluent methods
+    builder.ldif_ignore_file_errors = ldif_ignore_file_errors
+    builder.ldif_ignore_entry_errors = ldif_ignore_entry_errors
+    builder.enable_ldif_streams = enable_ldif_streams
+
+    return builder.build()
 
 
 def validate_ldap_config(config: TapLDAPConfig) -> FlextResult[Any]:
@@ -164,7 +263,7 @@ def validate_ldap_config(config: TapLDAPConfig) -> FlextResult[Any]:
                 "SSL enabled but port is 389 (consider using port 636 for LDAPS)",
             )
 
-        return FlextResult.ok(True)
+        return FlextResult.ok(data=True)
 
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Configuration validation failed: {e}")
@@ -311,6 +410,7 @@ def create_ldif_processing_config_advanced(
 # Export main API functions
 __all__ = [
     "FlextResult",
+    "LDIFConfigBuilder",
     "create_development_ldap_config",
     "create_ldap_connection_config",
     "create_ldif_processing_config",
