@@ -12,7 +12,10 @@ from __future__ import annotations
 import asyncio
 import time
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from flext_core import FlextResult
 
 from flext_core import get_logger
 from flext_ldap import (
@@ -133,7 +136,7 @@ class LDAPClient:
         protocol = "ldaps" if self.use_ssl else "ldap"
         return f"{protocol}://{self.host}:{self.port}"
 
-    def _convert_entry_to_dict(self, entry_data: Any) -> dict[str, object]:
+    def _convert_entry_to_dict(self, entry_data: FlextLdapEntry | dict[str, object]) -> dict[str, object]:
         """Convert FlextLdapEntry to dict format for backward compatibility.
 
         Single Responsibility: Handle only entry format conversion.
@@ -155,7 +158,7 @@ class LDAPClient:
 
     def _process_search_results(
         self,
-        result: Any,
+        result: FlextResult[list[FlextLdapEntry]],
         size_limit: int,
     ) -> list[dict[str, object]]:
         """Process LDAP search results with size limiting.
@@ -209,7 +212,7 @@ class LDAPClient:
             logger.debug(f"LDAP search failed: {e}")
             return []  # Return empty list on failure
 
-    def _run_async_in_new_loop(self, coro: Any) -> list[dict[str, object]]:
+    def _run_async_in_new_loop(self, coro: object) -> list[dict[str, object]]:
         """Run async coroutine in new event loop.
 
         Single Responsibility: Handle only event loop management.
@@ -370,7 +373,7 @@ class LDAPClient:
 
     def _process_search_results_with_oracle_support(
         self,
-        search_result: Any,
+        search_result: list[FlextLdapEntry] | list[dict[str, object]],
         oracle_oid_mode: bool,
     ) -> list[dict[str, object]]:
         """Process search results with Oracle OID support.
@@ -393,7 +396,7 @@ class LDAPClient:
         search_filter: str,
         attributes: list[str] | None,
         oracle_oid_mode: bool,
-    ) -> Any:
+    ) -> list[dict[str, object]]:
         """Execute Oracle search in new event loop.
 
         Single Responsibility: Handle only event loop management for Oracle search.

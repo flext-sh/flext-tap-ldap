@@ -164,19 +164,20 @@ class TestLDAPClient:
 
         # Test full flow: Oracle support should work when no event loop is running
         # The method will return empty in async context, so we test without event loop
-        with patch("asyncio.get_running_loop", side_effect=RuntimeError):
-            # Mock the synchronous search to return test data
-            with patch.object(client, "search", return_value=[mock_entry]):
-                results = list(
-                    client.search_with_oracle_support(
-                        base_dn="dc=oracle,dc=com",
-                        search_filter="(uid=jdoe)",
-                        oracle_oid_mode=True,
-                    ),
-                )
+        with (
+            patch("asyncio.get_running_loop", side_effect=RuntimeError),
+            patch.object(client, "search", return_value=[mock_entry]),
+        ):
+            results = list(
+                client.search_with_oracle_support(
+                    base_dn="dc=oracle,dc=com",
+                    search_filter="(uid=jdoe)",
+                    oracle_oid_mode=True,
+                ),
+            )
 
-                # Verify Oracle-specific processing occurred
-                if len(results) >= 1:  # Should have at least one result
+            # Verify Oracle-specific processing occurred
+            if len(results) >= 1:  # Should have at least one result
                     result = results[0]
                     # Oracle password should be mapped to userPassword
                     if "userPassword" not in result["attributes"]:
@@ -332,12 +333,9 @@ class TestLDAPClientComprehensive:
     def test_getattr_delegation(self, client: LDAPClient) -> None:
         """Test __getattr__ delegation to flext API."""
         # This will try to get an attribute from the flext API
-        # Should not raise AttributeError
-        try:
+        # Should raise AttributeError with appropriate message
+        with pytest.raises(AttributeError, match=r"(flext_api|LDAPClient)"):
             _ = client.some_unknown_method
-        except AttributeError as e:
-            # Should mention the flext API
-            assert "flext_api" in str(e) or "LDAPClient" in str(e)
 
     @patch("flext_tap_ldap.client.LDAPClient._perform_async_search")
     def test_search_error_handling(
@@ -350,6 +348,7 @@ class TestLDAPClientComprehensive:
         mock_async_search.side_effect = Exception("Connection failed")
 
         # Should handle the exception and return empty list or raise
+        # This test accepts both success (returns list) or failure (raises exception)
         try:
             results = client.search(
                 base_dn="dc=test,dc=com",
@@ -357,9 +356,9 @@ class TestLDAPClientComprehensive:
             )
             # If it doesn't raise, should return empty list
             assert isinstance(results, list)
-        except Exception as e:
-            # If it raises, should be handled appropriately
-            assert isinstance(e, Exception)
+        except Exception:
+            # If it raises, that's also acceptable behavior for this test
+            pass
 
     def test_health_check_comprehensive(self, client: LDAPClient) -> None:
         """Test comprehensive health check."""

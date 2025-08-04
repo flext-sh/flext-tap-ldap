@@ -9,8 +9,7 @@ Eliminates duplication by using centralized Singer exception patterns from flext
 
 from __future__ import annotations
 
-from typing import Any
-
+# Remove Any import - use specific types
 # 🚨 ARCHITECTURAL COMPLIANCE: Use Singer base exceptions to eliminate duplication
 from flext_core import (
     FlextSingerAuthenticationError,
@@ -31,9 +30,9 @@ class _FlextTapLdapErrorMixin:
 
     def _build_ldap_context(
         self,
-        kwargs: dict[str, Any],
-        **specific_params: Any,
-    ) -> dict[str, Any]:
+        kwargs: dict[str, object],
+        **specific_params: object,
+    ) -> dict[str, object]:
         """Build context dict with LDAP-specific parameters.
 
         Args:
@@ -68,9 +67,9 @@ class _FlextTapLdapErrorMixin:
         message: str,
         prefix: str,
         stream_name: str | None = None,
-        kwargs: dict[str, Any] | None = None,
-        **specific_params: Any,
-    ) -> tuple[str, dict[str, Any]]:
+        kwargs: dict[str, object] | None = None,
+        **specific_params: object,
+    ) -> tuple[str, dict[str, object]]:
         """Common initialization for LDAP errors to eliminate code duplication.
 
         Single Responsibility: Handle common initialization pattern.

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 # Import from flext-core for foundational patterns (standardized)
 from flext_core import FlextResult, FlextValueObject as FlextDomainBaseModel
@@ -10,6 +10,8 @@ from pydantic import Field
 
 if TYPE_CHECKING:
     from datetime import datetime
+
+    from flext_ldap import FlextLdapEntry
 
 
 class LDAPAttribute(FlextDomainBaseModel):
@@ -89,7 +91,7 @@ class LDAPEntry(FlextDomainBaseModel):
         """
         return self.dn
 
-    def get_attribute(self, name: str) -> Any | None:
+    def get_attribute(self, name: str) -> object | None:
         """Get attribute value by name (case-insensitive).
 
         Args:
@@ -138,7 +140,7 @@ class LDAPUser(LDAPEntry):
     login_shell: str | None = Field(None, description="Login shell")
 
     @classmethod
-    def from_entry(cls, entry: Any) -> LDAPUser:
+    def from_entry(cls, entry: dict[str, object] | FlextLdapEntry) -> LDAPUser:
         """Create LDAPUser from LDAP entry."""
         return cls(
             # Required fields from LDAPEntry using alias 'id' for dn
@@ -185,7 +187,7 @@ class LDAPGroup(LDAPEntry):
     modify_timestamp: str | None = Field(None, description="Modification timestamp")
 
     @classmethod
-    def from_entry(cls, entry: Any) -> LDAPGroup:
+    def from_entry(cls, entry: dict[str, object] | FlextLdapEntry) -> LDAPGroup:
         """Create LDAPGroup from LDAP entry."""
         return cls(
             # Required fields from LDAPEntry using alias 'id' for dn
