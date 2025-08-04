@@ -20,7 +20,7 @@ TapConfig = TapLDAPConfig
 
 __version__ = "0.9.0-wrapper"
 
-__all__ = [
+__all__: list[str] = [
     # Backward compatibility
     "FlextTapLDAP",
     "FlextTapLDAPConfig",

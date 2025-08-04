@@ -297,7 +297,7 @@ class FlextTapLdapStreamError(FlextTapLdapError):
         )
 
 
-__all__ = [
+__all__: list[str] = [
     "FlextTapLdapAuthenticationError",
     "FlextTapLdapConfigurationError",
     "FlextTapLdapConnectionError",

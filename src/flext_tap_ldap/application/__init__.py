@@ -13,7 +13,7 @@ from flext_tap_ldap.application.services import (
     TapExecutionService,
 )
 
-__all__ = [
+__all__: list[str] = [
     "LDAPConnectionService",
     "LDAPRecordService",
     "LDAPStreamService",

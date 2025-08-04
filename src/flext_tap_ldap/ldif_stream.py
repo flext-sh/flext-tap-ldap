@@ -126,4 +126,4 @@ class LDIFAnalysisStream(Stream):
 
 
 # Export what we can
-__all__ = ["LDIFAnalysisStream", "LDIFStream"]
+__all__: list[str] = ["LDIFAnalysisStream", "LDIFStream"]

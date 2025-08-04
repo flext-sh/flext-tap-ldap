@@ -163,7 +163,7 @@ class LDAPClient:
         Single Responsibility: Handle only result processing logic.
         """
         entries: list[dict[str, object]] = []
-        if not (result.is_success and result.data):
+        if not (result.success and result.data):
             return entries
 
         for entries_returned, entry_data in enumerate(result.data):
@@ -277,7 +277,7 @@ class LDAPClient:
                             "(objectClass=*)",
                             scope=FlextLdapScopeEnum.BASE,
                         )
-                        return result.is_success
+                        return result.success
                 except (RuntimeError, ValueError, TypeError):
                     # In test environments, connection may not be real
                     # Return True as fallback for compatibility
@@ -459,7 +459,7 @@ class LDAPClient:
 LDAPConnectionConfig = FlextLdapConnectionConfig
 LDAPEntry = FlextLdapEntry
 
-__all__ = [
+__all__: list[str] = [
     "LDAPClient",
     "LDAPConnectionConfig",
     "LDAPEntry",

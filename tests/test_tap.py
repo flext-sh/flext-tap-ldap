@@ -43,7 +43,7 @@ class TestFlextTapLDAPUnit:
     def test_tap_initialization(self, config: dict[str, object]) -> None:
         tap = FlextTapLDAP(config=config)
         if tap.name != "tap-ldap":
-            msg = f"Expected {'tap-ldap'}, got {tap.name}"
+            msg: str = f"Expected {'tap-ldap'}, got {tap.name}"
             raise AssertionError(msg)
         assert tap.config == config
 
@@ -54,15 +54,15 @@ class TestFlextTapLDAPUnit:
         # Check default streams
         stream_names = [s.name for s in streams]
         if "users" not in stream_names:
-            msg = f"Expected {'users'} in {stream_names}"
+            msg: str = f"Expected {'users'} in {stream_names}"
             raise AssertionError(msg)
         assert "groups" in stream_names
         if "organizational_units" not in stream_names:
-            msg = f"Expected {'organizational_units'} in {stream_names}"
+            msg: str = f"Expected {'organizational_units'} in {stream_names}"
             raise AssertionError(msg)
         assert "schema" in stream_names
         if len(streams) != 4:
-            msg = f"Expected {4}, got {len(streams)}"
+            msg: str = f"Expected {4}, got {len(streams)}"
             raise AssertionError(msg)
 
     def test_discover_custom_streams(self, config: dict[str, object]) -> None:
@@ -86,10 +86,10 @@ class TestFlextTapLDAPUnit:
 
         stream_names = [s.name for s in streams]
         if "service_accounts" not in stream_names:
-            msg = f"Expected {'service_accounts'} in {stream_names}"
+            msg: str = f"Expected {'service_accounts'} in {stream_names}"
             raise AssertionError(msg)
         if len(streams) != 5:
-            msg = f"Expected {5}, got {len(streams)}"
+            msg: str = f"Expected {5}, got {len(streams)}"
             raise AssertionError(msg)
 
     def test_catalog_generation(self, config: dict[str, object]) -> None:
@@ -97,10 +97,10 @@ class TestFlextTapLDAPUnit:
         catalog = tap.catalog_dict
 
         if "streams" not in catalog:
-            msg = f"Expected {'streams'} in {catalog}"
+            msg: str = f"Expected {'streams'} in {catalog}"
             raise AssertionError(msg)
         if len(catalog["streams"]) < 4:
-            msg = f"Expected {len(catalog['streams'])} >= {4}"
+            msg: str = f"Expected {len(catalog['streams'])} >= {4}"
             raise AssertionError(msg)
 
         # Check users stream
@@ -108,11 +108,15 @@ class TestFlextTapLDAPUnit:
             s for s in catalog["streams"] if s["tap_stream_id"] == "users"
         )
         if users_stream["replication_method"] != "INCREMENTAL":
-            msg = f"Expected {'INCREMENTAL'}, got {users_stream['replication_method']}"
+            msg: str = (
+                f"Expected {'INCREMENTAL'}, got {users_stream['replication_method']}"
+            )
             raise AssertionError(msg)
         assert users_stream["replication_key"] == "modifyTimestamp"
         if "inclusion" not in users_stream["metadata"][0]["metadata"]:
-            msg = f"Expected {'inclusion'} in {users_stream['metadata'][0]['metadata']}"
+            msg: str = (
+                f"Expected {'inclusion'} in {users_stream['metadata'][0]['metadata']}"
+            )
             raise AssertionError(msg)
 
     @patch("flext_tap_ldap.client.LDAPClient")
@@ -154,10 +158,12 @@ class TestFlextTapLDAPUnit:
                 records.append(item)
 
         if len(records) != 1:
-            msg = f"Expected {1}, got {len(records)}"
+            msg: str = f"Expected {1}, got {len(records)}"
             raise AssertionError(msg)
         record = records[0]
         if record["dn"] != "uid=jdoe,ou=users,dc=test,dc=com":
-            msg = f"Expected {'uid=jdoe,ou=users,dc=test,dc=com'}, got {record['dn']}"
+            msg: str = (
+                f"Expected {'uid=jdoe,ou=users,dc=test,dc=com'}, got {record['dn']}"
+            )
             raise AssertionError(msg)
         assert record["uid"] == "jdoe"

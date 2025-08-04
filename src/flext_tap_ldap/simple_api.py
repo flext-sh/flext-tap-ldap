@@ -408,7 +408,7 @@ def create_ldif_processing_config_advanced(
 
 
 # Export main API functions
-__all__ = [
+__all__: list[str] = [
     "FlextResult",
     "LDIFConfigBuilder",
     "create_development_ldap_config",

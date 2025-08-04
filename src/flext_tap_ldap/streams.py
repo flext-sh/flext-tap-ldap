@@ -609,7 +609,7 @@ class CustomStream(LDAPBaseStream):
             }
 
 
-__all__ = [
+__all__: list[str] = [
     "CustomStream",
     "GroupsStream",
     "LDAPBaseStream",

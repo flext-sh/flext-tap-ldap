@@ -71,7 +71,7 @@ class TestLDAPEntry:
             object_classes=["person"],
         )
         result = entry.validate_domain_rules()
-        assert result.is_success
+        assert result.success
 
         # Invalid entry (empty DN)
         invalid_entry = LDAPEntry(
@@ -79,7 +79,7 @@ class TestLDAPEntry:
             object_classes=["person"],
         )
         result = invalid_entry.validate_domain_rules()
-        assert not result.is_success
+        assert not result.success
         assert "DN cannot be empty" in result.error
 
 
