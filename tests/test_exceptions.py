@@ -304,12 +304,12 @@ class TestErrorHandlingIntegration:
             msg = "Connection failed"
             raise FlextTapLdapConnectionError(msg)
 
-        # Test catching base error
-        with pytest.raises(Exception):
+        # Test catching base error - use specific exception type
+        with pytest.raises(FlextTapLdapAuthenticationError):
             msg = "Auth failed"
             raise FlextTapLdapAuthenticationError(msg)
 
-        # Test catching generic exception
-        with pytest.raises(Exception):
+        # Test catching validation error - use specific exception type
+        with pytest.raises(FlextTapLdapValidationError):
             msg = "Validation failed"
             raise FlextTapLdapValidationError(msg)

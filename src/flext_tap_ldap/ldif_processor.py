@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -555,7 +555,7 @@ class FlextLDIFProcessor:
             "error_messages": self.errors.copy(),
         }
 
-    def load_from_file(self, file_path: Path) -> FlextResult[Any]:
+    def load_from_file(self, file_path: Path) -> FlextResult[str]:
         """Load LDIF entries from file and return as FlextResult."""
         try:
             self.entries = list(self.parse_file(file_path))
@@ -568,7 +568,7 @@ class FlextLDIFProcessor:
         self,
         content: str,
         source_name: str = "string",
-    ) -> FlextResult[Any]:
+    ) -> FlextResult[str]:
         """Load LDIF entries from string and return as FlextResult."""
         try:
             self.entries = list(self.parse_content(content, source_name))

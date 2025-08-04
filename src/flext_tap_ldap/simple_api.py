@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
-from typing import Any
 
+# Remove Any import - use specific types
 # Import from flext-core for foundational patterns (standardized)
 from flext_core import (
     FlextResult,
@@ -108,7 +108,7 @@ class LDIFConfigBuilder:
             return FlextResult.fail(f"Failed to build LDIF processing config: {e}")
 
 
-def setup_ldap_tap(config: TapLDAPConfig | None = None) -> FlextResult[Any]:
+def setup_ldap_tap(config: TapLDAPConfig | None = None) -> FlextResult[TapLDAPConfig]:
     """Setup LDAP tap with configuration.
 
     Args:
@@ -237,7 +237,7 @@ def create_ldif_processing_config(
     return builder.build()
 
 
-def validate_ldap_config(config: TapLDAPConfig) -> FlextResult[Any]:
+def validate_ldap_config(config: TapLDAPConfig) -> FlextResult[bool]:
     """Validate LDAP tap configuration.
 
     Args:
@@ -269,7 +269,7 @@ def validate_ldap_config(config: TapLDAPConfig) -> FlextResult[Any]:
         return FlextResult.fail(f"Configuration validation failed: {e}")
 
 
-def create_development_ldap_config(**overrides: Any) -> FlextResult[Any]:
+def create_development_ldap_config(**overrides: object) -> FlextResult[TapLDAPConfig]:
     """Create development LDAP configuration with defaults.
 
     Args:
@@ -311,7 +311,7 @@ def create_development_ldap_config(**overrides: Any) -> FlextResult[Any]:
         return FlextResult.fail(f"Failed to create development config: {e}")
 
 
-def create_production_ldap_config(**overrides: Any) -> FlextResult[Any]:
+def create_production_ldap_config(**overrides: object) -> FlextResult[TapLDAPConfig]:
     """Create production LDAP configuration with security defaults.
 
     Args:
@@ -358,7 +358,7 @@ def create_ldif_processing_config_advanced(
     ldif_directory: str | None = None,
     ldif_files: list[str] | None = None,
     **overrides: object,
-) -> FlextResult[Any]:
+) -> FlextResult[TapLDAPConfig]:
     """Create LDIF processing configuration for migration scenarios.
 
     Args:

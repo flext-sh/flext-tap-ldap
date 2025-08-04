@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 from unittest.mock import Mock, patch
 
 import pytest
@@ -354,7 +355,5 @@ class TestLDAPClientQuick:
         assert result == "delegated"
 
         # Test with non-existent attribute
-        try:
+        with contextlib.suppress(AttributeError):
             _ = client.non_existent_method
-        except AttributeError:
-            pass  # Expected for non-existent attributes

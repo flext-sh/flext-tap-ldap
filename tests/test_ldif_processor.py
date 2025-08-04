@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 import pytest
@@ -607,9 +608,9 @@ cn: another
                 entries = result.data
                 # Should still process valid entries
                 assert len(entries) >= 1
-        except Exception as e:
+        except Exception:
             # If parsing fails completely, that's also acceptable behavior
-            assert isinstance(e, Exception)
+            pass
 
     def test_processor_max_errors_limit(self) -> None:
         """Test processor max errors limit."""
@@ -622,9 +623,9 @@ cn: another
             result = FlextResult.ok(list(processor.parse_content(error_content)))
             # Should handle gracefully due to error limits
             assert isinstance(result, FlextResult)
-        except Exception:
+        except Exception as e:
             # May also raise exception when limits exceeded
-            pass
+            logging.warning("Exception during LDIF processing: %s", e)
 
     def test_processor_ignore_errors_false(self) -> None:
         """Test processor with ignore_errors=False."""
@@ -636,6 +637,6 @@ cn: another
             result = FlextResult.ok(list(processor.parse_content(invalid_content)))
             # Should either succeed or fail, but handle gracefully
             assert isinstance(result, FlextResult)
-        except Exception as e:
-            # Should raise exception when not ignoring errors
-            assert isinstance(e, Exception)
+        except Exception:
+            # Should raise exception when not ignoring errors - this is expected
+            pass

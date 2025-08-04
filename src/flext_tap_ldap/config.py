@@ -9,8 +9,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Any
-
+# Remove Any import - use specific types
 from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -162,10 +161,10 @@ class TapLDAPConfig(BaseSettings):
         return v
 
     @classmethod
-    def create_with_defaults(cls, **overrides: Any) -> TapLDAPConfig:
+    def create_with_defaults(cls, **overrides: object) -> TapLDAPConfig:
         """Create config with intelligent defaults."""
         # Use proper typed defaults for LDAPConnectionConfig
-        ldap_defaults: dict[str, Any] = {
+        ldap_defaults: dict[str, object] = {
             "host": "localhost",
             "port": 389,
             "bind_dn": None,
@@ -179,7 +178,7 @@ class TapLDAPConfig(BaseSettings):
         }
 
         # Use proper typed defaults for LDIFProcessingConfig
-        ldif_defaults: dict[str, Any] = {
+        ldif_defaults: dict[str, object] = {
             "ldif_files": None,
             "ldif_directory": None,
             "ldif_file_pattern": "*.ldif",
