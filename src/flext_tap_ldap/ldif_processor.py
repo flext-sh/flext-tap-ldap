@@ -249,7 +249,7 @@ class FlextLDIFProcessor:
 
     def parse_file(self, file_path: Path) -> Iterator[LDIFEntry]:
         if not file_path.exists():
-            msg = f"LDIF file not found: {file_path}"
+            msg: str = f"LDIF file not found: {file_path}"
             raise ValueError(msg)
 
         logger.info(f"Starting LDIF parsing: {file_path}")
@@ -262,7 +262,7 @@ class FlextLDIFProcessor:
             with Path(file_path).open(encoding="latin-1") as f:
                 yield from self._parse_lines(f.readlines(), str(file_path))
         except (RuntimeError, ValueError, TypeError) as e:
-            error_msg = f"Failed to parse LDIF file {file_path}: {e}"
+            error_msg: str = f"Failed to parse LDIF file {file_path}: {e}"
             if self.ignore_errors:
                 logger.exception(error_msg)
                 self.errors.append(error_msg)
@@ -440,7 +440,7 @@ class FlextLDIFProcessor:
             return None
 
         if not current_entry:
-            error_msg = f"Line {line_number}: Attribute line without DN in {source_name}: {line}"
+            error_msg: str = f"Line {line_number}: Attribute line without DN in {source_name}: {line}"
             self._handle_error(error_msg)
             return None  # Explicit None for attribute lines without DN
 
@@ -496,7 +496,7 @@ class FlextLDIFProcessor:
             attr_value = base64.b64decode(attr_value_b64).decode("utf-8")
             self._add_attribute(current_entry, attr_name, attr_value)
         except (RuntimeError, ValueError, TypeError) as e:
-            error_msg = f"Line {line_number}: Failed to decode base64 value in {source_name}: {e}"
+            error_msg: str = f"Line {line_number}: Failed to decode base64 value in {source_name}: {e}"
             self._handle_error(error_msg)
 
         return current_entry
@@ -539,7 +539,7 @@ class FlextLDIFProcessor:
         self.errors.append(error_msg)
 
         if len(self.errors) > self.max_errors:
-            msg = f"Too many errors (>{self.max_errors}), stopping"
+            msg: str = f"Too many errors (>{self.max_errors}), stopping"
             raise ValueError(msg)
 
         if self.ignore_errors:

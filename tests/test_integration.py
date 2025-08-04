@@ -63,23 +63,23 @@ class TestFlextTapLDAPIntegration:
         )
 
         if result.exit_code != 0:
-            msg = f"Expected {0}, got {result.exit_code}"
+            msg: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(msg)
 
         # Parse output as catalog
         catalog = json.loads(result.output)
         if "streams" not in catalog:
-            msg = f"Expected {'streams'} in {catalog}"
+            msg: str = f"Expected {'streams'} in {catalog}"
             raise AssertionError(msg)
 
         # Check default streams are discovered
         stream_names = [s["tap_stream_id"] for s in catalog["streams"]]
         if "users" not in stream_names:
-            msg = f"Expected {'users'} in {stream_names}"
+            msg: str = f"Expected {'users'} in {stream_names}"
             raise AssertionError(msg)
         assert "groups" in stream_names
         if "organizational_units" not in stream_names:
-            msg = f"Expected {'organizational_units'} in {stream_names}"
+            msg: str = f"Expected {'organizational_units'} in {stream_names}"
             raise AssertionError(msg)
         assert "schema" in stream_names
 
@@ -107,7 +107,7 @@ class TestFlextTapLDAPIntegration:
         )
 
         if result.exit_code != 0:
-            msg = f"Expected {0}, got {result.exit_code}"
+            msg: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(msg)
 
         # Check output contains Singer messages
@@ -117,7 +117,7 @@ class TestFlextTapLDAPIntegration:
         # Should have schema and record messages
         message_types = {msg["type"] for msg in messages}
         if "SCHEMA" not in message_types:
-            msg = f"Expected {'SCHEMA'} in {message_types}"
+            msg: str = f"Expected {'SCHEMA'} in {message_types}"
             raise AssertionError(msg)
 
     @patch("flext_tap_ldap.client.LDAPClient")
@@ -147,7 +147,7 @@ class TestFlextTapLDAPIntegration:
         )
 
         if result.exit_code != 0:
-            msg = f"Expected {0}, got {result.exit_code}"
+            msg: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(msg)
 
         # Verify incremental filter was applied
@@ -159,7 +159,7 @@ class TestFlextTapLDAPIntegration:
                 if "inetOrgPerson" in filter_arg:
                     # Should include timestamp filter for incremental
                     if "modifyTimestamp>=" in filter_arg or result.exit_code != 0:
-                        msg = f"Expected {0}, got {'modifyTimestamp>=' in filter_arg or result.exit_code}"
+                        msg: str = f"Expected {0}, got {'modifyTimestamp>=' in filter_arg or result.exit_code}"
                         raise AssertionError(msg)
 
     def test_custom_streams_config(self, runner: CliRunner, tmp_path: Path) -> None:
@@ -196,14 +196,14 @@ class TestFlextTapLDAPIntegration:
             )
 
         if result.exit_code != 0:
-            msg = f"Expected {0}, got {result.exit_code}"
+            msg: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(msg)
 
         # Check custom stream is in catalog
         catalog = json.loads(result.output)
         stream_names = [s["tap_stream_id"] for s in catalog["streams"]]
         if "service_accounts" not in stream_names:
-            msg = f"Expected {'service_accounts'} in {stream_names}"
+            msg: str = f"Expected {'service_accounts'} in {stream_names}"
             raise AssertionError(msg)
 
     def test_error_handling(
@@ -275,7 +275,7 @@ class TestFlextTapLDAPIntegration:
         )
 
         if result.exit_code != 0:
-            msg = f"Expected {0}, got {result.exit_code}"
+            msg: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(msg)
         # Note: In test environment with hardcoded data, pagination doesn't occur
         # This test verifies the tap can handle pagination setup without errors

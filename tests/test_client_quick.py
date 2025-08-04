@@ -79,7 +79,7 @@ class TestLDAPClientQuick:
         """Test search result processing with different scenarios."""
         # Success case
         mock_result = Mock()
-        mock_result.is_success = True
+        mock_result.success = True
         mock_result.data = [
             Mock(dn="uid=user1,dc=test,dc=com", attributes={"uid": ["user1"]}),
             Mock(dn="uid=user2,dc=test,dc=com", attributes={"uid": ["user2"]}),
@@ -94,12 +94,12 @@ class TestLDAPClientQuick:
         assert len(results) == 1
 
         # Failure case
-        mock_result.is_success = False
+        mock_result.success = False
         results = client._process_search_results(mock_result, size_limit=0)
         assert len(results) == 0
 
         # No data case
-        mock_result.is_success = True
+        mock_result.success = True
         mock_result.data = None
         results = client._process_search_results(mock_result, size_limit=0)
         assert len(results) == 0

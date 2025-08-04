@@ -213,7 +213,7 @@ class TestTapExecution:
         assert execution.completed_at is not None
         assert execution.duration_seconds is not None
         assert execution.is_completed is True
-        assert execution.is_successful is True
+        assert execution.successful is True
 
     def test_tap_execution_complete_execution_failure(self) -> None:
         """Test completing execution with failure."""
@@ -240,7 +240,7 @@ class TestTapExecution:
         assert execution.stdout == "Some output"
         assert execution.stderr == "Connection failed"
         assert execution.is_completed is True
-        assert execution.is_successful is False
+        assert execution.successful is False
 
     def test_tap_execution_cancel_execution(self) -> None:
         """Test cancelling execution."""
@@ -261,7 +261,7 @@ class TestTapExecution:
         assert execution.completed_at is not None
         assert execution.duration_seconds is not None
         assert execution.is_completed is True
-        assert execution.is_successful is False
+        assert execution.successful is False
 
     def test_tap_execution_update_metrics(self) -> None:
         """Test updating execution metrics."""

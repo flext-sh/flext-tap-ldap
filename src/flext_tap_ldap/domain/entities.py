@@ -82,7 +82,7 @@ class TapExecution(BaseModel):
         }
 
     @property
-    def is_successful(self) -> bool:
+    def successful(self) -> bool:
         return self.tap_status == "completed" and self.exit_code == 0
 
     def start_execution(self) -> None:

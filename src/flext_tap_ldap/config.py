@@ -157,7 +157,7 @@ class TapLDAPConfig(BaseSettings):
                     }
                     CustomStreamConfig(**config_data)  # type: ignore[arg-type]
                 except (ValueError, TypeError) as e:
-                    msg = f"Invalid custom stream config: {e}"
+                    msg: str = f"Invalid custom stream config: {e}"
                     raise ValueError(msg) from e
         return v
 
@@ -212,7 +212,7 @@ class TapLDAPConfig(BaseSettings):
 
 
 # Export main configuration classes
-__all__ = [
+__all__: list[str] = [
     "CustomStreamConfig",
     "LDAPConnectionConfig",
     "LDIFProcessingConfig",
