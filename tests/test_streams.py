@@ -590,7 +590,9 @@ class TestLDAPBaseStreamDirectUsage:
         # Create a subclass to test the base functionality
         class TestBaseStream(LDAPBaseStream):
             name = "test_base"
-            schema: ClassVar[dict[str, object]] = {"properties": {"dn": {"type": "string"}}}
+            schema: ClassVar[dict[str, object]] = {
+                "properties": {"dn": {"type": "string"}}
+            }
 
         # Create instance of test subclass
         base_stream = TestBaseStream(mock_tap)

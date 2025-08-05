@@ -136,7 +136,9 @@ class LDAPClient:
         protocol = "ldaps" if self.use_ssl else "ldap"
         return f"{protocol}://{self.host}:{self.port}"
 
-    def _convert_entry_to_dict(self, entry_data: FlextLdapEntry | dict[str, object]) -> dict[str, object]:
+    def _convert_entry_to_dict(
+        self, entry_data: FlextLdapEntry | dict[str, object],
+    ) -> dict[str, object]:
         """Convert FlextLdapEntry to dict format for backward compatibility.
 
         Single Responsibility: Handle only entry format conversion.

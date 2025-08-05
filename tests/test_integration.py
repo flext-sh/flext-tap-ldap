@@ -255,7 +255,7 @@ class TestFlextTapLDAPIntegration:
 
         async def mock_search(
             *args: Any,
-            **kwargs: Any,
+            **kwargs: object,
         ) -> AsyncGenerator[dict[str, object]]:
             yield {
                 "dn": "uid=user1,ou=users,dc=test,dc=com",
