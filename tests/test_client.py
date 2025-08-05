@@ -178,12 +178,12 @@ class TestLDAPClient:
 
             # Verify Oracle-specific processing occurred
             if len(results) >= 1:  # Should have at least one result
-                    result = results[0]
-                    # Oracle password should be mapped to userPassword
-                    if "userPassword" not in result["attributes"]:
-                        msg: str = f"Expected userPassword in {result['attributes']}"
-                        raise AssertionError(msg)
-                # If no results (empty), that's also acceptable as fallback behavior
+                result = results[0]
+                # Oracle password should be mapped to userPassword
+                if "userPassword" not in result["attributes"]:
+                    msg: str = f"Expected userPassword in {result['attributes']}"
+                    raise AssertionError(msg)
+            # If no results (empty), that's also acceptable as fallback behavior
 
         # Test async context behavior (should return empty)
         with patch("asyncio.get_running_loop", return_value=Mock()):

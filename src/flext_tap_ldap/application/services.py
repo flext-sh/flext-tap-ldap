@@ -132,7 +132,9 @@ class LDAPConnectionService:
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to create connection: {e}")
 
-    async def test_connection(self, connection_id: UUID) -> FlextResult[dict[str, object]]:
+    async def test_connection(
+        self, connection_id: UUID,
+    ) -> FlextResult[dict[str, object]]:
         try:
             connection = self._connections.get(connection_id)
             if not connection:
@@ -175,7 +177,9 @@ class LDAPStreamService:
             LDAPStream,
         ] = {}  # Initialized inline for immediate availability
 
-    async def create_stream(self, params: StreamCreationParams) -> FlextResult[dict[str, object]]:
+    async def create_stream(
+        self, params: StreamCreationParams,
+    ) -> FlextResult[dict[str, object]]:
         """Create LDAP stream using parameter object pattern.
 
         Refactored to use Parameter Object Pattern to reduce parameter count
@@ -284,7 +288,9 @@ class TapExecutionService:
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to create execution: {e}")
 
-    async def start_execution(self, execution_id: UUID) -> FlextResult[dict[str, object]]:
+    async def start_execution(
+        self, execution_id: UUID,
+    ) -> FlextResult[dict[str, object]]:
         try:
             execution = self._executions.get(execution_id)
             if not execution:
@@ -312,7 +318,9 @@ class TapExecutionService:
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to complete execution: {e}")
 
-    async def cancel_execution(self, execution_id: UUID) -> FlextResult[dict[str, object]]:
+    async def cancel_execution(
+        self, execution_id: UUID,
+    ) -> FlextResult[dict[str, object]]:
         try:
             execution = self._executions.get(execution_id)
             if not execution:
