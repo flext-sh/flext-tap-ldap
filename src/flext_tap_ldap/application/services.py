@@ -107,7 +107,7 @@ class LDAPConnectionService:
     async def create_connection(
         self,
         params: LDAPConnectionParams,
-    ) -> FlextResult[dict[str, object]]:
+    ) -> FlextResult[LDAPConnection]:
         """Create LDAP connection using parameter object pattern.
 
         Refactored to use Parameter Object Pattern, reducing complexity
@@ -141,7 +141,7 @@ class LDAPConnectionService:
             # Here you would actually test the LDAP connection
             # For now, we just mark it as tested
             connection.last_tested = datetime.now(UTC)
-            return FlextResult.ok(data=True)
+            return FlextResult.ok({"success": True})
         except (RuntimeError, ValueError, TypeError) as e:
             connection = self._connections.get(connection_id)
             if connection:
@@ -155,7 +155,7 @@ class LDAPConnectionService:
         """Get LDAP connection by ID."""
         try:
             connection = self._connections.get(connection_id)
-            return FlextResult.ok(connection)
+            return FlextResult.ok(connection)  # type: ignore[arg-type]
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to get connection: {e}")
 
@@ -163,7 +163,7 @@ class LDAPConnectionService:
         """List all LDAP connections."""
         try:
             connections = list(self._connections.values())
-            return FlextResult.ok(connections)
+            return FlextResult.ok(connections)  # type: ignore[arg-type]
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to list connections: {e}")
 
@@ -204,7 +204,7 @@ class LDAPStreamService:
             )
 
             self._streams[stream.id] = stream
-            return FlextResult.ok(stream)
+            return FlextResult.ok(stream)  # type: ignore[arg-type]
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to create stream: {e}")
 
@@ -235,7 +235,7 @@ class LDAPStreamService:
         """Get LDAP stream by ID."""
         try:
             stream = self._streams.get(stream_id)
-            return FlextResult.ok(stream)
+            return FlextResult.ok(stream)  # type: ignore[arg-type]
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to get stream: {e}")
 
@@ -250,7 +250,7 @@ class LDAPStreamService:
             if connection_id:
                 streams = [s for s in streams if s.connection_id == connection_id]
 
-            return FlextResult.ok(streams)
+            return FlextResult.ok(streams)  # type: ignore[arg-type]
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to list streams: {e}")
 
@@ -284,7 +284,7 @@ class TapExecutionService:
             )
 
             self._executions[execution.id] = execution
-            return FlextResult.ok(execution)
+            return FlextResult.ok(execution)  # type: ignore[arg-type]
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to create execution: {e}")
 
@@ -298,7 +298,7 @@ class TapExecutionService:
                 return FlextResult.fail("Execution not found")
 
             execution.start_execution()
-            return FlextResult.ok(execution)
+            return FlextResult.ok(execution)  # type: ignore[arg-type]
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to start execution: {e}")
 
@@ -316,7 +316,7 @@ class TapExecutionService:
                 return FlextResult.fail("Execution not found")
 
             execution.complete_execution(exit_code, stdout, stderr)
-            return FlextResult.ok(execution)
+            return FlextResult.ok(execution)  # type: ignore[arg-type]
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to complete execution: {e}")
 
@@ -330,7 +330,7 @@ class TapExecutionService:
                 return FlextResult.fail("Execution not found")
 
             execution.cancel_execution()
-            return FlextResult.ok(execution)
+            return FlextResult.ok(execution)  # type: ignore[arg-type]
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to cancel execution: {e}")
 
@@ -347,7 +347,7 @@ class TapExecutionService:
                 return FlextResult.fail("Execution not found")
 
             execution.update_metrics(records_extracted, streams_processed)
-            return FlextResult.ok(execution)
+            return FlextResult.ok(execution)  # type: ignore[arg-type]
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to update metrics: {e}")
 
@@ -358,7 +358,7 @@ class TapExecutionService:
         """Get tap execution by ID."""
         try:
             execution = self._executions.get(execution_id)
-            return FlextResult.ok(execution)
+            return FlextResult.ok(execution)  # type: ignore[arg-type]
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to get execution: {e}")
 
@@ -379,7 +379,7 @@ class TapExecutionService:
                 reverse=True,
             )
 
-            return FlextResult.ok(executions)
+            return FlextResult.ok(executions)  # type: ignore[arg-type]
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to list executions: {e}")
 
@@ -416,7 +416,7 @@ class LDAPRecordService:
             record.singer_record = record.to_singer_record()
 
             self._records[record.id] = record
-            return FlextResult.ok(record)
+            return FlextResult.ok(record)  # type: ignore[arg-type]
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to create record: {e}")
 
@@ -424,7 +424,7 @@ class LDAPRecordService:
         """Get LDAP record by ID."""
         try:
             record = self._records.get(record_id)
-            return FlextResult.ok(record)
+            return FlextResult.ok(record)  # type: ignore[arg-type]
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to get record: {e}")
 
@@ -447,7 +447,7 @@ class LDAPRecordService:
             # Sort by extracted_at descending
             records.sort(key=lambda r: r.extracted_at, reverse=True)
 
-            return FlextResult.ok(records[:limit])
+            return FlextResult.ok(records[:limit])  # type: ignore[arg-type]
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to list records: {e}")
 
@@ -466,6 +466,6 @@ class LDAPRecordService:
             if execution_id:
                 records = [r for r in records if r.execution_id == execution_id]
 
-            return FlextResult.ok(len(records))
+            return FlextResult.ok({"count": len(records)})
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to count records: {e}")

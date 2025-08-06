@@ -221,12 +221,12 @@ def create_ldif_processing_config(  # noqa: PLR0913
 
     default_max_errors = 100
     if not ldif_ignore_errors or ldif_max_errors != default_max_errors:
-        builder.with_error_handling(ldif_ignore_errors, ldif_max_errors)
+        builder.with_error_handling(ignore_errors=ldif_ignore_errors, max_errors=ldif_max_errors)
 
     if ldif_apply_transformations or ldif_transformation_rules:
         builder.with_transformations(
-            ldif_apply_transformations,
-            ldif_transformation_rules,
+            enable=ldif_apply_transformations,
+            rules=ldif_transformation_rules,
         )
 
     if migration_batch:

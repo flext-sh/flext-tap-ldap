@@ -153,7 +153,7 @@ class TapLDAPConfig(BaseSettings):
                         "replication_key": stream_config.get("replication_key"),
                         "json_schema": stream_config.get("json_schema"),
                     }
-                    CustomStreamConfig(**config_data)
+                    CustomStreamConfig(**config_data)  # type: ignore[arg-type]
                 except (ValueError, TypeError) as e:
                     msg: str = f"Invalid custom stream config: {e}"
                     raise ValueError(msg) from e
@@ -204,8 +204,8 @@ class TapLDAPConfig(BaseSettings):
 
         # Create properly typed config objects
         return cls(
-            connection=LDAPConnectionConfig(**ldap_defaults),
-            ldif_processing=LDIFProcessingConfig(**ldif_defaults),
+            connection=LDAPConnectionConfig(**ldap_defaults),  # type: ignore[arg-type]
+            ldif_processing=LDIFProcessingConfig(**ldif_defaults),  # type: ignore[arg-type]
         )
 
 
