@@ -6,7 +6,9 @@ for the brutal simplification migration project.
 
 from __future__ import annotations
 
+import base64
 import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
@@ -24,6 +26,16 @@ EXPECTED_BULK_SIZE = 2
 logger = get_logger(__name__)
 
 
+@dataclass
+class LineProcessingContext:
+    """Context for line processing."""
+
+    line: str
+    current_entry: LDIFEntry | None
+    line_number: int
+    source_name: str
+
+
 class LDIFParseError(Exception):
     """Exception raised during LDIF parsing."""
 
@@ -38,16 +50,19 @@ class LDIFEntry:
         self.controls: list[str] = []
 
     def get_attribute(self, name: str) -> list[str]:
+        """Get attribute values by name (case-insensitive)."""
         for attr_name, values in self.attributes.items():
             if attr_name.lower() == name.lower():
                 return values
         return []
 
     def has_object_class(self, object_class: str) -> bool:
+        """Check if entry has specific object class."""
         object_classes = self.get_attribute("objectClass") or []
         return any(oc.lower() == object_class.lower() for oc in object_classes)
 
     def to_dict(self) -> dict[str, object]:
+        """Convert entry to dictionary format."""
         entry_dict: dict[str, object] = {
             "dn": self.dn,
             "attributes": dict(self.attributes),  # Convert to proper dict type
@@ -248,6 +263,7 @@ class FlextLDIFProcessor:
         }
 
     def parse_file(self, file_path: Path) -> Iterator[LDIFEntry]:
+        """Parse LDIF file and yield entries."""
         if not file_path.exists():
             msg: str = f"LDIF file not found: {file_path}"
             raise ValueError(msg)
@@ -274,6 +290,7 @@ class FlextLDIFProcessor:
         content: str,
         source_name: str = "content",
     ) -> Iterator[LDIFEntry]:
+        """Parse LDIF content and yield entries."""
         lines = content.splitlines()
         yield from self._parse_lines(lines, source_name)
 
@@ -359,55 +376,71 @@ class FlextLDIFProcessor:
         to eliminate multiple return statements following SOLID principles.
         """
         try:
-            # Process line using chain of responsibility pattern
-            result = self._handle_dn_line(line, current_entry)
-            if result is not None:
-                return result
-
-            result = self._handle_attribute_line_validation(
-                line,
-                current_entry,
-                line_number,
-                source_name,
-            )
-            if result is not None:
-                return result
-
-            result = self._handle_changetype_line(line, current_entry)
-            if result is not None:
-                return result
-
-            result = self._handle_control_line(line, current_entry)
-            if result is not None:
-                return result
-
-            result = self._handle_base64_attribute(
-                line,
-                current_entry,
-                line_number,
-                source_name,
-            )
-            if result is not None:
-                return result
-
-            result = self._handle_regular_attribute(line, current_entry)
-            if result is not None:
-                return result
-
-            # Default: unrecognized line format
-            return self._handle_unrecognized_line(
-                line,
-                current_entry,
-                line_number,
-                source_name,
-            )
-
+            return self._process_line_with_chain(line, current_entry, line_number, source_name)
         except (RuntimeError, ValueError, TypeError) as e:
             error_msg = (
                 f"Line {line_number}: Error processing line in {source_name}: {e}"
             )
             self._handle_error(error_msg)
             return current_entry
+
+    def _process_line_with_chain(  # noqa: PLR0911
+        self,
+        line: str,
+        current_entry: LDIFEntry | None,
+        line_number: int,
+        source_name: str,
+    ) -> LDIFEntry | None:
+        """Process line using chain of responsibility pattern."""
+        context = LineProcessingContext(
+            line=line,
+            current_entry=current_entry,
+            line_number=line_number,
+            source_name=source_name,
+        )
+
+        # Process line using chain of responsibility pattern
+        result = self._handle_dn_line(context.line, context.current_entry)
+        if result is not None:
+            return result
+
+        result = self._handle_attribute_line_validation(
+            context.line,
+            context.current_entry,
+            context.line_number,
+            context.source_name,
+        )
+        if result is not None:
+            return result
+
+        result = self._handle_changetype_line(context.line, context.current_entry)
+        if result is not None:
+            return result
+
+        result = self._handle_control_line(context.line, context.current_entry)
+        if result is not None:
+            return result
+
+        result = self._handle_base64_attribute(
+            context.line,
+            context.current_entry,
+            context.line_number,
+            context.source_name,
+        )
+        if result is not None:
+            return result
+
+        result = self._handle_regular_attribute(context.line, context.current_entry)
+        if result is not None:
+            return result
+
+        # Default: unrecognized line format
+        return self._handle_unrecognized_line(
+            context.line,
+            context.current_entry,
+            context.line_number,
+            context.source_name,
+        )
 
     def _handle_dn_line(
         self,
@@ -491,8 +524,6 @@ class FlextLDIFProcessor:
         attr_value_b64 = parts[1].strip()
 
         try:
-            import base64
-
             attr_value = base64.b64decode(attr_value_b64).decode("utf-8")
             self._add_attribute(current_entry, attr_name, attr_value)
         except (RuntimeError, ValueError, TypeError) as e:
@@ -548,6 +579,7 @@ class FlextLDIFProcessor:
             raise ValueError(msg)
 
     def get_statistics(self) -> dict[str, object]:
+        """Get parsing statistics."""
         return {
             "processed_entries": self.processed_entries,
             "skipped_entries": self.skipped_entries,
@@ -653,6 +685,7 @@ class LDIFValidator:
         self.warnings: list[str] = []
 
     def validate_entry(self, entry: LDIFEntry) -> bool:
+        """Validate LDIF entry."""
         is_valid = True
 
         # Check for required DN
@@ -746,6 +779,7 @@ class LDIFValidator:
         return True
 
     def get_validation_results(self) -> dict[str, object]:
+        """Get validation results."""
         return {
             "errors": self.validation_errors.copy(),
             "warnings": self.warnings.copy(),
@@ -816,6 +850,7 @@ class LDIFTransformer:
         self.transformation_rules = transformation_rules or {}
 
     def transform_entry(self, entry: LDIFEntry) -> LDIFEntry:
+        """Transform LDIF entry."""
         # For now, return entry as-is
         # In the future, this will apply complex transformation rules
         return entry

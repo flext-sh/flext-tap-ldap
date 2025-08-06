@@ -53,17 +53,18 @@ class LDAPClient:
     This eliminates code duplication while maintaining test compatibility.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         config: LDAPClientConfig | None = None,
         host: str | None = None,
         port: int = 389,
         bind_dn: str | None = None,
         password: str | None = None,
+        *,
         use_ssl: bool = False,
         timeout: int = 30,
         page_size: int = 1000,
-        **kwargs: object,
+        **_kwargs: object,
     ) -> None:
         """Initialize with Parameter Object Pattern or backward-compatible interface."""
         # Support both new Parameter Object Pattern and backward compatibility
@@ -355,7 +356,7 @@ class LDAPClient:
     def _extend_attributes_with_oracle_support(
         self,
         attributes: list[str] | None,
-        oracle_oid_mode: bool,
+        *, oracle_oid_mode: bool,
     ) -> list[str] | None:
         """Extend attributes list with Oracle-specific attributes.
 
@@ -376,7 +377,7 @@ class LDAPClient:
     def _process_search_results_with_oracle_support(
         self,
         search_result: list[FlextLdapEntry] | list[dict[str, object]],
-        oracle_oid_mode: bool,
+        *, oracle_oid_mode: bool,
     ) -> list[dict[str, object]]:
         """Process search results with Oracle OID support.
 
@@ -397,14 +398,12 @@ class LDAPClient:
         base_dn: str,
         search_filter: str,
         attributes: list[str] | None,
-        oracle_oid_mode: bool,
+        *, oracle_oid_mode: bool,
     ) -> list[dict[str, object]]:
         """Execute Oracle search in new event loop.
 
         Single Responsibility: Handle only event loop management for Oracle search.
         """
-        import asyncio
-
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:
@@ -440,8 +439,6 @@ class LDAPClient:
 
         # Step 2: Handle event loop management
         try:
-            import asyncio
-
             asyncio.get_running_loop()
             # We're in an async context, can't use run_until_complete
             # Return empty list as fallback

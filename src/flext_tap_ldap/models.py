@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-# Import from flext-core for foundational patterns (standardized)
 from flext_core import FlextResult, FlextValueObject as FlextDomainBaseModel
 from pydantic import Field
 
@@ -20,7 +19,7 @@ class LDAPAttribute(FlextDomainBaseModel):
     name: str = Field(..., description="Attribute name")
     values: list[str] = Field(..., description="Attribute values")
     is_binary: bool = Field(
-        False,
+        default=False,
         description="Whether the attribute contains binary data",
     )
 

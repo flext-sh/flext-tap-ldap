@@ -12,8 +12,6 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 
-# Remove Any import - use specific types
-# Import from flext-core for foundational patterns (standardized)
 from flext_core import (
     FlextResult,
 )
@@ -62,6 +60,7 @@ class LDIFConfigBuilder:
 
     def with_error_handling(
         self,
+        *,
         ignore_errors: bool = True,
         max_errors: int = 100,
     ) -> LDIFConfigBuilder:
@@ -72,6 +71,7 @@ class LDIFConfigBuilder:
 
     def with_transformations(
         self,
+        *,
         enable: bool = True,
         rules: dict[str, object] | None = None,
     ) -> LDIFConfigBuilder:
@@ -132,10 +132,11 @@ def setup_ldap_tap(config: TapLDAPConfig | None = None) -> FlextResult[TapLDAPCo
         return FlextResult.fail(f"Failed to setup LDAP tap: {e}")
 
 
-def create_ldap_connection_config(
+def create_ldap_connection_config(  # noqa: PLR0913
     host: str,
     base_dn: str,
     port: int = 389,
+    *,
     use_ssl: bool = False,
     bind_dn: str | None = None,
     bind_password: str | None = None,
@@ -170,9 +171,10 @@ def create_ldap_connection_config(
         return FlextResult.fail(f"Failed to create LDAP connection config: {e}")
 
 
-def create_ldif_processing_config(
+def create_ldif_processing_config(  # noqa: PLR0913
     ldif_files: list[str] | None = None,
     ldif_directory: str | None = None,
+    *,
     ldif_file_pattern: str = "*.ldif",
     ldif_ignore_errors: bool = True,
     ldif_max_errors: int = 100,
@@ -217,7 +219,8 @@ def create_ldif_processing_config(
     if ldif_file_pattern != "*.ldif":
         builder.with_pattern(ldif_file_pattern)
 
-    if not ldif_ignore_errors or ldif_max_errors != 100:
+    default_max_errors = 100
+    if not ldif_ignore_errors or ldif_max_errors != default_max_errors:
         builder.with_error_handling(ldif_ignore_errors, ldif_max_errors)
 
     if ldif_apply_transformations or ldif_transformation_rules:
@@ -251,14 +254,18 @@ def validate_ldap_config(config: TapLDAPConfig) -> FlextResult[bool]:
         # Validate using Pydantic model validation
         config.model_validate(config.model_dump())
 
+        # Constants for port validation
+        max_port_number = 65535
+
         # Additional business rule validations
-        if config.connection.port <= 0 or config.connection.port > 65535:
-            return FlextResult.fail("Port must be between 1 and 65535")
+        if config.connection.port <= 0 or config.connection.port > max_port_number:
+            return FlextResult.fail(f"Port must be between 1 and {max_port_number}")
 
         if not config.connection.base_dn:
             return FlextResult.fail("Base DN is required")
 
-        if config.connection.use_ssl and config.connection.port == 389:
+        default_ldap_port = 389
+        if config.connection.use_ssl and config.connection.port == default_ldap_port:
             return FlextResult.fail(
                 "SSL enabled but port is 389 (consider using port 636 for LDAPS)",
             )

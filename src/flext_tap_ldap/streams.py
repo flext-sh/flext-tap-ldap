@@ -5,13 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-# FLEXT Core imports - single source of truth for types
 from flext_core import (
     get_logger,
 )
-
-# MIGRATED: Use centralized Singer SDK from flext-meltano
 from flext_meltano import Stream, singer_typing as th
+
+from flext_tap_ldap.client import LDAPClient
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -153,9 +152,6 @@ class UsersStream(LDAPBaseStream):
     ) -> Iterable[dict[str, object]]:
         """Get user records from LDAP server using flext-ldap integration."""
         try:
-            # CRITICAL INTEGRATION: Use actual LDAP client from flext-ldap
-            from flext_tap_ldap.client import LDAPClient
-
             # Extract connection config from tap configuration (flat format)
             config = self.tap.config
 
@@ -229,9 +225,6 @@ class GroupsStream(LDAPBaseStream):
     ) -> Iterable[dict[str, object]]:
         """Get group records from LDAP server using flext-ldap integration."""
         try:
-            # CRITICAL INTEGRATION: Use actual LDAP client from flext-ldap
-            from flext_tap_ldap.client import LDAPClient
-
             # Extract connection config from tap configuration (flat format)
             config = self.tap.config
 
@@ -327,9 +320,6 @@ class OrganizationalUnitsStream(LDAPBaseStream):
     ) -> Iterable[dict[str, object]]:
         """Get organizational unit records from LDAP server using flext-ldap integration."""
         try:
-            # CRITICAL INTEGRATION: Use actual LDAP client from flext-ldap
-            from flext_tap_ldap.client import LDAPClient
-
             # Extract connection config from tap configuration (flat format)
             config = self.tap.config
 
@@ -418,9 +408,6 @@ class SchemaStream(LDAPBaseStream):
     ) -> Iterable[dict[str, object]]:
         """Get schema records from LDAP server using flext-ldap integration."""
         try:
-            # CRITICAL INTEGRATION: Use actual LDAP client from flext-ldap
-            from flext_tap_ldap.client import LDAPClient
-
             # Extract connection config from tap configuration (flat format)
             config = self.tap.config
 
@@ -549,9 +536,6 @@ class CustomStream(LDAPBaseStream):
     ) -> Iterable[dict[str, object]]:
         """Get custom records from LDAP server using flext-ldap integration."""
         try:
-            # CRITICAL INTEGRATION: Use actual LDAP client from flext-ldap
-            from flext_tap_ldap.client import LDAPClient
-
             # Extract connection config from tap configuration (flat format)
             config = self.tap.config
 

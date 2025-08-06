@@ -46,9 +46,11 @@ class LDAPStream(BaseModel):
     last_extraction: datetime | None = None
 
     def update_schema(self, schema: dict[str, object]) -> None:
+        """Update stream schema."""
         self.stream_schema = schema
 
     def record_extraction(self, record_count: int) -> None:
+        """Record extraction statistics."""
         self.records_extracted += record_count
         self.last_extraction = datetime.now(UTC)
 
@@ -75,6 +77,7 @@ class TapExecution(BaseModel):
 
     @property
     def is_completed(self) -> bool:
+        """Check if execution is completed."""
         return self.tap_status in {
             "completed",
             "failed",
@@ -83,13 +86,16 @@ class TapExecution(BaseModel):
 
     @property
     def successful(self) -> bool:
+        """Check if execution was successful."""
         return self.tap_status == "completed" and self.exit_code == 0
 
     def start_execution(self) -> None:
+        """Start tap execution."""
         self.tap_status = "discovering"
         self.started_at = datetime.now(UTC)
 
     def start_extraction(self) -> None:
+        """Start extraction phase."""
         self.tap_status = "extracting"
 
     def complete_execution(
@@ -98,6 +104,7 @@ class TapExecution(BaseModel):
         stdout: str | None = None,
         stderr: str | None = None,
     ) -> None:
+        """Complete tap execution."""
         self.tap_status = "completed" if exit_code == 0 else "failed"
         self.exit_code = exit_code
         self.completed_at = datetime.now(UTC)
@@ -109,6 +116,7 @@ class TapExecution(BaseModel):
             self.duration_seconds = duration.total_seconds()
 
     def cancel_execution(self) -> None:
+        """Cancel tap execution."""
         self.tap_status = "cancelled"
         self.completed_at = datetime.now(UTC)
 
@@ -117,6 +125,7 @@ class TapExecution(BaseModel):
             self.duration_seconds = duration.total_seconds()
 
     def update_metrics(self, records_extracted: int, streams_processed: int) -> None:
+        """Update execution metrics."""
         self.records_extracted = records_extracted
         self.streams_processed = streams_processed
 
@@ -135,9 +144,11 @@ class LDAPRecord(BaseModel):
 
     @property
     def rdn(self) -> str:
+        """Get relative distinguished name."""
         return self.dn.split(",")[0] if self.dn else ""
 
     def to_singer_record(self) -> dict[str, object]:
+        """Convert to Singer record format."""
         return {
             "type": "RECORD",
             "record": {
