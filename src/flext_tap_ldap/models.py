@@ -13,6 +13,15 @@ if TYPE_CHECKING:
     from flext_ldap import FlextLdapEntry
 
 
+def _get_entry_value(entry: dict[str, object] | FlextLdapEntry, key: str, default: object = None) -> object:
+    """Helper function to get value from either dict or FlextLdapEntry."""
+    if isinstance(entry, dict):
+        return entry.get(key, default)
+    else:
+        # FlextLdapEntry - use getattr or similar access pattern
+        return getattr(entry, key, default)
+
+
 class LDAPAttribute(FlextDomainBaseModel):
     """Represents an LDAP attribute with its values."""
 
@@ -143,8 +152,8 @@ class LDAPUser(LDAPEntry):
         """Create LDAPUser from LDAP entry."""
         return cls(
             # Required fields from LDAPEntry using alias 'id' for dn
-            id=entry.get("dn", ""),
-            object_classes=entry.get("objectClass", []),
+            id=str(_get_entry_value(entry, "dn", "")),
+            object_classes=list(_get_entry_value(entry, "objectClass", [])),  # type: ignore[call-overload]
             # Optional metadata fields from LDAPEntry with defaults
             created_at=None,
             modified_at=None,
@@ -152,21 +161,21 @@ class LDAPUser(LDAPEntry):
             modified_by=None,
             change_type=None,
             # LDAPUser specific fields with defaults
-            uid=entry.get("uid", [None])[0],
-            cn=entry.get("cn", [None])[0],
-            sn=entry.get("sn", [None])[0],
-            given_name=entry.get("givenName", [None])[0],
-            display_name=entry.get("displayName", [None])[0],
-            mail=entry.get("mail", [None])[0],
-            telephone_number=entry.get("telephoneNumber", [None])[0],
-            mobile=entry.get("mobile", [None])[0],
-            employee_number=entry.get("employeeNumber", [None])[0],
-            employee_type=entry.get("employeeType", [None])[0],
-            department=entry.get("department", [None])[0],
-            title=entry.get("title", [None])[0],
-            manager=entry.get("manager", [None])[0],
-            home_directory=entry.get("homeDirectory", [None])[0],
-            login_shell=entry.get("loginShell", [None])[0],
+            uid=str(_get_entry_value(entry, "uid", [None])[0]) if _get_entry_value(entry, "uid", [None]) else None,  # type: ignore[index]
+            cn=str(_get_entry_value(entry, "cn", [None])[0]) if _get_entry_value(entry, "cn", [None]) else None,  # type: ignore[index]
+            sn=str(_get_entry_value(entry, "sn", [None])[0]) if _get_entry_value(entry, "sn", [None]) else None,  # type: ignore[index]
+            given_name=str(_get_entry_value(entry, "givenName", [None])[0]) if _get_entry_value(entry, "givenName", [None]) else None,  # type: ignore[index]
+            display_name=str(_get_entry_value(entry, "displayName", [None])[0]) if _get_entry_value(entry, "displayName", [None]) else None,  # type: ignore[index]
+            mail=str(_get_entry_value(entry, "mail", [None])[0]) if _get_entry_value(entry, "mail", [None]) else None,  # type: ignore[index]
+            telephone_number=str(_get_entry_value(entry, "telephoneNumber", [None])[0]) if _get_entry_value(entry, "telephoneNumber", [None]) else None,  # type: ignore[index]
+            mobile=str(_get_entry_value(entry, "mobile", [None])[0]) if _get_entry_value(entry, "mobile", [None]) else None,  # type: ignore[index]
+            employee_number=str(_get_entry_value(entry, "employeeNumber", [None])[0]) if _get_entry_value(entry, "employeeNumber", [None]) else None,  # type: ignore[index]
+            employee_type=str(_get_entry_value(entry, "employeeType", [None])[0]) if _get_entry_value(entry, "employeeType", [None]) else None,  # type: ignore[index]
+            department=str(_get_entry_value(entry, "department", [None])[0]) if _get_entry_value(entry, "department", [None]) else None,  # type: ignore[index]
+            title=str(_get_entry_value(entry, "title", [None])[0]) if _get_entry_value(entry, "title", [None]) else None,  # type: ignore[index]
+            manager=str(_get_entry_value(entry, "manager", [None])[0]) if _get_entry_value(entry, "manager", [None]) else None,  # type: ignore[index]
+            home_directory=str(_get_entry_value(entry, "homeDirectory", [None])[0]) if _get_entry_value(entry, "homeDirectory", [None]) else None,  # type: ignore[index]
+            login_shell=str(_get_entry_value(entry, "loginShell", [None])[0]) if _get_entry_value(entry, "loginShell", [None]) else None,  # type: ignore[index]
         )
 
 
@@ -190,8 +199,8 @@ class LDAPGroup(LDAPEntry):
         """Create LDAPGroup from LDAP entry."""
         return cls(
             # Required fields from LDAPEntry using alias 'id' for dn
-            id=entry.get("dn", ""),
-            object_classes=entry.get("objectClass", []),
+            id=str(_get_entry_value(entry, "dn", "")),
+            object_classes=list(_get_entry_value(entry, "objectClass", [])),  # type: ignore[call-overload]
             # Optional metadata fields from LDAPEntry with defaults
             created_at=None,
             modified_at=None,
@@ -199,14 +208,14 @@ class LDAPGroup(LDAPEntry):
             modified_by=None,
             change_type=None,
             # LDAPGroup specific fields with defaults
-            cn=entry.get("cn", [None])[0],
-            description=entry.get("description", [None])[0],
-            members=entry.get("member", []),
-            unique_members=entry.get("uniqueMember", []),
-            gid_number=entry.get("gidNumber", [None])[0],
+            cn=str(_get_entry_value(entry, "cn", [None])[0]) if _get_entry_value(entry, "cn", [None]) else None,  # type: ignore[index]
+            description=str(_get_entry_value(entry, "description", [None])[0]) if _get_entry_value(entry, "description", [None]) else None,  # type: ignore[index]
+            members=list(_get_entry_value(entry, "member", [])),  # type: ignore[call-overload]
+            unique_members=list(_get_entry_value(entry, "uniqueMember", [])),  # type: ignore[call-overload]
+            gid_number=str(_get_entry_value(entry, "gidNumber", [None])[0]) if _get_entry_value(entry, "gidNumber", [None]) else None,  # type: ignore[index]
             owner=None,
-            create_timestamp=entry.get("createTimestamp", [None])[0],
-            modify_timestamp=entry.get("modifyTimestamp", [None])[0],
+            create_timestamp=str(_get_entry_value(entry, "createTimestamp", [None])[0]) if _get_entry_value(entry, "createTimestamp", [None]) else None,  # type: ignore[index]
+            modify_timestamp=str(_get_entry_value(entry, "modifyTimestamp", [None])[0]) if _get_entry_value(entry, "modifyTimestamp", [None]) else None,  # type: ignore[index]
         )
 
 

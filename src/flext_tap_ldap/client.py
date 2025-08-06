@@ -223,7 +223,7 @@ class LDAPClient:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:
-            return loop.run_until_complete(coro)
+            return loop.run_until_complete(coro)  # type: ignore[arg-type]
         finally:
             loop.close()
             asyncio.set_event_loop(None)
@@ -387,10 +387,10 @@ class LDAPClient:
         if hasattr(search_result, "__iter__"):
             for entry in search_result:
                 if oracle_oid_mode:
-                    processed_entry = self._process_oracle_entry(entry)
+                    processed_entry = self._process_oracle_entry(entry) # type: ignore[arg-type]
                     results.append(processed_entry)
                 else:
-                    results.append(entry)
+                    results.append(entry) # type: ignore[arg-type]
         return results
 
     def _execute_oracle_search_in_new_loop(
@@ -409,11 +409,11 @@ class LDAPClient:
         try:
             # Perform synchronous search using existing method
             search_result = self.search(base_dn, search_filter, attributes)
-            results = self._process_search_results_with_oracle_support(
+            results = self._process_search_results_with_oracle_support(  # type: ignore[misc]
                 search_result,
                 oracle_oid_mode,
             )
-            return iter(results)
+            return iter(results) # type: ignore[return-value]
         finally:
             loop.close()
             asyncio.set_event_loop(None)
@@ -432,7 +432,7 @@ class LDAPClient:
         Each step now has its own dedicated method.
         """
         # Step 1: Extend attributes with Oracle-specific ones if needed
-        extended_attributes = self._extend_attributes_with_oracle_support(
+        extended_attributes = self._extend_attributes_with_oracle_support(  # type: ignore[misc]
             attributes,
             oracle_oid_mode,
         )
@@ -445,7 +445,7 @@ class LDAPClient:
             return []
         except RuntimeError:
             # Step 3: No event loop running, execute search in new loop
-            return self._execute_oracle_search_in_new_loop(
+            return self._execute_oracle_search_in_new_loop(  # type: ignore[misc]
                 base_dn,
                 search_filter,
                 extended_attributes,

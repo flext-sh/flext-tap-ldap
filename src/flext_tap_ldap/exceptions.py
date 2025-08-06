@@ -269,6 +269,7 @@ class FlextTapLdapSearchError(FlextTapLdapError):
 
         super().__init__(
             self._format_ldap_message(message, "search"),
+            ldap_server=None,
             stream_name=None,
             **context,
         )
@@ -289,6 +290,7 @@ class FlextTapLdapStreamError(FlextTapLdapError):
 
         super().__init__(
             self._format_ldap_message(message, "stream"),
+            ldap_server=None,
             stream_name=stream_name,
             **context,
         )
