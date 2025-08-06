@@ -9,8 +9,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar
 
 from flext_core import get_logger
-
-# MIGRATED: Use centralized Singer SDK from flext-meltano
 from flext_meltano import Tap, singer_typing as th
 from flext_meltano.common_schemas import create_ldap_tap_schema
 
@@ -18,6 +16,7 @@ from flext_tap_ldap.config import TapLDAPConfig
 from flext_tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
 from flext_tap_ldap.streams import (
     CustomStream,
+    CustomStreamParams,
     GroupsStream,
     OrganizationalUnitsStream,
     SchemaStream,
@@ -25,7 +24,6 @@ from flext_tap_ldap.streams import (
 )
 
 if TYPE_CHECKING:
-    # MIGRATED: Use centralized Singer SDK from flext-meltano
     from flext_meltano import Stream
 
 
@@ -179,7 +177,6 @@ class FlextTapLDAP(Tap):
         # Add custom streams if configured:
         custom_streams_config = self.config.get("custom_streams", [])
         for custom_config in custom_streams_config:
-            from flext_tap_ldap.streams import CustomStreamParams
 
             params = CustomStreamParams(
                 name=custom_config["name"],

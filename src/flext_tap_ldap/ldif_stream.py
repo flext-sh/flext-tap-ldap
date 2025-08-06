@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-# MIGRATED: Use centralized Singer SDK from flext-meltano
 from flext_meltano import Stream, singer_typing as th
 
 if TYPE_CHECKING:

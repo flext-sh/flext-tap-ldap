@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from unittest.mock import patch
 
@@ -13,7 +14,6 @@ from flext_tap_ldap.tap import FlextTapLDAP
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
-    from pathlib import Path
     from unittest.mock import Mock
 
 
@@ -27,21 +27,21 @@ class TestFlextTapLDAPIntegration:
     @pytest.fixture
     def config_file(self, tmp_path: Path, mock_ldap_config: dict[str, object]) -> Path:
         config_path = tmp_path / "config.json"
-        with open(config_path, "w", encoding="utf-8") as f:
+        with Path(config_path).open("w", encoding="utf-8") as f:
             json.dump(mock_ldap_config, f)
         return config_path
 
     @pytest.fixture
     def catalog_file(self, tmp_path: Path, sample_catalog: dict[str, object]) -> Path:
         catalog_path = tmp_path / "catalog.json"
-        with open(catalog_path, "w", encoding="utf-8") as f:
+        with Path(catalog_path).open("w", encoding="utf-8") as f:
             json.dump(sample_catalog, f)
         return catalog_path
 
     @pytest.fixture
     def state_file(self, tmp_path: Path, sample_state: dict[str, object]) -> Path:
         state_path = tmp_path / "state.json"
-        with open(state_path, "w", encoding="utf-8") as f:
+        with Path(state_path).open("w", encoding="utf-8") as f:
             json.dump(sample_state, f)
         return state_path
 
@@ -182,7 +182,7 @@ class TestFlextTapLDAPIntegration:
         }
 
         config_file = tmp_path / "config.json"
-        with open(config_file, "w", encoding="utf-8") as f:
+        with Path(config_file).open("w", encoding="utf-8") as f:
             json.dump(config, f)
 
         with patch("flext_tap_ldap.client.LDAPClient") as mock_ldap_client:
@@ -214,7 +214,7 @@ class TestFlextTapLDAPIntegration:
     ) -> None:
         # Test with invalid config
         config_file = tmp_path / "bad_config.json"
-        with open(config_file, "w", encoding="utf-8") as f:
+        with Path(config_file).open("w", encoding="utf-8") as f:
             json.dump({"invalid": "config"}, f)  # Missing required fields
 
         result = runner.invoke(

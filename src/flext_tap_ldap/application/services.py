@@ -9,13 +9,20 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
-from uuid import UUID
 
-# Import from flext-core for foundational patterns (standardized)
 from flext_core import (
     FlextResult,
 )
 
+from flext_tap_ldap.domain.entities import (
+    LDAPConnection,
+    LDAPRecord,
+    LDAPStream,
+    TapExecution,
+)
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 @dataclass
 class LDAPConnectionParams:
@@ -38,11 +45,14 @@ class LDAPConnectionParams:
 
     def __post_init__(self) -> None:
         """Validate connection parameters after initialization."""
+        # Constants for port validation
+        max_port_number = 65535
+
         if not self.host:
             msg = "Host is required"
             raise ValueError(msg)
-        if self.port <= 0 or self.port > 65535:
-            msg = "Port must be between 1 and 65535"
+        if self.port <= 0 or self.port > max_port_number:
+            msg = f"Port must be between 1 and {max_port_number}"
             raise ValueError(msg)
         if self.timeout_seconds <= 0:
             msg = "Timeout must be positive"
@@ -85,17 +95,6 @@ class StreamCreationParams:
             raise ValueError(msg)
 
 
-if TYPE_CHECKING:
-    from uuid import UUID
-
-    from flext_tap_ldap.domain.entities import (
-        LDAPConnection,
-        LDAPRecord,
-        LDAPStream,
-        TapExecution,
-    )
-
-
 class LDAPConnectionService:
     """Service for managing LDAP connections."""
 
@@ -115,8 +114,6 @@ class LDAPConnectionService:
         and improving maintainability following SOLID principles.
         """
         try:
-            from flext_tap_ldap.domain.entities import LDAPConnection
-
             # Parameter Object Pattern eliminates complex parameter passing
             connection = LDAPConnection(
                 host=params.host,
@@ -135,6 +132,7 @@ class LDAPConnectionService:
     async def test_connection(
         self, connection_id: UUID,
     ) -> FlextResult[dict[str, object]]:
+        """Test LDAP connection."""
         try:
             connection = self._connections.get(connection_id)
             if not connection:
@@ -154,6 +152,7 @@ class LDAPConnectionService:
         self,
         connection_id: UUID,
     ) -> FlextResult[dict[str, object]]:
+        """Get LDAP connection by ID."""
         try:
             connection = self._connections.get(connection_id)
             return FlextResult.ok(connection)
@@ -161,6 +160,7 @@ class LDAPConnectionService:
             return FlextResult.fail(f"Failed to get connection: {e}")
 
     async def list_connections(self) -> FlextResult[dict[str, object]]:
+        """List all LDAP connections."""
         try:
             connections = list(self._connections.values())
             return FlextResult.ok(connections)
@@ -186,8 +186,6 @@ class LDAPStreamService:
         and improve maintainability following SOLID principles.
         """
         try:
-            from flext_tap_ldap.domain.entities import LDAPStream
-
             # Generate tap_stream_id if not provided
             tap_stream_id = params.tap_stream_id
             if not tap_stream_id:
@@ -211,6 +209,7 @@ class LDAPStreamService:
             return FlextResult.fail(f"Failed to create stream: {e}")
 
     async def discover_schema(self, stream_id: UUID) -> FlextResult[dict[str, object]]:
+        """Discover schema for LDAP stream."""
         try:
             stream = self._streams.get(stream_id)
             if not stream:
@@ -233,6 +232,7 @@ class LDAPStreamService:
             return FlextResult.fail(f"Failed to discover schema: {e}")
 
     async def get_stream(self, stream_id: UUID) -> FlextResult[dict[str, object]]:
+        """Get LDAP stream by ID."""
         try:
             stream = self._streams.get(stream_id)
             return FlextResult.ok(stream)
@@ -243,6 +243,7 @@ class LDAPStreamService:
         self,
         connection_id: UUID | None = None,
     ) -> FlextResult[dict[str, object]]:
+        """List LDAP streams, optionally filtered by connection ID."""
         try:
             streams = list(self._streams.values())
 
@@ -271,9 +272,8 @@ class TapExecutionService:
         catalog: dict[str, object] | None = None,
         state: dict[str, object] | None = None,
     ) -> FlextResult[dict[str, object]]:
+        """Create tap execution."""
         try:
-            from flext_tap_ldap.domain.entities import TapExecution
-
             execution = TapExecution(
                 connection_id=connection_id,
                 command=command,
@@ -291,6 +291,7 @@ class TapExecutionService:
     async def start_execution(
         self, execution_id: UUID,
     ) -> FlextResult[dict[str, object]]:
+        """Start tap execution."""
         try:
             execution = self._executions.get(execution_id)
             if not execution:
@@ -308,6 +309,7 @@ class TapExecutionService:
         stdout: str | None = None,
         stderr: str | None = None,
     ) -> FlextResult[dict[str, object]]:
+        """Complete tap execution."""
         try:
             execution = self._executions.get(execution_id)
             if not execution:
@@ -321,6 +323,7 @@ class TapExecutionService:
     async def cancel_execution(
         self, execution_id: UUID,
     ) -> FlextResult[dict[str, object]]:
+        """Cancel tap execution."""
         try:
             execution = self._executions.get(execution_id)
             if not execution:
@@ -337,6 +340,7 @@ class TapExecutionService:
         records_extracted: int,
         streams_processed: int,
     ) -> FlextResult[dict[str, object]]:
+        """Update execution metrics."""
         try:
             execution = self._executions.get(execution_id)
             if not execution:
@@ -351,6 +355,7 @@ class TapExecutionService:
         self,
         execution_id: UUID,
     ) -> FlextResult[dict[str, object]]:
+        """Get tap execution by ID."""
         try:
             execution = self._executions.get(execution_id)
             return FlextResult.ok(execution)
@@ -361,6 +366,7 @@ class TapExecutionService:
         self,
         connection_id: UUID | None = None,
     ) -> FlextResult[dict[str, object]]:
+        """List tap executions, optionally filtered by connection ID."""
         try:
             executions = list(self._executions.values())
 
@@ -395,9 +401,8 @@ class LDAPRecordService:
         attributes: dict[str, object],
         object_class: list[str] | None = None,
     ) -> FlextResult[dict[str, object]]:
+        """Create LDAP record."""
         try:
-            from flext_tap_ldap.domain.entities import LDAPRecord
-
             record = LDAPRecord(
                 stream_id=stream_id,
                 execution_id=execution_id,
@@ -416,6 +421,7 @@ class LDAPRecordService:
             return FlextResult.fail(f"Failed to create record: {e}")
 
     async def get_record(self, record_id: UUID) -> FlextResult[dict[str, object]]:
+        """Get LDAP record by ID."""
         try:
             record = self._records.get(record_id)
             return FlextResult.ok(record)
@@ -428,6 +434,7 @@ class LDAPRecordService:
         execution_id: UUID | None = None,
         limit: int = 100,
     ) -> FlextResult[dict[str, object]]:
+        """List LDAP records, optionally filtered by stream or execution ID."""
         try:
             records = list(self._records.values())
 
@@ -449,6 +456,7 @@ class LDAPRecordService:
         stream_id: UUID | None = None,
         execution_id: UUID | None = None,
     ) -> FlextResult[dict[str, object]]:
+        """Count LDAP records, optionally filtered by stream or execution ID."""
         try:
             records = list(self._records.values())
 
