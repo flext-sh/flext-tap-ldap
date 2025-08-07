@@ -98,12 +98,11 @@ def ldap_connection(ldap_container: Any) -> Generator[Connection]:
 @pytest.fixture
 def tap_config_file(tmp_path: Path, ldap_container: Any) -> Path:
     config = {
-        "host": "localhost",
-        "port": 10389,
+        "ldap_host": "localhost",
+        "ldap_port": 10389,
         "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-        "password": "REDACTED_LDAP_BIND_PASSWORD_password",
+        "bind_password": "REDACTED_LDAP_BIND_PASSWORD_password",
         "base_dn": "dc=test,dc=com",
-        "timeout": 30,
         "page_size": 1000,
     }
     config_file = tmp_path / "tap_config.json"

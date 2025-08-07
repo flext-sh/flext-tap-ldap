@@ -26,11 +26,11 @@ class TestLDAPBaseStream:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLDAP)
         tap.config = {
-            "host": "test.ldap.com",
-            "port": 389,
+            "ldap_host": "test.ldap.com",
+            "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
             "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            "password": "test_password",
+            "bind_password": "test_password",
         }
         # Add required Singer SDK attributes
         tap.metrics_logger = Mock()
@@ -56,11 +56,11 @@ class TestUsersStream:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLDAP)
         tap.config = {
-            "host": "test.ldap.com",
-            "port": 389,
+            "ldap_host": "test.ldap.com",
+            "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
             "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            "password": "test_password",
+            "bind_password": "test_password",
             "user_filter": "(objectClass=inetOrgPerson)",
         }
         # Add required Singer SDK attributes
@@ -210,11 +210,11 @@ class TestGroupsStream:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLDAP)
         tap.config = {
-            "host": "test.ldap.com",
-            "port": 389,
+            "ldap_host": "test.ldap.com",
+            "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
             "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            "password": "test_password",
+            "bind_password": "test_password",
             "group_filter": "(objectClass=groupOfNames)",
         }
         # Add required Singer SDK attributes
@@ -252,11 +252,11 @@ class TestOrganizationalUnitsStream:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLDAP)
         tap.config = {
-            "host": "test.ldap.com",
-            "port": 389,
+            "ldap_host": "test.ldap.com",
+            "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
             "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            "password": "test_password",
+            "bind_password": "test_password",
         }
         # Add required Singer SDK attributes
         tap.metrics_logger = Mock()
@@ -293,11 +293,11 @@ class TestSchemaStream:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLDAP)
         tap.config = {
-            "host": "test.ldap.com",
-            "port": 389,
+            "ldap_host": "test.ldap.com",
+            "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
             "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            "password": "test_password",
+            "bind_password": "test_password",
         }
         # Add required Singer SDK attributes
         tap.metrics_logger = Mock()
@@ -379,11 +379,11 @@ class TestCustomStream:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLDAP)
         tap.config = {
-            "host": "test.ldap.com",
-            "port": 389,
+            "ldap_host": "test.ldap.com",
+            "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
             "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            "password": "test_password",
+            "bind_password": "test_password",
         }
         # Add required Singer SDK attributes
         tap.metrics_logger = Mock()
@@ -506,11 +506,11 @@ class TestStreamIntegration:
     def tap_config(self) -> dict[str, object]:
         """Standard tap configuration."""
         return {
-            "host": "test.ldap.com",
-            "port": 389,
+            "ldap_host": "test.ldap.com",
+            "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
             "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            "password": "test_password",
+            "bind_password": "test_password",
             "use_ssl": False,
             "timeout": 30,
             "page_size": 1000,
@@ -575,8 +575,8 @@ class TestLDAPBaseStreamDirectUsage:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLDAP)
         tap.config = {
-            "host": "test.ldap.com",
-            "port": 389,
+            "ldap_host": "test.ldap.com",
+            "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
         }
         tap.metrics_logger = Mock()
@@ -610,8 +610,8 @@ class TestStreamExceptionHandling:
         """Create mock tap that will cause exceptions."""
         tap = Mock(spec=FlextTapLDAP)
         tap.config = {
-            "host": "failing.ldap.com",
-            "port": 389,
+            "ldap_host": "failing.ldap.com",
+            "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
         }
         tap.metrics_logger = Mock()

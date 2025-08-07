@@ -24,6 +24,7 @@ from flext_tap_ldap.domain.entities import (
 if TYPE_CHECKING:
     from uuid import UUID
 
+
 @dataclass
 class LDAPConnectionParams:
     """Parameter object for LDAP connection creation.
