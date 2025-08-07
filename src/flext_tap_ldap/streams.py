@@ -157,11 +157,11 @@ class UsersStream(LDAPBaseStream):
 
             # Create LDAP client with configuration
             ldap_client = LDAPClient(
-                host=config["host"],
-                port=config.get("port", 389),
+                host=config["ldap_host"],
+                port=config.get("ldap_port", 389),
                 bind_dn=config["bind_dn"],
-                password=config["password"],
-                use_ssl=config.get("use_ssl", False),
+                password=config["bind_password"],
+                use_ssl=config.get("use_tls", False),
             )
 
             # Perform actual LDAP search for users
@@ -230,11 +230,11 @@ class GroupsStream(LDAPBaseStream):
 
             # Create LDAP client with configuration
             ldap_client = LDAPClient(
-                host=config["host"],
-                port=config.get("port", 389),
+                host=config["ldap_host"],
+                port=config.get("ldap_port", 389),
                 bind_dn=config["bind_dn"],
-                password=config["password"],
-                use_ssl=config.get("use_ssl", False),
+                password=config["bind_password"],
+                use_ssl=config.get("use_tls", False),
             )
 
             # Perform actual LDAP search for groups
@@ -325,11 +325,11 @@ class OrganizationalUnitsStream(LDAPBaseStream):
 
             # Create LDAP client with configuration
             ldap_client = LDAPClient(
-                host=config["host"],
-                port=config.get("port", 389),
+                host=config["ldap_host"],
+                port=config.get("ldap_port", 389),
                 bind_dn=config["bind_dn"],
-                password=config["password"],
-                use_ssl=config.get("use_ssl", False),
+                password=config["bind_password"],
+                use_ssl=config.get("use_tls", False),
             )
 
             # Perform actual LDAP search for organizational units
@@ -413,11 +413,11 @@ class SchemaStream(LDAPBaseStream):
 
             # Create LDAP client with configuration
             ldap_client = LDAPClient(
-                host=config["host"],
-                port=config.get("port", 389),
+                host=config["ldap_host"],
+                port=config.get("ldap_port", 389),
                 bind_dn=config["bind_dn"],
-                password=config["password"],
-                use_ssl=config.get("use_ssl", False),
+                password=config["bind_password"],
+                use_ssl=config.get("use_tls", False),
             )
 
             # Get LDAP schema information
@@ -541,11 +541,11 @@ class CustomStream(LDAPBaseStream):
 
             # Create LDAP client with configuration
             ldap_client = LDAPClient(
-                host=config["host"],
-                port=config.get("port", 389),
+                host=config["ldap_host"],
+                port=config.get("ldap_port", 389),
                 bind_dn=config["bind_dn"],
-                password=config["password"],
-                use_ssl=config.get("use_ssl", False),
+                password=config["bind_password"],
+                use_ssl=config.get("use_tls", False),
             )
 
             # Perform actual LDAP search with custom filter

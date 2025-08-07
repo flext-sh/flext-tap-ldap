@@ -11,15 +11,15 @@ from flext_meltano import get_tap_test_class
 
 from flext_tap_ldap.tap import FlextTapLDAP
 
-# Basic tap tests
+# Basic tap tests - using correct field names from schema
 TestFlextTapLDAP = get_tap_test_class(
     tap_class=FlextTapLDAP,
     config={
-        "host": "test.ldap.com",
-        "port": 389,
+        "ldap_host": "test.ldap.com",
+        "ldap_port": 389,
         "base_dn": "dc=test,dc=com",
         "bind_dn": "cn=admin,dc=test,dc=com",
-        "password": "test_password",
+        "bind_password": "test_password",
     },
 )
 
@@ -30,13 +30,12 @@ class TestFlextTapLDAPUnit:
     @pytest.fixture
     def config(self) -> dict[str, object]:
         return {
-            "host": "test.ldap.com",
-            "port": 389,
+            "ldap_host": "test.ldap.com",
+            "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
             "bind_dn": "cn=admin,dc=test,dc=com",
-            "password": "test_password",
-            "use_ssl": False,
-            "timeout": 30,
+            "bind_password": "test_password",
+            "use_tls": False,
             "page_size": 1000,
         }
 

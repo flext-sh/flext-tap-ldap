@@ -20,11 +20,11 @@ class TestLDIFStreamBasic:
         try:
             tap = FlextTapLDAP(
                 config={
-                    "host": "test.ldap.com",
-                    "port": 389,
+                    "ldap_host": "test.ldap.com",
+                    "ldap_port": 389,
                     "base_dn": "dc=test,dc=com",
                     "bind_dn": "cn=admin,dc=test,dc=com",
-                    "password": "test_password",
+                    "bind_password": "test_password",
                 },
             )
             stream = LDIFStream(tap=tap, name="test_stream", schema={}, path=[])

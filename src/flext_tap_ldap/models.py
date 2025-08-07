@@ -17,9 +17,8 @@ def _get_entry_value(entry: dict[str, object] | FlextLdapEntry, key: str, defaul
     """Helper function to get value from either dict or FlextLdapEntry."""
     if isinstance(entry, dict):
         return entry.get(key, default)
-    else:
-        # FlextLdapEntry - use getattr or similar access pattern
-        return getattr(entry, key, default)
+    # FlextLdapEntry - use getattr or similar access pattern
+    return getattr(entry, key, default)
 
 
 class LDAPAttribute(FlextDomainBaseModel):

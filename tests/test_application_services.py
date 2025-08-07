@@ -294,7 +294,7 @@ class TestTapExecutionService:
         result = await service.create_execution(
             connection_id=connection_id,
             command="discover",
-            config={"host": "localhost"},
+            config={"ldap_host": "localhost"},
         )
 
         assert result.success
@@ -417,4 +417,4 @@ class TestLDAPRecordService:
         count_result = await service.count_records(stream_id=stream_id)
 
         assert count_result.success
-        assert count_result.data == 2
+        assert count_result.data["count"] == 2

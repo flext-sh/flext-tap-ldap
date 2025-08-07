@@ -25,6 +25,35 @@ class TestFlextTapLDAPIntegration:
         return CliRunner()
 
     @pytest.fixture
+    def mock_ldap_config(self) -> dict[str, object]:
+        """Mock LDAP configuration."""
+        return {
+            "ldap_host": "test.ldap.com",
+            "ldap_port": 389,
+            "base_dn": "dc=test,dc=com",
+            "bind_dn": "cn=admin,dc=test,dc=com",
+            "bind_password": "test_password",
+        }
+
+    @pytest.fixture
+    def sample_catalog(self) -> dict[str, object]:
+        """Sample catalog for testing."""
+        return {
+            "streams": [
+                {
+                    "tap_stream_id": "users",
+                    "schema": {"properties": {"dn": {"type": "string"}}},
+                    "metadata": []
+                }
+            ]
+        }
+
+    @pytest.fixture
+    def sample_state(self) -> dict[str, object]:
+        """Sample state for testing."""
+        return {"bookmarks": {}}
+
+    @pytest.fixture
     def config_file(self, tmp_path: Path, mock_ldap_config: dict[str, object]) -> Path:
         config_path = tmp_path / "config.json"
         with Path(config_path).open("w", encoding="utf-8") as f:
@@ -164,7 +193,7 @@ class TestFlextTapLDAPIntegration:
 
     def test_custom_streams_config(self, runner: CliRunner, tmp_path: Path) -> None:
         config = {
-            "host": "test.ldap.com",
+            "ldap_host": "test.ldap.com",
             "base_dn": "dc=test,dc=com",
             "custom_streams": [
                 {

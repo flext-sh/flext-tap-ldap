@@ -136,7 +136,7 @@ class TestTapExecution:
             connection_id=connection_id,
             command="sync",
             tap_status="created",
-            config={"host": "ldap.example.com"},
+            config={"ldap_host": "ldap.example.com"},
             catalog={"streams": []},
             state={"bookmarks": {}},
         )
@@ -144,7 +144,7 @@ class TestTapExecution:
         assert execution.connection_id == connection_id
         assert execution.command == "sync"
         assert execution.tap_status == "created"
-        assert execution.config == {"host": "ldap.example.com"}
+        assert execution.config == {"ldap_host": "ldap.example.com"}
         assert execution.catalog == {"streams": []}
         assert execution.state == {"bookmarks": {}}
         assert isinstance(execution.id, UUID)
