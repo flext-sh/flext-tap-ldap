@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
 else:
-    from pathlib import Path  # noqa: TC003
+    from pathlib import Path
 
 from flext_core import (
     FlextResult,
@@ -137,7 +137,9 @@ class LDIFEntry:
         """Get validation errors for this entry."""
         errors = []
         if not self.is_valid():
-            errors.append({"code": "invalid_entry", "message": "Entry failed validation"})
+            errors.append(
+                {"code": "invalid_entry", "message": "Entry failed validation"}
+            )
         return errors
 
     def parse_dn(self) -> dict[str, object]:
@@ -252,7 +254,9 @@ class FlextLDIFProcessor:
         try:
             result = self._api.parse(content)
             if not result.success:
-                error_msg = f"Failed to parse LDIF content from {source_name}: {result.error}"
+                error_msg = (
+                    f"Failed to parse LDIF content from {source_name}: {result.error}"
+                )
                 if self.ignore_errors:
                     logger.error(error_msg)
                     self.errors.append(error_msg)

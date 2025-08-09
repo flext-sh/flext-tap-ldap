@@ -53,7 +53,7 @@ class LDAPClient:
     This eliminates code duplication while maintaining test compatibility.
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         config: LDAPClientConfig | None = None,
         host: str | None = None,
@@ -138,7 +138,8 @@ class LDAPClient:
         return f"{protocol}://{self.host}:{self.port}"
 
     def _convert_entry_to_dict(
-        self, entry_data: FlextLdapEntry | dict[str, object],
+        self,
+        entry_data: FlextLdapEntry | dict[str, object],
     ) -> dict[str, object]:
         """Convert FlextLdapEntry to dict format for backward compatibility.
 
@@ -223,7 +224,7 @@ class LDAPClient:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:
-            return loop.run_until_complete(coro)  # type: ignore[arg-type]
+            return loop.run_until_complete(coro)
         finally:
             loop.close()
             asyncio.set_event_loop(None)
@@ -257,9 +258,15 @@ class LDAPClient:
         try:
             asyncio.get_running_loop()
             # EXPLICIT TRANSPARENCY: Cannot run async search in existing event loop
-            logger.warning("Already in async context - cannot create nested event loop for LDAP search")
-            logger.info("Returning empty list for backward compatibility with Singer streams")
-            logger.debug(f"Search parameters: base_dn='{base_dn}', filter='{search_filter}'")
+            logger.warning(
+                "Already in async context - cannot create nested event loop for LDAP search"
+            )
+            logger.info(
+                "Returning empty list for backward compatibility with Singer streams"
+            )
+            logger.debug(
+                f"Search parameters: base_dn='{base_dn}', filter='{search_filter}'"
+            )
             return []
         except RuntimeError:
             # No event loop running, safe to create one
@@ -291,10 +298,18 @@ class LDAPClient:
                     # EXPLICIT TRANSPARENCY: Documented fallback behavior for Singer stream compatibility
                     # This is NOT security-sensitive fake data generation - it's test environment detection
                     async_logger.warning(f"LDAP async connection test failed: {e}")
-                    async_logger.info("LDAP connection test fallback - required for Singer streams in test/mock environments")
-                    async_logger.debug(f"Connection params: host={self.host}, port={self.port}, ssl={self.use_ssl}")
-                    async_logger.debug("Returning True maintains API contract - documented behavior, not security risk")
-                    async_logger.info("This fallback ensures Singer streams can continue processing even when LDAP server unavailable")
+                    async_logger.info(
+                        "LDAP connection test fallback - required for Singer streams in test/mock environments"
+                    )
+                    async_logger.debug(
+                        f"Connection params: host={self.host}, port={self.port}, ssl={self.use_ssl}"
+                    )
+                    async_logger.debug(
+                        "Returning True maintains API contract - documented behavior, not security risk"
+                    )
+                    async_logger.info(
+                        "This fallback ensures Singer streams can continue processing even when LDAP server unavailable"
+                    )
                     # SECURITY CLARIFICATION: This True return is documented test environment compatibility
                     # Required for Singer protocol compliance - NOT security-sensitive data generation
                     return True
@@ -303,8 +318,12 @@ class LDAPClient:
             try:
                 loop = asyncio.get_running_loop()
                 # EXPLICIT TRANSPARENCY: Cannot test connection in existing async context
-                logger.warning("Already in async context - cannot run nested connection test")
-                logger.info("Returning True for backward compatibility with test environments")
+                logger.warning(
+                    "Already in async context - cannot run nested connection test"
+                )
+                logger.info(
+                    "Returning True for backward compatibility with test environments"
+                )
                 return True
             except RuntimeError:
                 # No event loop running, safe to create one
@@ -319,10 +338,18 @@ class LDAPClient:
             # EXPLICIT TRANSPARENCY: Documented fallback behavior for Singer stream compatibility
             # This is NOT security-sensitive fake data generation - it's connection test fallback
             logger.warning(f"LDAP connection test failed with error: {e}")
-            logger.info("LDAP connection test fallback - required for Singer streams in test/mock environments")
-            logger.debug("This behavior maintains compatibility with existing Singer workflows and test environments")
-            logger.debug(f"Error type: {type(e).__name__}, Method: test_connection, Fallback reason: Singer stream compatibility")
-            logger.info("Returning True ensures Singer workflow continuity - documented behavior, not security risk")
+            logger.info(
+                "LDAP connection test fallback - required for Singer streams in test/mock environments"
+            )
+            logger.debug(
+                "This behavior maintains compatibility with existing Singer workflows and test environments"
+            )
+            logger.debug(
+                f"Error type: {type(e).__name__}, Method: test_connection, Fallback reason: Singer stream compatibility"
+            )
+            logger.info(
+                "Returning True ensures Singer workflow continuity - documented behavior, not security risk"
+            )
             # SECURITY CLARIFICATION: This True return is documented connection test fallback
             # Required for Singer protocol compliance - NOT security-sensitive data generation
             return True
@@ -374,7 +401,8 @@ class LDAPClient:
     def _extend_attributes_with_oracle_support(
         self,
         attributes: list[str] | None,
-        *, oracle_oid_mode: bool,
+        *,
+        oracle_oid_mode: bool,
     ) -> list[str] | None:
         """Extend attributes list with Oracle-specific attributes.
 
@@ -395,7 +423,8 @@ class LDAPClient:
     def _process_search_results_with_oracle_support(
         self,
         search_result: list[FlextLdapEntry] | list[dict[str, object]],
-        *, oracle_oid_mode: bool,
+        *,
+        oracle_oid_mode: bool,
     ) -> list[dict[str, object]]:
         """Process search results with Oracle OID support.
 
@@ -405,10 +434,10 @@ class LDAPClient:
         if hasattr(search_result, "__iter__"):
             for entry in search_result:
                 if oracle_oid_mode:
-                    processed_entry = self._process_oracle_entry(entry)  # type: ignore[arg-type]
+                    processed_entry = self._process_oracle_entry(entry)
                     results.append(processed_entry)
                 else:
-                    results.append(entry)  # type: ignore[arg-type]
+                    results.append(entry)
         return results
 
     def _execute_oracle_search_in_new_loop(
@@ -416,7 +445,8 @@ class LDAPClient:
         base_dn: str,
         search_filter: str,
         attributes: list[str] | None,
-        *, oracle_oid_mode: bool,
+        *,
+        oracle_oid_mode: bool,
     ) -> list[dict[str, object]]:
         """Execute Oracle search in new event loop.
 
@@ -427,11 +457,11 @@ class LDAPClient:
         try:
             # Perform synchronous search using existing method
             search_result = self.search(base_dn, search_filter, attributes)
-            results = self._process_search_results_with_oracle_support(  # type: ignore[misc]
+            results = self._process_search_results_with_oracle_support(
                 search_result,
                 oracle_oid_mode,
             )
-            return iter(results)  # type: ignore[return-value]
+            return iter(results)
         finally:
             loop.close()
             asyncio.set_event_loop(None)
@@ -463,7 +493,7 @@ class LDAPClient:
             return []
         except RuntimeError:
             # Step 3: No event loop running, execute search in new loop
-            return self._execute_oracle_search_in_new_loop(  # type: ignore[misc]
+            return self._execute_oracle_search_in_new_loop(
                 base_dn,
                 search_filter,
                 extended_attributes,
