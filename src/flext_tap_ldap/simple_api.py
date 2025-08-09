@@ -132,7 +132,7 @@ def setup_ldap_tap(config: TapLDAPConfig | None = None) -> FlextResult[TapLDAPCo
         return FlextResult.fail(f"Failed to setup LDAP tap: {e}")
 
 
-def create_ldap_connection_config(  # noqa: PLR0913
+def create_ldap_connection_config(
     host: str,
     base_dn: str,
     port: int = 389,
@@ -171,7 +171,7 @@ def create_ldap_connection_config(  # noqa: PLR0913
         return FlextResult.fail(f"Failed to create LDAP connection config: {e}")
 
 
-def create_ldif_processing_config(  # noqa: PLR0913
+def create_ldif_processing_config(
     ldif_files: list[str] | None = None,
     ldif_directory: str | None = None,
     *,
@@ -221,7 +221,9 @@ def create_ldif_processing_config(  # noqa: PLR0913
 
     default_max_errors = 100
     if not ldif_ignore_errors or ldif_max_errors != default_max_errors:
-        builder.with_error_handling(ignore_errors=ldif_ignore_errors, max_errors=ldif_max_errors)
+        builder.with_error_handling(
+            ignore_errors=ldif_ignore_errors, max_errors=ldif_max_errors
+        )
 
     if ldif_apply_transformations or ldif_transformation_rules:
         builder.with_transformations(
