@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
 else:
-    from pathlib import Path
+    pass
 
 from flext_core import (
     FlextResult,

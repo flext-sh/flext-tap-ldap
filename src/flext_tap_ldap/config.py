@@ -146,14 +146,32 @@ class TapLDAPConfig(BaseSettings):
             for stream_config in v:
                 try:
                     # Convert dict[str, object] to proper types for validation
-                    config_data = {
-                        "name": str(stream_config.get("name", "")),
-                        "search_filter": str(stream_config.get("search_filter", "")),
-                        "primary_keys": stream_config.get("primary_keys"),
-                        "replication_key": stream_config.get("replication_key"),
-                        "json_schema": stream_config.get("json_schema"),
-                    }
-                    CustomStreamConfig(**config_data)
+                    # Type-safe config construction
+                    name = str(stream_config.get("name", ""))
+                    search_filter = str(stream_config.get("search_filter", ""))
+                    primary_keys = stream_config.get("primary_keys")
+                    replication_key = stream_config.get("replication_key")
+                    json_schema = stream_config.get("json_schema")
+                    
+                    # Ensure proper types for primary_keys
+                    if primary_keys is not None and not isinstance(primary_keys, list):
+                        primary_keys = None
+                    
+                    # Ensure proper types for replication_key
+                    if replication_key is not None and not isinstance(replication_key, str):
+                        replication_key = None
+                        
+                    # Ensure proper types for json_schema
+                    if json_schema is not None and not isinstance(json_schema, dict):
+                        json_schema = None
+                    
+                    CustomStreamConfig(
+                        name=name,
+                        search_filter=search_filter,
+                        primary_keys=primary_keys,
+                        replication_key=replication_key,
+                        json_schema=json_schema,
+                    )
                 except (ValueError, TypeError) as e:
                     msg: str = f"Invalid custom stream config: {e}"
                     raise ValueError(msg) from e
@@ -202,10 +220,35 @@ class TapLDAPConfig(BaseSettings):
         ):
             ldif_defaults.update(overrides["ldif_processing"])
 
-        # Create properly typed config objects
+        # Create properly typed config objects with explicit parameters
+        ldap_connection = LDAPConnectionConfig(
+            host=str(ldap_defaults["host"]),
+            port=int(ldap_defaults["port"]),
+            bind_dn=ldap_defaults["bind_dn"] if isinstance(ldap_defaults["bind_dn"], str) else None,
+            bind_password=ldap_defaults["bind_password"] if isinstance(ldap_defaults["bind_password"], str) else None,
+            base_dn=str(ldap_defaults["base_dn"]),
+            use_ssl=bool(ldap_defaults["use_ssl"]),
+            timeout=int(ldap_defaults["timeout"]),
+            page_size=int(ldap_defaults["page_size"]),
+        )
+        
+        ldif_proc_config = LDIFProcessingConfig(
+            ldif_files=ldif_defaults["ldif_files"] if isinstance(ldif_defaults["ldif_files"], list) else None,
+            ldif_directory=ldif_defaults["ldif_directory"] if isinstance(ldif_defaults["ldif_directory"], str) else None,
+            ldif_file_pattern=str(ldif_defaults["ldif_file_pattern"]),
+            ldif_ignore_errors=bool(ldif_defaults["ldif_ignore_errors"]),
+            ldif_max_errors=int(ldif_defaults["ldif_max_errors"]),
+            ldif_ignore_file_errors=bool(ldif_defaults["ldif_ignore_file_errors"]),
+            ldif_ignore_entry_errors=bool(ldif_defaults["ldif_ignore_entry_errors"]),
+            ldif_apply_transformations=bool(ldif_defaults["ldif_apply_transformations"]),
+            ldif_transformation_rules=ldif_defaults["ldif_transformation_rules"] if isinstance(ldif_defaults["ldif_transformation_rules"], dict) else None,
+            migration_batch=ldif_defaults["migration_batch"] if isinstance(ldif_defaults["migration_batch"], str) else None,
+            enable_ldif_streams=bool(ldif_defaults["enable_ldif_streams"]),
+        )
+        
         return cls(
-            connection=LDAPConnectionConfig(**ldap_defaults),
-            ldif_processing=LDIFProcessingConfig(**ldif_defaults),
+            connection=ldap_connection,
+            ldif_processing=ldif_proc_config,
         )
 
 

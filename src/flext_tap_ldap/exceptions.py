@@ -20,7 +20,7 @@ Domain-specific exceptions for LDAP tap operations using factory pattern to elim
 from __future__ import annotations
 
 # 🚨 ZERO DUPLICATION: Use flext-core exception factory - eliminates 240+ lines
-from flext_core import create_module_exception_classes
+from flext_core.exceptions import create_module_exception_classes
 
 # Generate all standard exceptions using factory pattern
 _tap_ldap_exceptions = create_module_exception_classes("flext_tap_ldap")

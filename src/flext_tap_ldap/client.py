@@ -53,20 +53,28 @@ class LDAPClient:
     This eliminates code duplication while maintaining test compatibility.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913  # Backward compatibility requires multiple parameters
         self,
         config: LDAPClientConfig | None = None,
+        *,
         host: str | None = None,
         port: int = 389,
         bind_dn: str | None = None,
         password: str | None = None,
-        *,
         use_ssl: bool = False,
         timeout: int = 30,
         page_size: int = 1000,
         **_kwargs: object,
     ) -> None:
-        """Initialize with Parameter Object Pattern or backward-compatible interface."""
+        """Initialize with Parameter Object Pattern (preferred) or backward-compatible interface.
+
+        Preferred Usage (Parameter Object Pattern):
+            config = LDAPClientConfig(host="ldap.example.com", port=389)
+            client = LDAPClient(config=config)
+
+        Legacy Usage (for backward compatibility):
+            client = LDAPClient(host="ldap.example.com", port=389)
+        """
         # Support both new Parameter Object Pattern and backward compatibility
         if config is not None:
             # New way: Parameter Object Pattern (SOLID)
