@@ -24,6 +24,22 @@ from flext_tap_ldap.config import (
 
 
 @dataclass
+class LDAPConnectionParams:
+    """Parameter object for LDAP connection configuration.
+
+    Implements Parameter Object Pattern to reduce argument count
+    and improve maintainability following SOLID principles.
+    """
+
+    host: str
+    base_dn: str
+    port: int = 389
+    use_ssl: bool = False
+    bind_dn: str | None = None
+    bind_password: str | None = None
+
+
+@dataclass
 class LDIFConfigBuilder:
     """Builder for LDIF processing configuration.
 
@@ -133,23 +149,12 @@ def setup_ldap_tap(config: TapLDAPConfig | None = None) -> FlextResult[TapLDAPCo
 
 
 def create_ldap_connection_config(
-    host: str,
-    base_dn: str,
-    port: int = 389,
-    *,
-    use_ssl: bool = False,
-    bind_dn: str | None = None,
-    bind_password: str | None = None,
+    params: LDAPConnectionParams,
 ) -> FlextResult[LDAPConnectionConfig]:
-    """Create LDAP connection configuration.
+    """Create LDAP connection configuration using Parameter Object Pattern.
 
     Args:
-        host: LDAP server hostname
-        base_dn: Base DN for searches
-        port: LDAP server port (default 389)
-        use_ssl: Use SSL connection (default False)
-        bind_dn: Bind DN for authentication
-        bind_password: Bind password
+        params: LDAP connection parameters object
 
     Returns:
         FlextResult with LDAPConnectionConfig or error message.
@@ -157,12 +162,12 @@ def create_ldap_connection_config(
     """
     try:
         config = LDAPConnectionConfig(
-            host=host,
-            base_dn=base_dn,
-            port=port,
-            use_ssl=use_ssl,
-            bind_dn=bind_dn,
-            bind_password=bind_password,
+            host=params.host,
+            base_dn=params.base_dn,
+            port=params.port,
+            use_ssl=params.use_ssl,
+            bind_dn=params.bind_dn,
+            bind_password=params.bind_password,
         )
 
         return FlextResult.ok(config)
@@ -171,7 +176,32 @@ def create_ldap_connection_config(
         return FlextResult.fail(f"Failed to create LDAP connection config: {e}")
 
 
-def create_ldif_processing_config(
+def create_ldap_connection_config_legacy(  # noqa: PLR0913  # Legacy interface compatibility
+    host: str,
+    base_dn: str,
+    port: int = 389,
+    *,
+    use_ssl: bool = False,
+    bind_dn: str | None = None,
+    bind_password: str | None = None,
+) -> FlextResult[LDAPConnectionConfig]:
+    """Create LDAP connection configuration (legacy interface).
+
+    Backward compatibility wrapper for the Parameter Object Pattern implementation.
+    Use create_ldap_connection_config() with LDAPConnectionParams for new code.
+    """
+    params = LDAPConnectionParams(
+        host=host,
+        base_dn=base_dn,
+        port=port,
+        use_ssl=use_ssl,
+        bind_dn=bind_dn,
+        bind_password=bind_password,
+    )
+    return create_ldap_connection_config(params)
+
+
+def create_ldif_processing_config(  # noqa: PLR0913  # Builder Pattern internally, legacy compatibility
     ldif_files: list[str] | None = None,
     ldif_directory: str | None = None,
     *,
@@ -419,9 +449,11 @@ def create_ldif_processing_config_advanced(
 # Export main API functions
 __all__: list[str] = [
     "FlextResult",
+    "LDAPConnectionParams",
     "LDIFConfigBuilder",
     "create_development_ldap_config",
     "create_ldap_connection_config",
+    "create_ldap_connection_config_legacy",
     "create_ldif_processing_config",
     "create_ldif_processing_config_advanced",
     "create_production_ldap_config",
