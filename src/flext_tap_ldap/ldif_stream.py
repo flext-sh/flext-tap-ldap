@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from flext_core import get_logger
-from flext_ldap import FlextLdapExtendedEntry, get_ldap_api
+from flext_ldap import get_ldap_api
 from flext_ldif import FlextLdifAPI, FlextLdifEntry
 from flext_meltano import Stream, singer_typing as th
 
@@ -105,7 +105,7 @@ class LDIFStream(Stream):
         """Convert flext-ldif entry to Singer record."""
         # Delegate entry type classification to flext-ldap
         object_classes = flext_entry.attributes.get_values("objectClass")
-        entry_type = self._classify_entry_type_via_library(object_classes)
+        entry_type = self._classify_entry_type(object_classes)
 
         return {
             "dn": flext_entry.dn.value,
@@ -114,20 +114,16 @@ class LDIFStream(Stream):
             "attributes": flext_entry.attributes.attributes,
         }
 
-    def _classify_entry_type_via_library(self, object_classes: list[str]) -> str:
-        """Classify entry type using flext-ldap library classification."""
-        try:
-            # Create a FlextLdapExtendedEntry to use its classification method
-            # This fully delegates to flext-ldap with NO local logic
-            temp_entry = FlextLdapExtendedEntry(
-                dn="temp",
-                attributes={"objectClass": object_classes},
-            )
-            return temp_entry.classify_entry_type()
-
-        except Exception:
-            logger.exception("Entry classification error")
-            return "unknown"
+    def _classify_entry_type(self, object_classes: list[str]) -> str:
+        """Classify entry type by simple objectClass heuristics."""
+        lowered = {oc.lower() for oc in object_classes}
+        if "inetorgperson" in lowered or "person" in lowered:
+            return "user"
+        if "groupofnames" in lowered or "group" in lowered:
+            return "group"
+        if "organizationalunit" in lowered or "ou" in lowered:
+            return "ou"
+        return "other"
 
 
 class LDIFAnalysisStream(Stream):
@@ -245,7 +241,7 @@ class LDIFAnalysisStream(Stream):
                 for entry in result.data:
                     # Use library delegation for classification
                     oc_list = entry.attributes.get_values("objectClass")
-                    entry_type = self._classify_entry_type_via_library(oc_list)
+                    entry_type = self._classify_entry_type(oc_list)
                     entry_types[entry_type] = entry_types.get(entry_type, 0) + 1
 
                     # Count object classes
@@ -264,20 +260,16 @@ class LDIFAnalysisStream(Stream):
             logger.exception(f"Error analyzing LDIF file {ldif_file}")
             return {"total_entries": 0, "entry_types": {}, "object_classes": {}}
 
-    def _classify_entry_type_via_library(self, object_classes: list[str]) -> str:
-        """Classify entry type using flext-ldap library classification."""
-        try:
-            # Create a FlextLdapExtendedEntry to use its classification method
-            # This fully delegates to flext-ldap with NO local logic
-            temp_entry = FlextLdapExtendedEntry(
-                dn="temp",
-                attributes={"objectClass": object_classes},
-            )
-            return temp_entry.classify_entry_type()
-
-        except Exception:
-            logger.exception("Entry classification error")
-            return "unknown"
+    def _classify_entry_type(self, object_classes: list[str]) -> str:
+        """Classify entry type by simple objectClass heuristics."""
+        lowered = {oc.lower() for oc in object_classes}
+        if "inetorgperson" in lowered or "person" in lowered:
+            return "user"
+        if "groupofnames" in lowered or "group" in lowered:
+            return "group"
+        if "organizationalunit" in lowered or "ou" in lowered:
+            return "ou"
+        return "other"
 
 
 # Export what we can

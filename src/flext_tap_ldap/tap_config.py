@@ -1,7 +1,7 @@
-"""Configuration models for tap-ldap using consolidated patterns.
+"""Configuration for tap-ldap using flext-core and flext-ldap integration.
 
-CONSOLIDATED: Uses flext-meltano common LDAP config to eliminate duplication
-with flext-target-ldap.
+Consolidates configuration and validation with maximum integration
+to eliminate code duplication.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -9,21 +9,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from flext_core import FlextResult, get_logger
+from flext_ldap import FlextLdapConnectionConfig
 from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
-class LDAPConnectionConfig(BaseModel):
-    """LDAP connection configuration."""
-
-    host: str = Field(description="LDAP server host")
-    port: int = Field(default=389, description="LDAP server port")
-    use_ssl: bool = Field(default=False, description="Use SSL connection")
-    bind_dn: str | None = Field(default=None, description="Bind DN for authentication")
-    bind_password: str | None = Field(default=None, description="Bind password")
-    base_dn: str = Field(description="Base DN for searches")
-    timeout: int = Field(default=30, description="Connection timeout in seconds")
-    page_size: int = Field(default=1000, description="LDAP search page size")
+logger = get_logger(__name__)
 
 
 class CustomStreamConfig(BaseModel):
@@ -43,6 +34,13 @@ class CustomStreamConfig(BaseModel):
         default=None,
         description="JSON schema for the stream",
     )
+
+    def validate_domain_rules(self) -> FlextResult[None]:
+        """Validate domain-specific rules for custom streams."""
+        if not self.name or not self.search_filter:
+            return FlextResult.fail("Custom stream requires name and search_filter")
+
+        return FlextResult.ok(None)
 
 
 class LDIFProcessingConfig(BaseModel):
@@ -94,11 +92,24 @@ class LDIFProcessingConfig(BaseModel):
         description="Enable LDIF processing streams",
     )
 
+    def validate_domain_rules(self) -> FlextResult[None]:
+        """Validate domain-specific rules for LDIF processing."""
+        if self.ldif_files and self.ldif_directory:
+            return FlextResult.fail("Cannot specify both ldif_files and ldif_directory")
+
+        if self.enable_ldif_streams and not (self.ldif_files or self.ldif_directory):
+            return FlextResult.fail(
+                "LDIF streams enabled but no files or directory specified",
+            )
+
+        return FlextResult.ok(None)
+
 
 class TapLDAPConfig(BaseSettings):
-    """Complete configuration for tap-ldap using flext-core patterns.
+    """Complete configuration for tap-ldap using flext-core and flext-ldap patterns.
 
     Combines LDAP connection and LDIF processing configurations with Pydantic settings.
+    Uses FlextLdapConnectionConfig from flext-ldap to eliminate duplication.
     """
 
     model_config = SettingsConfigDict(
@@ -113,11 +124,13 @@ class TapLDAPConfig(BaseSettings):
         use_enum_values=True,
     )
 
-    # Core configurations as embedded value objects
-    connection: LDAPConnectionConfig = Field(
+    # Core LDAP connection using flext-ldap config to eliminate duplication
+    connection: FlextLdapConnectionConfig = Field(
         ...,
-        description="LDAP connection configuration",
+        description="LDAP connection configuration from flext-ldap",
     )
+
+    # LDIF processing configuration
     ldif_processing: LDIFProcessingConfig = Field(
         default_factory=LDIFProcessingConfig,
         description="LDIF processing configuration",
@@ -129,6 +142,21 @@ class TapLDAPConfig(BaseSettings):
         description="Project name",
     )
     project_version: str = Field(default="0.9.0", description="Project version")
+
+    # Tap-specific settings
+    page_size: int = Field(
+        default=1000,
+        description="Page size for paged results",
+        gt=0,
+    )
+    user_filter: str = Field(
+        default="(objectClass=inetOrgPerson)",
+        description="LDAP filter for user entries",
+    )
+    group_filter: str = Field(
+        default="(objectClass=groupOfNames)",
+        description="LDAP filter for group entries",
+    )
 
     # Custom streams
     custom_streams: list[dict[str, object]] | None = Field(
@@ -145,10 +173,10 @@ class TapLDAPConfig(BaseSettings):
         """Validate custom stream configurations."""
         if v is not None:
             # Validate each custom stream config with proper type conversion
+            validation_errors: list[str] = []
             for stream_config in v:
                 try:
                     # Convert dict[str, object] to proper types for validation
-                    # Type-safe config construction
                     name = str(stream_config.get("name", ""))
                     search_filter = str(stream_config.get("search_filter", ""))
                     primary_keys = stream_config.get("primary_keys")
@@ -160,43 +188,97 @@ class TapLDAPConfig(BaseSettings):
                         primary_keys = None
 
                     # Ensure proper types for replication_key
-                    if replication_key is not None and not isinstance(replication_key, str):
+                    if replication_key is not None and not isinstance(
+                        replication_key, str,
+                    ):
                         replication_key = None
 
                     # Ensure proper types for json_schema
                     if json_schema is not None and not isinstance(json_schema, dict):
                         json_schema = None
 
-                    CustomStreamConfig(
+                    # Validate using our CustomStreamConfig
+                    config_obj = CustomStreamConfig(
                         name=name,
                         search_filter=search_filter,
                         primary_keys=primary_keys,
                         replication_key=replication_key,
                         json_schema=json_schema,
                     )
+
+                    # Validate domain rules
+                    validation_result = config_obj.validate_domain_rules()
+
+                    if not validation_result.success:
+                        error_text = validation_result.error or "Unknown error"
+                        validation_errors.append(
+                            f"Invalid custom stream config: {error_text}",
+                        )
+
                 except (ValueError, TypeError) as e:
-                    msg: str = f"Invalid custom stream config: {e}"
-                    raise ValueError(msg) from e
+                    validation_errors.append(f"Invalid custom stream config: {e}")
+
+            if validation_errors:
+                # Raise a single ValueError summarizing all issues
+                combined = "; ".join(validation_errors)
+                raise ValueError(combined)
         return v
+
+    def validate_complete_config(self) -> FlextResult[None]:
+        """Validate the complete configuration with business rules."""
+        try:
+            # Validate LDIF processing config
+            ldif_validation = self.ldif_processing.validate_domain_rules()
+            if not ldif_validation.success:
+                return FlextResult.fail(
+                    f"LDIF config invalid: {ldif_validation.error or 'Unknown error'}",
+                )
+
+            # Validate custom streams if present
+            if self.custom_streams:
+                for stream_config in self.custom_streams:
+                    name = str(stream_config.get("name", ""))
+                    search_filter = str(stream_config.get("search_filter", ""))
+
+                    # Normalize types safely for mypy
+                    pk_raw = stream_config.get("primary_keys")
+                    pk_list: list[str] | None = pk_raw if isinstance(pk_raw, list) else None
+                    schema_raw = stream_config.get("json_schema")
+                    schema_dict: dict[str, object] | None = schema_raw if isinstance(schema_raw, dict) else None
+
+                    config_obj = CustomStreamConfig(
+                        name=name,
+                        search_filter=search_filter,
+                        primary_keys=pk_list,
+                        replication_key=str(stream_config.get("replication_key")) if isinstance(stream_config.get("replication_key"), str) else None,
+                        json_schema=schema_dict,
+                    )
+
+                    stream_validation = config_obj.validate_domain_rules()
+                    if not stream_validation.success:
+                        msg = (
+                            f"Custom stream '{name}' invalid: "
+                            f"{stream_validation.error or 'Unknown error'}"
+                        )
+                        return FlextResult.fail(msg)
+
+            return FlextResult.ok(None)
+
+        except Exception as e:
+            return FlextResult.fail(f"Configuration validation failed: {e}")
 
     @classmethod
     def create_with_defaults(cls, **overrides: object) -> TapLDAPConfig:
-        """Create config with intelligent defaults."""
-        # Use proper typed defaults for LDAPConnectionConfig
+        """Create config with intelligent defaults using flext-ldap integration."""
+        # Use FlextLdapConnectionConfig defaults
         ldap_defaults: dict[str, object] = {
             "host": "localhost",
             "port": 389,
-            "bind_dn": None,
-            "bind_password": None,
-            "base_dn": "",
             "use_ssl": False,
-            "use_tls": False,
             "timeout_seconds": 30,
-            "page_size": 1000,
-            "max_retries": 3,
         }
 
-        # Use proper typed defaults for LDIFProcessingConfig
+        # LDIF processing defaults
         ldif_defaults: dict[str, object] = {
             "ldif_files": None,
             "ldif_directory": None,
@@ -222,29 +304,40 @@ class TapLDAPConfig(BaseSettings):
         ):
             ldif_defaults.update(overrides["ldif_processing"])
 
-        # Create properly typed config objects with explicit parameters
-        ldap_connection = LDAPConnectionConfig(
-            host=str(ldap_defaults["host"]),
-            port=int(ldap_defaults["port"]) if isinstance(ldap_defaults["port"], (int, str)) else 389,
-            bind_dn=ldap_defaults["bind_dn"] if isinstance(ldap_defaults["bind_dn"], str) else None,
-            bind_password=ldap_defaults["bind_password"] if isinstance(ldap_defaults["bind_password"], str) else None,
-            base_dn=str(ldap_defaults["base_dn"]),
-            use_ssl=bool(ldap_defaults["use_ssl"]),
-            timeout=int(ldap_defaults["timeout"]) if isinstance(ldap_defaults["timeout"], (int, str)) else 30,
-            page_size=int(ldap_defaults["page_size"]) if isinstance(ldap_defaults["page_size"], (int, str)) else 1000,
+        # Create FlextLdapConnectionConfig with proper parameters
+        port_val = ldap_defaults.get("port", 389)
+        timeout_val = ldap_defaults.get("timeout_seconds", 30)
+        ldap_connection = FlextLdapConnectionConfig.model_validate(
+            {
+                "server": str(ldap_defaults.get("host", "localhost")),
+                "port": int(port_val) if isinstance(port_val, (int, str)) else 389,
+                "use_ssl": bool(ldap_defaults.get("use_ssl")),
+                "timeout": int(timeout_val) if isinstance(timeout_val, (int, str)) else 30,
+            },
         )
 
+        # Create LDIF processing config
         ldif_proc_config = LDIFProcessingConfig(
-            ldif_files=ldif_defaults["ldif_files"] if isinstance(ldif_defaults["ldif_files"], list) else None,
-            ldif_directory=ldif_defaults["ldif_directory"] if isinstance(ldif_defaults["ldif_directory"], str) else None,
+            ldif_files=ldif_defaults["ldif_files"]
+            if isinstance(ldif_defaults["ldif_files"], list)
+            else None,
+            ldif_directory=ldif_defaults["ldif_directory"]
+            if isinstance(ldif_defaults["ldif_directory"], str)
+            else None,
             ldif_file_pattern=str(ldif_defaults["ldif_file_pattern"]),
             ldif_ignore_errors=bool(ldif_defaults["ldif_ignore_errors"]),
             ldif_max_errors=int(ldif_defaults["ldif_max_errors"]) if isinstance(ldif_defaults["ldif_max_errors"], (int, str)) else 100,
             ldif_ignore_file_errors=bool(ldif_defaults["ldif_ignore_file_errors"]),
             ldif_ignore_entry_errors=bool(ldif_defaults["ldif_ignore_entry_errors"]),
-            ldif_apply_transformations=bool(ldif_defaults["ldif_apply_transformations"]),
-            ldif_transformation_rules=ldif_defaults["ldif_transformation_rules"] if isinstance(ldif_defaults["ldif_transformation_rules"], dict) else None,
-            migration_batch=ldif_defaults["migration_batch"] if isinstance(ldif_defaults["migration_batch"], str) else None,
+            ldif_apply_transformations=bool(
+                ldif_defaults["ldif_apply_transformations"],
+            ),
+            ldif_transformation_rules=ldif_defaults["ldif_transformation_rules"]
+            if isinstance(ldif_defaults["ldif_transformation_rules"], dict)
+            else None,
+            migration_batch=ldif_defaults["migration_batch"]
+            if isinstance(ldif_defaults["migration_batch"], str)
+            else None,
             enable_ldif_streams=bool(ldif_defaults["enable_ldif_streams"]),
         )
 
@@ -257,7 +350,6 @@ class TapLDAPConfig(BaseSettings):
 # Export main configuration classes
 __all__: list[str] = [
     "CustomStreamConfig",
-    "LDAPConnectionConfig",
     "LDIFProcessingConfig",
     "TapLDAPConfig",
 ]

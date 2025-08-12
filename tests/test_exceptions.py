@@ -275,29 +275,28 @@ class TestErrorHandlingIntegration:
 
     def test_error_chain_compatibility(self) -> None:
         """Test error chaining compatibility."""
-        try:
-            msg = "Original error"
+        msg = "Original error"
+        with pytest.raises(ValueError):
             raise ValueError(msg)
-        except ValueError:
-            chained_error = FlextTapLdapConnectionError(
-                "Connection failed due to original error",
-            )
-            # Python exception chaining should work
-            assert isinstance(chained_error, Exception)
+        chained_error = FlextTapLdapConnectionError(
+            "Connection failed due to original error",
+        )
+        # Python exception chaining should work
+        assert isinstance(chained_error, Exception)
 
     def test_exception_handling_patterns(self) -> None:
         """Test common exception handling patterns."""
         # Test catching specific error
+        msg = "Connection failed"
         with pytest.raises(FlextTapLdapConnectionError):
-            msg = "Connection failed"
             raise FlextTapLdapConnectionError(msg)
 
         # Test catching base error - use specific exception type
+        msg = "Auth failed"
         with pytest.raises(FlextTapLdapAuthenticationError):
-            msg = "Auth failed"
             raise FlextTapLdapAuthenticationError(msg)
 
         # Test catching validation error - use specific exception type
+        msg = "Validation failed"
         with pytest.raises(FlextTapLdapValidationError):
-            msg = "Validation failed"
             raise FlextTapLdapValidationError(msg)

@@ -48,7 +48,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
     # Start containers
     logger.info("Starting OpenLDAP container...")
     subprocess.run(
-        ["docker-compose", "-f", str(compose_file), "up", "-d"],
+        ["/usr/bin/env", "docker-compose", "-f", str(compose_file), "up", "-d"],
         check=True,
         cwd=str(project_root),
     )
@@ -76,7 +76,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
     # Cleanup
     logger.info("Stopping OpenLDAP container...")
     subprocess.run(
-        ["docker-compose", "-f", str(compose_file), "down", "-v"],
+        ["/usr/bin/env", "docker-compose", "-f", str(compose_file), "down", "-v"],
         check=True,
         cwd=str(project_root),
     )
