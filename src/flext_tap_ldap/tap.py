@@ -192,7 +192,7 @@ class FlextTapLDAP(Tap):
 
 
 def main() -> None:
-    """Main entry point for the tap."""
+    """Run the main entry point for the tap."""
     FlextTapLDAP.cli()
 
 

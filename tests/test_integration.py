@@ -185,11 +185,15 @@ class TestFlextTapLDAPIntegration:
             # Check that modifyTimestamp filter was included
             for call in search_calls:
                 filter_arg = call[1].get("search_filter", "")
-                if "inetOrgPerson" in filter_arg:
-                    # Should include timestamp filter for incremental
-                    if "modifyTimestamp>=" in filter_arg or result.exit_code != 0:
-                        msg: str = f"Expected {0}, got {'modifyTimestamp>=' in filter_arg or result.exit_code}"
-                        raise AssertionError(msg)
+                if (
+                    "inetOrgPerson" in filter_arg
+                    and ("modifyTimestamp>=" not in filter_arg or result.exit_code != 0)
+                ):
+                    msg: str = (
+                        f"Expected timestamp filter in incremental search, "
+                        f"got filter='{filter_arg}' and exit_code={result.exit_code}"
+                    )
+                    raise AssertionError(msg)
 
     def test_custom_streams_config(self, runner: CliRunner, tmp_path: Path) -> None:
         config = {

@@ -23,6 +23,44 @@ from flext_tap_ldap.config import (
 )
 
 
+def _coerce_str_optional(value: object) -> str | None:
+    """Coerce value to optional string using pattern matching."""
+    match value:
+        case str() as str_val if str_val:
+            return str_val
+        case _:
+            return None
+
+
+def _coerce_bool(value: object, *, default: bool = False) -> bool:
+    """Coerce arbitrary value to bool with sensible defaults."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered in {"true", "1", "yes", "y", "on"}:
+            return True
+        if lowered in {"false", "0", "no", "n", "off"}:
+            return False
+    if isinstance(value, (int, float)):
+        return bool(value)
+    return default
+
+
+def _coerce_int(value: object, default: int) -> int:
+    """Coerce arbitrary value to int, or return default on failure."""
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    if isinstance(value, str):
+        try:
+            return int(value.strip())
+        except ValueError:
+            return default
+    return default
+
+
 @dataclass
 class LDAPConnectionParams:
     """Parameter object for LDAP connection configuration.
@@ -125,7 +163,7 @@ class LDIFConfigBuilder:
 
 
 def setup_ldap_tap(config: TapLDAPConfig | None = None) -> FlextResult[TapLDAPConfig]:
-    """Setup LDAP tap with configuration.
+    """Set up the LDAP tap with configuration.
 
     Args:
         config: Optional configuration. If None, creates defaults.
@@ -176,44 +214,35 @@ def create_ldap_connection_config(
         return FlextResult.fail(f"Failed to create LDAP connection config: {e}")
 
 
-def create_ldap_connection_config_legacy(  # noqa: PLR0913  # Legacy interface compatibility
+def create_ldap_connection_config_legacy(
     host: str,
     base_dn: str,
     port: int = 389,
-    *,
-    use_ssl: bool = False,
-    bind_dn: str | None = None,
-    bind_password: str | None = None,
+    **kwargs: object,
 ) -> FlextResult[LDAPConnectionConfig]:
     """Create LDAP connection configuration (legacy interface).
 
     Backward compatibility wrapper for the Parameter Object Pattern implementation.
     Use create_ldap_connection_config() with LDAPConnectionParams for new code.
     """
-    params = LDAPConnectionParams(
-        host=host,
-        base_dn=base_dn,
-        port=port,
-        use_ssl=use_ssl,
-        bind_dn=bind_dn,
-        bind_password=bind_password,
-    )
-    return create_ldap_connection_config(params)
+    try:
+        params = LDAPConnectionParams(
+            host=host,
+            base_dn=base_dn,
+            port=port,
+            use_ssl=bool(kwargs.get("use_ssl")),
+            bind_dn=_coerce_str_optional(kwargs.get("bind_dn")),
+            bind_password=_coerce_str_optional(kwargs.get("bind_password")),
+        )
+        return create_ldap_connection_config(params)
+    except Exception as e:
+        return FlextResult.fail(f"Failed to create legacy connection config: {e}")
 
 
-def create_ldif_processing_config(  # noqa: PLR0913  # Builder Pattern internally, legacy compatibility
+def create_ldif_processing_config(
     ldif_files: list[str] | None = None,
     ldif_directory: str | None = None,
-    *,
-    ldif_file_pattern: str = "*.ldif",
-    ldif_ignore_errors: bool = True,
-    ldif_max_errors: int = 100,
-    ldif_ignore_file_errors: bool = True,
-    ldif_ignore_entry_errors: bool = True,
-    ldif_apply_transformations: bool = False,
-    ldif_transformation_rules: dict[str, object] | None = None,
-    migration_batch: str | None = None,
-    enable_ldif_streams: bool = False,
+    **kwargs: object,
 ) -> FlextResult[LDIFProcessingConfig]:
     """Create LDIF processing configuration.
 
@@ -236,44 +265,65 @@ def create_ldif_processing_config(  # noqa: PLR0913  # Builder Pattern internall
     Returns:
         FlextResult with LDIFProcessingConfig or error message.
 
+    Keyword Args:
+        **kwargs: Optional keyword-only parameters, including:
+            - ldif_file_pattern: Pattern for LDIF files (default: "*.ldif").
+            - ldif_ignore_errors: Continue on parsing errors (default: True).
+            - ldif_max_errors: Max errors before stopping (default: 100).
+            - ldif_ignore_file_errors: Continue if a file fails (default: True).
+            - ldif_ignore_entry_errors: Continue if an entry fails (default: True).
+            - ldif_apply_transformations: Apply transformation rules (default: False).
+            - ldif_transformation_rules: Dict of transformation rules.
+            - migration_batch: Identifier for batch processing.
+            - enable_ldif_streams: Enable LDIF streams (default: False).
+
     """
     # Use Builder Pattern to construct configuration
     builder = LDIFConfigBuilder()
 
+    # Files and directory
     if ldif_files:
         builder.with_files(ldif_files)
-
     if ldif_directory:
         builder.with_directory(ldif_directory)
 
-    if ldif_file_pattern != "*.ldif":
-        builder.with_pattern(ldif_file_pattern)
+    # Simple field normalization (no branching besides None checks)
+    builder.with_pattern(str(kwargs.get("ldif_file_pattern", "*.ldif")))
 
-    default_max_errors = 100
-    if not ldif_ignore_errors or ldif_max_errors != default_max_errors:
-        builder.with_error_handling(
-            ignore_errors=ldif_ignore_errors, max_errors=ldif_max_errors
-        )
+    ignore_errors = _coerce_bool(kwargs.get("ldif_ignore_errors", True), default=True)
+    max_errors = _coerce_int(kwargs.get("ldif_max_errors", 100), 100)
+    builder.with_error_handling(ignore_errors=ignore_errors, max_errors=max_errors)
 
-    if ldif_apply_transformations or ldif_transformation_rules:
-        builder.with_transformations(
-            enable=ldif_apply_transformations,
-            rules=ldif_transformation_rules,
-        )
+    apply_transformations = _coerce_bool(
+        kwargs.get("ldif_apply_transformations", False), default=False,
+    )
+    rules = kwargs.get("ldif_transformation_rules")
+    rules_dict = rules if isinstance(rules, dict) else None
+    builder.with_transformations(enable=apply_transformations, rules=rules_dict)
 
-    if migration_batch:
-        builder.with_migration_batch(migration_batch)
+    batch = _coerce_str_optional(kwargs.get("migration_batch"))
+    if batch:
+        builder.with_migration_batch(batch)
 
-    # Set specific fields not covered by fluent methods
-    builder.ldif_ignore_file_errors = ldif_ignore_file_errors
-    builder.ldif_ignore_entry_errors = ldif_ignore_entry_errors
-    builder.enable_ldif_streams = enable_ldif_streams
+    # Direct attribute settings
+    builder.ldif_ignore_file_errors = _coerce_bool(
+        kwargs.get("ldif_ignore_file_errors", True), default=True,
+    )
+    builder.ldif_ignore_entry_errors = _coerce_bool(
+        kwargs.get("ldif_ignore_entry_errors", True), default=True,
+    )
+    builder.enable_ldif_streams = _coerce_bool(
+        kwargs.get("enable_ldif_streams", False), default=False,
+    )
 
-    return builder.build()
+    try:
+        return builder.build()
+    except Exception as e:
+        return FlextResult.fail(f"Failed to create LDIF processing config: {e}")
 
 
 def validate_ldap_config(config: TapLDAPConfig) -> FlextResult[bool]:
-    """Validate LDAP tap configuration.
+    """Validate the LDAP tap configuration.
 
     Args:
         config: Configuration to validate
@@ -302,7 +352,7 @@ def validate_ldap_config(config: TapLDAPConfig) -> FlextResult[bool]:
                 "SSL enabled but port is 389 (consider using port 636 for LDAPS)",
             )
 
-        return FlextResult.ok(True)
+        return FlextResult.ok(data=True)
 
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Configuration validation failed: {e}")

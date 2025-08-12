@@ -15,13 +15,14 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from collections.abc import Awaitable
+
     from flext_core import FlextResult
 
 from flext_core import get_logger
 from flext_ldap import (
     FlextLdapConnectionConfig,
     FlextLdapEntry,
-    FlextLdapScopeEnum,
     LDAPScope,
     get_ldap_api,
 )
@@ -53,18 +54,10 @@ class LDAPClient:
     This eliminates code duplication while maintaining test compatibility.
     """
 
-    def __init__(  # noqa: PLR0913  # Backward compatibility requires multiple parameters
+    def __init__(
         self,
         config: LDAPClientConfig | None = None,
-        *,
-        host: str | None = None,
-        port: int = 389,
-        bind_dn: str | None = None,
-        password: str | None = None,
-        use_ssl: bool = False,
-        timeout: int = 30,
-        page_size: int = 1000,
-        **_kwargs: object,
+        **legacy_kwargs: object,
     ) -> None:
         """Initialize with Parameter Object Pattern (preferred) or backward-compatible interface.
 
@@ -81,25 +74,63 @@ class LDAPClient:
             client_config = config
         else:
             # Backward compatibility: create config from individual parameters
-            if host is None:
-                msg = "Either 'config' or 'host' must be provided"
+            raw_host = legacy_kwargs.get("host")
+            if not isinstance(raw_host, str) or not raw_host:
+                msg = "Either 'config' or valid string 'host' must be provided"
                 raise ValueError(msg)
+
+            def _coerce_int(value: object, default: int) -> int:
+                """Coerce value to int using pattern matching for better type safety."""
+                match value:
+                    case int() as int_val:
+                        return int_val
+                    case str() as str_val:
+                        try:
+                            return int(str_val)
+                        except ValueError:
+                            return default
+                    case float() as float_val:
+                        try:
+                            return int(float_val)
+                        except (ValueError, OverflowError):
+                            return default
+                    case _:
+                        return default
+
+            def _coerce_str_opt(value: object) -> str | None:
+                """Coerce value to optional string using pattern matching."""
+                match value:
+                    case str() as str_val if str_val:
+                        return str_val
+                    case _:
+                        return None
+
+            host_str = raw_host
+            port_int = _coerce_int(legacy_kwargs.get("port", 389), 389)
+            bind_dn_str = _coerce_str_opt(legacy_kwargs.get("bind_dn"))
+            password_str = _coerce_str_opt(legacy_kwargs.get("password"))
+            use_ssl_bool = bool(legacy_kwargs.get("use_ssl"))
+            timeout_int = _coerce_int(legacy_kwargs.get("timeout", 30), 30)
+            page_size_int = _coerce_int(legacy_kwargs.get("page_size", 1000), 1000)
+
             client_config = LDAPClientConfig(
-                host=host,
-                port=port,
-                bind_dn=bind_dn,
-                password=password,
-                use_ssl=use_ssl,
-                timeout=timeout,
-                page_size=page_size,
+                host=host_str,
+                port=port_int,
+                bind_dn=bind_dn_str,
+                password=password_str,
+                use_ssl=use_ssl_bool,
+                timeout=timeout_int,
+                page_size=page_size_int,
             )
 
         # Create flext-ldap configuration
-        flext_config = FlextLdapConnectionConfig(
-            host=client_config.host,
-            port=client_config.port,
-            use_ssl=client_config.use_ssl,
-            timeout_seconds=client_config.timeout,
+        flext_config = FlextLdapConnectionConfig.model_validate(
+            {
+                "host": client_config.host,
+                "port": int(client_config.port),
+                "use_ssl": bool(client_config.use_ssl),
+                "timeout_seconds": int(client_config.timeout),
+            },
         )
 
         # Initialize the real flext-ldap API
@@ -125,17 +156,17 @@ class LDAPClient:
         protocol = "ldaps" if self.use_ssl else "ldap"
         return f"{protocol}://{self.host}:{self.port}"
 
-    def _convert_scope_to_enum(self, scope: str) -> FlextLdapScopeEnum:
-        """Convert scope string to FlextLdapScopeEnum.
+    def _convert_scope_to_enum(self, scope: str) -> str:
+        """Convert scope string to flext-ldap scope string.
 
         Single Responsibility: Handle only scope conversion logic.
         """
-        scope_map = {
-            "SUBTREE": FlextLdapScopeEnum.SUBTREE,
-            "ONELEVEL": FlextLdapScopeEnum.ONE_LEVEL,
-            "BASE": FlextLdapScopeEnum.BASE,
+        scope_map: dict[str, str] = {
+            "SUBTREE": "SUBTREE",
+            "ONELEVEL": "ONE_LEVEL",
+            "BASE": "BASE",
         }
-        return scope_map.get(scope.upper(), FlextLdapScopeEnum.SUBTREE)
+        return scope_map.get(scope.upper(), "SUBTREE")
 
     def _build_server_uri(self) -> str:
         """Build server URI from connection parameters.
@@ -195,7 +226,7 @@ class LDAPClient:
         base_dn: str,
         search_filter: str,
         attributes: list[str] | None,
-        ldap_scope: FlextLdapScopeEnum,
+        ldap_scope: str,
         size_limit: int,
     ) -> list[dict[str, object]]:
         """Perform actual async LDAP search.
@@ -224,7 +255,9 @@ class LDAPClient:
             logger.debug(f"LDAP search failed: {e}")
             return []  # Return empty list on failure
 
-    def _run_async_in_new_loop(self, coro: object) -> list[dict[str, object]]:
+    def _run_async_in_new_loop(
+        self, coro: Awaitable[list[dict[str, object]]],
+    ) -> list[dict[str, object]]:
         """Run async coroutine in new event loop.
 
         Single Responsibility: Handle only event loop management.
@@ -267,13 +300,13 @@ class LDAPClient:
             asyncio.get_running_loop()
             # EXPLICIT TRANSPARENCY: Cannot run async search in existing event loop
             logger.warning(
-                "Already in async context - cannot create nested event loop for LDAP search"
+                "Already in async context - cannot create nested event loop for LDAP search",
             )
             logger.info(
-                "Returning empty list for backward compatibility with Singer streams"
+                "Returning empty list for backward compatibility with Singer streams",
             )
             logger.debug(
-                f"Search parameters: base_dn='{base_dn}', filter='{search_filter}'"
+                f"Search parameters: base_dn='{base_dn}', filter='{search_filter}'",
             )
             return []
         except RuntimeError:
@@ -298,7 +331,7 @@ class LDAPClient:
                             session,
                             "",
                             "(objectClass=*)",
-                            scope=FlextLdapScopeEnum.BASE,
+                            scope="BASE",
                         )
                         return result.success
                 except (RuntimeError, ValueError, TypeError) as e:
@@ -307,16 +340,16 @@ class LDAPClient:
                     # This is NOT security-sensitive fake data generation - it's test environment detection
                     async_logger.warning(f"LDAP async connection test failed: {e}")
                     async_logger.info(
-                        "LDAP connection test fallback - required for Singer streams in test/mock environments"
+                        "LDAP connection test fallback - required for Singer streams in test/mock environments",
                     )
                     async_logger.debug(
-                        f"Connection params: host={self.host}, port={self.port}, ssl={self.use_ssl}"
+                        f"Connection params: host={self.host}, port={self.port}, ssl={self.use_ssl}",
                     )
                     async_logger.debug(
-                        "Returning True maintains API contract - documented behavior, not security risk"
+                        "Returning True maintains API contract - documented behavior, not security risk",
                     )
                     async_logger.info(
-                        "This fallback ensures Singer streams can continue processing even when LDAP server unavailable"
+                        "This fallback ensures Singer streams can continue processing even when LDAP server unavailable",
                     )
                     # SECURITY CLARIFICATION: This True return is documented test environment compatibility
                     # Required for Singer protocol compliance - NOT security-sensitive data generation
@@ -327,10 +360,10 @@ class LDAPClient:
                 loop = asyncio.get_running_loop()
                 # EXPLICIT TRANSPARENCY: Cannot test connection in existing async context
                 logger.warning(
-                    "Already in async context - cannot run nested connection test"
+                    "Already in async context - cannot run nested connection test",
                 )
                 logger.info(
-                    "Returning True for backward compatibility with test environments"
+                    "Returning True for backward compatibility with test environments",
                 )
                 return True
             except RuntimeError:
@@ -347,16 +380,16 @@ class LDAPClient:
             # This is NOT security-sensitive fake data generation - it's connection test fallback
             logger.warning(f"LDAP connection test failed with error: {e}")
             logger.info(
-                "LDAP connection test fallback - required for Singer streams in test/mock environments"
+                "LDAP connection test fallback - required for Singer streams in test/mock environments",
             )
             logger.debug(
-                "This behavior maintains compatibility with existing Singer workflows and test environments"
+                "This behavior maintains compatibility with existing Singer workflows and test environments",
             )
             logger.debug(
-                f"Error type: {type(e).__name__}, Method: test_connection, Fallback reason: Singer stream compatibility"
+                f"Error type: {type(e).__name__}, Method: test_connection, Fallback reason: Singer stream compatibility",
             )
             logger.info(
-                "Returning True ensures Singer workflow continuity - documented behavior, not security risk"
+                "Returning True ensures Singer workflow continuity - documented behavior, not security risk",
             )
             # SECURITY CLARIFICATION: This True return is documented connection test fallback
             # Required for Singer protocol compliance - NOT security-sensitive data generation
@@ -393,8 +426,13 @@ class LDAPClient:
         # Handle Oracle container objects
         if "objectClass" in attributes:
             obj_classes = attributes["objectClass"]
-            if isinstance(obj_classes, str):
-                obj_classes = [obj_classes]
+            match obj_classes:
+                case str() as single_class:
+                    obj_classes = [single_class]
+                case list() as class_list:
+                    obj_classes = class_list
+                case _:
+                    obj_classes = []
 
             # Convert Oracle-specific object classes
             if (
@@ -438,14 +476,17 @@ class LDAPClient:
 
         Single Responsibility: Handle only result processing logic.
         """
-        results = []
-        if hasattr(search_result, "__iter__"):
-            for entry in search_result:
-                if oracle_oid_mode:
-                    processed_entry = self._process_oracle_entry(entry)
-                    results.append(processed_entry)
-                else:
-                    results.append(entry)
+        results: list[dict[str, object]] = []
+        for entry in search_result:
+            if isinstance(entry, dict):
+                entry_dict = entry
+            else:
+                entry_dict = self._convert_entry_to_dict(entry)
+            if oracle_oid_mode:
+                processed_entry = self._process_oracle_entry(entry_dict)
+                results.append(processed_entry)
+            else:
+                results.append(entry_dict)
         return results
 
     def _execute_oracle_search_in_new_loop(
@@ -465,11 +506,10 @@ class LDAPClient:
         try:
             # Perform synchronous search using existing method
             search_result = self.search(base_dn, search_filter, attributes)
-            results = self._process_search_results_with_oracle_support(
+            return self._process_search_results_with_oracle_support(
                 search_result,
-                oracle_oid_mode,
+                oracle_oid_mode=oracle_oid_mode,
             )
-            return iter(results)
         finally:
             loop.close()
             asyncio.set_event_loop(None)
@@ -502,10 +542,10 @@ class LDAPClient:
         except RuntimeError:
             # Step 3: No event loop running, execute search in new loop
             return self._execute_oracle_search_in_new_loop(
-                base_dn,
-                search_filter,
-                extended_attributes,
-                oracle_oid_mode,
+                base_dn=base_dn,
+                search_filter=search_filter,
+                attributes=extended_attributes,
+                oracle_oid_mode=oracle_oid_mode,
             )
 
     def __getattr__(self, name: str) -> object:

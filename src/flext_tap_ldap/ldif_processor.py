@@ -16,8 +16,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
-else:
-    pass
 
 from flext_core import (
     FlextResult,
@@ -116,10 +114,11 @@ class LDIFEntry:
         if name not in self.attributes:
             self.attributes[name] = []
 
-        if isinstance(value, list):
-            self.attributes[name].extend(value)
-        else:
-            self.attributes[name].append(value)
+        match value:
+            case list() as value_list:
+                self.attributes[name].extend(value_list)
+            case str() as value_str:
+                self.attributes[name].append(value_str)
 
     def is_valid(self) -> bool:
         """Check if the entry is valid using flext-ldif validation."""
@@ -138,7 +137,7 @@ class LDIFEntry:
         errors = []
         if not self.is_valid():
             errors.append(
-                {"code": "invalid_entry", "message": "Entry failed validation"}
+                {"code": "invalid_entry", "message": "Entry failed validation"},
             )
         return errors
 
@@ -158,10 +157,11 @@ class LDIFEntry:
 
     def update_attribute(self, name: str, value: str | list[str]) -> None:
         """Update an attribute value, replacing existing values."""
-        if isinstance(value, list):
-            self.attributes[name] = value.copy()
-        else:
-            self.attributes[name] = [value]
+        match value:
+            case list() as value_list:
+                self.attributes[name] = value_list.copy()
+            case str() as value_str:
+                self.attributes[name] = [value_str]
 
 
 class FlextLDIFProcessor:
@@ -172,7 +172,7 @@ class FlextLDIFProcessor:
     """
 
     def __init__(self, *, ignore_errors: bool = True, max_errors: int = 100) -> None:
-        """Initialize processor with flext-ldif backend."""
+        """Initialize the processor with a flext-ldif backend."""
         self.ignore_errors = ignore_errors
         self.max_errors = max_errors
         self.errors: list[str] = []
@@ -287,7 +287,6 @@ class FlextLDIFProcessor:
         attributes: dict[str, list[str]] = {}
         if flext_entry.attributes and flext_entry.attributes.attributes:
             for attr_name, attr_values in flext_entry.attributes.attributes.items():
-                # attr_values is always list[str] from FlextLdifAttributes definition
                 attributes[attr_name] = [str(v) for v in attr_values]
 
         return LDIFEntry(dn=dn, attributes=attributes)
@@ -365,12 +364,7 @@ class FlextLDIFProcessor:
 
         for entry in self.entries:
             record_attributes: dict[str, object] = {"dn": entry.dn}
-            for attr_name, attr_values in entry.attributes.items():
-                record_attributes[attr_name] = (
-                    attr_values
-                    if isinstance(attr_values, (list, str))
-                    else list(attr_values)
-                )
+            record_attributes.update(dict(entry.attributes))
 
             record: dict[str, object] = {
                 "type": "RECORD",

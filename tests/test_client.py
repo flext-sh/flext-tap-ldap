@@ -356,9 +356,9 @@ class TestLDAPClientComprehensive:
             )
             # If it doesn't raise, should return empty list
             assert isinstance(results, list)
-        except Exception:
-            # If it raises, that's also acceptable behavior for this test
-            pass
+        except Exception as exc:
+            # If it raises, that's also acceptable behavior for this test; don't silence
+            pytest.skip(f"Search raised as expected: {exc}")
 
     def test_health_check_comprehensive(self, client: LDAPClient) -> None:
         """Test comprehensive health check."""

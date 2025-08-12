@@ -611,9 +611,10 @@ cn: another
                 entries = result.data
                 # Should still process valid entries
                 assert len(entries) >= 1
-        except Exception:
-            # If parsing fails completely, that's also acceptable behavior
-            pass
+        except Exception as exc:
+            # If parsing fails completely, that's also acceptable behavior for this test
+            # but do not silently ignore
+            pytest.skip(f"Parsing failed as expected in strict mode: {exc}")
 
     def test_processor_max_errors_limit(self) -> None:
         """Test processor max errors limit."""
@@ -626,9 +627,9 @@ cn: another
             result = FlextResult.ok(list(processor.parse_content(error_content)))
             # Should handle gracefully due to error limits
             assert isinstance(result, FlextResult)
-        except Exception as e:
+        except Exception as exc:
             # May also raise exception when limits exceeded
-            logging.warning("Exception during LDIF processing: %s", e)
+            logging.getLogger(__name__).warning("LDIF processing raised: %s", exc)
 
     def test_processor_ignore_errors_false(self) -> None:
         """Test processor with ignore_errors=False."""
@@ -640,6 +641,6 @@ cn: another
             result = FlextResult.ok(list(processor.parse_content(invalid_content)))
             # Should either succeed or fail, but handle gracefully
             assert isinstance(result, FlextResult)
-        except Exception:
+        except Exception as exc:
             # Should raise exception when not ignoring errors - this is expected
-            pass
+            pytest.skip(f"Strict parser raised as expected: {exc}")

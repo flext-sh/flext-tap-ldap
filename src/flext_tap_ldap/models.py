@@ -14,13 +14,38 @@ if TYPE_CHECKING:
 
 
 def _get_entry_value(
-    entry: dict[str, object] | FlextLdapEntry, key: str, default: object = None
+    entry: dict[str, object] | FlextLdapEntry, key: str, default: object = None,
 ) -> object:
-    """Helper function to get value from either dict or FlextLdapEntry."""
+    """Get a value from either a dict or `FlextLdapEntry`.
+
+    Returns the attribute value by name from a plain dict or an attribute of
+    a `FlextLdapEntry`, falling back to `default` when not present.
+    """
     if isinstance(entry, dict):
         return entry.get(key, default)
     # FlextLdapEntry - use getattr or similar access pattern
     return getattr(entry, key, default)
+
+
+def _safe_list_str(value: object) -> list[str]:
+    """Safely coerce a value to list[str]."""
+    if isinstance(value, list):
+        return [str(v) for v in value]
+    if isinstance(value, tuple):
+        return [str(v) for v in value]
+    if isinstance(value, str):
+        # Single string treated as single-element list
+        return [value]
+    return []
+
+
+def _safe_first_str(value: object) -> str | None:
+    """Safely get the first string from a possibly list-like value."""
+    if isinstance(value, list | tuple):
+        return str(value[0]) if value else None
+    if isinstance(value, str):
+        return value
+    return None
 
 
 class LDAPAttribute(FlextDomainBaseModel):
@@ -154,59 +179,37 @@ class LDAPUser(LDAPEntry):
         return cls(
             # Required fields from LDAPEntry using alias 'id' for dn
             id=str(_get_entry_value(entry, "dn", "")),
-            object_classes=list(_get_entry_value(entry, "objectClass", [])),
+            object_classes=_safe_list_str(_get_entry_value(entry, "objectClass", [])),
             # Optional metadata fields from LDAPEntry with defaults
             created_at=None,
             modified_at=None,
             created_by=None,
             modified_by=None,
             change_type=None,
-            # LDAPUser specific fields with defaults
-            uid=str(_get_entry_value(entry, "uid", [None])[0])
-            if _get_entry_value(entry, "uid", [None])
-            else None,
-            cn=str(_get_entry_value(entry, "cn", [None])[0])
-            if _get_entry_value(entry, "cn", [None])
-            else None,
-            sn=str(_get_entry_value(entry, "sn", [None])[0])
-            if _get_entry_value(entry, "sn", [None])
-            else None,
-            given_name=str(_get_entry_value(entry, "givenName", [None])[0])
-            if _get_entry_value(entry, "givenName", [None])
-            else None,
-            display_name=str(_get_entry_value(entry, "displayName", [None])[0])
-            if _get_entry_value(entry, "displayName", [None])
-            else None,
-            mail=str(_get_entry_value(entry, "mail", [None])[0])
-            if _get_entry_value(entry, "mail", [None])
-            else None,
-            telephone_number=str(_get_entry_value(entry, "telephoneNumber", [None])[0])
-            if _get_entry_value(entry, "telephoneNumber", [None])
-            else None,
-            mobile=str(_get_entry_value(entry, "mobile", [None])[0])
-            if _get_entry_value(entry, "mobile", [None])
-            else None,
-            employee_number=str(_get_entry_value(entry, "employeeNumber", [None])[0])
-            if _get_entry_value(entry, "employeeNumber", [None])
-            else None,
-            employee_type=str(_get_entry_value(entry, "employeeType", [None])[0])
-            if _get_entry_value(entry, "employeeType", [None])
-            else None,
-            department=str(_get_entry_value(entry, "department", [None])[0])
-            if _get_entry_value(entry, "department", [None])
-            else None,
-            title=str(_get_entry_value(entry, "title", [None])[0])
-            if _get_entry_value(entry, "title", [None])
-            else None,
-            manager=str(_get_entry_value(entry, "manager", [None])[0])
-            if _get_entry_value(entry, "manager", [None])
-            else None,
-            home_directory=str(_get_entry_value(entry, "homeDirectory", [None])[0])
-            if _get_entry_value(entry, "homeDirectory", [None])
-            else None,
-            login_shell=str(_get_entry_value(entry, "loginShell", [None])[0])
-            if _get_entry_value(entry, "loginShell", [None])
-            else None,
+            # LDAPUser specific fields with safe extraction
+            uid=_safe_first_str(_get_entry_value(entry, "uid", [])),
+            cn=_safe_first_str(_get_entry_value(entry, "cn", [])),
+            sn=_safe_first_str(_get_entry_value(entry, "sn", [])),
+            given_name=_safe_first_str(_get_entry_value(entry, "givenName", [])),
+            display_name=_safe_first_str(_get_entry_value(entry, "displayName", [])),
+            mail=_safe_first_str(_get_entry_value(entry, "mail", [])),
+            telephone_number=_safe_first_str(
+                _get_entry_value(entry, "telephoneNumber", []),
+            ),
+            mobile=_safe_first_str(_get_entry_value(entry, "mobile", [])),
+            employee_number=_safe_first_str(
+                _get_entry_value(entry, "employeeNumber", []),
+            ),
+            employee_type=_safe_first_str(
+                _get_entry_value(entry, "employeeType", []),
+            ),
+            department=_safe_first_str(_get_entry_value(entry, "department", [])),
+            title=_safe_first_str(_get_entry_value(entry, "title", [])),
+            manager=_safe_first_str(_get_entry_value(entry, "manager", [])),
+            home_directory=_safe_first_str(
+                _get_entry_value(entry, "homeDirectory", []),
+            ),
+            login_shell=_safe_first_str(_get_entry_value(entry, "loginShell", [])),
         )
 
 
@@ -231,32 +234,26 @@ class LDAPGroup(LDAPEntry):
         return cls(
             # Required fields from LDAPEntry using alias 'id' for dn
             id=str(_get_entry_value(entry, "dn", "")),
-            object_classes=list(_get_entry_value(entry, "objectClass", [])),
+            object_classes=_safe_list_str(_get_entry_value(entry, "objectClass", [])),
             # Optional metadata fields from LDAPEntry with defaults
             created_at=None,
             modified_at=None,
             created_by=None,
             modified_by=None,
             change_type=None,
-            # LDAPGroup specific fields with defaults
-            cn=str(_get_entry_value(entry, "cn", [None])[0])
-            if _get_entry_value(entry, "cn", [None])
-            else None,
-            description=str(_get_entry_value(entry, "description", [None])[0])
-            if _get_entry_value(entry, "description", [None])
-            else None,
-            members=list(_get_entry_value(entry, "member", [])),
-            unique_members=list(_get_entry_value(entry, "uniqueMember", [])),
-            gid_number=str(_get_entry_value(entry, "gidNumber", [None])[0])
-            if _get_entry_value(entry, "gidNumber", [None])
-            else None,
+            # LDAPGroup specific fields with safe extraction
+            cn=_safe_first_str(_get_entry_value(entry, "cn", [])),
+            description=_safe_first_str(_get_entry_value(entry, "description", [])),
+            members=_safe_list_str(_get_entry_value(entry, "member", [])),
+            unique_members=_safe_list_str(_get_entry_value(entry, "uniqueMember", [])),
+            gid_number=_safe_first_str(_get_entry_value(entry, "gidNumber", [])),
             owner=None,
-            create_timestamp=str(_get_entry_value(entry, "createTimestamp", [None])[0])
-            if _get_entry_value(entry, "createTimestamp", [None])
-            else None,
-            modify_timestamp=str(_get_entry_value(entry, "modifyTimestamp", [None])[0])
-            if _get_entry_value(entry, "modifyTimestamp", [None])
-            else None,
+            create_timestamp=_safe_first_str(
+                _get_entry_value(entry, "createTimestamp", []),
+            ),
+            modify_timestamp=_safe_first_str(
+                _get_entry_value(entry, "modifyTimestamp", []),
+            ),
         )
 
 
