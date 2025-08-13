@@ -94,7 +94,7 @@ class LDAPAttribute(FlextDomainBaseModel):
 class LDAPEntry(FlextDomainBaseModel):
     """Represents an LDAP entry with comprehensive metadata."""
 
-    dn: str = Field(..., description="Distinguished Name", alias="id")
+    dn: str = Field(..., description="Distinguished Name")
     object_classes: list[str] = Field(..., description="Object classes")
     attributes: dict[str, object] = Field(
         default_factory=dict,
@@ -125,15 +125,6 @@ class LDAPEntry(FlextDomainBaseModel):
         """Validate business rules for LDAP entries."""
         return FlextResult.ok(None)
 
-    @property
-    def id(self) -> str:
-        """Get unique identifier for LDAP entry.
-
-        Returns:
-            Distinguished Name as unique identifier.
-
-        """
-        return self.dn
 
     @property
     def rdn(self) -> str:
@@ -192,8 +183,8 @@ class LDAPUser(LDAPEntry):
     def from_entry(cls, entry: dict[str, object] | FlextLdapEntry) -> LDAPUser:
         """Create LDAPUser from LDAP entry."""
         return cls(
-            # Required fields from LDAPEntry using alias 'id' for dn
-            id=str(_get_entry_value(entry, "dn", "")),
+            # Required fields from LDAPEntry
+            dn=str(_get_entry_value(entry, "dn", "")),
             object_classes=_safe_list_value(_get_entry_value(entry, "objectClass", [])),
             # Optional metadata fields from LDAPEntry with defaults
             created_at=None,
@@ -239,8 +230,8 @@ class LDAPGroup(LDAPEntry):
     def from_entry(cls, entry: dict[str, object] | FlextLdapEntry) -> LDAPGroup:
         """Create LDAPGroup from LDAP entry."""
         return cls(
-            # Required fields from LDAPEntry using alias 'id' for dn
-            id=str(_get_entry_value(entry, "dn", "")),
+            # Required fields from LDAPEntry
+            dn=str(_get_entry_value(entry, "dn", "")),
             object_classes=_safe_list_value(_get_entry_value(entry, "objectClass", [])),
             # Optional metadata fields from LDAPEntry with defaults
             created_at=None,
@@ -306,7 +297,7 @@ class LDAPSchema(FlextDomainBaseModel):
 class LDAPConnection(FlextDomainBaseModel):
     """LDAP connection entity with comprehensive tracking."""
 
-    id: UUID = Field(default_factory=uuid4, description="Connection unique identifier")
+    id: str = Field(default_factory=lambda: str(uuid4()), description="Connection unique identifier")
     host: str = Field(..., description="LDAP server host")
     port: int = Field(389, description="LDAP server port")
     bind_dn: str | None = Field(None, description="Bind DN for authentication")
@@ -359,8 +350,8 @@ class LDAPConnection(FlextDomainBaseModel):
 class LDAPStream(FlextDomainBaseModel):
     """LDAP stream entity with comprehensive metadata."""
 
-    id: UUID = Field(default_factory=uuid4, description="Stream unique identifier")
-    connection_id: UUID = Field(..., description="Associated connection ID")
+    id: str = Field(default_factory=lambda: str(uuid4()), description="Stream unique identifier")
+    connection_id: str = Field(..., description="Associated connection ID")
     stream_type: str = Field(..., description="Type of LDAP stream")
     search_filter: str = Field(..., description="LDAP search filter")
     attributes: list[str] = Field(default_factory=list, description="Attributes to extract")
@@ -406,8 +397,8 @@ class LDAPStream(FlextDomainBaseModel):
 class TapExecution(FlextDomainBaseModel):
     """Tap execution entity with comprehensive tracking."""
 
-    id: UUID = Field(default_factory=uuid4, description="Execution unique identifier")
-    connection_id: UUID = Field(..., description="Associated connection ID")
+    id: str = Field(default_factory=lambda: str(uuid4()), description="Execution unique identifier")
+    connection_id: str = Field(..., description="Associated connection ID")
     command: str = Field(..., description="Executed command")
     tap_status: str = Field("pending", description="Execution status")
     started_at: datetime | None = Field(None, description="Execution start time")
@@ -507,9 +498,9 @@ class TapExecution(FlextDomainBaseModel):
 class LDAPRecord(FlextDomainBaseModel):
     """LDAP record entity with Singer protocol support."""
 
-    id: UUID = Field(default_factory=uuid4, description="Record unique identifier")
-    stream_id: UUID = Field(..., description="Associated stream ID")
-    execution_id: UUID = Field(..., description="Associated execution ID")
+    id: str = Field(default_factory=lambda: str(uuid4()), description="Record unique identifier")
+    stream_id: str = Field(..., description="Associated stream ID")
+    execution_id: str = Field(..., description="Associated execution ID")
     dn: str = Field(..., description="Distinguished Name")
     attributes: dict[str, object] = Field(default_factory=dict, description="LDAP attributes")
     object_class: list[str] = Field(default_factory=list, description="Object classes")

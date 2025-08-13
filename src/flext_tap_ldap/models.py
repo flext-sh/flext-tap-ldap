@@ -87,7 +87,7 @@ class LDAPAttribute(FlextDomainBaseModel):
 class LDAPEntry(FlextDomainBaseModel):
     """Represents an LDAP entry."""
 
-    dn: str = Field(..., description="Distinguished Name", alias="id")
+    dn: str = Field(..., description="Distinguished Name")
     object_classes: list[str] = Field(..., description="Object classes")
 
     def validate_domain_rules(self) -> FlextResult[None]:
@@ -115,15 +115,6 @@ class LDAPEntry(FlextDomainBaseModel):
     )
     controls: list[str] = Field(default_factory=list, description="LDAP controls")
 
-    @property
-    def id(self) -> str:
-        """Get unique identifier for LDAP entry.
-
-        Returns:
-            Distinguished Name as unique identifier.
-
-        """
-        return self.dn
 
     def get_attribute(self, name: str) -> object | None:
         """Get attribute value by name (case-insensitive).
@@ -177,8 +168,8 @@ class LDAPUser(LDAPEntry):
     def from_entry(cls, entry: dict[str, object] | FlextLdapEntry) -> LDAPUser:
         """Create LDAPUser from LDAP entry."""
         return cls(
-            # Required fields from LDAPEntry using alias 'id' for dn
-            id=str(_get_entry_value(entry, "dn", "")),
+            # Required fields from LDAPEntry
+            dn=str(_get_entry_value(entry, "dn", "")),
             object_classes=_safe_list_str(_get_entry_value(entry, "objectClass", [])),
             # Optional metadata fields from LDAPEntry with defaults
             created_at=None,
@@ -232,8 +223,8 @@ class LDAPGroup(LDAPEntry):
     def from_entry(cls, entry: dict[str, object] | FlextLdapEntry) -> LDAPGroup:
         """Create LDAPGroup from LDAP entry."""
         return cls(
-            # Required fields from LDAPEntry using alias 'id' for dn
-            id=str(_get_entry_value(entry, "dn", "")),
+            # Required fields from LDAPEntry
+            dn=str(_get_entry_value(entry, "dn", "")),
             object_classes=_safe_list_str(_get_entry_value(entry, "objectClass", [])),
             # Optional metadata fields from LDAPEntry with defaults
             created_at=None,
