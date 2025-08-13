@@ -7,6 +7,19 @@ from typing import TYPE_CHECKING
 from flext_core import FlextResult, FlextValueObject as FlextDomainBaseModel
 from pydantic import Field
 
+# Re-export canonical Pydantic models from domain layer via models.py facade
+from flext_tap_ldap.domain.entities import (
+    ConnectionTestedEvent,
+    LDAPConnection,
+    LDAPRecord,
+    LDAPStream,
+    RecordExtractedEvent,
+    StreamDiscoveredEvent,
+    TapExecution,
+    TapExecutionCompletedEvent,
+    TapExecutionStartedEvent,
+)
+
 if TYPE_CHECKING:
     from datetime import datetime
 
@@ -284,3 +297,22 @@ class LDAPSchema(FlextDomainBaseModel):
             any(oc.lower().startswith(prefix) for prefix in oracle_prefixes)
             for oc in self.object_classes
         )
+
+
+# Public API: expose local value objects and re-exported domain entities/events
+__all__ = [
+    "ConnectionTestedEvent",
+    "LDAPAttribute",
+    "LDAPConnection",
+    "LDAPEntry",
+    "LDAPGroup",
+    "LDAPRecord",
+    "LDAPSchema",
+    "LDAPStream",
+    "LDAPUser",
+    "RecordExtractedEvent",
+    "StreamDiscoveredEvent",
+    "TapExecution",
+    "TapExecutionCompletedEvent",
+    "TapExecutionStartedEvent",
+]
