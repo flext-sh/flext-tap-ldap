@@ -189,7 +189,8 @@ class TapLDAPConfig(BaseSettings):
 
                     # Ensure proper types for replication_key
                     if replication_key is not None and not isinstance(
-                        replication_key, str,
+                        replication_key,
+                        str,
                     ):
                         replication_key = None
 
@@ -242,15 +243,21 @@ class TapLDAPConfig(BaseSettings):
 
                     # Normalize types safely for mypy
                     pk_raw = stream_config.get("primary_keys")
-                    pk_list: list[str] | None = pk_raw if isinstance(pk_raw, list) else None
+                    pk_list: list[str] | None = (
+                        pk_raw if isinstance(pk_raw, list) else None
+                    )
                     schema_raw = stream_config.get("json_schema")
-                    schema_dict: dict[str, object] | None = schema_raw if isinstance(schema_raw, dict) else None
+                    schema_dict: dict[str, object] | None = (
+                        schema_raw if isinstance(schema_raw, dict) else None
+                    )
 
                     config_obj = CustomStreamConfig(
                         name=name,
                         search_filter=search_filter,
                         primary_keys=pk_list,
-                        replication_key=str(stream_config.get("replication_key")) if isinstance(stream_config.get("replication_key"), str) else None,
+                        replication_key=str(stream_config.get("replication_key"))
+                        if isinstance(stream_config.get("replication_key"), str)
+                        else None,
                         json_schema=schema_dict,
                     )
 
@@ -312,7 +319,9 @@ class TapLDAPConfig(BaseSettings):
                 "server": str(ldap_defaults.get("host", "localhost")),
                 "port": int(port_val) if isinstance(port_val, (int, str)) else 389,
                 "use_ssl": bool(ldap_defaults.get("use_ssl")),
-                "timeout": int(timeout_val) if isinstance(timeout_val, (int, str)) else 30,
+                "timeout": int(timeout_val)
+                if isinstance(timeout_val, (int, str))
+                else 30,
             },
         )
 
@@ -326,7 +335,9 @@ class TapLDAPConfig(BaseSettings):
             else None,
             ldif_file_pattern=str(ldif_defaults["ldif_file_pattern"]),
             ldif_ignore_errors=bool(ldif_defaults["ldif_ignore_errors"]),
-            ldif_max_errors=int(ldif_defaults["ldif_max_errors"]) if isinstance(ldif_defaults["ldif_max_errors"], (int, str)) else 100,
+            ldif_max_errors=int(ldif_defaults["ldif_max_errors"])
+            if isinstance(ldif_defaults["ldif_max_errors"], (int, str))
+            else 100,
             ldif_ignore_file_errors=bool(ldif_defaults["ldif_ignore_file_errors"]),
             ldif_ignore_entry_errors=bool(ldif_defaults["ldif_ignore_entry_errors"]),
             ldif_apply_transformations=bool(

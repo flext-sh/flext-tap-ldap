@@ -43,9 +43,9 @@ class TestFlextTapLDAPIntegration:
                 {
                     "tap_stream_id": "users",
                     "schema": {"properties": {"dn": {"type": "string"}}},
-                    "metadata": []
-                }
-            ]
+                    "metadata": [],
+                },
+            ],
         }
 
     @pytest.fixture
@@ -185,9 +185,8 @@ class TestFlextTapLDAPIntegration:
             # Check that modifyTimestamp filter was included
             for call in search_calls:
                 filter_arg = call[1].get("search_filter", "")
-                if (
-                    "inetOrgPerson" in filter_arg
-                    and ("modifyTimestamp>=" not in filter_arg or result.exit_code != 0)
+                if "inetOrgPerson" in filter_arg and (
+                    "modifyTimestamp>=" not in filter_arg or result.exit_code != 0
                 ):
                     msg: str = (
                         f"Expected timestamp filter in incremental search, "

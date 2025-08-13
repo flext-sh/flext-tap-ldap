@@ -591,7 +591,7 @@ class TestLDAPBaseStreamDirectUsage:
         class TestBaseStream(LDAPBaseStream):
             name = "test_base"
             schema: ClassVar[dict[str, object]] = {
-                "properties": {"dn": {"type": "string"}}
+                "properties": {"dn": {"type": "string"}},
             }
 
         # Create instance of test subclass

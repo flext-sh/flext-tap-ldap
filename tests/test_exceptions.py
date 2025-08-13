@@ -28,19 +28,17 @@ class TestFlextTapLdapExceptions:
 
         # Test specific errors with context
         config_error = FlextTapLdapConfigurationError(
-            "Config error",
-            base_dn="dc=test,dc=com",
-            host="test.com"
+            "Config error", base_dn="dc=test,dc=com", host="test.com",
         )
         assert "[CONFIG_ERROR] flext_tap_ldap config: Config error" in str(config_error)
 
         # Test connection error
         conn_error = FlextTapLdapConnectionError(
-            "Connection failed",
-            host="test.com",
-            timeout=30
+            "Connection failed", host="test.com", timeout=30,
         )
-        assert "[FLEXT_2001] flext_tap_ldap connection: Connection failed" in str(conn_error)
+        assert "[FLEXT_2001] flext_tap_ldap connection: Connection failed" in str(
+            conn_error,
+        )
         assert hasattr(conn_error, "context")
 
 
@@ -70,7 +68,10 @@ class TestFlextTapLdapConnectionError:
         """Test creating connection error."""
         error = FlextTapLdapConnectionError("Failed to connect to LDAP server")
         error_str = str(error)
-        assert "[FLEXT_2001] flext_tap_ldap connection: Failed to connect to LDAP server" in error_str
+        assert (
+            "[FLEXT_2001] flext_tap_ldap connection: Failed to connect to LDAP server"
+            in error_str
+        )
         assert isinstance(error, Exception)
 
     def test_connection_error_with_context(self) -> None:
@@ -82,7 +83,9 @@ class TestFlextTapLdapConnectionError:
             timeout=30,
         )
 
-        assert "[FLEXT_2001] flext_tap_ldap connection: Connection timeout" in str(error)
+        assert "[FLEXT_2001] flext_tap_ldap connection: Connection timeout" in str(
+            error,
+        )
 
     def test_connection_error_inheritance(self) -> None:
         """Test connection error inheritance."""
@@ -117,7 +120,10 @@ class TestFlextTapLdapSearchError:
     def test_search_error_creation(self) -> None:
         """Test creating search error."""
         error = FlextTapLdapSearchError("Search operation failed")
-        assert "[PROCESSING_ERROR] flext_tap_ldap processing: Search operation failed" in str(error)
+        assert (
+            "[PROCESSING_ERROR] flext_tap_ldap processing: Search operation failed"
+            in str(error)
+        )
         assert isinstance(error, Exception)
 
     def test_search_error_with_context(self) -> None:
@@ -129,7 +135,10 @@ class TestFlextTapLdapSearchError:
             scope="SUBTREE",
         )
 
-        assert "[PROCESSING_ERROR] flext_tap_ldap processing: Invalid search filter" in str(error)
+        assert (
+            "[PROCESSING_ERROR] flext_tap_ldap processing: Invalid search filter"
+            in str(error)
+        )
 
 
 class TestFlextTapLdapConfigurationError:
@@ -138,7 +147,9 @@ class TestFlextTapLdapConfigurationError:
     def test_configuration_error_creation(self) -> None:
         """Test creating configuration error."""
         error = FlextTapLdapConfigurationError("Invalid configuration")
-        assert "[CONFIG_ERROR] flext_tap_ldap config: Invalid configuration" in str(error)
+        assert "[CONFIG_ERROR] flext_tap_ldap config: Invalid configuration" in str(
+            error,
+        )
         assert isinstance(error, Exception)
 
     def test_configuration_error_with_context(self) -> None:
@@ -149,7 +160,10 @@ class TestFlextTapLdapConfigurationError:
             config_section="connection",
         )
 
-        assert "[CONFIG_ERROR] flext_tap_ldap config: Missing required parameter" in str(error)
+        assert (
+            "[CONFIG_ERROR] flext_tap_ldap config: Missing required parameter"
+            in str(error)
+        )
 
 
 class TestFlextTapLdapProcessingError:
@@ -158,7 +172,9 @@ class TestFlextTapLdapProcessingError:
     def test_processing_error_creation(self) -> None:
         """Test creating processing error."""
         error = FlextTapLdapProcessingError("Processing failed")
-        assert "[PROCESSING_ERROR] flext_tap_ldap processing: Processing failed" in str(error)
+        assert "[PROCESSING_ERROR] flext_tap_ldap processing: Processing failed" in str(
+            error,
+        )
         assert isinstance(error, Exception)
 
     def test_processing_error_with_context(self) -> None:
@@ -169,7 +185,10 @@ class TestFlextTapLdapProcessingError:
             operation="transform",
         )
 
-        assert "[PROCESSING_ERROR] flext_tap_ldap processing: Failed to process entry" in str(error)
+        assert (
+            "[PROCESSING_ERROR] flext_tap_ldap processing: Failed to process entry"
+            in str(error)
+        )
 
 
 class TestFlextTapLdapStreamError:
@@ -178,7 +197,10 @@ class TestFlextTapLdapStreamError:
     def test_stream_error_creation(self) -> None:
         """Test creating stream error."""
         error = FlextTapLdapStreamError("Stream operation failed")
-        assert "[PROCESSING_ERROR] flext_tap_ldap processing: Stream operation failed" in str(error)
+        assert (
+            "[PROCESSING_ERROR] flext_tap_ldap processing: Stream operation failed"
+            in str(error)
+        )
         assert isinstance(error, Exception)
 
     def test_stream_error_with_context(self) -> None:
@@ -189,7 +211,10 @@ class TestFlextTapLdapStreamError:
             stream_type="LDAP",
         )
 
-        assert "[PROCESSING_ERROR] flext_tap_ldap processing: Stream discovery failed" in str(error)
+        assert (
+            "[PROCESSING_ERROR] flext_tap_ldap processing: Stream discovery failed"
+            in str(error)
+        )
 
 
 class TestFlextTapLdapValidationError:

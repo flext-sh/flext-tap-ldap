@@ -160,7 +160,9 @@ class TapLDAPConfig(BaseSettings):
                         primary_keys = None
 
                     # Ensure proper types for replication_key
-                    if replication_key is not None and not isinstance(replication_key, str):
+                    if replication_key is not None and not isinstance(
+                        replication_key, str,
+                    ):
                         replication_key = None
 
                     # Ensure proper types for json_schema
@@ -225,26 +227,48 @@ class TapLDAPConfig(BaseSettings):
         # Create properly typed config objects with explicit parameters
         ldap_connection = LDAPConnectionConfig(
             host=str(ldap_defaults["host"]),
-            port=int(ldap_defaults["port"]) if isinstance(ldap_defaults["port"], (int, str)) else 389,
-            bind_dn=ldap_defaults["bind_dn"] if isinstance(ldap_defaults["bind_dn"], str) else None,
-            bind_password=ldap_defaults["bind_password"] if isinstance(ldap_defaults["bind_password"], str) else None,
+            port=int(ldap_defaults["port"])
+            if isinstance(ldap_defaults["port"], (int, str))
+            else 389,
+            bind_dn=ldap_defaults["bind_dn"]
+            if isinstance(ldap_defaults["bind_dn"], str)
+            else None,
+            bind_password=ldap_defaults["bind_password"]
+            if isinstance(ldap_defaults["bind_password"], str)
+            else None,
             base_dn=str(ldap_defaults["base_dn"]),
             use_ssl=bool(ldap_defaults["use_ssl"]),
-            timeout=int(ldap_defaults["timeout"]) if isinstance(ldap_defaults["timeout"], (int, str)) else 30,
-            page_size=int(ldap_defaults["page_size"]) if isinstance(ldap_defaults["page_size"], (int, str)) else 1000,
+            timeout=int(ldap_defaults["timeout"])
+            if isinstance(ldap_defaults["timeout"], (int, str))
+            else 30,
+            page_size=int(ldap_defaults["page_size"])
+            if isinstance(ldap_defaults["page_size"], (int, str))
+            else 1000,
         )
 
         ldif_proc_config = LDIFProcessingConfig(
-            ldif_files=ldif_defaults["ldif_files"] if isinstance(ldif_defaults["ldif_files"], list) else None,
-            ldif_directory=ldif_defaults["ldif_directory"] if isinstance(ldif_defaults["ldif_directory"], str) else None,
+            ldif_files=ldif_defaults["ldif_files"]
+            if isinstance(ldif_defaults["ldif_files"], list)
+            else None,
+            ldif_directory=ldif_defaults["ldif_directory"]
+            if isinstance(ldif_defaults["ldif_directory"], str)
+            else None,
             ldif_file_pattern=str(ldif_defaults["ldif_file_pattern"]),
             ldif_ignore_errors=bool(ldif_defaults["ldif_ignore_errors"]),
-            ldif_max_errors=int(ldif_defaults["ldif_max_errors"]) if isinstance(ldif_defaults["ldif_max_errors"], (int, str)) else 100,
+            ldif_max_errors=int(ldif_defaults["ldif_max_errors"])
+            if isinstance(ldif_defaults["ldif_max_errors"], (int, str))
+            else 100,
             ldif_ignore_file_errors=bool(ldif_defaults["ldif_ignore_file_errors"]),
             ldif_ignore_entry_errors=bool(ldif_defaults["ldif_ignore_entry_errors"]),
-            ldif_apply_transformations=bool(ldif_defaults["ldif_apply_transformations"]),
-            ldif_transformation_rules=ldif_defaults["ldif_transformation_rules"] if isinstance(ldif_defaults["ldif_transformation_rules"], dict) else None,
-            migration_batch=ldif_defaults["migration_batch"] if isinstance(ldif_defaults["migration_batch"], str) else None,
+            ldif_apply_transformations=bool(
+                ldif_defaults["ldif_apply_transformations"],
+            ),
+            ldif_transformation_rules=ldif_defaults["ldif_transformation_rules"]
+            if isinstance(ldif_defaults["ldif_transformation_rules"], dict)
+            else None,
+            migration_batch=ldif_defaults["migration_batch"]
+            if isinstance(ldif_defaults["migration_batch"], str)
+            else None,
             enable_ldif_streams=bool(ldif_defaults["enable_ldif_streams"]),
         )
 

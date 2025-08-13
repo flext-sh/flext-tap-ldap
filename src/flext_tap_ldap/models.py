@@ -14,7 +14,9 @@ if TYPE_CHECKING:
 
 
 def _get_entry_value(
-    entry: dict[str, object] | FlextLdapEntry, key: str, default: object = None,
+    entry: dict[str, object] | FlextLdapEntry,
+    key: str,
+    default: object = None,
 ) -> object:
     """Get a value from either a dict or `FlextLdapEntry`.
 
@@ -114,7 +116,6 @@ class LDAPEntry(FlextDomainBaseModel):
         description="LDIF change type (add, modify, delete)",
     )
     controls: list[str] = Field(default_factory=list, description="LDAP controls")
-
 
     def get_attribute(self, name: str) -> object | None:
         """Get attribute value by name (case-insensitive).

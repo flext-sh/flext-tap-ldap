@@ -80,7 +80,9 @@ class LDIFStream(Stream):
                 yield from self._process_ldif_file(ldif_file)
         elif ldif_directory:
             # Directory processing should be implemented in flext-ldif library
-            logger.warning("Directory processing not yet implemented in flext-ldif library")
+            logger.warning(
+                "Directory processing not yet implemented in flext-ldif library",
+            )
 
     def _process_ldif_file(self, ldif_file: str) -> Iterable[dict[str, object]]:
         """Process single LDIF file using flext-ldif."""
@@ -101,7 +103,9 @@ class LDIFStream(Stream):
         except Exception:
             logger.exception(f"Error processing LDIF file {ldif_file}")
 
-    def _convert_entry_to_record(self, flext_entry: FlextLdifEntry) -> dict[str, object]:
+    def _convert_entry_to_record(
+        self, flext_entry: FlextLdifEntry,
+    ) -> dict[str, object]:
         """Convert flext-ldif entry to Singer record."""
         # Delegate entry type classification to flext-ldap
         object_classes = flext_entry.attributes.get_values("objectClass")
@@ -196,14 +200,20 @@ class LDIFAnalysisStream(Stream):
                     stats_entry_types = stats.get("entry_types", {})
                     if isinstance(stats_entry_types, dict):
                         for entry_type, count in stats_entry_types.items():
-                            entry_types[entry_type] = entry_types.get(entry_type, 0) + int(count)
+                            entry_types[entry_type] = entry_types.get(
+                                entry_type, 0,
+                            ) + int(count)
                     stats_object_classes = stats.get("object_classes", {})
                     if isinstance(stats_object_classes, dict):
                         for obj_class, count in stats_object_classes.items():
-                            object_classes[obj_class] = object_classes.get(obj_class, 0) + int(count)
+                            object_classes[obj_class] = object_classes.get(
+                                obj_class, 0,
+                            ) + int(count)
             elif ldif_directory:
                 # This should be implemented in flext-ldif library
-                logger.warning("Directory analysis should be implemented in flext-ldif library")
+                logger.warning(
+                    "Directory analysis should be implemented in flext-ldif library",
+                )
 
             yield {
                 "analysis_id": "ldif_summary",
