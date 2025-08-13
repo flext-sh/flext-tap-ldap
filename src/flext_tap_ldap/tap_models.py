@@ -314,7 +314,8 @@ class LDAPConnection(FlextDomainBaseModel):
     """LDAP connection entity with comprehensive tracking."""
 
     id: str = Field(
-        default_factory=lambda: str(uuid4()), description="Connection unique identifier",
+        default_factory=lambda: str(uuid4()),
+        description="Connection unique identifier",
     )
     host: str = Field(..., description="LDAP server host")
     port: int = Field(389, description="LDAP server port")
@@ -373,27 +374,32 @@ class LDAPStream(FlextDomainBaseModel):
     """LDAP stream entity with comprehensive metadata."""
 
     id: str = Field(
-        default_factory=lambda: str(uuid4()), description="Stream unique identifier",
+        default_factory=lambda: str(uuid4()),
+        description="Stream unique identifier",
     )
     connection_id: str = Field(..., description="Associated connection ID")
     stream_type: str = Field(..., description="Type of LDAP stream")
     search_filter: str = Field(..., description="LDAP search filter")
     attributes: list[str] = Field(
-        default_factory=list, description="Attributes to extract",
+        default_factory=list,
+        description="Attributes to extract",
     )
     tap_stream_id: str = Field(..., description="Singer tap stream ID")
     key_properties: list[str] = Field(
-        default_factory=list, description="Primary key properties",
+        default_factory=list,
+        description="Primary key properties",
     )
     replication_method: str = Field("FULL_TABLE", description="Replication method")
     replication_key: str | None = Field(None, description="Replication key field")
     stream_schema: dict[str, object] = Field(
-        default_factory=dict, description="Stream JSON schema",
+        default_factory=dict,
+        description="Stream JSON schema",
     )
     records_extracted: int = Field(0, description="Total records extracted")
     last_extraction: datetime | None = Field(None, description="Last extraction time")
     is_selected: bool = Field(
-        default=True, description="Stream is selected for extraction",
+        default=True,
+        description="Stream is selected for extraction",
     )
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
@@ -434,7 +440,8 @@ class TapExecution(FlextDomainBaseModel):
     """Tap execution entity with comprehensive tracking."""
 
     id: str = Field(
-        default_factory=lambda: str(uuid4()), description="Execution unique identifier",
+        default_factory=lambda: str(uuid4()),
+        description="Execution unique identifier",
     )
     connection_id: str = Field(..., description="Associated connection ID")
     command: str = Field(..., description="Executed command")
@@ -443,10 +450,12 @@ class TapExecution(FlextDomainBaseModel):
     completed_at: datetime | None = Field(None, description="Execution completion time")
     duration_seconds: float | None = Field(None, description="Execution duration")
     config: dict[str, object] = Field(
-        default_factory=dict, description="Tap configuration",
+        default_factory=dict,
+        description="Tap configuration",
     )
     catalog: dict[str, object] = Field(
-        default_factory=dict, description="Stream catalog",
+        default_factory=dict,
+        description="Stream catalog",
     )
     state: dict[str, object] = Field(default_factory=dict, description="Tap state")
     records_extracted: int = Field(0, description="Total records extracted")
@@ -536,7 +545,9 @@ class TapExecution(FlextDomainBaseModel):
         )
 
     def update_metrics(
-        self, records_extracted: int, streams_processed: int,
+        self,
+        records_extracted: int,
+        streams_processed: int,
     ) -> TapExecution:
         """Update execution metrics."""
         return self.model_copy(
@@ -551,18 +562,21 @@ class LDAPRecord(FlextDomainBaseModel):
     """LDAP record entity with Singer protocol support."""
 
     id: str = Field(
-        default_factory=lambda: str(uuid4()), description="Record unique identifier",
+        default_factory=lambda: str(uuid4()),
+        description="Record unique identifier",
     )
     stream_id: str = Field(..., description="Associated stream ID")
     execution_id: str = Field(..., description="Associated execution ID")
     dn: str = Field(..., description="Distinguished Name")
     attributes: dict[str, object] = Field(
-        default_factory=dict, description="LDAP attributes",
+        default_factory=dict,
+        description="LDAP attributes",
     )
     object_class: list[str] = Field(default_factory=list, description="Object classes")
     extracted_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     singer_record: dict[str, object] = Field(
-        default_factory=dict, description="Singer record data",
+        default_factory=dict,
+        description="Singer record data",
     )
 
     def validate_domain_rules(self) -> FlextResult[None]:

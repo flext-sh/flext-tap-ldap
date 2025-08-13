@@ -161,7 +161,8 @@ class TapLDAPConfig(BaseSettings):
 
                     # Ensure proper types for replication_key
                     if replication_key is not None and not isinstance(
-                        replication_key, str,
+                        replication_key,
+                        str,
                     ):
                         replication_key = None
 

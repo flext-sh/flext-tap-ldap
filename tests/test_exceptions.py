@@ -28,13 +28,17 @@ class TestFlextTapLdapExceptions:
 
         # Test specific errors with context
         config_error = FlextTapLdapConfigurationError(
-            "Config error", base_dn="dc=test,dc=com", host="test.com",
+            "Config error",
+            base_dn="dc=test,dc=com",
+            host="test.com",
         )
         assert "[CONFIG_ERROR] flext_tap_ldap config: Config error" in str(config_error)
 
         # Test connection error
         conn_error = FlextTapLdapConnectionError(
-            "Connection failed", host="test.com", timeout=30,
+            "Connection failed",
+            host="test.com",
+            timeout=30,
         )
         assert "[FLEXT_2001] flext_tap_ldap connection: Connection failed" in str(
             conn_error,
