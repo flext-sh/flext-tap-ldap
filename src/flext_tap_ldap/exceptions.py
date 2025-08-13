@@ -31,7 +31,9 @@ FlextTapLdapValidationError = _tap_ldap_exceptions["FlextTapLdapValidationError"
 FlextTapLdapConfigurationError = _tap_ldap_exceptions["FlextTapLdapConfigurationError"]
 FlextTapLdapProcessingError = _tap_ldap_exceptions["FlextTapLdapProcessingError"]
 FlextTapLdapConnectionError = _tap_ldap_exceptions["FlextTapLdapConnectionError"]
-FlextTapLdapAuthenticationError = _tap_ldap_exceptions["FlextTapLdapAuthenticationError"]
+FlextTapLdapAuthenticationError = _tap_ldap_exceptions[
+    "FlextTapLdapAuthenticationError"
+]
 FlextTapLdapTimeoutError = _tap_ldap_exceptions["FlextTapLdapTimeoutError"]
 
 # Create backward-compatible aliases for existing code

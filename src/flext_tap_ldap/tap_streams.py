@@ -151,8 +151,12 @@ class LDAPBaseStream(Stream):
             self.client = LDAPClient(
                 host=str(connection_config.get("host", "localhost")),
                 port=int(connection_config.get("port", 389)),
-                bind_dn=connection_config.get("bind_dn") if isinstance(connection_config.get("bind_dn"), str) else None,
-                password=connection_config.get("bind_password") if isinstance(connection_config.get("bind_password"), str) else None,
+                bind_dn=connection_config.get("bind_dn")
+                if isinstance(connection_config.get("bind_dn"), str)
+                else None,
+                password=connection_config.get("bind_password")
+                if isinstance(connection_config.get("bind_password"), str)
+                else None,
                 use_ssl=bool(connection_config.get("use_ssl", False)),
                 timeout=int(connection_config.get("timeout_seconds", 30)),
                 page_size=int(self.tap.config.get("page_size", 1000)),
@@ -233,13 +237,19 @@ class UsersStream(LDAPBaseStream):
             th.Property("loginShell", th.StringType, description="Login Shell"),
             th.Property("userPassword", th.StringType, description="User Password"),
             th.Property(
-                "objectClass", th.ArrayType(th.StringType), description="Object Classes",
+                "objectClass",
+                th.ArrayType(th.StringType),
+                description="Object Classes",
             ),
             th.Property(
-                "memberOf", th.ArrayType(th.StringType), description="Group Memberships",
+                "memberOf",
+                th.ArrayType(th.StringType),
+                description="Group Memberships",
             ),
             th.Property("createTimestamp", th.StringType, description="Creation Time"),
-            th.Property("modifyTimestamp", th.StringType, description="Modification Time"),
+            th.Property(
+                "modifyTimestamp", th.StringType, description="Modification Time",
+            ),
         ).to_dict()
 
         super().__init__(tap, name=name, schema=schema)
@@ -254,11 +264,26 @@ class UsersStream(LDAPBaseStream):
 
         user_filter = self.tap.config.get("user_filter", "(objectClass=inetOrgPerson)")
         user_attributes = [
-            "uid", "cn", "sn", "givenName", "displayName", "mail",
-            "telephoneNumber", "mobile", "employeeNumber", "employeeType",
-            "department", "title", "manager", "homeDirectory", "loginShell",
-            "userPassword", "objectClass", "memberOf",
-            "createTimestamp", "modifyTimestamp",
+            "uid",
+            "cn",
+            "sn",
+            "givenName",
+            "displayName",
+            "mail",
+            "telephoneNumber",
+            "mobile",
+            "employeeNumber",
+            "employeeType",
+            "department",
+            "title",
+            "manager",
+            "homeDirectory",
+            "loginShell",
+            "userPassword",
+            "objectClass",
+            "memberOf",
+            "createTimestamp",
+            "modifyTimestamp",
         ]
 
         results = self._search_ldap(user_filter, attributes=user_attributes)
@@ -281,18 +306,26 @@ class GroupsStream(LDAPBaseStream):
             th.Property("cn", th.StringType, description="Group Name"),
             th.Property("description", th.StringType, description="Group Description"),
             th.Property(
-                "member", th.ArrayType(th.StringType), description="Group Members",
+                "member",
+                th.ArrayType(th.StringType),
+                description="Group Members",
             ),
             th.Property(
-                "uniqueMember", th.ArrayType(th.StringType), description="Unique Members",
+                "uniqueMember",
+                th.ArrayType(th.StringType),
+                description="Unique Members",
             ),
             th.Property("gidNumber", th.StringType, description="Group ID Number"),
             th.Property("owner", th.StringType, description="Group Owner"),
             th.Property(
-                "objectClass", th.ArrayType(th.StringType), description="Object Classes",
+                "objectClass",
+                th.ArrayType(th.StringType),
+                description="Object Classes",
             ),
             th.Property("createTimestamp", th.StringType, description="Creation Time"),
-            th.Property("modifyTimestamp", th.StringType, description="Modification Time"),
+            th.Property(
+                "modifyTimestamp", th.StringType, description="Modification Time",
+            ),
         ).to_dict()
 
         super().__init__(tap, name=name, schema=schema)
@@ -307,8 +340,15 @@ class GroupsStream(LDAPBaseStream):
 
         group_filter = self.tap.config.get("group_filter", "(objectClass=groupOfNames)")
         group_attributes = [
-            "cn", "description", "member", "uniqueMember", "gidNumber",
-            "owner", "objectClass", "createTimestamp", "modifyTimestamp",
+            "cn",
+            "description",
+            "member",
+            "uniqueMember",
+            "gidNumber",
+            "owner",
+            "objectClass",
+            "createTimestamp",
+            "modifyTimestamp",
         ]
 
         results = self._search_ldap(group_filter, attributes=group_attributes)
@@ -331,10 +371,14 @@ class OrganizationalUnitsStream(LDAPBaseStream):
             th.Property("ou", th.StringType, description="Organizational Unit Name"),
             th.Property("description", th.StringType, description="Description"),
             th.Property(
-                "objectClass", th.ArrayType(th.StringType), description="Object Classes",
+                "objectClass",
+                th.ArrayType(th.StringType),
+                description="Object Classes",
             ),
             th.Property("createTimestamp", th.StringType, description="Creation Time"),
-            th.Property("modifyTimestamp", th.StringType, description="Modification Time"),
+            th.Property(
+                "modifyTimestamp", th.StringType, description="Modification Time",
+            ),
         ).to_dict()
 
         super().__init__(tap, name=name, schema=schema)
@@ -349,8 +393,11 @@ class OrganizationalUnitsStream(LDAPBaseStream):
 
         ou_filter = "(objectClass=organizationalUnit)"
         ou_attributes = [
-            "ou", "description", "objectClass",
-            "createTimestamp", "modifyTimestamp",
+            "ou",
+            "description",
+            "objectClass",
+            "createTimestamp",
+            "modifyTimestamp",
         ]
 
         results = self._search_ldap(ou_filter, attributes=ou_attributes)
@@ -372,18 +419,28 @@ class SchemaStream(LDAPBaseStream):
             th.Property("dn", th.StringType, description="Distinguished Name"),
             th.Property("cn", th.StringType, description="Common Name"),
             th.Property(
-                "objectClass", th.ArrayType(th.StringType), description="Object Classes",
+                "objectClass",
+                th.ArrayType(th.StringType),
+                description="Object Classes",
             ),
             th.Property(
-                "objectClasses", th.ArrayType(th.StringType), description="Available Object Classes",
+                "objectClasses",
+                th.ArrayType(th.StringType),
+                description="Available Object Classes",
             ),
             th.Property(
-                "attributeTypes", th.ArrayType(th.StringType), description="Available Attribute Types",
+                "attributeTypes",
+                th.ArrayType(th.StringType),
+                description="Available Attribute Types",
             ),
             th.Property(
-                "ldapSyntaxes", th.ArrayType(th.StringType), description="LDAP Syntaxes",
+                "ldapSyntaxes",
+                th.ArrayType(th.StringType),
+                description="LDAP Syntaxes",
             ),
-            th.Property("modifyTimestamp", th.StringType, description="Modification Time"),
+            th.Property(
+                "modifyTimestamp", th.StringType, description="Modification Time",
+            ),
         ).to_dict()
 
         super().__init__(tap, name=name, schema=schema)
@@ -398,8 +455,12 @@ class SchemaStream(LDAPBaseStream):
 
         schema_filter = "(objectClass=schema)"
         schema_attributes = [
-            "cn", "objectClass", "objectClasses", "attributeTypes",
-            "ldapSyntaxes", "modifyTimestamp",
+            "cn",
+            "objectClass",
+            "objectClasses",
+            "attributeTypes",
+            "ldapSyntaxes",
+            "modifyTimestamp",
         ]
 
         # Schema is usually at root DSE or cn=schema
@@ -407,7 +468,9 @@ class SchemaStream(LDAPBaseStream):
 
         for base_dn in base_dns:
             try:
-                results = self._search_ldap(schema_filter, base_dn=base_dn, attributes=schema_attributes)
+                results = self._search_ldap(
+                    schema_filter, base_dn=base_dn, attributes=schema_attributes,
+                )
                 if results:
                     for record in results:
                         yield record
@@ -443,7 +506,9 @@ class CustomStream(LDAPBaseStream):
                 if prop_type == "boolean":
                     return th.Property(name, th.BooleanType, description=prop_desc)
                 if prop_type == "array":
-                    return th.Property(name, th.ArrayType(th.StringType), description=prop_desc)
+                    return th.Property(
+                        name, th.ArrayType(th.StringType), description=prop_desc,
+                    )
                 return th.Property(name, th.StringType, description=prop_desc)
             # Fallback simple type
             return th.Property(name, th.StringType, description=f"{name} field")
@@ -457,8 +522,14 @@ class CustomStream(LDAPBaseStream):
         else:
             schema = th.PropertiesList(
                 th.Property("dn", th.StringType, description="Distinguished Name"),
-                th.Property("objectClass", th.ArrayType(th.StringType), description="Object Classes"),
-                th.Property("modifyTimestamp", th.StringType, description="Modification Time"),
+                th.Property(
+                    "objectClass",
+                    th.ArrayType(th.StringType),
+                    description="Object Classes",
+                ),
+                th.Property(
+                    "modifyTimestamp", th.StringType, description="Modification Time",
+                ),
             ).to_dict()
 
         super().__init__(tap, name=params.name, schema=schema)
@@ -488,6 +559,7 @@ class CustomStream(LDAPBaseStream):
 
 
 # LDIF STREAM IMPLEMENTATIONS using flext-ldif integration
+
 
 class LDIFStream(Stream):
     """LDIF stream using flext-ldif for ALL processing."""
@@ -525,7 +597,9 @@ class LDIFStream(Stream):
                 description="Entry attributes",
             ),
             th.Property("source_file", th.StringType, description="Source LDIF file"),
-            th.Property("line_number", th.IntegerType, description="Line number in file"),
+            th.Property(
+                "line_number", th.IntegerType, description="Line number in file",
+            ),
         ).to_dict()
 
         super().__init__(tap, name=self.name, schema=schema)
@@ -574,7 +648,9 @@ class LDIFStream(Stream):
             parse_result = self._ldif_api.parse_file(file_path)
 
             if not parse_result.success or not parse_result.data:
-                logger.warning(f"Failed to parse LDIF file {file_path}: {parse_result.error}")
+                logger.warning(
+                    f"Failed to parse LDIF file {file_path}: {parse_result.error}",
+                )
                 return
 
             entries = parse_result.data
@@ -596,7 +672,9 @@ class LDIFStream(Stream):
                 raise
 
     def _convert_ldif_entry_to_record(
-        self, entry: FlextLdifEntry, source_file: str,
+        self,
+        entry: FlextLdifEntry,
+        source_file: str,
     ) -> dict[str, object] | None:
         """Convert LDIF entry to stream record."""
         try:
@@ -634,20 +712,36 @@ class LDIFAnalysisStream(Stream):
         # Define schema for analysis results
         schema = th.PropertiesList(
             th.Property("file_path", th.StringType, description="LDIF file path"),
-            th.Property("total_entries", th.IntegerType, description="Total entries in file"),
-            th.Property("valid_entries", th.IntegerType, description="Valid entries count"),
-            th.Property("invalid_entries", th.IntegerType, description="Invalid entries count"),
-            th.Property("user_entries", th.IntegerType, description="User entries count"),
-            th.Property("group_entries", th.IntegerType, description="Group entries count"),
+            th.Property(
+                "total_entries", th.IntegerType, description="Total entries in file",
+            ),
+            th.Property(
+                "valid_entries", th.IntegerType, description="Valid entries count",
+            ),
+            th.Property(
+                "invalid_entries", th.IntegerType, description="Invalid entries count",
+            ),
+            th.Property(
+                "user_entries", th.IntegerType, description="User entries count",
+            ),
+            th.Property(
+                "group_entries", th.IntegerType, description="Group entries count",
+            ),
             th.Property("ou_entries", th.IntegerType, description="OU entries count"),
-            th.Property("other_entries", th.IntegerType, description="Other entries count"),
+            th.Property(
+                "other_entries", th.IntegerType, description="Other entries count",
+            ),
             th.Property(
                 "object_class_distribution",
                 th.ObjectType(),
                 description="Object class distribution",
             ),
-            th.Property("file_size_bytes", th.IntegerType, description="File size in bytes"),
-            th.Property("processing_time_seconds", th.NumberType, description="Processing time"),
+            th.Property(
+                "file_size_bytes", th.IntegerType, description="File size in bytes",
+            ),
+            th.Property(
+                "processing_time_seconds", th.NumberType, description="Processing time",
+            ),
             th.Property(
                 "errors",
                 th.ArrayType(th.StringType),
@@ -687,7 +781,9 @@ class LDIFAnalysisStream(Stream):
             logger.info(f"Analyzing LDIF file: {file_path}")
 
             # Get file size
-            file_size = Path(file_path).stat().st_size if Path(file_path).exists() else 0
+            file_size = (
+                Path(file_path).stat().st_size if Path(file_path).exists() else 0
+            )
 
             # Use flext-ldif to parse and analyze the file
             validation_result = self._ldif_api.parse_file(file_path)
@@ -709,11 +805,13 @@ class LDIFAnalysisStream(Stream):
 
             if validation_result.success and validation_result.data:
                 entries = validation_result.data
-                analysis_data.update({
-                    "total_entries": len(entries),
-                    "valid_entries": len(entries),
-                    "invalid_entries": 0,
-                })
+                analysis_data.update(
+                    {
+                        "total_entries": len(entries),
+                        "valid_entries": len(entries),
+                        "invalid_entries": 0,
+                    },
+                )
                 # Build object class distribution and type counts
                 oc_dist: dict[str, int] = {}
                 for entry in entries:

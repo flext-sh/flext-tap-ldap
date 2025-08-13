@@ -295,7 +295,8 @@ def create_ldif_processing_config(
     builder.with_error_handling(ignore_errors=ignore_errors, max_errors=max_errors)
 
     apply_transformations = _coerce_bool(
-        kwargs.get("ldif_apply_transformations", False), default=False,
+        kwargs.get("ldif_apply_transformations", False),
+        default=False,
     )
     rules = kwargs.get("ldif_transformation_rules")
     rules_dict = rules if isinstance(rules, dict) else None
@@ -307,13 +308,16 @@ def create_ldif_processing_config(
 
     # Direct attribute settings
     builder.ldif_ignore_file_errors = _coerce_bool(
-        kwargs.get("ldif_ignore_file_errors", True), default=True,
+        kwargs.get("ldif_ignore_file_errors", True),
+        default=True,
     )
     builder.ldif_ignore_entry_errors = _coerce_bool(
-        kwargs.get("ldif_ignore_entry_errors", True), default=True,
+        kwargs.get("ldif_ignore_entry_errors", True),
+        default=True,
     )
     builder.enable_ldif_streams = _coerce_bool(
-        kwargs.get("enable_ldif_streams", False), default=False,
+        kwargs.get("enable_ldif_streams", False),
+        default=False,
     )
 
     try:

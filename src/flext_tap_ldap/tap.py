@@ -177,7 +177,6 @@ class FlextTapLDAP(Tap):
         # Add custom streams if configured:
         custom_streams_config = self.config.get("custom_streams", [])
         for custom_config in custom_streams_config:
-
             params = CustomStreamParams(
                 name=custom_config["name"],
                 search_filter=custom_config["search_filter"],

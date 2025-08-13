@@ -256,7 +256,8 @@ class LDAPClient:
             return []  # Return empty list on failure
 
     def _run_async_in_new_loop(
-        self, coro: Awaitable[list[dict[str, object]]],
+        self,
+        coro: Awaitable[list[dict[str, object]]],
     ) -> list[dict[str, object]]:
         """Run async coroutine in new event loop.
 

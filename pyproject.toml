@@ -26,12 +26,7 @@ classifiers = [
     "Topic :: Database",
     "Topic :: System :: Archiving",
 ]
-dependencies = [
-    "flext-core @ ../flext-core",
-    "flext-meltano @ ../flext-meltano",
-    "flext-ldap @ ../flext-ldap",
-    "flext-observability @ ../flext-observability",
-]
+dependencies = []
 keywords = [
     "flext",
     "enterprise",

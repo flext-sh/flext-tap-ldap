@@ -12,7 +12,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 from flext_core import FlextResult, get_logger
 from flext_ldap import FlextLdapConnectionConfig
@@ -28,9 +27,6 @@ from flext_tap_ldap.tap_models import (
     LDAPStream,
     TapExecution,
 )
-
-if TYPE_CHECKING:
-    from uuid import UUID
 
 logger = get_logger(__name__)
 
@@ -446,7 +442,8 @@ class TapExecutionService:
                 return FlextResult.fail("Execution not found")
 
             updated_execution = execution.update_metrics(
-                records_extracted, streams_processed,
+                records_extracted,
+                streams_processed,
             )
             self._executions[execution_id] = updated_execution
             return FlextResult.ok(updated_execution)
@@ -519,7 +516,7 @@ class LDAPRecordService:
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to create record: {e}")
 
-    async def get_record(self, record_id: UUID) -> FlextResult[LDAPRecord]:
+    async def get_record(self, record_id: str) -> FlextResult[LDAPRecord]:
         """Get LDAP record by ID."""
         try:
             record = self._records.get(record_id)
@@ -602,7 +599,9 @@ class LDIFProcessingService:
             normalized: list[dict[str, object]] = []
             for entry in entries:
                 # FlextLdifEntry: expose minimal dict
-                dn = getattr(getattr(entry, "dn", None), "value", None) or getattr(entry, "dn", None)
+                dn = getattr(getattr(entry, "dn", None), "value", None) or getattr(
+                    entry, "dn", None,
+                )
                 attributes_obj = getattr(entry, "attributes", {})
                 attributes = getattr(attributes_obj, "attributes", attributes_obj)
                 normalized.append({"dn": dn, "attributes": attributes})
@@ -746,8 +745,12 @@ def create_ldap_connection_config_legacy(
         base_dn=base_dn,
         port=port,
         use_ssl=bool(kwargs.get("use_ssl")),
-        bind_dn=str(kwargs.get("bind_dn")) if isinstance(kwargs.get("bind_dn"), str) else None,
-        bind_password=str(kwargs.get("bind_password")) if isinstance(kwargs.get("bind_password"), str) else None,
+        bind_dn=str(kwargs.get("bind_dn"))
+        if isinstance(kwargs.get("bind_dn"), str)
+        else None,
+        bind_password=str(kwargs.get("bind_password"))
+        if isinstance(kwargs.get("bind_password"), str)
+        else None,
     )
     return create_ldap_connection_config(params)
 

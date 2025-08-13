@@ -14,7 +14,6 @@ import importlib.metadata
 import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
-from flext_tap_ldap.typings import FlextTypes
 
 from flext_core import FlextResult, get_logger
 from flext_ldap import (
@@ -248,7 +247,8 @@ class LDAPClient:
             return []  # Return empty list on failure
 
     def _run_async_in_new_loop(
-        self, coro: Awaitable[list[dict[str, object]]],
+        self,
+        coro: Awaitable[list[dict[str, object]]],
     ) -> list[dict[str, object]]:
         """Run async coroutine in new event loop."""
         loop = asyncio.new_event_loop()
@@ -610,7 +610,9 @@ class FlextTapLDAPPlugin:
             return FlextResult.fail(f"Plugin shutdown failed: {e}")
 
     def execute(
-        self, operation: str, parameters: dict[str, object] | None = None,
+        self,
+        operation: str,
+        parameters: dict[str, object] | None = None,
     ) -> FlextResult[dict[str, object]]:
         """Execute plugin operations via tap instance."""
         if not self._tap_instance:
@@ -660,7 +662,8 @@ class FlextTapLDAPPlugin:
             return FlextResult.fail(f"Stream discovery failed: {e}")
 
     def _execute_discover(
-        self, _parameters: dict[str, object],
+        self,
+        _parameters: dict[str, object],
     ) -> FlextResult[dict[str, object]]:
         """Execute discover operation through tap."""
         streams_result = self.discover_streams()
@@ -675,7 +678,9 @@ class FlextTapLDAPPlugin:
                     "schema": stream.schema,  # type: ignore[attr-defined]
                     "metadata": getattr(stream, "metadata", {}),
                     "replication_method": getattr(
-                        stream, "replication_method", "FULL_TABLE",
+                        stream,
+                        "replication_method",
+                        "FULL_TABLE",
                     ),
                 }
                 for stream in streams
@@ -687,7 +692,8 @@ class FlextTapLDAPPlugin:
         return FlextResult.ok(catalog_data)
 
     def _execute_sync(
-        self, _parameters: dict[str, object],
+        self,
+        _parameters: dict[str, object],
     ) -> FlextResult[dict[str, object]]:
         """Execute sync operation through tap."""
         # This would need to integrate with Singer protocol for actual sync
@@ -703,7 +709,8 @@ class FlextTapLDAPPlugin:
         )
 
     def _execute_test(
-        self, _parameters: dict[str, object],
+        self,
+        _parameters: dict[str, object],
     ) -> FlextResult[dict[str, object]]:
         """Execute test operation through tap."""
         try:
@@ -725,7 +732,8 @@ class FlextTapLDAPPlugin:
             return FlextResult.fail(f"Test operation failed: {e}")
 
     def _execute_catalog(
-        self, parameters: dict[str, object],
+        self,
+        parameters: dict[str, object],
     ) -> FlextResult[dict[str, object]]:
         """Execute catalog generation through tap."""
         # Alias for discover operation
