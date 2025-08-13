@@ -104,7 +104,8 @@ class LDIFStream(Stream):
             logger.exception(f"Error processing LDIF file {ldif_file}")
 
     def _convert_entry_to_record(
-        self, flext_entry: FlextLdifEntry,
+        self,
+        flext_entry: FlextLdifEntry,
     ) -> dict[str, object]:
         """Convert flext-ldif entry to Singer record."""
         # Delegate entry type classification to flext-ldap
@@ -201,13 +202,15 @@ class LDIFAnalysisStream(Stream):
                     if isinstance(stats_entry_types, dict):
                         for entry_type, count in stats_entry_types.items():
                             entry_types[entry_type] = entry_types.get(
-                                entry_type, 0,
+                                entry_type,
+                                0,
                             ) + int(count)
                     stats_object_classes = stats.get("object_classes", {})
                     if isinstance(stats_object_classes, dict):
                         for obj_class, count in stats_object_classes.items():
                             object_classes[obj_class] = object_classes.get(
-                                obj_class, 0,
+                                obj_class,
+                                0,
                             ) + int(count)
             elif ldif_directory:
                 # This should be implemented in flext-ldif library

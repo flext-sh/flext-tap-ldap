@@ -283,6 +283,7 @@ class LDAPStreamService:
 
             # Convert string to UUID for domain model
             from uuid import UUID
+
             stream = LDAPStream(
                 connection_id=UUID(params.connection_id),
                 stream_type=params.stream_type.lower(),
@@ -369,6 +370,7 @@ class TapExecutionService:
         """Create tap execution."""
         try:
             from uuid import UUID
+
             execution = TapExecution(
                 connection_id=UUID(connection_id),
                 command=command,
@@ -508,6 +510,7 @@ class LDAPRecordService:
         """Create LDAP record."""
         try:
             from uuid import UUID
+
             record = LDAPRecord(
                 stream_id=UUID(stream_id),
                 execution_id=UUID(execution_id),
@@ -606,7 +609,9 @@ class LDIFProcessingService:
             for entry in entries:
                 # FlextLdifEntry: expose minimal dict
                 dn = getattr(getattr(entry, "dn", None), "value", None) or getattr(
-                    entry, "dn", None,
+                    entry,
+                    "dn",
+                    None,
                 )
                 attributes_obj = getattr(entry, "attributes", {})
                 attributes = getattr(attributes_obj, "attributes", attributes_obj)

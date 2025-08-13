@@ -248,7 +248,9 @@ class UsersStream(LDAPBaseStream):
             ),
             th.Property("createTimestamp", th.StringType, description="Creation Time"),
             th.Property(
-                "modifyTimestamp", th.StringType, description="Modification Time",
+                "modifyTimestamp",
+                th.StringType,
+                description="Modification Time",
             ),
         ).to_dict()
 
@@ -324,7 +326,9 @@ class GroupsStream(LDAPBaseStream):
             ),
             th.Property("createTimestamp", th.StringType, description="Creation Time"),
             th.Property(
-                "modifyTimestamp", th.StringType, description="Modification Time",
+                "modifyTimestamp",
+                th.StringType,
+                description="Modification Time",
             ),
         ).to_dict()
 
@@ -377,7 +381,9 @@ class OrganizationalUnitsStream(LDAPBaseStream):
             ),
             th.Property("createTimestamp", th.StringType, description="Creation Time"),
             th.Property(
-                "modifyTimestamp", th.StringType, description="Modification Time",
+                "modifyTimestamp",
+                th.StringType,
+                description="Modification Time",
             ),
         ).to_dict()
 
@@ -439,7 +445,9 @@ class SchemaStream(LDAPBaseStream):
                 description="LDAP Syntaxes",
             ),
             th.Property(
-                "modifyTimestamp", th.StringType, description="Modification Time",
+                "modifyTimestamp",
+                th.StringType,
+                description="Modification Time",
             ),
         ).to_dict()
 
@@ -469,7 +477,9 @@ class SchemaStream(LDAPBaseStream):
         for base_dn in base_dns:
             try:
                 results = self._search_ldap(
-                    schema_filter, base_dn=base_dn, attributes=schema_attributes,
+                    schema_filter,
+                    base_dn=base_dn,
+                    attributes=schema_attributes,
                 )
                 if results:
                     for record in results:
@@ -507,7 +517,9 @@ class CustomStream(LDAPBaseStream):
                     return th.Property(name, th.BooleanType, description=prop_desc)
                 if prop_type == "array":
                     return th.Property(
-                        name, th.ArrayType(th.StringType), description=prop_desc,
+                        name,
+                        th.ArrayType(th.StringType),
+                        description=prop_desc,
                     )
                 return th.Property(name, th.StringType, description=prop_desc)
             # Fallback simple type
@@ -528,7 +540,9 @@ class CustomStream(LDAPBaseStream):
                     description="Object Classes",
                 ),
                 th.Property(
-                    "modifyTimestamp", th.StringType, description="Modification Time",
+                    "modifyTimestamp",
+                    th.StringType,
+                    description="Modification Time",
                 ),
             ).to_dict()
 
@@ -598,7 +612,9 @@ class LDIFStream(Stream):
             ),
             th.Property("source_file", th.StringType, description="Source LDIF file"),
             th.Property(
-                "line_number", th.IntegerType, description="Line number in file",
+                "line_number",
+                th.IntegerType,
+                description="Line number in file",
             ),
         ).to_dict()
 
@@ -713,23 +729,35 @@ class LDIFAnalysisStream(Stream):
         schema = th.PropertiesList(
             th.Property("file_path", th.StringType, description="LDIF file path"),
             th.Property(
-                "total_entries", th.IntegerType, description="Total entries in file",
+                "total_entries",
+                th.IntegerType,
+                description="Total entries in file",
             ),
             th.Property(
-                "valid_entries", th.IntegerType, description="Valid entries count",
+                "valid_entries",
+                th.IntegerType,
+                description="Valid entries count",
             ),
             th.Property(
-                "invalid_entries", th.IntegerType, description="Invalid entries count",
+                "invalid_entries",
+                th.IntegerType,
+                description="Invalid entries count",
             ),
             th.Property(
-                "user_entries", th.IntegerType, description="User entries count",
+                "user_entries",
+                th.IntegerType,
+                description="User entries count",
             ),
             th.Property(
-                "group_entries", th.IntegerType, description="Group entries count",
+                "group_entries",
+                th.IntegerType,
+                description="Group entries count",
             ),
             th.Property("ou_entries", th.IntegerType, description="OU entries count"),
             th.Property(
-                "other_entries", th.IntegerType, description="Other entries count",
+                "other_entries",
+                th.IntegerType,
+                description="Other entries count",
             ),
             th.Property(
                 "object_class_distribution",
@@ -737,10 +765,14 @@ class LDIFAnalysisStream(Stream):
                 description="Object class distribution",
             ),
             th.Property(
-                "file_size_bytes", th.IntegerType, description="File size in bytes",
+                "file_size_bytes",
+                th.IntegerType,
+                description="File size in bytes",
             ),
             th.Property(
-                "processing_time_seconds", th.NumberType, description="Processing time",
+                "processing_time_seconds",
+                th.NumberType,
+                description="Processing time",
             ),
             th.Property(
                 "errors",

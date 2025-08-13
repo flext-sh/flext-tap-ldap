@@ -50,7 +50,12 @@ def ldap_container(project_root: Path) -> Iterator[None]:
     compose_file = project_root / "docker-compose.yml"
     # Start containers
     logger.info("Starting OpenLDAP container...")
-    async def _run(cmd_list: list[str], cwd: str | None = None, timeout: int = 120) -> int:
+
+    async def _run(
+        cmd_list: list[str],
+        cwd: str | None = None,
+        timeout: int = 120,
+    ) -> int:
         process = await asyncio.create_subprocess_exec(
             *cmd_list,
             cwd=cwd,
@@ -66,7 +71,10 @@ def ldap_container(project_root: Path) -> Iterator[None]:
         return process.returncode
 
     asyncio.run(
-        _run(["/usr/bin/env", "docker-compose", "-f", str(compose_file), "up", "-d"], cwd=str(project_root)),
+        _run(
+            ["/usr/bin/env", "docker-compose", "-f", str(compose_file), "up", "-d"],
+            cwd=str(project_root),
+        ),
     )
     # Wait for LDAP to be ready
     max_retries = 30
@@ -92,7 +100,10 @@ def ldap_container(project_root: Path) -> Iterator[None]:
     # Cleanup
     logger.info("Stopping OpenLDAP container...")
     asyncio.run(
-        _run(["/usr/bin/env", "docker-compose", "-f", str(compose_file), "down", "-v"], cwd=str(project_root)),
+        _run(
+            ["/usr/bin/env", "docker-compose", "-f", str(compose_file), "down", "-v"],
+            cwd=str(project_root),
+        ),
     )
 
 
