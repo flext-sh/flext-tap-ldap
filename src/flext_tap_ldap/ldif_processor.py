@@ -380,6 +380,7 @@ class LDIFValidator:
     """LDIF content validator using flext-ldif validation capabilities."""
 
     def __init__(self) -> None:
+        """Initialize validator with in-memory state and API client."""
         self.validation_errors: list[str] = []
         self.warnings: list[str] = []
         self._api = FlextLdifAPI()
@@ -445,6 +446,7 @@ class LDIFTransformer:
     """Transform LDIF entries using flext-ldif transformation capabilities."""
 
     def __init__(self, transformation_rules: dict[str, object] | None = None) -> None:
+        """Initialize transformer with optional transformation rules."""
         self.transformation_rules = transformation_rules or {}
         self._api = FlextLdifAPI()
 

@@ -14,12 +14,13 @@ import importlib.metadata
 import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+from flext_tap_ldap.typings import FlextTypes
 
 from flext_core import FlextResult, get_logger
 from flext_ldap import (
     FlextLdapConnectionConfig,
     FlextLdapEntry,
-    LDAPScope,
+    FlextLdapScope as LDAPScope,
     get_ldap_api,
 )
 from flext_meltano import Tap, singer_typing as th
@@ -233,9 +234,9 @@ class LDAPClient:
                 self._password,
             ) as session:
                 result = await self._flext_api.search(
-                    session,
-                    base_dn,
-                    search_filter,
+                    session_id=session,
+                    base_dn=base_dn,
+                    search_filter=search_filter,
                     scope=ldap_scope,
                     attributes=attributes,
                 )
@@ -311,9 +312,9 @@ class LDAPClient:
                     ) as session:
                         # Try a simple search to test connection
                         result = await self._flext_api.search(
-                            session,
-                            "",
-                            "(objectClass=*)",
+                            session_id=session,
+                            base_dn="",
+                            search_filter="(objectClass=*)",
                             scope="BASE",
                         )
                         return result.success

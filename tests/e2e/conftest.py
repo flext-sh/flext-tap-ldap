@@ -19,11 +19,13 @@ logger = structlog.get_logger()
 
 @pytest.fixture(scope="session")
 def project_root() -> Path:
+    """Get the project root directory."""
     return Path(__file__).parent.parent.parent
 
 
 @pytest.fixture(scope="session")
 def sample_catalog() -> dict[str, object]:
+    """Create a sample Singer catalog for testing."""
     return {
         "streams": [
             {
@@ -44,6 +46,7 @@ def sample_catalog() -> dict[str, object]:
 
 @pytest.fixture(scope="session")
 def ldap_container(project_root: Path) -> Iterator[None]:
+    """Start and manage LDAP test container."""
     compose_file = project_root / "docker-compose.yml"
     # Start containers
     logger.info("Starting OpenLDAP container...")
@@ -84,6 +87,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
 
 @pytest.fixture
 def ldap_connection(ldap_container: Any) -> Generator[Connection]:
+    """Create LDAP connection for testing."""
     server = Server("localhost", port=10389, get_info=ALL)
     conn = Connection(
         server,
@@ -97,6 +101,7 @@ def ldap_connection(ldap_container: Any) -> Generator[Connection]:
 
 @pytest.fixture
 def tap_config_file(tmp_path: Path, ldap_container: Any) -> Path:
+    """Create tap configuration file for testing."""
     config = {
         "ldap_host": "localhost",
         "ldap_port": 10389,
@@ -112,6 +117,7 @@ def tap_config_file(tmp_path: Path, ldap_container: Any) -> Path:
 
 @pytest.fixture
 def catalog_file(tmp_path: Path, sample_catalog: dict[str, object]) -> Path:
+    """Create catalog file for testing."""
     catalog_file = tmp_path / "catalog.json"
     catalog_file.write_text(json.dumps(sample_catalog, indent=2))
     return catalog_file
