@@ -23,7 +23,7 @@ from flext_tap_ldap.tap_config import (
     LDIFProcessingConfig,
     TapLDAPConfig,
 )
-from flext_tap_ldap.tap_models import (
+from flext_tap_ldap.models import (
     LDAPAttribute,
     LDAPConnection,
     LDAPEntry,
@@ -71,6 +71,7 @@ TapConfig = TapLDAPConfig
 from flext_tap_ldap import exceptions as tap_exceptions
 
 __version__ = "0.9.0-reorganized"
+__version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 
 __all__: list[str] = [
     # Main Classes
@@ -127,4 +128,5 @@ __all__: list[str] = [
     "LDAPTap",
     "TapConfig",
     "__version__",
+    "__version_info__",
 ]

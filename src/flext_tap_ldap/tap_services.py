@@ -17,15 +17,15 @@ from flext_core import FlextResult, get_logger
 from flext_ldap import FlextLdapConnectionConfig
 from flext_ldif import FlextLdifAPI
 
-from flext_tap_ldap.tap_config import (
-    LDIFProcessingConfig,
-    TapLDAPConfig,
-)
-from flext_tap_ldap.tap_models import (
+from flext_tap_ldap.models import (
     LDAPConnection,
     LDAPRecord,
     LDAPStream,
     TapExecution,
+)
+from flext_tap_ldap.tap_config import (
+    LDIFProcessingConfig,
+    TapLDAPConfig,
 )
 
 logger = get_logger(__name__)
@@ -212,7 +212,7 @@ class LDAPConnectionService:
                 timeout=params.timeout_seconds,
             )
 
-            self._connections[connection.id] = connection
+            self._connections[str(connection.id)] = connection
             return FlextResult.ok(connection)
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to create connection: {e}")
@@ -227,16 +227,18 @@ class LDAPConnectionService:
             if not connection:
                 return FlextResult.fail("Connection not found")
 
-            # Update connection with test result
-            updated_connection = connection.test_connection_success()
-            self._connections[connection_id] = updated_connection
+            # Simulate test by marking last_tested and clearing last_error
+            connection.last_tested = datetime.now(UTC)
+            connection.last_error = None
+            self._connections[connection_id] = connection
 
-            return FlextResult.ok({"success": True, "connection": updated_connection})
+            return FlextResult.ok({"success": True, "connection": connection})
         except (RuntimeError, ValueError, TypeError) as e:
             connection = self._connections.get(connection_id)
             if connection:
-                updated_connection = connection.test_connection_failure(str(e))
-                self._connections[connection_id] = updated_connection
+                connection.last_tested = datetime.now(UTC)
+                connection.last_error = str(e)
+                self._connections[connection_id] = connection
             return FlextResult.fail(f"Failed to test connection: {e}")
 
     async def get_connection(
@@ -279,8 +281,10 @@ class LDAPStreamService:
             if not tap_stream_id:
                 tap_stream_id = f"{params.stream_type.lower()}_stream"
 
+            # Convert string to UUID for domain model
+            from uuid import UUID
             stream = LDAPStream(
-                connection_id=params.connection_id,
+                connection_id=UUID(params.connection_id),
                 stream_type=params.stream_type.lower(),
                 search_filter=params.search_filter,
                 attributes=params.attributes or [],
@@ -291,7 +295,7 @@ class LDAPStreamService:
                 stream_schema={},
             )
 
-            self._streams[stream.id] = stream
+            self._streams[str(stream.id)] = stream
             return FlextResult.ok(stream)
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to create stream: {e}")
@@ -314,8 +318,8 @@ class LDAPStreamService:
             }
 
             # Update stream with schema
-            updated_stream = stream.update_schema(schema)
-            self._streams[stream_id] = updated_stream
+            stream.update_schema(schema)
+            self._streams[stream_id] = stream
 
             return FlextResult.ok(schema)
         except (RuntimeError, ValueError, TypeError) as e:
@@ -364,8 +368,9 @@ class TapExecutionService:
     ) -> FlextResult[TapExecution]:
         """Create tap execution."""
         try:
+            from uuid import UUID
             execution = TapExecution(
-                connection_id=connection_id,
+                connection_id=UUID(connection_id),
                 command=command,
                 tap_status="created",
                 config=config or {},
@@ -373,7 +378,7 @@ class TapExecutionService:
                 state=state or {},
             )
 
-            self._executions[execution.id] = execution
+            self._executions[str(execution.id)] = execution
             return FlextResult.ok(execution)
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to create execution: {e}")
@@ -388,9 +393,9 @@ class TapExecutionService:
             if not execution:
                 return FlextResult.fail("Execution not found")
 
-            updated_execution = execution.start_execution()
-            self._executions[execution_id] = updated_execution
-            return FlextResult.ok(updated_execution)
+            execution.start_execution()
+            self._executions[execution_id] = execution
+            return FlextResult.ok(execution)
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to start execution: {e}")
 
@@ -407,9 +412,9 @@ class TapExecutionService:
             if not execution:
                 return FlextResult.fail("Execution not found")
 
-            updated_execution = execution.complete_execution(exit_code, stdout, stderr)
-            self._executions[execution_id] = updated_execution
-            return FlextResult.ok(updated_execution)
+            execution.complete_execution(exit_code, stdout, stderr)
+            self._executions[execution_id] = execution
+            return FlextResult.ok(execution)
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to complete execution: {e}")
 
@@ -423,9 +428,9 @@ class TapExecutionService:
             if not execution:
                 return FlextResult.fail("Execution not found")
 
-            updated_execution = execution.cancel_execution()
-            self._executions[execution_id] = updated_execution
-            return FlextResult.ok(updated_execution)
+            execution.cancel_execution()
+            self._executions[execution_id] = execution
+            return FlextResult.ok(execution)
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to cancel execution: {e}")
 
@@ -441,12 +446,12 @@ class TapExecutionService:
             if not execution:
                 return FlextResult.fail("Execution not found")
 
-            updated_execution = execution.update_metrics(
+            execution.update_metrics(
                 records_extracted,
                 streams_processed,
             )
-            self._executions[execution_id] = updated_execution
-            return FlextResult.ok(updated_execution)
+            self._executions[execution_id] = execution
+            return FlextResult.ok(execution)
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to update metrics: {e}")
 
@@ -502,16 +507,17 @@ class LDAPRecordService:
     ) -> FlextResult[LDAPRecord]:
         """Create LDAP record."""
         try:
+            from uuid import UUID
             record = LDAPRecord(
-                stream_id=stream_id,
-                execution_id=execution_id,
+                stream_id=UUID(stream_id),
+                execution_id=UUID(execution_id),
                 dn=dn,
                 attributes=attributes,
                 object_class=object_class or [],
                 singer_record={},  # Will be set by to_singer_record()
             )
 
-            self._records[record.id] = record
+            self._records[str(record.id)] = record
             return FlextResult.ok(record)
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Failed to create record: {e}")
