@@ -12,6 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
+from uuid import UUID
 
 from flext_core import FlextResult, get_logger
 from flext_ldap import FlextLdapConnectionConfig
@@ -282,8 +283,6 @@ class LDAPStreamService:
                 tap_stream_id = f"{params.stream_type.lower()}_stream"
 
             # Convert string to UUID for domain model
-            from uuid import UUID
-
             stream = LDAPStream(
                 connection_id=UUID(params.connection_id),
                 stream_type=params.stream_type.lower(),
@@ -369,8 +368,6 @@ class TapExecutionService:
     ) -> FlextResult[TapExecution]:
         """Create tap execution."""
         try:
-            from uuid import UUID
-
             execution = TapExecution(
                 connection_id=UUID(connection_id),
                 command=command,
@@ -509,8 +506,6 @@ class LDAPRecordService:
     ) -> FlextResult[LDAPRecord]:
         """Create LDAP record."""
         try:
-            from uuid import UUID
-
             record = LDAPRecord(
                 stream_id=UUID(stream_id),
                 execution_id=UUID(execution_id),
