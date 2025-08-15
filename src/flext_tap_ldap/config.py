@@ -9,12 +9,24 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from flext_core import FlextResult, FlextSettings, FlextValueObject
+from pydantic import Field, field_validator
 
 
-class LDAPConnectionConfig(BaseModel):
-    """LDAP connection configuration."""
+class LDAPConnectionConfig(FlextValueObject):
+    """LDAP connection configuration using FlextValueObject pattern."""
+
+    def validate_business_rules(self) -> FlextResult[None]:
+        """Validate LDAP connection configuration."""
+        if not self.host:
+            return FlextResult.fail("Host is required")
+        if self.port <= 0 or self.port > 65535:
+            return FlextResult.fail("Port must be between 1 and 65535")
+        if self.timeout <= 0:
+            return FlextResult.fail("Timeout must be positive")
+        if self.page_size <= 0:
+            return FlextResult.fail("Page size must be positive")
+        return FlextResult.ok(None)
 
     host: str = Field(description="LDAP server host")
     port: int = Field(default=389, description="LDAP server port")
@@ -26,8 +38,16 @@ class LDAPConnectionConfig(BaseModel):
     page_size: int = Field(default=1000, description="LDAP search page size")
 
 
-class CustomStreamConfig(BaseModel):
+class CustomStreamConfig(FlextValueObject):
     """Configuration for custom LDAP streams using flext-core patterns."""
+
+    def validate_business_rules(self) -> FlextResult[None]:
+        """Validate custom stream configuration."""
+        if not self.name:
+            return FlextResult.fail("Stream name is required")
+        if not self.search_filter:
+            return FlextResult.fail("Search filter is required")
+        return FlextResult.ok(None)
 
     name: str = Field(..., description="Stream name")
     search_filter: str = Field(..., description="LDAP search filter")
@@ -45,8 +65,16 @@ class CustomStreamConfig(BaseModel):
     )
 
 
-class LDIFProcessingConfig(BaseModel):
+class LDIFProcessingConfig(FlextValueObject):
     """Configuration for LDIF file processing using flext-core patterns."""
+
+    def validate_business_rules(self) -> FlextResult[None]:
+        """Validate LDIF processing configuration."""
+        if self.ldif_max_errors <= 0:
+            return FlextResult.fail("LDIF max errors must be positive")
+        if self.ldif_files and self.ldif_directory:
+            return FlextResult.fail("Cannot specify both ldif_files and ldif_directory")
+        return FlextResult.ok(None)
 
     ldif_files: list[str] | None = Field(
         default=None,
@@ -95,23 +123,22 @@ class LDIFProcessingConfig(BaseModel):
     )
 
 
-class TapLDAPConfig(BaseSettings):
+class TapLDAPConfig(FlextSettings):
     """Complete configuration for tap-ldap using flext-core patterns.
 
-    Combines LDAP connection and LDIF processing configurations with Pydantic settings.
+    Combines LDAP connection and LDIF processing configurations with FlextSettings.
     """
 
-    model_config = SettingsConfigDict(
-        env_prefix="TAP_LDAP_",
-        env_file=".env",
-        env_file_encoding="utf-8",
-        env_nested_delimiter="__",
-        case_sensitive=False,
-        extra="allow",
-        validate_assignment=True,
-        str_strip_whitespace=True,
-        use_enum_values=True,
-    )
+    class Config:
+        env_prefix = "TAP_LDAP_"
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+        env_nested_delimiter = "__"
+        case_sensitive = False
+        extra = "allow"
+        validate_assignment = True
+        str_strip_whitespace = True
+        use_enum_values = True
 
     # Core configurations as embedded value objects
     connection: LDAPConnectionConfig = Field(
