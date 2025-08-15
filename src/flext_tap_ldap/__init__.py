@@ -1,11 +1,4 @@
-"""FLEXT Tap LDAP - Singer tap for LDAP data extraction.
-
-This module implements the main tap class for LDAP data extraction
-using the centralized patterns from flext-core and flext-meltano.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
+"""Singer tap for LDAP data extraction."""
 
 from __future__ import annotations
 
