@@ -426,7 +426,7 @@ class LDAPRecordService:
             singer_res = record.to_singer_record()
             if singer_res.is_failure or singer_res.data is None:
                 return FlextResult.fail(
-                    singer_res.error or "Failed to build singer record"
+                    singer_res.error or "Failed to build singer record",
                 )
             record.singer_record = singer_res.data
 

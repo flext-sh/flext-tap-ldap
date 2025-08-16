@@ -10,11 +10,14 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from flext_core import FlextResult, FlextValueObject as FlextDomainBaseModel, get_logger
-from flext_ldap import FlextLdapEntry
 from pydantic import BaseModel, Field
+
+if TYPE_CHECKING:
+    from flext_ldap import FlextLdapEntry
 
 logger = get_logger(__name__)
 

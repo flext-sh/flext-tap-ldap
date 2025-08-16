@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from flext_core import FlextResult, FlextValueObject as FlextDomainBaseModel
-from flext_ldap import FlextLdapEntry
 from pydantic import Field
 
 from flext_tap_ldap.domain.entities import (
@@ -22,6 +21,8 @@ from flext_tap_ldap.domain.entities import (
 
 if TYPE_CHECKING:
     from datetime import datetime
+
+    from flext_ldap import FlextLdapEntry
 
 
 def _get_entry_value(
