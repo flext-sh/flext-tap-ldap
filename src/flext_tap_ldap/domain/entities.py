@@ -6,9 +6,9 @@ from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from flext_core import (
-    FlextBaseModel,
     FlextEntity,
     FlextEntityId,
+    FlextModel,
     FlextResult,
     get_logger,
 )
@@ -61,7 +61,7 @@ class LDAPStream(FlextEntity):
             return FlextResult.fail("Tap stream ID is required")
         if self.replication_method not in {"FULL_TABLE", "INCREMENTAL"}:
             return FlextResult.fail(
-                "Replication method must be FULL_TABLE or INCREMENTAL"
+                "Replication method must be FULL_TABLE or INCREMENTAL",
             )
         return FlextResult.ok(None)
 
@@ -152,7 +152,7 @@ class TapExecution(FlextEntity):
         """Start tap execution with validation."""
         if self.tap_status != "created":
             return FlextResult.fail(
-                f"Cannot start execution from status: {self.tap_status}"
+                f"Cannot start execution from status: {self.tap_status}",
             )
         self.tap_status = "discovering"
         self.started_at = datetime.now(UTC)
@@ -162,7 +162,7 @@ class TapExecution(FlextEntity):
         """Start extraction phase with validation."""
         if self.tap_status != "discovering":
             return FlextResult.fail(
-                f"Cannot start extraction from status: {self.tap_status}"
+                f"Cannot start extraction from status: {self.tap_status}",
             )
         self.tap_status = "extracting"
         return FlextResult.ok(None)
@@ -176,7 +176,7 @@ class TapExecution(FlextEntity):
         """Complete tap execution with validation."""
         if self.tap_status not in {"discovering", "extracting"}:
             return FlextResult.fail(
-                f"Cannot complete execution from status: {self.tap_status}"
+                f"Cannot complete execution from status: {self.tap_status}",
             )
 
         self.tap_status = "completed" if exit_code == 0 else "failed"
@@ -195,7 +195,7 @@ class TapExecution(FlextEntity):
         """Cancel tap execution with validation."""
         if self.tap_status in {"completed", "failed", "cancelled"}:
             return FlextResult.fail(
-                f"Cannot cancel execution with status: {self.tap_status}"
+                f"Cannot cancel execution with status: {self.tap_status}",
             )
 
         self.tap_status = "cancelled"
@@ -208,7 +208,7 @@ class TapExecution(FlextEntity):
         return FlextResult.ok(None)
 
     def update_metrics(
-        self, records_extracted: int, streams_processed: int
+        self, records_extracted: int, streams_processed: int,
     ) -> FlextResult[None]:
         """Update execution metrics with validation."""
         if records_extracted < 0:
@@ -266,8 +266,8 @@ class LDAPRecord(FlextEntity):
         return FlextResult.ok(record)
 
 
-# Domain Events using flext-core FlextBaseModel pattern
-class TapExecutionStartedEvent(FlextBaseModel):
+# Domain Events using flext-core FlextModel pattern
+class TapExecutionStartedEvent(FlextModel):
     """Event raised when tap execution starts."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -281,7 +281,7 @@ class TapExecutionStartedEvent(FlextBaseModel):
     command: str
 
 
-class TapExecutionCompletedEvent(FlextBaseModel):
+class TapExecutionCompletedEvent(FlextModel):
     """Event raised when tap execution completes."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -292,7 +292,7 @@ class TapExecutionCompletedEvent(FlextBaseModel):
     connection_id: UUID | None = None
 
 
-class StreamDiscoveredEvent(FlextBaseModel):
+class StreamDiscoveredEvent(FlextModel):
     """Event raised when stream is discovered."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -310,7 +310,7 @@ class StreamDiscoveredEvent(FlextBaseModel):
     stream_schema: dict[str, object]
 
 
-class RecordExtractedEvent(FlextBaseModel):
+class RecordExtractedEvent(FlextModel):
     """Event raised when record is extracted."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -328,7 +328,7 @@ class RecordExtractedEvent(FlextBaseModel):
     attributes_count: int
 
 
-class ConnectionTestedEvent(FlextBaseModel):
+class ConnectionTestedEvent(FlextModel):
     """Event raised when connection is tested."""
 
     def validate_business_rules(self) -> FlextResult[None]:

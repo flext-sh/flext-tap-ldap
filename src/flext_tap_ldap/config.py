@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextBaseConfigModel, FlextBaseModel, FlextResult
+from flext_core import FlextBaseConfigModel, FlextModel, FlextResult
 from pydantic import Field, field_validator
 from pydantic_settings import SettingsConfigDict
 
@@ -17,8 +17,8 @@ from pydantic_settings import SettingsConfigDict
 MAX_PORT = 65535
 
 
-class LDAPConnectionConfig(FlextBaseModel):
-    """LDAP connection configuration using FlextBaseModel pattern."""
+class LDAPConnectionConfig(FlextModel):
+    """LDAP connection configuration using FlextModel pattern."""
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate LDAP connection configuration."""
@@ -44,7 +44,7 @@ class LDAPConnectionConfig(FlextBaseModel):
     max_retries: int = Field(default=3, description="Maximum connection retries")
 
 
-class CustomStreamConfig(FlextBaseModel):
+class CustomStreamConfig(FlextModel):
     """Configuration for custom LDAP streams using flext-core patterns."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -71,7 +71,7 @@ class CustomStreamConfig(FlextBaseModel):
     )
 
 
-class LDIFProcessingConfig(FlextBaseModel):
+class LDIFProcessingConfig(FlextModel):
     """Configuration for LDIF file processing using flext-core patterns."""
 
     def validate_business_rules(self) -> FlextResult[None]:
