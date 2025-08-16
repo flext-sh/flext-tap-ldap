@@ -2,19 +2,24 @@
 
 from __future__ import annotations
 
-import logging
-from typing import Any
+from typing import TYPE_CHECKING
 
 import pytest
+import structlog
 from flext_core import FlextResult
 
-from flext_tap_ldap.ldif_processor import (
+from flext_tap_ldap import (
     FlextLDIFProcessor,
     LDIFEntry,
     LDIFParseError,
     LDIFTransformer,
     LDIFValidator,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+logger = structlog.get_logger()
 
 
 class TestLDIFEntry:
@@ -331,7 +336,7 @@ mail: john.doe@example.com
     def test_parse_ldif_file(
         self,
         processor: FlextLDIFProcessor,
-        tmp_path: Any,
+        tmp_path: Path,
         sample_ldif_content: str,
     ) -> None:
         """Test parsing LDIF file."""
@@ -456,7 +461,7 @@ invalidAttribute:
     def test_processor_load_from_file(
         self,
         processor: FlextLDIFProcessor,
-        tmp_path: Any,
+        tmp_path: str,
         sample_ldif_content: str,
     ) -> None:
         """Test loading from file using load_from_file method."""
@@ -472,7 +477,7 @@ invalidAttribute:
 class TestLDIFProcessorIntegration:
     """Integration tests for LDIF processor."""
 
-    def test_end_to_end_processing(self, tmp_path: Any) -> None:
+    def test_end_to_end_processing(self, tmp_path: str) -> None:
         """Test end-to-end LDIF processing."""
         # Create sample LDIF file
         ldif_content = """dn: dc=test,dc=com
@@ -507,7 +512,7 @@ mail: user1@test.com
         user_entry = next(e for e in entries if "cn=user1" in e.dn)
         assert user_entry.get_attribute("mail") == ["user1@test.com"]
 
-    def test_batch_processing(self, tmp_path: Any) -> None:
+    def test_batch_processing(self, tmp_path: str) -> None:
         """Test processing multiple LDIF files."""
         processor = FlextLDIFProcessor()
 
@@ -623,13 +628,9 @@ cn: another
         # Create content with many errors
         error_content = "\n".join([f"invalid_line_{i}" for i in range(10)])
 
-        try:
-            result = FlextResult.ok(list(processor.parse_content(error_content)))
-            # Should handle gracefully due to error limits
-            assert isinstance(result, FlextResult)
-        except Exception as exc:
-            # May also raise exception when limits exceeded
-            logging.getLogger(__name__).warning("LDIF processing raised: %s", exc)
+        result = FlextResult.ok(list(processor.parse_content(error_content)))
+        # Should handle gracefully due to error limits
+        assert isinstance(result, FlextResult)
 
     def test_processor_ignore_errors_false(self) -> None:
         """Test processor with ignore_errors=False."""

@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from flext_tap_ldap.client import LDAPClient
+from flext_tap_ldap import LDAPClient
 
 
 class TestLDAPClientCoverageBoost:

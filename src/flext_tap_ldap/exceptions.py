@@ -19,24 +19,25 @@ Domain-specific exceptions for LDAP tap operations using factory pattern to elim
 
 from __future__ import annotations
 
-# 🚨 ZERO DUPLICATION: Use flext-core exception factory - eliminates 240+ lines
-from flext_core.exceptions import create_module_exception_classes
+from flext_core import create_module_exception_classes
 
 # Generate all standard exceptions using factory pattern
 _tap_ldap_exceptions = create_module_exception_classes("flext_tap_ldap")
 
 # Export factory-created exception classes (using actual factory keys)
-FlextTapLdapError = _tap_ldap_exceptions["FlextTapLdapError"]
-FlextTapLdapValidationError = _tap_ldap_exceptions["FlextTapLdapValidationError"]
-FlextTapLdapConfigurationError = _tap_ldap_exceptions["FlextTapLdapConfigurationError"]
-FlextTapLdapProcessingError = _tap_ldap_exceptions["FlextTapLdapProcessingError"]
-FlextTapLdapConnectionError = _tap_ldap_exceptions["FlextTapLdapConnectionError"]
-FlextTapLdapAuthenticationError = _tap_ldap_exceptions[
-    "FlextTapLdapAuthenticationError"
+FlextTapLdapError = _tap_ldap_exceptions["FLEXT_TAP_LDAPError"]
+FlextTapLdapValidationError = _tap_ldap_exceptions["FLEXT_TAP_LDAPValidationError"]
+FlextTapLdapConfigurationError = _tap_ldap_exceptions[
+    "FLEXT_TAP_LDAPConfigurationError"
 ]
-FlextTapLdapTimeoutError = _tap_ldap_exceptions["FlextTapLdapTimeoutError"]
+FlextTapLdapProcessingError = _tap_ldap_exceptions["FLEXT_TAP_LDAPProcessingError"]
+FlextTapLdapConnectionError = _tap_ldap_exceptions["FLEXT_TAP_LDAPConnectionError"]
+FlextTapLdapAuthenticationError = _tap_ldap_exceptions[
+    "FLEXT_TAP_LDAPAuthenticationError"
+]
+FlextTapLdapTimeoutError = _tap_ldap_exceptions["FLEXT_TAP_LDAPTimeoutError"]
 
-# Create backward-compatible aliases for existing code
+# Create testing convenience aliases for existing code
 FlextTapLdapSearchError = FlextTapLdapProcessingError  # Search is processing
 FlextTapLdapStreamError = FlextTapLdapProcessingError  # Stream errors are processing
 

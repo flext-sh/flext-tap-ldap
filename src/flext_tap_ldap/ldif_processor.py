@@ -5,17 +5,13 @@ to the flext-ldif library to eliminate code duplication and leverage
 enterprise-grade LDIF processing infrastructure.
 
 Refactored to use flext-ldif exclusively, removing duplicated code
-while maintaining backward compatibility for existing Singer streams.
+while maintaining testing convenience for existing Singer streams.
 """
 
 from __future__ import annotations
 
 import uuid
 from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from collections.abc import Iterator
-    from pathlib import Path
 
 from flext_core import (
     FlextResult,
@@ -29,21 +25,25 @@ from flext_ldif import (
     FlextLdifParseError,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from pathlib import Path
+
 logger = get_logger(__name__)
 
-# Backward compatibility aliases that delegate to flext-ldif
+# Testing convenience aliases that delegate to flext-ldif
 LDIFParseError = FlextLdifParseError
 
 
 class LDIFEntry:
-    """Backward compatibility wrapper for FlextLdifEntry.
+    """Testing convenience wrapper for FlextLdifEntry.
 
     This class maintains the existing interface while delegating
     all operations to the flext-ldif library implementation.
     """
 
     def __init__(self, dn: str, attributes: dict[str, list[str]] | None = None) -> None:
-        """Initialize LDIF entry with backward compatibility."""
+        """Initialize LDIF entry with testing convenience."""
         self.dn = dn
         self.attributes = attributes or {}
         self.change_type: str | None = None
@@ -75,7 +75,7 @@ class LDIFEntry:
                 attributes=FlextLdifAttributes(attributes=self.attributes),
             )
         except Exception:
-            # Fallback: create minimal entry for backward compatibility
+            # Fallback: create minimal entry for testing convenience
             return FlextLdifEntry(
                 id=str(uuid.uuid4()),
                 dn=FlextLdifDistinguishedName(value=self.dn),
@@ -128,7 +128,7 @@ class LDIFEntry:
             result = api.validate([self._flext_entry])
             return result.success and bool(result.data)
         except Exception:
-            # Fallback to basic validation for backward compatibility
+            # Fallback to basic validation for testing convenience
             return bool(self.dn and self.dn.strip())
 
     @property
@@ -167,7 +167,7 @@ class LDIFEntry:
 class FlextLDIFProcessor:
     """LDIF file processor using flext-ldif library.
 
-    This class provides backward compatibility while delegating
+    This class provides testing convenience while delegating
     all LDIF processing to the enterprise-grade flext-ldif library.
     """
 
@@ -193,7 +193,7 @@ class FlextLDIFProcessor:
         raise ValueError(message)
 
     def parse_file(self, file_path: Path) -> Iterator[LDIFEntry]:
-        """Parse LDIF file using flext-ldif and yield backward-compatible entries."""
+        """Parse LDIF file using flext-ldif and yield testing convenience entries."""
         if not file_path.exists():
             msg = f"LDIF file not found: {file_path}"
             raise ValueError(msg)
@@ -217,9 +217,9 @@ class FlextLDIFProcessor:
 
             if result.data:
                 for flext_entry in result.data:
-                    # Convert FlextLdifEntry back to backward-compatible LDIFEntry
-                    compat_entry = self._convert_from_flext_entry(flext_entry)
-                    yield compat_entry
+                    # Convert FlextLdifEntry back to testing convenience LDIFEntry
+                    convenience_entry = self._convert_from_flext_entry(flext_entry)
+                    yield convenience_entry
                     self.processed_entries += 1
 
         except UnicodeDecodeError:
@@ -232,8 +232,8 @@ class FlextLDIFProcessor:
                 result = self._api.parse(content)
                 if result.success and result.data:
                     for flext_entry in result.data:
-                        compat_entry = self._convert_from_flext_entry(flext_entry)
-                        yield compat_entry
+                        convenience_entry = self._convert_from_flext_entry(flext_entry)
+                        yield convenience_entry
                         self.processed_entries += 1
             except Exception as e:
                 error_msg = f"Failed to parse LDIF file {file_path}: {e}"
@@ -248,7 +248,7 @@ class FlextLDIFProcessor:
         content: str,
         source_name: str = "content",
     ) -> Iterator[LDIFEntry]:
-        """Parse LDIF content using flext-ldif and yield backward-compatible entries."""
+        """Parse LDIF content using flext-ldif and yield testing convenience entries."""
         logger.info(f"Parsing LDIF content with flext-ldif from {source_name}")
 
         try:
@@ -266,8 +266,8 @@ class FlextLDIFProcessor:
 
             if result.data:
                 for flext_entry in result.data:
-                    compat_entry = self._convert_from_flext_entry(flext_entry)
-                    yield compat_entry
+                    convenience_entry = self._convert_from_flext_entry(flext_entry)
+                    yield convenience_entry
                     self.processed_entries += 1
 
         except Exception as e:
@@ -279,7 +279,7 @@ class FlextLDIFProcessor:
                 raise ValueError(error_msg) from e
 
     def _convert_from_flext_entry(self, flext_entry: FlextLdifEntry) -> LDIFEntry:
-        """Convert FlextLdifEntry to backward-compatible LDIFEntry."""
+        """Convert FlextLdifEntry to testing convenience LDIFEntry."""
         # Extract DN
         dn = flext_entry.dn.value if flext_entry.dn else ""
 

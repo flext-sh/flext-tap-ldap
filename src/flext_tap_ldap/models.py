@@ -5,9 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from flext_core import FlextResult, FlextValueObject as FlextDomainBaseModel
+from flext_ldap import FlextLdapEntry
 from pydantic import Field
 
-# Re-export canonical Pydantic models from domain layer via models.py facade
 from flext_tap_ldap.domain.entities import (
     ConnectionTestedEvent,
     LDAPConnection,
@@ -22,8 +22,6 @@ from flext_tap_ldap.domain.entities import (
 
 if TYPE_CHECKING:
     from datetime import datetime
-
-    from flext_ldap import FlextLdapEntry
 
 
 def _get_entry_value(
@@ -73,8 +71,8 @@ class LDAPAttribute(FlextDomainBaseModel):
         description="Whether the attribute contains binary data",
     )
 
-    def validate_domain_rules(self) -> FlextResult[None]:
-        """Validate domain-specific rules for LDAP attributes."""
+    def validate_business_rules(self) -> FlextResult[None]:
+        """Validate business rules for LDAP attributes."""
         # LDAP attributes can have any name and values
         return FlextResult.ok(None)
 
@@ -105,8 +103,8 @@ class LDAPEntry(FlextDomainBaseModel):
     dn: str = Field(..., description="Distinguished Name")
     object_classes: list[str] = Field(..., description="Object classes")
 
-    def validate_domain_rules(self) -> FlextResult[None]:
-        """Validate domain-specific rules for LDAP entries."""
+    def validate_business_rules(self) -> FlextResult[None]:
+        """Validate business rules for LDAP entries."""
         if not self.dn:
             return FlextResult.fail("DN cannot be empty")
         # Additional LDAP entry validation can be added here
@@ -157,6 +155,44 @@ class LDAPEntry(FlextDomainBaseModel):
 
         """
         return any(oc.lower() == object_class.lower() for oc in self.object_classes)
+
+    def to_dict(self) -> dict[str, object]:
+        """Convert entry to dictionary format.
+
+        Returns:
+            Dictionary representation of the LDAP entry.
+
+        """
+        result = {
+            "dn": self.dn,
+            "objectClass": self.object_classes,
+        }
+
+        # Add attributes
+        for name, value in self.attributes.items():
+            if isinstance(value, LDAPAttribute):
+                result[name] = value.values
+            else:
+                result[name] = value
+
+        return result
+
+    @classmethod
+    def from_dict(cls, data: dict[str, object]) -> LDAPEntry:
+        """Create LDAPEntry from dictionary.
+
+        Args:
+            data: Dictionary with entry data.
+
+        Returns:
+            LDAPEntry instance.
+
+        """
+        return cls(
+            dn=str(data.get("dn", "")),
+            object_classes=_safe_list_str(data.get("objectClass", [])),
+            attributes=data.get("attributes", {}),
+        )
 
 
 class LDAPUser(LDAPEntry):
@@ -279,8 +315,8 @@ class LDAPSchema(FlextDomainBaseModel):
         description="Naming contexts",
     )
 
-    def validate_domain_rules(self) -> FlextResult[None]:
-        """Validate domain-specific rules for LDAP schema."""
+    def validate_business_rules(self) -> FlextResult[None]:
+        """Validate business rules for LDAP schema."""
         # Schema validation rules can be added here
         return FlextResult.ok(None)
 

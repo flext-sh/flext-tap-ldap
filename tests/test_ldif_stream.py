@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from flext_tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
-from flext_tap_ldap.tap import FlextTapLDAP
+from flext_tap_ldap import FlextTapLDAP, LDIFAnalysisStream, LDIFStream
 
 
 class TestLDIFStreamBasic:

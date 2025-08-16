@@ -6,9 +6,9 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from flext_core import FlextResult
-from flext_ldap import FlextLdapScopeEnum
+from flext_ldap import FlextLdapScope
 
-from flext_tap_ldap.client import LDAPClient
+from flext_tap_ldap import LDAPClient
 
 # Constants
 EXPECTED_DATA_COUNT = 3
@@ -215,13 +215,13 @@ class TestLDAPClientComprehensive:
 
     def test_convert_scope_to_enum(self, client: LDAPClient) -> None:
         """Test scope conversion method."""
-        assert client._convert_scope_to_enum("BASE") == FlextLdapScopeEnum.BASE
-        assert client._convert_scope_to_enum("ONELEVEL") == FlextLdapScopeEnum.ONELEVEL
-        assert client._convert_scope_to_enum("SUBTREE") == FlextLdapScopeEnum.SUBTREE
+        assert client._convert_scope_to_enum("BASE") == FlextLdapScope.BASE
+        assert client._convert_scope_to_enum("ONELEVEL") == FlextLdapScope.ONELEVEL
+        assert client._convert_scope_to_enum("SUBTREE") == FlextLdapScope.SUBTREE
 
         # Test case insensitive
-        assert client._convert_scope_to_enum("base") == FlextLdapScopeEnum.BASE
-        assert client._convert_scope_to_enum("subtree") == FlextLdapScopeEnum.SUBTREE
+        assert client._convert_scope_to_enum("base") == FlextLdapScope.BASE
+        assert client._convert_scope_to_enum("subtree") == FlextLdapScope.SUBTREE
 
     def test_build_server_uri_ldap(self) -> None:
         """Test server URI building for LDAP."""

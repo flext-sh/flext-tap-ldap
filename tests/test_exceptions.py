@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from flext_tap_ldap.exceptions import (
+from flext_tap_ldap import (
     FlextTapLdapAuthenticationError,
     FlextTapLdapConfigurationError,
     FlextTapLdapConnectionError,
@@ -302,8 +302,8 @@ class TestErrorHandlingIntegration:
         assert "[FLEXT_2001] flext_tap_ldap connection: Connection failed" in str(error)
         # The context should be properly handled by the mixin
 
-    def test_error_chain_compatibility(self) -> None:
-        """Test error chaining compatibility."""
+    def test_error_chain_convenience(self) -> None:
+        """Test error chaining testing convenience."""
         msg = "Original error"
         with pytest.raises(ValueError):
             raise ValueError(msg)

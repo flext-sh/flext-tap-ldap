@@ -735,15 +735,15 @@ def create_ldap_connection_config(
         return FlextResult.fail(f"Failed to create LDAP connection config: {e}")
 
 
-def create_ldap_connection_config_legacy(
+def create_ldap_connection_config_convenience(
     host: str,
     base_dn: str,
     port: int = 389,
     **kwargs: object,
 ) -> FlextResult[dict[str, object]]:
-    """Create LDAP connection configuration (legacy interface).
+    """Create LDAP connection configuration (testing convenience interface).
 
-    Backward compatibility wrapper for the Parameter Object Pattern implementation.
+    Testing convenience wrapper for the Parameter Object Pattern implementation.
     Use create_ldap_connection_config() with LDAPConnectionParams for new code.
     """
     params = LDAPConnectionParams(
@@ -862,7 +862,7 @@ __all__ = [
     "TapExecutionService",
     "create_development_ldap_config",
     "create_ldap_connection_config",
-    "create_ldap_connection_config_legacy",
+    "create_ldap_connection_config_convenience",
     "create_production_ldap_config",
     "setup_ldap_tap",
     "validate_ldap_config",

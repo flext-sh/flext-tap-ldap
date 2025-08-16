@@ -6,9 +6,8 @@ import contextlib
 from unittest.mock import Mock, patch
 
 import pytest
-from flext_ldap import FlextLdapScopeEnum
 
-from flext_tap_ldap.client import LDAPClient
+from flext_tap_ldap import LDAPClient
 
 
 class TestLDAPClientQuick:
@@ -38,13 +37,13 @@ class TestLDAPClientQuick:
 
     def test_convert_scope_to_enum_all_values(self, client: LDAPClient) -> None:
         """Test all scope conversions."""
-        assert client._convert_scope_to_enum("BASE") == FlextLdapScopeEnum.BASE
-        assert client._convert_scope_to_enum("ONELEVEL") == FlextLdapScopeEnum.ONE_LEVEL
-        assert client._convert_scope_to_enum("SUBTREE") == FlextLdapScopeEnum.SUBTREE
+        assert client._convert_scope_to_enum("BASE") == "BASE"
+        assert client._convert_scope_to_enum("ONELEVEL") == "ONE_LEVEL"
+        assert client._convert_scope_to_enum("SUBTREE") == "SUBTREE"
         # Test case insensitive
-        assert client._convert_scope_to_enum("base") == FlextLdapScopeEnum.BASE
+        assert client._convert_scope_to_enum("base") == "BASE"
         # Test invalid scope defaults to SUBTREE
-        assert client._convert_scope_to_enum("INVALID") == FlextLdapScopeEnum.SUBTREE
+        assert client._convert_scope_to_enum("INVALID") == "SUBTREE"
 
     def test_convert_entry_to_dict_scenarios(self, client: LDAPClient) -> None:
         """Test entry conversion with different scenarios."""
@@ -151,7 +150,7 @@ class TestLDAPClientQuick:
     @patch("asyncio.set_event_loop")
     def test_test_connection_no_loop(
         self,
-        mock_set_loop: Mock,
+        mock_set_loop: Mock,  # noqa: ARG002
         mock_new_loop: Mock,
         mock_get_loop: Mock,
         client: LDAPClient,
@@ -297,7 +296,7 @@ class TestLDAPClientQuick:
     @patch("asyncio.get_running_loop")
     def test_execute_oracle_search_in_new_loop(
         self,
-        mock_get_loop: Mock,
+        mock_get_loop: Mock,  # noqa: ARG002
         client: LDAPClient,
     ) -> None:
         """Test Oracle search execution in new loop."""

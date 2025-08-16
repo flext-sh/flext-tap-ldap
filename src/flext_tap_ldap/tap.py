@@ -6,10 +6,10 @@ using the centralized patterns from flext-core.meltano.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import ClassVar
 
 from flext_core import get_logger
-from flext_meltano import Tap, singer_typing as th
+from flext_meltano import Stream, Tap, singer_typing as th
 from flext_meltano.common_schemas import create_ldap_tap_schema
 
 from flext_tap_ldap.config import TapLDAPConfig
@@ -22,10 +22,6 @@ from flext_tap_ldap.streams import (
     SchemaStream,
     UsersStream,
 )
-
-if TYPE_CHECKING:
-    from flext_meltano import Stream
-
 
 logger = get_logger(__name__)
 

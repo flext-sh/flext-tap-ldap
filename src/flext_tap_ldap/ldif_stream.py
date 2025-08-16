@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 
     from flext_tap_ldap.tap import FlextTapLDAP
 
+
 logger = get_logger(__name__)
 
 
