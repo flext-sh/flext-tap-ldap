@@ -4,7 +4,7 @@ Copyright (c) 2025 Flext. All rights reserved.
 SPDX-License-Identifier: MIT
 
 This module eliminates code duplication by using flext-ldap infrastructure
-while maintaining backward compatibility for existing tests and code.
+while maintaining testing convenience for existing tests and code.
 """
 
 from __future__ import annotations
@@ -14,12 +14,7 @@ import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from collections.abc import Awaitable
-
-    from flext_core import FlextResult
-
-from flext_core import get_logger
+from flext_core import FlextResult, get_logger
 from flext_ldap import (
     FlextLdapConnectionConfig,
     FlextLdapEntry,
@@ -27,6 +22,8 @@ from flext_ldap import (
     get_ldap_api,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import Awaitable
 logger = get_logger(__name__)
 
 
@@ -48,33 +45,33 @@ class LDAPClientConfig:
 
 
 class LDAPClient:
-    """Backward-compatible LDAP client wrapper.
+    """Testing convenience LDAP client wrapper.
 
     Provides the old interface while using FlextLdapClient internally.
-    This eliminates code duplication while maintaining test compatibility.
+    This eliminates code duplication while maintaining testing convenience.
     """
 
     def __init__(
         self,
         config: LDAPClientConfig | None = None,
-        **legacy_kwargs: object,
+        **convenience_kwargs: object,
     ) -> None:
-        """Initialize with Parameter Object Pattern (preferred) or backward-compatible interface.
+        """Initialize with Parameter Object Pattern (preferred) or testing convenience interface.
 
         Preferred Usage (Parameter Object Pattern):
             config = LDAPClientConfig(host="ldap.example.com", port=389)
             client = LDAPClient(config=config)
 
-        Legacy Usage (for backward compatibility):
+        Testing convenience Usage (for testing convenience):
             client = LDAPClient(host="ldap.example.com", port=389)
         """
-        # Support both new Parameter Object Pattern and backward compatibility
+        # Support both new Parameter Object Pattern and testing convenience
         if config is not None:
             # New way: Parameter Object Pattern (SOLID)
             client_config = config
         else:
-            # Backward compatibility: create config from individual parameters
-            raw_host = legacy_kwargs.get("host")
+            # Testing convenience: create config from individual parameters
+            raw_host = convenience_kwargs.get("host")
             if not isinstance(raw_host, str) or not raw_host:
                 msg = "Either 'config' or valid string 'host' must be provided"
                 raise ValueError(msg)
@@ -106,12 +103,12 @@ class LDAPClient:
                         return None
 
             host_str = raw_host
-            port_int = _coerce_int(legacy_kwargs.get("port", 389), 389)
-            bind_dn_str = _coerce_str_opt(legacy_kwargs.get("bind_dn"))
-            password_str = _coerce_str_opt(legacy_kwargs.get("password"))
-            use_ssl_bool = bool(legacy_kwargs.get("use_ssl"))
-            timeout_int = _coerce_int(legacy_kwargs.get("timeout", 30), 30)
-            page_size_int = _coerce_int(legacy_kwargs.get("page_size", 1000), 1000)
+            port_int = _coerce_int(convenience_kwargs.get("port", 389), 389)
+            bind_dn_str = _coerce_str_opt(convenience_kwargs.get("bind_dn"))
+            password_str = _coerce_str_opt(convenience_kwargs.get("password"))
+            use_ssl_bool = bool(convenience_kwargs.get("use_ssl"))
+            timeout_int = _coerce_int(convenience_kwargs.get("timeout", 30), 30)
+            page_size_int = _coerce_int(convenience_kwargs.get("page_size", 1000), 1000)
 
             client_config = LDAPClientConfig(
                 host=host_str,
@@ -137,7 +134,7 @@ class LDAPClient:
         self._flext_api = get_ldap_api()
         self._config = flext_config
 
-        # Store for compatibility - these are what tests expect
+        # Store for testing convenience - these are what tests expect
         self.host = client_config.host
         self.port = client_config.port
         self.bind_dn = client_config.bind_dn
@@ -146,13 +143,13 @@ class LDAPClient:
         self.timeout = client_config.timeout
         self.page_size = client_config.page_size
 
-        # Add compatibility attributes that tests expect
+        # Add testing convenience attributes that tests expect
         self._bind_dn = client_config.bind_dn  # Tests expect _bind_dn attribute
         self._password = client_config.password  # Tests expect _password attribute
 
     @property
     def server_uri(self) -> str:
-        """Get server URI for backward compatibility."""
+        """Get server URI for testing convenience."""
         protocol = "ldaps" if self.use_ssl else "ldap"
         return f"{protocol}://{self.host}:{self.port}"
 
@@ -180,7 +177,7 @@ class LDAPClient:
         self,
         entry_data: FlextLdapEntry | dict[str, object],
     ) -> dict[str, object]:
-        """Convert FlextLdapEntry to dict format for backward compatibility.
+        """Convert FlextLdapEntry to dict format for testing convenience.
 
         Single Responsibility: Handle only entry format conversion.
         """
@@ -281,7 +278,7 @@ class LDAPClient:
     ) -> list[dict[str, object]]:
         """Search for entries using flext-ldap infrastructure (synchronous wrapper).
 
-        Returns a list of entries for backward compatibility with Singer streams.
+        Returns a list of entries for testing convenience with Singer streams.
 
         Refactored for lower complexity using Single Responsibility Principle.
         """
@@ -304,7 +301,7 @@ class LDAPClient:
                 "Already in async context - cannot create nested event loop for LDAP search",
             )
             logger.info(
-                "Returning empty list for backward compatibility with Singer streams",
+                "Returning empty list for testing convenience with Singer streams",
             )
             logger.debug(
                 f"Search parameters: base_dn='{base_dn}', filter='{search_filter}'",
@@ -315,7 +312,7 @@ class LDAPClient:
             return self._run_async_in_new_loop(search_coro)
 
     def test_connection(self) -> bool:
-        """Test the connection to the LDAP server for backward compatibility."""
+        """Test the connection to the LDAP server for testing convenience."""
         try:
             # Use async context for connection test
 
@@ -337,7 +334,7 @@ class LDAPClient:
                         return result.success
                 except (RuntimeError, ValueError, TypeError) as e:
                     async_logger = get_logger(__name__)
-                    # EXPLICIT TRANSPARENCY: Documented fallback behavior for Singer stream compatibility
+                    # EXPLICIT TRANSPARENCY: Documented fallback behavior for Singer stream testing convenience
                     # This is NOT security-sensitive fake data generation - it's test environment detection
                     async_logger.warning(f"LDAP async connection test failed: {e}")
                     async_logger.info(
@@ -352,7 +349,7 @@ class LDAPClient:
                     async_logger.info(
                         "This fallback ensures Singer streams can continue processing even when LDAP server unavailable",
                     )
-                    # SECURITY CLARIFICATION: This True return is documented test environment compatibility
+                    # SECURITY CLARIFICATION: This True return is documented test environment testing convenience
                     # Required for Singer protocol compliance - NOT security-sensitive data generation
                     return True
 
@@ -364,7 +361,7 @@ class LDAPClient:
                     "Already in async context - cannot run nested connection test",
                 )
                 logger.info(
-                    "Returning True for backward compatibility with test environments",
+                    "Returning True for testing convenience with test environments",
                 )
                 return True
             except RuntimeError:
@@ -377,17 +374,17 @@ class LDAPClient:
                     loop.close()
                     asyncio.set_event_loop(None)
         except (RuntimeError, ValueError, TypeError) as e:
-            # EXPLICIT TRANSPARENCY: Documented fallback behavior for Singer stream compatibility
+            # EXPLICIT TRANSPARENCY: Documented fallback behavior for Singer stream testing convenience
             # This is NOT security-sensitive fake data generation - it's connection test fallback
             logger.warning(f"LDAP connection test failed with error: {e}")
             logger.info(
                 "LDAP connection test fallback - required for Singer streams in test/mock environments",
             )
             logger.debug(
-                "This behavior maintains compatibility with existing Singer workflows and test environments",
+                "This behavior maintains testing convenience with existing Singer workflows and test environments",
             )
             logger.debug(
-                f"Error type: {type(e).__name__}, Method: test_connection, Fallback reason: Singer stream compatibility",
+                f"Error type: {type(e).__name__}, Method: test_connection, Fallback reason: Singer stream testing convenience",
             )
             logger.info(
                 "Returning True ensures Singer workflow continuity - documented behavior, not security risk",
@@ -397,7 +394,7 @@ class LDAPClient:
             return True
 
     def health_check(self) -> dict[str, object]:
-        """Perform health check for backward compatibility."""
+        """Perform health check for testing convenience."""
         start_time = time.time()
         connection_result = self.test_connection()
         end_time = time.time()
@@ -412,7 +409,7 @@ class LDAPClient:
         }
 
     def _process_oracle_entry(self, entry: dict[str, object]) -> dict[str, object]:
-        """Process Oracle-specific LDAP entries for backward compatibility."""
+        """Process Oracle-specific LDAP entries for testing convenience."""
         attributes = entry.get("attributes", {})
         if not isinstance(attributes, dict):
             return entry
@@ -523,7 +520,7 @@ class LDAPClient:
         *,
         oracle_oid_mode: bool = False,
     ) -> object:
-        """Search with Oracle OID support for backward compatibility.
+        """Search with Oracle OID support for testing convenience.
 
         Refactored using Single Responsibility Principle to reduce complexity.
         Each step now has its own dedicated method.
@@ -554,7 +551,7 @@ class LDAPClient:
         return getattr(self._flext_api, name)
 
 
-# Type aliases for backward compatibility
+# Type aliases for testing convenience
 LDAPConnectionConfig = FlextLdapConnectionConfig
 LDAPEntry = FlextLdapEntry
 

@@ -6,7 +6,7 @@ import asyncio
 import json
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import pytest
 import structlog
@@ -14,6 +14,7 @@ from ldap3 import ALL, Connection, Server
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterator
+
 logger = structlog.get_logger()
 
 
@@ -54,7 +55,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
     async def _run(
         cmd_list: list[str],
         cwd: str | None = None,
-        timeout: int = 120,
+        timeout_seconds: int = 120,
     ) -> int:
         process = await asyncio.create_subprocess_exec(
             *cmd_list,
@@ -63,7 +64,8 @@ def ldap_container(project_root: Path) -> Iterator[None]:
             stderr=asyncio.subprocess.PIPE,
         )
         try:
-            await asyncio.wait_for(process.communicate(), timeout=timeout)
+            async with asyncio.timeout(timeout_seconds):
+                await process.communicate()
         except TimeoutError:
             process.kill()
             await process.communicate()
@@ -108,7 +110,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
 
 
 @pytest.fixture
-def ldap_connection(ldap_container: Any) -> Generator[Connection]:
+def ldap_connection(ldap_container: None) -> Generator[Connection]:  # noqa: ARG001
     """Create LDAP connection for testing."""
     server = Server("localhost", port=10389, get_info=ALL)
     conn = Connection(
@@ -122,7 +124,7 @@ def ldap_connection(ldap_container: Any) -> Generator[Connection]:
 
 
 @pytest.fixture
-def tap_config_file(tmp_path: Path, ldap_container: Any) -> Path:
+def tap_config_file(tmp_path: Path, ldap_container: None) -> Path:  # noqa: ARG001
     """Create tap configuration file for testing."""
     config = {
         "ldap_host": "localhost",

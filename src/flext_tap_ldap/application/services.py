@@ -11,6 +11,7 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from flext_core import (
+    FlextEntityId,
     FlextResult,
 )
 
@@ -102,7 +103,7 @@ class LDAPConnectionService:
     def __init__(self) -> None:
         """Initialize the connection service."""
         self._connections: dict[
-            UUID,
+            FlextEntityId,
             LDAPConnection,
         ] = {}  # Initialized inline for immediate availability
 
@@ -177,7 +178,7 @@ class LDAPStreamService:
     def __init__(self) -> None:
         """Initialize the stream service."""
         self._streams: dict[
-            UUID,
+            FlextEntityId,
             LDAPStream,
         ] = {}  # Initialized inline for immediate availability
 
@@ -383,7 +384,7 @@ class TapExecutionService:
 
             # Sort by started_at descending
             executions.sort(
-                key=lambda e: e.started_at or e.id.time_mid,
+                key=lambda e: e.started_at or datetime.min.replace(tzinfo=UTC),
                 reverse=True,
             )
 
@@ -422,7 +423,12 @@ class LDAPRecordService:
             )
 
             # Generate Singer record
-            record.singer_record = record.to_singer_record()
+            singer_res = record.to_singer_record()
+            if singer_res.is_failure or singer_res.data is None:
+                return FlextResult.fail(
+                    singer_res.error or "Failed to build singer record"
+                )
+            record.singer_record = singer_res.data
 
             self._records[record.id] = record
             return FlextResult.ok(record)

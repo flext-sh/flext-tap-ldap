@@ -7,15 +7,16 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from flext_tap_ldap.streams import (
+from flext_tap_ldap import (
     CustomStream,
     CustomStreamParams,
+    FlextTapLDAP,
     GroupsStream,
+    LDAPBaseStream,
     OrganizationalUnitsStream,
     SchemaStream,
     UsersStream,
 )
-from flext_tap_ldap.tap import FlextTapLDAP
 
 
 class TestLDAPBaseStream:
@@ -585,7 +586,6 @@ class TestLDAPBaseStreamDirectUsage:
 
     def test_base_stream_get_records_empty(self, mock_tap: Mock) -> None:
         """Test base stream get_records method (covers line 68)."""
-        from flext_tap_ldap.streams import LDAPBaseStream
 
         # Create a subclass to test the base functionality
         class TestBaseStream(LDAPBaseStream):

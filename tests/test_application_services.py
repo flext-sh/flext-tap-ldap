@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from uuid import uuid4
+
 import pytest
 
-from flext_tap_ldap.application.services import (
+from flext_tap_ldap import (
     LDAPConnectionParams,
     LDAPConnectionService,
     LDAPRecordService,
@@ -126,8 +128,6 @@ class TestLDAPConnectionService:
         service: LDAPConnectionService,
     ) -> None:
         """Test getting non-existent connection."""
-        from uuid import uuid4
-
         result = await service.get_connection(uuid4())
 
         assert result.success
@@ -178,8 +178,6 @@ class TestLDAPConnectionService:
         service: LDAPConnectionService,
     ) -> None:
         """Test testing non-existent connection."""
-        from uuid import uuid4
-
         result = await service.test_connection(uuid4())
 
         assert result.is_failure
@@ -196,8 +194,6 @@ class TestLDAPStreamService:
 
     async def test_create_stream_success(self, service: LDAPStreamService) -> None:
         """Test successful stream creation."""
-        from uuid import uuid4
-
         connection_id = uuid4()
         params = StreamCreationParams(
             connection_id=connection_id,
@@ -217,8 +213,6 @@ class TestLDAPStreamService:
         service: LDAPStreamService,
     ) -> None:
         """Test stream creation with default values."""
-        from uuid import uuid4
-
         connection_id = uuid4()
         params = StreamCreationParams(
             connection_id=connection_id,
@@ -234,8 +228,6 @@ class TestLDAPStreamService:
 
     async def test_discover_schema(self, service: LDAPStreamService) -> None:
         """Test schema discovery."""
-        from uuid import uuid4
-
         connection_id = uuid4()
         params = StreamCreationParams(
             connection_id=connection_id,
@@ -254,8 +246,6 @@ class TestLDAPStreamService:
 
     async def test_list_streams_filtered(self, service: LDAPStreamService) -> None:
         """Test listing streams filtered by connection."""
-        from uuid import uuid4
-
         connection_id1 = uuid4()
         connection_id2 = uuid4()
 
@@ -288,8 +278,6 @@ class TestTapExecutionService:
 
     async def test_create_execution(self, service: TapExecutionService) -> None:
         """Test execution creation."""
-        from uuid import uuid4
-
         connection_id = uuid4()
         result = await service.create_execution(
             connection_id=connection_id,
@@ -304,8 +292,6 @@ class TestTapExecutionService:
 
     async def test_start_execution(self, service: TapExecutionService) -> None:
         """Test starting execution."""
-        from uuid import uuid4
-
         connection_id = uuid4()
         create_result = await service.create_execution(connection_id, "sync")
         execution_id = create_result.data.id
@@ -318,8 +304,6 @@ class TestTapExecutionService:
 
     async def test_complete_execution(self, service: TapExecutionService) -> None:
         """Test completing execution."""
-        from uuid import uuid4
-
         connection_id = uuid4()
         create_result = await service.create_execution(connection_id, "sync")
         execution_id = create_result.data.id
@@ -337,8 +321,6 @@ class TestTapExecutionService:
 
     async def test_update_metrics(self, service: TapExecutionService) -> None:
         """Test updating execution metrics."""
-        from uuid import uuid4
-
         connection_id = uuid4()
         create_result = await service.create_execution(connection_id, "sync")
         execution_id = create_result.data.id
@@ -364,8 +346,6 @@ class TestLDAPRecordService:
 
     async def test_create_record(self, service: LDAPRecordService) -> None:
         """Test record creation."""
-        from uuid import uuid4
-
         stream_id = uuid4()
         execution_id = uuid4()
 
@@ -384,8 +364,6 @@ class TestLDAPRecordService:
 
     async def test_list_records_filtered(self, service: LDAPRecordService) -> None:
         """Test listing records with filters."""
-        from uuid import uuid4
-
         stream_id1 = uuid4()
         stream_id2 = uuid4()
         execution_id = uuid4()
@@ -405,8 +383,6 @@ class TestLDAPRecordService:
 
     async def test_count_records(self, service: LDAPRecordService) -> None:
         """Test counting records."""
-        from uuid import uuid4
-
         stream_id = uuid4()
         execution_id = uuid4()
 

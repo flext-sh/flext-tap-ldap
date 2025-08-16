@@ -214,15 +214,15 @@ def create_ldap_connection_config(
         return FlextResult.fail(f"Failed to create LDAP connection config: {e}")
 
 
-def create_ldap_connection_config_legacy(
+def create_ldap_connection_config_convenience(
     host: str,
     base_dn: str,
     port: int = 389,
     **kwargs: object,
 ) -> FlextResult[LDAPConnectionConfig]:
-    """Create LDAP connection configuration (legacy interface).
+    """Create LDAP connection configuration (testing convenience interface).
 
-    Backward compatibility wrapper for the Parameter Object Pattern implementation.
+    Testing convenience wrapper for the Parameter Object Pattern implementation.
     Use create_ldap_connection_config() with LDAPConnectionParams for new code.
     """
     try:
@@ -236,7 +236,7 @@ def create_ldap_connection_config_legacy(
         )
         return create_ldap_connection_config(params)
     except Exception as e:
-        return FlextResult.fail(f"Failed to create legacy connection config: {e}")
+        return FlextResult.fail(f"Failed to create convenience connection config: {e}")
 
 
 def create_ldif_processing_config(
@@ -247,7 +247,7 @@ def create_ldif_processing_config(
     """Create LDIF processing configuration.
 
     REFACTORED: Now uses Builder Pattern internally to eliminate parameter proliferation.
-    Maintains backward compatibility while providing cleaner internal implementation.
+    Maintains testing convenience while providing cleaner internal implementation.
 
     Args:
         ldif_files: List of LDIF files to process
@@ -507,7 +507,7 @@ __all__: list[str] = [
     "LDIFConfigBuilder",
     "create_development_ldap_config",
     "create_ldap_connection_config",
-    "create_ldap_connection_config_legacy",
+    "create_ldap_connection_config_convenience",
     "create_ldif_processing_config",
     "create_ldif_processing_config_advanced",
     "create_production_ldap_config",

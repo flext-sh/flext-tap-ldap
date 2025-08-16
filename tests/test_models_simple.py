@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flext_tap_ldap.models import (
+from flext_tap_ldap import (
     LDAPAttribute,
     LDAPEntry,
     LDAPSchema,

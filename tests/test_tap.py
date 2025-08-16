@@ -6,10 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-# MIGRATED: from singer_sdk.testing import get_tap_test_class -> use flext_meltano
-from flext_meltano import get_tap_test_class
-
-from flext_tap_ldap.tap import FlextTapLDAP
+from flext_tap_ldap import FlextTapLDAP, get_tap_test_class
 
 # Basic tap tests - using correct field names from schema
 TestFlextTapLDAP = get_tap_test_class(

@@ -35,8 +35,8 @@ class CustomStreamConfig(BaseModel):
         description="JSON schema for the stream",
     )
 
-    def validate_domain_rules(self) -> FlextResult[None]:
-        """Validate domain-specific rules for custom streams."""
+    def validate_business_rules(self) -> FlextResult[None]:
+        """Validate business rules for custom streams."""
         if not self.name or not self.search_filter:
             return FlextResult.fail("Custom stream requires name and search_filter")
 
@@ -92,8 +92,8 @@ class LDIFProcessingConfig(BaseModel):
         description="Enable LDIF processing streams",
     )
 
-    def validate_domain_rules(self) -> FlextResult[None]:
-        """Validate domain-specific rules for LDIF processing."""
+    def validate_business_rules(self) -> FlextResult[None]:
+        """Validate business rules for LDIF processing."""
         if self.ldif_files and self.ldif_directory:
             return FlextResult.fail("Cannot specify both ldif_files and ldif_directory")
 
@@ -207,8 +207,8 @@ class TapLDAPConfig(BaseSettings):
                         json_schema=json_schema,
                     )
 
-                    # Validate domain rules
-                    validation_result = config_obj.validate_domain_rules()
+                    # Validate business rules
+                    validation_result = config_obj.validate_business_rules()
 
                     if not validation_result.success:
                         error_text = validation_result.error or "Unknown error"
@@ -229,7 +229,7 @@ class TapLDAPConfig(BaseSettings):
         """Validate the complete configuration with business rules."""
         try:
             # Validate LDIF processing config
-            ldif_validation = self.ldif_processing.validate_domain_rules()
+            ldif_validation = self.ldif_processing.validate_business_rules()
             if not ldif_validation.success:
                 return FlextResult.fail(
                     f"LDIF config invalid: {ldif_validation.error or 'Unknown error'}",
@@ -261,7 +261,7 @@ class TapLDAPConfig(BaseSettings):
                         json_schema=schema_dict,
                     )
 
-                    stream_validation = config_obj.validate_domain_rules()
+                    stream_validation = config_obj.validate_business_rules()
                     if not stream_validation.success:
                         msg = (
                             f"Custom stream '{name}' invalid: "

@@ -4,17 +4,16 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
-from unittest.mock import patch
+from typing import TYPE_CHECKING
+from unittest.mock import Mock, patch
 
 import pytest
 from click.testing import CliRunner
 
-from flext_tap_ldap.tap import FlextTapLDAP
+from flext_tap_ldap import FlextTapLDAP
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
-    from unittest.mock import Mock
 
 
 class TestFlextTapLDAPIntegration:
@@ -286,8 +285,8 @@ class TestFlextTapLDAPIntegration:
         # Mock flext-ldap client search method with async context manager
 
         async def mock_search(
-            *args: Any,
-            **kwargs: object,
+            *args: object,  # noqa: ARG001
+            **kwargs: object,  # noqa: ARG001
         ) -> AsyncGenerator[dict[str, object]]:
             yield {
                 "dn": "uid=user1,ou=users,dc=test,dc=com",

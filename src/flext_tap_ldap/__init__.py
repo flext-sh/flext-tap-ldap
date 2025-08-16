@@ -6,10 +6,12 @@ from __future__ import annotations
 from flext_tap_ldap.tap_client import (
     FlextTapLDAP,
     FlextTapLDAPPlugin,
-    LDAPClient,
-    LDAPClientConfig,
     create_ldap_tap_plugin,
     main,
+)
+from flext_tap_ldap.client import (
+    LDAPClient,
+    LDAPClientConfig,
 )
 from flext_tap_ldap.tap_config import (
     CustomStreamConfig,
@@ -55,12 +57,12 @@ from flext_tap_ldap.tap_streams import (
     UsersStream,
 )
 
-# Backward compatibility aliases for existing code
+# Testing convenience aliases for existing code
 FlextTapLDAPConfig = TapLDAPConfig
 LDAPTap = FlextTapLDAP
 TapConfig = TapLDAPConfig
 
-# Legacy imports for backward compatibility
+# Testing convenience imports for existing code
 from flext_tap_ldap import exceptions as tap_exceptions
 
 __version__ = "0.9.0-reorganized"
@@ -116,7 +118,7 @@ __all__: list[str] = [
     "validate_ldap_config",
     # Entry Point
     "main",
-    # Backward compatibility
+    # Testing convenience
     "FlextTapLDAPConfig",
     "LDAPTap",
     "TapConfig",

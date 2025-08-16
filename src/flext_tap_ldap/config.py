@@ -9,19 +9,23 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextResult, FlextSettings, FlextValueObject
+from flext_core import FlextBaseConfigModel, FlextBaseModel, FlextResult
 from pydantic import Field, field_validator
+from pydantic_settings import SettingsConfigDict
+
+# Constants
+MAX_PORT = 65535
 
 
-class LDAPConnectionConfig(FlextValueObject):
-    """LDAP connection configuration using FlextValueObject pattern."""
+class LDAPConnectionConfig(FlextBaseModel):
+    """LDAP connection configuration using FlextBaseModel pattern."""
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate LDAP connection configuration."""
         if not self.host:
             return FlextResult.fail("Host is required")
-        if self.port <= 0 or self.port > 65535:
-            return FlextResult.fail("Port must be between 1 and 65535")
+        if self.port <= 0 or self.port > MAX_PORT:
+            return FlextResult.fail(f"Port must be between 1 and {MAX_PORT}")
         if self.timeout <= 0:
             return FlextResult.fail("Timeout must be positive")
         if self.page_size <= 0:
@@ -31,14 +35,16 @@ class LDAPConnectionConfig(FlextValueObject):
     host: str = Field(description="LDAP server host")
     port: int = Field(default=389, description="LDAP server port")
     use_ssl: bool = Field(default=False, description="Use SSL connection")
+    use_tls: bool = Field(default=False, description="Use TLS connection")
     bind_dn: str | None = Field(default=None, description="Bind DN for authentication")
     bind_password: str | None = Field(default=None, description="Bind password")
-    base_dn: str = Field(description="Base DN for searches")
+    base_dn: str = Field(default="", description="Base DN for searches")
     timeout: int = Field(default=30, description="Connection timeout in seconds")
     page_size: int = Field(default=1000, description="LDAP search page size")
+    max_retries: int = Field(default=3, description="Maximum connection retries")
 
 
-class CustomStreamConfig(FlextValueObject):
+class CustomStreamConfig(FlextBaseModel):
     """Configuration for custom LDAP streams using flext-core patterns."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -65,7 +71,7 @@ class CustomStreamConfig(FlextValueObject):
     )
 
 
-class LDIFProcessingConfig(FlextValueObject):
+class LDIFProcessingConfig(FlextBaseModel):
     """Configuration for LDIF file processing using flext-core patterns."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -123,22 +129,23 @@ class LDIFProcessingConfig(FlextValueObject):
     )
 
 
-class TapLDAPConfig(FlextSettings):
+class TapLDAPConfig(FlextBaseConfigModel):
     """Complete configuration for tap-ldap using flext-core patterns.
 
-    Combines LDAP connection and LDIF processing configurations with FlextSettings.
+    Combines LDAP connection and LDIF processing configurations with FlextBaseConfigModel.
     """
 
-    class Config:
-        env_prefix = "TAP_LDAP_"
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        env_nested_delimiter = "__"
-        case_sensitive = False
-        extra = "allow"
-        validate_assignment = True
-        str_strip_whitespace = True
-        use_enum_values = True
+    model_config = SettingsConfigDict(
+        env_prefix="TAP_LDAP_",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_nested_delimiter="__",
+        case_sensitive=False,
+        extra="allow",
+        validate_assignment=True,
+        str_strip_whitespace=True,
+        use_enum_values=True,
+    )
 
     # Core configurations as embedded value objects
     connection: LDAPConnectionConfig = Field(
@@ -197,16 +204,11 @@ class TapLDAPConfig(FlextSettings):
                     if json_schema is not None and not isinstance(json_schema, dict):
                         json_schema = None
 
-                    CustomStreamConfig(
-                        name=name,
-                        search_filter=search_filter,
-                        primary_keys=primary_keys,
-                        replication_key=replication_key,
-                        json_schema=json_schema,
-                    )
+                    # Validate custom stream config (no need to create instance)
+                    if not name or not search_filter:
+                        cls._raise_invalid_stream_config()
                 except (ValueError, TypeError) as e:
-                    msg: str = f"Invalid custom stream config: {e}"
-                    raise ValueError(msg) from e
+                    cls._raise_invalid_stream_config_with_error(e)
         return v
 
     @classmethod
@@ -221,7 +223,7 @@ class TapLDAPConfig(FlextSettings):
             "base_dn": "",
             "use_ssl": False,
             "use_tls": False,
-            "timeout_seconds": 30,
+            "timeout": 30,
             "page_size": 1000,
             "max_retries": 3,
         }
@@ -266,12 +268,16 @@ class TapLDAPConfig(FlextSettings):
             else None,
             base_dn=str(ldap_defaults["base_dn"]),
             use_ssl=bool(ldap_defaults["use_ssl"]),
+            use_tls=bool(ldap_defaults["use_tls"]),
             timeout=int(ldap_defaults["timeout"])
             if isinstance(ldap_defaults["timeout"], (int, str))
             else 30,
             page_size=int(ldap_defaults["page_size"])
             if isinstance(ldap_defaults["page_size"], (int, str))
             else 1000,
+            max_retries=int(ldap_defaults["max_retries"])
+            if isinstance(ldap_defaults["max_retries"], (int, str))
+            else 3,
         )
 
         ldif_proc_config = LDIFProcessingConfig(
@@ -305,6 +311,20 @@ class TapLDAPConfig(FlextSettings):
             ldif_processing=ldif_proc_config,
         )
 
+    @classmethod
+    def _raise_invalid_stream_config(cls) -> None:
+        """Raise invalid stream config error."""
+        raise ValueError(INVALID_STREAM_CONFIG_MSG)
+
+    @classmethod
+    def _raise_invalid_stream_config_with_error(cls, error: Exception) -> None:
+        """Raise invalid stream config error with details."""
+        raise ValueError(INVALID_STREAM_CONFIG_WITH_ERROR_MSG.format(error)) from error
+
+
+# Constants for error messages
+INVALID_STREAM_CONFIG_MSG = "Invalid custom stream config"
+INVALID_STREAM_CONFIG_WITH_ERROR_MSG = "Invalid custom stream config: {}"
 
 # Export main configuration classes
 __all__: list[str] = [

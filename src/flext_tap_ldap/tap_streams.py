@@ -20,12 +20,13 @@ from flext_ldap import get_ldap_api
 from flext_ldif import FlextLdifAPI, FlextLdifEntry
 from flext_meltano import Stream, singer_typing as th
 
-from flext_tap_ldap.tap_client import LDAPClient
+from flext_tap_ldap.client import LDAPClient
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
 
     from flext_tap_ldap.tap_client import FlextTapLDAP
+
 
 logger = get_logger(__name__)
 

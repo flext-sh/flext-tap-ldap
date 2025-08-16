@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from datetime import datetime
-from uuid import UUID, uuid4
+from uuid import uuid4
 
-from flext_tap_ldap.domain.entities import (
+from flext_core import FlextEntityId
+
+from flext_tap_ldap import (
     LDAPConnection,
     LDAPRecord,
     LDAPStream,
@@ -35,7 +37,7 @@ class TestLDAPConnection:
         assert connection.timeout == 30
         assert connection.pool_size == 5
         assert connection.is_active is True
-        assert isinstance(connection.id, UUID)
+        assert isinstance(connection.id, FlextEntityId)
 
     def test_ldap_connection_with_ssl(self) -> None:
         """Test creating an LDAP connection with SSL."""
@@ -74,7 +76,7 @@ class TestLDAPStream:
         assert stream.connection_id == connection_id
         assert stream.search_filter == "(objectClass=inetOrgPerson)"
         assert stream.attributes == ["cn", "uid", "mail"]
-        assert isinstance(stream.id, UUID)
+        assert isinstance(stream.id, FlextEntityId)
         assert stream.key_properties == ["dn"]
         assert stream.replication_method == "FULL_TABLE"
         assert stream.records_extracted == 0
@@ -147,7 +149,7 @@ class TestTapExecution:
         assert execution.config == {"ldap_host": "ldap.example.com"}
         assert execution.catalog == {"streams": []}
         assert execution.state == {"bookmarks": {}}
-        assert isinstance(execution.id, UUID)
+        assert isinstance(execution.id, FlextEntityId)
         assert execution.records_extracted == 0
         assert execution.streams_processed == 0
 
@@ -190,7 +192,7 @@ class TestTapExecution:
         execution = TapExecution(
             connection_id=connection_id,
             command="sync",
-            tap_status="extracting",
+            tap_status="created",
             config={},
             catalog={},
             state={},
@@ -221,7 +223,7 @@ class TestTapExecution:
         execution = TapExecution(
             connection_id=connection_id,
             command="sync",
-            tap_status="extracting",
+            tap_status="created",
             config={},
             catalog={},
             state={},
@@ -248,7 +250,7 @@ class TestTapExecution:
         execution = TapExecution(
             connection_id=connection_id,
             command="sync",
-            tap_status="extracting",
+            tap_status="created",
             config={},
             catalog={},
             state={},
@@ -310,7 +312,7 @@ class TestLDAPRecord:
             "organizationalPerson",
             "person",
         ]
-        assert isinstance(record.id, UUID)
+        assert isinstance(record.id, FlextEntityId)
         assert record.extracted_at is not None
 
     def test_ldap_record_rdn_property(self) -> None:
@@ -344,7 +346,9 @@ class TestLDAPRecord:
             singer_record={},
         )
 
-        singer_record = record.to_singer_record()
+        result = record.to_singer_record()
+        assert result.success
+        singer_record = result.data
 
         assert isinstance(singer_record, dict)
         assert singer_record["type"] == "RECORD"
