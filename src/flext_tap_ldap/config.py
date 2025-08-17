@@ -21,16 +21,16 @@ class LDAPConnectionConfig(FlextModel):
     """LDAP connection configuration using FlextModel pattern."""
 
     def validate_business_rules(self) -> FlextResult[None]:
-      """Validate LDAP connection configuration."""
-      if not self.host:
-          return FlextResult.fail("Host is required")
-      if self.port <= 0 or self.port > MAX_PORT:
-          return FlextResult.fail(f"Port must be between 1 and {MAX_PORT}")
-      if self.timeout <= 0:
-          return FlextResult.fail("Timeout must be positive")
-      if self.page_size <= 0:
-          return FlextResult.fail("Page size must be positive")
-      return FlextResult.ok(None)
+        """Validate LDAP connection configuration."""
+        if not self.host:
+            return FlextResult.fail("Host is required")
+        if self.port <= 0 or self.port > MAX_PORT:
+            return FlextResult.fail(f"Port must be between 1 and {MAX_PORT}")
+        if self.timeout <= 0:
+            return FlextResult.fail("Timeout must be positive")
+        if self.page_size <= 0:
+            return FlextResult.fail("Page size must be positive")
+        return FlextResult.ok(None)
 
     host: str = Field(description="LDAP server host")
     port: int = Field(default=389, description="LDAP server port")
@@ -48,26 +48,26 @@ class CustomStreamConfig(FlextModel):
     """Configuration for custom LDAP streams using flext-core patterns."""
 
     def validate_business_rules(self) -> FlextResult[None]:
-      """Validate custom stream configuration."""
-      if not self.name:
-          return FlextResult.fail("Stream name is required")
-      if not self.search_filter:
-          return FlextResult.fail("Search filter is required")
-      return FlextResult.ok(None)
+        """Validate custom stream configuration."""
+        if not self.name:
+            return FlextResult.fail("Stream name is required")
+        if not self.search_filter:
+            return FlextResult.fail("Search filter is required")
+        return FlextResult.ok(None)
 
     name: str = Field(..., description="Stream name")
     search_filter: str = Field(..., description="LDAP search filter")
     primary_keys: list[str] | None = Field(
-      default=None,
-      description="Primary key fields",
+        default=None,
+        description="Primary key fields",
     )
     replication_key: str | None = Field(
-      default=None,
-      description="Replication key field",
+        default=None,
+        description="Replication key field",
     )
     json_schema: dict[str, object] | None = Field(
-      default=None,
-      description="JSON schema for the stream",
+        default=None,
+        description="JSON schema for the stream",
     )
 
 
@@ -75,57 +75,57 @@ class LDIFProcessingConfig(FlextModel):
     """Configuration for LDIF file processing using flext-core patterns."""
 
     def validate_business_rules(self) -> FlextResult[None]:
-      """Validate LDIF processing configuration."""
-      if self.ldif_max_errors <= 0:
-          return FlextResult.fail("LDIF max errors must be positive")
-      if self.ldif_files and self.ldif_directory:
-          return FlextResult.fail("Cannot specify both ldif_files and ldif_directory")
-      return FlextResult.ok(None)
+        """Validate LDIF processing configuration."""
+        if self.ldif_max_errors <= 0:
+            return FlextResult.fail("LDIF max errors must be positive")
+        if self.ldif_files and self.ldif_directory:
+            return FlextResult.fail("Cannot specify both ldif_files and ldif_directory")
+        return FlextResult.ok(None)
 
     ldif_files: list[str] | None = Field(
-      default=None,
-      description="List of LDIF files to process",
+        default=None,
+        description="List of LDIF files to process",
     )
     ldif_directory: str | None = Field(
-      default=None,
-      description="Directory containing LDIF files",
+        default=None,
+        description="Directory containing LDIF files",
     )
     ldif_file_pattern: str = Field(
-      default="*.ldif",
-      description="File pattern for LDIF files in directory",
+        default="*.ldif",
+        description="File pattern for LDIF files in directory",
     )
     ldif_ignore_errors: bool = Field(
-      default=True,
-      description="Continue processing on LDIF parsing errors",
+        default=True,
+        description="Continue processing on LDIF parsing errors",
     )
     ldif_max_errors: int = Field(
-      default=100,
-      description="Maximum number of parsing errors before stopping",
-      gt=0,
+        default=100,
+        description="Maximum number of parsing errors before stopping",
+        gt=0,
     )
     ldif_ignore_file_errors: bool = Field(
-      default=True,
-      description="Continue processing if a file fails completely",
+        default=True,
+        description="Continue processing if a file fails completely",
     )
     ldif_ignore_entry_errors: bool = Field(
-      default=True,
-      description="Continue processing if an entry fails",
+        default=True,
+        description="Continue processing if an entry fails",
     )
     ldif_apply_transformations: bool = Field(
-      default=False,
-      description="Apply transformation rules to LDIF entries",
+        default=False,
+        description="Apply transformation rules to LDIF entries",
     )
     ldif_transformation_rules: dict[str, object] | None = Field(
-      default=None,
-      description="Transformation rules for LDIF processing",
+        default=None,
+        description="Transformation rules for LDIF processing",
     )
     migration_batch: str | None = Field(
-      default=None,
-      description="Migration batch identifier for tracking",
+        default=None,
+        description="Migration batch identifier for tracking",
     )
     enable_ldif_streams: bool = Field(
-      default=False,
-      description="Enable LDIF processing streams",
+        default=False,
+        description="Enable LDIF processing streams",
     )
 
 
@@ -136,190 +136,190 @@ class TapLDAPConfig(FlextBaseConfigModel):
     """
 
     model_config = SettingsConfigDict(
-      env_prefix="TAP_LDAP_",
-      env_file=".env",
-      env_file_encoding="utf-8",
-      env_nested_delimiter="__",
-      case_sensitive=False,
-      extra="allow",
-      validate_assignment=True,
-      str_strip_whitespace=True,
-      use_enum_values=True,
+        env_prefix="TAP_LDAP_",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_nested_delimiter="__",
+        case_sensitive=False,
+        extra="allow",
+        validate_assignment=True,
+        str_strip_whitespace=True,
+        use_enum_values=True,
     )
 
     # Core configurations as embedded value objects
     connection: LDAPConnectionConfig = Field(
-      ...,
-      description="LDAP connection configuration",
+        ...,
+        description="LDAP connection configuration",
     )
     ldif_processing: LDIFProcessingConfig = Field(
-      default_factory=LDIFProcessingConfig,
-      description="LDIF processing configuration",
+        default_factory=LDIFProcessingConfig,
+        description="LDIF processing configuration",
     )
 
     # Project identification
     project_name: str = Field(
-      default="flext-data.taps.flext-tap-ldap",
-      description="Project name",
+        default="flext-data.taps.flext-tap-ldap",
+        description="Project name",
     )
     project_version: str = Field(default="0.9.0", description="Project version")
 
     # Custom streams
     custom_streams: list[dict[str, object]] | None = Field(
-      default=None,
-      description="Custom stream definitions",
+        default=None,
+        description="Custom stream definitions",
     )
 
     @field_validator("custom_streams")
     @classmethod
     def validate_custom_streams(
-      cls,
-      v: list[dict[str, object]] | None,
+        cls,
+        v: list[dict[str, object]] | None,
     ) -> list[dict[str, object]] | None:
-      """Validate custom stream configurations."""
-      if v is not None:
-          # Validate each custom stream config with proper type conversion
-          for stream_config in v:
-              try:
-                  # Convert dict[str, object] to proper types for validation
-                  # Type-safe config construction
-                  name = str(stream_config.get("name", ""))
-                  search_filter = str(stream_config.get("search_filter", ""))
-                  primary_keys = stream_config.get("primary_keys")
-                  replication_key = stream_config.get("replication_key")
-                  json_schema = stream_config.get("json_schema")
+        """Validate custom stream configurations."""
+        if v is not None:
+            # Validate each custom stream config with proper type conversion
+            for stream_config in v:
+                try:
+                    # Convert dict[str, object] to proper types for validation
+                    # Type-safe config construction
+                    name = str(stream_config.get("name", ""))
+                    search_filter = str(stream_config.get("search_filter", ""))
+                    primary_keys = stream_config.get("primary_keys")
+                    replication_key = stream_config.get("replication_key")
+                    json_schema = stream_config.get("json_schema")
 
-                  # Ensure proper types for primary_keys
-                  if primary_keys is not None and not isinstance(primary_keys, list):
-                      primary_keys = None
+                    # Ensure proper types for primary_keys
+                    if primary_keys is not None and not isinstance(primary_keys, list):
+                        primary_keys = None
 
-                  # Ensure proper types for replication_key
-                  if replication_key is not None and not isinstance(
-                      replication_key,
-                      str,
-                  ):
-                      replication_key = None
+                    # Ensure proper types for replication_key
+                    if replication_key is not None and not isinstance(
+                        replication_key,
+                        str,
+                    ):
+                        replication_key = None
 
-                  # Ensure proper types for json_schema
-                  if json_schema is not None and not isinstance(json_schema, dict):
-                      json_schema = None
+                    # Ensure proper types for json_schema
+                    if json_schema is not None and not isinstance(json_schema, dict):
+                        json_schema = None
 
-                  # Validate custom stream config (no need to create instance)
-                  if not name or not search_filter:
-                      cls._raise_invalid_stream_config()
-              except (ValueError, TypeError) as e:
-                  cls._raise_invalid_stream_config_with_error(e)
-      return v
+                    # Validate custom stream config (no need to create instance)
+                    if not name or not search_filter:
+                        cls._raise_invalid_stream_config()
+                except (ValueError, TypeError) as e:
+                    cls._raise_invalid_stream_config_with_error(e)
+        return v
 
     @classmethod
     def create_with_defaults(cls, **overrides: object) -> TapLDAPConfig:
-      """Create config with intelligent defaults."""
-      # Use proper typed defaults for LDAPConnectionConfig
-      ldap_defaults: dict[str, object] = {
-          "host": "localhost",
-          "port": 389,
-          "bind_dn": None,
-          "bind_password": None,
-          "base_dn": "",
-          "use_ssl": False,
-          "use_tls": False,
-          "timeout": 30,
-          "page_size": 1000,
-          "max_retries": 3,
-      }
+        """Create config with intelligent defaults."""
+        # Use proper typed defaults for LDAPConnectionConfig
+        ldap_defaults: dict[str, object] = {
+            "host": "localhost",
+            "port": 389,
+            "bind_dn": None,
+            "bind_password": None,
+            "base_dn": "",
+            "use_ssl": False,
+            "use_tls": False,
+            "timeout": 30,
+            "page_size": 1000,
+            "max_retries": 3,
+        }
 
-      # Use proper typed defaults for LDIFProcessingConfig
-      ldif_defaults: dict[str, object] = {
-          "ldif_files": None,
-          "ldif_directory": None,
-          "ldif_file_pattern": "*.ldif",
-          "ldif_ignore_errors": True,
-          "ldif_max_errors": 100,
-          "ldif_ignore_file_errors": True,
-          "ldif_ignore_entry_errors": True,
-          "ldif_apply_transformations": False,
-          "ldif_transformation_rules": None,
-          "migration_batch": None,
-          "enable_ldif_streams": False,
-      }
+        # Use proper typed defaults for LDIFProcessingConfig
+        ldif_defaults: dict[str, object] = {
+            "ldif_files": None,
+            "ldif_directory": None,
+            "ldif_file_pattern": "*.ldif",
+            "ldif_ignore_errors": True,
+            "ldif_max_errors": 100,
+            "ldif_ignore_file_errors": True,
+            "ldif_ignore_entry_errors": True,
+            "ldif_apply_transformations": False,
+            "ldif_transformation_rules": None,
+            "migration_batch": None,
+            "enable_ldif_streams": False,
+        }
 
-      # Apply overrides to connection config
-      if "connection" in overrides and isinstance(overrides["connection"], dict):
-          ldap_defaults.update(overrides["connection"])
+        # Apply overrides to connection config
+        if "connection" in overrides and isinstance(overrides["connection"], dict):
+            ldap_defaults.update(overrides["connection"])
 
-      # Apply overrides to LDIF config
-      if "ldif_processing" in overrides and isinstance(
-          overrides["ldif_processing"],
-          dict,
-      ):
-          ldif_defaults.update(overrides["ldif_processing"])
+        # Apply overrides to LDIF config
+        if "ldif_processing" in overrides and isinstance(
+            overrides["ldif_processing"],
+            dict,
+        ):
+            ldif_defaults.update(overrides["ldif_processing"])
 
-      # Create properly typed config objects with explicit parameters
-      ldap_connection = LDAPConnectionConfig(
-          host=str(ldap_defaults["host"]),
-          port=int(ldap_defaults["port"])
-          if isinstance(ldap_defaults["port"], (int, str))
-          else 389,
-          bind_dn=ldap_defaults["bind_dn"]
-          if isinstance(ldap_defaults["bind_dn"], str)
-          else None,
-          bind_password=ldap_defaults["bind_password"]
-          if isinstance(ldap_defaults["bind_password"], str)
-          else None,
-          base_dn=str(ldap_defaults["base_dn"]),
-          use_ssl=bool(ldap_defaults["use_ssl"]),
-          use_tls=bool(ldap_defaults["use_tls"]),
-          timeout=int(ldap_defaults["timeout"])
-          if isinstance(ldap_defaults["timeout"], (int, str))
-          else 30,
-          page_size=int(ldap_defaults["page_size"])
-          if isinstance(ldap_defaults["page_size"], (int, str))
-          else 1000,
-          max_retries=int(ldap_defaults["max_retries"])
-          if isinstance(ldap_defaults["max_retries"], (int, str))
-          else 3,
-      )
+        # Create properly typed config objects with explicit parameters
+        ldap_connection = LDAPConnectionConfig(
+            host=str(ldap_defaults["host"]),
+            port=int(ldap_defaults["port"])
+            if isinstance(ldap_defaults["port"], (int, str))
+            else 389,
+            bind_dn=ldap_defaults["bind_dn"]
+            if isinstance(ldap_defaults["bind_dn"], str)
+            else None,
+            bind_password=ldap_defaults["bind_password"]
+            if isinstance(ldap_defaults["bind_password"], str)
+            else None,
+            base_dn=str(ldap_defaults["base_dn"]),
+            use_ssl=bool(ldap_defaults["use_ssl"]),
+            use_tls=bool(ldap_defaults["use_tls"]),
+            timeout=int(ldap_defaults["timeout"])
+            if isinstance(ldap_defaults["timeout"], (int, str))
+            else 30,
+            page_size=int(ldap_defaults["page_size"])
+            if isinstance(ldap_defaults["page_size"], (int, str))
+            else 1000,
+            max_retries=int(ldap_defaults["max_retries"])
+            if isinstance(ldap_defaults["max_retries"], (int, str))
+            else 3,
+        )
 
-      ldif_proc_config = LDIFProcessingConfig(
-          ldif_files=ldif_defaults["ldif_files"]
-          if isinstance(ldif_defaults["ldif_files"], list)
-          else None,
-          ldif_directory=ldif_defaults["ldif_directory"]
-          if isinstance(ldif_defaults["ldif_directory"], str)
-          else None,
-          ldif_file_pattern=str(ldif_defaults["ldif_file_pattern"]),
-          ldif_ignore_errors=bool(ldif_defaults["ldif_ignore_errors"]),
-          ldif_max_errors=int(ldif_defaults["ldif_max_errors"])
-          if isinstance(ldif_defaults["ldif_max_errors"], (int, str))
-          else 100,
-          ldif_ignore_file_errors=bool(ldif_defaults["ldif_ignore_file_errors"]),
-          ldif_ignore_entry_errors=bool(ldif_defaults["ldif_ignore_entry_errors"]),
-          ldif_apply_transformations=bool(
-              ldif_defaults["ldif_apply_transformations"],
-          ),
-          ldif_transformation_rules=ldif_defaults["ldif_transformation_rules"]
-          if isinstance(ldif_defaults["ldif_transformation_rules"], dict)
-          else None,
-          migration_batch=ldif_defaults["migration_batch"]
-          if isinstance(ldif_defaults["migration_batch"], str)
-          else None,
-          enable_ldif_streams=bool(ldif_defaults["enable_ldif_streams"]),
-      )
+        ldif_proc_config = LDIFProcessingConfig(
+            ldif_files=ldif_defaults["ldif_files"]
+            if isinstance(ldif_defaults["ldif_files"], list)
+            else None,
+            ldif_directory=ldif_defaults["ldif_directory"]
+            if isinstance(ldif_defaults["ldif_directory"], str)
+            else None,
+            ldif_file_pattern=str(ldif_defaults["ldif_file_pattern"]),
+            ldif_ignore_errors=bool(ldif_defaults["ldif_ignore_errors"]),
+            ldif_max_errors=int(ldif_defaults["ldif_max_errors"])
+            if isinstance(ldif_defaults["ldif_max_errors"], (int, str))
+            else 100,
+            ldif_ignore_file_errors=bool(ldif_defaults["ldif_ignore_file_errors"]),
+            ldif_ignore_entry_errors=bool(ldif_defaults["ldif_ignore_entry_errors"]),
+            ldif_apply_transformations=bool(
+                ldif_defaults["ldif_apply_transformations"],
+            ),
+            ldif_transformation_rules=ldif_defaults["ldif_transformation_rules"]
+            if isinstance(ldif_defaults["ldif_transformation_rules"], dict)
+            else None,
+            migration_batch=ldif_defaults["migration_batch"]
+            if isinstance(ldif_defaults["migration_batch"], str)
+            else None,
+            enable_ldif_streams=bool(ldif_defaults["enable_ldif_streams"]),
+        )
 
-      return cls(
-          connection=ldap_connection,
-          ldif_processing=ldif_proc_config,
-      )
+        return cls(
+            connection=ldap_connection,
+            ldif_processing=ldif_proc_config,
+        )
 
     @classmethod
     def _raise_invalid_stream_config(cls) -> None:
-      """Raise invalid stream config error."""
-      raise ValueError(INVALID_STREAM_CONFIG_MSG)
+        """Raise invalid stream config error."""
+        raise ValueError(INVALID_STREAM_CONFIG_MSG)
 
     @classmethod
     def _raise_invalid_stream_config_with_error(cls, error: Exception) -> None:
-      """Raise invalid stream config error with details."""
-      raise ValueError(INVALID_STREAM_CONFIG_WITH_ERROR_MSG.format(error)) from error
+        """Raise invalid stream config error with details."""
+        raise ValueError(INVALID_STREAM_CONFIG_WITH_ERROR_MSG.format(error)) from error
 
 
 # Constants for error messages
