@@ -1,7 +1,7 @@
 """Application layer for FLEXT-TAP-LDAP v0.7.0.
 
 REFACTORED:
-            Using flext-core application patterns - NO duplication.
+          Using flext-core application patterns - NO duplication.
 """
 
 from __future__ import annotations

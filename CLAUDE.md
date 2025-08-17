@@ -26,10 +26,12 @@ FLEXT-TAP-LDAP is a Singer-compliant tap for extracting data from LDAP directori
 
 ### Dependencies
 
-- **flext-core**: Foundation library with FlextResult, logging, DI container
-- **flext-meltano**: Centralized Singer SDK and common patterns
-- **flext-ldap**: LDAP connectivity infrastructure
-- **flext-observability**: Monitoring and metrics
+- **flext-core**: Foundation library with FlextResult, logging, DI container, and FlextModel patterns
+- **flext-ldap**: LDAP connectivity infrastructure (local path dependency)
+- **flext-ldif**: LDIF file processing and validation (local path dependency)
+- **flext-observability**: Monitoring and metrics (local path dependency)
+- **pydantic**: Data validation and settings with strict typing
+- **python-ldap**: Core LDAP library (test dependency)
 
 ## Development Commands
 
@@ -82,49 +84,8 @@ make coverage-html            # Generate HTML coverage report
 ### LDAP Testing Environment
 
 ```bash
-# Start test LDAP server
+# Start test LDAP server (Docker Compose setup available)
 docker-compose up -d openldap
-
-## TODO: GAPS DE ARQUITETURA IDENTIFICADOS - PRIORIDADE ALTA
-
-### 🚨 GAP 1: LDAP Library Integration Incomplete
-**Status**: ALTO - Tap não integra completamente com flext-ldap
-**Problema**:
-- Dependency em flext-ldap mas integration patterns não claros
-- LDAP connection management pode ser duplicado
-- Schema discovery não reutiliza flext-ldap capabilities
-
-**TODO**:
-- [ ] Integrar completamente com flext-ldap para connection management
-- [ ] Reutilizar flext-ldap schema discovery capabilities
-- [ ] Documentar LDAP library integration patterns
-- [ ] Eliminar duplicação de LDAP connection code
-
-### 🚨 GAP 2: LDIF Processing Integration Gap
-**Status**: ALTO - LDIF streams não integram com flext-ldif
-**Problema**:
-- LDIF processing implementado localmente em ldif_stream.py
-- Não reutiliza flext-ldif para parsing e validation
-- Duplicação de LDIF processing logic
-
-**TODO**:
-- [ ] Migrar LDIF processing para usar flext-ldif library
-- [ ] Integrar LDIF validation com flext-ldif patterns
-- [ ] Refatorar ldif_stream.py para use flext-ldif
-- [ ] Documentar LDIF integration patterns
-
-### 🚨 GAP 3: Meltano Integration Superficial
-**Status**: ALTO - Integration com flext-meltano não completa
-**Problema**:
-- Dependency em flext-meltano mas patterns não fully utilized
-- Singer SDK integration via flext-meltano não clear
-- Plugin registration não automatic via Meltano
-
-**TODO**:
-- [ ] Integrar completamente com flext-meltano Singer patterns
-- [ ] Implement automatic plugin registration via Meltano
-- [ ] Use flext-meltano common patterns consistently
-- [ ] Document Meltano integration workflow
 
 # Access LDAP admin interface
 # http://localhost:10080 (phpLDAPadmin)
@@ -134,6 +95,23 @@ make ldap-test
 
 # Manual tap testing with test server
 poetry run tap-ldap --config config.json --discover
+```
+
+### Debug Commands
+
+```bash
+# Run specific test categories
+pytest -m unit -v                    # Unit tests only
+pytest -m integration -v             # Integration tests only
+pytest -m slow -v                    # Performance tests
+pytest -m "not slow" -v              # Fast tests for quick feedback
+
+# Test debugging
+pytest tests/test_tap.py -vvs --pdb  # Debug specific test with pdb
+pytest --lf -v                       # Run last failed tests
+
+# Run single test file with coverage
+pytest tests/test_streams.py --cov=src/flext_tap_ldap --cov-report=term-missing -v
 ```
 
 ## Project Structure
@@ -160,14 +138,38 @@ src/flext_tap_ldap/
 
 ```
 tests/
+├── conftest.py                      # Pytest fixtures and configuration
 ├── e2e/
-│   └── ldif/                 # Sample LDIF files for testing
-├── test_client.py            # LDAP client tests
-├── test_streams.py           # Stream implementation tests
-├── test_tap.py               # Main tap functionality tests
-├── test_integration.py       # Integration tests
-└── conftest.py               # Pytest fixtures and configuration
+│   ├── conftest.py                  # E2E test configuration
+│   └── ldif/                        # Sample LDIF files for testing
+│       ├── 01-base.ldif            # Base LDAP structure
+│       ├── 02-users.ldif           # User entries
+│       └── 03-groups.ldif          # Group entries
+├── test_application_services.py    # Application service layer tests
+├── test_client.py                   # LDAP client tests
+├── test_client_coverage_boost.py   # Additional client coverage
+├── test_client_quick.py             # Quick client tests
+├── test_domain_entities.py         # Domain entity tests
+├── test_exceptions.py               # Exception handling tests
+├── test_integration.py              # Integration tests
+├── test_ldif_processor.py           # LDIF processing tests
+├── test_ldif_stream.py              # LDIF stream tests
+├── test_models.py                   # Model validation tests
+├── test_models_simple.py            # Simple model tests
+├── test_streams.py                  # Singer stream tests
+└── test_tap.py                      # Main tap functionality tests
 ```
+
+### Test Markers and Coverage
+
+The project uses pytest markers for test categorization:
+- `unit`: Unit tests (fast, isolated)
+- `integration`: Integration tests (require external dependencies)
+- `slow`: Performance tests (longer running)
+- `smoke`: Basic functionality tests
+- `e2e`: End-to-end tests
+
+Coverage is enforced at 90% minimum with branch coverage enabled.
 
 ## Configuration
 
@@ -235,10 +237,11 @@ Define custom LDAP queries as streams:
 ### Code Standards
 
 - **Python 3.13**: Latest Python with modern typing features
-- **Pydantic**: Strict data validation and configuration
-- **Async/Await**: Async patterns where beneficial
-- **Type Hints**: Complete type annotations throughout
-- **Error Handling**: FlextResult pattern for all service operations
+- **Pydantic**: Strict data validation and configuration with FlextModel base classes
+- **Type Hints**: Complete type annotations throughout (strict MyPy configuration)
+- **Error Handling**: FlextResult pattern for all service operations (railway-oriented programming)
+- **Clean Architecture**: Domain, application, and infrastructure layer separation
+- **Local Dependencies**: Uses local path dependencies to flext-core, flext-ldap, flext-ldif, and flext-observability
 
 ## Singer Protocol Implementation
 
@@ -270,25 +273,32 @@ All streams produce Singer RECORD messages with:
 
 ### Adding a New Stream
 
-1. Create stream class inheriting from `LDAPBaseStream`
+1. Create stream class inheriting from `Stream` (from flext-meltano)
 2. Define schema using `singer_typing` from flext-meltano
-3. Implement `get_records()` method
+3. Implement `get_records()` method with proper error handling
 4. Add to `discover_streams()` in `FlextTapLDAP`
-5. Add comprehensive tests
+5. Add comprehensive tests with appropriate markers
 
 ### Extending Configuration
 
-1. Update `TapLDAPConfig` in `config.py`
-2. Add Pydantic field with validation
-3. Update JSON schema in `tap.py`
-4. Update tests and documentation
+1. Update configuration classes in `config.py` using FlextModel patterns
+2. Add Pydantic field with proper validation and FlextResult business rules
+3. Update JSON schema in `tap.py` using `singer_typing` helpers
+4. Update tests and ensure 90% coverage maintained
 
-### Adding Domain Logic
+### Working with LDIF Files
 
-1. Create or update entities in `domain/entities.py`
-2. Add business logic to application services
-3. Use FlextResult pattern for error handling
-4. Add domain events for important state changes
+1. Add LDIF files to `tests/e2e/ldif/` for testing
+2. Use `LDIFStream` and `LDIFAnalysisStream` for processing
+3. Configure LDIF processing options in tap config
+4. Test with `enable_ldif_streams: true` in configuration
+
+### Domain Logic Development
+
+1. Create or update entities in `domain/entities.py` with business validation
+2. Add business logic to `application/services.py` using FlextResult pattern
+3. Use dependency injection patterns from flext-core
+4. Follow Clean Architecture principles with clear layer separation
 
 ## Docker Integration
 
@@ -298,11 +308,43 @@ The project includes a complete Docker Compose setup for testing:
 - **phpLDAPadmin**: Web interface on port 10080
 - **Sample LDIF Data**: Pre-loaded test data in `tests/e2e/ldif/`
 
-## Related Projects
+## Architecture Integration
 
-This tap integrates with the broader FLEXT ecosystem:
+### FLEXT Ecosystem Integration
+
+This tap is part of the larger FLEXT enterprise data integration platform:
+
+- **flext-core**: Provides FlextResult, FlextModel, logging, and dependency injection patterns
+- **flext-ldap**: LDAP connectivity and operations (local dependency)
+- **flext-ldif**: LDIF file processing and validation (local dependency)
+- **flext-observability**: Monitoring and metrics (local dependency)
+
+### Related Singer Projects
 
 - **flext-target-ldap**: Corresponding Singer target for loading data to LDAP
 - **flext-dbt-ldap**: DBT models for LDAP data transformation
-- **flext-meltano**: Orchestration and common Singer patterns
-- **flext-core**: Foundation patterns and utilities
+
+### Key Architecture Patterns
+
+- **Clean Architecture**: Domain-driven design with clear layer boundaries
+- **FlextResult Pattern**: Railway-oriented programming for error handling
+- **FlextModel**: Extended Pydantic models with business rule validation
+- **Singer Protocol**: Standard data extraction protocol compliance
+
+## Build and Packaging
+
+The project uses Poetry for dependency management with strict version pinning:
+
+```bash
+# Build distribution packages
+make build
+
+# Check dependencies
+make deps-show
+make deps-audit
+
+# Update dependencies
+make deps-update
+```
+
+All dependencies are managed through `pyproject.toml` with separate groups for development, testing, typing, and security tools.
