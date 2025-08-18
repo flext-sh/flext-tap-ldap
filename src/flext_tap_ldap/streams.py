@@ -504,7 +504,7 @@ class CustomStream(LDAPBaseStream):
             if isinstance(prop_config, dict):
                 prop_type_str = prop_config.get("type")
                 if prop_type_str == "array":
-                    prop_type = th.ArrayType(th.StringType)  # type: ignore[assignment]
+                    prop_type = th.ArrayType(th.StringType)
                 elif prop_type_str == "boolean":
                     prop_type = th.BooleanType
                 elif prop_type_str == "integer":
@@ -516,7 +516,7 @@ class CustomStream(LDAPBaseStream):
                 properties.append(
                     th.Property(
                         prop_name,
-                        prop_type,  # type: ignore[arg-type]
+                        prop_type,
                         description=str(description),
                     ),
                 )

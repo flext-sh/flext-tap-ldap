@@ -12,9 +12,9 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from flext_core import FlextResult, FlextValueObject as FlextDomainBaseModel, get_logger
+from flext_core import FlextModel, FlextResult, FlextValueObject, get_logger
 from flext_ldap import FlextLdapEntry
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 logger = get_logger(__name__)
 
@@ -49,7 +49,7 @@ def _safe_first_value(value: object) -> str | None:
     return None
 
 
-class LDAPAttribute(FlextDomainBaseModel):
+class LDAPAttribute(FlextValueObject):
     """Represents an LDAP attribute with its values."""
 
     name: str = Field(..., description="Attribute name")
@@ -90,7 +90,7 @@ class LDAPAttribute(FlextDomainBaseModel):
         return len(self.values) > 1
 
 
-class LDAPEntry(FlextDomainBaseModel):
+class LDAPEntry(FlextModel):
     """Represents an LDAP entry with comprehensive metadata."""
 
     dn: str = Field(..., description="Distinguished Name")
@@ -263,7 +263,7 @@ class LDAPGroup(LDAPEntry):
         )
 
 
-class LDAPSchema(FlextDomainBaseModel):
+class LDAPSchema(FlextModel):
     """Represents LDAP schema information."""
 
     object_classes: list[str] = Field(
@@ -307,7 +307,7 @@ class LDAPSchema(FlextDomainBaseModel):
 # CONNECTION AND EXECUTION MODELS
 
 
-class LDAPConnection(FlextDomainBaseModel):
+class LDAPConnection(FlextModel):
     """LDAP connection entity with comprehensive tracking."""
 
     id: str = Field(
@@ -367,7 +367,7 @@ class LDAPConnection(FlextDomainBaseModel):
         )
 
 
-class LDAPStream(FlextDomainBaseModel):
+class LDAPStream(FlextModel):
     """LDAP stream entity with comprehensive metadata."""
 
     id: str = Field(
@@ -433,7 +433,7 @@ class LDAPStream(FlextDomainBaseModel):
         )
 
 
-class TapExecution(FlextDomainBaseModel):
+class TapExecution(FlextModel):
     """Tap execution entity with comprehensive tracking."""
 
     id: str = Field(
@@ -555,7 +555,7 @@ class TapExecution(FlextDomainBaseModel):
         )
 
 
-class LDAPRecord(FlextDomainBaseModel):
+class LDAPRecord(FlextModel):
     """LDAP record entity with Singer protocol support."""
 
     id: str = Field(
@@ -607,7 +607,7 @@ class LDAPRecord(FlextDomainBaseModel):
 # DOMAIN EVENTS
 
 
-class TapExecutionStartedEvent(BaseModel):
+class TapExecutionStartedEvent(FlextModel):
     """Event raised when tap execution starts."""
 
     execution_id: UUID
@@ -616,7 +616,7 @@ class TapExecutionStartedEvent(BaseModel):
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
-class TapExecutionCompletedEvent(BaseModel):
+class TapExecutionCompletedEvent(FlextModel):
     """Event raised when tap execution completes."""
 
     execution_id: UUID
@@ -628,7 +628,7 @@ class TapExecutionCompletedEvent(BaseModel):
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
-class StreamDiscoveredEvent(BaseModel):
+class StreamDiscoveredEvent(FlextModel):
     """Event raised when stream is discovered."""
 
     stream_id: UUID
@@ -639,7 +639,7 @@ class StreamDiscoveredEvent(BaseModel):
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
-class RecordExtractedEvent(BaseModel):
+class RecordExtractedEvent(FlextModel):
     """Event raised when record is extracted."""
 
     record_id: UUID
@@ -650,7 +650,7 @@ class RecordExtractedEvent(BaseModel):
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
-class ConnectionTestedEvent(BaseModel):
+class ConnectionTestedEvent(FlextModel):
     """Event raised when connection is tested."""
 
     connection_id: UUID
