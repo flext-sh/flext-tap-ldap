@@ -650,7 +650,7 @@ class FlextTapLDAPPlugin:
 
             # Get streams from tap using Singer SDK interface
             streams = self._tap_instance.discover_streams()
-            return FlextResult.ok(streams)  # type: ignore[arg-type]
+            return FlextResult.ok(streams)
 
         except Exception as e:
             logger.exception("Stream discovery failed")
@@ -669,8 +669,8 @@ class FlextTapLDAPPlugin:
         catalog_data: dict[str, object] = {
             "streams": [
                 {
-                    "tap_stream_id": stream.tap_stream_id,  # type: ignore[attr-defined]
-                    "schema": stream.schema,  # type: ignore[attr-defined]
+                    "tap_stream_id": stream.tap_stream_id,
+                    "schema": stream.schema,
                     "metadata": getattr(stream, "metadata", {}),
                     "replication_method": getattr(
                         stream,
