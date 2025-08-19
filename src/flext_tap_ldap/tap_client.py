@@ -587,11 +587,11 @@ class FlextTapLDAPPlugin:
             self._tap_instance = FlextTapLDAP(config=self._config)
 
             logger.info("FLEXT Tap LDAP plugin initialized successfully")
-            return FlextResult.ok(None)
+            return FlextResult[None].ok(None)
 
         except Exception as e:
             logger.exception("Failed to initialize FLEXT Tap LDAP plugin")
-            return FlextResult.fail(f"Plugin initialization failed: {e}")
+            return FlextResult[None].fail(f"Plugin initialization failed: {e}")
 
     def shutdown(self) -> FlextResult[None]:
         """Shutdown the plugin."""
@@ -599,10 +599,10 @@ class FlextTapLDAPPlugin:
             if self._tap_instance:
                 self._tap_instance = None
                 logger.info("FLEXT Tap LDAP plugin shutdown successfully")
-            return FlextResult.ok(None)
+            return FlextResult[None].ok(None)
         except Exception as e:
             logger.exception("Failed to shutdown FLEXT Tap LDAP plugin")
-            return FlextResult.fail(f"Plugin shutdown failed: {e}")
+            return FlextResult[None].fail(f"Plugin shutdown failed: {e}")
 
     def execute(
         self,
@@ -613,7 +613,7 @@ class FlextTapLDAPPlugin:
         if not self._tap_instance:
             init_result = self.initialize()
             if not init_result.success:
-                return FlextResult.fail(
+                return FlextResult[None].fail(
                     f"Plugin initialization failed: {init_result.error}",
                 )
 
@@ -627,34 +627,34 @@ class FlextTapLDAPPlugin:
             }
 
             if operation not in operation_handlers:
-                return FlextResult.fail(f"Unknown operation: {operation}")
+                return FlextResult[None].fail(f"Unknown operation: {operation}")
 
             return operation_handlers[operation](parameters or {})
 
         except Exception as e:
             logger.exception(f"Plugin operation '{operation}' failed")
-            return FlextResult.fail(f"Operation {operation} failed: {e}")
+            return FlextResult[None].fail(f"Operation {operation} failed: {e}")
 
     def discover_streams(self) -> FlextResult[list[object]]:
         """Discover available streams."""
         if not self._tap_instance:
             init_result = self.initialize()
             if not init_result.success:
-                return FlextResult.fail(
+                return FlextResult[None].fail(
                     f"Plugin initialization failed: {init_result.error}",
                 )
 
         try:
             if self._tap_instance is None:
-                return FlextResult.fail("Tap instance not properly initialized")
+                return FlextResult[None].fail("Tap instance not properly initialized")
 
             # Get streams from tap using Singer SDK interface
             streams = self._tap_instance.discover_streams()
-            return FlextResult.ok(streams)
+            return FlextResult[None].ok(streams)
 
         except Exception as e:
             logger.exception("Stream discovery failed")
-            return FlextResult.fail(f"Stream discovery failed: {e}")
+            return FlextResult[None].fail(f"Stream discovery failed: {e}")
 
     def _execute_discover(
         self,
@@ -663,7 +663,7 @@ class FlextTapLDAPPlugin:
         """Execute discover operation through tap."""
         streams_result = self.discover_streams()
         if not streams_result.success:
-            return FlextResult.fail(streams_result.error or "Discovery failed")
+            return FlextResult[None].fail(streams_result.error or "Discovery failed")
 
         streams = streams_result.data or []
         catalog_data: dict[str, object] = {
@@ -684,7 +684,7 @@ class FlextTapLDAPPlugin:
             "plugin_version": self.version,
         }
 
-        return FlextResult.ok(catalog_data)
+        return FlextResult[None].ok(catalog_data)
 
     def _execute_sync(
         self,
@@ -693,7 +693,7 @@ class FlextTapLDAPPlugin:
         """Execute sync operation through tap."""
         # This would need to integrate with Singer protocol for actual sync
         # For now, return placeholder indicating sync capability
-        return FlextResult.ok(
+        return FlextResult[None].ok(
             {
                 "operation": "sync",
                 "status": "completed",
@@ -710,11 +710,11 @@ class FlextTapLDAPPlugin:
         """Execute test operation through tap."""
         try:
             if not self._tap_instance:
-                return FlextResult.fail("Tap instance not initialized")
+                return FlextResult[None].fail("Tap instance not initialized")
 
             # Test configuration (Pydantic validation already occurred during creation)
             # Connection test could be added here in the future
-            return FlextResult.ok(
+            return FlextResult[None].ok(
                 {
                     "operation": "test",
                     "status": "passed",
@@ -724,7 +724,7 @@ class FlextTapLDAPPlugin:
             )
 
         except Exception as e:
-            return FlextResult.fail(f"Test operation failed: {e}")
+            return FlextResult[None].fail(f"Test operation failed: {e}")
 
     def _execute_catalog(
         self,
@@ -750,10 +750,10 @@ def create_ldap_tap_plugin(
     try:
         plugin = FlextTapLDAPPlugin(config)
         logger.info("LDAP tap plugin created successfully")
-        return FlextResult.ok(plugin)
+        return FlextResult[None].ok(plugin)
     except Exception as e:
         logger.exception("Failed to create LDAP tap plugin")
-        return FlextResult.fail(f"Plugin creation failed: {e}")
+        return FlextResult[None].fail(f"Plugin creation failed: {e}")
 
 
 def main() -> None:

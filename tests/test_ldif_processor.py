@@ -287,7 +287,7 @@ mail: john.doe@example.com
         sample_ldif_content: str,
     ) -> None:
         """Test parsing LDIF content."""
-        result = FlextResult.ok(list(processor.parse_content(sample_ldif_content)))
+        result = FlextResult[None].ok(list(processor.parse_content(sample_ldif_content)))
 
         assert result.success
         entries = result.data
@@ -308,7 +308,7 @@ mail: john.doe@example.com
         ldif_file = tmp_path / "test.ldif"
         ldif_file.write_text(sample_ldif_content)
 
-        result = FlextResult.ok(list(processor.parse_file(ldif_file)))
+        result = FlextResult[None].ok(list(processor.parse_file(ldif_file)))
 
         assert result.success
         entries = result.data
@@ -319,9 +319,9 @@ mail: john.doe@example.com
         invalid_content = "this is not valid ldif content"
 
         try:
-            result = FlextResult.ok(list(processor.parse_content(invalid_content)))
+            result = FlextResult[None].ok(list(processor.parse_content(invalid_content)))
         except Exception as e:
-            result = FlextResult.failure(str(e))
+            result = FlextResult[None].fail(str(e))
 
         # Depending on implementation, this might succeed with warnings
         # or fail - adjust based on actual behavior
@@ -337,11 +337,11 @@ invalidAttribute:
 """
 
         try:
-            result = FlextResult.ok(
+            result = FlextResult[None].ok(
                 list(processor.parse_content(content_with_errors)),
             )
         except Exception as e:
-            result = FlextResult.failure(str(e))
+            result = FlextResult[None].fail(str(e))
 
         # Should handle errors gracefully
         assert isinstance(result, FlextResult)
@@ -464,7 +464,7 @@ mail: user1@test.com
         ldif_file.write_text(ldif_content)
 
         processor = FlextLDIFProcessor()
-        result = FlextResult.ok(list(processor.parse_file(ldif_file)))
+        result = FlextResult[None].ok(list(processor.parse_file(ldif_file)))
 
         assert result.success
         entries = result.data
@@ -494,7 +494,7 @@ sn: User {i}
         # Process all files
         results = []
         for ldif_file in tmp_path.glob("batch_*.ldif"):
-            result = FlextResult.ok(list(processor.parse_file(ldif_file)))
+            result = FlextResult[None].ok(list(processor.parse_file(ldif_file)))
             results.append(result)
 
         assert len(results) == 3
@@ -576,7 +576,7 @@ cn: another
 """
 
         try:
-            result = FlextResult.ok(list(processor.parse_content(problematic_content)))
+            result = FlextResult[None].ok(list(processor.parse_content(problematic_content)))
             if result.success:
                 entries = result.data
                 # Should still process valid entries
@@ -593,7 +593,7 @@ cn: another
         # Create content with many errors
         error_content = "\n".join([f"invalid_line_{i}" for i in range(10)])
 
-        result = FlextResult.ok(list(processor.parse_content(error_content)))
+        result = FlextResult[None].ok(list(processor.parse_content(error_content)))
         # Should handle gracefully due to error limits
         assert isinstance(result, FlextResult)
 
@@ -604,7 +604,7 @@ cn: another
         invalid_content = "clearly invalid ldif content"
 
         try:
-            result = FlextResult.ok(list(processor.parse_content(invalid_content)))
+            result = FlextResult[None].ok(list(processor.parse_content(invalid_content)))
             # Should either succeed or fail, but handle gracefully
             assert isinstance(result, FlextResult)
         except Exception as exc:

@@ -26,14 +26,14 @@ class LDAPConnection(FlextEntity):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate LDAP connection business rules."""
         if not self.host:
-            return FlextResult.fail("Host is required")
+            return FlextResult[None].fail("Host is required")
         if self.port <= 0 or self.port > MAX_PORT:
-            return FlextResult.fail(f"Port must be between 1 and {MAX_PORT}")
+            return FlextResult[None].fail(f"Port must be between 1 and {MAX_PORT}")
         if self.timeout <= 0:
-            return FlextResult.fail("Timeout must be positive")
+            return FlextResult[None].fail("Timeout must be positive")
         if self.pool_size <= 0:
-            return FlextResult.fail("Pool size must be positive")
-        return FlextResult.ok(None)
+            return FlextResult[None].fail("Pool size must be positive")
+        return FlextResult[None].ok(None)
 
     id: FlextEntityId = Field(default_factory=lambda: FlextEntityId(str(uuid4())))
     host: str
@@ -54,16 +54,16 @@ class LDAPStream(FlextEntity):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate LDAP stream business rules."""
         if not self.stream_type:
-            return FlextResult.fail("Stream type is required")
+            return FlextResult[None].fail("Stream type is required")
         if not self.search_filter:
-            return FlextResult.fail("Search filter is required")
+            return FlextResult[None].fail("Search filter is required")
         if not self.tap_stream_id:
-            return FlextResult.fail("Tap stream ID is required")
+            return FlextResult[None].fail("Tap stream ID is required")
         if self.replication_method not in {"FULL_TABLE", "INCREMENTAL"}:
-            return FlextResult.fail(
+            return FlextResult[None].fail(
                 "Replication method must be FULL_TABLE or INCREMENTAL",
             )
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     id: FlextEntityId = Field(default_factory=lambda: FlextEntityId(str(uuid4())))
     connection_id: UUID
@@ -81,17 +81,17 @@ class LDAPStream(FlextEntity):
     def update_schema(self, schema: dict[str, object]) -> FlextResult[None]:
         """Update stream schema with validation."""
         if not isinstance(schema, dict):
-            return FlextResult.fail("Schema must be a dictionary")
+            return FlextResult[None].fail("Schema must be a dictionary")
         self.stream_schema = schema
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     def record_extraction(self, record_count: int) -> FlextResult[None]:
         """Record extraction statistics with validation."""
         if record_count < 0:
-            return FlextResult.fail("Record count cannot be negative")
+            return FlextResult[None].fail("Record count cannot be negative")
         self.records_extracted += record_count
         self.last_extraction = datetime.now(UTC)
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
 
 class TapExecution(FlextEntity):
@@ -100,7 +100,7 @@ class TapExecution(FlextEntity):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate tap execution business rules."""
         if not self.command:
-            return FlextResult.fail("Command is required")
+            return FlextResult[None].fail("Command is required")
         valid_statuses = {
             "created",
             "discovering",
@@ -110,12 +110,12 @@ class TapExecution(FlextEntity):
             "cancelled",
         }
         if self.tap_status not in valid_statuses:
-            return FlextResult.fail(f"Invalid tap status: {self.tap_status}")
+            return FlextResult[None].fail(f"Invalid tap status: {self.tap_status}")
         if self.records_extracted < 0:
-            return FlextResult.fail("Records extracted cannot be negative")
+            return FlextResult[None].fail("Records extracted cannot be negative")
         if self.streams_processed < 0:
-            return FlextResult.fail("Streams processed cannot be negative")
-        return FlextResult.ok(None)
+            return FlextResult[None].fail("Streams processed cannot be negative")
+        return FlextResult[None].ok(None)
 
     id: FlextEntityId = Field(default_factory=lambda: FlextEntityId(str(uuid4())))
     connection_id: UUID
@@ -151,21 +151,21 @@ class TapExecution(FlextEntity):
     def start_execution(self) -> FlextResult[None]:
         """Start tap execution with validation."""
         if self.tap_status != "created":
-            return FlextResult.fail(
+            return FlextResult[None].fail(
                 f"Cannot start execution from status: {self.tap_status}",
             )
         self.tap_status = "discovering"
         self.started_at = datetime.now(UTC)
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     def start_extraction(self) -> FlextResult[None]:
         """Start extraction phase with validation."""
         if self.tap_status != "discovering":
-            return FlextResult.fail(
+            return FlextResult[None].fail(
                 f"Cannot start extraction from status: {self.tap_status}",
             )
         self.tap_status = "extracting"
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     def complete_execution(
         self,
@@ -175,7 +175,7 @@ class TapExecution(FlextEntity):
     ) -> FlextResult[None]:
         """Complete tap execution with validation."""
         if self.tap_status not in {"discovering", "extracting"}:
-            return FlextResult.fail(
+            return FlextResult[None].fail(
                 f"Cannot complete execution from status: {self.tap_status}",
             )
 
@@ -189,12 +189,12 @@ class TapExecution(FlextEntity):
             duration = self.completed_at - self.started_at
             self.duration_seconds = duration.total_seconds()
 
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     def cancel_execution(self) -> FlextResult[None]:
         """Cancel tap execution with validation."""
         if self.tap_status in {"completed", "failed", "cancelled"}:
-            return FlextResult.fail(
+            return FlextResult[None].fail(
                 f"Cannot cancel execution with status: {self.tap_status}",
             )
 
@@ -205,7 +205,7 @@ class TapExecution(FlextEntity):
             duration = self.completed_at - self.started_at
             self.duration_seconds = duration.total_seconds()
 
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     def update_metrics(
         self,
@@ -214,13 +214,13 @@ class TapExecution(FlextEntity):
     ) -> FlextResult[None]:
         """Update execution metrics with validation."""
         if records_extracted < 0:
-            return FlextResult.fail("Records extracted cannot be negative")
+            return FlextResult[None].fail("Records extracted cannot be negative")
         if streams_processed < 0:
-            return FlextResult.fail("Streams processed cannot be negative")
+            return FlextResult[None].fail("Streams processed cannot be negative")
 
         self.records_extracted = records_extracted
         self.streams_processed = streams_processed
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
 
 class LDAPRecord(FlextEntity):
@@ -229,12 +229,12 @@ class LDAPRecord(FlextEntity):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate LDAP record business rules."""
         if not self.dn:
-            return FlextResult.fail("Distinguished Name (DN) is required")
+            return FlextResult[None].fail("Distinguished Name (DN) is required")
         if not self.object_class:
-            return FlextResult.fail("Object class is required")
+            return FlextResult[None].fail("Object class is required")
         if not isinstance(self.attributes, dict):
-            return FlextResult.fail("Attributes must be a dictionary")
-        return FlextResult.ok(None)
+            return FlextResult[None].fail("Attributes must be a dictionary")
+        return FlextResult[None].ok(None)
 
     id: FlextEntityId = Field(default_factory=lambda: FlextEntityId(str(uuid4())))
     stream_id: UUID
@@ -254,7 +254,7 @@ class LDAPRecord(FlextEntity):
         """Convert to Singer record format with validation."""
         validation_result = self.validate_business_rules()
         if not validation_result.success:
-            return FlextResult.fail(f"Invalid LDAP record: {validation_result.error}")
+            return FlextResult[None].fail(f"Invalid LDAP record: {validation_result.error}")
 
         record = {
             "type": "RECORD",
@@ -265,7 +265,7 @@ class LDAPRecord(FlextEntity):
             },
             "time_extracted": self.extracted_at.isoformat(),
         }
-        return FlextResult.ok(record)
+        return FlextResult[None].ok(record)
 
 
 # Domain Events using flext-core FlextModel pattern
@@ -275,8 +275,8 @@ class TapExecutionStartedEvent(FlextModel):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate event data."""
         if not self.command:
-            return FlextResult.fail("Command is required for execution started event")
-        return FlextResult.ok(None)
+            return FlextResult[None].fail("Command is required for execution started event")
+        return FlextResult[None].ok(None)
 
     execution_id: UUID
     connection_id: UUID
@@ -288,7 +288,7 @@ class TapExecutionCompletedEvent(FlextModel):
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate event data."""
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     execution_id: UUID
     connection_id: UUID | None = None
@@ -300,10 +300,10 @@ class StreamDiscoveredEvent(FlextModel):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate event data."""
         if not self.stream_name:
-            return FlextResult.fail("Stream name is required")
+            return FlextResult[None].fail("Stream name is required")
         if not self.stream_type:
-            return FlextResult.fail("Stream type is required")
-        return FlextResult.ok(None)
+            return FlextResult[None].fail("Stream type is required")
+        return FlextResult[None].ok(None)
 
     stream_id: UUID
     connection_id: UUID
@@ -318,10 +318,10 @@ class RecordExtractedEvent(FlextModel):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate event data."""
         if not self.dn:
-            return FlextResult.fail("DN is required for record extracted event")
+            return FlextResult[None].fail("DN is required for record extracted event")
         if self.attributes_count < 0:
-            return FlextResult.fail("Attributes count cannot be negative")
-        return FlextResult.ok(None)
+            return FlextResult[None].fail("Attributes count cannot be negative")
+        return FlextResult[None].ok(None)
 
     record_id: UUID
     stream_id: UUID
@@ -335,7 +335,7 @@ class ConnectionTestedEvent(FlextModel):
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate event data."""
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     connection_id: UUID
     connection_name: str | None = None

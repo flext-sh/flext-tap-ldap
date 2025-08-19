@@ -71,7 +71,7 @@ class LDAPAttribute(FlextDomainBaseModel):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for LDAP attributes."""
         # LDAP attributes can have any name and values
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     @property
     def single_value(self) -> str | None:
@@ -103,9 +103,9 @@ class LDAPEntry(FlextDomainBaseModel):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for LDAP entries."""
         if not self.dn:
-            return FlextResult.fail("DN cannot be empty")
+            return FlextResult[None].fail("DN cannot be empty")
         # Additional LDAP entry validation can be added here
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     attributes: dict[str, object] = Field(
         default_factory=dict,
@@ -315,7 +315,7 @@ class LDAPSchema(FlextDomainBaseModel):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for LDAP schema."""
         # Schema validation rules can be added here
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     @property
     def has_oracle_extensions(self) -> bool:

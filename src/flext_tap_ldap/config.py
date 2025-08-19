@@ -23,14 +23,14 @@ class LDAPConnectionConfig(FlextModel):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate LDAP connection configuration."""
         if not self.host:
-            return FlextResult.fail("Host is required")
+            return FlextResult[None].fail("Host is required")
         if self.port <= 0 or self.port > MAX_PORT:
-            return FlextResult.fail(f"Port must be between 1 and {MAX_PORT}")
+            return FlextResult[None].fail(f"Port must be between 1 and {MAX_PORT}")
         if self.timeout <= 0:
-            return FlextResult.fail("Timeout must be positive")
+            return FlextResult[None].fail("Timeout must be positive")
         if self.page_size <= 0:
-            return FlextResult.fail("Page size must be positive")
-        return FlextResult.ok(None)
+            return FlextResult[None].fail("Page size must be positive")
+        return FlextResult[None].ok(None)
 
     host: str = Field(description="LDAP server host")
     port: int = Field(default=389, description="LDAP server port")
@@ -50,10 +50,10 @@ class CustomStreamConfig(FlextModel):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate custom stream configuration."""
         if not self.name:
-            return FlextResult.fail("Stream name is required")
+            return FlextResult[None].fail("Stream name is required")
         if not self.search_filter:
-            return FlextResult.fail("Search filter is required")
-        return FlextResult.ok(None)
+            return FlextResult[None].fail("Search filter is required")
+        return FlextResult[None].ok(None)
 
     name: str = Field(..., description="Stream name")
     search_filter: str = Field(..., description="LDAP search filter")
@@ -77,10 +77,10 @@ class LDIFProcessingConfig(FlextModel):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate LDIF processing configuration."""
         if self.ldif_max_errors <= 0:
-            return FlextResult.fail("LDIF max errors must be positive")
+            return FlextResult[None].fail("LDIF max errors must be positive")
         if self.ldif_files and self.ldif_directory:
-            return FlextResult.fail("Cannot specify both ldif_files and ldif_directory")
-        return FlextResult.ok(None)
+            return FlextResult[None].fail("Cannot specify both ldif_files and ldif_directory")
+        return FlextResult[None].ok(None)
 
     ldif_files: list[str] | None = Field(
         default=None,

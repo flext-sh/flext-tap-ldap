@@ -38,9 +38,9 @@ class CustomStreamConfig(BaseModel):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for custom streams."""
         if not self.name or not self.search_filter:
-            return FlextResult.fail("Custom stream requires name and search_filter")
+            return FlextResult[None].fail("Custom stream requires name and search_filter")
 
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
 
 class LDIFProcessingConfig(BaseModel):
@@ -95,14 +95,14 @@ class LDIFProcessingConfig(BaseModel):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for LDIF processing."""
         if self.ldif_files and self.ldif_directory:
-            return FlextResult.fail("Cannot specify both ldif_files and ldif_directory")
+            return FlextResult[None].fail("Cannot specify both ldif_files and ldif_directory")
 
         if self.enable_ldif_streams and not (self.ldif_files or self.ldif_directory):
-            return FlextResult.fail(
+            return FlextResult[None].fail(
                 "LDIF streams enabled but no files or directory specified",
             )
 
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
 
 class TapLDAPConfig(BaseSettings):
@@ -231,7 +231,7 @@ class TapLDAPConfig(BaseSettings):
             # Validate LDIF processing config
             ldif_validation = self.ldif_processing.validate_business_rules()
             if not ldif_validation.success:
-                return FlextResult.fail(
+                return FlextResult[None].fail(
                     f"LDIF config invalid: {ldif_validation.error or 'Unknown error'}",
                 )
 
@@ -267,12 +267,12 @@ class TapLDAPConfig(BaseSettings):
                             f"Custom stream '{name}' invalid: "
                             f"{stream_validation.error or 'Unknown error'}"
                         )
-                        return FlextResult.fail(msg)
+                        return FlextResult[None].fail(msg)
 
-            return FlextResult.ok(None)
+            return FlextResult[None].ok(None)
 
         except Exception as e:
-            return FlextResult.fail(f"Configuration validation failed: {e}")
+            return FlextResult[None].fail(f"Configuration validation failed: {e}")
 
     @classmethod
     def create_with_defaults(cls, **overrides: object) -> TapLDAPConfig:
