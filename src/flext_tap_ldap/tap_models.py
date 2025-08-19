@@ -62,12 +62,12 @@ class LDAPAttribute(FlextValueObject):
     def validate_domain_rules(self) -> FlextResult[None]:
         """Validate domain-specific rules for LDAP attributes."""
         # LDAP attributes can have any name and values
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for LDAP attributes."""
         # Business validation for LDAP attributes
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     @property
     def single_value(self) -> str | None:
@@ -116,13 +116,13 @@ class LDAPEntry(FlextModel):
     def validate_domain_rules(self) -> FlextResult[None]:
         """Validate domain-specific rules for LDAP entries."""
         if not self.dn:
-            return FlextResult.fail("DN cannot be empty")
+            return FlextResult[None].fail("DN cannot be empty")
         # Additional LDAP entry validation can be added here
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for LDAP entries."""
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     @property
     def rdn(self) -> str:
@@ -283,11 +283,11 @@ class LDAPSchema(FlextModel):
     def validate_domain_rules(self) -> FlextResult[None]:
         """Validate domain-specific rules for LDAP schema."""
         # Schema validation rules can be added here
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for LDAP schema."""
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     @property
     def has_oracle_extensions(self) -> bool:
@@ -330,15 +330,15 @@ class LDAPConnection(FlextModel):
     def validate_domain_rules(self) -> FlextResult[None]:
         """Validate domain-specific rules for LDAP connections."""
         if not self.host:
-            return FlextResult.fail("Host is required")
+            return FlextResult[None].fail("Host is required")
         max_port_number = 65535
         if self.port < 1 or self.port > max_port_number:
-            return FlextResult.fail(f"Port must be between 1 and {max_port_number}")
-        return FlextResult.ok(None)
+            return FlextResult[None].fail(f"Port must be between 1 and {max_port_number}")
+        return FlextResult[None].ok(None)
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for LDAP connections."""
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     @property
     def connection_string(self) -> str:
@@ -404,14 +404,14 @@ class LDAPStream(FlextModel):
     def validate_domain_rules(self) -> FlextResult[None]:
         """Validate domain-specific rules for LDAP streams."""
         if not self.tap_stream_id:
-            return FlextResult.fail("Tap stream ID is required")
+            return FlextResult[None].fail("Tap stream ID is required")
         if not self.search_filter:
-            return FlextResult.fail("Search filter is required")
-        return FlextResult.ok(None)
+            return FlextResult[None].fail("Search filter is required")
+        return FlextResult[None].ok(None)
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for LDAP streams."""
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     def update_schema(self, schema: dict[str, object]) -> LDAPStream:
         """Update stream schema."""
@@ -465,12 +465,12 @@ class TapExecution(FlextModel):
     def validate_domain_rules(self) -> FlextResult[None]:
         """Validate domain-specific rules for tap executions."""
         if not self.command:
-            return FlextResult.fail("Command is required")
-        return FlextResult.ok(None)
+            return FlextResult[None].fail("Command is required")
+        return FlextResult[None].ok(None)
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for tap executions."""
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     @property
     def is_completed(self) -> bool:
@@ -579,12 +579,12 @@ class LDAPRecord(FlextModel):
     def validate_domain_rules(self) -> FlextResult[None]:
         """Validate domain-specific rules for LDAP records."""
         if not self.dn:
-            return FlextResult.fail("DN is required")
-        return FlextResult.ok(None)
+            return FlextResult[None].fail("DN is required")
+        return FlextResult[None].ok(None)
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for LDAP records."""
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     @property
     def rdn(self) -> str:

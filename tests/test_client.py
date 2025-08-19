@@ -85,7 +85,7 @@ class TestLDAPClient:
                     "mail": ["john.doe@example.com"],
                 },
             }
-            mock_search.return_value = FlextResult.ok([mock_entry])
+            mock_search.return_value = FlextResult[None].ok([mock_entry])
 
             # Perform search using synchronous method
             results = client.search(
