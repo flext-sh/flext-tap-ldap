@@ -147,7 +147,9 @@ class LDAPConnectionService:
             connection = self._connections.get(connection_id)
             if connection:
                 connection.last_error = str(e)
-            return FlextResult[dict[str, object]].fail(f"Failed to test connection: {e}")
+            return FlextResult[dict[str, object]].fail(
+                f"Failed to test connection: {e}"
+            )
 
     async def get_connection(
         self,
