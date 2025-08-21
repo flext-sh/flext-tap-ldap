@@ -287,7 +287,9 @@ mail: john.doe@example.com
         sample_ldif_content: str,
     ) -> None:
         """Test parsing LDIF content."""
-        result = FlextResult[None].ok(list(processor.parse_content(sample_ldif_content)))
+        result = FlextResult[None].ok(
+            list(processor.parse_content(sample_ldif_content))
+        )
 
         assert result.success
         entries = result.data
@@ -319,7 +321,9 @@ mail: john.doe@example.com
         invalid_content = "this is not valid ldif content"
 
         try:
-            result = FlextResult[None].ok(list(processor.parse_content(invalid_content)))
+            result = FlextResult[None].ok(
+                list(processor.parse_content(invalid_content))
+            )
         except Exception as e:
             result = FlextResult[None].fail(str(e))
 
@@ -576,7 +580,9 @@ cn: another
 """
 
         try:
-            result = FlextResult[None].ok(list(processor.parse_content(problematic_content)))
+            result = FlextResult[None].ok(
+                list(processor.parse_content(problematic_content))
+            )
             if result.success:
                 entries = result.data
                 # Should still process valid entries
@@ -604,7 +610,9 @@ cn: another
         invalid_content = "clearly invalid ldif content"
 
         try:
-            result = FlextResult[None].ok(list(processor.parse_content(invalid_content)))
+            result = FlextResult[None].ok(
+                list(processor.parse_content(invalid_content))
+            )
             # Should either succeed or fail, but handle gracefully
             assert isinstance(result, FlextResult)
         except Exception as exc:

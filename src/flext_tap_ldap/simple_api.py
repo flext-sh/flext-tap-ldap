@@ -159,7 +159,9 @@ class LDIFConfigBuilder:
                 ),
             )
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[None].fail(f"Failed to build LDIF processing config: {e}")
+            return FlextResult[None].fail(
+                f"Failed to build LDIF processing config: {e}"
+            )
 
 
 def setup_ldap_tap(config: TapLDAPConfig | None = None) -> FlextResult[TapLDAPConfig]:
@@ -236,7 +238,9 @@ def create_ldap_connection_config_convenience(
         )
         return create_ldap_connection_config(params)
     except Exception as e:
-        return FlextResult[None].fail(f"Failed to create convenience connection config: {e}")
+        return FlextResult[None].fail(
+            f"Failed to create convenience connection config: {e}"
+        )
 
 
 def create_ldif_processing_config(
@@ -345,7 +349,9 @@ def validate_ldap_config(config: TapLDAPConfig) -> FlextResult[bool]:
 
         # Additional business rule validations
         if config.connection.port <= 0 or config.connection.port > max_port_number:
-            return FlextResult[None].fail(f"Port must be between 1 and {max_port_number}")
+            return FlextResult[None].fail(
+                f"Port must be between 1 and {max_port_number}"
+            )
 
         if not config.connection.base_dn:
             return FlextResult[None].fail("Base DN is required")

@@ -38,7 +38,9 @@ class CustomStreamConfig(BaseModel):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for custom streams."""
         if not self.name or not self.search_filter:
-            return FlextResult[None].fail("Custom stream requires name and search_filter")
+            return FlextResult[None].fail(
+                "Custom stream requires name and search_filter"
+            )
 
         return FlextResult[None].ok(None)
 
@@ -95,7 +97,9 @@ class LDIFProcessingConfig(BaseModel):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for LDIF processing."""
         if self.ldif_files and self.ldif_directory:
-            return FlextResult[None].fail("Cannot specify both ldif_files and ldif_directory")
+            return FlextResult[None].fail(
+                "Cannot specify both ldif_files and ldif_directory"
+            )
 
         if self.enable_ldif_streams and not (self.ldif_files or self.ldif_directory):
             return FlextResult[None].fail(
