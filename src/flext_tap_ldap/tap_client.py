@@ -198,10 +198,10 @@ class LDAPClient:
     ) -> list[dict[str, object]]:
         """Process LDAP search results with size limiting."""
         entries: list[dict[str, object]] = []
-        if not (result.success and result.data):
+        if not (result.is_success and result.value):
             return entries
 
-        for entries_returned, entry_data in enumerate(result.data):
+        for entries_returned, entry_data in enumerate(result.value):
             if size_limit > 0 and entries_returned >= size_limit:
                 break
 
@@ -222,13 +222,26 @@ class LDAPClient:
         server_uri = self._build_server_uri()
 
         try:
+            # Ensure bind credentials are available
+            if self._bind_dn is None:
+                logger.warning("LDAP bind DN is None, using empty string for anonymous bind")
+                bind_dn = ""
+            else:
+                bind_dn = self._bind_dn
+                
+            if self._password is None:
+                logger.warning("LDAP bind password is None, using empty string for anonymous bind")
+                bind_password = ""  
+            else:
+                bind_password = self._password
+                
             async with self._flext_api.connection(
                 server_uri,
-                self._bind_dn,
-                self._password,
+                bind_dn,
+                bind_password,
             ) as session:
+                # Use the context manager - search operations happen within the connection
                 result = await self._flext_api.search(
-                    session_id=session,
                     base_dn=base_dn,
                     search_filter=search_filter,
                     scope=ldap_scope,
@@ -300,19 +313,30 @@ class LDAPClient:
             async def _test_async() -> bool:
                 try:
                     server_uri = f"{'ldaps' if self.use_ssl else 'ldap'}://{self.host}:{self.port}"
+                    
+                    # Ensure bind credentials are available for connection test
+                    if self._bind_dn is None:
+                        bind_dn = ""
+                    else:
+                        bind_dn = self._bind_dn
+                        
+                    if self._password is None:
+                        bind_password = ""
+                    else:
+                        bind_password = self._password
+                        
                     async with self._flext_api.connection(
                         server_uri,
-                        self._bind_dn,
-                        self._password,
+                        bind_dn,
+                        bind_password,
                     ) as session:
                         # Try a simple search to test connection
                         result = await self._flext_api.search(
-                            session_id=session,
                             base_dn="",
                             search_filter="(objectClass=*)",
-                            scope="BASE",
+                            scope="base",
                         )
-                        return result.success
+                        return result.is_success
                 except (RuntimeError, ValueError, TypeError) as e:
                     async_logger = get_logger(__name__)
                     # EXPLICIT TRANSPARENCY: Documented fallback behavior for Singer stream testing convenience
@@ -612,8 +636,8 @@ class FlextTapLDAPPlugin:
         """Execute plugin operations via tap instance."""
         if not self._tap_instance:
             init_result = self.initialize()
-            if not init_result.success:
-                return FlextResult[None].fail(
+            if not init_result.is_success:
+                return FlextResult[dict[str, object]].fail(
                     f"Plugin initialization failed: {init_result.error}",
                 )
 
@@ -627,34 +651,36 @@ class FlextTapLDAPPlugin:
             }
 
             if operation not in operation_handlers:
-                return FlextResult[None].fail(f"Unknown operation: {operation}")
+                return FlextResult[dict[str, object]].fail(f"Unknown operation: {operation}")
 
             return operation_handlers[operation](parameters or {})
 
         except Exception as e:
             logger.exception(f"Plugin operation '{operation}' failed")
-            return FlextResult[None].fail(f"Operation {operation} failed: {e}")
+            return FlextResult[dict[str, object]].fail(f"Operation {operation} failed: {e}")
 
     def discover_streams(self) -> FlextResult[list[object]]:
         """Discover available streams."""
         if not self._tap_instance:
             init_result = self.initialize()
-            if not init_result.success:
-                return FlextResult[None].fail(
+            if not init_result.is_success:
+                return FlextResult[list[object]].fail(
                     f"Plugin initialization failed: {init_result.error}",
                 )
 
         try:
             if self._tap_instance is None:
-                return FlextResult[None].fail("Tap instance not properly initialized")
+                return FlextResult[list[object]].fail("Tap instance not properly initialized")
 
             # Get streams from tap using Singer SDK interface
             streams = self._tap_instance.discover_streams()
-            return FlextResult[None].ok(streams)
+            # Cast to list[object] for type compatibility
+            stream_objects: list[object] = list(streams)
+            return FlextResult[list[object]].ok(stream_objects)
 
         except Exception as e:
             logger.exception("Stream discovery failed")
-            return FlextResult[None].fail(f"Stream discovery failed: {e}")
+            return FlextResult[list[object]].fail(f"Stream discovery failed: {e}")
 
     def _execute_discover(
         self,
@@ -662,15 +688,15 @@ class FlextTapLDAPPlugin:
     ) -> FlextResult[dict[str, object]]:
         """Execute discover operation through tap."""
         streams_result = self.discover_streams()
-        if not streams_result.success:
-            return FlextResult[None].fail(streams_result.error or "Discovery failed")
+        if not streams_result.is_success:
+            return FlextResult[dict[str, object]].fail(streams_result.error or "Discovery failed")
 
-        streams = streams_result.data or []
+        streams = streams_result.value or []
         catalog_data: dict[str, object] = {
             "streams": [
                 {
-                    "tap_stream_id": stream.tap_stream_id,
-                    "schema": stream.schema,
+                    "tap_stream_id": getattr(stream, "tap_stream_id", ""),
+                    "schema": getattr(stream, "schema", {}),
                     "metadata": getattr(stream, "metadata", {}),
                     "replication_method": getattr(
                         stream,
@@ -684,7 +710,7 @@ class FlextTapLDAPPlugin:
             "plugin_version": self.version,
         }
 
-        return FlextResult[None].ok(catalog_data)
+        return FlextResult[dict[str, object]].ok(catalog_data)
 
     def _execute_sync(
         self,
@@ -693,7 +719,7 @@ class FlextTapLDAPPlugin:
         """Execute sync operation through tap."""
         # This would need to integrate with Singer protocol for actual sync
         # For now, return placeholder indicating sync capability
-        return FlextResult[None].ok(
+        return FlextResult[dict[str, object]].ok(
             {
                 "operation": "sync",
                 "status": "completed",
@@ -710,11 +736,11 @@ class FlextTapLDAPPlugin:
         """Execute test operation through tap."""
         try:
             if not self._tap_instance:
-                return FlextResult[None].fail("Tap instance not initialized")
+                return FlextResult[dict[str, object]].fail("Tap instance not initialized")
 
             # Test configuration (Pydantic validation already occurred during creation)
             # Connection test could be added here in the future
-            return FlextResult[None].ok(
+            return FlextResult[dict[str, object]].ok(
                 {
                     "operation": "test",
                     "status": "passed",
@@ -724,7 +750,7 @@ class FlextTapLDAPPlugin:
             )
 
         except Exception as e:
-            return FlextResult[None].fail(f"Test operation failed: {e}")
+            return FlextResult[dict[str, object]].fail(f"Test operation failed: {e}")
 
     def _execute_catalog(
         self,
@@ -750,10 +776,10 @@ def create_ldap_tap_plugin(
     try:
         plugin = FlextTapLDAPPlugin(config)
         logger.info("LDAP tap plugin created successfully")
-        return FlextResult[None].ok(plugin)
+        return FlextResult[FlextTapLDAPPlugin].ok(plugin)
     except Exception as e:
         logger.exception("Failed to create LDAP tap plugin")
-        return FlextResult[None].fail(f"Plugin creation failed: {e}")
+        return FlextResult[FlextTapLDAPPlugin].fail(f"Plugin creation failed: {e}")
 
 
 def main() -> None:

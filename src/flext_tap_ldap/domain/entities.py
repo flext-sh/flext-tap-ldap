@@ -254,7 +254,7 @@ class LDAPRecord(FlextEntity):
         """Convert to Singer record format with validation."""
         validation_result = self.validate_business_rules()
         if not validation_result.success:
-            return FlextResult[None].fail(
+            return FlextResult[dict[str, object]].fail(
                 f"Invalid LDAP record: {validation_result.error}"
             )
 
@@ -267,7 +267,7 @@ class LDAPRecord(FlextEntity):
             },
             "time_extracted": self.extracted_at.isoformat(),
         }
-        return FlextResult[None].ok(record)
+        return FlextResult[dict[str, object]].ok(record)
 
 
 # Domain Events using flext-core FlextModel pattern

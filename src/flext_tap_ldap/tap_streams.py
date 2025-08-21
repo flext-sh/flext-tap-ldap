@@ -21,7 +21,7 @@ from flext_ldif import FlextLdifAPI, FlextLdifEntry
 from flext_meltano import Stream, singer_typing as th
 
 from flext_tap_ldap.client import LDAPClient
-from flext_tap_ldap.tap import FlextTapLDAP
+from flext_tap_ldap.tap_client import FlextTapLDAP
 
 logger = get_logger(__name__)
 
