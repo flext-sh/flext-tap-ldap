@@ -125,9 +125,9 @@ class LDAPConnectionService:
             )
 
             self._connections[connection.id] = connection
-            return FlextResult[None].ok(connection)
+            return FlextResult[LDAPConnection].ok(connection)
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[None].fail(f"Failed to create connection: {e}")
+            return FlextResult[LDAPConnection].fail(f"Failed to create connection: {e}")
 
     async def test_connection(
         self,
@@ -137,17 +137,17 @@ class LDAPConnectionService:
         try:
             connection = self._connections.get(connection_id)
             if not connection:
-                return FlextResult[None].fail("Connection not found")
+                return FlextResult[dict[str, object]].fail("Connection not found")
 
             # Here you would actually test the LDAP connection
             # For now, we just mark it as tested
             connection.last_tested = datetime.now(UTC)
-            return FlextResult[None].ok({"success": True})
+            return FlextResult[dict[str, object]].ok({"success": True})
         except (RuntimeError, ValueError, TypeError) as e:
             connection = self._connections.get(connection_id)
             if connection:
                 connection.last_error = str(e)
-            return FlextResult[None].fail(f"Failed to test connection: {e}")
+            return FlextResult[dict[str, object]].fail(f"Failed to test connection: {e}")
 
     async def get_connection(
         self,
