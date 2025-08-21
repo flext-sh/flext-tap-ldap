@@ -224,17 +224,21 @@ class LDAPClient:
         try:
             # Ensure bind credentials are available
             if self._bind_dn is None:
-                logger.warning("LDAP bind DN is None, using empty string for anonymous bind")
+                logger.warning(
+                    "LDAP bind DN is None, using empty string for anonymous bind"
+                )
                 bind_dn = ""
             else:
                 bind_dn = self._bind_dn
-                
+
             if self._password is None:
-                logger.warning("LDAP bind password is None, using empty string for anonymous bind")
-                bind_password = ""  
+                logger.warning(
+                    "LDAP bind password is None, using empty string for anonymous bind"
+                )
+                bind_password = ""
             else:
                 bind_password = self._password
-                
+
             async with self._flext_api.connection(
                 server_uri,
                 bind_dn,
@@ -313,18 +317,18 @@ class LDAPClient:
             async def _test_async() -> bool:
                 try:
                     server_uri = f"{'ldaps' if self.use_ssl else 'ldap'}://{self.host}:{self.port}"
-                    
+
                     # Ensure bind credentials are available for connection test
                     if self._bind_dn is None:
                         bind_dn = ""
                     else:
                         bind_dn = self._bind_dn
-                        
+
                     if self._password is None:
                         bind_password = ""
                     else:
                         bind_password = self._password
-                        
+
                     async with self._flext_api.connection(
                         server_uri,
                         bind_dn,
@@ -651,13 +655,17 @@ class FlextTapLDAPPlugin:
             }
 
             if operation not in operation_handlers:
-                return FlextResult[dict[str, object]].fail(f"Unknown operation: {operation}")
+                return FlextResult[dict[str, object]].fail(
+                    f"Unknown operation: {operation}"
+                )
 
             return operation_handlers[operation](parameters or {})
 
         except Exception as e:
             logger.exception(f"Plugin operation '{operation}' failed")
-            return FlextResult[dict[str, object]].fail(f"Operation {operation} failed: {e}")
+            return FlextResult[dict[str, object]].fail(
+                f"Operation {operation} failed: {e}"
+            )
 
     def discover_streams(self) -> FlextResult[list[object]]:
         """Discover available streams."""
@@ -670,7 +678,9 @@ class FlextTapLDAPPlugin:
 
         try:
             if self._tap_instance is None:
-                return FlextResult[list[object]].fail("Tap instance not properly initialized")
+                return FlextResult[list[object]].fail(
+                    "Tap instance not properly initialized"
+                )
 
             # Get streams from tap using Singer SDK interface
             streams = self._tap_instance.discover_streams()
@@ -689,7 +699,9 @@ class FlextTapLDAPPlugin:
         """Execute discover operation through tap."""
         streams_result = self.discover_streams()
         if not streams_result.is_success:
-            return FlextResult[dict[str, object]].fail(streams_result.error or "Discovery failed")
+            return FlextResult[dict[str, object]].fail(
+                streams_result.error or "Discovery failed"
+            )
 
         streams = streams_result.value or []
         catalog_data: dict[str, object] = {
@@ -736,7 +748,9 @@ class FlextTapLDAPPlugin:
         """Execute test operation through tap."""
         try:
             if not self._tap_instance:
-                return FlextResult[dict[str, object]].fail("Tap instance not initialized")
+                return FlextResult[dict[str, object]].fail(
+                    "Tap instance not initialized"
+                )
 
             # Test configuration (Pydantic validation already occurred during creation)
             # Connection test could be added here in the future

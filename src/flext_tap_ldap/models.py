@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from flext_core import FlextResult, FlextValueObject as FlextDomainBaseModel
+from flext_core import FlextResult, FlextValue as FlextDomainBaseModel
 from flext_ldap import FlextLdapEntry
 from pydantic import Field
 

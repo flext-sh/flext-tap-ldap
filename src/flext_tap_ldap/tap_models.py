@@ -12,7 +12,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from flext_core import FlextModel, FlextResult, FlextValueObject, get_logger
+from flext_core import FlextModel, FlextResult, FlextValue, get_logger
 from flext_ldap import FlextLdapEntry
 from pydantic import Field
 
@@ -49,7 +49,7 @@ def _safe_first_value(value: object) -> str | None:
     return None
 
 
-class LDAPAttribute(FlextValueObject):
+class LDAPAttribute(FlextValue):
     """Represents an LDAP attribute with its values."""
 
     name: str = Field(..., description="Attribute name")
