@@ -333,7 +333,9 @@ class LDAPConnection(FlextModel):
             return FlextResult[None].fail("Host is required")
         max_port_number = 65535
         if self.port < 1 or self.port > max_port_number:
-            return FlextResult[None].fail(f"Port must be between 1 and {max_port_number}")
+            return FlextResult[None].fail(
+                f"Port must be between 1 and {max_port_number}"
+            )
         return FlextResult[None].ok(None)
 
     def validate_business_rules(self) -> FlextResult[None]:

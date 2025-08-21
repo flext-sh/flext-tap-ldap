@@ -254,7 +254,9 @@ class LDAPRecord(FlextEntity):
         """Convert to Singer record format with validation."""
         validation_result = self.validate_business_rules()
         if not validation_result.success:
-            return FlextResult[None].fail(f"Invalid LDAP record: {validation_result.error}")
+            return FlextResult[None].fail(
+                f"Invalid LDAP record: {validation_result.error}"
+            )
 
         record = {
             "type": "RECORD",
@@ -275,7 +277,9 @@ class TapExecutionStartedEvent(FlextModel):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate event data."""
         if not self.command:
-            return FlextResult[None].fail("Command is required for execution started event")
+            return FlextResult[None].fail(
+                "Command is required for execution started event"
+            )
         return FlextResult[None].ok(None)
 
     execution_id: UUID

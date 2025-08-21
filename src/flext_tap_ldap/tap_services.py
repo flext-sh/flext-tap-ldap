@@ -187,7 +187,9 @@ class LDIFConfigBuilder:
                 ),
             )
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[object].fail(f"Failed to build LDIF processing config: {e}")
+            return FlextResult[object].fail(
+                f"Failed to build LDIF processing config: {e}"
+            )
 
 
 class LDAPConnectionService:
@@ -592,7 +594,9 @@ class LDIFProcessingService:
             result = self._ldif_api.parse_file(file_path)
 
             if not result.success:
-                return FlextResult[object].fail(f"Failed to parse LDIF file: {result.error}")
+                return FlextResult[object].fail(
+                    f"Failed to parse LDIF file: {result.error}"
+                )
 
             entries = result.data or []
             logger.info(
