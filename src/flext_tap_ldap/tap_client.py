@@ -243,7 +243,7 @@ class LDAPClient:
                 server_uri,
                 bind_dn,
                 bind_password,
-            ) as session:
+            ):
                 # Use the context manager - search operations happen within the connection
                 result = await self._flext_api.search(
                     base_dn=base_dn,
@@ -319,21 +319,15 @@ class LDAPClient:
                     server_uri = f"{'ldaps' if self.use_ssl else 'ldap'}://{self.host}:{self.port}"
 
                     # Ensure bind credentials are available for connection test
-                    if self._bind_dn is None:
-                        bind_dn = ""
-                    else:
-                        bind_dn = self._bind_dn
+                    bind_dn = "" if self._bind_dn is None else self._bind_dn
 
-                    if self._password is None:
-                        bind_password = ""
-                    else:
-                        bind_password = self._password
+                    bind_password = "" if self._password is None else self._password
 
                     async with self._flext_api.connection(
                         server_uri,
                         bind_dn,
                         bind_password,
-                    ) as session:
+                    ):
                         # Try a simple search to test connection
                         result = await self._flext_api.search(
                             base_dn="",
