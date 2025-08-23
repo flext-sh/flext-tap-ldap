@@ -362,7 +362,7 @@ def validate_ldap_config(config: TapLDAPConfig) -> FlextResult[bool]:
                 "SSL enabled but port is 389 (consider using port 636 for LDAPS)",
             )
 
-        return FlextResult[None].ok(True)
+        return FlextResult[None].ok(data=True)
 
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult[None].fail(f"Configuration validation failed: {e}")
