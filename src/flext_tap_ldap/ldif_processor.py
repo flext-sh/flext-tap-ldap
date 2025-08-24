@@ -304,11 +304,11 @@ class FlextLDIFProcessor:
         try:
             self.entries = list(self.parse_file(file_path))
             self._update_stats()
-            return FlextResult[None].ok(
+            return FlextResult[str].ok(
                 "LDIF file loaded successfully using flext-ldif"
             )
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[None].fail(f"Failed to load LDIF file: {e}")
+            return FlextResult[str].fail(f"Failed to load LDIF file: {e}")
 
     def load_from_string(
         self,
@@ -319,11 +319,11 @@ class FlextLDIFProcessor:
         try:
             self.entries = list(self.parse_content(content, source_name))
             self._update_stats()
-            return FlextResult[None].ok(
+            return FlextResult[str].ok(
                 "LDIF content loaded successfully using flext-ldif"
             )
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[None].fail(f"Failed to load LDIF content: {e}")
+            return FlextResult[str].fail(f"Failed to load LDIF content: {e}")
 
     def _update_stats(self) -> None:
         """Update statistics based on loaded entries."""
