@@ -150,7 +150,7 @@ class TestLDAPClientQuick:
     @patch("asyncio.set_event_loop")
     def test_test_connection_no_loop(
         self,
-        mock_set_loop: Mock,  # noqa: ARG002
+        mock_set_loop: Mock,
         mock_new_loop: Mock,
         mock_get_loop: Mock,
         client: LDAPClient,
@@ -296,7 +296,7 @@ class TestLDAPClientQuick:
     @patch("asyncio.get_running_loop")
     def test_execute_oracle_search_in_new_loop(
         self,
-        mock_get_loop: Mock,  # noqa: ARG002
+        mock_get_loop: Mock,
         client: LDAPClient,
     ) -> None:
         """Test Oracle search execution in new loop."""
