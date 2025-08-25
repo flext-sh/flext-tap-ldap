@@ -43,7 +43,7 @@ tap-ldap = "flext_tap_ldap.tap:main"
 flext-tap-ldap = "flext_tap_ldap.tap:main"
 
 [tool.ruff]
-extend = "../.config/tools/.ruff-shared.toml"
+extend = "../ruff-shared.toml"
 lint.isort.known-first-party = ["flext_tap_ldap"]
 [tool.mypy]
 # Strict mode - enables all recommended checks
