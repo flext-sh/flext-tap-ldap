@@ -6,22 +6,22 @@ from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from flext_core import (
-    FlextEntity,
-    FlextEntityId,
+    FlextModels.Entity,
+    FlextModels.EntityId,
     FlextModel,
     FlextResult,
-    get_logger,
+    FlextLogger,
 )
 from pydantic import Field
 
 # Constants
 MAX_PORT = 65535
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 
-class LDAPConnection(FlextEntity):
-    """LDAP connection entity using FlextEntity pattern."""
+class LDAPConnection(FlextModels.Entity):
+    """LDAP connection entity using FlextModels.Entity pattern."""
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate LDAP connection business rules."""
@@ -35,7 +35,7 @@ class LDAPConnection(FlextEntity):
             return FlextResult[None].fail("Pool size must be positive")
         return FlextResult[None].ok(None)
 
-    id: FlextEntityId = Field(default_factory=lambda: FlextEntityId(str(uuid4())))
+    id: FlextModels.EntityId = Field(default_factory=lambda: FlextModels.EntityId(str(uuid4())))
     host: str
     port: int
     bind_dn: str | None = None
@@ -48,8 +48,8 @@ class LDAPConnection(FlextEntity):
     last_error: str | None = None
 
 
-class LDAPStream(FlextEntity):
-    """LDAP stream entity using FlextEntity pattern."""
+class LDAPStream(FlextModels.Entity):
+    """LDAP stream entity using FlextModels.Entity pattern."""
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate LDAP stream business rules."""
@@ -65,7 +65,7 @@ class LDAPStream(FlextEntity):
             )
         return FlextResult[None].ok(None)
 
-    id: FlextEntityId = Field(default_factory=lambda: FlextEntityId(str(uuid4())))
+    id: FlextModels.EntityId = Field(default_factory=lambda: FlextModels.EntityId(str(uuid4())))
     connection_id: UUID
     stream_type: str
     search_filter: str
@@ -94,8 +94,8 @@ class LDAPStream(FlextEntity):
         return FlextResult[None].ok(None)
 
 
-class TapExecution(FlextEntity):
-    """Tap execution entity using FlextEntity pattern."""
+class TapExecution(FlextModels.Entity):
+    """Tap execution entity using FlextModels.Entity pattern."""
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate tap execution business rules."""
@@ -117,7 +117,7 @@ class TapExecution(FlextEntity):
             return FlextResult[None].fail("Streams processed cannot be negative")
         return FlextResult[None].ok(None)
 
-    id: FlextEntityId = Field(default_factory=lambda: FlextEntityId(str(uuid4())))
+    id: FlextModels.EntityId = Field(default_factory=lambda: FlextModels.EntityId(str(uuid4())))
     connection_id: UUID
     command: str
     tap_status: str
@@ -223,8 +223,8 @@ class TapExecution(FlextEntity):
         return FlextResult[None].ok(None)
 
 
-class LDAPRecord(FlextEntity):
-    """LDAP record entity using FlextEntity pattern."""
+class LDAPRecord(FlextModels.Entity):
+    """LDAP record entity using FlextModels.Entity pattern."""
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate LDAP record business rules."""
@@ -236,7 +236,7 @@ class LDAPRecord(FlextEntity):
             return FlextResult[None].fail("Attributes must be a dictionary")
         return FlextResult[None].ok(None)
 
-    id: FlextEntityId = Field(default_factory=lambda: FlextEntityId(str(uuid4())))
+    id: FlextModels.EntityId = Field(default_factory=lambda: FlextModels.EntityId(str(uuid4())))
     stream_id: UUID
     execution_id: UUID
     dn: str

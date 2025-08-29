@@ -14,7 +14,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import UUID
 
-from flext_core import FlextResult, get_logger
+from flext_core import FlextLogger, FlextResult
 from flext_ldap import FlextLdapConnectionConfig
 from flext_ldif import FlextLdifAPI
 
@@ -29,7 +29,7 @@ from flext_tap_ldap.tap_config import (
     TapLDAPConfig,
 )
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 # Constants
 EXPECTED_DATA_COUNT = 3

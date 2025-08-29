@@ -12,7 +12,7 @@ import pytest
 import structlog
 from ldap3 import ALL, Connection, Server
 
-logger = structlog.get_logger()
+logger = structlog.FlextLogger()
 
 
 @pytest.fixture(scope="session")

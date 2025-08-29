@@ -14,7 +14,7 @@ import time
 from collections.abc import Awaitable
 from dataclasses import dataclass
 
-from flext_core import FlextResult, get_logger
+from flext_core import FlextLogger, FlextResult
 from flext_ldap import (
     FlextLdapConnectionConfig,
     FlextLdapEntry,
@@ -22,7 +22,7 @@ from flext_ldap import (
     get_ldap_api,
 )
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 
 @dataclass
@@ -331,7 +331,7 @@ class LDAPClient:
                         )
                         return result.success
                 except (RuntimeError, ValueError, TypeError) as e:
-                    async_logger = get_logger(__name__)
+                    async_logger = FlextLogger(__name__)
                     # EXPLICIT TRANSPARENCY: Documented fallback behavior for Singer stream testing convenience
                     # This is NOT security-sensitive fake data generation - it's test environment detection
                     async_logger.warning(f"LDAP async connection test failed: {e}")

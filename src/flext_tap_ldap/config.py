@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextBaseConfigModel, FlextModel, FlextResult
+from flext_core import FlextConfig.BaseConfigModel, FlextModel, FlextResult
 from pydantic import Field, field_validator
 from pydantic_settings import SettingsConfigDict
 
@@ -131,10 +131,10 @@ class LDIFProcessingConfig(FlextModel):
     )
 
 
-class TapLDAPConfig(FlextBaseConfigModel):
+class TapLDAPConfig(FlextConfig.BaseConfigModel):
     """Complete configuration for tap-ldap using flext-core patterns.
 
-    Combines LDAP connection and LDIF processing configurations with FlextBaseConfigModel.
+    Combines LDAP connection and LDIF processing configurations with FlextConfig.BaseConfigModel.
     """
 
     model_config = SettingsConfigDict(
