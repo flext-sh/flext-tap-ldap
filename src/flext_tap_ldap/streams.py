@@ -6,14 +6,14 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 
 from flext_core import (
-    get_logger,
+    FlextLogger,
 )
 from flext_meltano import Stream, singer_typing as th
 
 from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.tap import FlextTapLDAP
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 
 class FallbackDataFactory:

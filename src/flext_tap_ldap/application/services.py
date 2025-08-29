@@ -11,7 +11,7 @@ from datetime import UTC, datetime
 from uuid import UUID
 
 from flext_core import (
-    FlextEntityId,
+    FlextModels.EntityId,
     FlextResult,
 )
 
@@ -100,7 +100,7 @@ class LDAPConnectionService:
     def __init__(self) -> None:
         """Initialize the connection service."""
         self._connections: dict[
-            FlextEntityId,
+            FlextModels.EntityId,
             LDAPConnection,
         ] = {}  # Initialized inline for immediate availability
 
@@ -177,7 +177,7 @@ class LDAPStreamService:
     def __init__(self) -> None:
         """Initialize the stream service."""
         self._streams: dict[
-            FlextEntityId,
+            FlextModels.EntityId,
             LDAPStream,
         ] = {}  # Initialized inline for immediate availability
 

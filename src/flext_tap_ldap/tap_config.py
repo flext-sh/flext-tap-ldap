@@ -9,12 +9,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextConfig, FlextResult, get_logger
+from flext_core import FlextConfig, FlextLogger, FlextResult
 from flext_ldap import FlextLdapConnectionConfig
 from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import SettingsConfigDict
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 
 class CustomStreamConfig(BaseModel):

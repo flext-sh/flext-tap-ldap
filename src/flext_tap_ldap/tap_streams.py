@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from itertools import starmap
 from pathlib import Path
 
-from flext_core import get_logger
+from flext_core import FlextLogger
 from flext_ldap import get_ldap_api
 from flext_ldif import FlextLdifAPI, FlextLdifEntry
 from flext_meltano import Stream, singer_typing as th
@@ -23,7 +23,7 @@ from flext_meltano import Stream, singer_typing as th
 from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.tap_client import FlextTapLDAP
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 
 class FallbackDataFactory:

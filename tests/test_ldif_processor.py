@@ -16,7 +16,7 @@ from flext_tap_ldap import (
     LDIFValidator,
 )
 
-logger = structlog.get_logger()
+logger = structlog.FlextLogger()
 
 
 class TestLDIFEntry:

@@ -15,8 +15,8 @@ from collections.abc import Iterator
 from pathlib import Path
 
 from flext_core import (
+    FlextLogger,
     FlextResult,
-    get_logger,
 )
 from flext_ldif import (
     FlextLdifAPI,
@@ -29,7 +29,7 @@ from flext_tap_ldap.exceptions import (
     FlextLdifParseError,
 )
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 # Testing convenience aliases that delegate to flext-ldif
 LDIFParseError = FlextLdifParseError
 
@@ -304,9 +304,7 @@ class FlextLDIFProcessor:
         try:
             self.entries = list(self.parse_file(file_path))
             self._update_stats()
-            return FlextResult[str].ok(
-                "LDIF file loaded successfully using flext-ldif"
-            )
+            return FlextResult[str].ok("LDIF file loaded successfully using flext-ldif")
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[str].fail(f"Failed to load LDIF file: {e}")
 

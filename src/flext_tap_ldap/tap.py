@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from flext_core import get_logger
+from flext_core import FlextLogger
 from flext_meltano import Stream, Tap, singer_typing as th
 from flext_meltano.common_schemas import create_ldap_tap_schema
 
@@ -23,7 +23,7 @@ from flext_tap_ldap.streams import (
     UsersStream,
 )
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 
 class FlextTapLDAP(Tap):
