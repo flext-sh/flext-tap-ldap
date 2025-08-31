@@ -12,7 +12,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from flext_core import FlextModel, FlextResult, FlextModels.Value, FlextLogger
+from flext_core import FlextLogger, FlextModels, FlextResult
 from flext_ldap import FlextLdapEntry
 from pydantic import Field
 
@@ -90,7 +90,7 @@ class LDAPAttribute(FlextModels.Value):
         return len(self.values) > 1
 
 
-class LDAPEntry(FlextModel):
+class LDAPEntry(FlextModels):
     """Represents an LDAP entry with comprehensive metadata."""
 
     dn: str = Field(..., description="Distinguished Name")
@@ -263,7 +263,7 @@ class LDAPGroup(LDAPEntry):
         )
 
 
-class LDAPSchema(FlextModel):
+class LDAPSchema(FlextModels):
     """Represents LDAP schema information."""
 
     object_classes: list[str] = Field(
@@ -307,7 +307,7 @@ class LDAPSchema(FlextModel):
 # CONNECTION AND EXECUTION MODELS
 
 
-class LDAPConnection(FlextModel):
+class LDAPConnection(FlextModels):
     """LDAP connection entity with comprehensive tracking."""
 
     id: str = Field(
@@ -369,7 +369,7 @@ class LDAPConnection(FlextModel):
         )
 
 
-class LDAPStream(FlextModel):
+class LDAPStream(FlextModels):
     """LDAP stream entity with comprehensive metadata."""
 
     id: str = Field(
@@ -435,7 +435,7 @@ class LDAPStream(FlextModel):
         )
 
 
-class TapExecution(FlextModel):
+class TapExecution(FlextModels):
     """Tap execution entity with comprehensive tracking."""
 
     id: str = Field(
@@ -557,7 +557,7 @@ class TapExecution(FlextModel):
         )
 
 
-class LDAPRecord(FlextModel):
+class LDAPRecord(FlextModels):
     """LDAP record entity with Singer protocol support."""
 
     id: str = Field(
@@ -609,7 +609,7 @@ class LDAPRecord(FlextModel):
 # DOMAIN EVENTS
 
 
-class TapExecutionStartedEvent(FlextModel):
+class TapExecutionStartedEvent(FlextModels):
     """Event raised when tap execution starts."""
 
     execution_id: UUID
@@ -618,7 +618,7 @@ class TapExecutionStartedEvent(FlextModel):
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
-class TapExecutionCompletedEvent(FlextModel):
+class TapExecutionCompletedEvent(FlextModels):
     """Event raised when tap execution completes."""
 
     execution_id: UUID
@@ -630,7 +630,7 @@ class TapExecutionCompletedEvent(FlextModel):
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
-class StreamDiscoveredEvent(FlextModel):
+class StreamDiscoveredEvent(FlextModels):
     """Event raised when stream is discovered."""
 
     stream_id: UUID
@@ -641,7 +641,7 @@ class StreamDiscoveredEvent(FlextModel):
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
-class RecordExtractedEvent(FlextModel):
+class RecordExtractedEvent(FlextModels):
     """Event raised when record is extracted."""
 
     record_id: UUID
@@ -652,7 +652,7 @@ class RecordExtractedEvent(FlextModel):
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
-class ConnectionTestedEvent(FlextModel):
+class ConnectionTestedEvent(FlextModels):
     """Event raised when connection is tested."""
 
     connection_id: UUID

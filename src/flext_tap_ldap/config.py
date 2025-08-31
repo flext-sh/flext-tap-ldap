@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextConfig.BaseConfigModel, FlextModel, FlextResult
+from flext_core import FlextConfig.BaseModel, FlextModels, FlextResult
 from pydantic import Field, field_validator
 from pydantic_settings import SettingsConfigDict
 
@@ -17,8 +17,8 @@ from pydantic_settings import SettingsConfigDict
 MAX_PORT = 65535
 
 
-class LDAPConnectionConfig(FlextModel):
-    """LDAP connection configuration using FlextModel pattern."""
+class LDAPConnectionConfig(FlextModels):
+    """LDAP connection configuration using FlextModels pattern."""
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate LDAP connection configuration."""
@@ -44,7 +44,7 @@ class LDAPConnectionConfig(FlextModel):
     max_retries: int = Field(default=3, description="Maximum connection retries")
 
 
-class CustomStreamConfig(FlextModel):
+class CustomStreamConfig(FlextModels):
     """Configuration for custom LDAP streams using flext-core patterns."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -71,7 +71,7 @@ class CustomStreamConfig(FlextModel):
     )
 
 
-class LDIFProcessingConfig(FlextModel):
+class LDIFProcessingConfig(FlextModels):
     """Configuration for LDIF file processing using flext-core patterns."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -131,10 +131,10 @@ class LDIFProcessingConfig(FlextModel):
     )
 
 
-class TapLDAPConfig(FlextConfig.BaseConfigModel):
+class TapLDAPConfig(FlextConfig.BaseModel):
     """Complete configuration for tap-ldap using flext-core patterns.
 
-    Combines LDAP connection and LDIF processing configurations with FlextConfig.BaseConfigModel.
+    Combines LDAP connection and LDIF processing configurations with FlextConfig.BaseModel.
     """
 
     model_config = SettingsConfigDict(
