@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from flext_core import FlextResult, FlextModels.Value as FlextDomainBaseModel
+from flext_core import FlextModels, FlextResult
 from flext_ldap import FlextLdapEntry
 from pydantic import Field
 
@@ -58,7 +58,7 @@ def _safe_first_str(value: object) -> str | None:
     return None
 
 
-class LDAPAttribute(FlextDomainBaseModel):
+class LDAPAttribute(FlextModels.Entity):
     """Represents an LDAP attribute with its values."""
 
     name: str = Field(..., description="Attribute name")
@@ -94,7 +94,7 @@ class LDAPAttribute(FlextDomainBaseModel):
         return len(self.values) > 1
 
 
-class LDAPEntry(FlextDomainBaseModel):
+class LDAPEntry(FlextModels.Entity):
     """Represents an LDAP entry."""
 
     dn: str = Field(..., description="Distinguished Name")
@@ -295,7 +295,7 @@ class LDAPGroup(LDAPEntry):
         )
 
 
-class LDAPSchema(FlextDomainBaseModel):
+class LDAPSchema(FlextModels.Entity):
     """Represents LDAP schema information."""
 
     object_classes: list[str] = Field(

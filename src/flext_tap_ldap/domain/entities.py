@@ -6,11 +6,9 @@ from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from flext_core import (
-    FlextModels.Entity,
-    FlextModels.EntityId,
-    FlextModel,
-    FlextResult,
     FlextLogger,
+    FlextModels,
+    FlextResult,
 )
 from pydantic import Field
 
@@ -35,7 +33,9 @@ class LDAPConnection(FlextModels.Entity):
             return FlextResult[None].fail("Pool size must be positive")
         return FlextResult[None].ok(None)
 
-    id: FlextModels.EntityId = Field(default_factory=lambda: FlextModels.EntityId(str(uuid4())))
+    id: FlextModels.EntityId = Field(
+        default_factory=lambda: FlextModels.EntityId(str(uuid4()))
+    )
     host: str
     port: int
     bind_dn: str | None = None
@@ -65,7 +65,9 @@ class LDAPStream(FlextModels.Entity):
             )
         return FlextResult[None].ok(None)
 
-    id: FlextModels.EntityId = Field(default_factory=lambda: FlextModels.EntityId(str(uuid4())))
+    id: FlextModels.EntityId = Field(
+        default_factory=lambda: FlextModels.EntityId(str(uuid4()))
+    )
     connection_id: UUID
     stream_type: str
     search_filter: str
@@ -117,7 +119,9 @@ class TapExecution(FlextModels.Entity):
             return FlextResult[None].fail("Streams processed cannot be negative")
         return FlextResult[None].ok(None)
 
-    id: FlextModels.EntityId = Field(default_factory=lambda: FlextModels.EntityId(str(uuid4())))
+    id: FlextModels.EntityId = Field(
+        default_factory=lambda: FlextModels.EntityId(str(uuid4()))
+    )
     connection_id: UUID
     command: str
     tap_status: str
@@ -236,7 +240,9 @@ class LDAPRecord(FlextModels.Entity):
             return FlextResult[None].fail("Attributes must be a dictionary")
         return FlextResult[None].ok(None)
 
-    id: FlextModels.EntityId = Field(default_factory=lambda: FlextModels.EntityId(str(uuid4())))
+    id: FlextModels.EntityId = Field(
+        default_factory=lambda: FlextModels.EntityId(str(uuid4()))
+    )
     stream_id: UUID
     execution_id: UUID
     dn: str
@@ -270,8 +276,8 @@ class LDAPRecord(FlextModels.Entity):
         return FlextResult[dict[str, object]].ok(record)
 
 
-# Domain Events using flext-core FlextModel pattern
-class TapExecutionStartedEvent(FlextModel):
+# Domain Events using flext-core FlextModels pattern
+class TapExecutionStartedEvent(FlextModels):
     """Event raised when tap execution starts."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -287,7 +293,7 @@ class TapExecutionStartedEvent(FlextModel):
     command: str
 
 
-class TapExecutionCompletedEvent(FlextModel):
+class TapExecutionCompletedEvent(FlextModels):
     """Event raised when tap execution completes."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -298,7 +304,7 @@ class TapExecutionCompletedEvent(FlextModel):
     connection_id: UUID | None = None
 
 
-class StreamDiscoveredEvent(FlextModel):
+class StreamDiscoveredEvent(FlextModels):
     """Event raised when stream is discovered."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -316,7 +322,7 @@ class StreamDiscoveredEvent(FlextModel):
     stream_schema: dict[str, object]
 
 
-class RecordExtractedEvent(FlextModel):
+class RecordExtractedEvent(FlextModels):
     """Event raised when record is extracted."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -334,7 +340,7 @@ class RecordExtractedEvent(FlextModel):
     attributes_count: int
 
 
-class ConnectionTestedEvent(FlextModel):
+class ConnectionTestedEvent(FlextModels):
     """Event raised when connection is tested."""
 
     def validate_business_rules(self) -> FlextResult[None]:

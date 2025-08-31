@@ -213,7 +213,9 @@ def create_ldap_connection_config(
         return FlextResult[LDAPConnectionConfig].ok(config)
 
     except (RuntimeError, ValueError, TypeError) as e:
-        return FlextResult[LDAPConnectionConfig].fail(f"Failed to create LDAP connection config: {e}")
+        return FlextResult[LDAPConnectionConfig].fail(
+            f"Failed to create LDAP connection config: {e}"
+        )
 
 
 def create_ldap_connection_config_convenience(
@@ -327,7 +329,9 @@ def create_ldif_processing_config(
     try:
         return builder.build()
     except Exception as e:
-        return FlextResult[LDIFProcessingConfig].fail(f"Failed to create LDIF processing config: {e}")
+        return FlextResult[LDIFProcessingConfig].fail(
+            f"Failed to create LDIF processing config: {e}"
+        )
 
 
 def validate_ldap_config(config: TapLDAPConfig) -> FlextResult[bool]:
@@ -407,7 +411,9 @@ def create_development_ldap_config(**overrides: object) -> FlextResult[TapLDAPCo
         return FlextResult[TapLDAPConfig].ok(config)
 
     except (RuntimeError, ValueError, TypeError) as e:
-        return FlextResult[TapLDAPConfig].fail(f"Failed to create development config: {e}")
+        return FlextResult[TapLDAPConfig].fail(
+            f"Failed to create development config: {e}"
+        )
 
 
 def create_production_ldap_config(**overrides: object) -> FlextResult[TapLDAPConfig]:
@@ -450,7 +456,9 @@ def create_production_ldap_config(**overrides: object) -> FlextResult[TapLDAPCon
         return FlextResult[TapLDAPConfig].ok(config)
 
     except (RuntimeError, ValueError, TypeError) as e:
-        return FlextResult[TapLDAPConfig].fail(f"Failed to create production config: {e}")
+        return FlextResult[TapLDAPConfig].fail(
+            f"Failed to create production config: {e}"
+        )
 
 
 def create_ldif_processing_config_advanced(
@@ -503,7 +511,9 @@ def create_ldif_processing_config_advanced(
         return FlextResult[TapLDAPConfig].ok(config)
 
     except (RuntimeError, ValueError, TypeError) as e:
-        return FlextResult[TapLDAPConfig].fail(f"Failed to create LDIF processing config: {e}")
+        return FlextResult[TapLDAPConfig].fail(
+            f"Failed to create LDIF processing config: {e}"
+        )
 
 
 # Export main API functions
