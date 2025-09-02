@@ -37,7 +37,7 @@ class TestLDAPConnection:
         assert connection.timeout == 30
         assert connection.pool_size == 5
         assert connection.is_active is True
-        assert isinstance(connection.id, FlextModels)
+        assert isinstance(connection.id, str)
 
     def test_ldap_connection_with_ssl(self) -> None:
         """Test creating an LDAP connection with SSL."""
@@ -76,7 +76,7 @@ class TestLDAPStream:
         assert stream.connection_id == connection_id
         assert stream.search_filter == "(objectClass=inetOrgPerson)"
         assert stream.attributes == ["cn", "uid", "mail"]
-        assert isinstance(stream.id, FlextModels)
+        assert isinstance(stream.id, str)
         assert stream.key_properties == ["dn"]
         assert stream.replication_method == "FULL_TABLE"
         assert stream.records_extracted == 0
@@ -149,7 +149,7 @@ class TestTapExecution:
         assert execution.config == {"ldap_host": "ldap.example.com"}
         assert execution.catalog == {"streams": []}
         assert execution.state == {"bookmarks": {}}
-        assert isinstance(execution.id, FlextModels)
+        assert isinstance(execution.id, str)
         assert execution.records_extracted == 0
         assert execution.streams_processed == 0
 
@@ -312,7 +312,7 @@ class TestLDAPRecord:
             "organizationalPerson",
             "person",
         ]
-        assert isinstance(record.id, FlextModels)
+        assert isinstance(record.id, str)
         assert record.extracted_at is not None
 
     def test_ldap_record_rdn_property(self) -> None:

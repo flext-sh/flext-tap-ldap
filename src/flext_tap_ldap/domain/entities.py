@@ -232,7 +232,7 @@ class LDAPRecord(FlextModels.ValueObject):
             return FlextResult[None].fail("Attributes must be a dictionary")
         return FlextResult[None].ok(None)
 
-    id: FlextModels = Field(default_factory=lambda: FlextModels(str(uuid4())))
+    id: str = Field(default_factory=lambda: str(uuid4()))
     stream_id: UUID
     execution_id: UUID
     dn: str
