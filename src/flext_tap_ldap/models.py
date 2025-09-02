@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from flext_core import FlextModels, FlextResult
-from flext_ldap import FlextLdapEntry
+from flext_ldap import FlextLDAPEntry
 from pydantic import Field
 
 from flext_tap_ldap.domain.entities import (
@@ -22,18 +22,18 @@ from flext_tap_ldap.domain.entities import (
 
 
 def _get_entry_value(
-    entry: dict[str, object] | FlextLdapEntry,
+    entry: dict[str, object] | FlextLDAPEntry,
     key: str,
     default: object = None,
 ) -> object:
-    """Get a value from either a dict or `FlextLdapEntry`.
+    """Get a value from either a dict or `FlextLDAPEntry`.
 
     Returns the attribute value by name from a plain dict or an attribute of
-    a `FlextLdapEntry`, falling back to `default` when not present.
+    a `FlextLDAPEntry`, falling back to `default` when not present.
     """
     if isinstance(entry, dict):
         return entry.get(key, default)
-    # FlextLdapEntry - use getattr or similar access pattern
+    # FlextLDAPEntry - use getattr or similar access pattern
     return getattr(entry, key, default)
 
 
@@ -58,7 +58,7 @@ def _safe_first_str(value: object) -> str | None:
     return None
 
 
-class LDAPAttribute(FlextModels.Entity):
+class LDAPAttribute(FlextModels):
     """Represents an LDAP attribute with its values."""
 
     name: str = Field(..., description="Attribute name")
@@ -94,7 +94,7 @@ class LDAPAttribute(FlextModels.Entity):
         return len(self.values) > 1
 
 
-class LDAPEntry(FlextModels.Entity):
+class LDAPEntry(FlextModels):
     """Represents an LDAP entry."""
 
     dn: str = Field(..., description="Distinguished Name")
@@ -212,7 +212,7 @@ class LDAPUser(LDAPEntry):
     login_shell: str | None = Field(None, description="Login shell")
 
     @classmethod
-    def from_entry(cls, entry: dict[str, object] | FlextLdapEntry) -> LDAPUser:
+    def from_entry(cls, entry: dict[str, object] | FlextLDAPEntry) -> LDAPUser:
         """Create LDAPUser from LDAP entry."""
         return cls(
             # Required fields from LDAPEntry
@@ -267,7 +267,7 @@ class LDAPGroup(LDAPEntry):
     modify_timestamp: str | None = Field(None, description="Modification timestamp")
 
     @classmethod
-    def from_entry(cls, entry: dict[str, object] | FlextLdapEntry) -> LDAPGroup:
+    def from_entry(cls, entry: dict[str, object] | FlextLDAPEntry) -> LDAPGroup:
         """Create LDAPGroup from LDAP entry."""
         return cls(
             # Required fields from LDAPEntry
@@ -295,7 +295,7 @@ class LDAPGroup(LDAPEntry):
         )
 
 
-class LDAPSchema(FlextModels.Entity):
+class LDAPSchema(FlextModels):
     """Represents LDAP schema information."""
 
     object_classes: list[str] = Field(

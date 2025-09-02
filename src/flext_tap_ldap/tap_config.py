@@ -9,15 +9,15 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextConfig, FlextLogger, FlextResult
-from flext_ldap import FlextLdapConnectionConfig
-from pydantic import BaseModel, Field, field_validator
+from flext_core import FlextLogger, FlextModels, FlextResult
+from flext_ldap import FlextLDAPConnectionConfig
+from pydantic import Field, field_validator
 from pydantic_settings import SettingsConfigDict
 
 logger = FlextLogger(__name__)
 
 
-class CustomStreamConfig(BaseModel):
+class CustomStreamConfig(FlextModels.BaseModel):
     """Configuration for custom LDAP streams using flext-core patterns."""
 
     name: str = Field(..., description="Stream name")
@@ -45,7 +45,7 @@ class CustomStreamConfig(BaseModel):
         return FlextResult[None].ok(None)
 
 
-class LDIFProcessingConfig(BaseModel):
+class LDIFProcessingConfig(FlextModels.BaseModel):
     """Configuration for LDIF file processing using flext-core patterns."""
 
     ldif_files: list[str] | None = Field(
@@ -109,11 +109,11 @@ class LDIFProcessingConfig(BaseModel):
         return FlextResult[None].ok(None)
 
 
-class TapLDAPConfig(FlextConfig.Settings):
+class TapLDAPConfig(FlextModels.Settings):
     """Complete configuration for tap-ldap using flext-core and flext-ldap patterns.
 
     Combines LDAP connection and LDIF processing configurations with Pydantic settings.
-    Uses FlextLdapConnectionConfig from flext-ldap to eliminate duplication.
+    Uses FlextLDAPConnectionConfig from flext-ldap to eliminate duplication.
     """
 
     model_config = SettingsConfigDict(
@@ -129,7 +129,7 @@ class TapLDAPConfig(FlextConfig.Settings):
     )
 
     # Core LDAP connection using flext-ldap config to eliminate duplication
-    connection: FlextLdapConnectionConfig = Field(
+    connection: FlextLDAPConnectionConfig = Field(
         ...,
         description="LDAP connection configuration from flext-ldap",
     )
@@ -281,7 +281,7 @@ class TapLDAPConfig(FlextConfig.Settings):
     @classmethod
     def create_with_defaults(cls, **overrides: object) -> TapLDAPConfig:
         """Create config with intelligent defaults using flext-ldap integration."""
-        # Use FlextLdapConnectionConfig defaults
+        # Use FlextLDAPConnectionConfig defaults
         ldap_defaults: dict[str, object] = {
             "host": "localhost",
             "port": 389,
@@ -315,10 +315,10 @@ class TapLDAPConfig(FlextConfig.Settings):
         ):
             ldif_defaults.update(overrides["ldif_processing"])
 
-        # Create FlextLdapConnectionConfig with proper parameters
+        # Create FlextLDAPConnectionConfig with proper parameters
         port_val = ldap_defaults.get("port", 389)
         timeout_val = ldap_defaults.get("timeout_seconds", 30)
-        ldap_connection = FlextLdapConnectionConfig.model_validate(
+        ldap_connection = FlextLDAPConnectionConfig.model_validate(
             {
                 "server": str(ldap_defaults.get("host", "localhost")),
                 "port": int(port_val) if isinstance(port_val, (int, str)) else 389,

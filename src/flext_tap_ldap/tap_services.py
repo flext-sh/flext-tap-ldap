@@ -15,8 +15,8 @@ from pathlib import Path
 from uuid import UUID
 
 from flext_core import FlextLogger, FlextResult
-from flext_ldap import FlextLdapConnectionConfig
-from flext_ldif import FlextLdifAPI
+from flext_ldap import FlextLDAPConnectionConfig
+from flext_ldif import FlextLDIFAPI
 
 from flext_tap_ldap.models import (
     LDAPConnection,
@@ -583,7 +583,7 @@ class LDIFProcessingService:
 
     def __init__(self) -> None:
         """Initialize LDIF processing service."""
-        self._ldif_api = FlextLdifAPI()
+        self._ldif_api = FlextLDIFAPI()
 
     def process_ldif_file(self, file_path: str) -> FlextResult[list[dict[str, object]]]:
         """Process LDIF file using flext-ldif library."""
@@ -606,7 +606,7 @@ class LDIFProcessingService:
             # Normalize to list[dict[str, object]]
             normalized: list[dict[str, object]] = []
             for entry in entries:
-                # FlextLdifEntry: expose minimal dict
+                # FlextLDIFEntry: expose minimal dict
                 dn = getattr(getattr(entry, "dn", None), "value", None) or getattr(
                     entry,
                     "dn",
@@ -794,7 +794,7 @@ def create_development_ldap_config(**overrides: object) -> FlextResult[TapLDAPCo
 
     """
     try:
-        connection_config = FlextLdapConnectionConfig.model_validate(
+        connection_config = FlextLDAPConnectionConfig.model_validate(
             {"server": "localhost", "port": 389, "use_ssl": False, "timeout": 30},
         )
 
@@ -828,7 +828,7 @@ def create_production_ldap_config(**overrides: object) -> FlextResult[TapLDAPCon
 
     """
     try:
-        connection_config = FlextLdapConnectionConfig.model_validate(
+        connection_config = FlextLDAPConnectionConfig.model_validate(
             {"server": "ldap.company.com", "port": 636, "use_ssl": True, "timeout": 30},
         )
 

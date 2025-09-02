@@ -11,7 +11,7 @@ from datetime import UTC, datetime
 from uuid import UUID
 
 from flext_core import (
-    FlextModels.EntityId,
+    FlextModels,
     FlextResult,
 )
 
@@ -100,7 +100,7 @@ class LDAPConnectionService:
     def __init__(self) -> None:
         """Initialize the connection service."""
         self._connections: dict[
-            FlextModels.EntityId,
+            FlextModels,
             LDAPConnection,
         ] = {}  # Initialized inline for immediate availability
 
@@ -160,7 +160,9 @@ class LDAPConnectionService:
             connection = self._connections.get(connection_id)
             return FlextResult[LDAPConnection | None].ok(connection)
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[LDAPConnection | None].fail(f"Failed to get connection: {e}")
+            return FlextResult[LDAPConnection | None].fail(
+                f"Failed to get connection: {e}"
+            )
 
     async def list_connections(self) -> FlextResult[list[LDAPConnection]]:
         """List all LDAP connections."""
@@ -168,7 +170,9 @@ class LDAPConnectionService:
             connections = list(self._connections.values())
             return FlextResult[list[LDAPConnection]].ok(connections)
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[list[LDAPConnection]].fail(f"Failed to list connections: {e}")
+            return FlextResult[list[LDAPConnection]].fail(
+                f"Failed to list connections: {e}"
+            )
 
 
 class LDAPStreamService:
@@ -177,7 +181,7 @@ class LDAPStreamService:
     def __init__(self) -> None:
         """Initialize the stream service."""
         self._streams: dict[
-            FlextModels.EntityId,
+            FlextModels,
             LDAPStream,
         ] = {}  # Initialized inline for immediate availability
 
@@ -234,7 +238,9 @@ class LDAPStreamService:
             stream.update_schema(schema)
             return FlextResult[dict[str, object]].ok(schema)
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[dict[str, object]].fail(f"Failed to discover schema: {e}")
+            return FlextResult[dict[str, object]].fail(
+                f"Failed to discover schema: {e}"
+            )
 
     async def get_stream(self, stream_id: UUID) -> FlextResult[LDAPStream | None]:
         """Get LDAP stream by ID."""
@@ -368,7 +374,9 @@ class TapExecutionService:
             execution = self._executions.get(execution_id)
             return FlextResult[TapExecution | None].ok(execution)
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[TapExecution | None].fail(f"Failed to get execution: {e}")
+            return FlextResult[TapExecution | None].fail(
+                f"Failed to get execution: {e}"
+            )
 
     async def list_executions(
         self,
@@ -389,7 +397,9 @@ class TapExecutionService:
 
             return FlextResult[list[TapExecution]].ok(executions)
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[list[TapExecution]].fail(f"Failed to list executions: {e}")
+            return FlextResult[list[TapExecution]].fail(
+                f"Failed to list executions: {e}"
+            )
 
 
 class LDAPRecordService:
