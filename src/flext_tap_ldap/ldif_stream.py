@@ -14,7 +14,7 @@ from pathlib import Path
 
 from flext_core import FlextLogger
 from flext_ldap import get_ldap_api
-from flext_ldif import FlextLdifAPI, FlextLdifEntry
+from flext_ldif import FlextLDIFAPI, FlextLDIFEntry
 from flext_meltano import Stream, singer_typing as th
 
 from flext_tap_ldap.tap import FlextTapLDAP
@@ -34,7 +34,7 @@ class LDIFStream(Stream):
         # Store tap reference
         self.tap = tap
         # Initialize flext-ldif API for processing
-        self._ldif_api = FlextLdifAPI()
+        self._ldif_api = FlextLDIFAPI()
         self._ldap_api = get_ldap_api()
         # Define schema
         schema = th.PropertiesList(
@@ -93,7 +93,7 @@ class LDIFStream(Stream):
 
     def _convert_entry_to_record(
         self,
-        flext_entry: FlextLdifEntry,
+        flext_entry: FlextLDIFEntry,
     ) -> dict[str, object]:
         """Convert flext-ldif entry to Singer record."""
         # Delegate entry type classification to flext-ldap
@@ -130,7 +130,7 @@ class LDIFAnalysisStream(Stream):
         # Store tap reference
         self.tap = tap
         # Initialize flext-ldif API for analysis
-        self._ldif_api = FlextLdifAPI()
+        self._ldif_api = FlextLDIFAPI()
         self._ldap_api = get_ldap_api()
         # Define schema
         schema = th.PropertiesList(

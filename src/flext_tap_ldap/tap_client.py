@@ -17,9 +17,9 @@ from dataclasses import dataclass
 
 from flext_core import FlextLogger, FlextResult
 from flext_ldap import (
-    FlextLdapConnectionConfig,
-    FlextLdapEntry,
-    FlextLdapScope as LDAPScope,
+    FlextLDAPConnectionConfig,
+    FlextLDAPEntry,
+    FlextLDAPScope as LDAPScope,
     get_ldap_api,
 )
 from flext_meltano import Stream, Tap, singer_typing as th
@@ -60,7 +60,7 @@ class LDAPClientConfig:
 class LDAPClient:
     """Testing convenience LDAP client wrapper.
 
-    Provides the old interface while using FlextLdapClient internally.
+    Provides the old interface while using FlextLDAPClient internally.
     This eliminates code duplication while maintaining testing convenience.
     """
 
@@ -125,7 +125,7 @@ class LDAPClient:
             )
 
         # Create flext-ldap configuration
-        flext_config = FlextLdapConnectionConfig.model_validate(
+        flext_config = FlextLDAPConnectionConfig.model_validate(
             {
                 "server": client_config.host,
                 "port": client_config.port,
@@ -173,11 +173,11 @@ class LDAPClient:
 
     def _convert_entry_to_dict(
         self,
-        entry_data: FlextLdapEntry | dict[str, object],
+        entry_data: FlextLDAPEntry | dict[str, object],
     ) -> dict[str, object]:
-        """Convert FlextLdapEntry to dict format for testing convenience."""
+        """Convert FlextLDAPEntry to dict format for testing convenience."""
         if hasattr(entry_data, "dn") and hasattr(entry_data, "attributes"):
-            # It's a FlextLdapEntry model object - flatten attributes
+            # It's a FlextLDAPEntry model object - flatten attributes
             entry_dict = {"dn": entry_data.dn}
             # Add flattened attributes to the entry dict
             for attr_name, attr_values in entry_data.attributes.items():
@@ -193,7 +193,7 @@ class LDAPClient:
 
     def _process_search_results(
         self,
-        result: FlextResult[list[FlextLdapEntry]],
+        result: FlextResult[list[FlextLDAPEntry]],
         size_limit: int,
     ) -> list[dict[str, object]]:
         """Process LDAP search results with size limiting."""
@@ -796,8 +796,8 @@ def main() -> None:
 
 
 # Type aliases for testing convenience
-LDAPConnectionConfig = FlextLdapConnectionConfig
-LDAPEntry = FlextLdapEntry
+LDAPConnectionConfig = FlextLDAPConnectionConfig
+LDAPEntry = FlextLDAPEntry
 
 __all__ = [
     # Main Classes
