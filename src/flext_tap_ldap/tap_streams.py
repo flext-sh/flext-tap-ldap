@@ -16,12 +16,14 @@ from itertools import starmap
 from pathlib import Path
 
 from flext_core import FlextLogger
-from flext_ldap import get_ldap_api
+from flext_ldap import FlextLDAPApi
 from flext_ldif import FlextLDIFAPI, FlextLDIFEntry
-from flext_meltano import Stream, singer_typing as th
+from flext_meltano import FlextSingerTypes, FlextTapStream as Stream
+
+# Create FlextSingerTypes instance for schema definitions
+th = FlextSingerTypes()
 
 from flext_tap_ldap.client import LDAPClient
-from flext_tap_ldap.tap_client import FlextTapLDAP
 
 logger = FlextLogger(__name__)
 
@@ -586,7 +588,7 @@ class LDIFStream(Stream):
 
         # Initialize flext-ldif API for processing
         self._ldif_api = FlextLDIFAPI()
-        self._ldap_api = get_ldap_api()
+        self._ldap_api = FlextLDAPApi()
 
         # Define schema
         schema = th.PropertiesList(

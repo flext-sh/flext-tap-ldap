@@ -9,9 +9,9 @@ from __future__ import annotations
 from typing import ClassVar
 
 from flext_core import FlextLogger
-from flext_meltano import Stream, Tap, singer_typing as th
-from flext_meltano.common_schemas import create_ldap_tap_schema
+from flext_meltano import Stream, Tap
 
+# from flext_meltano.common_schemas import create_ldap_tap_schema  # Not available
 from flext_tap_ldap.config import TapLDAPConfig
 from flext_tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
 from flext_tap_ldap.streams import (
@@ -32,120 +32,28 @@ class FlextTapLDAP(Tap):
     name: str = "tap-ldap"
     config_class = TapLDAPConfig
 
-    # REAL DRY: Use centralized LDAP schema from flext-meltano instead of duplicating
-    config_jsonschema: ClassVar[dict[str, object]] = create_ldap_tap_schema(
-        # LDAP-specific additional properties for tap-ldap
-        additional_properties=th.PropertiesList(
-            th.Property(
-                "page_size",
-                th.IntegerType,
-                default=1000,
-                description="Page size for paged results",
-            ),
-            th.Property(
-                "user_filter",
-                th.StringType,
-                default="(object_class=inetOrgPerson)",
-                description="LDAP filter for user entries",
-            ),
-            th.Property(
-                "group_filter",
-                th.StringType,
-                default="(object_class=groupOfNames)",
-                description="LDAP filter for group entries",
-            ),
-            th.Property(
-                "custom_streams",
-                th.ArrayType(
-                    th.ObjectType(
-                        th.Property("name", th.StringType, required=True),
-                        th.Property("search_filter", th.StringType, required=True),
-                        th.Property("primary_keys", th.ArrayType(th.StringType)),
-                        th.Property("replication_key", th.StringType),
-                        th.Property(
-                            "schema",
-                            th.ObjectType(),
-                            description="JSON schema for the stream",
-                        ),
-                    ),
-                ),
-                description="Custom stream definitions",
-            ),
-            th.Property(
-                "stream_maps",
-                th.ObjectType(),
-                description="Configuration for stream maps",
-            ),
-            th.Property(
-                "stream_map_settings",
-                th.ObjectType(),
-                description="Settings for stream maps",
-            ),
-            # LDIF Processing Configuration
-            th.Property(
-                "ldif_files",
-                th.ArrayType(th.StringType),
-                description="List of LDIF files to process",
-            ),
-            th.Property(
-                "ldif_directory",
-                th.StringType,
-                description="Directory containing LDIF files",
-            ),
-            th.Property(
-                "ldif_file_pattern",
-                th.StringType,
-                default="*.ldif",
-                description="File pattern for LDIF files in directory",
-            ),
-            th.Property(
-                "ldif_ignore_errors",
-                th.BooleanType,
-                default=True,
-                description="Continue processing on LDIF parsing errors",
-            ),
-            th.Property(
-                "ldif_max_errors",
-                th.IntegerType,
-                default=100,
-                description="Maximum number of parsing errors before stopping",
-            ),
-            th.Property(
-                "ldif_ignore_file_errors",
-                th.BooleanType,
-                default=True,
-                description="Continue processing if a file fails completely",
-            ),
-            th.Property(
-                "ldif_ignore_entry_errors",
-                th.BooleanType,
-                default=True,
-                description="Continue processing if an entry fails",
-            ),
-            th.Property(
-                "ldif_apply_transformations",
-                th.BooleanType,
-                default=False,
-                description="Apply transformation rules to LDIF entries",
-            ),
-            th.Property(
-                "ldif_transformation_rules",
-                th.ObjectType(),
-                description="Transformation rules for LDIF processing",
-            ),
-            th.Property(
-                "migration_batch",
-                th.StringType,
-                description="Migration batch identifier for tracking",
-            ),
-            th.Property(
-                "enable_ldif_streams",
-                th.BooleanType,
-                default=False,
-                description="Enable LDIF processing streams",
-            ),
-        ),
-    ).to_dict()
+    # TODO: Use centralized LDAP schema when flext-meltano common_schemas is available
+    config_jsonschema: ClassVar[dict[str, object]] = {
+        "type": "object",
+        "properties": {
+            # Basic LDAP connection properties
+            "host": {"type": "string", "description": "LDAP server host"},
+            "port": {"type": "integer", "default": 389, "description": "LDAP server port"},
+            "bind_dn": {"type": "string", "description": "Bind DN for authentication"},
+            "password": {"type": "string", "description": "Password for authentication"},
+            "base_dn": {"type": "string", "description": "Base DN for searches"},
+            "use_ssl": {"type": "boolean", "default": False, "description": "Use SSL connection"},
+            # Tap-specific properties
+            "page_size": {"type": "integer", "default": 1000, "description": "Page size for paged results"},
+            "user_filter": {"type": "string", "default": "(objectClass=inetOrgPerson)", "description": "LDAP filter for user entries"},
+            "group_filter": {"type": "string", "default": "(objectClass=groupOfNames)", "description": "LDAP filter for group entries"},
+            # LDIF processing properties
+            "ldif_files": {"type": "array", "items": {"type": "string"}, "description": "List of LDIF files to process"},
+            "ldif_directory": {"type": "string", "description": "Directory containing LDIF files"},
+            "enable_ldif_streams": {"type": "boolean", "default": False, "description": "Enable LDIF processing streams"},
+            "migration_batch": {"type": "string", "description": "Migration batch identifier for tracking"},
+        }
+    }
 
     def discover_streams(self) -> list[Stream]:
         """Discover available streams."""

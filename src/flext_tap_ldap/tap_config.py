@@ -109,7 +109,7 @@ class LDIFProcessingConfig(FlextModels.BaseConfig):
         return FlextResult[None].ok(None)
 
 
-class TapLDAPConfig(FlextModels.Settings):
+class TapLDAPConfig(FlextModels.BaseConfig):
     """Complete configuration for tap-ldap using flext-core and flext-ldap patterns.
 
     Combines LDAP connection and LDIF processing configurations with Pydantic settings.

@@ -5,8 +5,6 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import uuid4
 
-from flext_core import FlextModels
-
 from flext_tap_ldap import (
     LDAPConnection,
     LDAPRecord,
