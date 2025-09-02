@@ -219,7 +219,7 @@ class TapExecution(FlextModels.Entity):
         return FlextResult[None].ok(None)
 
 
-class LDAPRecord(FlextModels.ValueObject):
+class LDAPRecord(FlextModels.Value):
     """LDAP record entity using FlextModels pattern."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -267,7 +267,7 @@ class LDAPRecord(FlextModels.ValueObject):
 
 
 # Domain Events using flext-core FlextModels pattern
-class TapExecutionStartedEvent(FlextModels.DomainEvent):
+class TapExecutionStartedEvent(FlextModels.Event):
     """Event raised when tap execution starts."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -283,7 +283,7 @@ class TapExecutionStartedEvent(FlextModels.DomainEvent):
     command: str
 
 
-class TapExecutionCompletedEvent(FlextModels.DomainEvent):
+class TapExecutionCompletedEvent(FlextModels.Event):
     """Event raised when tap execution completes."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -294,7 +294,7 @@ class TapExecutionCompletedEvent(FlextModels.DomainEvent):
     connection_id: UUID | None = None
 
 
-class StreamDiscoveredEvent(FlextModels.DomainEvent):
+class StreamDiscoveredEvent(FlextModels.Event):
     """Event raised when stream is discovered."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -312,7 +312,7 @@ class StreamDiscoveredEvent(FlextModels.DomainEvent):
     stream_schema: dict[str, object]
 
 
-class RecordExtractedEvent(FlextModels.DomainEvent):
+class RecordExtractedEvent(FlextModels.Event):
     """Event raised when record is extracted."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -330,7 +330,7 @@ class RecordExtractedEvent(FlextModels.DomainEvent):
     attributes_count: int
 
 
-class ConnectionTestedEvent(FlextModels.DomainEvent):
+class ConnectionTestedEvent(FlextModels.Event):
     """Event raised when connection is tested."""
 
     def validate_business_rules(self) -> FlextResult[None]:

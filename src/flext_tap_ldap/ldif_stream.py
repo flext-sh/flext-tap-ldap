@@ -13,7 +13,7 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 
 from flext_core import FlextLogger
-from flext_ldap import get_ldap_api
+from flext_ldap import FlextLDAPApi
 from flext_ldif import FlextLDIFAPI, FlextLDIFEntry
 from flext_meltano import Stream, singer_typing as th
 
@@ -35,7 +35,7 @@ class LDIFStream(Stream):
         self.tap = tap
         # Initialize flext-ldif API for processing
         self._ldif_api = FlextLDIFAPI()
-        self._ldap_api = get_ldap_api()
+        self._ldap_api = FlextLDAPApi()
         # Define schema
         schema = th.PropertiesList(
             th.Property("dn", th.StringType, description="Distinguished Name"),
@@ -131,7 +131,7 @@ class LDIFAnalysisStream(Stream):
         self.tap = tap
         # Initialize flext-ldif API for analysis
         self._ldif_api = FlextLDIFAPI()
-        self._ldap_api = get_ldap_api()
+        self._ldap_api = FlextLDAPApi()
         # Define schema
         schema = th.PropertiesList(
             th.Property(
