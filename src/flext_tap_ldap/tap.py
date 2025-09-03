@@ -38,21 +38,58 @@ class FlextTapLDAP(Tap):
         "properties": {
             # Basic LDAP connection properties
             "host": {"type": "string", "description": "LDAP server host"},
-            "port": {"type": "integer", "default": 389, "description": "LDAP server port"},
+            "port": {
+                "type": "integer",
+                "default": 389,
+                "description": "LDAP server port",
+            },
             "bind_dn": {"type": "string", "description": "Bind DN for authentication"},
-            "password": {"type": "string", "description": "Password for authentication"},
+            "password": {
+                "type": "string",
+                "description": "Password for authentication",
+            },
             "base_dn": {"type": "string", "description": "Base DN for searches"},
-            "use_ssl": {"type": "boolean", "default": False, "description": "Use SSL connection"},
+            "use_ssl": {
+                "type": "boolean",
+                "default": False,
+                "description": "Use SSL connection",
+            },
             # Tap-specific properties
-            "page_size": {"type": "integer", "default": 1000, "description": "Page size for paged results"},
-            "user_filter": {"type": "string", "default": "(objectClass=inetOrgPerson)", "description": "LDAP filter for user entries"},
-            "group_filter": {"type": "string", "default": "(objectClass=groupOfNames)", "description": "LDAP filter for group entries"},
+            "page_size": {
+                "type": "integer",
+                "default": 1000,
+                "description": "Page size for paged results",
+            },
+            "user_filter": {
+                "type": "string",
+                "default": "(objectClass=inetOrgPerson)",
+                "description": "LDAP filter for user entries",
+            },
+            "group_filter": {
+                "type": "string",
+                "default": "(objectClass=groupOfNames)",
+                "description": "LDAP filter for group entries",
+            },
             # LDIF processing properties
-            "ldif_files": {"type": "array", "items": {"type": "string"}, "description": "List of LDIF files to process"},
-            "ldif_directory": {"type": "string", "description": "Directory containing LDIF files"},
-            "enable_ldif_streams": {"type": "boolean", "default": False, "description": "Enable LDIF processing streams"},
-            "migration_batch": {"type": "string", "description": "Migration batch identifier for tracking"},
-        }
+            "ldif_files": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "List of LDIF files to process",
+            },
+            "ldif_directory": {
+                "type": "string",
+                "description": "Directory containing LDIF files",
+            },
+            "enable_ldif_streams": {
+                "type": "boolean",
+                "default": False,
+                "description": "Enable LDIF processing streams",
+            },
+            "migration_batch": {
+                "type": "string",
+                "description": "Migration batch identifier for tracking",
+            },
+        },
     }
 
     def discover_streams(self) -> list[Stream]:

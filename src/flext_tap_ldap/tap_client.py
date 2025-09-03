@@ -434,8 +434,7 @@ class FlextTapLDAP:
 
         # Create tap configuration using FlextMeltano abstractions
         tap_config_result = create_flext_tap_config(
-            tap_type="tap-ldap",
-            connection_config=ldap_connection_config
+            tap_type="tap-ldap", connection_config=ldap_connection_config
         )
 
         if tap_config_result.failure:
