@@ -17,7 +17,7 @@ from pydantic_settings import SettingsConfigDict
 logger = FlextLogger(__name__)
 
 
-class CustomStreamConfig(FlextModels.BaseConfig):
+class CustomStreamConfig(FlextModels.Config):
     """Configuration for custom LDAP streams using flext-core patterns."""
 
     name: str = Field(..., description="Stream name")
@@ -45,7 +45,7 @@ class CustomStreamConfig(FlextModels.BaseConfig):
         return FlextResult[None].ok(None)
 
 
-class LDIFProcessingConfig(FlextModels.BaseConfig):
+class LDIFProcessingConfig(FlextModels.Config):
     """Configuration for LDIF file processing using flext-core patterns."""
 
     ldif_files: list[str] | None = Field(
@@ -109,7 +109,7 @@ class LDIFProcessingConfig(FlextModels.BaseConfig):
         return FlextResult[None].ok(None)
 
 
-class TapLDAPConfig(FlextModels.BaseConfig):
+class TapLDAPConfig(FlextModels.Config):
     """Complete configuration for tap-ldap using flext-core and flext-ldap patterns.
 
     Combines LDAP connection and LDIF processing configurations with Pydantic settings.

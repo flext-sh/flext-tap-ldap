@@ -17,7 +17,7 @@ from pydantic_settings import SettingsConfigDict
 MAX_PORT = 65535
 
 
-class LDAPConnectionConfig(FlextModels.BaseConfig):
+class LDAPConnectionConfig(FlextModels.Config):
     """LDAP connection configuration using FlextModels pattern."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -44,7 +44,7 @@ class LDAPConnectionConfig(FlextModels.BaseConfig):
     max_retries: int = Field(default=3, description="Maximum connection retries")
 
 
-class CustomStreamConfig(FlextModels.BaseConfig):
+class CustomStreamConfig(FlextModels.Config):
     """Configuration for custom LDAP streams using flext-core patterns."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -71,7 +71,7 @@ class CustomStreamConfig(FlextModels.BaseConfig):
     )
 
 
-class LDIFProcessingConfig(FlextModels.BaseConfig):
+class LDIFProcessingConfig(FlextModels.Config):
     """Configuration for LDIF file processing using flext-core patterns."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -131,7 +131,7 @@ class LDIFProcessingConfig(FlextModels.BaseConfig):
     )
 
 
-class TapLDAPConfig(FlextModels.BaseConfig):
+class TapLDAPConfig(FlextModels.Config):
     """Complete configuration for tap-ldap using flext-core patterns.
 
     Combines LDAP connection and LDIF processing configurations with FlextConfig.BaseModel.
