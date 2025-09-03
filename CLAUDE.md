@@ -31,7 +31,7 @@ FLEXT-TAP-LDAP is a Singer-compliant tap for extracting data from LDAP directori
 - **flext-ldif**: LDIF file processing and validation (local path dependency)
 - **flext-observability**: Monitoring and metrics (local path dependency)
 - **pydantic**: Data validation and settings with strict typing
-- **python-ldap**: Core LDAP library (test dependency)
+- **Python-ldap**: Core LDAP library (test dependency)
 
 ## Development Commands
 
@@ -163,6 +163,7 @@ tests/
 ### Test Markers and Coverage
 
 The project uses pytest markers for test categorization:
+
 - `unit`: Unit tests (fast, isolated)
 - `integration`: Integration tests (require external dependencies)
 - `slow`: Performance tests (longer running)
