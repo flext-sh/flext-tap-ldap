@@ -20,10 +20,11 @@ from flext_ldap import FlextLDAPApi
 from flext_ldif import FlextLDIFAPI, FlextLDIFEntry
 from flext_meltano import FlextSingerTypes, FlextTapStream as Stream
 
+from flext_tap_ldap.client import LDAPClient
+from flext_tap_ldap.tap import FlextTapLDAP
+
 # Create FlextSingerTypes instance for schema definitions
 th = FlextSingerTypes()
-
-from flext_tap_ldap.client import LDAPClient
 
 logger = FlextLogger(__name__)
 
