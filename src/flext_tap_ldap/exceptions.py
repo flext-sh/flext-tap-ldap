@@ -1,3 +1,11 @@
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
+
+from __future__ import annotations
+
+from flext_core import FlextTypes
+
 """Domain-specific exceptions for LDAP tap operations using FlextExceptions patterns.
 
 Copyright (c) 2025 FLEXT Contributors
@@ -6,9 +14,9 @@ SPDX-License-Identifier: MIT
 LDAP Tap Exception Hierarchy using flext-core FlextExceptions patterns.
 """
 
-from __future__ import annotations
 
 from flext_core.exceptions import FlextExceptions
+from flext_core.typings import FlextTypes
 
 
 # LDAP Tap specific exceptions using FlextExceptions base patterns
@@ -66,7 +74,7 @@ FlextTapLdapSearchError = FlextTapLdapProcessingError  # Search is processing
 FlextTapLdapStreamError = FlextTapLdapProcessingError  # Stream errors are processing
 
 
-__all__: list[str] = [
+__all__: FlextTypes.Core.StringList = [
     "FlextTapLdapAuthenticationError",
     "FlextTapLdapConfigurationError",
     "FlextTapLdapConnectionError",

@@ -1,3 +1,11 @@
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
+
+from __future__ import annotations
+
+from flext_core import FlextTypes
+
 """Configuration for tap-ldap using flext-core and flext-ldap integration.
 
 Consolidates configuration and validation with maximum integration
@@ -7,9 +15,9 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
-from __future__ import annotations
 
 from flext_core import FlextLogger, FlextModels, FlextResult
+from flext_core.typings import FlextTypes
 from flext_ldap import FlextLDAPConnectionConfig
 from pydantic import Field, field_validator
 from pydantic_settings import SettingsConfigDict
@@ -22,7 +30,7 @@ class CustomStreamConfig(FlextModels.Config):
 
     name: str = Field(..., description="Stream name")
     search_filter: str = Field(..., description="LDAP search filter")
-    primary_keys: list[str] | None = Field(
+    primary_keys: FlextTypes.Core.StringList | None = Field(
         default=None,
         description="Primary key fields",
     )
@@ -30,7 +38,7 @@ class CustomStreamConfig(FlextModels.Config):
         default=None,
         description="Replication key field",
     )
-    json_schema: dict[str, object] | None = Field(
+    json_schema: FlextTypes.Core.Dict | None = Field(
         default=None,
         description="JSON schema for the stream",
     )
@@ -48,7 +56,7 @@ class CustomStreamConfig(FlextModels.Config):
 class LDIFProcessingConfig(FlextModels.Config):
     """Configuration for LDIF file processing using flext-core patterns."""
 
-    ldif_files: list[str] | None = Field(
+    ldif_files: FlextTypes.Core.StringList | None = Field(
         default=None,
         description="List of LDIF files to process",
     )
@@ -81,7 +89,7 @@ class LDIFProcessingConfig(FlextModels.Config):
         default=False,
         description="Apply transformation rules to LDIF entries",
     )
-    ldif_transformation_rules: dict[str, object] | None = Field(
+    ldif_transformation_rules: FlextTypes.Core.Dict | None = Field(
         default=None,
         description="Transformation rules for LDIF processing",
     )
@@ -163,7 +171,7 @@ class TapLDAPConfig(FlextModels.Config):
     )
 
     # Custom streams
-    custom_streams: list[dict[str, object]] | None = Field(
+    custom_streams: list[FlextTypes.Core.Dict] | None = Field(
         default=None,
         description="Custom stream definitions",
     )
@@ -172,15 +180,15 @@ class TapLDAPConfig(FlextModels.Config):
     @classmethod
     def validate_custom_streams(
         cls,
-        v: list[dict[str, object]] | None,
-    ) -> list[dict[str, object]] | None:
+        v: list[FlextTypes.Core.Dict] | None,
+    ) -> list[FlextTypes.Core.Dict] | None:
         """Validate custom stream configurations."""
         if v is not None:
             # Validate each custom stream config with proper type conversion
-            validation_errors: list[str] = []
+            validation_errors: FlextTypes.Core.StringList = []
             for stream_config in v:
                 try:
-                    # Convert dict[str, object] to proper types for validation
+                    # Convert FlextTypes.Core.Dict to proper types for validation
                     name = str(stream_config.get("name", ""))
                     search_filter = str(stream_config.get("search_filter", ""))
                     primary_keys = stream_config.get("primary_keys")
@@ -247,11 +255,11 @@ class TapLDAPConfig(FlextModels.Config):
 
                     # Normalize types safely for mypy
                     pk_raw = stream_config.get("primary_keys")
-                    pk_list: list[str] | None = (
+                    pk_list: FlextTypes.Core.StringList | None = (
                         pk_raw if isinstance(pk_raw, list) else None
                     )
                     schema_raw = stream_config.get("json_schema")
-                    schema_dict: dict[str, object] | None = (
+                    schema_dict: FlextTypes.Core.Dict | None = (
                         schema_raw if isinstance(schema_raw, dict) else None
                     )
 
@@ -282,7 +290,7 @@ class TapLDAPConfig(FlextModels.Config):
     def create_with_defaults(cls, **overrides: object) -> TapLDAPConfig:
         """Create config with intelligent defaults using flext-ldap integration."""
         # Use FlextLDAPConnectionConfig defaults
-        ldap_defaults: dict[str, object] = {
+        ldap_defaults: FlextTypes.Core.Dict = {
             "host": "localhost",
             "port": 389,
             "use_ssl": False,
@@ -290,7 +298,7 @@ class TapLDAPConfig(FlextModels.Config):
         }
 
         # LDIF processing defaults
-        ldif_defaults: dict[str, object] = {
+        ldif_defaults: FlextTypes.Core.Dict = {
             "ldif_files": None,
             "ldif_directory": None,
             "ldif_file_pattern": "*.ldif",
@@ -363,7 +371,7 @@ class TapLDAPConfig(FlextModels.Config):
 
 
 # Export main configuration classes
-__all__: list[str] = [
+__all__: FlextTypes.Core.StringList = [
     "CustomStreamConfig",
     "LDIFProcessingConfig",
     "TapLDAPConfig",

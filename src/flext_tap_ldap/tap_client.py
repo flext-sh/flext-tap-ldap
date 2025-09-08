@@ -1,3 +1,11 @@
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
+
+from __future__ import annotations
+
+from flext_core import FlextTypes
+
 """LDAP Client and Tap Plugin for flext-tap-ldap using flext-ldap integration.
 
 Consolidates LDAP client functionality with tap plugin interface
@@ -7,7 +15,6 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
-from __future__ import annotations
 
 import asyncio
 import importlib.metadata
@@ -16,6 +23,7 @@ from collections.abc import Awaitable
 from dataclasses import dataclass
 
 from flext_core import FlextLogger, FlextResult
+from flext_core.typings import FlextTypes
 from flext_ldap import (
     FlextLDAPApi,
     FlextLDAPConnectionConfig,
@@ -169,8 +177,8 @@ class LDAPClient:
 
     def _convert_entry_to_dict(
         self,
-        entry_data: FlextLDAPEntry | dict[str, object],
-    ) -> dict[str, object]:
+        entry_data: FlextLDAPEntry | FlextTypes.Core.Dict,
+    ) -> FlextTypes.Core.Dict:
         """Convert FlextLDAPEntry to dict format for testing convenience."""
         if hasattr(entry_data, "dn") and hasattr(entry_data, "attributes"):
             # It's a FlextLDAPEntry model object - flatten attributes
@@ -191,9 +199,9 @@ class LDAPClient:
         self,
         result: FlextResult[list[FlextLDAPEntry]],
         size_limit: int,
-    ) -> list[dict[str, object]]:
+    ) -> list[FlextTypes.Core.Dict]:
         """Process LDAP search results with size limiting."""
-        entries: list[dict[str, object]] = []
+        entries: list[FlextTypes.Core.Dict] = []
         if not (result.is_success and result.value):
             return entries
 
@@ -210,10 +218,10 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str,
-        attributes: list[str] | None,
+        attributes: FlextTypes.Core.StringList | None,
         ldap_scope: str,
         size_limit: int,
-    ) -> list[dict[str, object]]:
+    ) -> list[FlextTypes.Core.Dict]:
         """Perform actual async LDAP search."""
         server_uri = self._build_server_uri()
 
@@ -256,8 +264,8 @@ class LDAPClient:
 
     def _run_async_in_new_loop(
         self,
-        coro: Awaitable[list[dict[str, object]]],
-    ) -> list[dict[str, object]]:
+        coro: Awaitable[list[FlextTypes.Core.Dict]],
+    ) -> list[FlextTypes.Core.Dict]:
         """Run async coroutine in new event loop."""
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -271,10 +279,10 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
-        attributes: list[str] | None = None,
+        attributes: FlextTypes.Core.StringList | None = None,
         scope: str = "SUBTREE",
         size_limit: int = 0,
-    ) -> list[dict[str, object]]:
+    ) -> list[FlextTypes.Core.Dict]:
         """Search for entries using flext-ldap infrastructure (synchronous wrapper)."""
         ldap_scope = self._convert_scope_to_enum(scope)
 
@@ -392,7 +400,7 @@ class LDAPClient:
             # Required for Singer protocol compliance - NOT security-sensitive data generation
             return True
 
-    def health_check(self) -> dict[str, object]:
+    def health_check(self) -> FlextTypes.Core.Dict:
         """Perform health check for testing convenience."""
         start_time = time.time()
         connection_result = self.test_connection()
@@ -519,7 +527,7 @@ class FlextTapLDAPPlugin:
     following the FLEXT plugin architecture patterns.
     """
 
-    def __init__(self, config: dict[str, object]) -> None:
+    def __init__(self, config: FlextTypes.Core.Dict) -> None:
         """Initialize LDAP tap plugin."""
         # Convert dict config to TapLDAPConfig
         self._config = TapLDAPConfig(**config)
@@ -566,13 +574,13 @@ class FlextTapLDAPPlugin:
     def execute(
         self,
         operation: str,
-        parameters: dict[str, object] | None = None,
-    ) -> FlextResult[dict[str, object]]:
+        parameters: FlextTypes.Core.Dict | None = None,
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Execute plugin operations via tap instance."""
         if not self._tap_instance:
             init_result = self.initialize()
             if not init_result.is_success:
-                return FlextResult[dict[str, object]].fail(
+                return FlextResult[FlextTypes.Core.Dict].fail(
                     f"Plugin initialization failed: {init_result.error}",
                 )
 
@@ -586,7 +594,7 @@ class FlextTapLDAPPlugin:
             }
 
             if operation not in operation_handlers:
-                return FlextResult[dict[str, object]].fail(
+                return FlextResult[FlextTypes.Core.Dict].fail(
                     f"Unknown operation: {operation}"
                 )
 
@@ -594,48 +602,50 @@ class FlextTapLDAPPlugin:
 
         except Exception as e:
             logger.exception(f"Plugin operation '{operation}' failed")
-            return FlextResult[dict[str, object]].fail(
+            return FlextResult[FlextTypes.Core.Dict].fail(
                 f"Operation {operation} failed: {e}"
             )
 
-    def discover_streams(self) -> FlextResult[list[object]]:
+    def discover_streams(self) -> FlextResult[FlextTypes.Core.List]:
         """Discover available streams."""
         if not self._tap_instance:
             init_result = self.initialize()
             if not init_result.is_success:
-                return FlextResult[list[object]].fail(
+                return FlextResult[FlextTypes.Core.List].fail(
                     f"Plugin initialization failed: {init_result.error}",
                 )
 
         try:
             if self._tap_instance is None:
-                return FlextResult[list[object]].fail(
+                return FlextResult[FlextTypes.Core.List].fail(
                     "Tap instance not properly initialized"
                 )
 
             # Get streams from tap using Singer SDK interface
             streams = self._tap_instance.discover_streams()
-            # Cast to list[object] for type compatibility
-            stream_objects: list[object] = list(streams)
-            return FlextResult[list[object]].ok(stream_objects)
+            # Cast to FlextTypes.Core.List for type compatibility
+            stream_objects: FlextTypes.Core.List = list(streams)
+            return FlextResult[FlextTypes.Core.List].ok(stream_objects)
 
         except Exception as e:
             logger.exception("Stream discovery failed")
-            return FlextResult[list[object]].fail(f"Stream discovery failed: {e}")
+            return FlextResult[FlextTypes.Core.List].fail(
+                f"Stream discovery failed: {e}"
+            )
 
     def _execute_discover(
         self,
-        _parameters: dict[str, object],
-    ) -> FlextResult[dict[str, object]]:
+        _parameters: FlextTypes.Core.Dict,
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Execute discover operation through tap."""
         streams_result = self.discover_streams()
         if not streams_result.is_success:
-            return FlextResult[dict[str, object]].fail(
+            return FlextResult[FlextTypes.Core.Dict].fail(
                 streams_result.error or "Discovery failed"
             )
 
         streams = streams_result.value or []
-        catalog_data: dict[str, object] = {
+        catalog_data: FlextTypes.Core.Dict = {
             "streams": [
                 {
                     "tap_stream_id": getattr(stream, "tap_stream_id", ""),
@@ -653,16 +663,16 @@ class FlextTapLDAPPlugin:
             "plugin_version": self.version,
         }
 
-        return FlextResult[dict[str, object]].ok(catalog_data)
+        return FlextResult[FlextTypes.Core.Dict].ok(catalog_data)
 
     def _execute_sync(
         self,
-        _parameters: dict[str, object],
-    ) -> FlextResult[dict[str, object]]:
+        _parameters: FlextTypes.Core.Dict,
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Execute sync operation through tap."""
         # This would need to integrate with Singer protocol for actual sync
         # For now, return placeholder indicating sync capability
-        return FlextResult[dict[str, object]].ok(
+        return FlextResult[FlextTypes.Core.Dict].ok(
             {
                 "operation": "sync",
                 "status": "completed",
@@ -674,18 +684,18 @@ class FlextTapLDAPPlugin:
 
     def _execute_test(
         self,
-        _parameters: dict[str, object],
-    ) -> FlextResult[dict[str, object]]:
+        _parameters: FlextTypes.Core.Dict,
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Execute test operation through tap."""
         try:
             if not self._tap_instance:
-                return FlextResult[dict[str, object]].fail(
+                return FlextResult[FlextTypes.Core.Dict].fail(
                     "Tap instance not initialized"
                 )
 
             # Test configuration (Pydantic validation already occurred during creation)
             # Connection test could be added here in the future
-            return FlextResult[dict[str, object]].ok(
+            return FlextResult[FlextTypes.Core.Dict].ok(
                 {
                     "operation": "test",
                     "status": "passed",
@@ -695,19 +705,19 @@ class FlextTapLDAPPlugin:
             )
 
         except Exception as e:
-            return FlextResult[dict[str, object]].fail(f"Test operation failed: {e}")
+            return FlextResult[FlextTypes.Core.Dict].fail(f"Test operation failed: {e}")
 
     def _execute_catalog(
         self,
-        parameters: dict[str, object],
-    ) -> FlextResult[dict[str, object]]:
+        parameters: FlextTypes.Core.Dict,
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Execute catalog generation through tap."""
         # Alias for discover operation
         return self._execute_discover(parameters)
 
 
 def create_ldap_tap_plugin(
-    config: dict[str, object],
+    config: FlextTypes.Core.Dict,
 ) -> FlextResult[FlextTapLDAPPlugin]:
     """Create an LDAP tap plugin instance.
 

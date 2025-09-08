@@ -1,4 +1,8 @@
-"""Coverage boost tests to push client.py to 80%+ coverage."""
+"""Coverage boost tests to push client.py to 80%+ coverage.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 

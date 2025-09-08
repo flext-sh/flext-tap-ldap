@@ -5,9 +5,21 @@ EXPECTED_DATA_COUNT = 3
 
 MIGRATED TO FLEXT-CORE:
 Provides enterprise-ready setup utilities with FlextResult pattern support.
+
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
+
+from flext_core import FlextTypes
+
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
+
 
 import os
 from dataclasses import dataclass, field
@@ -15,6 +27,7 @@ from dataclasses import dataclass, field
 from flext_core import (
     FlextResult,
 )
+from flext_core.typings import FlextTypes
 
 from flext_tap_ldap.config import (
     LDAPConnectionConfig,
@@ -85,7 +98,7 @@ class LDIFConfigBuilder:
     following Interface Segregation Principle.
     """
 
-    ldif_files: list[str] = field(default_factory=list)
+    ldif_files: FlextTypes.Core.StringList = field(default_factory=list)
     ldif_directory: str | None = None
     ldif_file_pattern: str = "*.ldif"
     ldif_ignore_errors: bool = True
@@ -93,11 +106,11 @@ class LDIFConfigBuilder:
     ldif_ignore_file_errors: bool = True
     ldif_ignore_entry_errors: bool = True
     ldif_apply_transformations: bool = False
-    ldif_transformation_rules: dict[str, object] = field(default_factory=dict)
+    ldif_transformation_rules: FlextTypes.Core.Dict = field(default_factory=dict)
     migration_batch: str | None = None
     enable_ldif_streams: bool = False
 
-    def with_files(self, files: list[str]) -> LDIFConfigBuilder:
+    def with_files(self, files: FlextTypes.Core.StringList) -> LDIFConfigBuilder:
         """Set LDIF files to process."""
         self.ldif_files = files
         return self
@@ -127,7 +140,7 @@ class LDIFConfigBuilder:
         self,
         *,
         enable: bool = True,
-        rules: dict[str, object] | None = None,
+        rules: FlextTypes.Core.Dict | None = None,
     ) -> LDIFConfigBuilder:
         """Configure transformation settings."""
         self.ldif_apply_transformations = enable
@@ -246,7 +259,7 @@ def create_ldap_connection_config_convenience(
 
 
 def create_ldif_processing_config(
-    ldif_files: list[str] | None = None,
+    ldif_files: FlextTypes.Core.StringList | None = None,
     ldif_directory: str | None = None,
     **kwargs: object,
 ) -> FlextResult[LDIFProcessingConfig]:
@@ -463,7 +476,7 @@ def create_production_ldap_config(**overrides: object) -> FlextResult[TapLDAPCon
 
 def create_ldif_processing_config_advanced(
     ldif_directory: str | None = None,
-    ldif_files: list[str] | None = None,
+    ldif_files: FlextTypes.Core.StringList | None = None,
     **overrides: object,
 ) -> FlextResult[TapLDAPConfig]:
     """Create LDIF processing configuration for migration scenarios.
@@ -517,7 +530,7 @@ def create_ldif_processing_config_advanced(
 
 
 # Export main API functions
-__all__: list[str] = [
+__all__: FlextTypes.Core.StringList = [
     "FlextResult",
     "LDAPConnectionParams",
     "LDIFConfigBuilder",

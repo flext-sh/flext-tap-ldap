@@ -2,9 +2,21 @@
 
 REFACTORED:
 Uses flext-core service patterns - NO duplication. Clean architecture.
+
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
+
+from flext_core import FlextTypes
+
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
+
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -14,6 +26,7 @@ from flext_core import (
     FlextModels,
     FlextResult,
 )
+from flext_core.typings import FlextTypes
 
 from flext_tap_ldap.domain.entities import (
     LDAPConnection,
@@ -75,9 +88,9 @@ class StreamCreationParams:
     connection_id: UUID
     stream_type: str
     search_filter: str
-    attributes: list[str] | None = None
+    attributes: FlextTypes.Core.StringList | None = None
     tap_stream_id: str | None = None
-    key_properties: list[str] | None = None
+    key_properties: FlextTypes.Core.StringList | None = None
     replication_method: str = "FULL_TABLE"
     replication_key: str | None = None
 
@@ -132,22 +145,22 @@ class LDAPConnectionService:
     async def test_connection(
         self,
         connection_id: UUID,
-    ) -> FlextResult[dict[str, object]]:
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Test LDAP connection."""
         try:
             connection = self._connections.get(connection_id)
             if not connection:
-                return FlextResult[dict[str, object]].fail("Connection not found")
+                return FlextResult[FlextTypes.Core.Dict].fail("Connection not found")
 
             # Here you would actually test the LDAP connection
             # For now, we just mark it as tested
             connection.last_tested = datetime.now(UTC)
-            return FlextResult[dict[str, object]].ok({"success": True})
+            return FlextResult[FlextTypes.Core.Dict].ok({"success": True})
         except (RuntimeError, ValueError, TypeError) as e:
             connection = self._connections.get(connection_id)
             if connection:
                 connection.last_error = str(e)
-            return FlextResult[dict[str, object]].fail(
+            return FlextResult[FlextTypes.Core.Dict].fail(
                 f"Failed to test connection: {e}"
             )
 
@@ -217,12 +230,14 @@ class LDAPStreamService:
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[LDAPStream].fail(f"Failed to create stream: {e}")
 
-    async def discover_schema(self, stream_id: UUID) -> FlextResult[dict[str, object]]:
+    async def discover_schema(
+        self, stream_id: UUID
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Discover schema for LDAP stream."""
         try:
             stream = self._streams.get(stream_id)
             if not stream:
-                return FlextResult[dict[str, object]].fail("Stream not found")
+                return FlextResult[FlextTypes.Core.Dict].fail("Stream not found")
 
             # Here you would actually discover the schema from LDAP
             # For now, return a basic schema
@@ -236,9 +251,9 @@ class LDAPStreamService:
             }
 
             stream.update_schema(schema)
-            return FlextResult[dict[str, object]].ok(schema)
+            return FlextResult[FlextTypes.Core.Dict].ok(schema)
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[dict[str, object]].fail(
+            return FlextResult[FlextTypes.Core.Dict].fail(
                 f"Failed to discover schema: {e}"
             )
 
@@ -280,9 +295,9 @@ class TapExecutionService:
         self,
         connection_id: UUID,
         command: str,
-        config: dict[str, object] | None = None,
-        catalog: dict[str, object] | None = None,
-        state: dict[str, object] | None = None,
+        config: FlextTypes.Core.Dict | None = None,
+        catalog: FlextTypes.Core.Dict | None = None,
+        state: FlextTypes.Core.Dict | None = None,
     ) -> FlextResult[TapExecution]:
         """Create tap execution."""
         try:
@@ -417,8 +432,8 @@ class LDAPRecordService:
         stream_id: UUID,
         execution_id: UUID,
         dn: str,
-        attributes: dict[str, object],
-        object_class: list[str] | None = None,
+        attributes: FlextTypes.Core.Dict,
+        object_class: FlextTypes.Core.StringList | None = None,
     ) -> FlextResult[LDAPRecord]:
         """Create LDAP record."""
         try:
@@ -479,7 +494,7 @@ class LDAPRecordService:
         self,
         stream_id: UUID | None = None,
         execution_id: UUID | None = None,
-    ) -> FlextResult[dict[str, object]]:
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Count LDAP records, optionally filtered by stream or execution ID."""
         try:
             records = list(self._records.values())
@@ -490,6 +505,8 @@ class LDAPRecordService:
             if execution_id:
                 records = [r for r in records if r.execution_id == execution_id]
 
-            return FlextResult[dict[str, object]].ok({"count": len(records)})
+            return FlextResult[FlextTypes.Core.Dict].ok({"count": len(records)})
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[dict[str, object]].fail(f"Failed to count records: {e}")
+            return FlextResult[FlextTypes.Core.Dict].fail(
+                f"Failed to count records: {e}"
+            )

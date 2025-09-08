@@ -1,10 +1,14 @@
-"""Domain models for tap-ldap using flext-core."""
+"""Domain models for tap-ldap using flext-core.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
 from datetime import datetime
 
-from flext_core import FlextModels, FlextResult
+from flext_core import FlextModels, FlextResult, FlextTypes
 from flext_ldap import FlextLDAPEntry
 from pydantic import Field
 
@@ -22,7 +26,7 @@ from flext_tap_ldap.domain.entities import (
 
 
 def _get_entry_value(
-    entry: dict[str, object] | FlextLDAPEntry,
+    entry: FlextTypes.Core.Dict | FlextLDAPEntry,
     key: str,
     default: object = None,
 ) -> object:
@@ -37,8 +41,8 @@ def _get_entry_value(
     return getattr(entry, key, default)
 
 
-def _safe_list_str(value: object) -> list[str]:
-    """Safely coerce a value to list[str]."""
+def _safe_list_str(value: object) -> FlextTypes.Core.StringList:
+    """Safely coerce a value to FlextTypes.Core.StringList."""
     if isinstance(value, list):
         return [str(v) for v in value]
     if isinstance(value, tuple):
@@ -62,7 +66,7 @@ class LDAPAttribute(FlextModels):
     """Represents an LDAP attribute with its values."""
 
     name: str = Field(..., description="Attribute name")
-    values: list[str] = Field(..., description="Attribute values")
+    values: FlextTypes.Core.StringList = Field(..., description="Attribute values")
     is_binary: bool = Field(
         default=False,
         description="Whether the attribute contains binary data",
@@ -98,7 +102,9 @@ class LDAPEntry(FlextModels):
     """Represents an LDAP entry."""
 
     dn: str = Field(..., description="Distinguished Name")
-    object_classes: list[str] = Field(..., description="Object classes")
+    object_classes: FlextTypes.Core.StringList = Field(
+        ..., description="Object classes"
+    )
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for LDAP entries."""
@@ -107,7 +113,7 @@ class LDAPEntry(FlextModels):
         # Additional LDAP entry validation can be added here
         return FlextResult[None].ok(None)
 
-    attributes: dict[str, object] = Field(
+    attributes: FlextTypes.Core.Dict = Field(
         default_factory=dict,
         description="Entry attributes",
     )
@@ -123,7 +129,9 @@ class LDAPEntry(FlextModels):
         None,
         description="LDIF change type (add, modify, delete)",
     )
-    controls: list[str] = Field(default_factory=list, description="LDAP controls")
+    controls: FlextTypes.Core.StringList = Field(
+        default_factory=list, description="LDAP controls"
+    )
 
     def get_attribute(self, name: str) -> object | None:
         """Get attribute value by name (case-insensitive).
@@ -153,7 +161,7 @@ class LDAPEntry(FlextModels):
         """
         return any(oc.lower() == object_class.lower() for oc in self.object_classes)
 
-    def to_dict(self) -> dict[str, object]:
+    def to_dict(self) -> FlextTypes.Core.Dict:
         """Convert entry to dictionary format.
 
         Returns:
@@ -175,7 +183,7 @@ class LDAPEntry(FlextModels):
         return result
 
     @classmethod
-    def from_dict(cls, data: dict[str, object]) -> LDAPEntry:
+    def from_dict(cls, data: FlextTypes.Core.Dict) -> LDAPEntry:
         """Create LDAPEntry from dictionary.
 
         Args:
@@ -212,7 +220,7 @@ class LDAPUser(LDAPEntry):
     login_shell: str | None = Field(None, description="Login shell")
 
     @classmethod
-    def from_entry(cls, entry: dict[str, object] | FlextLDAPEntry) -> LDAPUser:
+    def from_entry(cls, entry: FlextTypes.Core.Dict | FlextLDAPEntry) -> LDAPUser:
         """Create LDAPUser from LDAP entry."""
         return cls(
             # Required fields from LDAPEntry
@@ -256,8 +264,10 @@ class LDAPGroup(LDAPEntry):
 
     cn: str | None = Field(None, description="Group name")
     description: str | None = Field(None, description="Group description")
-    members: list[str] = Field(default_factory=list, description="Member DNs")
-    unique_members: list[str] = Field(
+    members: FlextTypes.Core.StringList = Field(
+        default_factory=list, description="Member DNs"
+    )
+    unique_members: FlextTypes.Core.StringList = Field(
         default_factory=list,
         description="Unique member DNs",
     )
@@ -267,7 +277,7 @@ class LDAPGroup(LDAPEntry):
     modify_timestamp: str | None = Field(None, description="Modification timestamp")
 
     @classmethod
-    def from_entry(cls, entry: dict[str, object] | FlextLDAPEntry) -> LDAPGroup:
+    def from_entry(cls, entry: FlextTypes.Core.Dict | FlextLDAPEntry) -> LDAPGroup:
         """Create LDAPGroup from LDAP entry."""
         return cls(
             # Required fields from LDAPEntry
@@ -298,16 +308,18 @@ class LDAPGroup(LDAPEntry):
 class LDAPSchema(FlextModels):
     """Represents LDAP schema information."""
 
-    object_classes: list[str] = Field(
+    object_classes: FlextTypes.Core.StringList = Field(
         default_factory=list,
         description="Available object classes",
     )
-    attribute_types: list[str] = Field(
+    attribute_types: FlextTypes.Core.StringList = Field(
         default_factory=list,
         description="Available attribute types",
     )
-    ldap_syntaxes: list[str] = Field(default_factory=list, description="LDAP syntaxes")
-    naming_contexts: list[str] = Field(
+    ldap_syntaxes: FlextTypes.Core.StringList = Field(
+        default_factory=list, description="LDAP syntaxes"
+    )
+    naming_contexts: FlextTypes.Core.StringList = Field(
         default_factory=list,
         description="Naming contexts",
     )

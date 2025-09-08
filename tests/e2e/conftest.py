@@ -1,4 +1,8 @@
-"""Pytest fixtures for E2E tests."""
+"""Pytest fixtures for E2E tests.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
@@ -10,6 +14,8 @@ from pathlib import Path
 
 import pytest
 import structlog
+from flext_core import FlextTypes
+from flext_core.typings import FlextTypes
 from ldap3 import ALL, Connection, Server
 
 logger = structlog.FlextLogger()
@@ -22,7 +28,7 @@ def project_root() -> Path:
 
 
 @pytest.fixture(scope="session")
-def sample_catalog() -> dict[str, object]:
+def sample_catalog() -> FlextTypes.Core.Dict:
     """Create a sample Singer catalog for testing."""
     return {
         "streams": [
@@ -50,7 +56,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
     logger.info("Starting OpenLDAP container...")
 
     async def _run(
-        cmd_list: list[str],
+        cmd_list: FlextTypes.Core.StringList,
         cwd: str | None = None,
         timeout_seconds: int = 120,
     ) -> int:
@@ -137,7 +143,7 @@ def tap_config_file(tmp_path: Path, ldap_container: None) -> Path:
 
 
 @pytest.fixture
-def catalog_file(tmp_path: Path, sample_catalog: dict[str, object]) -> Path:
+def catalog_file(tmp_path: Path, sample_catalog: FlextTypes.Core.Dict) -> Path:
     """Create catalog file for testing."""
     catalog_file = tmp_path / "catalog.json"
     catalog_file.write_text(json.dumps(sample_catalog, indent=2))

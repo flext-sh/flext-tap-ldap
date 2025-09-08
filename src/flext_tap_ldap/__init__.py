@@ -1,6 +1,18 @@
-"""Singer tap for LDAP data extraction."""
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
 
 from __future__ import annotations
+from flext_core import FlextTypes
+
+
+"""Singer tap for LDAP data extraction."""
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
+
+from flext_core.typings import FlextTypes
 
 # Import new consolidated implementations
 from flext_tap_ldap.tap_client import (
@@ -68,7 +80,7 @@ from flext_tap_ldap import exceptions as tap_exceptions
 __version__ = "0.9.0-reorganized"
 __version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 
-__all__: list[str] = [
+__all__: FlextTypes.Core.StringList = [
     # Main Classes
     "FlextTapLDAP",
     "FlextTapLDAPPlugin",

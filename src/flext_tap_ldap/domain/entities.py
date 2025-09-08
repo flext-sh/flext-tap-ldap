@@ -1,6 +1,18 @@
-"""Domain entities for tap-ldap using flext-core patterns."""
+"""Domain entities for tap-ldap using flext-core patterns.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
+
+from flext_core import FlextTypes
+
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
+
 
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
@@ -10,7 +22,23 @@ from flext_core import (
     FlextModels,
     FlextResult,
 )
+from flext_core.typings import FlextTypes
 from pydantic import Field
+
+# Constants
+MAX_PORT = 65535
+
+logger = FlextLogger(__name__)
+
+
+class LDAPConnection(FlextModels.Entity):
+    """LDAP connection entity using FlextModels pattern."""
+
+
+from flext_core import (
+    FlextLogger,
+    FlextModels,
+)
 
 # Constants
 MAX_PORT = 65535
@@ -51,12 +79,12 @@ class LDAPStream(FlextModels.Entity):
     connection_id: UUID
     stream_type: str
     search_filter: str
-    attributes: list[str]
+    attributes: FlextTypes.Core.StringList
     tap_stream_id: str
-    key_properties: list[str]
+    key_properties: FlextTypes.Core.StringList
     replication_method: str
     replication_key: str | None = None
-    stream_schema: dict[str, object]
+    stream_schema: FlextTypes.Core.Dict
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate LDAP stream business rules."""
@@ -75,7 +103,7 @@ class LDAPStream(FlextModels.Entity):
     records_extracted: int = 0
     last_extraction: datetime | None = None
 
-    def update_schema(self, schema: dict[str, object]) -> FlextResult[None]:
+    def update_schema(self, schema: FlextTypes.Core.Dict) -> FlextResult[None]:
         """Update stream schema with validation."""
         if not isinstance(schema, dict):
             return FlextResult[None].fail("Schema must be a dictionary")
@@ -120,9 +148,9 @@ class TapExecution(FlextModels.Entity):
     started_at: datetime | None = None
     completed_at: datetime | None = None
     duration_seconds: float | None = None
-    config: dict[str, object]
-    catalog: dict[str, object]
-    state: dict[str, object]
+    config: FlextTypes.Core.Dict
+    catalog: FlextTypes.Core.Dict
+    state: FlextTypes.Core.Dict
     records_extracted: int = 0
     streams_processed: int = 0
     stdout: str | None = None
@@ -236,21 +264,21 @@ class LDAPRecord(FlextModels.Value):
     stream_id: UUID
     execution_id: UUID
     dn: str
-    attributes: dict[str, object]
-    object_class: list[str]
+    attributes: FlextTypes.Core.Dict
+    object_class: FlextTypes.Core.StringList
     extracted_at: datetime = Field(default_factory=datetime.now)
-    singer_record: dict[str, object]
+    singer_record: FlextTypes.Core.Dict
 
     @property
     def rdn(self) -> str:
         """Get relative distinguished name."""
         return self.dn.split(",")[0] if self.dn else ""
 
-    def to_singer_record(self) -> FlextResult[dict[str, object]]:
+    def to_singer_record(self) -> FlextResult[FlextTypes.Core.Dict]:
         """Convert to Singer record format with validation."""
         validation_result = self.validate_business_rules()
         if not validation_result.success:
-            return FlextResult[dict[str, object]].fail(
+            return FlextResult[FlextTypes.Core.Dict].fail(
                 f"Invalid LDAP record: {validation_result.error}"
             )
 
@@ -263,7 +291,7 @@ class LDAPRecord(FlextModels.Value):
             },
             "time_extracted": self.extracted_at.isoformat(),
         }
-        return FlextResult[dict[str, object]].ok(record)
+        return FlextResult[FlextTypes.Core.Dict].ok(record)
 
 
 # Domain Events using flext-core FlextModels pattern
@@ -309,7 +337,7 @@ class StreamDiscoveredEvent(FlextModels.Event):
     connection_id: UUID
     stream_name: str
     stream_type: str
-    stream_schema: dict[str, object]
+    stream_schema: FlextTypes.Core.Dict
 
 
 class RecordExtractedEvent(FlextModels.Event):

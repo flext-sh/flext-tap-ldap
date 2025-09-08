@@ -1,4 +1,8 @@
-"""Quick comprehensive tests for LDAP client to maximize coverage efficiently."""
+"""Quick comprehensive tests for LDAP client to maximize coverage efficiently.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
@@ -6,6 +10,8 @@ import contextlib
 from unittest.mock import Mock, patch
 
 import pytest
+from flext_core import FlextTypes
+from flext_core.typings import FlextTypes
 
 from flext_tap_ldap import LDAPClient
 
@@ -139,7 +145,7 @@ class TestLDAPClientQuick:
     def test_run_async_in_new_loop(self, client: LDAPClient) -> None:
         """Test running async coroutine in new loop."""
 
-        async def dummy_coro() -> list[dict[str, object]]:
+        async def dummy_coro() -> list[FlextTypes.Core.Dict]:
             return [{"test": "data"}]
 
         result = client._run_async_in_new_loop(dummy_coro())
