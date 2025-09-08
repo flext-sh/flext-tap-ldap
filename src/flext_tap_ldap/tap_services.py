@@ -1,3 +1,11 @@
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
+
+from __future__ import annotations
+
+from flext_core import FlextTypes
+
 """Services for FLEXT Tap LDAP operations and utilities.
 
 Consolidates application services, LDIF processing, and simple API utilities
@@ -7,7 +15,6 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
-from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -15,6 +22,7 @@ from pathlib import Path
 from uuid import UUID
 
 from flext_core import FlextLogger, FlextResult
+from flext_core.typings import FlextTypes
 from flext_ldap import FlextLDAPConnectionConfig
 from flext_ldif import FlextLDIFAPI
 
@@ -86,9 +94,9 @@ class StreamCreationParams:
     connection_id: str
     stream_type: str
     search_filter: str
-    attributes: list[str] | None = None
+    attributes: FlextTypes.Core.StringList | None = None
     tap_stream_id: str | None = None
-    key_properties: list[str] | None = None
+    key_properties: FlextTypes.Core.StringList | None = None
     replication_method: str = "FULL_TABLE"
     replication_key: str | None = None
 
@@ -113,7 +121,7 @@ class LDIFConfigBuilder:
     following Interface Segregation Principle.
     """
 
-    ldif_files: list[str] = field(default_factory=list)
+    ldif_files: FlextTypes.Core.StringList = field(default_factory=list)
     ldif_directory: str | None = None
     ldif_file_pattern: str = "*.ldif"
     ldif_ignore_errors: bool = True
@@ -121,11 +129,11 @@ class LDIFConfigBuilder:
     ldif_ignore_file_errors: bool = True
     ldif_ignore_entry_errors: bool = True
     ldif_apply_transformations: bool = False
-    ldif_transformation_rules: dict[str, object] = field(default_factory=dict)
+    ldif_transformation_rules: FlextTypes.Core.Dict = field(default_factory=dict)
     migration_batch: str | None = None
     enable_ldif_streams: bool = False
 
-    def with_files(self, files: list[str]) -> LDIFConfigBuilder:
+    def with_files(self, files: FlextTypes.Core.StringList) -> LDIFConfigBuilder:
         """Set LDIF files to process."""
         self.ldif_files = files
         return self
@@ -155,7 +163,7 @@ class LDIFConfigBuilder:
         self,
         *,
         enable: bool = True,
-        rules: dict[str, object] | None = None,
+        rules: FlextTypes.Core.Dict | None = None,
     ) -> LDIFConfigBuilder:
         """Configure transformation settings."""
         self.ldif_apply_transformations = enable
@@ -223,7 +231,7 @@ class LDAPConnectionService:
     async def test_connection(
         self,
         connection_id: str,
-    ) -> FlextResult[dict[str, object]]:
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Test LDAP connection."""
         try:
             connection = self._connections.get(connection_id)
@@ -302,7 +310,9 @@ class LDAPStreamService:
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[object].fail(f"Failed to create stream: {e}")
 
-    async def discover_schema(self, stream_id: str) -> FlextResult[dict[str, object]]:
+    async def discover_schema(
+        self, stream_id: str
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Discover schema for LDAP stream."""
         try:
             stream = self._streams.get(stream_id)
@@ -364,9 +374,9 @@ class TapExecutionService:
         self,
         connection_id: str,
         command: str,
-        config: dict[str, object] | None = None,
-        catalog: dict[str, object] | None = None,
-        state: dict[str, object] | None = None,
+        config: FlextTypes.Core.Dict | None = None,
+        catalog: FlextTypes.Core.Dict | None = None,
+        state: FlextTypes.Core.Dict | None = None,
     ) -> FlextResult[TapExecution]:
         """Create tap execution."""
         try:
@@ -503,8 +513,8 @@ class LDAPRecordService:
         stream_id: str,
         execution_id: str,
         dn: str,
-        attributes: dict[str, object],
-        object_class: list[str] | None = None,
+        attributes: FlextTypes.Core.Dict,
+        object_class: FlextTypes.Core.StringList | None = None,
     ) -> FlextResult[LDAPRecord]:
         """Create LDAP record."""
         try:
@@ -585,7 +595,9 @@ class LDIFProcessingService:
         """Initialize LDIF processing service."""
         self._ldif_api = FlextLDIFAPI()
 
-    def process_ldif_file(self, file_path: str) -> FlextResult[list[dict[str, object]]]:
+    def process_ldif_file(
+        self, file_path: str
+    ) -> FlextResult[list[FlextTypes.Core.Dict]]:
         """Process LDIF file using flext-ldif library."""
         try:
             logger.info(f"Processing LDIF file: {file_path}")
@@ -603,8 +615,8 @@ class LDIFProcessingService:
                 f"Successfully processed {len(entries)} entries from {file_path}",
             )
 
-            # Normalize to list[dict[str, object]]
-            normalized: list[dict[str, object]] = []
+            # Normalize to list[FlextTypes.Core.Dict]
+            normalized: list[FlextTypes.Core.Dict] = []
             for entry in entries:
                 # FlextLDIFEntry: expose minimal dict
                 dn = getattr(getattr(entry, "dn", None), "value", None) or getattr(
@@ -622,7 +634,7 @@ class LDIFProcessingService:
             logger.exception(f"Error processing LDIF file {file_path}")
             return FlextResult[object].fail(f"LDIF processing failed: {e}")
 
-    def validate_ldif_file(self, file_path: str) -> FlextResult[dict[str, object]]:
+    def validate_ldif_file(self, file_path: str) -> FlextResult[FlextTypes.Core.Dict]:
         """Validate LDIF file using flext-ldif library."""
         try:
             logger.info(f"Validating LDIF file: {file_path}")
@@ -636,7 +648,7 @@ class LDIFProcessingService:
             entries = result.data or []
             total_entries = len(entries)
             # Consider parse success as valid
-            validation_data: dict[str, object] = {
+            validation_data: FlextTypes.Core.Dict = {
                 "total_entries": total_entries,
                 "valid_entries": total_entries,
                 "invalid_entries": 0,
@@ -650,7 +662,7 @@ class LDIFProcessingService:
             logger.exception(f"Error validating LDIF file {file_path}")
             return FlextResult[object].fail(f"LDIF validation failed: {e}")
 
-    def get_ldif_statistics(self, file_path: str) -> FlextResult[dict[str, object]]:
+    def get_ldif_statistics(self, file_path: str) -> FlextResult[FlextTypes.Core.Dict]:
         """Get LDIF file statistics using flext-ldif library."""
         try:
             # First validate to get statistics
@@ -710,7 +722,7 @@ def setup_ldap_tap(config: TapLDAPConfig | None = None) -> FlextResult[TapLDAPCo
 
 def create_ldap_connection_config(
     params: LDAPConnectionParams,
-) -> FlextResult[dict[str, object]]:
+) -> FlextResult[FlextTypes.Core.Dict]:
     """Create LDAP connection configuration using Parameter Object Pattern.
 
     Args:
@@ -744,7 +756,7 @@ def create_ldap_connection_config_convenience(
     base_dn: str,
     port: int = 389,
     **kwargs: object,
-) -> FlextResult[dict[str, object]]:
+) -> FlextResult[FlextTypes.Core.Dict]:
     """Create LDAP connection configuration (testing convenience interface).
 
     Testing convenience wrapper for the Parameter Object Pattern implementation.

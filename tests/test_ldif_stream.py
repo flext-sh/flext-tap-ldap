@@ -1,4 +1,8 @@
-"""Tests for LDIF stream functionality."""
+"""Tests for LDIF stream functionality.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,9 @@
-"""LDAP streams for extracting data from LDAP directories."""
+"""LDAP streams for extracting data from LDAP directories.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+
+"""
 
 from __future__ import annotations
 
@@ -7,6 +12,7 @@ from dataclasses import dataclass
 
 from flext_core import (
     FlextLogger,
+    FlextTypes,
 )
 from flext_meltano import Stream, singer_typing as th
 
@@ -24,7 +30,7 @@ class FallbackDataFactory:
     """
 
     @staticmethod
-    def create_test_user_record() -> dict[str, object]:
+    def create_test_user_record() -> FlextTypes.Core.Dict:
         """Create standardized test user record for fallback scenarios."""
         return {
             "dn": "uid=jdoe,ou=users,dc=test,dc=com",
@@ -55,8 +61,8 @@ class CustomStreamParams:
 
     name: str
     search_filter: str
-    schema_properties: dict[str, object] | None = None
-    primary_keys: list[str] | None = None
+    schema_properties: FlextTypes.Core.Dict | None = None
+    primary_keys: FlextTypes.Core.StringList | None = None
     replication_key: str | None = None
 
     def __post_init__(self) -> None:
@@ -82,7 +88,7 @@ class LDAPBaseStream(Stream):
         self,
         tap: FlextTapLDAP,
         name: str | None = None,
-        schema: dict[str, object] | None = None,
+        schema: FlextTypes.Core.Dict | None = None,
     ) -> None:
         """Initialize the LDAP stream."""
         super().__init__(tap, name=name, schema=schema)
@@ -91,7 +97,7 @@ class LDAPBaseStream(Stream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[dict[str, object]]:
+    ) -> Iterable[FlextTypes.Core.Dict]:
         """Get records from LDAP."""
         # This is a base implementation that yields empty records
         # Subclasses should override this method
@@ -145,7 +151,7 @@ class UsersStream(LDAPBaseStream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[dict[str, object]]:
+    ) -> Iterable[FlextTypes.Core.Dict]:
         """Get user records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
@@ -218,7 +224,7 @@ class GroupsStream(LDAPBaseStream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[dict[str, object]]:
+    ) -> Iterable[FlextTypes.Core.Dict]:
         """Get group records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
@@ -313,7 +319,7 @@ class OrganizationalUnitsStream(LDAPBaseStream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[dict[str, object]]:
+    ) -> Iterable[FlextTypes.Core.Dict]:
         """Get organizational unit records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
@@ -401,7 +407,7 @@ class SchemaStream(LDAPBaseStream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[dict[str, object]]:
+    ) -> Iterable[FlextTypes.Core.Dict]:
         """Get schema records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
@@ -529,7 +535,7 @@ class CustomStream(LDAPBaseStream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[dict[str, object]]:
+    ) -> Iterable[FlextTypes.Core.Dict]:
         """Get custom records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
@@ -595,7 +601,7 @@ class CustomStream(LDAPBaseStream):
             }
 
 
-__all__: list[str] = [
+__all__: FlextTypes.Core.StringList = [
     "CustomStream",
     "GroupsStream",
     "LDAPBaseStream",

@@ -1,4 +1,8 @@
-"""Integration tests for tap-ldap."""
+"""Integration tests for tap-ldap.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
@@ -9,6 +13,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 from click.testing import CliRunner
+from flext_core import FlextTypes
+from flext_core.typings import FlextTypes
 
 from flext_tap_ldap import FlextTapLDAP
 
@@ -21,7 +27,7 @@ class TestFlextTapLDAPIntegration:
         return CliRunner()
 
     @pytest.fixture
-    def mock_ldap_config(self) -> dict[str, object]:
+    def mock_ldap_config(self) -> FlextTypes.Core.Dict:
         """Mock LDAP configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -32,7 +38,7 @@ class TestFlextTapLDAPIntegration:
         }
 
     @pytest.fixture
-    def sample_catalog(self) -> dict[str, object]:
+    def sample_catalog(self) -> FlextTypes.Core.Dict:
         """Sample catalog for testing."""
         return {
             "streams": [
@@ -45,26 +51,30 @@ class TestFlextTapLDAPIntegration:
         }
 
     @pytest.fixture
-    def sample_state(self) -> dict[str, object]:
+    def sample_state(self) -> FlextTypes.Core.Dict:
         """Sample state for testing."""
         return {"bookmarks": {}}
 
     @pytest.fixture
-    def config_file(self, tmp_path: Path, mock_ldap_config: dict[str, object]) -> Path:
+    def config_file(
+        self, tmp_path: Path, mock_ldap_config: FlextTypes.Core.Dict
+    ) -> Path:
         config_path = tmp_path / "config.json"
         with Path(config_path).open("w", encoding="utf-8") as f:
             json.dump(mock_ldap_config, f)
         return config_path
 
     @pytest.fixture
-    def catalog_file(self, tmp_path: Path, sample_catalog: dict[str, object]) -> Path:
+    def catalog_file(
+        self, tmp_path: Path, sample_catalog: FlextTypes.Core.Dict
+    ) -> Path:
         catalog_path = tmp_path / "catalog.json"
         with Path(catalog_path).open("w", encoding="utf-8") as f:
             json.dump(sample_catalog, f)
         return catalog_path
 
     @pytest.fixture
-    def state_file(self, tmp_path: Path, sample_state: dict[str, object]) -> Path:
+    def state_file(self, tmp_path: Path, sample_state: FlextTypes.Core.Dict) -> Path:
         state_path = tmp_path / "state.json"
         with Path(state_path).open("w", encoding="utf-8") as f:
             json.dump(sample_state, f)
@@ -264,7 +274,7 @@ class TestFlextTapLDAPIntegration:
         async def mock_search(
             *args: object,
             **kwargs: object,
-        ) -> AsyncGenerator[dict[str, object]]:
+        ) -> AsyncGenerator[FlextTypes.Core.Dict]:
             yield {
                 "dn": "uid=user1,ou=users,dc=test,dc=com",
                 "attributes": {"uid": "user1", "cn": "User One"},

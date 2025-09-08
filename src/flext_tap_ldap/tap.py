@@ -2,13 +2,26 @@
 
 This module implements the main tap class for LDAP data extraction
 using the centralized patterns from flext-core.meltano.
+
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
 
+from flext_core import FlextTypes
+
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
+
+
 from typing import ClassVar
 
 from flext_core import FlextLogger
+from flext_core.typings import FlextTypes
 from flext_meltano import Stream, Tap
 
 # from flext_meltano.common_schemas import create_ldap_tap_schema  # Not available
@@ -33,7 +46,7 @@ class FlextTapLDAP(Tap):
     config_class = TapLDAPConfig
 
     # TODO: Use centralized LDAP schema when flext-meltano common_schemas is available
-    config_jsonschema: ClassVar[dict[str, object]] = {
+    config_jsonschema: ClassVar[FlextTypes.Core.Dict] = {
         "type": "object",
         "properties": {
             # Basic LDAP connection properties

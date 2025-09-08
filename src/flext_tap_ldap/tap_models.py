@@ -1,3 +1,11 @@
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
+
+from __future__ import annotations
+
+from flext_core import FlextTypes
+
 """Domain Models for FLEXT Tap LDAP with flext-core integration.
 
 Consolidates all data models for LDAP tap operations including entries,
@@ -7,12 +15,12 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
-from __future__ import annotations
 
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from flext_core import FlextLogger, FlextModels, FlextResult
+from flext_core.typings import FlextTypes
 from flext_ldap import FlextLDAPEntry
 from pydantic import Field
 
@@ -20,7 +28,7 @@ logger = FlextLogger(__name__)
 
 
 def _get_entry_value(
-    entry: dict[str, object] | FlextLDAPEntry,
+    entry: FlextTypes.Core.Dict | FlextLDAPEntry,
     key: str,
     default: object = None,
 ) -> object:
@@ -31,8 +39,10 @@ def _get_entry_value(
     return getattr(entry, key, default)
 
 
-def _safe_list_value(value: object, default: list[str] | None = None) -> list[str]:
-    """Safely convert value to list[str]."""
+def _safe_list_value(
+    value: object, default: FlextTypes.Core.StringList | None = None
+) -> FlextTypes.Core.StringList:
+    """Safely convert value to FlextTypes.Core.StringList."""
     if isinstance(value, list):
         return [str(item) for item in value]
     if isinstance(value, str):
@@ -53,7 +63,7 @@ class LDAPAttribute(FlextModels):
     """Represents an LDAP attribute with its values."""
 
     name: str = Field(..., description="Attribute name")
-    values: list[str] = Field(..., description="Attribute values")
+    values: FlextTypes.Core.StringList = Field(..., description="Attribute values")
     is_binary: bool = Field(
         default=False,
         description="Whether the attribute contains binary data",
@@ -94,8 +104,10 @@ class LDAPEntry(FlextModels):
     """Represents an LDAP entry with comprehensive metadata."""
 
     dn: str = Field(..., description="Distinguished Name")
-    object_classes: list[str] = Field(..., description="Object classes")
-    attributes: dict[str, object] = Field(
+    object_classes: FlextTypes.Core.StringList = Field(
+        ..., description="Object classes"
+    )
+    attributes: FlextTypes.Core.Dict = Field(
         default_factory=dict,
         description="Entry attributes",
     )
@@ -111,7 +123,9 @@ class LDAPEntry(FlextModels):
         None,
         description="LDIF change type (add, modify, delete)",
     )
-    controls: list[str] = Field(default_factory=list, description="LDAP controls")
+    controls: FlextTypes.Core.StringList = Field(
+        default_factory=list, description="LDAP controls"
+    )
 
     def validate_domain_rules(self) -> FlextResult[None]:
         """Validate domain-specific rules for LDAP entries."""
@@ -178,7 +192,7 @@ class LDAPUser(LDAPEntry):
     login_shell: str | None = Field(None, description="Login shell")
 
     @classmethod
-    def from_entry(cls, entry: dict[str, object] | FlextLDAPEntry) -> LDAPUser:
+    def from_entry(cls, entry: FlextTypes.Core.Dict | FlextLDAPEntry) -> LDAPUser:
         """Create LDAPUser from LDAP entry."""
         return cls(
             # Required fields from LDAPEntry
@@ -222,8 +236,10 @@ class LDAPGroup(LDAPEntry):
 
     cn: str | None = Field(None, description="Group name")
     description: str | None = Field(None, description="Group description")
-    members: list[str] = Field(default_factory=list, description="Member DNs")
-    unique_members: list[str] = Field(
+    members: FlextTypes.Core.StringList = Field(
+        default_factory=list, description="Member DNs"
+    )
+    unique_members: FlextTypes.Core.StringList = Field(
         default_factory=list,
         description="Unique member DNs",
     )
@@ -233,7 +249,7 @@ class LDAPGroup(LDAPEntry):
     modify_timestamp: str | None = Field(None, description="Modification timestamp")
 
     @classmethod
-    def from_entry(cls, entry: dict[str, object] | FlextLDAPEntry) -> LDAPGroup:
+    def from_entry(cls, entry: FlextTypes.Core.Dict | FlextLDAPEntry) -> LDAPGroup:
         """Create LDAPGroup from LDAP entry."""
         return cls(
             # Required fields from LDAPEntry
@@ -266,16 +282,18 @@ class LDAPGroup(LDAPEntry):
 class LDAPSchema(FlextModels):
     """Represents LDAP schema information."""
 
-    object_classes: list[str] = Field(
+    object_classes: FlextTypes.Core.StringList = Field(
         default_factory=list,
         description="Available object classes",
     )
-    attribute_types: list[str] = Field(
+    attribute_types: FlextTypes.Core.StringList = Field(
         default_factory=list,
         description="Available attribute types",
     )
-    ldap_syntaxes: list[str] = Field(default_factory=list, description="LDAP syntaxes")
-    naming_contexts: list[str] = Field(
+    ldap_syntaxes: FlextTypes.Core.StringList = Field(
+        default_factory=list, description="LDAP syntaxes"
+    )
+    naming_contexts: FlextTypes.Core.StringList = Field(
         default_factory=list,
         description="Naming contexts",
     )
@@ -379,18 +397,18 @@ class LDAPStream(FlextModels):
     connection_id: str = Field(..., description="Associated connection ID")
     stream_type: str = Field(..., description="Type of LDAP stream")
     search_filter: str = Field(..., description="LDAP search filter")
-    attributes: list[str] = Field(
+    attributes: FlextTypes.Core.StringList = Field(
         default_factory=list,
         description="Attributes to extract",
     )
     tap_stream_id: str = Field(..., description="Singer tap stream ID")
-    key_properties: list[str] = Field(
+    key_properties: FlextTypes.Core.StringList = Field(
         default_factory=list,
         description="Primary key properties",
     )
     replication_method: str = Field("FULL_TABLE", description="Replication method")
     replication_key: str | None = Field(None, description="Replication key field")
-    stream_schema: dict[str, object] = Field(
+    stream_schema: FlextTypes.Core.Dict = Field(
         default_factory=dict,
         description="Stream JSON schema",
     )
@@ -415,7 +433,7 @@ class LDAPStream(FlextModels):
         """Validate business rules for LDAP streams."""
         return FlextResult[None].ok(None)
 
-    def update_schema(self, schema: dict[str, object]) -> LDAPStream:
+    def update_schema(self, schema: FlextTypes.Core.Dict) -> LDAPStream:
         """Update stream schema."""
         return self.model_copy(
             update={
@@ -448,15 +466,15 @@ class TapExecution(FlextModels):
     started_at: datetime | None = Field(None, description="Execution start time")
     completed_at: datetime | None = Field(None, description="Execution completion time")
     duration_seconds: float | None = Field(None, description="Execution duration")
-    config: dict[str, object] = Field(
+    config: FlextTypes.Core.Dict = Field(
         default_factory=dict,
         description="Tap configuration",
     )
-    catalog: dict[str, object] = Field(
+    catalog: FlextTypes.Core.Dict = Field(
         default_factory=dict,
         description="Stream catalog",
     )
-    state: dict[str, object] = Field(default_factory=dict, description="Tap state")
+    state: FlextTypes.Core.Dict = Field(default_factory=dict, description="Tap state")
     records_extracted: int = Field(0, description="Total records extracted")
     streams_processed: int = Field(0, description="Total streams processed")
     stdout: str | None = Field(None, description="Standard output")
@@ -567,13 +585,15 @@ class LDAPRecord(FlextModels):
     stream_id: str = Field(..., description="Associated stream ID")
     execution_id: str = Field(..., description="Associated execution ID")
     dn: str = Field(..., description="Distinguished Name")
-    attributes: dict[str, object] = Field(
+    attributes: FlextTypes.Core.Dict = Field(
         default_factory=dict,
         description="LDAP attributes",
     )
-    object_class: list[str] = Field(default_factory=list, description="Object classes")
+    object_class: FlextTypes.Core.StringList = Field(
+        default_factory=list, description="Object classes"
+    )
     extracted_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    singer_record: dict[str, object] = Field(
+    singer_record: FlextTypes.Core.Dict = Field(
         default_factory=dict,
         description="Singer record data",
     )
@@ -593,7 +613,7 @@ class LDAPRecord(FlextModels):
         """Get relative distinguished name."""
         return self.dn.split(",")[0] if self.dn else ""
 
-    def to_singer_record(self) -> dict[str, object]:
+    def to_singer_record(self) -> FlextTypes.Core.Dict:
         """Convert to Singer record format."""
         return {
             "type": "RECORD",
@@ -637,7 +657,7 @@ class StreamDiscoveredEvent(FlextModels):
     connection_id: UUID
     stream_name: str
     stream_type: str
-    stream_schema: dict[str, object]
+    stream_schema: FlextTypes.Core.Dict
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
