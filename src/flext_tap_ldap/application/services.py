@@ -10,14 +10,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextTypes
-
-"""
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
-
-
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from uuid import UUID
@@ -25,8 +17,8 @@ from uuid import UUID
 from flext_core import (
     FlextModels,
     FlextResult,
+    FlextTypes,
 )
-from flext_core.typings import FlextTypes
 
 from flext_tap_ldap.domain.entities import (
     LDAPConnection,

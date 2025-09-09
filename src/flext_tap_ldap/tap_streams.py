@@ -25,8 +25,9 @@ from pathlib import Path
 from flext_core import FlextLogger
 from flext_core.typings import FlextTypes
 from flext_ldap import FlextLDAPApi
-from flext_ldif import FlextLDIFAPI, FlextLDIFEntry
-from flext_meltano import FlextSingerTypes, FlextTapStream as Stream
+from flext_ldif import FlextLDIFAPI, FlextLDIFModels
+from flext_meltano import FlextSingerTypes, StreamDefinition
+from singer_sdk import Stream
 
 from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.tap import FlextTapLDAP
@@ -696,7 +697,7 @@ class LDIFStream(Stream):
 
     def _convert_ldif_entry_to_record(
         self,
-        entry: FlextLDIFEntry,
+        entry: FlextLDIFModels.Entry,
         source_file: str,
     ) -> FlextTypes.Core.Dict | None:
         """Convert LDIF entry to stream record."""

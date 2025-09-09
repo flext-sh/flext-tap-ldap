@@ -1,351 +1,522 @@
-# CLAUDE.md
+# CLAUDE.md - FLEXT Tap LDAP Quality Refactoring Guide
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+**Project**: FLEXT Tap LDAP - Enterprise LDAP Data Extraction  
+**Status**: Quality Refactoring Required | **Architecture**: Clean Architecture + DDD  
+**Dependencies**: Python 3.13+, flext-core, flext-ldap, flext-meltano, singer-sdk  
+**Coverage Target**: 90% | **Current Type Status**: Requires Assessment  
+**Authority**: FLEXT-TAP-LDAP | **Last Updated**: 2025-01-08
 
-## Project Overview
+---
 
-FLEXT-TAP-LDAP is a Singer-compliant tap for extracting data from LDAP directories and LDIF files. It's part of the FLEXT enterprise data integration platform, implementing Clean Architecture, Domain-Driven Design (DDD), and zero-tolerance quality standards.
+## 🎯 PROJECT MISSION STATEMENT
 
-## Key Architecture
+Transform FLEXT Tap LDAP into a **production-ready, enterprise-grade LDAP/LDIF data extraction tap** implementing Singer protocol with zero tolerance quality standards. This tap provides comprehensive LDAP directory and LDIF file processing capabilities with Clean Architecture, Domain-Driven Design, and integration with the broader FLEXT ecosystem.
 
-### Design Patterns
+### 🏆 SUCCESS CRITERIA (EVIDENCE-BASED VALIDATION)
 
-- **Clean Architecture**: Clear separation between domain, application, and infrastructure layers
-- **Domain-Driven Design**: Domain entities and services model the LDAP extraction business logic
-- **Singer SDK**: Standard data extraction protocol for ETL pipelines
-- **FlextResult Pattern**: Railway-oriented programming for error handling from flext-core
-- **Dependency Injection**: Uses flext-core DI container for service management
+- **✅ 90% Test Coverage**: Real functional tests, not mock-heavy (measured via `pytest --cov=src --cov-report=term`)
+- **✅ Zero Tolerance Quality**: MyPy strict + Ruff ALL rules + Bandit security (measured via `make validate`)  
+- **✅ Singer Protocol Compliance**: Full catalog discovery + data extraction working (verified via `make discover && make run`)
+- **✅ LDAP Integration**: Real LDAP connectivity + LDIF processing (verified via `make ldap-test`)
+- **✅ Performance**: Handles enterprise-scale LDAP directories efficiently (measured via performance tests)
 
-### Core Components
+---
 
-- **Domain Layer** (`src/flext_tap_ldap/domain/`): Entities like `LDAPConnection`, `LDAPStream`, `TapExecution`, `LDAPRecord`
-- **Application Services** (`src/flext_tap_ldap/application/`): Business logic services using FlextResult pattern
-- **Stream Classes** (`src/flext_tap_ldap/streams.py`): Singer streams for Users, Groups, OUs, Schema, and Custom queries
-- **Configuration** (`src/flext_tap_ldap/config.py`): Pydantic-based config with LDAP connection and LDIF processing settings
-- **LDIF Processing** (`src/flext_tap_ldap/ldif_stream.py`): Specialized streams for LDIF file processing
+## 🚫 PROJECT PROHIBITIONS (ZERO TOLERANCE ENFORCEMENT)
 
-### Dependencies
+### ⛔ ABSOLUTELY FORBIDDEN ACTIONS:
 
-- **flext-core**: Foundation library with FlextResult, logging, DI container, and FlextModel patterns
-- **flext-ldap**: LDAP connectivity infrastructure (local path dependency)
-- **flext-ldif**: LDIF file processing and validation (local path dependency)
-- **flext-observability**: Monitoring and metrics (local path dependency)
-- **pydantic**: Data validation and settings with strict typing
-- **Python-ldap**: Core LDAP library (test dependency)
+1. **Quality Degradation**:
+   - NEVER reduce test coverage below 90%
+   - NEVER suppress MyPy/Ruff errors without proper resolution
+   - NEVER disable security scanning (Bandit/pip-audit)
+   - NEVER compromise Singer protocol compliance
 
-## Development Commands
+2. **Architectural Violations**:
+   - NEVER bypass Clean Architecture layer boundaries
+   - NEVER create circular dependencies between layers
+   - NEVER duplicate functionality available in flext-core/flext-ldap/flext-ldif
+   - NEVER ignore FlextResult pattern for error handling
 
-### Essential Commands
+3. **LDAP/LDIF Specific Violations**:
+   - NEVER hardcode LDAP connection parameters
+   - NEVER process LDIF files without proper error handling
+   - NEVER ignore LDAP schema validation
+   - NEVER create insecure authentication mechanisms
 
-```bash
-# Complete project setup
-make setup                    # Install dependencies and pre-commit hooks
+4. **Singer Protocol Violations**:
+   - NEVER return data without proper Singer RECORD messages
+   - NEVER skip catalog discovery implementation
+   - NEVER ignore incremental replication keys
+   - NEVER create non-compliant stream schemas
 
-# Quality gates (run before committing)
-make validate                 # Complete validation (lint + type + security + test)
-make check                    # Quick health check (lint + type)
+---
 
-# Testing
-make test                     # Run all tests with 90% coverage requirement
-make test-unit                # Unit tests only
-make test-integration         # Integration tests only
-pytest -m "not slow"          # Fast tests for quick feedback
+## 🏗️ PROJECT ARCHITECTURE (CURRENT STATE ANALYSIS REQUIRED)
 
-# Code quality
-make lint                     # Ruff linting with ALL rules enabled
-make format                   # Auto-format with Ruff
-make type-check               # MyPy strict type checking
-make security                 # Bandit security scanning + pip-audit
+### Core Architecture Layers
 
-# Singer tap operations
-make discover                 # Generate catalog.json schema
-make run                      # Run data extraction
-make validate-config          # Validate tap configuration JSON
-```
-
-### Development Workflow
-
-```bash
-# Single test file
-pytest tests/test_streams.py -v
-
-# Run specific test markers
-pytest -m unit                # Unit tests
-pytest -m integration         # Integration tests
-pytest -m slow                # Performance tests
-
-# Debug failing tests
-pytest tests/test_tap.py -vvs --pdb
-
-# Coverage analysis
-make coverage-html            # Generate HTML coverage report
-```
-
-### LDAP Testing Environment
-
-```bash
-# Start test LDAP server (Docker Compose setup available)
-docker-compose up -d openldap
-
-# Access LDAP REDACTED_LDAP_BIND_PASSWORD interface
-# http://localhost:10080 (phpLDAPREDACTED_LDAP_BIND_PASSWORD)
-
-# Test LDAP connectivity
-make ldap-test
-
-# Manual tap testing with test server
-poetry run tap-ldap --config config.json --discover
-```
-
-### Debug Commands
-
-```bash
-# Run specific test categories
-pytest -m unit -v                    # Unit tests only
-pytest -m integration -v             # Integration tests only
-pytest -m slow -v                    # Performance tests
-pytest -m "not slow" -v              # Fast tests for quick feedback
-
-# Test debugging
-pytest tests/test_tap.py -vvs --pdb  # Debug specific test with pdb
-pytest --lf -v                       # Run last failed tests
-
-# Run single test file with coverage
-pytest tests/test_streams.py --cov=src/flext_tap_ldap --cov-report=term-missing -v
-```
-
-## Project Structure
-
-### Source Organization
-
-```
+```python
+# FLEXT Tap LDAP follows Clean Architecture + DDD
 src/flext_tap_ldap/
-├── domain/
-│   └── entities.py           # Domain entities with business logic
-├── application/
-│   └── services.py           # Application services using FlextResult
-├── infrastructure/           # External integrations (currently empty)
-├── tap.py                    # Main FlextTapLDAP class
-├── streams.py                # Singer stream implementations
-├── config.py                 # Pydantic configuration models
-├── client.py                 # LDAP client wrapper
-├── ldif_stream.py            # LDIF file processing streams
-├── ldif_processor.py         # LDIF parsing utilities
-└── exceptions.py             # Domain-specific exceptions
+   domain/                    # Core business logic (NEVER depend on external layers)
+      entities.py             # Domain entities: LDAPConnection, LDAPStream, TapExecution
+   application/               # Application services (orchestrate domain logic)
+      services.py             # Business logic with FlextResult pattern
+   infrastructure/            # External integrations (LDAP, LDIF, file system)
+   tap.py                     # Main TapLDAP class (Singer SDK implementation)
+   streams.py                 # Singer stream implementations
+   config.py                  # Pydantic configuration models
+   client.py                  # LDAP client wrapper (infrastructure)
+   ldif_stream.py             # LDIF file processing streams
+   ldif_processor.py          # LDIF parsing utilities
+   exceptions.py              # Domain-specific exception hierarchy
 ```
 
-### Test Structure
+### Service Architecture Pattern (MANDATORY)
 
-```
-tests/
-├── conftest.py                      # Pytest fixtures and configuration
-├── e2e/
-│   ├── conftest.py                  # E2E test configuration
-│   └── ldif/                        # Sample LDIF files for testing
-│       ├── 01-base.ldif            # Base LDAP structure
-│       ├── 02-users.ldif           # User entries
-│       └── 03-groups.ldif          # Group entries
-├── test_application_services.py    # Application service layer tests
-├── test_client.py                   # LDAP client tests
-├── test_client_coverage_boost.py   # Additional client coverage
-├── test_client_quick.py             # Quick client tests
-├── test_domain_entities.py         # Domain entity tests
-├── test_exceptions.py               # Exception handling tests
-├── test_integration.py              # Integration tests
-├── test_ldif_processor.py           # LDIF processing tests
-├── test_ldif_stream.py              # LDIF stream tests
-├── test_models.py                   # Model validation tests
-├── test_models_simple.py            # Simple model tests
-├── test_streams.py                  # Singer stream tests
-└── test_tap.py                      # Main tap functionality tests
-```
-
-### Test Markers and Coverage
-
-The project uses pytest markers for test categorization:
-
-- `unit`: Unit tests (fast, isolated)
-- `integration`: Integration tests (require external dependencies)
-- `slow`: Performance tests (longer running)
-- `smoke`: Basic functionality tests
-- `e2e`: End-to-end tests
-
-Coverage is enforced at 90% minimum with branch coverage enabled.
-
-## Configuration
-
-### Standard LDAP Configuration
-
-```json
-{
-  "host": "localhost",
-  "port": 389,
-  "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-  "password": "REDACTED_LDAP_BIND_PASSWORD_password",
-  "base_dn": "dc=test,dc=com",
-  "use_ssl": false,
-  "timeout": 30,
-  "page_size": 1000
-}
-```
-
-### LDIF Processing Configuration
-
-```json
-{
-  "enable_ldif_streams": true,
-  "ldif_files": ["/path/to/export.ldif"],
-  "ldif_directory": "/path/to/ldif/files",
-  "ldif_ignore_errors": true,
-  "ldif_max_errors": 100,
-  "migration_batch": "batch_001"
-}
-```
-
-### Custom Streams
-
-Define custom LDAP queries as streams:
-
-```json
-{
-  "custom_streams": [
-    {
-      "name": "custom_users",
-      "search_filter": "(&(objectClass=person)(department=IT))",
-      "primary_keys": ["dn"],
-      "replication_key": "modifyTimestamp",
-      "schema": {
-        "properties": {
-          "department": { "type": "string" },
-          "employeeNumber": { "type": "string" }
-        }
-      }
-    }
-  ]
-}
+```python
+class FlextTapLdapService(FlextDomainService):
+    """Single unified service class following flext-core patterns.
+    
+    This class consolidates all LDAP/LDIF tap-related operations,
+    following the single responsibility principle while
+    maintaining a unified interface for data extraction.
+    """
+    
+    def __init__(self, **data) -> None:
+        """Initialize service with proper dependency injection."""
+        super().__init__(**data)
+        self._container = FlextContainer.get_global()
+        self._logger = FlextLogger(__name__)
+    
+    def extract_ldap_data(self, connection_config: dict, search_filter: str) -> FlextResult[list[dict]]:
+        """Extract data from LDAP directory with comprehensive error handling."""
+        if not connection_config or not search_filter:
+            return FlextResult[list[dict]].fail("Connection config and search filter are required")
+        
+        try:
+            # Use flext-ldap for connection management
+            ldap_client = self._container.get(LdapClient)
+            connection_result = ldap_client.connect(connection_config)
+            if connection_result.is_failure:
+                return FlextResult[list[dict]].fail(f"LDAP connection failed: {connection_result.error}")
+            
+            # Perform search with pagination
+            search_result = ldap_client.search_with_paging(
+                search_filter=search_filter,
+                page_size=connection_config.get("page_size", 1000)
+            )
+            
+            if search_result.is_success:
+                return FlextResult[list[dict]].ok(search_result.value)
+            else:
+                return FlextResult[list[dict]].fail(f"LDAP search failed: {search_result.error}")
+                
+        except Exception as e:
+            self._logger.error(f"LDAP data extraction error: {e}")
+            return FlextResult[list[dict]].fail(f"LDAP extraction error: {str(e)}")
+    
+    def process_ldif_file(self, file_path: str, batch_size: int = 1000) -> FlextResult[list[dict]]:
+        """Process LDIF file with comprehensive error handling."""
+        if not file_path:
+            return FlextResult[list[dict]].fail("File path is required")
+        
+        try:
+            # Use flext-ldif for file processing
+            ldif_processor = self._container.get(LdifProcessor)
+            processing_result = ldif_processor.process_file(
+                file_path=file_path,
+                batch_size=batch_size,
+                validate_schema=True
+            )
+            
+            if processing_result.is_success:
+                return FlextResult[list[dict]].ok(processing_result.value)
+            else:
+                return FlextResult[list[dict]].fail(f"LDIF processing failed: {processing_result.error}")
+                
+        except Exception as e:
+            self._logger.error(f"LDIF processing error: {e}")
+            return FlextResult[list[dict]].fail(f"LDIF processing error: {str(e)}")
+    
+    def validate_configuration(self, config: dict) -> FlextResult[bool]:
+        """Validate tap configuration with business rules."""
+        # Implementation with comprehensive validation
+        return FlextResult[bool].ok(True)
 ```
 
-## Quality Standards
+---
 
-### Zero Tolerance Quality Gates
+## ⚡ IMPLEMENTATION STRATEGY (PRIORITY-BASED EXECUTION)
 
-- **Test Coverage**: Minimum 90% (enforced by pytest-cov)
-- **Type Safety**: Strict MyPy with no untyped code
-- **Linting**: Ruff with ALL rules enabled, minimal ignored rules
-- **Security**: Bandit scanning + pip-audit for vulnerabilities
-- **Pre-commit**: Automated quality checks on every commit
+### Phase 1: Foundation Assessment & Repair (MANDATORY FIRST)
 
-### Code Standards
-
-- **Python 3.13**: Latest Python with modern typing features
-- **Pydantic**: Strict data validation and configuration with FlextModel base classes
-- **Type Hints**: Complete type annotations throughout (strict MyPy configuration)
-- **Error Handling**: FlextResult pattern for all service operations (railway-oriented programming)
-- **Clean Architecture**: Domain, application, and infrastructure layer separation
-- **Local Dependencies**: Uses local path dependencies to flext-core, flext-ldap, flext-ldif, and flext-observability
-
-## Singer Protocol Implementation
-
-### Stream Types
-
-- **UsersStream**: Extract user accounts (`objectClass=inetOrgPerson`)
-- **GroupsStream**: Extract groups (`objectClass=groupOfNames`)
-- **OrganizationalUnitsStream**: Extract organizational units
-- **SchemaStream**: Extract LDAP schema information
-- **CustomStream**: User-defined LDAP queries
-- **LDIFStream**: Process LDIF files
-- **LDIFAnalysisStream**: Analyze LDIF structure and content
-
-### Replication Methods
-
-- **FULL_TABLE**: Complete data extraction (default)
-- **INCREMENTAL**: Based on `modifyTimestamp` where available
-
-### Record Format
-
-All streams produce Singer RECORD messages with:
-
-- `dn`: Distinguished Name (primary key)
-- `objectClass`: Array of LDAP object classes
-- LDAP attributes as individual fields
-- `modifyTimestamp`: For incremental replication
-
-## Common Development Tasks
-
-### Adding a New Stream
-
-1. Create stream class inheriting from `Stream` (from flext-meltano)
-2. Define schema using `singer_typing` from flext-meltano
-3. Implement `get_records()` method with proper error handling
-4. Add to `discover_streams()` in `FlextTapLDAP`
-5. Add comprehensive tests with appropriate markers
-
-### Extending Configuration
-
-1. Update configuration classes in `config.py` using FlextModel patterns
-2. Add Pydantic field with proper validation and FlextResult business rules
-3. Update JSON schema in `tap.py` using `singer_typing` helpers
-4. Update tests and ensure 90% coverage maintained
-
-### Working with LDIF Files
-
-1. Add LDIF files to `tests/e2e/ldif/` for testing
-2. Use `LDIFStream` and `LDIFAnalysisStream` for processing
-3. Configure LDIF processing options in tap config
-4. Test with `enable_ldif_streams: true` in configuration
-
-### Domain Logic Development
-
-1. Create or update entities in `domain/entities.py` with business validation
-2. Add business logic to `application/services.py` using FlextResult pattern
-3. Use dependency injection patterns from flext-core
-4. Follow Clean Architecture principles with clear layer separation
-
-## Docker Integration
-
-The project includes a complete Docker Compose setup for testing:
-
-- **OpenLDAP Server**: Test LDAP directory on port 10389
-- **phpLDAPREDACTED_LDAP_BIND_PASSWORD**: Web interface on port 10080
-- **Sample LDIF Data**: Pre-loaded test data in `tests/e2e/ldif/`
-
-## Architecture Integration
-
-### FLEXT Ecosystem Integration
-
-This tap is part of the larger FLEXT enterprise data integration platform:
-
-- **flext-core**: Provides FlextResult, FlextModel, logging, and dependency injection patterns
-- **flext-ldap**: LDAP connectivity and operations (local dependency)
-- **flext-ldif**: LDIF file processing and validation (local dependency)
-- **flext-observability**: Monitoring and metrics (local dependency)
-
-### Related Singer Projects
-
-- **flext-target-ldap**: Corresponding Singer target for loading data to LDAP
-- **flext-dbt-ldap**: DBT models for LDAP data transformation
-
-### Key Architecture Patterns
-
-- **Clean Architecture**: Domain-driven design with clear layer boundaries
-- **FlextResult Pattern**: Railway-oriented programming for error handling
-- **FlextModel**: Extended Pydantic models with business rule validation
-- **Singer Protocol**: Standard data extraction protocol compliance
-
-## Build and Packaging
-
-The project uses Poetry for dependency management with strict version pinning:
-
+#### 1.1 Current State Discovery (INVESTIGATE FIRST)
 ```bash
-# Build distribution packages
-make build
+# MANDATORY: Complete ecosystem understanding
+find flext-core/src -name "*.py" -exec grep -l "FlextDomainService\|FlextResult\|FlextContainer" {} \;
+# Read EVERY file that shows up - understand what's available
 
-# Check dependencies
-make deps-show
-make deps-audit
+# Map current LDAP/LDIF dependencies  
+grep -r "from flext_" src/ --include="*.py" | cut -d: -f2 | sort | uniq
+# Understand dependency relationships before refactoring
 
-# Update dependencies
-make deps-update
+# Check current Singer SDK integration
+python -c "from flext_tap_ldap import FlextTapLDAP; help(FlextTapLDAP.discover_streams)"
+# Verify current API compatibility
+
+# Count current test coverage
+pytest --cov=src --cov-report=term | grep "TOTAL"
+# Get baseline coverage before improvements
+
+# Map current failure patterns
+pytest --tb=no -q | tail -1 | grep -oE "[0-9]+ failed"
+# Understand current test landscape
 ```
 
-All dependencies are managed through `pyproject.toml` with separate groups for development, testing, typing, and security tools.
+#### 1.2 Quality Gate Assessment
+```bash
+# Type checking status
+mypy src/ --strict --show-error-codes 2>&1 | wc -l
+# Count current type errors (target: 0)
+
+# Linting status  
+ruff check src/ --statistics | grep "errors"
+# Count current linting errors (target: 0)
+
+# Security scan
+bandit -r src/ -f json 2>/dev/null | jq '.metrics._totals' || echo "Security scan needed"
+# Assess security status
+
+# Singer protocol compliance
+make discover 2>&1 | grep -E "ERROR|FAILED" | wc -l
+# Test current Singer compliance
+```
+
+### Phase 2: Core Service Unification (ARCHITECTURE FOCUS)
+
+#### 2.1 Single Service Class Creation
+```python
+# Create src/flext_tap_ldap/services/tap_service.py
+class FlextTapLdapService(FlextDomainService):
+    """Unified LDAP/LDIF tap service with comprehensive functionality."""
+    # Implementation following the pattern above
+```
+
+#### 2.2 Legacy Pattern Migration
+- **FlextResult Adoption**: Replace all exception-based error handling with FlextResult pattern
+- **Dependency Injection**: Move to flext-core DI container usage
+- **Service Consolidation**: Migrate distributed functionality to unified service class
+
+### Phase 3: Singer Protocol Excellence (PROTOCOL COMPLIANCE)
+
+#### 3.1 Stream Implementation Standardization
+```python
+class LdapUsersStream(Stream):
+    """LDAP Users stream with flext-core integration."""
+    
+    def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
+        """Extract user records with comprehensive error handling."""
+        service = self._container.get(FlextTapLdapService)
+        result = service.extract_ldap_data(
+            connection_config=self.config,
+            search_filter="(objectClass=inetOrgPerson)"
+        )
+        
+        if result.is_success:
+            for record in result.value:
+                yield record
+        else:
+            self.logger.error(f"User extraction failed: {result.error}")
+            raise RuntimeError(f"User stream error: {result.error}")
+```
+
+#### 3.2 Schema Discovery Enhancement
+- **Dynamic Schema Detection**: Implement LDAP schema introspection
+- **LDIF Schema Analysis**: Automatic schema discovery from LDIF files
+- **Configuration-Based Schema**: Support custom schema definitions
+
+### Phase 4: Integration Testing Excellence (REAL TESTING)
+
+#### 4.1 Docker Test Environment
+```bash
+# Enhanced Docker Compose for comprehensive testing
+docker-compose up -d openldap
+# Provides real LDAP server for integration tests
+
+# Real LDIF processing tests
+tests/e2e/ldif/
+├── 01-base.ldif              # Base LDAP structure
+├── 02-users.ldif             # User entries for testing  
+├── 03-groups.ldif            # Group entries for testing
+└── 04-complex-schema.ldif    # Complex schema for edge cases
+```
+
+#### 4.2 Performance Testing Implementation
+```python
+@pytest.mark.slow
+def test_large_ldap_directory_extraction():
+    """Test tap performance with enterprise-scale LDAP directory."""
+    # Test with 10,000+ entries, measure extraction time
+    # Verify memory usage stays reasonable
+    # Validate pagination performance
+```
+
+---
+
+## 🔧 ESSENTIAL COMMANDS (DAILY DEVELOPMENT)
+
+### Quality Gates (MANDATORY BEFORE ANY COMMIT)
+```bash
+# NEVER SKIP: Complete validation pipeline
+make validate                # lint + type + security + test (90% coverage)
+
+# Quick validation during development  
+make check                   # lint + type-check + test
+
+# Individual quality components
+make lint                    # Ruff linting (ALL rules enabled)
+make type-check              # MyPy strict mode validation
+make security                # Bandit + pip-audit security scanning
+make format                  # Auto-format code with Ruff
+```
+
+### Singer Tap Operations
+```bash
+# Essential Singer protocol operations
+make discover                # Generate catalog.json schema (test Singer compliance)
+make run                     # Run data extraction (validate full pipeline)
+make validate-config         # Validate tap configuration JSON
+
+# LDAP-specific testing
+make ldap-test               # Test LDAP connectivity with Docker environment
+make ldif-validate           # Validate LDIF file format and processing
+```
+
+### Testing Strategy (90% COVERAGE TARGET)
+```bash
+# Comprehensive testing approach
+make test                    # All tests with 90% coverage requirement
+make test-unit               # Unit tests only (-m "not integration")
+make test-integration        # Integration tests with real LDAP/LDIF
+make test-singer             # Singer protocol compliance tests
+make coverage-html           # Generate HTML coverage report for analysis
+
+# Performance and slow tests
+pytest -m slow               # Performance tests (enterprise-scale testing)
+pytest -m "not slow"         # Fast tests for quick feedback loop
+```
+
+### LDAP Development Environment
+```bash
+# Docker-based development environment
+docker-compose up -d openldap        # Start test LDAP server (port 10389)
+# Access phpLDAPREDACTED_LDAP_BIND_PASSWORD: http://localhost:10080
+
+# Manual testing with real environment
+poetry run tap-ldap --config config.json --discover > catalog.json
+poetry run tap-ldap --config config.json --catalog catalog.json --state state.json
+```
+
+---
+
+## 📊 SUCCESS METRICS (EVIDENCE-BASED MEASUREMENT)
+
+### Code Quality Metrics (AUTOMATED VALIDATION)
+```bash
+# Coverage measurement (TARGET: 90%)
+pytest --cov=src --cov-report=term | grep "TOTAL" | awk '{print $4}'
+
+# Type safety assessment (TARGET: 0 errors)
+mypy src/ --strict --show-error-codes 2>&1 | wc -l
+
+# Linting compliance (TARGET: 0 errors)  
+ruff check src/ --statistics | grep -o "[0-9]\+ errors"
+
+# Security assessment (TARGET: 0 critical vulnerabilities)
+bandit -r src/ -f json 2>/dev/null | jq '.metrics._totals.SEVERITY_RISK_HIGH' || echo 0
+```
+
+### Singer Protocol Compliance (FUNCTIONAL VALIDATION)
+```bash
+# Catalog discovery success
+make discover >/dev/null 2>&1 && echo "✅ Discovery OK" || echo "❌ Discovery FAILED"
+
+# Data extraction success
+make run >/dev/null 2>&1 && echo "✅ Extraction OK" || echo "❌ Extraction FAILED"
+
+# Schema validation
+singer-check-tap --catalog catalog.json < /dev/null && echo "✅ Schema OK" || echo "❌ Schema FAILED"
+```
+
+### LDAP/LDIF Functionality (DOMAIN-SPECIFIC VALIDATION)
+```bash
+# LDAP connectivity test
+make ldap-test >/dev/null 2>&1 && echo "✅ LDAP OK" || echo "❌ LDAP FAILED"
+
+# LDIF processing test
+make ldif-validate >/dev/null 2>&1 && echo "✅ LDIF OK" || echo "❌ LDIF FAILED"
+
+# Stream extraction test
+python -c "
+from flext_tap_ldap import FlextTapLDAP
+tap = FlextTapLDAP()
+streams = list(tap.discover_streams())
+print(f'✅ {len(streams)} streams discovered')
+" && echo "Stream discovery OK"
+```
+
+---
+
+## 🔍 PROJECT-SPECIFIC CONTEXT (LDAP/LDIF DOMAIN EXPERTISE)
+
+### LDAP Directory Integration Patterns
+
+#### Enterprise LDAP Support
+- **Directory Servers**: Active Directory, OpenLDAP, Oracle Directory Server Enterprise Edition
+- **Authentication**: Simple bind, SASL, StartTLS, SSL/TLS  
+- **Schema Support**: inetOrgPerson, groupOfNames, organizationalUnit, custom schemas
+- **Operations**: Search, pagination, referral following, attribute mapping
+
+#### LDIF File Processing Excellence
+- **Format Support**: LDIF v1, change records, base64 encoding
+- **Validation**: Schema compliance, referential integrity, attribute validation
+- **Performance**: Streaming processing, memory-efficient parsing, batch processing
+- **Error Handling**: Parse error recovery, malformed entry handling, encoding issues
+
+### Singer Protocol Implementation Details
+
+#### Stream Types and Configuration
+```python
+# Stream implementations aligned with LDAP structure
+SUPPORTED_STREAMS = {
+    "users": "(&(objectClass=inetOrgPerson)(!(objectClass=computer)))",
+    "groups": "(objectClass=groupOfNames)",
+    "computers": "(&(objectClass=computer)(objectClass=organizationalPerson))",
+    "organizational_units": "(objectClass=organizationalUnit)",
+    "schema": "(objectClass=subSchema)",
+    "custom": "user-defined-filter"
+}
+
+# Incremental replication support
+REPLICATION_KEYS = {
+    "users": "modifyTimestamp",
+    "groups": "modifyTimestamp", 
+    "computers": "modifyTimestamp",
+    "organizational_units": "modifyTimestamp"
+}
+```
+
+#### Configuration Schema Excellence
+```python
+class FlextTapLdapConfig(FlextModel):
+    """Comprehensive LDAP tap configuration with validation."""
+    
+    # LDAP Connection (required)
+    host: str = Field(..., description="LDAP server hostname")
+    port: int = Field(default=389, ge=1, le=65535)
+    bind_dn: str = Field(..., description="Bind DN for authentication")
+    password: SecretStr = Field(..., description="Password for bind DN")
+    base_dn: str = Field(..., description="Base DN for searches")
+    
+    # SSL/TLS Configuration
+    use_ssl: bool = Field(default=False)
+    use_tls: bool = Field(default=False) 
+    ca_cert_file: Optional[str] = None
+    cert_file: Optional[str] = None
+    key_file: Optional[str] = None
+    
+    # Performance Settings
+    timeout: int = Field(default=30, ge=1, le=300)
+    page_size: int = Field(default=1000, ge=1, le=10000)
+    connection_pool_size: int = Field(default=5, ge=1, le=20)
+    
+    # LDIF Processing
+    enable_ldif_streams: bool = Field(default=False)
+    ldif_files: list[str] = Field(default_factory=list)
+    ldif_directory: Optional[str] = None
+    ldif_ignore_errors: bool = Field(default=True)
+    ldif_max_errors: int = Field(default=100, ge=0, le=10000)
+    
+    # Custom Streams
+    custom_streams: list[dict] = Field(default_factory=list)
+    
+    # Migration Support
+    migration_batch: Optional[str] = None
+```
+
+### Integration with FLEXT Ecosystem
+
+#### Dependency Architecture
+```python
+# FLEXT ecosystem integration (MANDATORY patterns)
+from flext_core import FlextDomainService, FlextResult, FlextContainer, FlextLogger
+from flext_ldap import LdapClient, LdapConnectionConfig  # Local dependency
+from flext_ldif import LdifProcessor, LdifValidator    # Local dependency
+from flext_meltano import Tap, Stream, singer_typing   # Singer SDK integration
+from flext_observability import FlextMetrics, FlextHealthCheck  # Monitoring
+```
+
+#### Service Discovery Pattern
+```python
+def setup_dependencies() -> None:
+    """Configure dependency injection for LDAP tap."""
+    container = FlextContainer.get_global()
+    
+    # Register LDAP services
+    container.register(LdapClient, singleton=True)
+    container.register(LdifProcessor, singleton=True)
+    container.register(FlextTapLdapService, singleton=True)
+    
+    # Register Singer services
+    container.register(Tap, factory=lambda: FlextTapLDAP)
+    
+    # Register monitoring services
+    container.register(FlextMetrics, singleton=True)
+    container.register(FlextHealthCheck, singleton=True)
+```
+
+---
+
+## 🎯 QUALITY ACHIEVEMENT ROADMAP (PHASE-BY-PHASE SUCCESS)
+
+### Week 1: Foundation Stability (PREREQUISITE SUCCESS)
+- [ ] **Quality Gate Repair**: Achieve `make validate` success (0 errors)
+- [ ] **Test Coverage Assessment**: Document current coverage and gaps
+- [ ] **Dependency Analysis**: Map all flext-* dependencies and integration points
+- [ ] **Singer Compliance**: Ensure basic discover/extract functionality works
+
+### Week 2: Service Architecture (UNIFICATION SUCCESS) 
+- [ ] **Unified Service**: Implement `FlextTapLdapService` with all functionality
+- [ ] **FlextResult Migration**: Replace all exception handling with FlextResult pattern
+- [ ] **Container Integration**: Migrate to flext-core dependency injection
+- [ ] **Layer Validation**: Ensure Clean Architecture compliance
+
+### Week 3: Protocol Excellence (SINGER COMPLIANCE)
+- [ ] **Stream Standardization**: Implement all LDAP stream types with error handling
+- [ ] **Schema Discovery**: Dynamic schema detection from LDAP/LDIF sources
+- [ ] **Incremental Replication**: Implement timestamp-based incremental extraction
+- [ ] **Configuration Validation**: Comprehensive config validation with business rules
+
+### Week 4: Testing Excellence (90% COVERAGE TARGET)
+- [ ] **Integration Tests**: Real LDAP/LDIF processing tests with Docker environment
+- [ ] **Performance Tests**: Enterprise-scale testing with large datasets
+- [ ] **Error Scenario Tests**: Network failures, malformed data, authentication issues
+- [ ] **Coverage Validation**: Achieve and maintain 90% test coverage
+
+### Success Validation (EVIDENCE-BASED CONFIRMATION)
+```bash
+# Final success confirmation (ALL must pass)
+make validate                    # ✅ Zero errors
+pytest --cov=src --cov-report=term | grep "90%"  # ✅ Coverage target
+make discover && make run        # ✅ Singer compliance
+docker-compose up -d && make ldap-test  # ✅ LDAP integration
+```
+
+---
+
+**PROJECT AUTHORITY**: FLEXT-TAP-LDAP  
+**REFACTORING AUTHORITY**: Evidence-based validation required for all success claims  
+**QUALITY AUTHORITY**: Zero tolerance - 90% coverage, zero type errors, full Singer compliance  
+**INTEGRATION AUTHORITY**: Must integrate seamlessly with FLEXT ecosystem (flext-core, flext-ldap, flext-ldif)

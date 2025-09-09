@@ -1,11 +1,3 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT.
-"""
-
-from __future__ import annotations
-
-from flext_core import FlextTypes
-
 """Configuration models for tap-ldap using consolidated patterns.
 
 CONSOLIDATED: Uses flext-meltano common LDAP config to eliminate duplication
@@ -15,9 +7,9 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
+from __future__ import annotations
 
-from flext_core import FlextModels, FlextResult
-from flext_core.typings import FlextTypes
+from flext_core import FlextModels, FlextResult, FlextTypes
 from pydantic import Field, field_validator
 from pydantic_settings import SettingsConfigDict
 

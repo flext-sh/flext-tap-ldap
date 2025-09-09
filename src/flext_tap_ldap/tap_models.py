@@ -21,21 +21,21 @@ from uuid import UUID, uuid4
 
 from flext_core import FlextLogger, FlextModels, FlextResult
 from flext_core.typings import FlextTypes
-from flext_ldap import FlextLDAPEntry
+from flext_ldap import FlextLDAPEntities
 from pydantic import Field
 
 logger = FlextLogger(__name__)
 
 
 def _get_entry_value(
-    entry: FlextTypes.Core.Dict | FlextLDAPEntry,
+    entry: FlextTypes.Core.Dict | FlextLDAPEntities.Entry,
     key: str,
     default: object = None,
 ) -> object:
-    """Get a value from either a dict or `FlextLDAPEntry`."""
+    """Get a value from either a dict or `FlextLDAPEntities.Entry`."""
     if isinstance(entry, dict):
         return entry.get(key, default)
-    # FlextLDAPEntry - use getattr or similar access pattern
+    # FlextLDAPEntities.Entry - use getattr or similar access pattern
     return getattr(entry, key, default)
 
 
@@ -192,7 +192,7 @@ class LDAPUser(LDAPEntry):
     login_shell: str | None = Field(None, description="Login shell")
 
     @classmethod
-    def from_entry(cls, entry: FlextTypes.Core.Dict | FlextLDAPEntry) -> LDAPUser:
+    def from_entry(cls, entry: FlextTypes.Core.Dict | FlextLDAPEntities.Entry) -> LDAPUser:
         """Create LDAPUser from LDAP entry."""
         return cls(
             # Required fields from LDAPEntry
@@ -249,7 +249,7 @@ class LDAPGroup(LDAPEntry):
     modify_timestamp: str | None = Field(None, description="Modification timestamp")
 
     @classmethod
-    def from_entry(cls, entry: FlextTypes.Core.Dict | FlextLDAPEntry) -> LDAPGroup:
+    def from_entry(cls, entry: FlextTypes.Core.Dict | FlextLDAPEntities.Entry) -> LDAPGroup:
         """Create LDAPGroup from LDAP entry."""
         return cls(
             # Required fields from LDAPEntry
