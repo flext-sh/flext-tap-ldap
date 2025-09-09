@@ -1,33 +1,25 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT.
-"""
-
-from __future__ import annotations
-
-from flext_core import FlextTypes
-
 """LDAP client for flext-tap-ldap using flext-ldap infrastructure.
 
-Copyright (c) 2025 Flext. All rights reserved.
+Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 
 This module eliminates code duplication by using flext-ldap infrastructure
 while maintaining testing convenience for existing tests and code.
 """
 
+from __future__ import annotations
 
 import asyncio
 import time
 from collections.abc import Awaitable
 from dataclasses import dataclass
 
-from flext_core import FlextLogger, FlextResult
-from flext_core.typings import FlextTypes
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import (
     FlextLDAPApi,
     FlextLDAPConnectionConfig,
-    FlextLDAPEntry,
-    FlextLDAPScope as LDAPScope,
+    FlextLDAPEntities,
+    LdapScope as LDAPScope,
 )
 
 logger = FlextLogger(__name__)
@@ -185,14 +177,14 @@ class LDAPClient:
 
     def _convert_entry_to_dict(
         self,
-        entry_data: FlextLDAPEntry | FlextTypes.Core.Dict,
+        entry_data: FlextLDAPEntities.Entry | FlextTypes.Core.Dict,
     ) -> FlextTypes.Core.Dict:
-        """Convert FlextLDAPEntry to dict format for testing convenience.
+        """Convert FlextLDAPEntities.Entry to dict format for testing convenience.
 
         Single Responsibility: Handle only entry format conversion.
         """
         if hasattr(entry_data, "dn") and hasattr(entry_data, "attributes"):
-            # It's a FlextLDAPEntry model object - flatten attributes
+            # It's a FlextLDAPEntities.Entry model object - flatten attributes
             entry_dict = {"dn": entry_data.dn}
             # Add flattened attributes to the entry dict
             for attr_name, attr_values in entry_data.attributes.items():
@@ -208,7 +200,7 @@ class LDAPClient:
 
     def _process_search_results(
         self,
-        result: FlextResult[list[FlextLDAPEntry]],
+        result: FlextResult[list[FlextLDAPEntities.Entry]],
         size_limit: int,
     ) -> list[FlextTypes.Core.Dict]:
         """Process LDAP search results with size limiting.
@@ -478,7 +470,7 @@ class LDAPClient:
 
     def _process_search_results_with_oracle_support(
         self,
-        search_result: list[FlextLDAPEntry] | list[FlextTypes.Core.Dict],
+        search_result: list[FlextLDAPEntities.Entry] | list[FlextTypes.Core.Dict],
         *,
         oracle_oid_mode: bool,
     ) -> list[FlextTypes.Core.Dict]:
@@ -565,7 +557,7 @@ class LDAPClient:
 
 # Type aliases for testing convenience
 LDAPConnectionConfig = FlextLDAPConnectionConfig
-LDAPEntry = FlextLDAPEntry
+LDAPEntry = FlextLDAPEntities.Entry
 
 __all__: FlextTypes.Core.StringList = [
     "LDAPClient",

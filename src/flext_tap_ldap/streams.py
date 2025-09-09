@@ -9,15 +9,30 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from flext_core import (
     FlextLogger,
     FlextTypes,
 )
-from flext_meltano import Stream, singer_typing as th
+from flext_meltano import FlextSingerTypes
+from singer_sdk import Stream
+from singer_sdk.typing import (
+    ArrayType,
+    BooleanType,
+    DateTimeType, 
+    IntegerType,
+    ObjectType,
+    PropertiesList,
+    Property,
+    StringType,
+)
+th = FlextSingerTypes()
 
 from flext_tap_ldap.client import LDAPClient
-from flext_tap_ldap.tap import FlextTapLDAP
+
+if TYPE_CHECKING:
+    from flext_tap_ldap.tap import FlextTapLDAP
 
 logger = FlextLogger(__name__)
 
@@ -119,31 +134,31 @@ class UsersStream(LDAPBaseStream):
         self.primary_keys = ["dn"]
         super().__init__(tap, name=self.name, schema=self.schema)
 
-    schema = th.PropertiesList(
-        th.Property("dn", th.StringType, description="Distinguished Name"),
-        th.Property("uid", th.StringType, description="User ID"),
-        th.Property("cn", th.StringType, description="Common Name"),
-        th.Property("mail", th.StringType, description="Email address"),
-        th.Property("sn", th.StringType, description="Surname"),
-        th.Property("givenName", th.StringType, description="Given name"),
-        th.Property(
+    schema = PropertiesList(
+        Property("dn", StringType, description="Distinguished Name"),
+        Property("uid", StringType, description="User ID"),
+        Property("cn", StringType, description="Common Name"),
+        Property("mail", StringType, description="Email address"),
+        Property("sn", StringType, description="Surname"),
+        Property("givenName", StringType, description="Given name"),
+        Property(
             "userPrincipalName",
-            th.StringType,
+            StringType,
             description="User Principal Name",
         ),
-        th.Property(
+        Property(
             "memberOf",
-            th.ArrayType(th.StringType),
+            ArrayType(StringType),
             description="Group memberships",
         ),
-        th.Property(
+        Property(
             "objectClass",
-            th.ArrayType(th.StringType),
+            ArrayType(StringType),
             description="Object classes",
         ),
-        th.Property(
+        Property(
             "modifyTimestamp",
-            th.DateTimeType,
+            DateTimeType,
             description="Last modification timestamp",
         ),
     ).to_dict()
@@ -199,24 +214,24 @@ class GroupsStream(LDAPBaseStream):
         self.primary_keys = ["dn"]
         super().__init__(tap, name=self.name, schema=self.schema)
 
-    schema = th.PropertiesList(
-        th.Property("dn", th.StringType, description="Distinguished Name"),
-        th.Property("cn", th.StringType, description="Common Name"),
-        th.Property("description", th.StringType, description="Group description"),
-        th.Property("member", th.ArrayType(th.StringType), description="Group members"),
-        th.Property(
+    schema = PropertiesList(
+        Property("dn", StringType, description="Distinguished Name"),
+        Property("cn", StringType, description="Common Name"),
+        Property("description", StringType, description="Group description"),
+        Property("member", ArrayType(StringType), description="Group members"),
+        Property(
             "memberOf",
-            th.ArrayType(th.StringType),
+            ArrayType(StringType),
             description="Parent groups",
         ),
-        th.Property(
+        Property(
             "objectClass",
-            th.ArrayType(th.StringType),
+            ArrayType(StringType),
             description="Object classes",
         ),
-        th.Property(
+        Property(
             "modifyTimestamp",
-            th.DateTimeType,
+            DateTimeType,
             description="Last modification timestamp",
         ),
     ).to_dict()
@@ -300,18 +315,18 @@ class OrganizationalUnitsStream(LDAPBaseStream):
         self.primary_keys = ["dn"]
         super().__init__(tap, name=self.name, schema=self.schema)
 
-    schema = th.PropertiesList(
-        th.Property("dn", th.StringType, description="Distinguished Name"),
-        th.Property("ou", th.StringType, description="Organizational Unit name"),
-        th.Property("description", th.StringType, description="OU description"),
-        th.Property(
+    schema = PropertiesList(
+        Property("dn", StringType, description="Distinguished Name"),
+        Property("ou", StringType, description="Organizational Unit name"),
+        Property("description", StringType, description="OU description"),
+        Property(
             "objectClass",
-            th.ArrayType(th.StringType),
+            ArrayType(StringType),
             description="Object classes",
         ),
-        th.Property(
+        Property(
             "modifyTimestamp",
-            th.DateTimeType,
+            DateTimeType,
             description="Last modification timestamp",
         ),
     ).to_dict()
@@ -391,15 +406,15 @@ class SchemaStream(LDAPBaseStream):
         self.primary_keys = ["name"]
         super().__init__(tap, name=self.name, schema=self.schema)
 
-    schema = th.PropertiesList(
-        th.Property("name", th.StringType, description="Schema element name"),
-        th.Property("type", th.StringType, description="Schema element type"),
-        th.Property("oid", th.StringType, description="Object identifier"),
-        th.Property("description", th.StringType, description="Schema description"),
-        th.Property("syntax", th.StringType, description="Attribute syntax"),
-        th.Property(
+    schema = PropertiesList(
+        Property("name", StringType, description="Schema element name"),
+        Property("type", StringType, description="Schema element type"),
+        Property("oid", StringType, description="Object identifier"),
+        Property("description", StringType, description="Schema description"),
+        Property("syntax", StringType, description="Attribute syntax"),
+        Property(
             "single_value",
-            th.BooleanType,
+            BooleanType,
             description="Single-valued attribute",
         ),
     ).to_dict()
@@ -497,30 +512,30 @@ class CustomStream(LDAPBaseStream):
 
         # Build schema from properties
         properties = [
-            th.Property("dn", th.StringType, description="Distinguished Name"),
+            Property("dn", StringType, description="Distinguished Name"),
         ]
         for prop_name, prop_config in (params.schema_properties or {}).items():
             prop_type: type[
-                th.StringType
-                | th.ArrayType[th.StringType]
-                | th.BooleanType
-                | th.IntegerType
-                | th.DateTimeType
-            ] = th.StringType  # Default type
+                StringType
+                | ArrayType
+                | BooleanType
+                | IntegerType
+                | DateTimeType
+            ] = StringType  # Default type
             if isinstance(prop_config, dict):
                 prop_type_str = prop_config.get("type")
                 if prop_type_str == "array":
-                    prop_type = th.ArrayType(th.StringType)
+                    prop_type = ArrayType(StringType)
                 elif prop_type_str == "boolean":
-                    prop_type = th.BooleanType
+                    prop_type = BooleanType
                 elif prop_type_str == "integer":
-                    prop_type = th.IntegerType
+                    prop_type = IntegerType
                 elif prop_type_str == "datetime":
-                    prop_type = th.DateTimeType
+                    prop_type = DateTimeType
 
                 description = prop_config.get("description", f"{prop_name} field")
                 properties.append(
-                    th.Property(
+                    Property(
                         prop_name,
                         prop_type,
                         description=str(description),
@@ -528,7 +543,7 @@ class CustomStream(LDAPBaseStream):
                 )
 
         # Set schema using internal attribute BEFORE calling super().__init__()
-        schema_dict = th.PropertiesList(*properties).to_dict()
+        schema_dict = PropertiesList(*properties).to_dict()
         # Now call super().__init__()
         super().__init__(tap=tap, name=params.name, schema=schema_dict)
 

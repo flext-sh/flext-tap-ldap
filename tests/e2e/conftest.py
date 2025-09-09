@@ -13,12 +13,10 @@ from collections.abc import Generator, Iterator
 from pathlib import Path
 
 import pytest
-import structlog
-from flext_core import FlextTypes
-from flext_core.typings import FlextTypes
+from flext_core import FlextLogger, FlextTypes
 from ldap3 import ALL, Connection, Server
 
-logger = structlog.FlextLogger()
+logger = FlextLogger(__name__)
 
 
 @pytest.fixture(scope="session")

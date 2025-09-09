@@ -13,7 +13,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from flext_core import FlextTypes
+
+if TYPE_CHECKING:
+    from flext_tap_ldap.tap import FlextTapLDAP
 
 """
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -27,10 +32,11 @@ from pathlib import Path
 from flext_core import FlextLogger
 from flext_core.typings import FlextTypes
 from flext_ldap import FlextLDAPApi
-from flext_ldif import FlextLDIFAPI, FlextLDIFEntry
-from flext_meltano import Stream, singer_typing as th
+from flext_ldif import FlextLDIFAPI, FlextLDIFModels
+from flext_meltano import FlextSingerTypes
+th = FlextSingerTypes()
+from singer_sdk import Stream
 
-from flext_tap_ldap.tap import FlextTapLDAP
 
 logger = FlextLogger(__name__)
 
@@ -106,7 +112,7 @@ class LDIFStream(Stream):
 
     def _convert_entry_to_record(
         self,
-        flext_entry: FlextLDIFEntry,
+        flext_entry: FlextLDIFModels.Entry,
     ) -> FlextTypes.Core.Dict:
         """Convert flext-ldif entry to Singer record."""
         # Delegate entry type classification to flext-ldap

@@ -25,6 +25,7 @@ class TestLDAPConnection:
     def test_ldap_connection_creation(self) -> None:
         """Test creating an LDAP connection."""
         connection = LDAPConnection(
+            id="test-connection",
             host="ldap.example.com",
             port=389,
             bind_dn="cn=admin,dc=example,dc=com",
@@ -44,6 +45,7 @@ class TestLDAPConnection:
     def test_ldap_connection_with_ssl(self) -> None:
         """Test creating an LDAP connection with SSL."""
         connection = LDAPConnection(
+            id="test-ssl-connection",
             host="ldaps.example.com",
             port=636,
             bind_dn=None,
@@ -64,6 +66,7 @@ class TestLDAPStream:
         """Test creating an LDAP stream."""
         connection_id = uuid4()
         stream = LDAPStream(
+            id="stream-1",
             connection_id=connection_id,
             stream_type="users",
             tap_stream_id="users",
@@ -87,6 +90,7 @@ class TestLDAPStream:
         """Test updating stream schema."""
         connection_id = uuid4()
         stream = LDAPStream(
+            id="stream-2",
             connection_id=connection_id,
             stream_type="users",
             tap_stream_id="users",
@@ -112,6 +116,7 @@ class TestLDAPStream:
         """Test recording extraction metrics."""
         connection_id = uuid4()
         stream = LDAPStream(
+            id="stream-3",
             connection_id=connection_id,
             stream_type="users",
             tap_stream_id="users",
@@ -137,6 +142,7 @@ class TestTapExecution:
         """Test creating a tap execution."""
         connection_id = uuid4()
         execution = TapExecution(
+            id="exec-1",
             connection_id=connection_id,
             command="sync",
             tap_status="created",
@@ -159,6 +165,7 @@ class TestTapExecution:
         """Test starting execution."""
         connection_id = uuid4()
         execution = TapExecution(
+            id="exec-2",
             connection_id=connection_id,
             command="sync",
             tap_status="created",
@@ -177,6 +184,7 @@ class TestTapExecution:
         """Test starting extraction phase."""
         connection_id = uuid4()
         execution = TapExecution(
+            id="exec-3",
             connection_id=connection_id,
             command="sync",
             tap_status="discovering",
@@ -192,6 +200,7 @@ class TestTapExecution:
         """Test completing execution successfully."""
         connection_id = uuid4()
         execution = TapExecution(
+            id="exec-4",
             connection_id=connection_id,
             command="sync",
             tap_status="created",
@@ -223,6 +232,7 @@ class TestTapExecution:
         """Test completing execution with failure."""
         connection_id = uuid4()
         execution = TapExecution(
+            id="exec-5",
             connection_id=connection_id,
             command="sync",
             tap_status="created",
@@ -250,6 +260,7 @@ class TestTapExecution:
         """Test cancelling execution."""
         connection_id = uuid4()
         execution = TapExecution(
+            id="exec-6",
             connection_id=connection_id,
             command="sync",
             tap_status="created",
@@ -271,6 +282,7 @@ class TestTapExecution:
         """Test updating execution metrics."""
         connection_id = uuid4()
         execution = TapExecution(
+            id="exec-7",
             connection_id=connection_id,
             command="sync",
             tap_status="extracting",
@@ -293,6 +305,7 @@ class TestLDAPRecord:
         stream_id = uuid4()
         execution_id = uuid4()
         record = LDAPRecord(
+            id="record-1",
             stream_id=stream_id,
             execution_id=execution_id,
             dn="uid=jdoe,ou=users,dc=example,dc=com",
@@ -322,6 +335,7 @@ class TestLDAPRecord:
         stream_id = uuid4()
         execution_id = uuid4()
         record = LDAPRecord(
+            id="record-2",
             stream_id=stream_id,
             execution_id=execution_id,
             dn="uid=jdoe,ou=users,dc=example,dc=com",
@@ -337,6 +351,7 @@ class TestLDAPRecord:
         stream_id = uuid4()
         execution_id = uuid4()
         record = LDAPRecord(
+            id="record-3",
             stream_id=stream_id,
             execution_id=execution_id,
             dn="uid=jdoe,ou=users,dc=example,dc=com",
@@ -369,6 +384,15 @@ class TestDomainEvents:
         connection_id = uuid4()
 
         event = TapExecutionStartedEvent(
+            source_service="test-service",
+            message_type="TapExecutionStarted",
+            data={
+                "execution_id": str(execution_id),
+                "connection_id": str(connection_id),
+                "command": "sync",
+            },
+            aggregate_id=str(execution_id),
+            aggregate_type="TapExecution",
             execution_id=execution_id,
             connection_id=connection_id,
             command="sync",
@@ -384,6 +408,14 @@ class TestDomainEvents:
         connection_id = uuid4()
 
         event = TapExecutionCompletedEvent(
+            source_service="test-service",
+            message_type="TapExecutionCompleted",
+            data={
+                "execution_id": str(execution_id),
+                "connection_id": str(connection_id),
+            },
+            aggregate_id=str(execution_id),
+            aggregate_type="TapExecution",
             execution_id=execution_id,
             connection_id=connection_id,
         )

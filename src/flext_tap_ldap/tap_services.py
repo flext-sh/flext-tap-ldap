@@ -510,17 +510,21 @@ class LDAPRecordService:
 
     async def create_record(
         self,
-        stream_id: str,
-        execution_id: str,
+        stream_id: str | UUID,
+        execution_id: str | UUID,
         dn: str,
         attributes: FlextTypes.Core.Dict,
         object_class: FlextTypes.Core.StringList | None = None,
     ) -> FlextResult[LDAPRecord]:
         """Create LDAP record."""
         try:
+            # Convert to UUID if not already
+            stream_uuid = stream_id if isinstance(stream_id, UUID) else UUID(stream_id)
+            execution_uuid = execution_id if isinstance(execution_id, UUID) else UUID(execution_id)
+            
             record = LDAPRecord(
-                stream_id=UUID(stream_id),
-                execution_id=UUID(execution_id),
+                stream_id=stream_uuid,
+                execution_id=execution_uuid,
                 dn=dn,
                 attributes=attributes,
                 object_class=object_class or [],
