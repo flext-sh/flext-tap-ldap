@@ -40,44 +40,139 @@ class FlextTapLdapValidationError(FlextExceptions.BaseError):
         *,
         field: str | None = None,
         value: object | None = None,
+        code: str | None = None,
+        context: dict[str, object] | None = None,
+        correlation_id: str | None = None,
         **kwargs: object,
     ) -> None:
-        super().__init__(message, field=field, value=value, **kwargs)
+        # Merge extra kwargs and field/value into context
+        merged_context = dict(context) if context else {}
+        if field is not None:
+            merged_context["field"] = field
+        if value is not None:
+            merged_context["value"] = value
+        merged_context.update(kwargs)
+        super().__init__(
+            message,
+            code=code,
+            context=merged_context or None,
+            correlation_id=correlation_id,
+        )
 
 
 class FlextTapLdapConfigurationError(FlextExceptions.BaseError):
     """LDAP tap configuration error."""
 
-    def __init__(self, message: str, **kwargs: object) -> None:
-        super().__init__(message, **kwargs)
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: str | None = None,
+        context: dict[str, object] | None = None,
+        correlation_id: str | None = None,
+        **kwargs: object,
+    ) -> None:
+        # Merge extra kwargs into context
+        merged_context = dict(context) if context else {}
+        merged_context.update(kwargs)
+        super().__init__(
+            message,
+            code=code,
+            context=merged_context or None,
+            correlation_id=correlation_id,
+        )
 
 
 class FlextTapLdapProcessingError(FlextExceptions.BaseError):
     """LDAP tap processing error."""
 
-    def __init__(self, message: str, **kwargs: object) -> None:
-        super().__init__(message, **kwargs)
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: str | None = None,
+        context: dict[str, object] | None = None,
+        correlation_id: str | None = None,
+        **kwargs: object,
+    ) -> None:
+        # Merge extra kwargs into context
+        merged_context = dict(context) if context else {}
+        merged_context.update(kwargs)
+        super().__init__(
+            message,
+            code=code,
+            context=merged_context or None,
+            correlation_id=correlation_id,
+        )
 
 
 class FlextTapLdapConnectionError(FlextExceptions.BaseError):
     """LDAP tap connection error."""
 
-    def __init__(self, message: str, **kwargs: object) -> None:
-        super().__init__(message, **kwargs)
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: str | None = None,
+        context: dict[str, object] | None = None,
+        correlation_id: str | None = None,
+        **kwargs: object,
+    ) -> None:
+        # Merge extra kwargs into context
+        merged_context = dict(context) if context else {}
+        merged_context.update(kwargs)
+        super().__init__(
+            message,
+            code=code,
+            context=merged_context or None,
+            correlation_id=correlation_id,
+        )
 
 
 class FlextTapLdapAuthenticationError(FlextExceptions.BaseError):
     """LDAP tap authentication error."""
 
-    def __init__(self, message: str, **kwargs: object) -> None:
-        super().__init__(message, **kwargs)
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: str | None = None,
+        context: dict[str, object] | None = None,
+        correlation_id: str | None = None,
+        **kwargs: object,
+    ) -> None:
+        # Merge extra kwargs into context
+        merged_context = dict(context) if context else {}
+        merged_context.update(kwargs)
+        super().__init__(
+            message,
+            code=code,
+            context=merged_context or None,
+            correlation_id=correlation_id,
+        )
 
 
 class FlextTapLdapTimeoutError(FlextExceptions.BaseError):
     """LDAP tap timeout error."""
 
-    def __init__(self, message: str, **kwargs: object) -> None:
-        super().__init__(message, **kwargs)
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: str | None = None,
+        context: dict[str, object] | None = None,
+        correlation_id: str | None = None,
+        **kwargs: object,
+    ) -> None:
+        # Merge extra kwargs into context
+        merged_context = dict(context) if context else {}
+        merged_context.update(kwargs)
+        super().__init__(
+            message,
+            code=code,
+            context=merged_context or None,
+            correlation_id=correlation_id,
+        )
 
 
 # Create convenience aliases for existing code

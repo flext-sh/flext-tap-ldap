@@ -22,7 +22,7 @@ from typing import ClassVar
 
 from flext_core import FlextLogger
 from flext_core.typings import FlextTypes
-from singer_sdk import Tap, Stream
+from singer_sdk import Stream, Tap
 
 # from flext_meltano.common_schemas import create_ldap_tap_schema  # Not available
 from flext_tap_ldap.config import TapLDAPConfig

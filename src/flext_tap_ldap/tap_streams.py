@@ -26,7 +26,7 @@ from flext_core import FlextLogger
 from flext_core.typings import FlextTypes
 from flext_ldap import FlextLDAPApi
 from flext_ldif import FlextLDIFAPI, FlextLDIFModels
-from flext_meltano import FlextSingerTypes, StreamDefinition
+from flext_meltano import FlextSingerTypes
 from singer_sdk import Stream
 
 from flext_tap_ldap.client import LDAPClient
