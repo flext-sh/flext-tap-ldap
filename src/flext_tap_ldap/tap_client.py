@@ -33,8 +33,6 @@ from flext_ldap import (
 from flext_meltano import (
     FlextSingerTypes,
     FlextTapAbstractions as FlextTap,
-    FlextTargetAbstractions,
-    StreamDefinition,
 )
 
 # from flext_meltano.common_schemas import create_ldap_tap_schema  # Not available

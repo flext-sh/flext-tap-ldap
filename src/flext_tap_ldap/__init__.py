@@ -8,6 +8,19 @@ Singer tap for LDAP data extraction.
 from __future__ import annotations
 from flext_core.typings import FlextTypes
 
+# Import exceptions
+from flext_tap_ldap.exceptions import (
+    FlextTapLdapAuthenticationError,
+    FlextTapLdapConfigurationError,
+    FlextTapLdapConnectionError,
+    FlextTapLdapError,
+    FlextTapLdapProcessingError,
+    FlextTapLdapSearchError,
+    FlextTapLdapStreamError,
+    FlextTapLdapTimeoutError,
+    FlextTapLdapValidationError,
+)
+
 # Import new consolidated implementations
 from flext_tap_ldap.tap_client import (
     FlextTapLDAP,
@@ -77,6 +90,16 @@ __version__ = "0.9.0-reorganized"
 __version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 
 __all__: FlextTypes.Core.StringList = [
+    # Exceptions
+    "FlextTapLdapAuthenticationError",
+    "FlextTapLdapConfigurationError",
+    "FlextTapLdapConnectionError",
+    "FlextTapLdapError",
+    "FlextTapLdapProcessingError",
+    "FlextTapLdapSearchError",
+    "FlextTapLdapStreamError",
+    "FlextTapLdapTimeoutError",
+    "FlextTapLdapValidationError",
     # Main Classes
     "FlextTapLDAP",
     "FlextTapLDAPPlugin",

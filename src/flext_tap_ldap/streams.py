@@ -20,13 +20,13 @@ from singer_sdk import Stream
 from singer_sdk.typing import (
     ArrayType,
     BooleanType,
-    DateTimeType, 
+    DateTimeType,
     IntegerType,
-    ObjectType,
     PropertiesList,
     Property,
     StringType,
 )
+
 th = FlextSingerTypes()
 
 from flext_tap_ldap.client import LDAPClient

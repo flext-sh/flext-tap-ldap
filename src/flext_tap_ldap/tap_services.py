@@ -521,7 +521,7 @@ class LDAPRecordService:
             # Convert to UUID if not already
             stream_uuid = stream_id if isinstance(stream_id, UUID) else UUID(stream_id)
             execution_uuid = execution_id if isinstance(execution_id, UUID) else UUID(execution_id)
-            
+
             record = LDAPRecord(
                 stream_id=stream_uuid,
                 execution_id=execution_uuid,

@@ -34,9 +34,9 @@ from flext_core.typings import FlextTypes
 from flext_ldap import FlextLDAPApi
 from flext_ldif import FlextLDIFAPI, FlextLDIFModels
 from flext_meltano import FlextSingerTypes
+
 th = FlextSingerTypes()
 from singer_sdk import Stream
-
 
 logger = FlextLogger(__name__)
 
