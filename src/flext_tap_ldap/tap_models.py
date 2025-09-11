@@ -192,7 +192,9 @@ class LDAPUser(LDAPEntry):
     login_shell: str | None = Field(None, description="Login shell")
 
     @classmethod
-    def from_entry(cls, entry: FlextTypes.Core.Dict | FlextLDAPEntities.Entry) -> LDAPUser:
+    def from_entry(
+        cls, entry: FlextTypes.Core.Dict | FlextLDAPEntities.Entry
+    ) -> LDAPUser:
         """Create LDAPUser from LDAP entry."""
         return cls(
             # Required fields from LDAPEntry
@@ -249,7 +251,9 @@ class LDAPGroup(LDAPEntry):
     modify_timestamp: str | None = Field(None, description="Modification timestamp")
 
     @classmethod
-    def from_entry(cls, entry: FlextTypes.Core.Dict | FlextLDAPEntities.Entry) -> LDAPGroup:
+    def from_entry(
+        cls, entry: FlextTypes.Core.Dict | FlextLDAPEntities.Entry
+    ) -> LDAPGroup:
         """Create LDAPGroup from LDAP entry."""
         return cls(
             # Required fields from LDAPEntry

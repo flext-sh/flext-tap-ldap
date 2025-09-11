@@ -184,7 +184,7 @@ class TapLDAPConfig(FlextModels.Config):
             for stream_config in v:
                 try:
                     # Convert FlextTypes.Core.Dict to proper types for validation
-                    # Type-safe config construction
+
                     name = str(stream_config.get("name", ""))
                     search_filter = str(stream_config.get("search_filter", ""))
                     primary_keys = stream_config.get("primary_keys")
