@@ -33,7 +33,7 @@ class LDAPConnectionParams:
     """Parameter object for LDAP connection creation.
 
     Implements Parameter Object Pattern to reduce parameter count
-    and improve maintainability following SOLID principles.
+    and improve maintainability
     """
 
     host: str
@@ -116,7 +116,7 @@ class LDAPConnectionService:
         """Create LDAP connection using parameter object pattern.
 
         Refactored to use Parameter Object Pattern, reducing complexity
-        and improving maintainability following SOLID principles.
+        and improving maintainability
         """
         try:
             # Parameter Object Pattern eliminates complex parameter passing
@@ -197,7 +197,7 @@ class LDAPStreamService:
         """Create LDAP stream using parameter object pattern.
 
         Refactored to use Parameter Object Pattern to reduce parameter count
-        and improve maintainability following SOLID principles.
+        and improve maintainability
         """
         try:
             # Generate tap_stream_id if not provided

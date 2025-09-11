@@ -46,7 +46,7 @@ class LDAPClientConfig:
     """Parameter object for LDAP client configuration.
 
     Implements Parameter Object Pattern to reduce parameter count
-    and improve maintainability following SOLID principles.
+    and improve maintainability
     """
 
     host: str

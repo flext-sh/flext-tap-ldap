@@ -110,7 +110,7 @@ class CustomStreamParams:
     """Parameter object for CustomStream initialization.
 
     Implements Parameter Object Pattern to reduce parameter count
-    and improve maintainability following SOLID principles.
+    and improve maintainability
     """
 
     name: str

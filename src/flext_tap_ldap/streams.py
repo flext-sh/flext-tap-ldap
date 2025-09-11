@@ -71,7 +71,7 @@ class CustomStreamParams:
     """Parameter object for CustomStream initialization.
 
     Implements Parameter Object Pattern to reduce parameter count
-    and improve maintainability following SOLID principles.
+    and improve maintainability
     """
 
     name: str
@@ -502,7 +502,7 @@ class CustomStream(LDAPBaseStream):
         """Initialize custom stream using parameter object pattern.
 
         Refactored to use Parameter Object Pattern to reduce parameter count
-        and improve maintainability following SOLID principles.
+        and improve maintainability
         """
         self.name = params.name
         self.path = f"/{params.name}"
