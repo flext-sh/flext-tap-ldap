@@ -418,8 +418,6 @@ class LDAPClient:
         if not isinstance(attributes, dict):
             return entry
 
-        # Type guard for attributes dict
-
         # Handle Oracle password attributes
         if "orclPassword" in attributes:
             # Oracle OID stores passwords differently

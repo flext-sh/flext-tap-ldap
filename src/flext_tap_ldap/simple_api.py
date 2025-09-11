@@ -306,7 +306,6 @@ def create_ldif_processing_config(
     if ldif_directory:
         builder.with_directory(ldif_directory)
 
-    # Simple field normalization (no branching besides None checks)
     builder.with_pattern(str(kwargs.get("ldif_file_pattern", "*.ldif")))
 
     ignore_errors = _coerce_bool(kwargs.get("ldif_ignore_errors", True), default=True)

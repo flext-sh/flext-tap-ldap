@@ -709,7 +709,6 @@ class FlextTapLDAPPlugin:
         parameters: FlextTypes.Core.Dict,
     ) -> FlextResult[FlextTypes.Core.Dict]:
         """Execute catalog generation through tap."""
-        # Alias for discover operation
         return self._execute_discover(parameters)
 
 

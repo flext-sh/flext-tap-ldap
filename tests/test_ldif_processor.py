@@ -9,8 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-import structlog
-from flext_core import FlextResult
+from flext_core import FlextLogger, FlextResult
 
 from flext_tap_ldap import (
     FlextLDIFProcessor,
@@ -20,7 +19,7 @@ from flext_tap_ldap import (
     LDIFValidator,
 )
 
-logger = structlog.FlextLogger()
+logger = FlextLogger(__name__)
 
 
 class TestLDIFEntry:
