@@ -4,43 +4,28 @@ This module provides LDIF file processing capabilities by delegating
 to the flext-ldif library to eliminate code duplication and leverage
 enterprise-grade LDIF processing infrastructure.
 
-Refactored to use flext-ldif exclusively, removing duplicated code
-while maintaining testing convenience for existing Singer streams.
-
-
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
 
-from flext_core import FlextTypes
-
-"""
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
-
-
-import uuid
 from collections.abc import Iterator
 from pathlib import Path
 
 from flext_core import (
     FlextLogger,
     FlextResult,
+    FlextTypes,
 )
-from flext_core.typings import FlextTypes
-from flext_ldif import (
-    FlextLDIFAPI,
-    FlextLDIFAttributes,
-    FlextLDIFDistinguishedName,
-    FlextLDIFEntry,
-)
+from flext_ldif import FlextLDIFAPI
+from flext_ldif.exceptions import FlextLDIFParseError
+from flext_ldif.models import FlextLDIFModels
 
-from flext_tap_ldap.exceptions import (
-    FlextLDIFParseError,
-)
+# Type aliases for cleaner code
+FlextLDIFAttributes = FlextLDIFModels.LdifAttributes
+FlextLDIFDistinguishedName = FlextLDIFModels.DistinguishedName
+FlextLDIFEntry = FlextLDIFModels.Entry
 
 logger = FlextLogger(__name__)
 # Testing convenience aliases that delegate to flext-ldif
@@ -84,16 +69,14 @@ class LDIFEntry:
 
             # Fallback: create minimal entry
             return FlextLDIFEntry(
-                id=str(uuid.uuid4()),
                 dn=FlextLDIFDistinguishedName(value=self.dn),
-                attributes=FlextLDIFAttributes(attributes=self.attributes),
+                attributes=FlextLDIFAttributes(data=self.attributes),
             )
         except Exception:
             # Fallback: create minimal entry for testing convenience
             return FlextLDIFEntry(
-                id=str(uuid.uuid4()),
                 dn=FlextLDIFDistinguishedName(value=self.dn),
-                attributes=FlextLDIFAttributes(attributes=self.attributes),
+                attributes=FlextLDIFAttributes(data=self.attributes),
             )
 
     def get_attribute(self, name: str) -> FlextTypes.Core.StringList:
@@ -301,8 +284,8 @@ class FlextLDIFProcessor:
 
         # Extract attributes
         attributes: dict[str, FlextTypes.Core.StringList] = {}
-        if flext_entry.attributes and flext_entry.attributes.attributes:
-            for attr_name, attr_values in flext_entry.attributes.attributes.items():
+        if flext_entry.attributes and flext_entry.attributes.data:
+            for attr_name, attr_values in flext_entry.attributes.data.items():
                 attributes[attr_name] = [str(v) for v in attr_values]
 
         return LDIFEntry(dn=dn, attributes=attributes)

@@ -1,11 +1,3 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT.
-"""
-
-from __future__ import annotations
-
-from flext_core import FlextTypes
-
 """Configuration for tap-ldap using flext-core and flext-ldap integration.
 
 Consolidates configuration and validation with maximum integration
@@ -15,8 +7,9 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
+from __future__ import annotations
 
-from flext_core import FlextLogger, FlextModels, FlextResult
+from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
 from flext_core.typings import FlextTypes
 from flext_ldap import FlextLDAPConnectionConfig
 from pydantic import Field, field_validator

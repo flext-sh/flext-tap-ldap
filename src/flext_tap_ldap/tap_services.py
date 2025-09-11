@@ -1,11 +1,3 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT.
-"""
-
-from __future__ import annotations
-
-from flext_core import FlextTypes
-
 """Services for FLEXT Tap LDAP operations and utilities.
 
 Consolidates application services, LDIF processing, and simple API utilities
@@ -15,13 +7,14 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
+from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import UUID
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_core.typings import FlextTypes
 from flext_ldap import FlextLDAPConnectionConfig
 from flext_ldif import FlextLDIFAPI

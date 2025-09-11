@@ -1,31 +1,17 @@
 """Simple API for LDAP tap setup and operations using flext-core patterns.
 
-# Constants
-EXPECTED_DATA_COUNT = 3
-
-MIGRATED TO FLEXT-CORE:
-Provides enterprise-ready setup utilities with FlextResult pattern support.
-
-
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
 
-from flext_core import FlextTypes
-
-"""
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
-
-
 import os
 from dataclasses import dataclass, field
 
 from flext_core import (
     FlextResult,
+    FlextTypes,
 )
 from flext_core.typings import FlextTypes
 

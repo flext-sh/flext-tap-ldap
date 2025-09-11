@@ -1,11 +1,3 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT.
-"""
-
-from __future__ import annotations
-
-from flext_core import FlextTypes
-
 """LDAP Streams for flext-tap-ldap with integrated LDIF processing.
 
 Consolidates all stream definitions including LDAP directory streams
@@ -15,6 +7,7 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
+from __future__ import annotations
 
 import time
 from collections.abc import Iterable, Mapping
@@ -22,7 +15,7 @@ from dataclasses import dataclass
 from itertools import starmap
 from pathlib import Path
 
-from flext_core import FlextLogger
+from flext_core import FlextLogger, FlextTypes
 from flext_core.typings import FlextTypes
 from flext_ldap import FlextLDAPApi
 from flext_ldif import FlextLDIFAPI, FlextLDIFModels

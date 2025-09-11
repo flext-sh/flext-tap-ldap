@@ -3,42 +3,28 @@
 This module provides LDIF streams that delegate ALL processing to the
 flext-ldif and flext-ldap libraries, eliminating code duplication.
 
-REFACTORED: Uses flext-ldif for LDIF parsing and flext-ldap for entry classification.
-NO local LDIF or LDAP logic - everything delegated to libraries.
-
-
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-from flext_core import FlextTypes
-
-if TYPE_CHECKING:
-    from flext_tap_ldap.tap import FlextTapLDAP
-
-"""
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
-
-
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 
-from flext_core import FlextLogger
+from flext_core import FlextLogger, FlextTypes
 from flext_core.typings import FlextTypes
 from flext_ldap import FlextLDAPApi
 from flext_ldif import FlextLDIFAPI, FlextLDIFModels
 from flext_meltano import FlextSingerTypes
-
-th = FlextSingerTypes()
+from flext_meltano.singer_types import FlextSingerTypes
 from singer_sdk import Stream
 
+from flext_tap_ldap.tap import FlextTapLDAP
+
 logger = FlextLogger(__name__)
+
+th: FlextSingerTypes = FlextSingerTypes()
 
 
 class LDIFStream(Stream):
