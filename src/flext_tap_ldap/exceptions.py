@@ -11,8 +11,6 @@ from __future__ import annotations
 from flext_core.exceptions import FlextExceptions
 from flext_core.typings import FlextTypes
 
-# All exceptions inherit from FlextExceptions.BaseError for simplicity
-
 
 # LDAP Tap specific exceptions using FlextExceptions base patterns
 class FlextTapLdapError(FlextExceptions.BaseError):

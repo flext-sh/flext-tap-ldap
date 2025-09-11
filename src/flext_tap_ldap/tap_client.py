@@ -1,11 +1,3 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT.
-"""
-
-from __future__ import annotations
-
-from flext_core import FlextTypes
-
 """LDAP Client and Tap Plugin for flext-tap-ldap using flext-ldap integration.
 
 Consolidates LDAP client functionality with tap plugin interface
@@ -15,6 +7,7 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
+from __future__ import annotations
 
 import asyncio
 import importlib.metadata
@@ -22,7 +15,7 @@ import time
 from collections.abc import Awaitable
 from dataclasses import dataclass
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_core.typings import FlextTypes
 from flext_ldap import (
     FlextLDAPApi,

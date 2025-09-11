@@ -10,21 +10,11 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextTypes
-
-"""
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
-
-
 from typing import ClassVar
 
-from flext_core import FlextLogger
-from flext_core.typings import FlextTypes
+from flext_core import FlextLogger, FlextTypes
 from singer_sdk import Stream, Tap
 
-# from flext_meltano.common_schemas import create_ldap_tap_schema  # Not available
 from flext_tap_ldap.config import TapLDAPConfig
 from flext_tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
 from flext_tap_ldap.streams import (

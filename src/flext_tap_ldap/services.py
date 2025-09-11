@@ -1,8 +1,4 @@
-"""Application services for FLEXT-TAP-LDAP v0.7.0.
-
-REFACTORED:
-Uses flext-core service patterns - NO duplication. Clean architecture.
-
+"""Application services for FLEXT-TAP-LDAP.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -20,7 +16,7 @@ from flext_core import (
     FlextTypes,
 )
 
-from flext_tap_ldap.domain.entities import (
+from flext_tap_ldap.models import (
     LDAPConnection,
     LDAPRecord,
     LDAPStream,
