@@ -48,7 +48,7 @@ class LDAPConnectionParams:
     """Parameter object for LDAP connection configuration.
 
     Implements Parameter Object Pattern to reduce parameter count
-    and improve maintainability following SOLID principles.
+    and improve maintainability
     """
 
     host: str
