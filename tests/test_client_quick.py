@@ -53,7 +53,7 @@ class TestLDAPClientQuick:
 
     def test_convert_entry_to_dict_scenarios(self, client: LDAPClient) -> None:
         """Test entry conversion with different scenarios."""
-        # Test with FlextLDAPEntry-like object
+        # Test with FlextLDAPEntities-like object
         mock_entry = Mock()
         mock_entry.dn = "uid=test,dc=example,dc=com"
         mock_entry.attributes = {

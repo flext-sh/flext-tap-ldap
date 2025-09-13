@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
 from flext_core import (
     FlextLogger,
@@ -27,12 +26,10 @@ from singer_sdk.typing import (
     StringType,
 )
 
-th = FlextSingerTypes()
-
 from flext_tap_ldap.client import LDAPClient
+from flext_tap_ldap.tap import FlextTapLDAP
 
-if TYPE_CHECKING:
-    from flext_tap_ldap.tap import FlextTapLDAP
+th = FlextSingerTypes()
 
 logger = FlextLogger(__name__)
 

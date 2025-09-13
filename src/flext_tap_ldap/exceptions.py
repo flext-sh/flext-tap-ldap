@@ -1,14 +1,14 @@
 """Domain-specific exceptions for LDAP tap operations using FlextExceptions patterns.
 
+LDAP Tap Exception Hierarchy using flext-core FlextExceptions patterns.
+
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
-
-LDAP Tap Exception Hierarchy using flext-core FlextExceptions patterns.
 """
 
 from __future__ import annotations
 
-from flext_core.exceptions import FlextExceptions
+from flext_core import FlextExceptions
 from flext_core.typings import FlextTypes
 
 

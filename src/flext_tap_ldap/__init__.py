@@ -1,78 +1,42 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+"""Enterprise LDAP data extraction library for FLEXT ecosystem.
 
-SPDX-License-Identifier: MIT.
-
-Singer tap for LDAP data extraction.
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
 
-from flext_core.typings import FlextTypes
+from flext_core import FlextTypes
 
-from flext_tap_ldap.client import (
-    LDAPClient,
-    LDAPClientConfig,
-)
+from flext_tap_ldap.client import LDAPClient, LDAPClientConfig
 from flext_tap_ldap.exceptions import (
-    FlextTapLdapAuthenticationError,
-    FlextTapLdapConfigurationError,
     FlextTapLdapConnectionError,
     FlextTapLdapError,
-    FlextTapLdapProcessingError,
-    FlextTapLdapSearchError,
-    FlextTapLdapStreamError,
-    FlextTapLdapTimeoutError,
     FlextTapLdapValidationError,
 )
 from flext_tap_ldap.models import (
     LDAPAttribute,
-    LDAPConnection,
     LDAPEntry,
     LDAPGroup,
-    LDAPRecord,
     LDAPSchema,
-    LDAPStream,
     LDAPUser,
-    TapExecution,
-    TapExecutionCompletedEvent,
-    TapExecutionStartedEvent,
 )
-from flext_tap_ldap.tap_client import (
-    FlextTapLDAP,
-    FlextTapLDAPPlugin,
-    create_ldap_tap_plugin,
-    main,
-)
+from flext_tap_ldap.tap_client import FlextTapLDAP, FlextTapLDAPPlugin
 from flext_tap_ldap.tap_config import (
     CustomStreamConfig,
     LDIFProcessingConfig,
     TapLDAPConfig,
 )
 from flext_tap_ldap.tap_services import (
-    LDAPConnectionParams,
     LDAPConnectionService,
     LDAPRecordService,
     LDAPStreamService,
-    LDIFConfigBuilder,
-    LDIFProcessingService,
-    StreamCreationParams,
     TapExecutionService,
-    create_development_ldap_config,
-    create_ldap_connection_config,
-    create_production_ldap_config,
-    setup_ldap_tap,
-    validate_ldap_config,
 )
 from flext_tap_ldap.tap_streams import (
     CustomStream,
-    CustomStreamParams,
-    FallbackDataFactory,
     GroupsStream,
     LDAPBaseStream,
-    LDIFAnalysisStream,
-    LDIFStream,
-    OrganizationalUnitsStream,
-    SchemaStream,
     UsersStream,
 )
 

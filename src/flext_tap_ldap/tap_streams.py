@@ -16,7 +16,6 @@ from itertools import starmap
 from pathlib import Path
 
 from flext_core import FlextLogger, FlextTypes
-from flext_core.typings import FlextTypes
 from flext_ldap import FlextLDAPApi
 from flext_ldif import FlextLDIFAPI, FlextLDIFModels
 from flext_meltano import FlextSingerTypes

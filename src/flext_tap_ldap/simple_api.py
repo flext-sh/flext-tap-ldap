@@ -13,7 +13,6 @@ from flext_core import (
     FlextResult,
     FlextTypes,
 )
-from flext_core.typings import FlextTypes
 
 from flext_tap_ldap.config import (
     LDAPConnectionConfig,
