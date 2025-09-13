@@ -1,12 +1,3 @@
-"""LDAP client for flext-tap-ldap using flext-ldap infrastructure.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-This module eliminates code duplication by using flext-ldap infrastructure
-while maintaining testing convenience for existing tests and code.
-"""
-
 from __future__ import annotations
 
 import asyncio

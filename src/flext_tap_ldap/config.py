@@ -1,10 +1,6 @@
-"""Configuration models for tap-ldap using consolidated patterns.
+"""FLEXT Module.
 
-CONSOLIDATED: Uses flext-meltano common LDAP config to eliminate duplication
-with flext-target-ldap.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
+Copyright (c) 2025 FLEXT Team. All rights reserved. SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations

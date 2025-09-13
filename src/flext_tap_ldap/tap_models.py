@@ -1,19 +1,9 @@
-"""Domain Models for FLEXT Tap LDAP with flext-core integration.
-
-Consolidates all data models for LDAP tap operations including entries,
-streams, connections, and execution tracking.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
-
 from __future__ import annotations
 
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
-from flext_core.typings import FlextTypes
 from flext_ldap import FlextLDAPEntities
 from pydantic import Field
 

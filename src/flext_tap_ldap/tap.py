@@ -3,7 +3,6 @@
 This module implements the main tap class for LDAP data extraction
 using the centralized patterns from flext-core.meltano.
 
-
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """

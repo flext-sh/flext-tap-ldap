@@ -1,19 +1,9 @@
-"""LDIF stream implementation for tap-ldap using flext-ldif and flext-ldap.
-
-This module provides LDIF streams that delegate ALL processing to the
-flext-ldif and flext-ldap libraries, eliminating code duplication.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
-
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 
 from flext_core import FlextLogger, FlextTypes
-from flext_core.typings import FlextTypes
 from flext_ldap import FlextLDAPApi
 from flext_ldif import FlextLDIFAPI, FlextLDIFModels
 from flext_meltano import FlextSingerTypes

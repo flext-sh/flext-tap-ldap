@@ -15,7 +15,6 @@ from pathlib import Path
 from uuid import UUID
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
-from flext_core.typings import FlextTypes
 from flext_ldap import FlextLDAPConnectionConfig
 from flext_ldif import FlextLDIFAPI
 

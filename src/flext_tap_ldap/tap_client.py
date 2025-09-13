@@ -16,7 +16,6 @@ from collections.abc import Awaitable
 from dataclasses import dataclass
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
-from flext_core.typings import FlextTypes
 from flext_ldap import (
     FlextLDAPApi,
     FlextLDAPConnectionConfig,
@@ -28,7 +27,6 @@ from flext_meltano import (
     FlextTapAbstractions as FlextTap,
 )
 
-# from flext_meltano.common_schemas import create_ldap_tap_schema  # Not available
 from flext_tap_ldap.tap_config import TapLDAPConfig
 
 logger = FlextLogger(__name__)

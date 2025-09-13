@@ -495,6 +495,7 @@ objectClass: person
 cn: user{i}
 sn: User {i}
 """
+
             ldif_file = tmp_path / f"batch_{i}.ldif"
             ldif_file.write_text(content)
 
