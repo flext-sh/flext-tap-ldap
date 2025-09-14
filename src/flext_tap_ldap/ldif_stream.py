@@ -1,3 +1,5 @@
+"""FLEXT Tap LDAP - LDIF stream processing."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping

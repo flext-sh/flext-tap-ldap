@@ -1,3 +1,5 @@
+"""FLEXT Tap LDAP - Data models for LDAP tap operations."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime

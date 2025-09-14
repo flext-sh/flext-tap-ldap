@@ -26,6 +26,7 @@ class TestLDIFEntry:
     """Test LDIF entry functionality with modern patterns."""
 
     def test_basic_entry_creation(self) -> None:
+        """Test method."""
         """Test basic LDIF entry creation and validation."""
         entry = LDIFEntry("cn=john,ou=users,dc=example,dc=com")
         assert entry.dn == "cn=john,ou=users,dc=example,dc=com"
@@ -33,6 +34,7 @@ class TestLDIFEntry:
         assert entry.is_valid()
 
     def test_entry_with_attributes(self) -> None:
+        """Test method."""
         """Test LDIF entry with attributes."""
         entry = LDIFEntry("cn=john,ou=users,dc=example,dc=com")
         entry.add_attribute("cn", "john")
@@ -43,6 +45,7 @@ class TestLDIFEntry:
         assert entry.get_attribute("mail") == ["john.doe@example.com"]
 
     def test_entry_validation(self) -> None:
+        """Test method."""
         """Test LDIF entry validation."""
         # Valid entry
         valid_entry = LDIFEntry("cn=valid,dc=example,dc=com")
@@ -53,6 +56,7 @@ class TestLDIFEntry:
         assert not invalid_entry.is_valid()
 
     def test_entry_validation_errors(self) -> None:
+        """Test method."""
         """Test LDIF entry validation errors property."""
         # Test empty DN error
         entry_empty_dn = LDIFEntry("")
@@ -89,6 +93,7 @@ class TestLDIFEntry:
         assert len(errors) == 0
 
     def test_entry_object_class_checking(self) -> None:
+        """Test method."""
         """Test object class checking functionality."""
         entry = LDIFEntry("cn=test,dc=example,dc=com")
         entry.add_attribute("objectClass", ["person", "inetOrgPerson"])
@@ -98,6 +103,7 @@ class TestLDIFEntry:
         assert not entry.has_object_class("organizationalUnit")
 
     def test_entry_to_dict(self) -> None:
+        """Test method."""
         """Test entry to dict conversion."""
         entry = LDIFEntry("cn=test,dc=example,dc=com")
         entry.add_attribute("cn", "test")
@@ -112,6 +118,7 @@ class TestLDIFEntry:
         assert entry_dict["controls"] == ["control1"]
 
     def test_entry_add_attribute_list(self) -> None:
+        """Test method."""
         """Test adding attribute with list values."""
         entry = LDIFEntry("cn=test,dc=example,dc=com")
         # Add single value
@@ -125,6 +132,7 @@ class TestLDIFEntry:
         assert entry.get_attribute("cn") == ["test", "alias"]
 
     def test_entry_parse_dn(self) -> None:
+        """Test method."""
         """Test DN parsing functionality."""
         entry = LDIFEntry("cn=john,ou=users,dc=example,dc=com")
         dn_parts = entry.parse_dn()
@@ -132,6 +140,7 @@ class TestLDIFEntry:
         # The exact structure depends on implementation
 
     def test_entry_remove_attribute(self) -> None:
+        """Test method."""
         """Test removing attributes from entry."""
         entry = LDIFEntry("cn=test,dc=example,dc=com")
         entry.add_attribute("cn", "test")
@@ -144,6 +153,7 @@ class TestLDIFEntry:
         entry.remove_attribute("nonexistent")
 
     def test_entry_update_attribute(self) -> None:
+        """Test method."""
         """Test updating attributes in entry."""
         entry = LDIFEntry("cn=test,dc=example,dc=com")
         entry.add_attribute("cn", "original")
@@ -155,6 +165,7 @@ class TestLDIFEntry:
         assert entry.get_attribute("objectClass") == ["person", "inetOrgPerson"]
 
     def test_ldif_parse_error(self) -> None:
+        """Test method."""
         """Test LDIF parse error exception."""
         error = LDIFParseError("Test parse error")
         assert str(error) == "Test parse error"
@@ -165,11 +176,13 @@ class TestLDIFValidator:
     """Test LDIF validator functionality."""
 
     def test_validator_initialization(self) -> None:
+        """Test method."""
         """Test LDIF validator initialization."""
         validator = LDIFValidator()
         assert validator is not None
 
     def test_dn_validation(self) -> None:
+        """Test method."""
         """Test DN validation."""
         validator = LDIFValidator()
         # Valid DNs
@@ -180,6 +193,7 @@ class TestLDIFValidator:
         assert not validator.validate_dn_format("invalid-dn")
 
     def test_attribute_validation(self) -> None:
+        """Test method."""
         """Test attribute validation."""
         validator = LDIFValidator()
         # Valid attributes
@@ -196,6 +210,7 @@ class TestLDIFValidator:
         )
 
     def test_validate_entry(self) -> None:
+        """Test method."""
         """Test entry validation."""
         validator = LDIFValidator()
         # Valid entry
@@ -208,6 +223,7 @@ class TestLDIFValidator:
         assert not validator.validate_entry(invalid_entry)
 
     def test_validate_objectclass_requirements(self) -> None:
+        """Test method."""
         """Test objectClass requirements validation using new API."""
         validator = LDIFValidator()
         # inetOrgPerson with required attributes
@@ -226,6 +242,7 @@ class TestLDIFValidator:
         assert isinstance(result, bool)
 
     def test_validate_entries_batch(self) -> None:
+        """Test method."""
         """Test batch validation of entries."""
         validator = LDIFValidator()
         entries = [
@@ -243,6 +260,7 @@ class TestLDIFValidator:
         assert "invalid_entries" in results
 
     def test_get_validation_results(self) -> None:
+        """Test method."""
         """Test getting validation results."""
         validator = LDIFValidator()
         # Validate some entries first
@@ -281,6 +299,7 @@ mail: john.doe@example.com
 """
 
     def test_processor_initialization(self, processor: FlextLDIFProcessor) -> None:
+        """Test method."""
         """Test LDIF processor initialization."""
         assert processor is not None
 
@@ -320,6 +339,7 @@ mail: john.doe@example.com
         assert len(entries) == 3
 
     def test_process_invalid_ldif(self, processor: FlextLDIFProcessor) -> None:
+        """Test method."""
         """Test processing invalid LDIF content."""
         invalid_content = "this is not valid ldif content"
 
@@ -335,6 +355,7 @@ mail: john.doe@example.com
         assert isinstance(result, FlextResult)
 
     def test_validation_with_errors(self, processor: FlextLDIFProcessor) -> None:
+        """Test method."""
         """Test LDIF processing with validation errors."""
         content_with_errors = """dn:
 objectClass: domain
@@ -356,6 +377,7 @@ invalidAttribute:
             assert result.error is not None
 
     def test_processor_get_statistics(self, processor: FlextLDIFProcessor) -> None:
+        """Test method."""
         """Test processor statistics functionality."""
         stats = processor.get_statistics()
         assert isinstance(stats, dict)
@@ -450,6 +472,7 @@ class TestLDIFProcessorIntegration:
     """Integration tests for LDIF processor."""
 
     def test_end_to_end_processing(self, tmp_path: str) -> None:
+        """Test method."""
         """Test end-to-end LDIF processing."""
         # Create sample LDIF file
         ldif_content = """dn: dc=test,dc=com
@@ -485,6 +508,7 @@ mail: user1@test.com
         assert user_entry.get_attribute("mail") == ["user1@test.com"]
 
     def test_batch_processing(self, tmp_path: str) -> None:
+        """Test method."""
         """Test processing multiple LDIF files."""
         processor = FlextLDIFProcessor()
 
@@ -513,6 +537,7 @@ class TestLDIFTransformer:
     """Test LDIF transformer functionality."""
 
     def test_transformer_initialization(self) -> None:
+        """Test method."""
         """Test transformer initialization."""
         # Default initialization
         transformer = LDIFTransformer()
@@ -524,6 +549,7 @@ class TestLDIFTransformer:
         assert transformer_with_rules is not None
 
     def test_transform_entry(self) -> None:
+        """Test method."""
         """Test transforming LDIF entry."""
         transformer = LDIFTransformer()
 
@@ -540,6 +566,7 @@ class TestLDIFTransformer:
         # Transformation specifics depend on implementation
 
     def test_apply_attribute_mappings(self) -> None:
+        """Test method."""
         """Test attribute mapping functionality."""
         rules = {"attribute_mappings": {"mail": "email", "cn": "commonName"}}
         transformer = LDIFTransformer(transformation_rules=rules)
@@ -564,6 +591,7 @@ class TestLDIFProcessorErrorHandling:
     """Test error handling in LDIF processor."""
 
     def test_processor_with_parsing_errors(self) -> None:
+        """Test method."""
         """Test processor handling of parsing errors."""
         processor = FlextLDIFProcessor(ignore_errors=True, max_errors=5)
 
@@ -597,6 +625,7 @@ cn: another
             pytest.skip(f"Parsing failed as expected in strict mode: {exc}")
 
     def test_processor_max_errors_limit(self) -> None:
+        """Test method."""
         """Test processor max errors limit."""
         processor = FlextLDIFProcessor(ignore_errors=True, max_errors=2)
 
@@ -608,6 +637,7 @@ cn: another
         assert isinstance(result, FlextResult)
 
     def test_processor_ignore_errors_false(self) -> None:
+        """Test method."""
         """Test processor with ignore_errors=False."""
         processor = FlextLDIFProcessor(ignore_errors=False)
 

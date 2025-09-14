@@ -31,6 +31,7 @@ class TestFlextTapLDAPUnit:
 
     @pytest.fixture
     def config(self) -> FlextTypes.Core.Dict:
+        """Create a test configuration fixture."""
         return {
             "ldap_host": "test.ldap.com",
             "ldap_port": 389,
@@ -42,6 +43,7 @@ class TestFlextTapLDAPUnit:
         }
 
     def test_tap_initialization(self, config: FlextTypes.Core.Dict) -> None:
+        """Test method."""
         tap = FlextTapLDAP(config=config)
         if tap.name != "tap-ldap":
             msg: str = f"Expected {'tap-ldap'}, got {tap.name}"
@@ -49,6 +51,7 @@ class TestFlextTapLDAPUnit:
         assert tap.config == config
 
     def test_discover_streams(self, config: FlextTypes.Core.Dict) -> None:
+        """Test method."""
         tap = FlextTapLDAP(config=config)
         streams = tap.discover_streams()
 
@@ -67,6 +70,7 @@ class TestFlextTapLDAPUnit:
             raise AssertionError(msg)
 
     def test_discover_custom_streams(self, config: FlextTypes.Core.Dict) -> None:
+        """Test method."""
         config["custom_streams"] = [
             {
                 "name": "service_accounts",
@@ -94,6 +98,7 @@ class TestFlextTapLDAPUnit:
             raise AssertionError(msg)
 
     def test_catalog_generation(self, config: FlextTypes.Core.Dict) -> None:
+        """Test method."""
         tap = FlextTapLDAP(config=config)
         catalog = tap.catalog_dict
 
@@ -126,6 +131,7 @@ class TestFlextTapLDAPUnit:
         mock_client_class: MagicMock,
         config: FlextTypes.Core.Dict,
     ) -> None:
+        """Test streaming records from LDAP."""
         # Mock LDAP client
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client

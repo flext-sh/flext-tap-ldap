@@ -24,6 +24,7 @@ class TestLDAPConnectionParams:
     """Test LDAPConnectionParams parameter object."""
 
     def test_valid_params_creation(self) -> None:
+        """Test method."""
         """Test creating valid connection parameters."""
         params = LDAPConnectionParams(
             host="localhost",
@@ -40,11 +41,13 @@ class TestLDAPConnectionParams:
         assert params.use_ssl is False
 
     def test_invalid_host_validation(self) -> None:
+        """Test method."""
         """Test host validation."""
         with pytest.raises(ValueError, match="Host is required"):
             LDAPConnectionParams(host="")
 
     def test_invalid_port_validation(self) -> None:
+        """Test method."""
         """Test port validation."""
         with pytest.raises(ValueError, match="Port must be between 1 and 65535"):
             LDAPConnectionParams(host="localhost", port=0)
@@ -53,16 +56,19 @@ class TestLDAPConnectionParams:
             LDAPConnectionParams(host="localhost", port=70000)
 
     def test_invalid_timeout_validation(self) -> None:
+        """Test method."""
         """Test timeout validation."""
         with pytest.raises(ValueError, match="Timeout must be positive"):
             LDAPConnectionParams(host="localhost", timeout_seconds=0)
 
     def test_invalid_page_size_validation(self) -> None:
+        """Test method."""
         """Test page size validation."""
         with pytest.raises(ValueError, match="Page size must be positive"):
             LDAPConnectionParams(host="localhost", page_size=0)
 
     def test_invalid_max_retries_validation(self) -> None:
+        """Test method."""
         """Test max retries validation."""
         with pytest.raises(ValueError, match="Max retries cannot be negative"):
             LDAPConnectionParams(host="localhost", max_retries=-1)
@@ -197,6 +203,7 @@ class TestLDAPStreamService:
         return LDAPStreamService()
 
     async def test_create_stream_success(self, service: LDAPStreamService) -> None:
+        """Test method."""
         """Test successful stream creation."""
         connection_id = uuid4()
         params = StreamCreationParams(
@@ -231,6 +238,7 @@ class TestLDAPStreamService:
         assert result.data.replication_method == "FULL_TABLE"
 
     async def test_discover_schema(self, service: LDAPStreamService) -> None:
+        """Test method."""
         """Test schema discovery."""
         connection_id = uuid4()
         params = StreamCreationParams(
@@ -249,6 +257,7 @@ class TestLDAPStreamService:
         assert "dn" in schema_result.data["properties"]
 
     async def test_list_streams_filtered(self, service: LDAPStreamService) -> None:
+        """Test method."""
         """Test listing streams filtered by connection."""
         connection_id1 = uuid4()
         connection_id2 = uuid4()
@@ -281,6 +290,7 @@ class TestTapExecutionService:
         return TapExecutionService()
 
     async def test_create_execution(self, service: TapExecutionService) -> None:
+        """Test method."""
         """Test execution creation."""
         connection_id = uuid4()
         result = await service.create_execution(
@@ -295,6 +305,7 @@ class TestTapExecutionService:
         assert result.data.tap_status == "created"
 
     async def test_start_execution(self, service: TapExecutionService) -> None:
+        """Test method."""
         """Test starting execution."""
         connection_id = uuid4()
         create_result = await service.create_execution(connection_id, "sync")
@@ -307,6 +318,7 @@ class TestTapExecutionService:
         assert start_result.data.started_at is not None
 
     async def test_complete_execution(self, service: TapExecutionService) -> None:
+        """Test method."""
         """Test completing execution."""
         connection_id = uuid4()
         create_result = await service.create_execution(connection_id, "sync")
@@ -324,6 +336,7 @@ class TestTapExecutionService:
         assert complete_result.data.exit_code == 0
 
     async def test_update_metrics(self, service: TapExecutionService) -> None:
+        """Test method."""
         """Test updating execution metrics."""
         connection_id = uuid4()
         create_result = await service.create_execution(connection_id, "sync")
@@ -349,6 +362,7 @@ class TestLDAPRecordService:
         return LDAPRecordService()
 
     async def test_create_record(self, service: LDAPRecordService) -> None:
+        """Test method."""
         """Test record creation."""
         stream_id = uuid4()
         execution_id = uuid4()
@@ -367,6 +381,7 @@ class TestLDAPRecordService:
         assert "singer_record" in result.data.__dict__
 
     async def test_list_records_filtered(self, service: LDAPRecordService) -> None:
+        """Test method."""
         """Test listing records with filters."""
         stream_id1 = uuid4()
         stream_id2 = uuid4()
@@ -386,6 +401,7 @@ class TestLDAPRecordService:
         assert len(filtered_result.data) == 2
 
     async def test_count_records(self, service: LDAPRecordService) -> None:
+        """Test method."""
         """Test counting records."""
         stream_id = uuid4()
         execution_id = uuid4()

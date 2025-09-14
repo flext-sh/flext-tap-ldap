@@ -17,6 +17,7 @@ class TestLDAPAttribute:
     """Test LDAP attribute model."""
 
     def test_attribute_creation(self) -> None:
+        """Test method."""
         """Test creating LDAP attribute."""
         attr = LDAPAttribute(
             name="cn",
@@ -28,6 +29,7 @@ class TestLDAPAttribute:
         assert attr.is_binary is False
 
     def test_single_value_property(self) -> None:
+        """Test method."""
         """Test single_value property."""
         # Single value
         single_attr = LDAPAttribute(name="uid", values=["jdoe"])
@@ -38,6 +40,7 @@ class TestLDAPAttribute:
         assert empty_attr.single_value is None
 
     def test_is_multi_valued_property(self) -> None:
+        """Test method."""
         """Test is_multi_valued property."""
         # Single value
         single_attr = LDAPAttribute(name="uid", values=["jdoe"])
@@ -48,6 +51,7 @@ class TestLDAPAttribute:
         assert multi_attr.is_multi_valued is True
 
     def test_validate_domain_rules(self) -> None:
+        """Test method."""
         """Test domain validation."""
         attr = LDAPAttribute(name="test", values=["value"])
         # Should not raise exception
@@ -58,6 +62,7 @@ class TestLDAPEntry:
     """Test LDAP entry model."""
 
     def test_entry_creation(self) -> None:
+        """Test method."""
         """Test creating LDAP entry."""
         entry = LDAPEntry(
             id="uid=jdoe,ou=users,dc=example,dc=com",
@@ -68,6 +73,7 @@ class TestLDAPEntry:
         assert entry.object_classes == ["inetOrgPerson", "person"]
 
     def test_entry_validation(self) -> None:
+        """Test method."""
         """Test entry validation."""
         # Valid entry
         entry = LDAPEntry(
@@ -91,6 +97,7 @@ class TestLDAPSchema:
     """Test LDAP schema model."""
 
     def test_schema_creation(self) -> None:
+        """Test method."""
         """Test creating LDAP schema."""
         schema = LDAPSchema(
             object_classes=["person", "inetOrgPerson"],
@@ -101,12 +108,14 @@ class TestLDAPSchema:
         assert "cn" in schema.attribute_types
 
     def test_schema_validation(self) -> None:
+        """Test method."""
         """Test schema validation."""
         schema = LDAPSchema()
         # Should not raise exception
         schema.validate_domain_rules()
 
     def test_has_oracle_extensions(self) -> None:
+        """Test method."""
         """Test Oracle extensions detection."""
         # Schema without Oracle extensions
         normal_schema = LDAPSchema(
