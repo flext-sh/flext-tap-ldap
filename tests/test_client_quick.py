@@ -11,7 +11,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 from flext_core import FlextTypes
-from flext_core.typings import FlextTypes
 
 from flext_tap_ldap import LDAPClient
 
@@ -113,12 +112,12 @@ class TestLDAPClientQuick:
     @patch("asyncio.get_running_loop")
     def test_search_no_event_loop(
         self,
-        mock_get_loop: Mock,
+        _mock_get_loop: Mock,
         client: LDAPClient,
     ) -> None:
         """Test search when no event loop is running."""
         # Mock no event loop
-        mock_get_loop.side_effect = RuntimeError("no event loop")
+        _mock_get_loop.side_effect = RuntimeError("no event loop")
 
         with patch.object(
             client,
@@ -132,12 +131,12 @@ class TestLDAPClientQuick:
     @patch("asyncio.get_running_loop")
     def test_search_with_event_loop(
         self,
-        mock_get_loop: Mock,
+        _mock_get_loop: Mock,
         client: LDAPClient,
     ) -> None:
         """Test search when event loop is already running."""
         # Mock existing event loop
-        mock_get_loop.return_value = Mock()
+        _mock_get_loop.return_value = Mock()
 
         results = client.search("dc=test,dc=com")
         assert results == []  # Should return empty in async context
@@ -156,13 +155,13 @@ class TestLDAPClientQuick:
     @patch("asyncio.set_event_loop")
     def test_test_connection_no_loop(
         self,
-        mock_set_loop: Mock,
+        _mock_set_loop: Mock,
         mock_new_loop: Mock,
-        mock_get_loop: Mock,
+        _mock_get_loop: Mock,
         client: LDAPClient,
     ) -> None:
         """Test connection test when no event loop."""
-        mock_get_loop.side_effect = RuntimeError("no event loop")
+        _mock_get_loop.side_effect = RuntimeError("no event loop")
 
         mock_loop = Mock()
         mock_new_loop.return_value = mock_loop
@@ -176,11 +175,11 @@ class TestLDAPClientQuick:
     @patch("asyncio.get_running_loop")
     def test_test_connection_with_loop(
         self,
-        mock_get_loop: Mock,
+        _mock_get_loop: Mock,
         client: LDAPClient,
     ) -> None:
         """Test connection test when event loop exists."""
-        mock_get_loop.return_value = Mock()
+        _mock_get_loop.return_value = Mock()
 
         result = client.test_connection()
         assert result is True  # Fallback for existing loop
@@ -302,7 +301,7 @@ class TestLDAPClientQuick:
     @patch("asyncio.get_running_loop")
     def test_execute_oracle_search_in_new_loop(
         self,
-        mock_get_loop: Mock,
+        _mock_get_loop: Mock,
         client: LDAPClient,
     ) -> None:
         """Test Oracle search execution in new loop."""
@@ -319,12 +318,12 @@ class TestLDAPClientQuick:
     @patch("asyncio.get_running_loop")
     def test_search_with_oracle_support_scenarios(
         self,
-        mock_get_loop: Mock,
+        _mock_get_loop: Mock,
         client: LDAPClient,
     ) -> None:
         """Test Oracle support search with different scenarios."""
         # Test with existing event loop
-        mock_get_loop.return_value = Mock()
+        _mock_get_loop.return_value = Mock()
 
         results = client.search_with_oracle_support(
             "dc=oracle,dc=com",
@@ -335,7 +334,7 @@ class TestLDAPClientQuick:
         assert list(results) == []  # Should return empty in async context
 
         # Test without event loop
-        mock_get_loop.side_effect = RuntimeError("no event loop")
+        _mock_get_loop.side_effect = RuntimeError("no event loop")
 
         with patch.object(
             client,

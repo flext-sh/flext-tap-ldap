@@ -6,7 +6,6 @@ from pathlib import Path
 from flext_core import FlextLogger, FlextTypes
 from flext_ldap import FlextLDAPApi
 from flext_ldif import FlextLDIFAPI, FlextLDIFModels
-from flext_meltano import FlextSingerTypes
 from flext_meltano.singer_types import FlextSingerTypes
 from singer_sdk import Stream
 

@@ -34,7 +34,8 @@ class FlextTapLDAP(Tap):
     name: str = "tap-ldap"
     config_class = TapLDAPConfig
 
-    # TODO: Use centralized LDAP schema when flext-meltano common_schemas is available
+    # TODO(@flext-team): Use centralized LDAP schema when flext-meltano common_schemas is available
+    # Issue: https://github.com/flext-team/flext-meltano/issues/1
     config_jsonschema: ClassVar[FlextTypes.Core.Dict] = {
         "type": "object",
         "properties": {

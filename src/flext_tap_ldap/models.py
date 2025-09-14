@@ -12,7 +12,7 @@ from flext_core import FlextModels, FlextResult, FlextTypes
 from flext_ldap import FlextLDAPEntities
 from pydantic import Field
 
-from flext_tap_ldap.domain.entities import (
+from flext_tap_ldap.tap_models import (
     ConnectionTestedEvent,
     LDAPConnection,
     LDAPRecord,
