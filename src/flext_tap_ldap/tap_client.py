@@ -23,8 +23,11 @@ from flext_ldap import (
     LdapScope as LDAPScope,
 )
 from flext_meltano import (
+    FlextMeltanoTypeAdapters,
     FlextSingerTypes,
     FlextTapAbstractions as FlextTap,
+    Stream,
+    create_flext_tap_config,
 )
 
 from flext_tap_ldap.tap_config import TapLDAPConfig
@@ -464,8 +467,8 @@ class FlextTapLDAP:
             # For now, return empty list as we're focusing on the abstraction working
             # Individual stream implementations need separate migration
 
-        except Exception as e:
-            self._logger.exception(f"Error discovering streams: {e}")
+        except Exception:
+            self._logger.exception("Error discovering streams")
             return []
 
     def generate_catalog(self) -> dict:
@@ -479,8 +482,8 @@ class FlextTapLDAP:
 
             return catalog_result.value
 
-        except Exception as e:
-            self._logger.exception(f"Error generating catalog: {e}")
+        except Exception:
+            self._logger.exception("Error generating catalog")
             return {"streams": []}
 
     def sync_stream(self, stream_name: str) -> dict:
@@ -495,7 +498,7 @@ class FlextTapLDAP:
             return sync_result.value
 
         except Exception as e:
-            self._logger.exception(f"Error syncing stream: {e}")
+            self._logger.exception("Error syncing stream")
             return {"status": "failed", "error": str(e)}
 
     @property

@@ -8,8 +8,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextExceptions
-from flext_core.typings import FlextTypes
+from flext_core import FlextExceptions, FlextTypes
 
 
 # LDAP Tap specific exceptions using FlextExceptions base patterns
