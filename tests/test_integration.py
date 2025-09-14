@@ -23,6 +23,7 @@ class TestFlextTapLDAPIntegration:
 
     @pytest.fixture
     def runner(self) -> CliRunner:
+        """Create a CLI runner fixture for testing."""
         return CliRunner()
 
     @pytest.fixture
@@ -58,6 +59,7 @@ class TestFlextTapLDAPIntegration:
     def config_file(
         self, tmp_path: Path, mock_ldap_config: FlextTypes.Core.Dict
     ) -> Path:
+        """Create temporary config file."""
         config_path = tmp_path / "config.json"
         with Path(config_path).open("w", encoding="utf-8") as f:
             json.dump(mock_ldap_config, f)
@@ -67,6 +69,7 @@ class TestFlextTapLDAPIntegration:
     def catalog_file(
         self, tmp_path: Path, sample_catalog: FlextTypes.Core.Dict
     ) -> Path:
+        """Create temporary catalog file."""
         catalog_path = tmp_path / "catalog.json"
         with Path(catalog_path).open("w", encoding="utf-8") as f:
             json.dump(sample_catalog, f)
@@ -74,6 +77,7 @@ class TestFlextTapLDAPIntegration:
 
     @pytest.fixture
     def state_file(self, tmp_path: Path, sample_state: FlextTypes.Core.Dict) -> Path:
+        """Create a state file fixture for testing."""
         state_path = tmp_path / "state.json"
         with Path(state_path).open("w", encoding="utf-8") as f:
             json.dump(sample_state, f)
@@ -86,6 +90,7 @@ class TestFlextTapLDAPIntegration:
         runner: CliRunner,
         config_file: Path,
     ) -> None:
+        """Test discovery mode functionality."""
         # Mock flext-ldap client
         mock_client_instance = mock_ldap_client.return_value
         mock_client_instance.search.return_value.__aenter__.return_value = []
@@ -121,6 +126,7 @@ class TestFlextTapLDAPIntegration:
         config_file: Path,
         catalog_file: Path,
     ) -> None:
+        """Test sync mode functionality."""
         # Mock flext-ldap client search results
         mock_client_instance = mock_ldap_client.return_value
         mock_client_instance.search.return_value.__aenter__.return_value = [
@@ -155,6 +161,7 @@ class TestFlextTapLDAPIntegration:
         catalog_file: Path,
         state_file: Path,
     ) -> None:
+        """Test incremental sync functionality."""
         # Mock flext-ldap client for incremental sync
         mock_client_instance = mock_ldap_client.return_value
         mock_client_instance.search.return_value.__aenter__.return_value = []
@@ -189,6 +196,7 @@ class TestFlextTapLDAPIntegration:
                     raise AssertionError(msg)
 
     def test_custom_streams_config(self, runner: CliRunner, tmp_path: Path) -> None:
+        """Test method."""
         config = {
             "ldap_host": "test.ldap.com",
             "base_dn": "dc=test,dc=com",
@@ -234,6 +242,7 @@ class TestFlextTapLDAPIntegration:
         tmp_path: Path,
         caplog: pytest.LogCaptureFixture,
     ) -> None:
+        """Test error handling functionality."""
         # Test with invalid config
         config_file = tmp_path / "bad_config.json"
         with Path(config_file).open("w", encoding="utf-8") as f:
@@ -266,13 +275,14 @@ class TestFlextTapLDAPIntegration:
         config_file: Path,
         catalog_file: Path,
     ) -> None:
+        """Test pagination handling functionality."""
         # Mock flext-ldap client for pagination testing
         mock_client_instance = mock_ldap_client.return_value
 
         # Mock flext-ldap client search method with async context manager
         async def mock_search(
-            *args: object,
-            **kwargs: object,
+            *args: object,  # noqa: ARG001
+            **kwargs: object,  # noqa: ARG001
         ) -> AsyncGenerator[FlextTypes.Core.Dict]:
             yield {
                 "dn": "uid=user1,ou=users,dc=test,dc=com",

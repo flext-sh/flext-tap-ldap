@@ -24,6 +24,7 @@ class TestFlextTapLdapExceptions:
     """Test factory-created exception functionality."""
 
     def test_exception_creation(self) -> None:
+        """Test method."""
         """Test that all exceptions can be created with proper context."""
         # Test base error
         error = FlextTapLdapError("Base error", host="test.com", port=389)
@@ -54,12 +55,14 @@ class TestFlextTapLdapError:
     """Test base FlextTapLdap error."""
 
     def test_base_error_creation(self) -> None:
+        """Test method."""
         """Test creating base LDAP error."""
         error = FlextTapLdapError("Test error")
         assert "Test error" in str(error)
         assert isinstance(error, Exception)
 
     def test_base_error_with_context(self) -> None:
+        """Test method."""
         """Test base error with context."""
         context = {"ldap_host": "ldap.example.com", "ldap_port": 389}
         error = FlextTapLdapError("Connection failed", **context)
@@ -73,6 +76,7 @@ class TestFlextTapLdapConnectionError:
     """Test LDAP connection errors."""
 
     def test_connection_error_creation(self) -> None:
+        """Test method."""
         """Test creating connection error."""
         error = FlextTapLdapConnectionError("Failed to connect to LDAP server")
         error_str = str(error)
@@ -83,6 +87,7 @@ class TestFlextTapLdapConnectionError:
         assert isinstance(error, Exception)
 
     def test_connection_error_with_context(self) -> None:
+        """Test method."""
         """Test connection error with context."""
         error = FlextTapLdapConnectionError(
             "Connection timeout",
@@ -96,6 +101,7 @@ class TestFlextTapLdapConnectionError:
         )
 
     def test_connection_error_inheritance(self) -> None:
+        """Test method."""
         """Test connection error inheritance."""
         error = FlextTapLdapConnectionError("Test")
         assert isinstance(error, Exception)
@@ -105,6 +111,7 @@ class TestFlextTapLdapAuthenticationError:
     """Test LDAP authentication errors."""
 
     def test_authentication_error_creation(self) -> None:
+        """Test method."""
         """Test creating authentication error."""
         error = FlextTapLdapAuthenticationError("Invalid credentials")
         error_str = str(error)
@@ -112,6 +119,7 @@ class TestFlextTapLdapAuthenticationError:
         assert isinstance(error, Exception)
 
     def test_authentication_error_with_bind_dn(self) -> None:
+        """Test method."""
         """Test authentication error with bind DN context."""
         error = FlextTapLdapAuthenticationError(
             "Authentication failed",
@@ -126,6 +134,7 @@ class TestFlextTapLdapSearchError:
     """Test LDAP search errors."""
 
     def test_search_error_creation(self) -> None:
+        """Test method."""
         """Test creating search error."""
         error = FlextTapLdapSearchError("Search operation failed")
         assert (
@@ -135,6 +144,7 @@ class TestFlextTapLdapSearchError:
         assert isinstance(error, Exception)
 
     def test_search_error_with_context(self) -> None:
+        """Test method."""
         """Test search error with search context."""
         error = FlextTapLdapSearchError(
             "Invalid search filter",
@@ -153,6 +163,7 @@ class TestFlextTapLdapConfigurationError:
     """Test LDAP configuration errors."""
 
     def test_configuration_error_creation(self) -> None:
+        """Test method."""
         """Test creating configuration error."""
         error = FlextTapLdapConfigurationError("Invalid configuration")
         assert "[CONFIG_ERROR] flext_tap_ldap config: Invalid configuration" in str(
@@ -161,6 +172,7 @@ class TestFlextTapLdapConfigurationError:
         assert isinstance(error, Exception)
 
     def test_configuration_error_with_context(self) -> None:
+        """Test method."""
         """Test configuration error with context."""
         error = FlextTapLdapConfigurationError(
             "Missing required parameter",
@@ -178,6 +190,7 @@ class TestFlextTapLdapProcessingError:
     """Test LDAP processing errors."""
 
     def test_processing_error_creation(self) -> None:
+        """Test method."""
         """Test creating processing error."""
         error = FlextTapLdapProcessingError("Processing failed")
         assert "[PROCESSING_ERROR] flext_tap_ldap processing: Processing failed" in str(
@@ -186,6 +199,7 @@ class TestFlextTapLdapProcessingError:
         assert isinstance(error, Exception)
 
     def test_processing_error_with_context(self) -> None:
+        """Test method."""
         """Test processing error with context."""
         error = FlextTapLdapProcessingError(
             "Failed to process entry",
@@ -203,6 +217,7 @@ class TestFlextTapLdapStreamError:
     """Test LDAP stream errors."""
 
     def test_stream_error_creation(self) -> None:
+        """Test method."""
         """Test creating stream error."""
         error = FlextTapLdapStreamError("Stream operation failed")
         assert (
@@ -212,6 +227,7 @@ class TestFlextTapLdapStreamError:
         assert isinstance(error, Exception)
 
     def test_stream_error_with_context(self) -> None:
+        """Test method."""
         """Test stream error with context."""
         error = FlextTapLdapStreamError(
             "Stream discovery failed",
@@ -229,12 +245,14 @@ class TestFlextTapLdapValidationError:
     """Test LDAP validation errors."""
 
     def test_validation_error_creation(self) -> None:
+        """Test method."""
         """Test creating validation error."""
         error = FlextTapLdapValidationError("Data validation failed")
         assert "[FLEXT_3001] flext_tap_ldap: Data validation failed" in str(error)
         assert isinstance(error, Exception)
 
     def test_validation_error_with_validation_context(self) -> None:
+        """Test method."""
         """Test validation error with validation context."""
         error = FlextTapLdapValidationError(
             "Invalid DN format",
@@ -250,6 +268,7 @@ class TestErrorInheritanceHierarchy:
     """Test error inheritance hierarchy."""
 
     def test_all_errors_inherit_from_base(self) -> None:
+        """Test method."""
         """Test that all specific errors inherit from appropriate base classes."""
         # Test FlextTapLdapError hierarchy (FlextTapLdapSearchError, FlextTapLdapStreamError)
         flext_tap_error_classes = [
@@ -275,6 +294,7 @@ class TestErrorInheritanceHierarchy:
             assert isinstance(error, Exception)
 
     def test_error_factory_functionality(self) -> None:
+        """Test method."""
         """Test that all errors use the factory pattern correctly."""
         # Test with connection error
         conn_error = FlextTapLdapConnectionError("Test", host="test.com")
@@ -293,6 +313,7 @@ class TestErrorHandlingIntegration:
     """Test error handling integration scenarios."""
 
     def test_error_with_multiple_context_params(self) -> None:
+        """Test method."""
         """Test error with multiple context parameters."""
         error = FlextTapLdapConnectionError(
             "Connection failed",
@@ -307,6 +328,7 @@ class TestErrorHandlingIntegration:
         # The context should be properly handled by the mixin
 
     def test_error_chain_convenience(self) -> None:
+        """Test method."""
         """Test error chaining testing convenience."""
         msg = "Original error"
         with pytest.raises(ValueError):
@@ -318,6 +340,7 @@ class TestErrorHandlingIntegration:
         assert isinstance(chained_error, Exception)
 
     def test_exception_handling_patterns(self) -> None:
+        """Test method."""
         """Test common exception handling patterns."""
         # Test catching specific error
         msg = "Connection failed"

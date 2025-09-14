@@ -23,6 +23,7 @@ class TestLDAPConnection:
     """Test LDAPConnection entity."""
 
     def test_ldap_connection_creation(self) -> None:
+        """Test method."""
         """Test creating an LDAP connection."""
         connection = LDAPConnection(
             id="test-connection",
@@ -43,6 +44,7 @@ class TestLDAPConnection:
         assert isinstance(connection.id, str)
 
     def test_ldap_connection_with_ssl(self) -> None:
+        """Test method."""
         """Test creating an LDAP connection with SSL."""
         connection = LDAPConnection(
             id="test-ssl-connection",
@@ -63,6 +65,7 @@ class TestLDAPStream:
     """Test LDAPStream entity."""
 
     def test_ldap_stream_creation(self) -> None:
+        """Test method."""
         """Test creating an LDAP stream."""
         connection_id = uuid4()
         stream = LDAPStream(
@@ -87,6 +90,7 @@ class TestLDAPStream:
         assert stream.records_extracted == 0
 
     def test_ldap_stream_update_schema(self) -> None:
+        """Test method."""
         """Test updating stream schema."""
         connection_id = uuid4()
         stream = LDAPStream(
@@ -113,6 +117,7 @@ class TestLDAPStream:
         assert stream.stream_schema == new_schema
 
     def test_ldap_stream_record_extraction(self) -> None:
+        """Test method."""
         """Test recording extraction metrics."""
         connection_id = uuid4()
         stream = LDAPStream(
@@ -139,6 +144,7 @@ class TestTapExecution:
     """Test TapExecution entity."""
 
     def test_tap_execution_creation(self) -> None:
+        """Test method."""
         """Test creating a tap execution."""
         connection_id = uuid4()
         execution = TapExecution(
@@ -162,6 +168,7 @@ class TestTapExecution:
         assert execution.streams_processed == 0
 
     def test_tap_execution_start_execution(self) -> None:
+        """Test method."""
         """Test starting execution."""
         connection_id = uuid4()
         execution = TapExecution(
@@ -181,6 +188,7 @@ class TestTapExecution:
         assert isinstance(execution.started_at, datetime)
 
     def test_tap_execution_start_extraction(self) -> None:
+        """Test method."""
         """Test starting extraction phase."""
         connection_id = uuid4()
         execution = TapExecution(
@@ -197,6 +205,7 @@ class TestTapExecution:
         assert execution.tap_status == "extracting"
 
     def test_tap_execution_complete_execution_success(self) -> None:
+        """Test method."""
         """Test completing execution successfully."""
         connection_id = uuid4()
         execution = TapExecution(
@@ -229,6 +238,7 @@ class TestTapExecution:
         assert execution.successful is True
 
     def test_tap_execution_complete_execution_failure(self) -> None:
+        """Test method."""
         """Test completing execution with failure."""
         connection_id = uuid4()
         execution = TapExecution(
@@ -257,6 +267,7 @@ class TestTapExecution:
         assert execution.successful is False
 
     def test_tap_execution_cancel_execution(self) -> None:
+        """Test method."""
         """Test cancelling execution."""
         connection_id = uuid4()
         execution = TapExecution(
@@ -279,6 +290,7 @@ class TestTapExecution:
         assert execution.successful is False
 
     def test_tap_execution_update_metrics(self) -> None:
+        """Test method."""
         """Test updating execution metrics."""
         connection_id = uuid4()
         execution = TapExecution(
@@ -301,6 +313,7 @@ class TestLDAPRecord:
     """Test LDAPRecord entity."""
 
     def test_ldap_record_creation(self) -> None:
+        """Test method."""
         """Test creating an LDAP record."""
         stream_id = uuid4()
         execution_id = uuid4()
@@ -331,6 +344,7 @@ class TestLDAPRecord:
         assert record.extracted_at is not None
 
     def test_ldap_record_rdn_property(self) -> None:
+        """Test method."""
         """Test getting relative DN."""
         stream_id = uuid4()
         execution_id = uuid4()
@@ -347,6 +361,7 @@ class TestLDAPRecord:
         assert record.rdn == "uid=jdoe"
 
     def test_ldap_record_to_singer_record(self) -> None:
+        """Test method."""
         """Test converting to Singer record format."""
         stream_id = uuid4()
         execution_id = uuid4()
@@ -379,6 +394,7 @@ class TestDomainEvents:
     """Test domain events."""
 
     def test_tap_execution_started_event(self) -> None:
+        """Test method."""
         """Test tap execution started event."""
         execution_id = uuid4()
         connection_id = uuid4()
@@ -403,6 +419,7 @@ class TestDomainEvents:
         assert event.command == "sync"
 
     def test_tap_execution_completed_event(self) -> None:
+        """Test method."""
         """Test tap execution completed event."""
         execution_id = uuid4()
         connection_id = uuid4()

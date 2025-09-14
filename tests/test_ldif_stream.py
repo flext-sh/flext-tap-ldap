@@ -13,11 +13,13 @@ class TestLDIFStreamBasic:
     """Basic tests for LDIF stream functionality."""
 
     def test_imports(self) -> None:
+        """Test method."""
         """Test that LDIF stream modules can be imported."""
         assert LDIFStream is not None
         assert LDIFAnalysisStream is not None
 
     def test_ldif_stream_creation(self) -> None:
+        """Test method."""
         """Test LDIF stream can be created."""
         # Test that stream can be instantiated
         try:
