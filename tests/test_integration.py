@@ -281,8 +281,8 @@ class TestFlextTapLDAPIntegration:
 
         # Mock flext-ldap client search method with async context manager
         async def mock_search(
-            *args: object,  # noqa: ARG001
-            **kwargs: object,  # noqa: ARG001
+            *args: object,
+            **kwargs: object,
         ) -> AsyncGenerator[FlextTypes.Core.Dict]:
             yield {
                 "dn": "uid=user1,ou=users,dc=test,dc=com",
