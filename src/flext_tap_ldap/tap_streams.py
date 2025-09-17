@@ -15,12 +15,12 @@ from dataclasses import dataclass
 from itertools import starmap
 from pathlib import Path
 
-from flext_core import FlextLogger, FlextTypes
-from flext_ldap import FlextLDAPApi
-from flext_ldif import FlextLDIFAPI, FlextLDIFModels
-from flext_meltano import FlextSingerTypes
 from singer_sdk import Stream
 
+from flext_core import FlextLogger, FlextTypes
+from flext_ldap import FlextLdapApi
+from flext_ldif import FlextLdifAPI, FlextLdifModels
+from flext_meltano import FlextSingerTypes
 from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.tap import FlextTapLDAP
 
@@ -589,8 +589,8 @@ class LDIFStream(Stream):
         self.tap = tap
 
         # Initialize flext-ldif API for processing
-        self._ldif_api = FlextLDIFAPI()
-        self._ldap_api = FlextLDAPApi()
+        self._ldif_api = FlextLdifAPI()
+        self._ldap_api = FlextLdapApi()
 
         # Define schema
         schema = th.PropertiesList(
@@ -689,7 +689,7 @@ class LDIFStream(Stream):
 
     def _convert_ldif_entry_to_record(
         self,
-        entry: FlextLDIFModels.Entry,
+        entry: FlextLdifModels.Entry,
         source_file: str,
     ) -> FlextTypes.Core.Dict | None:
         """Convert LDIF entry to stream record."""
@@ -723,7 +723,7 @@ class LDIFAnalysisStream(Stream):
         self.tap = tap
 
         # Initialize flext-ldif API
-        self._ldif_api = FlextLDIFAPI()
+        self._ldif_api = FlextLdifAPI()
 
         # Define schema for analysis results
         schema = th.PropertiesList(

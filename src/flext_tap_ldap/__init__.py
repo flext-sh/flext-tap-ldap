@@ -7,7 +7,6 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_core import FlextTypes
-
 from flext_tap_ldap.client import LDAPClient, LDAPClientConfig
 from flext_tap_ldap.exceptions import (
     FlextTapLdapConnectionError,

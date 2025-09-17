@@ -13,8 +13,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 from click.testing import CliRunner
-from flext_core import FlextTypes
 
+from flext_core import FlextTypes
 from flext_tap_ldap import FlextTapLDAP
 
 

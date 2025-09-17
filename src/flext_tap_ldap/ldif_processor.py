@@ -13,27 +13,28 @@ from __future__ import annotations
 from collections.abc import Iterator
 from pathlib import Path
 
+from flext_ldif.exceptions import FlextLdifParseError
+from flext_ldif.models import FlextLdifModels
+
 from flext_core import (
     FlextLogger,
     FlextResult,
     FlextTypes,
 )
-from flext_ldif import FlextLDIFAPI
-from flext_ldif.exceptions import FlextLDIFParseError
-from flext_ldif.models import FlextLDIFModels
+from flext_ldif import FlextLdifAPI
 
 # Type aliases for cleaner code
-FlextLDIFAttributes = FlextLDIFModels.LdifAttributes
-FlextLDIFDistinguishedName = FlextLDIFModels.DistinguishedName
-FlextLDIFEntry = FlextLDIFModels.Entry
+FlextLdifAttributes = FlextLdifModels.LdifAttributes
+FlextLdifDistinguishedName = FlextLdifModels.DistinguishedName
+FlextLdifEntry = FlextLdifModels.Entry
 
 logger = FlextLogger(__name__)
 # Testing convenience aliases that delegate to flext-ldif
-LDIFParseError = FlextLDIFParseError
+LDIFParseError = FlextLdifParseError
 
 
 class LDIFEntry:
-    """Testing convenience wrapper for FlextLDIFEntry.
+    """Testing convenience wrapper for FlextLdifEntry.
 
     This class maintains the existing interface while delegating
     all operations to the flext-ldif library implementation.
@@ -51,11 +52,11 @@ class LDIFEntry:
         # Create internal flext-ldif entry for actual processing
         self._flext_entry = self._create_flext_entry()
 
-    def _create_flext_entry(self) -> FlextLDIFEntry:
-        """Create FlextLDIFEntry from current data."""
+    def _create_flext_entry(self) -> FlextLdifEntry:
+        """Create FlextLdifEntry from current data."""
         try:
             # Use flext-ldif to create proper entry
-            api = FlextLDIFAPI()
+            api = FlextLdifAPI()
             # Convert attributes to the format expected by flext-ldif
             ldif_content = f"dn: {self.dn}\n"
             for attr_name, attr_values in self.attributes.items():
@@ -68,15 +69,15 @@ class LDIFEntry:
                 return result.data[0]
 
             # Fallback: create minimal entry
-            return FlextLDIFEntry(
-                dn=FlextLDIFDistinguishedName(value=self.dn),
-                attributes=FlextLDIFAttributes(data=self.attributes),
+            return FlextLdifEntry(
+                dn=FlextLdifDistinguishedName(value=self.dn),
+                attributes=FlextLdifAttributes(data=self.attributes),
             )
         except Exception:
             # Fallback: create minimal entry for testing convenience
-            return FlextLDIFEntry(
-                dn=FlextLDIFDistinguishedName(value=self.dn),
-                attributes=FlextLDIFAttributes(data=self.attributes),
+            return FlextLdifEntry(
+                dn=FlextLdifDistinguishedName(value=self.dn),
+                attributes=FlextLdifAttributes(data=self.attributes),
             )
 
     def get_attribute(self, name: str) -> FlextTypes.Core.StringList:
@@ -121,7 +122,7 @@ class LDIFEntry:
         """Check if the entry is valid using flext-ldif validation."""
         try:
             # Delegate to flext-ldif for validation
-            api = FlextLDIFAPI()
+            api = FlextLdifAPI()
             result = api.validate([self._flext_entry])
             return result.success and bool(result.data)
         except Exception:
@@ -142,7 +143,7 @@ class LDIFEntry:
         """Parse DN into components using flext-ldif DN parsing."""
         try:
             # Use flext-ldif DN parsing capabilities
-            dn_obj = FlextLDIFDistinguishedName(value=self.dn)
+            dn_obj = FlextLdifDistinguishedName(value=self.dn)
             return {"dn": self.dn, "components": dn_obj.value}
         except Exception:
             return {"dn": self.dn}
@@ -163,7 +164,7 @@ class LDIFEntry:
                 self.attributes[name] = [value_str]
 
 
-class FlextLDIFProcessor:
+class FlextLdifProcessor:
     """LDIF file processor using flext-ldif library.
 
     This class provides testing convenience while delegating
@@ -185,7 +186,7 @@ class FlextLDIFProcessor:
         }
 
         # Create flext-ldif API instance
-        self._api = FlextLDIFAPI()
+        self._api = FlextLdifAPI()
 
     def _raise_parse_error(self, message: str) -> None:
         """Raise ValueError with the given message."""
@@ -216,7 +217,7 @@ class FlextLDIFProcessor:
 
             if result.data:
                 for flext_entry in result.data:
-                    # Convert FlextLDIFEntry back to testing convenience LDIFEntry
+                    # Convert FlextLdifEntry back to testing convenience LDIFEntry
                     convenience_entry = self._convert_from_flext_entry(flext_entry)
                     yield convenience_entry
                     self.processed_entries += 1
@@ -277,8 +278,8 @@ class FlextLDIFProcessor:
             else:
                 raise ValueError(error_msg) from e
 
-    def _convert_from_flext_entry(self, flext_entry: FlextLDIFEntry) -> LDIFEntry:
-        """Convert FlextLDIFEntry to testing convenience LDIFEntry."""
+    def _convert_from_flext_entry(self, flext_entry: FlextLdifEntry) -> LDIFEntry:
+        """Convert FlextLdifEntry to testing convenience LDIFEntry."""
         # Extract DN
         dn = flext_entry.dn.value if flext_entry.dn else ""
 
@@ -384,7 +385,7 @@ class LDIFValidator:
         """Initialize validator with in-memory state and API client."""
         self.validation_errors: FlextTypes.Core.StringList = []
         self.warnings: FlextTypes.Core.StringList = []
-        self._api = FlextLDIFAPI()
+        self._api = FlextLdifAPI()
 
     def validate_entry(self, entry: LDIFEntry) -> bool:
         """Validate LDIF entry using flext-ldif validation."""
@@ -411,7 +412,7 @@ class LDIFValidator:
         errors = []
 
         try:
-            # Convert to FlextLDIFEntry objects
+            # Convert to FlextLdifEntry objects
             flext_entries = [entry._flext_entry for entry in entries]
 
             # Use flext-ldif batch validation
@@ -451,7 +452,7 @@ class LDIFTransformer:
     ) -> None:
         """Initialize transformer with optional transformation rules."""
         self.transformation_rules = transformation_rules or {}
-        self._api = FlextLDIFAPI()
+        self._api = FlextLdifAPI()
 
     def transform_entry(self, entry: LDIFEntry) -> LDIFEntry:
         """Transform LDIF entry - placeholder for future enhancements."""

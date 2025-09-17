@@ -10,8 +10,8 @@ import contextlib
 from unittest.mock import Mock, patch
 
 import pytest
-from flext_core import FlextTypes
 
+from flext_core import FlextTypes
 from flext_tap_ldap import LDAPClient
 
 
@@ -56,7 +56,7 @@ class TestLDAPClientQuick:
     def test_convert_entry_to_dict_scenarios(self, client: LDAPClient) -> None:
         """Test method."""
         """Test entry conversion with different scenarios."""
-        # Test with FlextLDAPEntities-like object
+        # Test with FlextLdapEntities-like object
         mock_entry = Mock()
         mock_entry.dn = "uid=test,dc=example,dc=com"
         mock_entry.attributes = {

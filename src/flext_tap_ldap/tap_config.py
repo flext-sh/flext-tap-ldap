@@ -9,10 +9,11 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
-from flext_ldap import FlextLDAPConnectionConfig
 from pydantic import Field, field_validator
 from pydantic_settings import SettingsConfigDict
+
+from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
+from flext_ldap import FlextLdapConnectionConfig
 
 logger = FlextLogger(__name__)
 
@@ -113,7 +114,7 @@ class TapLDAPConfig(FlextModels.Config):
     """Complete configuration for tap-ldap using flext-core and flext-ldap patterns.
 
     Combines LDAP connection and LDIF processing configurations with Pydantic settings.
-    Uses FlextLDAPConnectionConfig from flext-ldap to eliminate duplication.
+    Uses FlextLdapConnectionConfig from flext-ldap to eliminate duplication.
     """
 
     model_config = SettingsConfigDict(
@@ -129,7 +130,7 @@ class TapLDAPConfig(FlextModels.Config):
     )
 
     # Core LDAP connection using flext-ldap config to eliminate duplication
-    connection: FlextLDAPConnectionConfig = Field(
+    connection: FlextLdapConnectionConfig = Field(
         ...,
         description="LDAP connection configuration from flext-ldap",
     )
@@ -281,7 +282,7 @@ class TapLDAPConfig(FlextModels.Config):
     @classmethod
     def create_with_defaults(cls, **overrides: object) -> TapLDAPConfig:
         """Create config with intelligent defaults using flext-ldap integration."""
-        # Use FlextLDAPConnectionConfig defaults
+        # Use FlextLdapConnectionConfig defaults
         ldap_defaults: FlextTypes.Core.Dict = {
             "host": "localhost",
             "port": 389,
@@ -315,10 +316,10 @@ class TapLDAPConfig(FlextModels.Config):
         ):
             ldif_defaults.update(overrides["ldif_processing"])
 
-        # Create FlextLDAPConnectionConfig with proper parameters
+        # Create FlextLdapConnectionConfig with proper parameters
         port_val = ldap_defaults.get("port", 389)
         timeout_val = ldap_defaults.get("timeout_seconds", 30)
-        ldap_connection = FlextLDAPConnectionConfig.model_validate(
+        ldap_connection = FlextLdapConnectionConfig.model_validate(
             {
                 "server": str(ldap_defaults.get("host", "localhost")),
                 "port": int(port_val) if isinstance(port_val, (int, str)) else 389,

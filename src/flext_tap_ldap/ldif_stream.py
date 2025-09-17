@@ -5,12 +5,12 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 
-from flext_core import FlextLogger, FlextTypes
-from flext_ldap import FlextLDAPApi
-from flext_ldif import FlextLDIFAPI, FlextLDIFModels
 from flext_meltano.singer_types import FlextSingerTypes
 from singer_sdk import Stream
 
+from flext_core import FlextLogger, FlextTypes
+from flext_ldap import FlextLdapApi
+from flext_ldif import FlextLdifAPI, FlextLdifModels
 from flext_tap_ldap.tap import FlextTapLDAP
 
 logger = FlextLogger(__name__)
@@ -30,8 +30,8 @@ class LDIFStream(Stream):
         # Store tap reference
         self.tap = tap
         # Initialize flext-ldif API for processing
-        self._ldif_api = FlextLDIFAPI()
-        self._ldap_api = FlextLDAPApi()
+        self._ldif_api = FlextLdifAPI()
+        self._ldap_api = FlextLdapApi()
         # Define schema
         schema = th.PropertiesList(
             th.Property("dn", th.StringType, description="Distinguished Name"),
@@ -89,7 +89,7 @@ class LDIFStream(Stream):
 
     def _convert_entry_to_record(
         self,
-        flext_entry: FlextLDIFModels.Entry,
+        flext_entry: FlextLdifModels.Entry,
     ) -> FlextTypes.Core.Dict:
         """Convert flext-ldif entry to Singer record."""
         # Delegate entry type classification to flext-ldap
@@ -126,8 +126,8 @@ class LDIFAnalysisStream(Stream):
         # Store tap reference
         self.tap = tap
         # Initialize flext-ldif API for analysis
-        self._ldif_api = FlextLDIFAPI()
-        self._ldap_api = FlextLDAPApi()
+        self._ldif_api = FlextLdifAPI()
+        self._ldap_api = FlextLdapApi()
         # Define schema
         schema = th.PropertiesList(
             th.Property(

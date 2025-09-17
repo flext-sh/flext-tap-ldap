@@ -17,9 +17,9 @@ from dataclasses import dataclass
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import (
-    FlextLDAPApi,
-    FlextLDAPConnectionConfig,
-    FlextLDAPEntities,
+    FlextLdapApi,
+    FlextLdapConnectionConfig,
+    FlextLdapEntities,
     LdapScope as LDAPScope,
 )
 from flext_meltano import (
@@ -29,7 +29,6 @@ from flext_meltano import (
     Stream,
     create_flext_tap_config,
 )
-
 from flext_tap_ldap.tap_config import TapLDAPConfig
 
 logger = FlextLogger(__name__)
@@ -55,7 +54,7 @@ class LDAPClientConfig:
 class LDAPClient:
     """Testing convenience LDAP client wrapper.
 
-    Provides the old interface while using FlextLDAPClient internally.
+    Provides the old interface while using FlextLdapClient internally.
     This eliminates code duplication while maintaining testing convenience.
     """
 
@@ -120,7 +119,7 @@ class LDAPClient:
             )
 
         # Create flext-ldap configuration
-        flext_config = FlextLDAPConnectionConfig.model_validate(
+        flext_config = FlextLdapConnectionConfig.model_validate(
             {
                 "server": client_config.host,
                 "port": client_config.port,
@@ -130,7 +129,7 @@ class LDAPClient:
         )
 
         # Initialize the real flext-ldap API
-        self._flext_api = FlextLDAPApi()
+        self._flext_api = FlextLdapApi()
         self._config = flext_config
 
         # Store for testing convenience - these are what tests expect
@@ -168,11 +167,11 @@ class LDAPClient:
 
     def _convert_entry_to_dict(
         self,
-        entry_data: FlextLDAPEntities.Entry | FlextTypes.Core.Dict,
+        entry_data: FlextLdapEntities.Entry | FlextTypes.Core.Dict,
     ) -> FlextTypes.Core.Dict:
-        """Convert FlextLDAPEntities.Entry to dict format for testing convenience."""
+        """Convert FlextLdapEntities.Entry to dict format for testing convenience."""
         if hasattr(entry_data, "dn") and hasattr(entry_data, "attributes"):
-            # It's a FlextLDAPEntities.Entry model object - flatten attributes
+            # It's a FlextLdapEntities.Entry model object - flatten attributes
             entry_dict = {"dn": entry_data.dn}
             # Add flattened attributes to the entry dict
             for attr_name, attr_values in entry_data.attributes.items():
@@ -188,7 +187,7 @@ class LDAPClient:
 
     def _process_search_results(
         self,
-        result: FlextResult[list[FlextLDAPEntities.Entry]],
+        result: FlextResult[list[FlextLdapEntities.Entry]],
         size_limit: int,
     ) -> list[FlextTypes.Core.Dict]:
         """Process LDAP search results with size limiting."""
@@ -444,7 +443,7 @@ class FlextTapLDAP:
         adapter = FlextMeltanoTypeAdapters()
         self._flext_tap = FlextTap(tap_config_result.value, adapter)
 
-        # Use the FlextLDAPConnectionConfig directly - no need to recreate LDAPClient
+        # Use the FlextLdapConnectionConfig directly - no need to recreate LDAPClient
         # The FlextTap composition handles the connection abstraction
         self._connection_config = config.connection
 
@@ -733,8 +732,8 @@ def main() -> None:
 
 
 # Type aliases for testing convenience
-LDAPConnectionConfig = FlextLDAPConnectionConfig
-LDAPEntry = FlextLDAPEntities.Entry
+LDAPConnectionConfig = FlextLdapConnectionConfig
+LDAPEntry = FlextLdapEntities.Entry
 
 __all__ = [
     # Main Classes
