@@ -8,10 +8,10 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from flext_core import FlextModels, FlextResult, FlextTypes
-from flext_ldap import FlextLDAPEntities
 from pydantic import Field
 
+from flext_core import FlextModels, FlextResult, FlextTypes
+from flext_ldap import FlextLdapEntities
 from flext_tap_ldap.tap_models import (
     ConnectionTestedEvent,
     LDAPConnection,
@@ -26,18 +26,18 @@ from flext_tap_ldap.tap_models import (
 
 
 def _get_entry_value(
-    entry: FlextTypes.Core.Dict | FlextLDAPEntities.Entry,
+    entry: FlextTypes.Core.Dict | FlextLdapEntities.Entry,
     key: str,
     default: object = None,
 ) -> object:
-    """Get a value from either a dict or `FlextLDAPEntities.Entry`.
+    """Get a value from either a dict or `FlextLdapEntities.Entry`.
 
     Returns the attribute value by name from a plain dict or an attribute of
-    a `FlextLDAPEntities.Entry`, falling back to `default` when not present.
+    a `FlextLdapEntities.Entry`, falling back to `default` when not present.
     """
     if isinstance(entry, dict):
         return entry.get(key, default)
-    # FlextLDAPEntities.Entry - use getattr or similar access pattern
+    # FlextLdapEntities.Entry - use getattr or similar access pattern
     return getattr(entry, key, default)
 
 
@@ -221,7 +221,7 @@ class LDAPUser(LDAPEntry):
 
     @classmethod
     def from_entry(
-        cls, entry: FlextTypes.Core.Dict | FlextLDAPEntities.Entry
+        cls, entry: FlextTypes.Core.Dict | FlextLdapEntities.Entry
     ) -> LDAPUser:
         """Create LDAPUser from LDAP entry."""
         return cls(
@@ -280,7 +280,7 @@ class LDAPGroup(LDAPEntry):
 
     @classmethod
     def from_entry(
-        cls, entry: FlextTypes.Core.Dict | FlextLDAPEntities.Entry
+        cls, entry: FlextTypes.Core.Dict | FlextLdapEntities.Entry
     ) -> LDAPGroup:
         """Create LDAPGroup from LDAP entry."""
         return cls(

@@ -6,11 +6,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from pydantic import Field
+
 from flext_core import (
     FlextModels,
     FlextTypes,
 )
-from pydantic import Field
 
 # Constants
 MAX_PORT = 65535

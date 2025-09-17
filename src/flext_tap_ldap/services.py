@@ -15,7 +15,6 @@ from flext_core import (
     FlextResult,
     FlextTypes,
 )
-
 from flext_tap_ldap.models import (
     LDAPConnection,
     LDAPRecord,

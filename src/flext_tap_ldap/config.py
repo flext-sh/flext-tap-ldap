@@ -5,9 +5,10 @@ Copyright (c) 2025 FLEXT Team. All rights reserved. SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextModels, FlextResult, FlextTypes
 from pydantic import Field, field_validator
 from pydantic_settings import SettingsConfigDict
+
+from flext_core import FlextModels, FlextResult, FlextTypes
 
 # Constants
 MAX_PORT = 65535

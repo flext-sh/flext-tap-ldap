@@ -9,8 +9,8 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
-from flext_core import FlextTypes
 
+from flext_core import FlextTypes
 from flext_tap_ldap import FlextTapLDAP, get_tap_test_class
 
 # Basic tap tests - using correct field names from schema

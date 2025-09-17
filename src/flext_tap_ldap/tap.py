@@ -11,9 +11,9 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from flext_core import FlextLogger, FlextTypes
 from singer_sdk import Stream, Tap
 
+from flext_core import FlextLogger, FlextTypes
 from flext_tap_ldap.config import TapLDAPConfig
 from flext_tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
 from flext_tap_ldap.streams import (

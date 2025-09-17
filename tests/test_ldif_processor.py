@@ -9,10 +9,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from flext_core import FlextLogger, FlextResult
 
+from flext_core import FlextLogger, FlextResult
 from flext_tap_ldap import (
-    FlextLDIFProcessor,
+    FlextLdifProcessor,
     LDIFEntry,
     LDIFParseError,
     LDIFTransformer,
@@ -272,13 +272,13 @@ class TestLDIFValidator:
         assert isinstance(results, dict)
 
 
-class TestFlextLDIFProcessor:
+class TestFlextLdifProcessor:
     """Test FLEXT LDIF processor functionality."""
 
     @pytest.fixture
-    def processor(self) -> FlextLDIFProcessor:
+    def processor(self) -> FlextLdifProcessor:
         """Create LDIF processor instance."""
-        return FlextLDIFProcessor()
+        return FlextLdifProcessor()
 
     @pytest.fixture
     def sample_ldif_content(self) -> str:
@@ -298,14 +298,14 @@ sn: doe
 mail: john.doe@example.com
 """
 
-    def test_processor_initialization(self, processor: FlextLDIFProcessor) -> None:
+    def test_processor_initialization(self, processor: FlextLdifProcessor) -> None:
         """Test method."""
         """Test LDIF processor initialization."""
         assert processor is not None
 
     def test_parse_ldif_content(
         self,
-        processor: FlextLDIFProcessor,
+        processor: FlextLdifProcessor,
         sample_ldif_content: str,
     ) -> None:
         """Test parsing LDIF content."""
@@ -324,7 +324,7 @@ mail: john.doe@example.com
 
     def test_parse_ldif_file(
         self,
-        processor: FlextLDIFProcessor,
+        processor: FlextLdifProcessor,
         tmp_path: Path,
         sample_ldif_content: str,
     ) -> None:
@@ -338,7 +338,7 @@ mail: john.doe@example.com
         entries = result.data
         assert len(entries) == 3
 
-    def test_process_invalid_ldif(self, processor: FlextLDIFProcessor) -> None:
+    def test_process_invalid_ldif(self, processor: FlextLdifProcessor) -> None:
         """Test method."""
         """Test processing invalid LDIF content."""
         invalid_content = "this is not valid ldif content"
@@ -354,7 +354,7 @@ mail: john.doe@example.com
         # or fail - adjust based on actual behavior
         assert isinstance(result, FlextResult)
 
-    def test_validation_with_errors(self, processor: FlextLDIFProcessor) -> None:
+    def test_validation_with_errors(self, processor: FlextLdifProcessor) -> None:
         """Test method."""
         """Test LDIF processing with validation errors."""
         content_with_errors = """dn:
@@ -376,7 +376,7 @@ invalidAttribute:
         if result.is_failure:
             assert result.error is not None
 
-    def test_processor_get_statistics(self, processor: FlextLDIFProcessor) -> None:
+    def test_processor_get_statistics(self, processor: FlextLdifProcessor) -> None:
         """Test method."""
         """Test processor statistics functionality."""
         stats = processor.get_statistics()
@@ -390,7 +390,7 @@ invalidAttribute:
 
     def test_processor_load_from_string(
         self,
-        processor: FlextLDIFProcessor,
+        processor: FlextLdifProcessor,
         sample_ldif_content: str,
     ) -> None:
         """Test loading LDIF from string."""
@@ -404,7 +404,7 @@ invalidAttribute:
 
     def test_processor_filter_methods(
         self,
-        processor: FlextLDIFProcessor,
+        processor: FlextLdifProcessor,
         sample_ldif_content: str,
     ) -> None:
         """Test processor filter methods."""
@@ -430,7 +430,7 @@ invalidAttribute:
 
     def test_processor_to_singer_format(
         self,
-        processor: FlextLDIFProcessor,
+        processor: FlextLdifProcessor,
         sample_ldif_content: str,
     ) -> None:
         """Test converting to Singer format."""
@@ -454,7 +454,7 @@ invalidAttribute:
 
     def test_processor_load_from_file(
         self,
-        processor: FlextLDIFProcessor,
+        processor: FlextLdifProcessor,
         tmp_path: str,
         sample_ldif_content: str,
     ) -> None:
@@ -493,7 +493,7 @@ mail: user1@test.com
         ldif_file = tmp_path / "integration_test.ldif"
         ldif_file.write_text(ldif_content)
 
-        processor = FlextLDIFProcessor()
+        processor = FlextLdifProcessor()
         result = FlextResult[None].ok(list(processor.parse_file(ldif_file)))
 
         assert result.success
@@ -510,7 +510,7 @@ mail: user1@test.com
     def test_batch_processing(self, tmp_path: str) -> None:
         """Test method."""
         """Test processing multiple LDIF files."""
-        processor = FlextLDIFProcessor()
+        processor = FlextLdifProcessor()
 
         # Create multiple LDIF files
         for i in range(3):
@@ -593,7 +593,7 @@ class TestLDIFProcessorErrorHandling:
     def test_processor_with_parsing_errors(self) -> None:
         """Test method."""
         """Test processor handling of parsing errors."""
-        processor = FlextLDIFProcessor(ignore_errors=True, max_errors=5)
+        processor = FlextLdifProcessor(ignore_errors=True, max_errors=5)
 
         # Content with intentional errors
         problematic_content = """dn: cn=valid,dc=example,dc=com
@@ -627,7 +627,7 @@ cn: another
     def test_processor_max_errors_limit(self) -> None:
         """Test method."""
         """Test processor max errors limit."""
-        processor = FlextLDIFProcessor(ignore_errors=True, max_errors=2)
+        processor = FlextLdifProcessor(ignore_errors=True, max_errors=2)
 
         # Create content with many errors
         error_content = "\n".join([f"invalid_line_{i}" for i in range(10)])
@@ -639,7 +639,7 @@ cn: another
     def test_processor_ignore_errors_false(self) -> None:
         """Test method."""
         """Test processor with ignore_errors=False."""
-        processor = FlextLDIFProcessor(ignore_errors=False)
+        processor = FlextLdifProcessor(ignore_errors=False)
 
         invalid_content = "clearly invalid ldif content"
 

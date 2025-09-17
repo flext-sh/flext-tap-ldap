@@ -10,11 +10,6 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 
-from flext_core import (
-    FlextLogger,
-    FlextTypes,
-)
-from flext_meltano import FlextSingerTypes
 from singer_sdk import Stream
 from singer_sdk.typing import (
     ArrayType,
@@ -26,6 +21,11 @@ from singer_sdk.typing import (
     StringType,
 )
 
+from flext_core import (
+    FlextLogger,
+    FlextTypes,
+)
+from flext_meltano import FlextSingerTypes
 from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.tap import FlextTapLDAP
 
