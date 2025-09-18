@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
 from unittest.mock import Mock, patch
 
@@ -151,6 +152,7 @@ class TestLDAPClientQuick:
         """Test running async coroutine in new loop."""
 
         async def dummy_coro() -> list[FlextTypes.Core.Dict]:
+            await asyncio.sleep(0)  # Make it truly async
             return [{"test": "data"}]
 
         result = client._run_async_in_new_loop(dummy_coro())
