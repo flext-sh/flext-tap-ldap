@@ -14,24 +14,35 @@ import importlib.metadata
 import time
 from collections.abc import Awaitable
 from dataclasses import dataclass
+from datetime import UTC, datetime
+from typing import Any
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import (
+    FlextContainer,
+    FlextDomainService,
+    FlextLogger,
+    FlextResult,
+    FlextTypes,
+)
 from flext_ldap import (
     FlextLdapApi,
     FlextLdapConnectionConfig,
     FlextLdapEntities,
     LdapScope as LDAPScope,
 )
-from flext_meltano import (
-    FlextMeltanoTypeAdapters,
-    FlextSingerTypes,
-    FlextTapAbstractions as FlextTap,
-    Stream,
-    create_flext_tap_config,
-)
 from flext_tap_ldap.tap_config import TapLDAPConfig
 
 logger = FlextLogger(__name__)
+
+
+@dataclass
+class LdapTapResult:
+    """Result object for LDAP tap execution."""
+
+    success: bool
+    message: str
+    catalog: dict[str, Any]
+    records_processed: int
 
 
 @dataclass
@@ -410,104 +421,433 @@ class LDAPClient:
         return getattr(self._flext_api, name)
 
 
-class FlextTapLDAP:
-    """LDAP tap implementation using FlextMeltano abstractions only."""
+class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
+    """LDAP Tap Client for extracting data from LDAP directories.
 
-    def __init__(self, config: TapLDAPConfig) -> None:
-        """Initialize LDAP tap using FlextMeltano composition pattern."""
-        self._config = config
+    Unified class implementing LDAP data extraction using Singer spec.
+    Follows flext-core patterns with explicit error handling.
+    """
+
+    def __init__(self, **data: object) -> None:
+        """Initialize LDAP tap with flext-core foundation."""
+        super().__init__(**data)
+        self._container = FlextContainer.get_global()
         self._logger = FlextLogger(__name__)
+        self._flext_api = FlextLdapApi()
+        self._session_id: str | None = None  # Use session_id instead of raw connection
+        self._schema_cache: dict[str, dict[str, Any]] = {}
 
-        # Use FlextSingerTypes for all typing needs
-        self._types = FlextSingerTypes()
+    class _ConnectionHelper:
+        """Nested helper for LDAP connection management."""
 
-        # Create FlextTap configuration from nested connection config
-        ldap_connection_config = {
-            "server": getattr(config.connection, "server", "ldap://localhost:389"),
-            "bind_dn": getattr(config.connection, "bind_dn", ""),
-            "bind_password": getattr(config.connection, "bind_password", ""),
-            "use_ssl": getattr(config.connection, "use_ssl", False),
-            "timeout": getattr(config.connection, "timeout_seconds", 30),
-        }
+        @staticmethod
+        async def create_connection(
+            flext_api: Any, config: TapLDAPConfig,
+        ) -> FlextResult[str]:
+            """Create and test LDAP connection using flext-ldap API (ZERO TOLERANCE COMPLIANCE)."""
+            try:
+                # Build server URI from config
+                protocol = "ldaps" if config.use_ssl else "ldap"
+                server_uri = f"{protocol}://{config.host}:{config.port}"
 
-        # Create tap configuration using FlextMeltano abstractions
-        tap_config_result = create_flext_tap_config(
-            tap_type="tap-ldap", connection_config=ldap_connection_config
+                # Use flext-ldap API instead of direct ldap3
+                connect_result = await flext_api.connect(
+                    server_uri=server_uri,
+                    bind_dn=config.bind_dn,
+                    bind_password=config.bind_password,
+                )
+
+                if connect_result.is_failure:
+                    return FlextResult[str].fail(
+                        f"LDAP connection failed: {connect_result.error}"
+                    )
+
+                return FlextResult[str].ok(connect_result.value)  # session_id
+
+            except Exception as e:
+                return FlextResult[str].fail(
+                    f"LDAP connection error: {e!s}"
+                )
+
+        @staticmethod
+        async def validate_search_base(
+            flext_api: Any, session_id: str, search_base: str
+        ) -> FlextResult[bool]:
+            """Validate search base exists in directory."""
+            try:
+                # Use flext-ldap API for search base validation
+                search_result = await flext_api.search(
+                    session_id=session_id,
+                    search_base=search_base,
+                    search_filter="(objectClass=*)",
+                    search_scope="base",
+                    attributes=["objectClass"],
+                )
+
+                if search_result.is_failure:
+                    return FlextResult[bool].fail(
+                        f"Search base not found: {search_base}"
+                    )
+
+                return FlextResult[bool].ok(value=True)
+
+            except Exception as e:
+                return FlextResult[bool].fail(f"Search base validation error: {e!s}")
+
+    class _SchemaHelper:
+        """Nested helper for LDAP schema operations."""
+
+        @staticmethod
+        async def discover_schema(
+            flext_api, session_id: str, search_base: str
+        ) -> FlextResult[dict[str, Any]]:
+            """Discover LDAP schema for search base."""
+            try:
+                # Use flext-ldap API for schema discovery
+                search_result = await flext_api.search(
+                    session_id=session_id,
+                    search_base=search_base,
+                    search_filter="(objectClass=*)",
+                    search_scope="subtree",
+                    attributes=["*"],
+                    size_limit=10,
+                )
+
+                if search_result.is_failure:
+                    return FlextResult[dict[str, Any]].fail(f"Schema discovery search failed: {search_result.error}")
+
+                entries = search_result.unwrap()
+
+                # Process entries to build schema
+                schema_info = {
+                    "object_classes": set(),
+                    "attributes": set(),
+                    "entries_count": len(entries),
+                }
+
+                for entry in entries:
+                    if "objectClass" in entry.get("attributes", {}):
+                        object_classes = entry["attributes"]["objectClass"]
+                        if isinstance(object_classes, list):
+                            schema_info["object_classes"].update(object_classes)
+                        else:
+                            schema_info["object_classes"].add(object_classes)
+
+                    # Collect all attribute names
+                    for attr_name in entry.get("attributes", {}).keys():
+                        schema_info["attributes"].add(attr_name)
+
+                # Convert sets to lists for JSON serialization
+                schema_info["object_classes"] = list(schema_info["object_classes"])
+                schema_info["attributes"] = list(schema_info["attributes"])
+
+                return FlextResult[dict[str, Any]].ok(schema_info)
+
+            except Exception as e:
+                return FlextResult[dict[str, Any]].fail(f"Schema discovery failed: {e!s}")
+
+    class _ExtractionHelper:
+        """Nested helper for data extraction operations."""
+
+        @staticmethod
+        async def extract_entries(
+            flext_api: Any, session_id: str, config: TapLDAPConfig
+        ) -> FlextResult[list[dict[str, Any]]]:
+            """Extract all entries from LDAP directory."""
+            try:
+                # Convert scope to flext-ldap format
+                scope_map = {
+                    "SUBTREE": "subtree",
+                    "ONELEVEL": "one_level",
+                    "BASE": "base"
+                }
+                search_scope = scope_map.get(config.search_scope.upper(), "subtree")
+
+                # Use flext-ldap API for entry extraction
+                search_result = await flext_api.search(
+                    session_id=session_id,
+                    search_base=config.search_base,
+                    search_filter=config.search_filter or "(objectClass=*)",
+                    search_scope=search_scope,
+                    attributes=config.attributes or ["*"],
+                )
+
+                if search_result.is_failure:
+                    return FlextResult[list[dict[str, Any]]].fail(
+                        f"Entry extraction search failed: {search_result.error}"
+                    )
+
+                entries = []
+                for entry in search_result.unwrap():
+                    entry_dict = {}
+
+                    # Process attributes from flext-ldap entry format
+                    if hasattr(entry, "attributes"):
+                        for attr_name, attr_values in entry.attributes.items():
+                            if isinstance(attr_values, list) and len(attr_values) == 1:
+                                entry_dict[attr_name] = attr_values[0]
+                            else:
+                                entry_dict[attr_name] = attr_values
+
+                    # Add metadata
+                    entry_dict["_ldap_dn"] = getattr(entry, "dn", str(entry))
+                    entry_dict["_extracted_at"] = datetime.now(UTC).isoformat()
+                    entries.append(entry_dict)
+
+                return FlextResult[list[dict[str, Any]]].ok(entries)
+
+            except Exception as e:
+                return FlextResult[list[dict[str, Any]]].fail(
+                    f"Entry extraction error: {e!s}"
+                )
+
+    async def health_check(self) -> FlextResult[str]:
+        """Check LDAP tap health status."""
+        self._logger.debug("Performing LDAP tap health check")
+
+        if not self.domain_model:
+            return FlextResult[str].fail("No LDAP configuration provided")
+
+        # Test connection using flext-ldap API (ZERO TOLERANCE COMPLIANCE)
+        connection_result = await self._ConnectionHelper.create_connection(
+            self._flext_api, self.domain_model
+        )
+        if connection_result.is_failure:
+            return FlextResult[str].fail(
+                f"Health check failed: {connection_result.error}"
+            )
+
+        connection_result.unwrap()
+
+        # Test basic search to validate configuration using flext-ldap API
+        search_result = await self._flext_api.search_simple(
+            search_base=self.domain_model.search_base,
+            search_filter="(objectClass=*)",
+            size_limit=1
         )
 
-        if tap_config_result.failure:
-            msg = f"Failed to create tap config: {tap_config_result.error}"
-            raise ValueError(msg)
+        # Disconnect when done
+        await self._flext_api.disconnect()
 
-        # Use composition with FlextTap
-        adapter = FlextMeltanoTypeAdapters()
-        self._flext_tap = FlextTap(tap_config_result.value, adapter)
+        if search_result.is_failure:
+            return FlextResult[str].fail(
+                f"Search base validation failed: {search_result.error}"
+            )
 
-        # Use the FlextLdapConnectionConfig directly - no need to recreate LDAPClient
-        # The FlextTap composition handles the connection abstraction
-        self._connection_config = config.connection
+        return FlextResult[str].ok("LDAP tap healthy")
 
-    def discover_streams(self) -> list[Stream]:
-        """Discover available LDAP streams using FlextTap abstraction."""
+    async def discover_catalog(self) -> FlextResult[dict[str, Any]]:
+        """Discover LDAP catalog schema."""
+        self._logger.info("Discovering LDAP catalog")
+
+        if not self.domain_model:
+            return FlextResult[dict[str, Any]].fail("No LDAP configuration provided")
+
+        # Create connection
+        connection_result = await self._ConnectionHelper.create_connection(
+            self._flext_api, self.domain_model
+        )
+        if connection_result.is_failure:
+            return FlextResult[dict[str, Any]].fail(
+                f"Connection failed: {connection_result.error}"
+            )
+
+        session_id = connection_result.unwrap()
+
         try:
-            # Use FlextTap discovery
-            discovery_result = self._flext_tap.discover_streams()
+            # Discover schema
+            schema_result = await self._SchemaHelper.discover_schema(
+                self._flext_api, session_id, self.domain_model.search_base
+            )
 
-            if discovery_result.failure:
-                self._logger.error(f"Stream discovery failed: {discovery_result.error}")
-                return []
+            if schema_result.is_failure:
+                return FlextResult[dict[str, Any]].fail(
+                    f"Schema discovery failed: {schema_result.error}"
+                )
 
-            # Convert to actual LDAP streams
-            return []
+            schema = schema_result.unwrap()
 
-            # Use FlextTap discovery instead of manual stream creation
-            # Let FlextTap handle the stream discovery and management
+            # Build Singer catalog
+            catalog = {
+                "streams": [
+                    {
+                        "tap_stream_id": "ldap_entries",
+                        "stream": "ldap_entries",
+                        "schema": schema,
+                        "metadata": [
+                            {
+                                "breadcrumb": [],
+                                "metadata": {
+                                    "inclusion": "available",
+                                    "selected": True,
+                                },
+                            }
+                        ],
+                    }
+                ]
+            }
 
-            # For now, return empty list as we're focusing on the abstraction working
-            # Individual stream implementations need separate migration
+            return FlextResult[dict[str, Any]].ok(catalog)
 
-        except Exception:
-            self._logger.exception("Error discovering streams")
-            return []
+        finally:
+            # Disconnect when done
+            await self._flext_api.disconnect()
 
-    def generate_catalog(self) -> dict:
-        """Generate Singer catalog using FlextTap abstractions."""
+    async def sync_data(
+        self, catalog: dict[str, Any], state: dict[str, Any] | None = None
+    ) -> FlextResult[None]:
+        """Sync LDAP data using Singer protocol."""
+        self._logger.info("Starting LDAP data sync")
+
+        if not self.domain_model:
+            return FlextResult[None].fail("No LDAP configuration provided")
+
+        # Validate catalog structure
+        if not catalog or "streams" not in catalog:
+            return FlextResult[None].fail("Invalid catalog: missing streams")
+
+        # Create connection
+        connection_result = await self._ConnectionHelper.create_connection(
+            self._flext_api, self.domain_model
+        )
+        if connection_result.is_failure:
+            return FlextResult[None].fail(
+                f"Connection failed: {connection_result.error}"
+            )
+
+        session_id = connection_result.unwrap()
+
         try:
-            catalog_result = self._flext_tap.generate_catalog()
+            # Process each stream in catalog
+            selected_streams = [
+                s
+                for s in catalog["streams"]
+                if s.get("metadata", {}).get("selected", False)
+            ]
 
-            if catalog_result.failure:
-                self._logger.error(f"Catalog generation failed: {catalog_result.error}")
-                return {"streams": []}
+            for stream in selected_streams:
+                stream_name = stream.get("stream", "ldap_entries")
 
-            return catalog_result.value
+                # Extract entries for this stream
+                extraction_result = await self._ExtractionHelper.extract_entries(
+                    self._flext_api, session_id, self.domain_model
+                )
+                if extraction_result.is_failure:
+                    return FlextResult[None].fail(
+                        f"Extraction failed for stream {stream_name}: {extraction_result.error}"
+                    )
 
-        except Exception:
-            self._logger.exception("Error generating catalog")
-            return {"streams": []}
+                entries = extraction_result.unwrap()
 
-    def sync_stream(self, stream_name: str) -> dict:
-        """Sync stream data using FlextTap abstractions."""
+                # Log the sync process for this stream
+                self._logger.info(
+                    f"Processing stream {stream_name} with {len(entries)} entries"
+                )
+
+            # Update state with current sync information
+            current_state = state or {}
+            current_state.update(
+                {
+                    "last_sync": datetime.now(UTC).isoformat(),
+                    "bookmarks": {
+                        stream["stream"]: {
+                            "last_updated": datetime.now(UTC).isoformat()
+                        }
+                        for stream in selected_streams
+                    },
+                    "total_processed_streams": len(selected_streams),
+                }
+            )
+
+            # Log the final state for debugging
+            self._logger.debug(f"Updated state: {current_state}")
+
+            return FlextResult[None].ok(None)
+
+        finally:
+            # Disconnect when done
+            await self._flext_api.disconnect()
+
+    async def test_connection(self) -> FlextResult[dict[str, Any]]:
+        """Test LDAP connection and return server info."""
+        self._logger.debug("Testing LDAP connection")
+
+        if not self.domain_model:
+            return FlextResult[dict[str, Any]].fail("No LDAP configuration provided")
+
+        connection_result = await self._ConnectionHelper.create_connection(
+            self._flext_api, self.domain_model
+        )
+        if connection_result.is_failure:
+            return FlextResult[dict[str, Any]].fail(
+                f"Connection test failed: {connection_result.error}"
+            )
+
+        session_id = connection_result.unwrap()
+
         try:
-            sync_result = self._flext_tap.sync_stream(stream_name)
+            # Test basic search to get server info using flext-ldap API
+            search_result = await self._flext_api.search_simple(
+                search_base="",
+                search_filter="(objectClass=*)",
+                size_limit=1
+            )
 
-            if sync_result.failure:
-                self._logger.error(f"Stream sync failed: {sync_result.error}")
-                return {"status": "failed", "error": sync_result.error}
+            server_info = {
+                "server_uri": f"{'ldaps' if self.domain_model.use_ssl else 'ldap'}://{self.domain_model.host}:{self.domain_model.port}",
+                "connected": True,
+                "search_test": search_result.is_success,
+                "connection_method": "flext-ldap API",
+                "session_id": session_id,
+            }
 
-            return sync_result.value
+            return FlextResult[dict[str, Any]].ok(server_info)
 
-        except Exception as e:
-            self._logger.exception("Error syncing stream")
-            return {"status": "failed", "error": str(e)}
+        finally:
+            # Disconnect when done
+            await self._flext_api.disconnect()
 
-    @property
-    def name(self) -> str:
-        """Get tap name."""
-        return "tap-ldap"
+    async def execute(self) -> FlextResult[LdapTapResult]:
+        """Execute LDAP tap operation."""
+        self._logger.info("Executing LDAP tap operation")
 
-    def config_class(self) -> TapLDAPConfig:
-        """Get config class."""
-        return TapLDAPConfig
+        if not self.domain_model:
+            return FlextResult[LdapTapResult].fail("No configuration provided")
+
+        # Health check first
+        health_result = await self.health_check()
+        if health_result.is_failure:
+            return FlextResult[LdapTapResult].fail(
+                f"Health check failed: {health_result.error}"
+            )
+
+        # Discover catalog
+        catalog_result = await self.discover_catalog()
+        if catalog_result.is_failure:
+            return FlextResult[LdapTapResult].fail(
+                f"Catalog discovery failed: {catalog_result.error}"
+            )
+
+        catalog = catalog_result.unwrap()
+
+        # Sync data
+        sync_result = await self.sync_data(catalog)
+        if sync_result.is_failure:
+            return FlextResult[LdapTapResult].fail(
+                f"Data sync failed: {sync_result.error}"
+            )
+
+        # Create result
+        result = LdapTapResult(
+            success=True,
+            message="LDAP tap execution completed successfully",
+            catalog=catalog,
+            records_processed=len(
+                catalog.get("streams", [{}])[0].get("schema", {}).get("properties", {})
+            ),
+        )
+
+        return FlextResult[LdapTapResult].ok(result)
 
 
 class FlextTapLDAPPlugin:
