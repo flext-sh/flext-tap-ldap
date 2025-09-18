@@ -3,8 +3,20 @@
 **Project**: FLEXT Tap LDAP - Enterprise LDAP Data Extraction  
 **Status**: Quality Refactoring Required | **Architecture**: Clean Architecture + DDD  
 **Dependencies**: Python 3.13+, flext-core, flext-ldap, flext-meltano, singer-sdk  
-**Coverage Target**: 90% | **Current Type Status**: Requires Assessment  
+**Coverage Target**: 75% minimum (proven achievable), 100% aspirational target | **Current Type Status**: Requires Assessment
 **Authority**: FLEXT-TAP-LDAP | **Last Updated**: 2025-01-08
+
+**Hierarchy**: This document provides project-specific standards based on workspace-level patterns defined in [../CLAUDE.md](../CLAUDE.md). For architectural principles, quality gates, and MCP server usage, reference the main workspace standards.
+
+## 🔗 MCP SERVER INTEGRATION
+
+| MCP Server | Purpose | Status |
+|------------|---------|--------|
+| **serena** | Singer tap codebase analysis and LDAP extraction patterns | **ACTIVE** |
+| **sequential-thinking** | LDAP data processing and Singer protocol architecture | **ACTIVE** |
+| **github** | Singer ecosystem integration and tap PRs | **ACTIVE** |
+
+**Usage**: `claude mcp list` for available servers, leverage for Singer-specific development patterns and LDAP extraction analysis.
 
 ---
 
@@ -221,7 +233,7 @@ class FlextTapLdapService(FlextDomainService):
 class LdapUsersStream(Stream):
     """LDAP Users stream with flext-core integration."""
 
-    def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
+    def get_records(self, context: dict | None) -> Iterable[dict[str, object]]:
         """Extract user records with comprehensive error handling."""
         service = self._container.get(FlextTapLdapService)
         result = service.extract_ldap_data(
