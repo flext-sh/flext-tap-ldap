@@ -1,7 +1,7 @@
 # CLAUDE.md - FLEXT Tap LDAP Quality Refactoring Guide
 
 **Project**: FLEXT Tap LDAP - Enterprise LDAP Data Extraction  
-**Status**: Quality Refactoring Required | **Architecture**: Clean Architecture + DDD  
+**Status**: Quality Refactoring Required · 1.0.0 Release Preparation | **Architecture**: Clean Architecture + DDD  
 **Dependencies**: Python 3.13+, flext-core, flext-ldap, flext-meltano, singer-sdk  
 **Coverage Target**: 75% minimum (proven achievable), 100% aspirational target | **Current Type Status**: Requires Assessment
 **Authority**: FLEXT-TAP-LDAP | **Last Updated**: 2025-01-08
@@ -10,11 +10,11 @@
 
 ## 🔗 MCP SERVER INTEGRATION
 
-| MCP Server | Purpose | Status |
-|------------|---------|--------|
-| **serena** | Singer tap codebase analysis and LDAP extraction patterns | **ACTIVE** |
-| **sequential-thinking** | LDAP data processing and Singer protocol architecture | **ACTIVE** |
-| **github** | Singer ecosystem integration and tap PRs | **ACTIVE** |
+| MCP Server              | Purpose                                                   | Status     |
+| ----------------------- | --------------------------------------------------------- | ---------- |
+| **serena**              | Singer tap codebase analysis and LDAP extraction patterns | **ACTIVE** |
+| **sequential-thinking** | LDAP data processing and Singer protocol architecture     | **ACTIVE** |
+| **github**              | Singer ecosystem integration and tap PRs                  | **ACTIVE** |
 
 **Usage**: `claude mcp list` for available servers, leverage for Singer-specific development patterns and LDAP extraction analysis.
 

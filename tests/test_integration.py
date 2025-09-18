@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import asyncio
 import json
 from collections.abc import AsyncGenerator
 from pathlib import Path
@@ -284,6 +285,7 @@ class TestFlextTapLDAPIntegration:
             *_args: object,
             **_kwargs: object,
         ) -> AsyncGenerator[FlextTypes.Core.Dict]:
+            await asyncio.sleep(0)  # Make it truly async
             yield {
                 "dn": "uid=user1,ou=users,dc=test,dc=com",
                 "attributes": {"uid": "user1", "cn": "User One"},

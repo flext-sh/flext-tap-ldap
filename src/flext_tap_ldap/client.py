@@ -6,6 +6,9 @@ import asyncio
 import time
 from collections.abc import Awaitable
 from dataclasses import dataclass
+from typing import Any
+
+from flext_ldap.models import FlextLdapModels
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import (
@@ -170,17 +173,23 @@ class LDAPClient:
 
     def _convert_entry_to_dict(
         self,
-        entry_data: FlextLdapEntities.Entry | FlextTypes.Core.Dict,
-    ) -> FlextTypes.Core.Dict:
+        entry_data: FlextLdapModels.Entry
+        | FlextLdapEntities.Entry
+        | FlextTypes.Core.Dict,
+    ) -> dict[str, Any]:
         """Convert FlextLdapEntities.Entry to dict format for testing convenience.
 
         Single Responsibility: Handle only entry format conversion.
         """
+        # Check if it's an Entry object using hasattr for attributes
         if hasattr(entry_data, "dn") and hasattr(entry_data, "attributes"):
             # It's a FlextLdapEntities.Entry model object - flatten attributes
-            entry_dict = {"dn": entry_data.dn}
+            # Use getattr to safely access attributes for type checker
+            dn = getattr(entry_data, "dn", "")
+            attributes = getattr(entry_data, "attributes", {})
+            entry_dict = {"dn": dn}
             # Add flattened attributes to the entry dict
-            for attr_name, attr_values in entry_data.attributes.items():
+            for attr_name, attr_values in attributes.items():
                 # Convert single values and lists appropriately
                 if isinstance(attr_values, list) and len(attr_values) == 1:
                     entry_dict[attr_name] = attr_values[0]
@@ -188,12 +197,17 @@ class LDAPClient:
                     # Keep as list or whatever type it is
                     entry_dict[attr_name] = attr_values
             return entry_dict
-        # It's already a dict (from mock)
-        return dict(entry_data) if entry_data else {}
+        # It's already a dict (from mock) - ensure proper type conversion
+        if entry_data:
+            if isinstance(entry_data, dict):
+                return entry_data
+            # Convert to dict if it's not already
+            return dict(entry_data) if hasattr(entry_data, "__iter__") else {}
+        return {}
 
     def _process_search_results(
         self,
-        result: FlextResult[list[FlextLdapEntities.Entry]],
+        result: FlextResult[list[FlextLdapModels.Entry]],
         size_limit: int,
     ) -> list[FlextTypes.Core.Dict]:
         """Process LDAP search results with size limiting.
@@ -228,18 +242,24 @@ class LDAPClient:
         server_uri = self._build_server_uri()
 
         try:
+            # Ensure bind_dn and password are not None for the API call
+            bind_dn = self._bind_dn or ""
+            password = self._password or ""
             async with self._flext_api.connection(
                 server_uri,
-                self._bind_dn,
-                self._password,
-            ) as session:
-                result = await self._flext_api.search(
-                    session_id=session,
+                bind_dn,
+                password,
+            ) as _session:
+                # Create search request using FlextLdap models
+                search_request = FlextLdapModels.SearchRequest(
                     base_dn=base_dn,
-                    search_filter=search_filter,
+                    filter_str=search_filter,
                     scope=ldap_scope,
                     attributes=attributes,
+                    size_limit=size_limit,
+                    time_limit=30,
                 )
+                result = await self._flext_api.search(search_request)
 
                 return self._process_search_results(result, size_limit)
 
@@ -314,18 +334,24 @@ class LDAPClient:
             async def _test_async() -> bool:
                 try:
                     server_uri = f"{'ldaps' if self.use_ssl else 'ldap'}://{self.host}:{self.port}"
+                    # Ensure bind_dn and password are not None for the API call
+                    bind_dn = self._bind_dn or ""
+                    password = self._password or ""
                     async with self._flext_api.connection(
                         server_uri,
-                        self._bind_dn,
-                        self._password,
-                    ) as session:
+                        bind_dn,
+                        password,
+                    ) as _session:
                         # Try a simple search to test connection
-                        result = await self._flext_api.search(
-                            session_id=session,
+                        test_search_request = FlextLdapModels.SearchRequest(
                             base_dn="",
-                            search_filter="(objectClass=*)",
+                            filter_str="(objectClass=*)",
                             scope="BASE",
+                            attributes=None,
+                            size_limit=1,
+                            time_limit=5,
                         )
+                        result = await self._flext_api.search(test_search_request)
                         return result.success
                 except (RuntimeError, ValueError, TypeError) as e:
                     async_logger = FlextLogger(__name__)
@@ -461,7 +487,7 @@ class LDAPClient:
 
     def _process_search_results_with_oracle_support(
         self,
-        search_result: list[FlextLdapEntities.Entry] | list[FlextTypes.Core.Dict],
+        search_result: list[FlextLdapModels.Entry] | list[FlextTypes.Core.Dict],
         *,
         oracle_oid_mode: bool,
     ) -> list[FlextTypes.Core.Dict]:
