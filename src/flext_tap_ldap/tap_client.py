@@ -229,7 +229,7 @@ class LDAPClient:
             # Ensure bind credentials are available
             if self._bind_dn is None:
                 logger.warning(
-                    "LDAP bind DN is None, using empty string for anonymous bind"
+                    "LDAP bind DN is None, using empty string for anonymous bind",
                 )
                 bind_dn = ""
             else:
@@ -237,7 +237,7 @@ class LDAPClient:
 
             if self._password is None:
                 logger.warning(
-                    "LDAP bind password is None, using empty string for anonymous bind"
+                    "LDAP bind password is None, using empty string for anonymous bind",
                 )
                 bind_password = ""
             else:
@@ -459,7 +459,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
                 if connect_result.is_failure:
                     return FlextResult[str].fail(
-                        f"LDAP connection failed: {connect_result.error}"
+                        f"LDAP connection failed: {connect_result.error}",
                     )
 
                 return FlextResult[str].ok(connect_result.unwrap())
@@ -469,7 +469,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
         @staticmethod
         async def validate_search_base(
-            flext_api: FlextLdapApi, session_id: str, search_base: str
+            flext_api: FlextLdapApi, session_id: str, search_base: str,
         ) -> FlextResult[bool]:
             """Validate search base exists in directory."""
             try:
@@ -484,7 +484,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
                 if search_result.is_failure:
                     return FlextResult[bool].fail(
-                        f"Search base not found: {search_base}"
+                        f"Search base not found: {search_base}",
                     )
 
                 return FlextResult[bool].ok(value=True)
@@ -497,7 +497,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
         @staticmethod
         async def discover_schema(
-            flext_api: FlextLdapApi, session_id: str, search_base: str
+            flext_api: FlextLdapApi, session_id: str, search_base: str,
         ) -> FlextResult[FlextTypes.Core.Dict]:
             """Discover LDAP schema for search base."""
             try:
@@ -513,7 +513,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
                 if search_result.is_failure:
                     return FlextResult[FlextTypes.Core.Dict].fail(
-                        f"Schema discovery search failed: {search_result.error}"
+                        f"Schema discovery search failed: {search_result.error}",
                     )
 
                 entries = search_result.unwrap()
@@ -545,7 +545,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
             except Exception as e:
                 return FlextResult[FlextTypes.Core.Dict].fail(
-                    f"Schema discovery failed: {e!s}"
+                    f"Schema discovery failed: {e!s}",
                 )
 
     class _ExtractionHelper:
@@ -553,7 +553,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
         @staticmethod
         async def extract_entries(
-            flext_api: FlextLdapApi, session_id: str, config: TapLDAPConfig
+            flext_api: FlextLdapApi, session_id: str, config: TapLDAPConfig,
         ) -> FlextResult[list[FlextTypes.Core.Dict]]:
             """Extract all entries from LDAP directory."""
             try:
@@ -576,7 +576,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
                 if search_result.is_failure:
                     return FlextResult[list[FlextTypes.Core.Dict]].fail(
-                        f"Entry extraction search failed: {search_result.error}"
+                        f"Entry extraction search failed: {search_result.error}",
                     )
 
                 entries = []
@@ -600,7 +600,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
             except Exception as e:
                 return FlextResult[list[FlextTypes.Core.Dict]].fail(
-                    f"Entry extraction error: {e!s}"
+                    f"Entry extraction error: {e!s}",
                 )
 
     async def health_check(self) -> FlextResult[str]:
@@ -612,11 +612,11 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
         # Test connection using flext-ldap API (ZERO TOLERANCE COMPLIANCE)
         connection_result = await self._ConnectionHelper.create_connection(
-            self._flext_api, self.domain_model
+            self._flext_api, self.domain_model,
         )
         if connection_result.is_failure:
             return FlextResult[str].fail(
-                f"Health check failed: {connection_result.error}"
+                f"Health check failed: {connection_result.error}",
             )
 
         connection_result.unwrap()
@@ -633,7 +633,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
         if search_result.is_failure:
             return FlextResult[str].fail(
-                f"Search base validation failed: {search_result.error}"
+                f"Search base validation failed: {search_result.error}",
             )
 
         return FlextResult[str].ok("LDAP tap healthy")
@@ -644,16 +644,16 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
         if not self.domain_model:
             return FlextResult[FlextTypes.Core.Dict].fail(
-                "No LDAP configuration provided"
+                "No LDAP configuration provided",
             )
 
         # Create connection
         connection_result = await self._ConnectionHelper.create_connection(
-            self._flext_api, self.domain_model
+            self._flext_api, self.domain_model,
         )
         if connection_result.is_failure:
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Connection failed: {connection_result.error}"
+                f"Connection failed: {connection_result.error}",
             )
 
         session_id = connection_result.unwrap()
@@ -661,12 +661,12 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
         try:
             # Discover schema
             schema_result = await self._SchemaHelper.discover_schema(
-                self._flext_api, session_id, self.domain_model.search_base
+                self._flext_api, session_id, self.domain_model.search_base,
             )
 
             if schema_result.is_failure:
                 return FlextResult[FlextTypes.Core.Dict].fail(
-                    f"Schema discovery failed: {schema_result.error}"
+                    f"Schema discovery failed: {schema_result.error}",
                 )
 
             schema = schema_result.unwrap()
@@ -685,10 +685,10 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
                                     "inclusion": "available",
                                     "selected": True,
                                 },
-                            }
+                            },
                         ],
-                    }
-                ]
+                    },
+                ],
             }
 
             return FlextResult[FlextTypes.Core.Dict].ok(catalog)
@@ -698,7 +698,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
             await self._flext_api.disconnect()
 
     async def sync_data(
-        self, catalog: FlextTypes.Core.Dict, state: FlextTypes.Core.Dict | None = None
+        self, catalog: FlextTypes.Core.Dict, state: FlextTypes.Core.Dict | None = None,
     ) -> FlextResult[None]:
         """Sync LDAP data using Singer protocol."""
         self._logger.info("Starting LDAP data sync")
@@ -712,11 +712,11 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
         # Create connection
         connection_result = await self._ConnectionHelper.create_connection(
-            self._flext_api, self.domain_model
+            self._flext_api, self.domain_model,
         )
         if connection_result.is_failure:
             return FlextResult[None].fail(
-                f"Connection failed: {connection_result.error}"
+                f"Connection failed: {connection_result.error}",
             )
 
         session_id = connection_result.unwrap()
@@ -734,18 +734,18 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
                 # Extract entries for this stream
                 extraction_result = await self._ExtractionHelper.extract_entries(
-                    self._flext_api, session_id, self.domain_model
+                    self._flext_api, session_id, self.domain_model,
                 )
                 if extraction_result.is_failure:
                     return FlextResult[None].fail(
-                        f"Extraction failed for stream {stream_name}: {extraction_result.error}"
+                        f"Extraction failed for stream {stream_name}: {extraction_result.error}",
                     )
 
                 entries = extraction_result.unwrap()
 
                 # Log the sync process for this stream
                 self._logger.info(
-                    f"Processing stream {stream_name} with {len(entries)} entries"
+                    f"Processing stream {stream_name} with {len(entries)} entries",
                 )
 
             # Update state with current sync information
@@ -755,12 +755,12 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
                     "last_sync": datetime.now(UTC).isoformat(),
                     "bookmarks": {
                         stream["stream"]: {
-                            "last_updated": datetime.now(UTC).isoformat()
+                            "last_updated": datetime.now(UTC).isoformat(),
                         }
                         for stream in selected_streams
                     },
                     "total_processed_streams": len(selected_streams),
-                }
+                },
             )
 
             # Log the final state for debugging
@@ -778,15 +778,15 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
         if not self.domain_model:
             return FlextResult[FlextTypes.Core.Dict].fail(
-                "No LDAP configuration provided"
+                "No LDAP configuration provided",
             )
 
         connection_result = await self._ConnectionHelper.create_connection(
-            self._flext_api, self.domain_model
+            self._flext_api, self.domain_model,
         )
         if connection_result.is_failure:
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Connection test failed: {connection_result.error}"
+                f"Connection test failed: {connection_result.error}",
             )
 
         session_id = connection_result.unwrap()
@@ -794,7 +794,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
         try:
             # Test basic search to get server info using flext-ldap API
             search_result = await self._flext_api.search_simple(
-                search_base="", search_filter="(objectClass=*)", size_limit=1
+                search_base="", search_filter="(objectClass=*)", size_limit=1,
             )
 
             server_info = {
@@ -822,14 +822,14 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
         health_result = await self.health_check()
         if health_result.is_failure:
             return FlextResult[LdapTapResult].fail(
-                f"Health check failed: {health_result.error}"
+                f"Health check failed: {health_result.error}",
             )
 
         # Discover catalog
         catalog_result = await self.discover_catalog()
         if catalog_result.is_failure:
             return FlextResult[LdapTapResult].fail(
-                f"Catalog discovery failed: {catalog_result.error}"
+                f"Catalog discovery failed: {catalog_result.error}",
             )
 
         catalog = catalog_result.unwrap()
@@ -838,7 +838,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
         sync_result = await self.sync_data(catalog)
         if sync_result.is_failure:
             return FlextResult[LdapTapResult].fail(
-                f"Data sync failed: {sync_result.error}"
+                f"Data sync failed: {sync_result.error}",
             )
 
         # Create result
@@ -847,7 +847,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
             message="LDAP tap execution completed successfully",
             catalog=catalog,
             records_processed=len(
-                catalog.get("streams", [{}])[0].get("schema", {}).get("properties", {})
+                catalog.get("streams", [{}])[0].get("schema", {}).get("properties", {}),
             ),
         )
 
@@ -929,7 +929,7 @@ class FlextTapLDAPPlugin:
 
             if operation not in operation_handlers:
                 return FlextResult[FlextTypes.Core.Dict].fail(
-                    f"Unknown operation: {operation}"
+                    f"Unknown operation: {operation}",
                 )
 
             return operation_handlers[operation](parameters or {})
@@ -937,7 +937,7 @@ class FlextTapLDAPPlugin:
         except Exception as e:
             logger.exception(f"Plugin operation '{operation}' failed")
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Operation {operation} failed: {e}"
+                f"Operation {operation} failed: {e}",
             )
 
     def discover_streams(self) -> FlextResult[FlextTypes.Core.List]:
@@ -952,7 +952,7 @@ class FlextTapLDAPPlugin:
         try:
             if self._tap_instance is None:
                 return FlextResult[FlextTypes.Core.List].fail(
-                    "Tap instance not properly initialized"
+                    "Tap instance not properly initialized",
                 )
 
             # Get streams from tap using Singer SDK interface
@@ -964,7 +964,7 @@ class FlextTapLDAPPlugin:
         except Exception as e:
             logger.exception("Stream discovery failed")
             return FlextResult[FlextTypes.Core.List].fail(
-                f"Stream discovery failed: {e}"
+                f"Stream discovery failed: {e}",
             )
 
     def _execute_discover(
@@ -975,7 +975,7 @@ class FlextTapLDAPPlugin:
         streams_result = self.discover_streams()
         if not streams_result.is_success:
             return FlextResult[FlextTypes.Core.Dict].fail(
-                streams_result.error or "Discovery failed"
+                streams_result.error or "Discovery failed",
             )
 
         streams = streams_result.value or []
@@ -1024,7 +1024,7 @@ class FlextTapLDAPPlugin:
         try:
             if not self._tap_instance:
                 return FlextResult[FlextTypes.Core.Dict].fail(
-                    "Tap instance not initialized"
+                    "Tap instance not initialized",
                 )
 
             # Test configuration (Pydantic validation already occurred during creation)

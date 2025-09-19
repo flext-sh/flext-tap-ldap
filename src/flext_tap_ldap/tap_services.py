@@ -187,7 +187,7 @@ class LDIFConfigBuilder:
             )
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[object].fail(
-                f"Failed to build LDIF processing config: {e}"
+                f"Failed to build LDIF processing config: {e}",
             )
 
 
@@ -302,7 +302,7 @@ class LDAPStreamService:
             return FlextResult[object].fail(f"Failed to create stream: {e}")
 
     async def discover_schema(
-        self, stream_id: str
+        self, stream_id: str,
     ) -> FlextResult[FlextTypes.Core.Dict]:
         """Discover schema for LDAP stream."""
         try:
@@ -593,7 +593,7 @@ class LDIFProcessingService:
         self._ldif_api = FlextLdifAPI()
 
     def process_ldif_file(
-        self, file_path: str
+        self, file_path: str,
     ) -> FlextResult[list[FlextTypes.Core.Dict]]:
         """Process LDIF file using flext-ldif library."""
         try:
@@ -604,7 +604,7 @@ class LDIFProcessingService:
 
             if not result.success:
                 return FlextResult[object].fail(
-                    f"Failed to parse LDIF file: {result.error}"
+                    f"Failed to parse LDIF file: {result.error}",
                 )
 
             entries = result.data or []

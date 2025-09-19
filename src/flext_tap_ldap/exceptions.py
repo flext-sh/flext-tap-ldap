@@ -25,7 +25,7 @@ class FlextTapLdapError(FlextExceptions.BaseError):
     ) -> None:
         """Initialize base LDAP tap error."""
         super().__init__(
-            message, code=code, context=context, correlation_id=correlation_id
+            message, code=code, context=context, correlation_id=correlation_id,
         )
 
 

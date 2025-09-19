@@ -310,7 +310,7 @@ mail: john.doe@example.com
     ) -> None:
         """Test parsing LDIF content."""
         result = FlextResult[None].ok(
-            list(processor.parse_content(sample_ldif_content))
+            list(processor.parse_content(sample_ldif_content)),
         )
 
         assert result.success
@@ -345,7 +345,7 @@ mail: john.doe@example.com
 
         try:
             result = FlextResult[None].ok(
-                list(processor.parse_content(invalid_content))
+                list(processor.parse_content(invalid_content)),
             )
         except Exception as e:
             result = FlextResult[None].fail(str(e))
@@ -613,7 +613,7 @@ cn: another
 
         try:
             result = FlextResult[None].ok(
-                list(processor.parse_content(problematic_content))
+                list(processor.parse_content(problematic_content)),
             )
             if result.success:
                 entries = result.data
@@ -645,7 +645,7 @@ cn: another
 
         try:
             result = FlextResult[None].ok(
-                list(processor.parse_content(invalid_content))
+                list(processor.parse_content(invalid_content)),
             )
             # Should either succeed or fail, but handle gracefully
             assert isinstance(result, FlextResult)

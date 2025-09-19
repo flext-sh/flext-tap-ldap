@@ -148,7 +148,7 @@ class LDAPConnectionService:
             if connection:
                 connection.last_error = str(e)
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Failed to test connection: {e}"
+                f"Failed to test connection: {e}",
             )
 
     async def get_connection(
@@ -161,7 +161,7 @@ class LDAPConnectionService:
             return FlextResult[LDAPConnection | None].ok(connection)
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[LDAPConnection | None].fail(
-                f"Failed to get connection: {e}"
+                f"Failed to get connection: {e}",
             )
 
     async def list_connections(self) -> FlextResult[list[LDAPConnection]]:
@@ -171,7 +171,7 @@ class LDAPConnectionService:
             return FlextResult[list[LDAPConnection]].ok(connections)
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[list[LDAPConnection]].fail(
-                f"Failed to list connections: {e}"
+                f"Failed to list connections: {e}",
             )
 
 
@@ -218,7 +218,7 @@ class LDAPStreamService:
             return FlextResult[LDAPStream].fail(f"Failed to create stream: {e}")
 
     async def discover_schema(
-        self, stream_id: UUID
+        self, stream_id: UUID,
     ) -> FlextResult[FlextTypes.Core.Dict]:
         """Discover schema for LDAP stream."""
         try:
@@ -241,7 +241,7 @@ class LDAPStreamService:
             return FlextResult[FlextTypes.Core.Dict].ok(schema)
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Failed to discover schema: {e}"
+                f"Failed to discover schema: {e}",
             )
 
     async def get_stream(self, stream_id: UUID) -> FlextResult[LDAPStream | None]:
@@ -377,7 +377,7 @@ class TapExecutionService:
             return FlextResult[TapExecution | None].ok(execution)
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[TapExecution | None].fail(
-                f"Failed to get execution: {e}"
+                f"Failed to get execution: {e}",
             )
 
     async def list_executions(
@@ -400,7 +400,7 @@ class TapExecutionService:
             return FlextResult[list[TapExecution]].ok(executions)
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[list[TapExecution]].fail(
-                f"Failed to list executions: {e}"
+                f"Failed to list executions: {e}",
             )
 
 
@@ -495,5 +495,5 @@ class LDAPRecordService:
             return FlextResult[FlextTypes.Core.Dict].ok({"count": len(records)})
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Failed to count records: {e}"
+                f"Failed to count records: {e}",
             )

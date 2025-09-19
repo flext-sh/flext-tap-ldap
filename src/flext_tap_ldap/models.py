@@ -103,7 +103,7 @@ class LDAPEntry(FlextModels):
 
     dn: str = Field(..., description="Distinguished Name")
     object_classes: FlextTypes.Core.StringList = Field(
-        ..., description="Object classes"
+        ..., description="Object classes",
     )
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -130,7 +130,7 @@ class LDAPEntry(FlextModels):
         description="LDIF change type (add, modify, delete)",
     )
     controls: FlextTypes.Core.StringList = Field(
-        default_factory=list, description="LDAP controls"
+        default_factory=list, description="LDAP controls",
     )
 
     def get_attribute(self, name: str) -> object | None:
@@ -221,7 +221,7 @@ class LDAPUser(LDAPEntry):
 
     @classmethod
     def from_entry(
-        cls, entry: FlextTypes.Core.Dict | FlextLdapEntities.Entry
+        cls, entry: FlextTypes.Core.Dict | FlextLdapEntities.Entry,
     ) -> LDAPUser:
         """Create LDAPUser from LDAP entry."""
         return cls(
@@ -267,7 +267,7 @@ class LDAPGroup(LDAPEntry):
     cn: str | None = Field(None, description="Group name")
     description: str | None = Field(None, description="Group description")
     members: FlextTypes.Core.StringList = Field(
-        default_factory=list, description="Member DNs"
+        default_factory=list, description="Member DNs",
     )
     unique_members: FlextTypes.Core.StringList = Field(
         default_factory=list,
@@ -280,7 +280,7 @@ class LDAPGroup(LDAPEntry):
 
     @classmethod
     def from_entry(
-        cls, entry: FlextTypes.Core.Dict | FlextLdapEntities.Entry
+        cls, entry: FlextTypes.Core.Dict | FlextLdapEntities.Entry,
     ) -> LDAPGroup:
         """Create LDAPGroup from LDAP entry."""
         return cls(
@@ -321,7 +321,7 @@ class LDAPSchema(FlextModels):
         description="Available attribute types",
     )
     ldap_syntaxes: FlextTypes.Core.StringList = Field(
-        default_factory=list, description="LDAP syntaxes"
+        default_factory=list, description="LDAP syntaxes",
     )
     naming_contexts: FlextTypes.Core.StringList = Field(
         default_factory=list,
