@@ -12,7 +12,6 @@ from flext_ldap import (
     FlextLdapApi,
     FlextLdapEntities,
     FlextLdapModels,
-    LdapScope as LDAPScope,
 )
 
 logger = FlextLogger(__name__)
@@ -427,7 +426,8 @@ class LDAPClient:
         }
 
     def _process_oracle_entry(
-        self, entry: FlextTypes.Core.Dict,
+        self,
+        entry: FlextTypes.Core.Dict,
     ) -> FlextTypes.Core.Dict:
         """Process Oracle-specific LDAP entries for testing convenience."""
         attributes = entry.get("attributes", {})
@@ -577,5 +577,4 @@ __all__: FlextTypes.Core.StringList = [
     "LDAPClient",
     "LDAPConnectionConfig",
     "LDAPEntry",
-    "LDAPScope",
 ]

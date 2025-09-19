@@ -26,7 +26,8 @@ def _get_entry_value(
 
 
 def _safe_list_value(
-    value: object, default: FlextTypes.Core.StringList | None = None,
+    value: object,
+    default: FlextTypes.Core.StringList | None = None,
 ) -> FlextTypes.Core.StringList:
     """Safely convert value to FlextTypes.Core.StringList."""
     if isinstance(value, list):
@@ -91,7 +92,8 @@ class LDAPEntry(FlextModels.Entity):
 
     dn: str = Field(..., description="Distinguished Name")
     object_classes: FlextTypes.Core.StringList = Field(
-        ..., description="Object classes",
+        ...,
+        description="Object classes",
     )
     attributes: FlextTypes.Core.Dict = Field(
         default_factory=dict,
@@ -108,7 +110,8 @@ class LDAPEntry(FlextModels.Entity):
         description="LDIF change type (add, modify, delete)",
     )
     controls: FlextTypes.Core.StringList = Field(
-        default_factory=list, description="LDAP controls",
+        default_factory=list,
+        description="LDAP controls",
     )
 
     def validate_domain_rules(self) -> FlextResult[None]:
@@ -177,7 +180,8 @@ class LDAPUser(LDAPEntry):
 
     @classmethod
     def from_entry(
-        cls, entry: FlextTypes.Core.Dict | FlextLdapEntities.Entry,
+        cls,
+        entry: FlextTypes.Core.Dict | FlextLdapEntities.Entry,
     ) -> LDAPUser:
         """Create LDAPUser from LDAP entry."""
         return cls(
@@ -221,7 +225,8 @@ class LDAPGroup(LDAPEntry):
     cn: str | None = Field(None, description="Group name")
     description: str | None = Field(None, description="Group description")
     members: FlextTypes.Core.StringList = Field(
-        default_factory=list, description="Member DNs",
+        default_factory=list,
+        description="Member DNs",
     )
     unique_members: FlextTypes.Core.StringList = Field(
         default_factory=list,
@@ -234,7 +239,8 @@ class LDAPGroup(LDAPEntry):
 
     @classmethod
     def from_entry(
-        cls, entry: FlextTypes.Core.Dict | FlextLdapEntities.Entry,
+        cls,
+        entry: FlextTypes.Core.Dict | FlextLdapEntities.Entry,
     ) -> LDAPGroup:
         """Create LDAPGroup from LDAP entry."""
         return cls(
@@ -275,7 +281,8 @@ class LDAPSchema(FlextModels.Value):
         description="Available attribute types",
     )
     ldap_syntaxes: FlextTypes.Core.StringList = Field(
-        default_factory=list, description="LDAP syntaxes",
+        default_factory=list,
+        description="LDAP syntaxes",
     )
     naming_contexts: FlextTypes.Core.StringList = Field(
         default_factory=list,
@@ -572,7 +579,8 @@ class LDAPRecord(FlextModels.Entity):
         description="LDAP attributes",
     )
     object_class: FlextTypes.Core.StringList = Field(
-        default_factory=list, description="Object classes",
+        default_factory=list,
+        description="Object classes",
     )
     extracted_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     singer_record: FlextTypes.Core.Dict = Field(

@@ -45,6 +45,7 @@ flext-tap-ldap = "flext_tap_ldap.tap:main"
 [tool.ruff]
 extend = "../ruff-shared.toml"
 lint.isort.known-first-party = ["flext_tap_ldap"]
+
 [tool.mypy]
 # Strict mode - enables all recommended checks
 strict = true
@@ -53,7 +54,7 @@ strict = true
 check_untyped_defs = true
 disallow_any_decorated = false
 disallow_any_explicit = true
-disallow_any_expr = false          # Too restrictive for real-world usage
+disallow_any_expr = false           # Too restrictive for real-world usage
 disallow_any_generics = true
 disallow_any_unimported = true
 disallow_incomplete_defs = true

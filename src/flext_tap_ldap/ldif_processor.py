@@ -13,7 +13,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from pathlib import Path
 
-from flext_ldif.exceptions import FlextLdifParseError
+from flext_ldif.exceptions import FlextLdifExceptions
 from flext_ldif.models import FlextLdifModels
 
 from flext_core import (
@@ -30,7 +30,7 @@ FlextLdifEntry = FlextLdifModels.Entry
 
 logger = FlextLogger(__name__)
 # Testing convenience aliases that delegate to flext-ldif
-LDIFParseError = FlextLdifParseError
+LDIFParseError = FlextLdifExceptions.parse_error
 
 
 class LDIFEntry:
@@ -41,7 +41,9 @@ class LDIFEntry:
     """
 
     def __init__(
-        self, dn: str, attributes: dict[str, FlextTypes.Core.StringList] | None = None,
+        self,
+        dn: str,
+        attributes: dict[str, FlextTypes.Core.StringList] | None = None,
     ) -> None:
         """Initialize LDIF entry with testing convenience."""
         self.dn = dn
@@ -154,7 +156,9 @@ class LDIFEntry:
             self.attributes[name] = []
 
     def update_attribute(
-        self, name: str, value: str | FlextTypes.Core.StringList,
+        self,
+        name: str,
+        value: str | FlextTypes.Core.StringList,
     ) -> None:
         """Update an attribute value, replacing existing values."""
         match value:
@@ -448,7 +452,8 @@ class LDIFTransformer:
     """Transform LDIF entries using flext-ldif transformation capabilities."""
 
     def __init__(
-        self, transformation_rules: FlextTypes.Core.Dict | None = None,
+        self,
+        transformation_rules: FlextTypes.Core.Dict | None = None,
     ) -> None:
         """Initialize transformer with optional transformation rules."""
         self.transformation_rules = transformation_rules or {}
