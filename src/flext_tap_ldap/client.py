@@ -6,15 +6,14 @@ import asyncio
 import time
 from collections.abc import Awaitable
 from dataclasses import dataclass
-from typing import Any
 
 from flext_ldap.models import FlextLdapModels
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import (
     FlextLdapApi,
-    FlextLdapConnectionConfig,
     FlextLdapEntities,
+    FlextLdapModels,
     LdapScope as LDAPScope,
 )
 
@@ -115,7 +114,7 @@ class LDAPClient:
             )
 
         # Create flext-ldap configuration
-        flext_config = FlextLdapConnectionConfig.model_validate(
+        flext_config = FlextLdapModels.ConnectionConfig.model_validate(
             {
                 "host": client_config.host,
                 "port": int(client_config.port),
@@ -176,7 +175,7 @@ class LDAPClient:
         entry_data: FlextLdapModels.Entry
         | FlextLdapEntities.Entry
         | FlextTypes.Core.Dict,
-    ) -> dict[str, Any]:
+    ) -> dict[str, object]:
         """Convert FlextLdapEntities.Entry to dict format for testing convenience.
 
         Single Responsibility: Handle only entry format conversion.
@@ -573,7 +572,7 @@ class LDAPClient:
 
 
 # Type aliases for testing convenience
-LDAPConnectionConfig = FlextLdapConnectionConfig
+LDAPConnectionConfig = FlextLdapModels.ConnectionConfig
 LDAPEntry = FlextLdapEntities.Entry
 
 __all__: FlextTypes.Core.StringList = [

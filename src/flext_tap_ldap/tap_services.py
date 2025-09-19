@@ -15,7 +15,7 @@ from pathlib import Path
 from uuid import UUID
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
-from flext_ldap import FlextLdapConnectionConfig
+from flext_ldap import FlextLdapModels
 from flext_ldif import FlextLdifAPI
 from flext_tap_ldap.models import (
     LDAPConnection,
@@ -803,7 +803,7 @@ def create_development_ldap_config(**overrides: object) -> FlextResult[TapLDAPCo
 
     """
     try:
-        connection_config = FlextLdapConnectionConfig.model_validate(
+        connection_config = FlextLdapModels.ConnectionConfig.model_validate(
             {"server": "localhost", "port": 389, "use_ssl": False, "timeout": 30},
         )
 
@@ -837,7 +837,7 @@ def create_production_ldap_config(**overrides: object) -> FlextResult[TapLDAPCon
 
     """
     try:
-        connection_config = FlextLdapConnectionConfig.model_validate(
+        connection_config = FlextLdapModels.ConnectionConfig.model_validate(
             {"server": "ldap.company.com", "port": 636, "use_ssl": True, "timeout": 30},
         )
 
