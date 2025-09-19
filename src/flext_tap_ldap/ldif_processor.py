@@ -41,7 +41,7 @@ class LDIFEntry:
     """
 
     def __init__(
-        self, dn: str, attributes: dict[str, FlextTypes.Core.StringList] | None = None
+        self, dn: str, attributes: dict[str, FlextTypes.Core.StringList] | None = None,
     ) -> None:
         """Initialize LDIF entry with testing convenience."""
         self.dn = dn
@@ -154,7 +154,7 @@ class LDIFEntry:
             self.attributes[name] = []
 
     def update_attribute(
-        self, name: str, value: str | FlextTypes.Core.StringList
+        self, name: str, value: str | FlextTypes.Core.StringList,
     ) -> None:
         """Update an attribute value, replacing existing values."""
         match value:
@@ -319,7 +319,7 @@ class FlextLdifProcessor:
             self.entries = list(self.parse_content(content, source_name))
             self._update_stats()
             return FlextResult[str].ok(
-                "LDIF content loaded successfully using flext-ldif"
+                "LDIF content loaded successfully using flext-ldif",
             )
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[str].fail(f"Failed to load LDIF content: {e}")
@@ -448,7 +448,7 @@ class LDIFTransformer:
     """Transform LDIF entries using flext-ldif transformation capabilities."""
 
     def __init__(
-        self, transformation_rules: FlextTypes.Core.Dict | None = None
+        self, transformation_rules: FlextTypes.Core.Dict | None = None,
     ) -> None:
         """Initialize transformer with optional transformation rules."""
         self.transformation_rules = transformation_rules or {}

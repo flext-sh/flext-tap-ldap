@@ -77,7 +77,7 @@ class LDIFProcessingConfig(FlextModels.Config):
             return FlextResult[None].fail("LDIF max errors must be positive")
         if self.ldif_files and self.ldif_directory:
             return FlextResult[None].fail(
-                "Cannot specify both ldif_files and ldif_directory"
+                "Cannot specify both ldif_files and ldif_directory",
             )
         return FlextResult[None].ok(None)
 

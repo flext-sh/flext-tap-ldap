@@ -31,7 +31,7 @@ class LDAPEntry(FlextModels.Entity):
 
     dn: str = Field(..., description="Distinguished Name")
     attributes: FlextTypes.Core.Dict = Field(
-        default_factory=dict, description="Entry attributes"
+        default_factory=dict, description="Entry attributes",
     )
     object_class: list[str] = Field(default_factory=list, description="Object classes")
 

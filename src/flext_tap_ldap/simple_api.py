@@ -157,7 +157,7 @@ class LDIFConfigBuilder:
             )
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[LDIFProcessingConfig].fail(
-                f"Failed to build LDIF processing config: {e}"
+                f"Failed to build LDIF processing config: {e}",
             )
 
 
@@ -211,7 +211,7 @@ def create_ldap_connection_config(
 
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult[LDAPConnectionConfig].fail(
-            f"Failed to create LDAP connection config: {e}"
+            f"Failed to create LDAP connection config: {e}",
         )
 
 
@@ -238,7 +238,7 @@ def create_ldap_connection_config_convenience(
         return create_ldap_connection_config(params)
     except Exception as e:
         return FlextResult[LDAPConnectionConfig].fail(
-            f"Failed to create convenience connection config: {e}"
+            f"Failed to create convenience connection config: {e}",
         )
 
 
@@ -326,7 +326,7 @@ def create_ldif_processing_config(
         return builder.build()
     except Exception as e:
         return FlextResult[LDIFProcessingConfig].fail(
-            f"Failed to create LDIF processing config: {e}"
+            f"Failed to create LDIF processing config: {e}",
         )
 
 
@@ -350,7 +350,7 @@ def validate_ldap_config(config: TapLDAPConfig) -> FlextResult[bool]:
         # Additional business rule validations
         if config.connection.port <= 0 or config.connection.port > max_port_number:
             return FlextResult[bool].fail(
-                f"Port must be between 1 and {max_port_number}"
+                f"Port must be between 1 and {max_port_number}",
             )
 
         if not config.connection.base_dn:
@@ -408,7 +408,7 @@ def create_development_ldap_config(**overrides: object) -> FlextResult[TapLDAPCo
 
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult[TapLDAPConfig].fail(
-            f"Failed to create development config: {e}"
+            f"Failed to create development config: {e}",
         )
 
 
@@ -453,7 +453,7 @@ def create_production_ldap_config(**overrides: object) -> FlextResult[TapLDAPCon
 
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult[TapLDAPConfig].fail(
-            f"Failed to create production config: {e}"
+            f"Failed to create production config: {e}",
         )
 
 
@@ -508,7 +508,7 @@ def create_ldif_processing_config_advanced(
 
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult[TapLDAPConfig].fail(
-            f"Failed to create LDIF processing config: {e}"
+            f"Failed to create LDIF processing config: {e}",
         )
 
 

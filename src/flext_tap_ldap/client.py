@@ -7,8 +7,6 @@ import time
 from collections.abc import Awaitable
 from dataclasses import dataclass
 
-from flext_ldap.models import FlextLdapModels
-
 from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import (
     FlextLdapApi,
@@ -429,7 +427,7 @@ class LDAPClient:
         }
 
     def _process_oracle_entry(
-        self, entry: FlextTypes.Core.Dict
+        self, entry: FlextTypes.Core.Dict,
     ) -> FlextTypes.Core.Dict:
         """Process Oracle-specific LDAP entries for testing convenience."""
         attributes = entry.get("attributes", {})
