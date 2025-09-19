@@ -218,7 +218,8 @@ class LDAPStreamService:
             return FlextResult[LDAPStream].fail(f"Failed to create stream: {e}")
 
     async def discover_schema(
-        self, stream_id: UUID,
+        self,
+        stream_id: UUID,
     ) -> FlextResult[FlextTypes.Core.Dict]:
         """Discover schema for LDAP stream."""
         try:

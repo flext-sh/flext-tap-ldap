@@ -538,7 +538,8 @@ class TestStreamIntegration:
         }
 
     def test_all_default_streams_creation(
-        self, tap_config: FlextTypes.Core.Dict,
+        self,
+        tap_config: FlextTypes.Core.Dict,
     ) -> None:
         """Test that all default streams can be created."""
         tap = FlextTapLDAP(config=tap_config)

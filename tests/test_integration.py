@@ -58,7 +58,9 @@ class TestFlextTapLDAPIntegration:
 
     @pytest.fixture
     def config_file(
-        self, tmp_path: Path, mock_ldap_config: FlextTypes.Core.Dict,
+        self,
+        tmp_path: Path,
+        mock_ldap_config: FlextTypes.Core.Dict,
     ) -> Path:
         """Create temporary config file."""
         config_path = tmp_path / "config.json"
@@ -68,7 +70,9 @@ class TestFlextTapLDAPIntegration:
 
     @pytest.fixture
     def catalog_file(
-        self, tmp_path: Path, sample_catalog: FlextTypes.Core.Dict,
+        self,
+        tmp_path: Path,
+        sample_catalog: FlextTypes.Core.Dict,
     ) -> Path:
         """Create temporary catalog file."""
         catalog_path = tmp_path / "catalog.json"
