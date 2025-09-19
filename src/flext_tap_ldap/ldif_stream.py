@@ -5,12 +5,12 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 
-from flext_meltano.singer_types import FlextSingerTypes
 from singer_sdk import Stream
 
 from flext_core import FlextLogger, FlextTypes
 from flext_ldap import FlextLdapApi
 from flext_ldif import FlextLdifAPI, FlextLdifModels
+from flext_meltano.singer_types import FlextSingerTypes
 from flext_tap_ldap.tap import FlextTapLDAP
 
 logger = FlextLogger(__name__)
