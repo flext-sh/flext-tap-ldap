@@ -25,8 +25,8 @@ from flext_core import (
 )
 from flext_ldap import (
     FlextLdapApi,
-    FlextLdapConnectionConfig,
     FlextLdapEntities,
+    FlextLdapModels,
     LdapScope as LDAPScope,
 )
 from flext_tap_ldap.tap_config import TapLDAPConfig
@@ -129,7 +129,7 @@ class LDAPClient:
             )
 
         # Create flext-ldap configuration
-        flext_config = FlextLdapConnectionConfig.model_validate(
+        flext_config = FlextLdapModels.ConnectionConfig.model_validate(
             {
                 "server": client_config.host,
                 "port": client_config.port,
@@ -1076,7 +1076,7 @@ def main() -> None:
 
 
 # Type aliases for testing convenience
-LDAPConnectionConfig = FlextLdapConnectionConfig
+LDAPConnectionConfig = FlextLdapModels.ConnectionConfig
 LDAPEntry = FlextLdapEntities.Entry
 
 __all__ = [
