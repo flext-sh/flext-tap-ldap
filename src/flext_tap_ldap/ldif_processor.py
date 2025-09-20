@@ -13,14 +13,15 @@ from __future__ import annotations
 from collections.abc import Iterator
 from pathlib import Path
 
+from flext_ldif.exceptions import FlextLdifExceptions
+from flext_ldif.models import FlextLdifModels
+
 from flext_core import (
     FlextLogger,
     FlextResult,
     FlextTypes,
 )
 from flext_ldif import FlextLdifAPI
-from flext_ldif.exceptions import FlextLdifExceptions
-from flext_ldif.models import FlextLdifModels
 
 # Type aliases for cleaner code
 FlextLdifAttributes = FlextLdifModels.LdifAttributes
