@@ -449,7 +449,9 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
             try:
                 # Build server URI from config
                 protocol = "ldaps" if config.connection.use_ssl else "ldap"
-                server_uri = f"{protocol}://{config.connection.server}:{config.connection.port}"
+                server_uri = (
+                    f"{protocol}://{config.connection.server}:{config.connection.port}"
+                )
 
                 # Use flext-ldap API instead of direct ldap3
                 connect_result = await flext_api.connect(
