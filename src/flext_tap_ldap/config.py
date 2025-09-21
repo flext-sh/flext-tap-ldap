@@ -8,10 +8,7 @@ from __future__ import annotations
 from pydantic import Field, field_validator
 from pydantic_settings import SettingsConfigDict
 
-from flext_core import FlextModels, FlextResult, FlextTypes
-
-# Constants
-MAX_PORT = 65535
+from flext_core import FlextConstants, FlextModels, FlextResult, FlextTypes
 
 
 class LDAPConnectionConfig(FlextModels.Config):
@@ -21,8 +18,10 @@ class LDAPConnectionConfig(FlextModels.Config):
         """Validate LDAP connection configuration."""
         if not self.host:
             return FlextResult[None].fail("Host is required")
-        if self.port <= 0 or self.port > MAX_PORT:
-            return FlextResult[None].fail(f"Port must be between 1 and {MAX_PORT}")
+        if self.port <= 0 or self.port > FlextConstants.Network.MAX_PORT:
+            return FlextResult[None].fail(
+                f"Port must be between 1 and {FlextConstants.Network.MAX_PORT}"
+            )
         if self.timeout <= 0:
             return FlextResult[None].fail("Timeout must be positive")
         if self.page_size <= 0:
@@ -30,15 +29,26 @@ class LDAPConnectionConfig(FlextModels.Config):
         return FlextResult[None].ok(None)
 
     host: str = Field(description="LDAP server host")
-    port: int = Field(default=389, description="LDAP server port")
+    port: int = Field(
+        default=389, description="LDAP server port"
+    )  # Keep LDAP-specific port
     use_ssl: bool = Field(default=False, description="Use SSL connection")
     use_tls: bool = Field(default=False, description="Use TLS connection")
     bind_dn: str | None = Field(default=None, description="Bind DN for authentication")
     bind_password: str | None = Field(default=None, description="Bind password")
     base_dn: str = Field(default="", description="Base DN for searches")
-    timeout: int = Field(default=30, description="Connection timeout in seconds")
-    page_size: int = Field(default=1000, description="LDAP search page size")
-    max_retries: int = Field(default=3, description="Maximum connection retries")
+    timeout: int = Field(
+        default=FlextConstants.Network.DEFAULT_TIMEOUT,
+        description="Connection timeout in seconds",
+    )
+    page_size: int = Field(
+        default=FlextConstants.Defaults.PAGE_SIZE * 10,
+        description="LDAP search page size",
+    )
+    max_retries: int = Field(
+        default=FlextConstants.Reliability.MAX_RETRY_ATTEMPTS,
+        description="Maximum connection retries",
+    )
 
 
 class CustomStreamConfig(FlextModels.Config):
