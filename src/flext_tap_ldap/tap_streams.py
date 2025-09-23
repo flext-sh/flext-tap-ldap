@@ -16,16 +16,25 @@ from itertools import starmap
 from pathlib import Path
 
 from singer_sdk import Stream
+from singer_sdk.typing import (
+    ArrayType,
+    BooleanType,
+    IntegerType,
+    NumberType,
+    ObjectType,
+    PropertiesList,
+    Property,
+    StringType,
+)
 
 from flext_core import FlextLogger, FlextTypes
 from flext_ldap import FlextLdapClient
 from flext_ldif import FlextLdifAPI, FlextLdifModels
-from flext_meltano import FlextSingerTypes
 from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.tap import FlextTapLDAP
 
-# Create FlextSingerTypes instance for schema definitions
-th = FlextSingerTypes()
+# Use Singer SDK types directly for schema definitions
+th = None  # Not needed anymore, using direct imports
 
 logger = FlextLogger(__name__)
 
@@ -167,7 +176,7 @@ class LDAPBaseStream(Stream):
 
     def get_records(
         self,
-        _context: Mapping[str, object] | None = None,
+        context: Mapping[str, object] | None = None,
     ) -> Iterable[FlextTypes.Core.Dict]:
         """Get records from LDAP - base implementation."""
         # This is a base implementation that yields empty records
@@ -191,7 +200,7 @@ class LDAPBaseStream(Stream):
                 base_dn = connection_config.get("base_dn", "")
 
             results = self.client.search(
-                base_dn=base_dn,
+                base_dn=base_dn or "",
                 search_filter=search_filter,
                 attributes=attributes,
                 scope="SUBTREE",
@@ -218,38 +227,20 @@ class UsersStream(LDAPBaseStream):
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize users stream."""
         name = "users"
-        schema = th.PropertiesList(
-            th.Property("dn", th.StringType, description="Distinguished Name"),
-            th.Property("uid", th.StringType, description="User ID"),
-            th.Property("cn", th.StringType, description="Common Name"),
-            th.Property("sn", th.StringType, description="Surname"),
-            th.Property("givenName", th.StringType, description="Given Name"),
-            th.Property("displayName", th.StringType, description="Display Name"),
-            th.Property("mail", th.StringType, description="Email Address"),
-            th.Property("telephoneNumber", th.StringType, description="Phone Number"),
-            th.Property("mobile", th.StringType, description="Mobile Number"),
-            th.Property("employeeNumber", th.StringType, description="Employee Number"),
-            th.Property("employeeType", th.StringType, description="Employee Type"),
-            th.Property("department", th.StringType, description="Department"),
-            th.Property("title", th.StringType, description="Job Title"),
-            th.Property("manager", th.StringType, description="Manager DN"),
-            th.Property("homeDirectory", th.StringType, description="Home Directory"),
-            th.Property("loginShell", th.StringType, description="Login Shell"),
-            th.Property("userPassword", th.StringType, description="User Password"),
-            th.Property(
+        schema: dict[str, object] = PropertiesList(
+            Property(
                 "objectClass",
-                th.ArrayType(th.StringType),
+                ArrayType(StringType),
                 description="Object Classes",
             ),
-            th.Property(
+            Property(
                 "memberOf",
-                th.ArrayType(th.StringType),
+                ArrayType(StringType),
                 description="Group Memberships",
             ),
-            th.Property("createTimestamp", th.StringType, description="Creation Time"),
-            th.Property(
+            Property(
                 "modifyTimestamp",
-                th.StringType,
+                StringType,
                 description="Modification Time",
             ),
         ).to_dict()
@@ -259,7 +250,7 @@ class UsersStream(LDAPBaseStream):
 
     def get_records(
         self,
-        _context: Mapping[str, object] | None = None,
+        context: Mapping[str, object] | None = None,
     ) -> Iterable[FlextTypes.Core.Dict]:
         """Get user records from LDAP."""
         logger.info("Extracting LDAP users")
@@ -303,31 +294,25 @@ class GroupsStream(LDAPBaseStream):
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize groups stream."""
         name = "groups"
-        schema = th.PropertiesList(
-            th.Property("dn", th.StringType, description="Distinguished Name"),
-            th.Property("cn", th.StringType, description="Group Name"),
-            th.Property("description", th.StringType, description="Group Description"),
-            th.Property(
+        schema: dict[str, object] = PropertiesList(
+            Property(
                 "member",
-                th.ArrayType(th.StringType),
+                ArrayType(StringType),
                 description="Group Members",
             ),
-            th.Property(
+            Property(
                 "uniqueMember",
-                th.ArrayType(th.StringType),
+                ArrayType(StringType),
                 description="Unique Members",
             ),
-            th.Property("gidNumber", th.StringType, description="Group ID Number"),
-            th.Property("owner", th.StringType, description="Group Owner"),
-            th.Property(
+            Property(
                 "objectClass",
-                th.ArrayType(th.StringType),
+                ArrayType(StringType),
                 description="Object Classes",
             ),
-            th.Property("createTimestamp", th.StringType, description="Creation Time"),
-            th.Property(
+            Property(
                 "modifyTimestamp",
-                th.StringType,
+                StringType,
                 description="Modification Time",
             ),
         ).to_dict()
@@ -337,7 +322,7 @@ class GroupsStream(LDAPBaseStream):
 
     def get_records(
         self,
-        _context: Mapping[str, object] | None = None,
+        context: Mapping[str, object] | None = None,
     ) -> Iterable[FlextTypes.Core.Dict]:
         """Get group records from LDAP."""
         logger.info("Extracting LDAP groups")
@@ -370,19 +355,15 @@ class OrganizationalUnitsStream(LDAPBaseStream):
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize organizational units stream."""
         name = "organizational_units"
-        schema = th.PropertiesList(
-            th.Property("dn", th.StringType, description="Distinguished Name"),
-            th.Property("ou", th.StringType, description="Organizational Unit Name"),
-            th.Property("description", th.StringType, description="Description"),
-            th.Property(
+        schema: dict[str, object] = PropertiesList(
+            Property(
                 "objectClass",
-                th.ArrayType(th.StringType),
+                ArrayType(StringType),
                 description="Object Classes",
             ),
-            th.Property("createTimestamp", th.StringType, description="Creation Time"),
-            th.Property(
+            Property(
                 "modifyTimestamp",
-                th.StringType,
+                StringType,
                 description="Modification Time",
             ),
         ).to_dict()
@@ -392,7 +373,7 @@ class OrganizationalUnitsStream(LDAPBaseStream):
 
     def get_records(
         self,
-        _context: Mapping[str, object] | None = None,
+        context: Mapping[str, object] | None = None,
     ) -> Iterable[FlextTypes.Core.Dict]:
         """Get organizational unit records from LDAP."""
         logger.info("Extracting LDAP organizational units")
@@ -421,32 +402,30 @@ class SchemaStream(LDAPBaseStream):
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize schema stream."""
         name = "schema"
-        schema = th.PropertiesList(
-            th.Property("dn", th.StringType, description="Distinguished Name"),
-            th.Property("cn", th.StringType, description="Common Name"),
-            th.Property(
+        schema: dict[str, object] = PropertiesList(
+            Property(
                 "objectClass",
-                th.ArrayType(th.StringType),
+                ArrayType(StringType),
                 description="Object Classes",
             ),
-            th.Property(
+            Property(
                 "objectClasses",
-                th.ArrayType(th.StringType),
+                ArrayType(StringType),
                 description="Available Object Classes",
             ),
-            th.Property(
+            Property(
                 "attributeTypes",
-                th.ArrayType(th.StringType),
+                ArrayType(StringType),
                 description="Available Attribute Types",
             ),
-            th.Property(
+            Property(
                 "ldapSyntaxes",
-                th.ArrayType(th.StringType),
+                ArrayType(StringType),
                 description="LDAP Syntaxes",
             ),
-            th.Property(
+            Property(
                 "modifyTimestamp",
-                th.StringType,
+                StringType,
                 description="Modification Time",
             ),
         ).to_dict()
@@ -456,7 +435,7 @@ class SchemaStream(LDAPBaseStream):
 
     def get_records(
         self,
-        _context: Mapping[str, object] | None = None,
+        context: Mapping[str, object] | None = None,
     ) -> Iterable[FlextTypes.Core.Dict]:
         """Get schema records from LDAP."""
         logger.info("Extracting LDAP schema")
@@ -510,38 +489,38 @@ class CustomStream(LDAPBaseStream):
                 prop_type = str(definition.get("type", "string"))
                 prop_desc = str(definition.get("description", f"{name} field"))
                 if prop_type == "integer":
-                    return th.Property(name, th.IntegerType, description=prop_desc)
+                    return Property(name, IntegerType, description=prop_desc)
                 if prop_type == "number":
-                    return th.Property(name, th.NumberType, description=prop_desc)
+                    return Property(name, NumberType, description=prop_desc)
                 if prop_type == "boolean":
-                    return th.Property(name, th.BooleanType, description=prop_desc)
+                    return Property(name, BooleanType, description=prop_desc)
                 if prop_type == "array":
-                    return th.Property(
+                    return Property(
                         name,
-                        th.ArrayType(th.StringType),
+                        ArrayType(StringType),
                         description=prop_desc,
                     )
-                return th.Property(name, th.StringType, description=prop_desc)
+                return Property(name, StringType, description=prop_desc)
             # Fallback simple type
-            return th.Property(name, th.StringType, description=f"{name} field")
+            return Property(name, StringType, description=f"{name} field")
 
         # Build schema from parameters
         if params.schema_properties:
             schema_props = list(starmap(_map_prop, params.schema_properties.items()))
-            # Ensure all are th.Property
-            typed_props = [p for p in schema_props if isinstance(p, th.Property)]
-            schema = th.PropertiesList(*typed_props).to_dict()
+            # Ensure all are Property
+            typed_props = [p for p in schema_props if isinstance(p, Property)]
+            schema = PropertiesList(*typed_props).to_dict()
         else:
-            schema = th.PropertiesList(
-                th.Property("dn", th.StringType, description="Distinguished Name"),
-                th.Property(
+            schema = PropertiesList(
+                Property("dn", StringType, description="Distinguished Name"),
+                Property(
                     "objectClass",
-                    th.ArrayType(th.StringType),
+                    ArrayType(StringType),
                     description="Object Classes",
                 ),
-                th.Property(
+                Property(
                     "modifyTimestamp",
-                    th.StringType,
+                    StringType,
                     description="Modification Time",
                 ),
             ).to_dict()
@@ -552,7 +531,7 @@ class CustomStream(LDAPBaseStream):
 
     def get_records(
         self,
-        _context: Mapping[str, object] | None = None,
+        context: Mapping[str, object] | None = None,
     ) -> Iterable[FlextTypes.Core.Dict]:
         """Get records using custom filter."""
         logger.info(f"Extracting LDAP records for custom stream: {self.params.name}")
@@ -593,27 +572,25 @@ class LDIFStream(Stream):
         self._ldap_api = FlextLdapClient()
 
         # Define schema
-        schema = th.PropertiesList(
-            th.Property("dn", th.StringType, description="Distinguished Name"),
-            th.Property(
+        schema: dict[str, object] = PropertiesList(
+            Property(
                 "entry_type",
-                th.StringType,
+                StringType,
                 description="Entry type classification",
             ),
-            th.Property(
+            Property(
                 "objectClass",
-                th.ArrayType(th.StringType),
+                ArrayType(StringType),
                 description="Object classes",
             ),
-            th.Property(
+            Property(
                 "attributes",
-                th.ObjectType(),
+                ObjectType(),
                 description="Entry attributes",
             ),
-            th.Property("source_file", th.StringType, description="Source LDIF file"),
-            th.Property(
+            Property(
                 "line_number",
-                th.IntegerType,
+                IntegerType,
                 description="Line number in file",
             ),
         ).to_dict()
@@ -635,7 +612,7 @@ class LDIFStream(Stream):
 
     def get_records(
         self,
-        _context: Mapping[str, object] | None = None,
+        context: Mapping[str, object] | None = None,
     ) -> Iterable[FlextTypes.Core.Dict]:
         """Get LDIF records using flext-ldif processing."""
         logger.info("Processing LDIF files using flext-ldif library")
@@ -661,15 +638,15 @@ class LDIFStream(Stream):
             logger.info(f"Processing LDIF file: {file_path}")
 
             # Use flext-ldif to parse the file
-            parse_result = self._ldif_api.parse_file(file_path)
+            parse_result = self._ldif_api.parse_ldif_file(file_path)
 
-            if not parse_result.success or not parse_result.data:
+            if not parse_result.success or not parse_result.value:
                 logger.warning(
                     f"Failed to parse LDIF file {file_path}: {parse_result.error}",
                 )
                 return
 
-            entries = parse_result.data
+            entries = parse_result.value
             logger.info(f"Found {len(entries)} entries in {file_path}")
 
             for entry in entries:
@@ -695,14 +672,14 @@ class LDIFStream(Stream):
         """Convert LDIF entry to stream record."""
         try:
             # Classify entry type by object classes
-            object_classes = entry.attributes.get_values("objectClass")
+            object_classes = entry.get_attribute("objectClass") or []
             entry_type = self._classify_entry_type(object_classes)
 
             return {
-                "dn": entry.dn.value,
+                "dn": str(entry.dn),
                 "entry_type": entry_type,
                 "objectClass": object_classes,
-                "attributes": entry.attributes.attributes,
+                "attributes": entry.attributes,
                 "source_file": source_file,
                 "line_number": 0,
             }
@@ -726,57 +703,55 @@ class LDIFAnalysisStream(Stream):
         self._ldif_api = FlextLdifAPI()
 
         # Define schema for analysis results
-        schema = th.PropertiesList(
-            th.Property("file_path", th.StringType, description="LDIF file path"),
-            th.Property(
+        schema: dict[str, object] = PropertiesList(
+            Property(
                 "total_entries",
-                th.IntegerType,
+                IntegerType,
                 description="Total entries in file",
             ),
-            th.Property(
+            Property(
                 "valid_entries",
-                th.IntegerType,
+                IntegerType,
                 description="Valid entries count",
             ),
-            th.Property(
+            Property(
                 "invalid_entries",
-                th.IntegerType,
+                IntegerType,
                 description="Invalid entries count",
             ),
-            th.Property(
+            Property(
                 "user_entries",
-                th.IntegerType,
+                IntegerType,
                 description="User entries count",
             ),
-            th.Property(
+            Property(
                 "group_entries",
-                th.IntegerType,
+                IntegerType,
                 description="Group entries count",
             ),
-            th.Property("ou_entries", th.IntegerType, description="OU entries count"),
-            th.Property(
+            Property(
                 "other_entries",
-                th.IntegerType,
+                IntegerType,
                 description="Other entries count",
             ),
-            th.Property(
+            Property(
                 "object_class_distribution",
-                th.ObjectType(),
+                ObjectType(),
                 description="Object class distribution",
             ),
-            th.Property(
+            Property(
                 "file_size_bytes",
-                th.IntegerType,
+                IntegerType,
                 description="File size in bytes",
             ),
-            th.Property(
+            Property(
                 "processing_time_seconds",
-                th.NumberType,
+                NumberType,
                 description="Processing time",
             ),
-            th.Property(
+            Property(
                 "errors",
-                th.ArrayType(th.StringType),
+                ArrayType(StringType),
                 description="Processing errors",
             ),
         ).to_dict()
@@ -785,7 +760,7 @@ class LDIFAnalysisStream(Stream):
 
     def get_records(
         self,
-        _context: Mapping[str, object] | None = None,
+        context: Mapping[str, object] | None = None,
     ) -> Iterable[FlextTypes.Core.Dict]:
         """Get LDIF analysis records."""
         logger.info("Analyzing LDIF files")
@@ -835,8 +810,8 @@ class LDIFAnalysisStream(Stream):
                 "errors": [],
             }
 
-            if validation_result.success and validation_result.data:
-                entries = validation_result.data
+            if validation_result.success and validation_result.value:
+                entries = validation_result.value
                 analysis_data.update(
                     {
                         "total_entries": len(entries),
