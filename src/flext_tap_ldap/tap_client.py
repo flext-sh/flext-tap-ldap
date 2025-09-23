@@ -18,13 +18,13 @@ from datetime import UTC, datetime
 
 from flext_core import (
     FlextContainer,
-    FlextDomainService,
     FlextLogger,
     FlextResult,
+    FlextService,
     FlextTypes,
 )
 from flext_ldap import (
-    FlextLdapApi,
+    FlextLdapClient,
     FlextLdapEntities,
     FlextLdapModels,
 )
@@ -138,7 +138,7 @@ class LDAPClient:
         )
 
         # Initialize the real flext-ldap API
-        self._flext_api = FlextLdapApi()
+        self._flext_api = FlextLdapClient()
         self._config = flext_config
 
         # Store for testing convenience - these are what tests expect
@@ -421,7 +421,7 @@ class LDAPClient:
         return getattr(self._flext_api, name)
 
 
-class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
+class FlextTapLDAP(FlextService[TapLDAPConfig]):
     """LDAP Tap Client for extracting data from LDAP directories.
 
     Unified class implementing LDAP data extraction using Singer spec.
@@ -433,7 +433,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
         super().__init__()
         self._container = FlextContainer.get_global()
         self._logger = FlextLogger(__name__)
-        self._flext_api = FlextLdapApi()
+        self._flext_api = FlextLdapClient()
         self._session_id: str | None = None  # Use session_id instead of raw connection
         self._schema_cache: dict[str, FlextTypes.Core.Dict] = {}
 
@@ -442,7 +442,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
         @staticmethod
         async def create_connection(
-            flext_api: FlextLdapApi,
+            flext_api: FlextLdapClient,
             config: TapLDAPConfig,
         ) -> FlextResult[str]:
             """Create and test LDAP connection using flext-ldap API (ZERO TOLERANCE COMPLIANCE)."""
@@ -472,7 +472,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
         @staticmethod
         async def validate_search_base(
-            flext_api: FlextLdapApi,
+            flext_api: FlextLdapClient,
             _session_id: str,
             search_base: str,
         ) -> FlextResult[bool]:
@@ -502,7 +502,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
         @staticmethod
         async def discover_schema(
-            flext_api: FlextLdapApi,
+            flext_api: FlextLdapClient,
             _session_id: str,
             search_base: str,
         ) -> FlextResult[FlextTypes.Core.Dict]:
@@ -560,7 +560,7 @@ class FlextTapLDAP(FlextDomainService[TapLDAPConfig]):
 
         @staticmethod
         async def extract_entries(
-            flext_api: FlextLdapApi,
+            flext_api: FlextLdapClient,
             _session_id: str,
             config: TapLDAPConfig,
         ) -> FlextResult[list[FlextTypes.Core.Dict]]:
