@@ -9,7 +9,7 @@ from dataclasses import dataclass
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import (
-    FlextLdapApi,
+    FlextLdapClient,
     FlextLdapEntities,
     FlextLdapModels,
 )
@@ -121,7 +121,7 @@ class LDAPClient:
         )
 
         # Initialize the real flext-ldap API
-        self._flext_api = FlextLdapApi()
+        self._flext_api = FlextLdapClient()
         self._config = flext_config
 
         # Store for testing convenience - these are what tests expect

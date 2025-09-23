@@ -18,7 +18,7 @@ from pathlib import Path
 from singer_sdk import Stream
 
 from flext_core import FlextLogger, FlextTypes
-from flext_ldap import FlextLdapApi
+from flext_ldap import FlextLdapClient
 from flext_ldif import FlextLdifAPI, FlextLdifModels
 from flext_meltano import FlextSingerTypes
 from flext_tap_ldap.client import LDAPClient
@@ -590,7 +590,7 @@ class LDIFStream(Stream):
 
         # Initialize flext-ldif API for processing
         self._ldif_api = FlextLdifAPI()
-        self._ldap_api = FlextLdapApi()
+        self._ldap_api = FlextLdapClient()
 
         # Define schema
         schema = th.PropertiesList(

@@ -9,7 +9,7 @@ from flext_meltano.singer_types import FlextSingerTypes
 from singer_sdk import Stream
 
 from flext_core import FlextLogger, FlextTypes
-from flext_ldap import FlextLdapApi
+from flext_ldap import FlextLdapClient
 from flext_ldif import FlextLdifAPI, FlextLdifModels
 from flext_tap_ldap.tap import FlextTapLDAP
 
@@ -31,7 +31,7 @@ class LDIFStream(Stream):
         self.tap = tap
         # Initialize flext-ldif API for processing
         self._ldif_api = FlextLdifAPI()
-        self._ldap_api = FlextLdapApi()
+        self._ldap_api = FlextLdapClient()
         # Define schema
         schema = th.PropertiesList(
             th.Property("dn", th.StringType, description="Distinguished Name"),
@@ -127,7 +127,7 @@ class LDIFAnalysisStream(Stream):
         self.tap = tap
         # Initialize flext-ldif API for analysis
         self._ldif_api = FlextLdifAPI()
-        self._ldap_api = FlextLdapApi()
+        self._ldap_api = FlextLdapClient()
         # Define schema
         schema = th.PropertiesList(
             th.Property(
