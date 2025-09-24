@@ -27,8 +27,7 @@ from flext_core import (
 )
 from flext_meltano import FlextSingerTypes
 from flext_tap_ldap.client import LDAPClient
-
-# from flext_tap_ldap.tap import FlextTapLDAP  # Circular import - removed
+from flext_tap_ldap.tap_client import FlextTapLDAP
 
 th = FlextSingerTypes()
 
@@ -78,7 +77,7 @@ class CustomStreamParams:
     primary_keys: FlextTypes.Core.StringList | None = None
     replication_key: str | None = None
 
-    def __post_init__(self) -> None:
+    def __post_init__(self: object) -> None:
         """Validate custom stream parameters after initialization."""
         if not self.name:
             msg = "Stream name is required"
@@ -168,7 +167,7 @@ class UsersStream(LDAPBaseStream):
         """Get user records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
-            config = self.tap.config
+            config: dict[str, object] = self.tap.config
 
             # Create LDAP client with configuration
             ldap_client = LDAPClient(
@@ -241,7 +240,7 @@ class GroupsStream(LDAPBaseStream):
         """Get group records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
-            config = self.tap.config
+            config: dict[str, object] = self.tap.config
 
             # Create LDAP client with configuration
             ldap_client = LDAPClient(
@@ -336,7 +335,7 @@ class OrganizationalUnitsStream(LDAPBaseStream):
         """Get organizational unit records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
-            config = self.tap.config
+            config: dict[str, object] = self.tap.config
 
             # Create LDAP client with configuration
             ldap_client = LDAPClient(
@@ -424,7 +423,7 @@ class SchemaStream(LDAPBaseStream):
         """Get schema records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
-            config = self.tap.config
+            config: dict[str, object] = self.tap.config
 
             # Create LDAP client with configuration
             ldap_client = LDAPClient(
@@ -450,7 +449,7 @@ class SchemaStream(LDAPBaseStream):
             if schemas:  # If we got real LDAP schema data
                 for schema_entry in schemas:
                     # Parse attributeTypes from schema
-                    attr_types = schema_entry.get("attributeTypes", [])
+                    attr_types: list[object] = schema_entry.get("attributeTypes", [])
                     if isinstance(attr_types, list):
                         for attr_type in attr_types:
                             # Basic parsing - real implementation would parse LDAP schema syntax
@@ -537,7 +536,7 @@ class CustomStream(LDAPBaseStream):
                 )
 
         # Set schema using internal attribute BEFORE calling super().__init__()
-        schema_dict = PropertiesList(*properties).to_dict()
+        schema_dict: dict[str, object] = PropertiesList(*properties).to_dict()
         # Now call super().__init__()
         super().__init__(tap=tap, name=params.name, schema=schema_dict)
 
@@ -548,7 +547,7 @@ class CustomStream(LDAPBaseStream):
         """Get custom records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
-            config = self.tap.config
+            config: dict[str, object] = self.tap.config
 
             # Create LDAP client with configuration
             ldap_client = LDAPClient(
@@ -585,7 +584,7 @@ class CustomStream(LDAPBaseStream):
                 logger.info("No LDAP custom data returned, using fallback test data")
                 # Fallback to minimal test data for development
                 try:
-                    config = self.tap.config
+                    config: dict[str, object] = self.tap.config
                     base_dn = config["base_dn"]
                 except Exception:
                     base_dn = "dc=example,dc=com"
@@ -599,7 +598,7 @@ class CustomStream(LDAPBaseStream):
             logger.exception("Failed to get custom stream records")
             # Fallback to minimal test data for development
             try:
-                config = self.tap.config
+                config: dict[str, object] = self.tap.config
                 base_dn = config["base_dn"]
             except Exception:
                 base_dn = "dc=example,dc=com"

@@ -137,7 +137,7 @@ class LDIFConfigBuilder:
         self.migration_batch = batch_name
         return self
 
-    def build(self) -> FlextResult[LDIFProcessingConfig]:
+    def build(self: object) -> FlextResult[LDIFProcessingConfig]:
         """Build the LDIF processing configuration."""
         try:
             return FlextResult[LDIFProcessingConfig].ok(
@@ -174,7 +174,7 @@ def setup_ldap_tap(config: TapLDAPConfig | None = None) -> FlextResult[TapLDAPCo
     try:
         if config is None:
             # Create with intelligent defaults
-            config = TapLDAPConfig.create_with_defaults()
+            config: dict[str, object] = TapLDAPConfig.create_with_defaults()
 
         # Validate configuration
         config.model_validate(config.model_dump())
@@ -198,7 +198,7 @@ def create_ldap_connection_config(
 
     """
     try:
-        config = LDAPConnectionConfig(
+        config: dict[str, object] = LDAPConnectionConfig(
             host=params.host,
             base_dn=params.base_dn,
             port=params.port,
@@ -301,7 +301,7 @@ def create_ldif_processing_config(
         default=False,
     )
     rules = kwargs.get("ldif_transformation_rules")
-    rules_dict = rules if isinstance(rules, dict) else None
+    rules_dict: dict[str, object] = rules if isinstance(rules, dict) else None
     builder.with_transformations(enable=apply_transformations, rules=rules_dict)
 
     batch = _coerce_str_optional(kwargs.get("migration_batch"))
@@ -391,7 +391,7 @@ def create_development_ldap_config(**overrides: object) -> FlextResult[TapLDAPCo
             base_dn="dc=example,dc=com",
         )
 
-        config = TapLDAPConfig(
+        config: dict[str, object] = TapLDAPConfig(
             connection=connection_config,
             ldif_processing=LDIFProcessingConfig(enable_ldif_streams=False),
             project_name="flext-data.taps.flext-tap-ldap",
@@ -400,9 +400,9 @@ def create_development_ldap_config(**overrides: object) -> FlextResult[TapLDAPCo
 
         # Apply overrides
         if overrides:
-            config_dict = config.model_dump()
+            config_dict: dict[str, object] = config.model_dump()
             config_dict.update(overrides)
-            config = TapLDAPConfig(**config_dict)
+            config: dict[str, object] = TapLDAPConfig(**config_dict)
 
         return FlextResult[TapLDAPConfig].ok(config)
 
@@ -432,7 +432,7 @@ def create_production_ldap_config(**overrides: object) -> FlextResult[TapLDAPCon
             base_dn="dc=company,dc=com",
         )
 
-        config = TapLDAPConfig(
+        config: dict[str, object] = TapLDAPConfig(
             connection=connection_config,
             ldif_processing=LDIFProcessingConfig(
                 enable_ldif_streams=False,
@@ -445,9 +445,9 @@ def create_production_ldap_config(**overrides: object) -> FlextResult[TapLDAPCon
 
         # Apply overrides
         if overrides:
-            config_dict = config.model_dump()
+            config_dict: dict[str, object] = config.model_dump()
             config_dict.update(overrides)
-            config = TapLDAPConfig(**config_dict)
+            config: dict[str, object] = TapLDAPConfig(**config_dict)
 
         return FlextResult[TapLDAPConfig].ok(config)
 
@@ -491,7 +491,7 @@ def create_ldif_processing_config_advanced(
             ldif_apply_transformations=False,
         )
 
-        config = TapLDAPConfig(
+        config: dict[str, object] = TapLDAPConfig(
             connection=connection_config,
             ldif_processing=ldif_config,
             project_name="flext-data.taps.flext-tap-ldap",
@@ -500,9 +500,9 @@ def create_ldif_processing_config_advanced(
 
         # Apply overrides
         if overrides:
-            config_dict = config.model_dump()
+            config_dict: dict[str, object] = config.model_dump()
             config_dict.update(overrides)
-            config = TapLDAPConfig(**config_dict)
+            config: dict[str, object] = TapLDAPConfig(**config_dict)
 
         return FlextResult[TapLDAPConfig].ok(config)
 

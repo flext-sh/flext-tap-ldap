@@ -36,7 +36,7 @@ class CustomStreamConfig(FlextModels.ArbitraryTypesModel):
         description="JSON schema for the stream",
     )
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate business rules for custom streams."""
         if not self.name or not self.search_filter:
             return FlextResult[None].fail(
@@ -95,7 +95,7 @@ class LDIFProcessingConfig(FlextModels.ArbitraryTypesModel):
         description="Enable LDIF processing streams",
     )
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate business rules for LDIF processing."""
         if self.ldif_files and self.ldif_directory:
             return FlextResult[None].fail(
@@ -213,7 +213,9 @@ class TapLDAPConfig(FlextModels.ArbitraryTypesModel):
                     )
 
                     # Validate business rules
-                    validation_result = config_obj.validate_business_rules()
+                    validation_result: FlextResult[object] = (
+                        config_obj.validate_business_rules()
+                    )
 
                     if not validation_result.success:
                         error_text = validation_result.error or "Unknown error"
@@ -230,7 +232,7 @@ class TapLDAPConfig(FlextModels.ArbitraryTypesModel):
                 raise ValueError(combined)
         return v
 
-    def validate_complete_config(self) -> FlextResult[None]:
+    def validate_complete_config(self: object) -> FlextResult[None]:
         """Validate the complete configuration with business rules."""
         try:
             # Validate LDIF processing config

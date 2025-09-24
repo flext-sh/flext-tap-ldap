@@ -72,13 +72,13 @@ class LDAPAttribute(FlextModels.Value):
         description="Whether the attribute contains binary data",
     )
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate business rules for LDAP attributes."""
         # LDAP attributes can have any name and values
         return FlextResult[None].ok(None)
 
     @property
-    def single_value(self) -> str | None:
+    def single_value(self: object) -> str | None:
         """Get first value if exists, None otherwise.
 
         Returns:
@@ -88,7 +88,7 @@ class LDAPAttribute(FlextModels.Value):
         return self.values[0] if self.values else None
 
     @property
-    def is_multi_valued(self) -> bool:
+    def is_multi_valued(self: object) -> bool:
         """Check if attribute has multiple values.
 
         Returns:
@@ -107,7 +107,7 @@ class LDAPEntry(FlextModels.Entity):
         description="Object classes",
     )
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate business rules for LDAP entries."""
         if not self.dn:
             return FlextResult[None].fail("DN cannot be empty")
@@ -163,7 +163,7 @@ class LDAPEntry(FlextModels.Entity):
         """
         return any(oc.lower() == object_class.lower() for oc in self.object_classes)
 
-    def to_dict(self) -> FlextTypes.Core.Dict:
+    def to_dict(self: object) -> FlextTypes.Core.Dict:
         """Convert entry to dictionary format.
 
         Returns:
@@ -334,13 +334,13 @@ class LDAPSchema(FlextModels.Value):
         description="Naming contexts",
     )
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate business rules for LDAP schema."""
         # Schema validation rules can be added here
         return FlextResult[None].ok(None)
 
     @property
-    def has_oracle_extensions(self) -> bool:
+    def has_oracle_extensions(self: object) -> bool:
         """Check if schema contains Oracle-specific extensions.
 
         Returns:

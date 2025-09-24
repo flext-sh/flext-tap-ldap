@@ -48,7 +48,7 @@ class LDAPClient:
         """Initialize with Parameter Object Pattern (preferred) or testing convenience interface.
 
         Preferred Usage (Parameter Object Pattern):
-            config = LDAPClientConfig(host="ldap.example.com", port=389)
+            config: dict[str, object] = LDAPClientConfig(host="ldap.example.com", port=389)
             client = LDAPClient(config=config)
 
         Testing convenience Usage (for testing convenience):
@@ -57,7 +57,7 @@ class LDAPClient:
         # Support both new Parameter Object Pattern and testing convenience
         if config is not None:
             # New way: Parameter Object Pattern (SOLID)
-            client_config = config
+            client_config: dict[str, object] = config
         else:
             # Testing convenience: create config from individual parameters
             raw_host = convenience_kwargs.get("host")
@@ -137,7 +137,7 @@ class LDAPClient:
         self._password = client_config.password  # Tests expect _password attribute
 
     @property
-    def server_uri(self) -> str:
+    def server_uri(self: object) -> str:
         """Get server URI for testing convenience."""
         protocol = "ldaps" if self.use_ssl else "ldap"
         return f"{protocol}://{self.host}:{self.port}"
@@ -154,7 +154,7 @@ class LDAPClient:
         }
         return scope_map.get(scope.upper(), "SUBTREE")
 
-    def _build_server_uri(self) -> str:
+    def _build_server_uri(self: object) -> str:
         """Build server URI from connection parameters.
 
         Single Responsibility: Handle only URI construction.
@@ -179,7 +179,7 @@ class LDAPClient:
             # It's a FlextLdapModels.Entry model object - flatten attributes
             # Use getattr to safely access attributes for type checker
             dn = getattr(entry_data, "dn", "")
-            attributes = getattr(entry_data, "attributes", {})
+            attributes: dict[str, object] = getattr(entry_data, "attributes", {})
             entry_dict = {"dn": dn}
             # Add flattened attributes to the entry dict
             for attr_name, attr_values in attributes.items():
@@ -215,7 +215,7 @@ class LDAPClient:
             if size_limit > 0 and entries_returned >= size_limit:
                 break
 
-            entry_dict = self._convert_entry_to_dict(entry_data)
+            entry_dict: dict[str, object] = self._convert_entry_to_dict(entry_data)
             entries.append(entry_dict)
 
         return entries
@@ -252,7 +252,9 @@ class LDAPClient:
                     size_limit=size_limit,
                     time_limit=30,
                 )
-                result = await self._flext_api.search(search_request)
+                result: FlextResult[object] = await self._flext_api.search(
+                    search_request
+                )
 
                 return self._process_search_results(result, size_limit)
 
@@ -319,7 +321,7 @@ class LDAPClient:
             # No event loop running, safe to create one
             return self._run_async_in_new_loop(search_coro)
 
-    def test_connection(self) -> bool:
+    def test_connection(self: object) -> bool:
         """Test the connection to the LDAP server for testing convenience."""
         try:
             # Use async context for connection test
@@ -344,7 +346,9 @@ class LDAPClient:
                             size_limit=1,
                             time_limit=5,
                         )
-                        result = await self._flext_api.search(test_search_request)
+                        result: FlextResult[object] = await self._flext_api.search(
+                            test_search_request
+                        )
                         return result.success
                 except (RuntimeError, ValueError, TypeError) as e:
                     async_logger = FlextLogger(__name__)
@@ -407,10 +411,10 @@ class LDAPClient:
             # Required for Singer protocol compliance - NOT security-sensitive data generation
             return True
 
-    def health_check(self) -> FlextTypes.Core.Dict:
+    def health_check(self: object) -> FlextTypes.Core.Dict:
         """Perform health check for testing convenience."""
         start_time = time.time()
-        connection_result = self.test_connection()
+        connection_result: FlextResult[object] = self.test_connection()
         end_time = time.time()
 
         response_time_ms = round((end_time - start_time) * 1000, 2)
@@ -427,7 +431,7 @@ class LDAPClient:
         entry: FlextTypes.Core.Dict,
     ) -> FlextTypes.Core.Dict:
         """Process Oracle-specific LDAP entries for testing convenience."""
-        attributes = entry.get("attributes", {})
+        attributes: dict[str, object] = entry.get("attributes", {})
         if not isinstance(attributes, dict):
             return entry
 
@@ -494,7 +498,7 @@ class LDAPClient:
             if isinstance(entry, dict):
                 entry_dict = entry
             else:
-                entry_dict = self._convert_entry_to_dict(entry)
+                entry_dict: dict[str, object] = self._convert_entry_to_dict(entry)
             if oracle_oid_mode:
                 processed_entry = self._process_oracle_entry(entry_dict)
                 results.append(processed_entry)
@@ -518,7 +522,9 @@ class LDAPClient:
         asyncio.set_event_loop(loop)
         try:
             # Perform synchronous search using existing method
-            search_result = self.search(base_dn, search_filter, attributes)
+            search_result: FlextResult[object] = self.search(
+                base_dn, search_filter, attributes
+            )
             return self._process_search_results_with_oracle_support(
                 search_result,
                 oracle_oid_mode=oracle_oid_mode,

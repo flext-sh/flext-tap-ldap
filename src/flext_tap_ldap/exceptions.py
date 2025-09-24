@@ -48,7 +48,7 @@ class FlextTapLdapValidationError(FlextExceptions.BaseError):
     ) -> None:
         """Initialize LDAP tap validation error."""
         # Merge extra kwargs and field/value into context
-        merged_context = dict(context) if context else {}
+        merged_context: dict[str, object] = dict(context) if context else {}
         if field is not None:
             merged_context["field"] = field
         if value is not None:
@@ -76,7 +76,7 @@ class FlextTapLdapConfigurationError(FlextExceptions.BaseError):
     ) -> None:
         """Initialize LDAP tap configuration error."""
         # Merge extra kwargs into context
-        merged_context = dict(context) if context else {}
+        merged_context: dict[str, object] = dict(context) if context else {}
         merged_context.update(kwargs)
         super().__init__(
             message,
@@ -100,7 +100,7 @@ class FlextTapLdapProcessingError(FlextExceptions.BaseError):
     ) -> None:
         """Initialize LDAP tap processing error."""
         # Merge extra kwargs into context
-        merged_context = dict(context) if context else {}
+        merged_context: dict[str, object] = dict(context) if context else {}
         merged_context.update(kwargs)
         super().__init__(
             message,
@@ -124,7 +124,7 @@ class FlextTapLdapConnectionError(FlextExceptions.BaseError):
     ) -> None:
         """Initialize LDAP tap connection error."""
         # Merge extra kwargs into context
-        merged_context = dict(context) if context else {}
+        merged_context: dict[str, object] = dict(context) if context else {}
         merged_context.update(kwargs)
         super().__init__(
             message,
@@ -148,7 +148,7 @@ class FlextTapLdapAuthenticationError(FlextExceptions.BaseError):
     ) -> None:
         """Initialize LDAP tap authentication error."""
         # Merge extra kwargs into context
-        merged_context = dict(context) if context else {}
+        merged_context: dict[str, object] = dict(context) if context else {}
         merged_context.update(kwargs)
         super().__init__(
             message,
@@ -172,7 +172,7 @@ class FlextTapLdapTimeoutError(FlextExceptions.BaseError):
     ) -> None:
         # Merge extra kwargs into context
         """Initialize LDAP timeout error."""
-        merged_context = dict(context) if context else {}
+        merged_context: dict[str, object] = dict(context) if context else {}
         merged_context.update(kwargs)
         super().__init__(
             message,

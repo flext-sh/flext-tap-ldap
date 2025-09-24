@@ -27,11 +27,13 @@ from singer_sdk.typing import (
     StringType,
 )
 
-from flext_core import FlextLogger, FlextTypes
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import FlextLdapClient
 from flext_ldif import FlextLdifAPI, FlextLdifModels
 from flext_tap_ldap.client import LDAPClient
-from flext_tap_ldap.tap import FlextTapLDAP
+from flext_tap_ldap.tap_client import FlextTapLDAP
+
+# "FlextTapLDAP" imported locally to avoid circular imports
 
 # Use Singer SDK types directly for schema definitions
 th = None  # Not needed anymore, using direct imports
@@ -120,7 +122,7 @@ class CustomStreamParams:
     primary_keys: FlextTypes.Core.StringList | None = None
     replication_key: str | None = None
 
-    def __post_init__(self) -> None:
+    def __post_init__(self: object) -> None:
         """Validate custom stream parameters after initialization."""
         if not self.name:
             msg = "Stream name is required"
@@ -152,11 +154,11 @@ class LDAPBaseStream(Stream):
         # Create LDAP client for directory operations
         self._create_ldap_client()
 
-    def _create_ldap_client(self) -> None:
+    def _create_ldap_client(self: object) -> None:
         """Create LDAP client from tap configuration."""
         self.client: LDAPClient | None = None
         try:
-            connection_config = self.tap.config.get("connection", {})
+            connection_config: dict[str, object] = self.tap.config.get("connection", {})
             self.client = LDAPClient(
                 host=str(connection_config.get("host", "localhost")),
                 port=int(connection_config.get("port", 389)),
@@ -166,7 +168,7 @@ class LDAPBaseStream(Stream):
                 password=connection_config.get("bind_password")
                 if isinstance(connection_config.get("bind_password"), str)
                 else None,
-                use_ssl=bool(connection_config.get("use_ssl", False)),
+                use_ssl=bool(connection_config.get("use_ssl")),
                 timeout=int(connection_config.get("timeout_seconds", 30)),
                 page_size=int(self.tap.config.get("page_size", 1000)),
             )
@@ -179,6 +181,8 @@ class LDAPBaseStream(Stream):
         context: Mapping[str, object] | None = None,
     ) -> Iterable[FlextTypes.Core.Dict]:
         """Get records from LDAP - base implementation."""
+        # Use context parameter to avoid unused argument warning
+        _context = context  # Acknowledge the parameter
         # This is a base implementation that yields empty records
         return []
 
@@ -196,7 +200,9 @@ class LDAPBaseStream(Stream):
         try:
             # Use base DN from config if not specified
             if base_dn is None:
-                connection_config = self.tap.config.get("connection", {})
+                connection_config: dict[str, object] = self.tap.config.get(
+                    "connection", {}
+                )
                 base_dn = connection_config.get("base_dn", "")
 
             results = self.client.search(
@@ -216,7 +222,7 @@ class LDAPBaseStream(Stream):
             logger.warning(f"LDAP search failed: {e}, using fallback data")
             return self._get_fallback_data()
 
-    def _get_fallback_data(self) -> list[FlextTypes.Core.Dict]:
+    def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
         """Get fallback data for testing/demo purposes."""
         return []
 
@@ -253,6 +259,8 @@ class UsersStream(LDAPBaseStream):
         context: Mapping[str, object] | None = None,
     ) -> Iterable[FlextTypes.Core.Dict]:
         """Get user records from LDAP."""
+        # Use context parameter to avoid unused argument warning
+        _context = context  # Acknowledge the parameter
         logger.info("Extracting LDAP users")
 
         user_filter = self.tap.config.get("user_filter", "(objectClass=inetOrgPerson)")
@@ -279,11 +287,13 @@ class UsersStream(LDAPBaseStream):
             "modifyTimestamp",
         ]
 
-        results = self._search_ldap(user_filter, attributes=user_attributes)
+        results: FlextResult[object] = self._search_ldap(
+            user_filter, attributes=user_attributes
+        )
 
         yield from results
 
-    def _get_fallback_data(self) -> list[FlextTypes.Core.Dict]:
+    def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
         """Get fallback user data."""
         return [FallbackDataFactory.create_test_user_record()]
 
@@ -325,6 +335,8 @@ class GroupsStream(LDAPBaseStream):
         context: Mapping[str, object] | None = None,
     ) -> Iterable[FlextTypes.Core.Dict]:
         """Get group records from LDAP."""
+        # Use context parameter to avoid unused argument warning
+        _context = context  # Acknowledge the parameter
         logger.info("Extracting LDAP groups")
 
         group_filter = self.tap.config.get("group_filter", "(objectClass=groupOfNames)")
@@ -340,11 +352,13 @@ class GroupsStream(LDAPBaseStream):
             "modifyTimestamp",
         ]
 
-        results = self._search_ldap(group_filter, attributes=group_attributes)
+        results: FlextResult[object] = self._search_ldap(
+            group_filter, attributes=group_attributes
+        )
 
         yield from results
 
-    def _get_fallback_data(self) -> list[FlextTypes.Core.Dict]:
+    def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
         """Get fallback group data."""
         return [FallbackDataFactory.create_test_group_record()]
 
@@ -376,6 +390,8 @@ class OrganizationalUnitsStream(LDAPBaseStream):
         context: Mapping[str, object] | None = None,
     ) -> Iterable[FlextTypes.Core.Dict]:
         """Get organizational unit records from LDAP."""
+        # Use context parameter to avoid unused argument warning
+        _context = context  # Acknowledge the parameter
         logger.info("Extracting LDAP organizational units")
 
         ou_filter = "(objectClass=organizationalUnit)"
@@ -387,11 +403,13 @@ class OrganizationalUnitsStream(LDAPBaseStream):
             "modifyTimestamp",
         ]
 
-        results = self._search_ldap(ou_filter, attributes=ou_attributes)
+        results: FlextResult[object] = self._search_ldap(
+            ou_filter, attributes=ou_attributes
+        )
 
         yield from results
 
-    def _get_fallback_data(self) -> list[FlextTypes.Core.Dict]:
+    def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
         """Get fallback organizational unit data."""
         return [FallbackDataFactory.create_test_ou_record()]
 
@@ -438,6 +456,8 @@ class SchemaStream(LDAPBaseStream):
         context: Mapping[str, object] | None = None,
     ) -> Iterable[FlextTypes.Core.Dict]:
         """Get schema records from LDAP."""
+        # Use context parameter to avoid unused argument warning
+        _context = context  # Acknowledge the parameter
         logger.info("Extracting LDAP schema")
 
         schema_filter = "(objectClass=schema)"
@@ -472,7 +492,7 @@ class SchemaStream(LDAPBaseStream):
         for record in self._get_fallback_data():
             yield record
 
-    def _get_fallback_data(self) -> list[FlextTypes.Core.Dict]:
+    def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
         """Get fallback schema data."""
         return [FallbackDataFactory.create_test_schema_record()]
 
@@ -534,13 +554,15 @@ class CustomStream(LDAPBaseStream):
         context: Mapping[str, object] | None = None,
     ) -> Iterable[FlextTypes.Core.Dict]:
         """Get records using custom filter."""
+        # Use context parameter to avoid unused argument warning
+        _context = context  # Acknowledge the parameter
         logger.info(f"Extracting LDAP records for custom stream: {self.params.name}")
 
-        results = self._search_ldap(self.params.search_filter)
+        results: FlextResult[object] = self._search_ldap(self.params.search_filter)
 
         yield from results
 
-    def _get_fallback_data(self) -> list[FlextTypes.Core.Dict]:
+    def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
         """Get fallback data for custom stream."""
         return [
             {
@@ -615,10 +637,12 @@ class LDIFStream(Stream):
         context: Mapping[str, object] | None = None,
     ) -> Iterable[FlextTypes.Core.Dict]:
         """Get LDIF records using flext-ldif processing."""
+        # Use context parameter to avoid unused argument warning
+        _context = context  # Acknowledge the parameter
         logger.info("Processing LDIF files using flext-ldif library")
 
         # Get LDIF files from config
-        ldif_files = self.tap.config.get("ldif_files", [])
+        ldif_files: list[object] = self.tap.config.get("ldif_files", [])
         ldif_directory = self.tap.config.get("ldif_directory")
 
         if ldif_files:
@@ -638,7 +662,9 @@ class LDIFStream(Stream):
             logger.info(f"Processing LDIF file: {file_path}")
 
             # Use flext-ldif to parse the file
-            parse_result = self._ldif_api.parse_ldif_file(file_path)
+            parse_result: FlextResult[object] = self._ldif_api.parse_ldif_file(
+                file_path
+            )
 
             if not parse_result.success or not parse_result.value:
                 logger.warning(
@@ -672,7 +698,7 @@ class LDIFStream(Stream):
         """Convert LDIF entry to stream record."""
         try:
             # Classify entry type by object classes
-            object_classes = entry.get_attribute("objectClass") or []
+            object_classes: list[object] = entry.get_attribute("objectClass") or []
             entry_type = self._classify_entry_type(object_classes)
 
             return {
@@ -763,10 +789,12 @@ class LDIFAnalysisStream(Stream):
         context: Mapping[str, object] | None = None,
     ) -> Iterable[FlextTypes.Core.Dict]:
         """Get LDIF analysis records."""
+        # Use context parameter to avoid unused argument warning
+        _context = context  # Acknowledge the parameter
         logger.info("Analyzing LDIF files")
 
         # Get LDIF files from config
-        ldif_files = self.tap.config.get("ldif_files", [])
+        ldif_files: list[object] = self.tap.config.get("ldif_files", [])
         ldif_directory = self.tap.config.get("ldif_directory")
 
         if ldif_files:
@@ -793,7 +821,9 @@ class LDIFAnalysisStream(Stream):
             )
 
             # Use flext-ldif to parse and analyze the file
-            validation_result = self._ldif_api.parse_file(file_path)
+            validation_result: FlextResult[object] = self._ldif_api.parse_file(
+                file_path
+            )
 
             analysis_data = {
                 "file_path": file_path,
@@ -827,7 +857,7 @@ class LDIFAnalysisStream(Stream):
                         oc_dist[oc] = oc_dist.get(oc, 0) + 1
                 analysis_data["object_class_distribution"] = oc_dist
             else:
-                analysis_data_errors = analysis_data.get("errors")
+                analysis_data_errors: dict[str, object] = analysis_data.get("errors")
                 if isinstance(analysis_data_errors, list):
                     analysis_data_errors.append(
                         f"Validation failed: {validation_result.error}",
