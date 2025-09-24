@@ -10,7 +10,6 @@ from dataclasses import dataclass
 from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import (
     FlextLdapClient,
-    FlextLdapEntities,
     FlextLdapModels,
 )
 
@@ -169,17 +168,15 @@ class LDAPClient:
 
     def _convert_entry_to_dict(
         self,
-        entry_data: FlextLdapModels.Entry
-        | FlextLdapEntities.Entry
-        | FlextTypes.Core.Dict,
+        entry_data: FlextLdapModels.Entry | FlextTypes.Core.Dict,
     ) -> dict[str, object]:
-        """Convert FlextLdapEntities.Entry to dict format for testing convenience.
+        """Convert FlextLdapModels.Entry to dict format for testing convenience.
 
         Single Responsibility: Handle only entry format conversion.
         """
         # Check if it's an Entry object using hasattr for attributes
         if hasattr(entry_data, "dn") and hasattr(entry_data, "attributes"):
-            # It's a FlextLdapEntities.Entry model object - flatten attributes
+            # It's a FlextLdapModels.Entry model object - flatten attributes
             # Use getattr to safely access attributes for type checker
             dn = getattr(entry_data, "dn", "")
             attributes = getattr(entry_data, "attributes", {})
@@ -571,7 +568,7 @@ class LDAPClient:
 
 # Type aliases for testing convenience
 LDAPConnectionConfig = FlextLdapModels.ConnectionConfig
-LDAPEntry = FlextLdapEntities.Entry
+LDAPEntry = FlextLdapModels.Entry
 
 __all__: FlextTypes.Core.StringList = [
     "LDAPClient",

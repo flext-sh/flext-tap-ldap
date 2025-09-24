@@ -27,7 +27,8 @@ from flext_core import (
 )
 from flext_meltano import FlextSingerTypes
 from flext_tap_ldap.client import LDAPClient
-from flext_tap_ldap.tap import FlextTapLDAP
+
+# from flext_tap_ldap.tap import FlextTapLDAP  # Circular import - removed
 
 th = FlextSingerTypes()
 

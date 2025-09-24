@@ -8,20 +8,20 @@ from uuid import UUID, uuid4
 from pydantic import Field
 
 from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
-from flext_ldap import FlextLdapEntities
+from flext_ldap import FlextLdapModels
 
 logger = FlextLogger(__name__)
 
 
 def _get_entry_value(
-    entry: FlextTypes.Core.Dict | FlextLdapEntities.Entry,
+    entry: FlextTypes.Core.Dict | FlextLdapModels.Entry,
     key: str,
     default: object = None,
 ) -> object:
-    """Get a value from either a dict or `FlextLdapEntities.Entry`."""
+    """Get a value from either a dict or `FlextLdapModels.Entry`."""
     if isinstance(entry, dict):
         return entry.get(key, default)
-    # FlextLdapEntities.Entry - use getattr or similar access pattern
+    # FlextLdapModels.Entry - use getattr or similar access pattern
     return getattr(entry, key, default)
 
 
@@ -181,7 +181,7 @@ class LDAPUser(LDAPEntry):
     @classmethod
     def from_entry(
         cls,
-        entry: FlextTypes.Core.Dict | FlextLdapEntities.Entry,
+        entry: FlextTypes.Core.Dict | FlextLdapModels.Entry,
     ) -> LDAPUser:
         """Create LDAPUser from LDAP entry."""
         return cls(
@@ -240,7 +240,7 @@ class LDAPGroup(LDAPEntry):
     @classmethod
     def from_entry(
         cls,
-        entry: FlextTypes.Core.Dict | FlextLdapEntities.Entry,
+        entry: FlextTypes.Core.Dict | FlextLdapModels.Entry,
     ) -> LDAPGroup:
         """Create LDAPGroup from LDAP entry."""
         return cls(
