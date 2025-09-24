@@ -56,18 +56,18 @@ class LDAPAttribute(FlextModels.Value):
         description="Whether the attribute contains binary data",
     )
 
-    def validate_domain_rules(self) -> FlextResult[None]:
+    def validate_domain_rules(self: object) -> FlextResult[None]:
         """Validate domain-specific rules for LDAP attributes."""
         # LDAP attributes can have any name and values
         return FlextResult[None].ok(None)
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate business rules for LDAP attributes."""
         # Business validation for LDAP attributes
         return FlextResult[None].ok(None)
 
     @property
-    def single_value(self) -> str | None:
+    def single_value(self: object) -> str | None:
         """Get first value if exists, None otherwise.
 
         Returns:
@@ -77,7 +77,7 @@ class LDAPAttribute(FlextModels.Value):
         return self.values[0] if self.values else None
 
     @property
-    def is_multi_valued(self) -> bool:
+    def is_multi_valued(self: object) -> bool:
         """Check if attribute has multiple values.
 
         Returns:
@@ -114,19 +114,19 @@ class LDAPEntry(FlextModels.Entity):
         description="LDAP controls",
     )
 
-    def validate_domain_rules(self) -> FlextResult[None]:
+    def validate_domain_rules(self: object) -> FlextResult[None]:
         """Validate domain-specific rules for LDAP entries."""
         if not self.dn:
             return FlextResult[None].fail("DN cannot be empty")
         # Additional LDAP entry validation can be added here
         return FlextResult[None].ok(None)
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate business rules for LDAP entries."""
         return FlextResult[None].ok(None)
 
     @property
-    def rdn(self) -> str:
+    def rdn(self: object) -> str:
         """Get relative distinguished name."""
         return self.dn.split(",")[0] if self.dn else ""
 
@@ -289,17 +289,17 @@ class LDAPSchema(FlextModels.Value):
         description="Naming contexts",
     )
 
-    def validate_domain_rules(self) -> FlextResult[None]:
+    def validate_domain_rules(self: object) -> FlextResult[None]:
         """Validate domain-specific rules for LDAP schema."""
         # Schema validation rules can be added here
         return FlextResult[None].ok(None)
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate business rules for LDAP schema."""
         return FlextResult[None].ok(None)
 
     @property
-    def has_oracle_extensions(self) -> bool:
+    def has_oracle_extensions(self: object) -> bool:
         """Check if schema contains Oracle-specific extensions.
 
         Returns:
@@ -335,7 +335,7 @@ class LDAPConnection(FlextModels.Entity):
     last_error: str | None = Field(None, description="Last connection error")
     # created_at and updated_at inherited from Entity
 
-    def validate_domain_rules(self) -> FlextResult[None]:
+    def validate_domain_rules(self: object) -> FlextResult[None]:
         """Validate domain-specific rules for LDAP connections."""
         if not self.host:
             return FlextResult[None].fail("Host is required")
@@ -346,17 +346,17 @@ class LDAPConnection(FlextModels.Entity):
             )
         return FlextResult[None].ok(None)
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate business rules for LDAP connections."""
         return FlextResult[None].ok(None)
 
     @property
-    def connection_string(self) -> str:
+    def connection_string(self: object) -> str:
         """Get connection string for display purposes."""
         protocol = "ldaps" if self.use_ssl else "ldap"
         return f"{protocol}://{self.host}:{self.port}"
 
-    def test_connection_success(self) -> LDAPConnection:
+    def test_connection_success(self: object) -> LDAPConnection:
         """Mark connection test as successful."""
         return self.model_copy(
             update={
@@ -410,7 +410,7 @@ class LDAPStream(FlextModels.Entity):
     )
     # created_at and updated_at inherited from Entity
 
-    def validate_domain_rules(self) -> FlextResult[None]:
+    def validate_domain_rules(self: object) -> FlextResult[None]:
         """Validate domain-specific rules for LDAP streams."""
         if not self.tap_stream_id:
             return FlextResult[None].fail("Tap stream ID is required")
@@ -418,7 +418,7 @@ class LDAPStream(FlextModels.Entity):
             return FlextResult[None].fail("Search filter is required")
         return FlextResult[None].ok(None)
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate business rules for LDAP streams."""
         return FlextResult[None].ok(None)
 
@@ -471,18 +471,18 @@ class TapExecution(FlextModels.Entity):
     exit_code: int | None = Field(None, description="Exit code")
     error_message: str | None = Field(None, description="Error message")
 
-    def validate_domain_rules(self) -> FlextResult[None]:
+    def validate_domain_rules(self: object) -> FlextResult[None]:
         """Validate domain-specific rules for tap executions."""
         if not self.command:
             return FlextResult[None].fail("Command is required")
         return FlextResult[None].ok(None)
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate business rules for tap executions."""
         return FlextResult[None].ok(None)
 
     @property
-    def is_completed(self) -> bool:
+    def is_completed(self: object) -> bool:
         """Check if execution is completed."""
         return self.tap_status in {
             "completed",
@@ -491,11 +491,11 @@ class TapExecution(FlextModels.Entity):
         }
 
     @property
-    def successful(self) -> bool:
+    def successful(self: object) -> bool:
         """Check if execution was successful."""
         return self.tap_status == "completed" and self.exit_code == 0
 
-    def start_execution(self) -> TapExecution:
+    def start_execution(self: object) -> TapExecution:
         """Start tap execution."""
         return self.model_copy(
             update={
@@ -504,7 +504,7 @@ class TapExecution(FlextModels.Entity):
             },
         )
 
-    def start_extraction(self) -> TapExecution:
+    def start_extraction(self: object) -> TapExecution:
         """Start extraction phase."""
         return self.model_copy(update={"tap_status": "extracting"})
 
@@ -533,7 +533,7 @@ class TapExecution(FlextModels.Entity):
             },
         )
 
-    def cancel_execution(self) -> TapExecution:
+    def cancel_execution(self: object) -> TapExecution:
         """Cancel tap execution."""
         completed_at = datetime.now(UTC)
         duration_seconds = None
@@ -588,22 +588,22 @@ class LDAPRecord(FlextModels.Entity):
         description="Singer record data",
     )
 
-    def validate_domain_rules(self) -> FlextResult[None]:
+    def validate_domain_rules(self: object) -> FlextResult[None]:
         """Validate domain-specific rules for LDAP records."""
         if not self.dn:
             return FlextResult[None].fail("DN is required")
         return FlextResult[None].ok(None)
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate business rules for LDAP records."""
         return FlextResult[None].ok(None)
 
     @property
-    def rdn(self) -> str:
+    def rdn(self: object) -> str:
         """Get relative distinguished name."""
         return self.dn.split(",")[0] if self.dn else ""
 
-    def to_singer_record(self) -> FlextTypes.Core.Dict:
+    def to_singer_record(self: object) -> FlextTypes.Core.Dict:
         """Convert to Singer record format."""
         return {
             "type": "RECORD",

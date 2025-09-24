@@ -14,7 +14,7 @@ from flext_core import FlextConstants, FlextModels, FlextResult, FlextTypes
 class LDAPConnectionConfig(FlextModels.ArbitraryTypesModel):
     """LDAP connection configuration using FlextModels pattern."""
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate LDAP connection configuration."""
         if not self.host:
             return FlextResult[None].fail("Host is required")
@@ -54,7 +54,7 @@ class LDAPConnectionConfig(FlextModels.ArbitraryTypesModel):
 class CustomStreamConfig(FlextModels.ArbitraryTypesModel):
     """Configuration for custom LDAP streams using flext-core patterns."""
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate custom stream configuration."""
         if not self.name:
             return FlextResult[None].fail("Stream name is required")
@@ -81,7 +81,7 @@ class CustomStreamConfig(FlextModels.ArbitraryTypesModel):
 class LDIFProcessingConfig(FlextModels.ArbitraryTypesModel):
     """Configuration for LDIF file processing using flext-core patterns."""
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate LDIF processing configuration."""
         if self.ldif_max_errors <= 0:
             return FlextResult[None].fail("LDIF max errors must be positive")
@@ -321,7 +321,7 @@ class TapLDAPConfig(FlextModels.ArbitraryTypesModel):
         )
 
     @classmethod
-    def _raise_invalid_stream_config(cls) -> None:
+    def _raise_invalid_stream_config(cls: object) -> None:
         """Raise invalid stream config error."""
         raise ValueError(INVALID_STREAM_CONFIG_MSG)
 
@@ -332,8 +332,10 @@ class TapLDAPConfig(FlextModels.ArbitraryTypesModel):
 
 
 # Constants for error messages
-INVALID_STREAM_CONFIG_MSG = "Invalid custom stream config"
-INVALID_STREAM_CONFIG_WITH_ERROR_MSG = "Invalid custom stream config: {}"
+INVALID_STREAM_CONFIG_MSG: dict[str, object] = "Invalid custom stream config"
+INVALID_STREAM_CONFIG_WITH_ERROR_MSG: dict[str, object] = (
+    "Invalid custom stream config: {}"
+)
 
 # Export main configuration classes
 __all__: FlextTypes.Core.StringList = [

@@ -66,92 +66,18 @@ class LDAPClient:
     This eliminates code duplication while maintaining testing convenience.
     """
 
-    def __init__(
-        self,
-        config: LDAPClientConfig | None = None,
-        **convenience_kwargs: object,
-    ) -> None:
-        """Initialize with Parameter Object Pattern (preferred) or testing convenience interface.
-
-        Preferred Usage (Parameter Object Pattern):
-            config = LDAPClientConfig(host="ldap.example.com", port=389)
-            client = LDAPClient(config=config)
-
-        Testing convenience Usage (for testing convenience):
-            client = LDAPClient(host="ldap.example.com", port=389)
-        """
-        # Support both new Parameter Object Pattern and testing convenience
-        if config is not None:
-            # New way: Parameter Object Pattern (SOLID)
-            client_config = config
-        else:
-            # Testing convenience: create config from individual parameters
-            host = convenience_kwargs.get("host")
-            if host is None:
-                msg = "Either 'config' or 'host' must be provided"
-                raise ValueError(msg)
-
-            def _coerce_int(value: object, default: int) -> int:
-                """Coerce value to int with better error handling."""
-                match value:
-                    case int() as int_val:
-                        return int_val
-                    case str() as str_val:
-                        try:
-                            return int(str_val)
-                        except ValueError:
-                            return default
-                    case float() as float_val:
-                        try:
-                            return int(float_val)
-                        except (ValueError, OverflowError):
-                            return default
-                    case _:
-                        return default
-
-            host_str = str(host)
-            port_int = _coerce_int(convenience_kwargs.get("port", 389), 389)
-            bind_dn_str = convenience_kwargs.get("bind_dn")
-            password_str = convenience_kwargs.get("password")
-            use_ssl_bool = bool(convenience_kwargs.get("use_ssl"))
-            timeout_int = _coerce_int(convenience_kwargs.get("timeout", 30), 30)
-            page_size_int = _coerce_int(convenience_kwargs.get("page_size", 1000), 1000)
-            client_config = LDAPClientConfig(
-                host=host_str,
-                port=port_int,
-                bind_dn=bind_dn_str if isinstance(bind_dn_str, str) else None,
-                password=password_str if isinstance(password_str, str) else None,
-                use_ssl=use_ssl_bool,
-                timeout=timeout_int,
-                page_size=page_size_int,
-            )
-
-        # Create flext-ldap configuration
-        flext_config = FlextLdapModels.ConnectionConfig.model_validate(
-            {
-                "server": client_config.host,
-                "port": client_config.port,
-                "use_ssl": client_config.use_ssl,
-                "timeout": client_config.timeout,
-            },
-        )
-
-        # Initialize the real flext-ldap API
-        self._flext_api = FlextLdapClient()
-        self._config = flext_config
-
+    def __init__(self, client_config: LDAPClientConfig) -> None:
+        """Initialize the LDAP client."""
         # Store for testing convenience - these are what tests expect
-        self.host = client_config.host
-        self.port = client_config.port
-        self.bind_dn = client_config.bind_dn
-        self.password = client_config.password
-        self.use_ssl = client_config.use_ssl
-        self.timeout = client_config.timeout
-        self.page_size = client_config.page_size
-
-        # Add testing convenience attributes that tests expect
-        self._bind_dn = client_config.bind_dn  # Tests expect _bind_dn attribute
-        self._password = client_config.password  # Tests expect _password attribute
+        self.host: str = client_config.host
+        self.port: int = client_config.port
+        self.bind_dn: str | None = client_config.bind_dn
+        self.password: str | None = client_config.password
+        self.use_ssl: bool = client_config.use_ssl
+        self.timeout: int = client_config.timeout
+        self.page_size: int = (
+            client_config.page_size
+        )  # Tests expect _password attribute
 
     @property
     def server_uri(self) -> str:
@@ -178,9 +104,9 @@ class LDAPClient:
         entry_data: FlextLdapModels.Entry | FlextTypes.Core.Dict,
     ) -> FlextTypes.Core.Dict:
         """Convert FlextLdapModels.Entry to dict format for testing convenience."""
-        if hasattr(entry_data, "dn") and hasattr(entry_data, "attributes"):
+        if isinstance(entry_data, FlextLdapModels.Entry):
             # It's a FlextLdapModels.Entry model object - flatten attributes
-            entry_dict = {"dn": entry_data.dn}
+            entry_dict: FlextTypes.Core.Dict = {"dn": entry_data.dn}
             # Add flattened attributes to the entry dict
             for attr_name, attr_values in entry_data.attributes.items():
                 # Convert single values and lists appropriately
@@ -216,7 +142,7 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str,
-        attributes: FlextTypes.Core.StringList | None,
+        attributes: list[str] | None,
         ldap_scope: str,
         size_limit: int,
     ) -> list[FlextTypes.Core.Dict]:
@@ -278,7 +204,7 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
-        attributes: FlextTypes.Core.StringList | None = None,
+        attributes: list[str] | None = None,
         scope: str = "SUBTREE",
         size_limit: int = 0,
     ) -> list[FlextTypes.Core.Dict]:
@@ -435,6 +361,7 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
         self._flext_api = FlextLdapClient()
         self._session_id: str | None = None  # Use session_id instead of raw connection
         self._schema_cache: dict[str, FlextTypes.Core.Dict] = {}
+        self.domain_model: TapLDAPConfig | None = None
 
     class _ConnectionHelper:
         """Nested helper for LDAP connection management."""
@@ -571,14 +498,16 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
                     "ONELEVEL": "one_level",
                     "BASE": "base",
                 }
-                search_scope = scope_map.get(config.search_scope.upper(), "subtree")
+                search_scope = scope_map.get(
+                    config.connection.search_scope.upper(), "subtree"
+                )
 
                 # Use flext-ldap API for entry extraction
                 search_request = FlextLdapModels.SearchRequest(
-                    base_dn=config.search_base,
-                    filter_str=config.search_filter or "(objectClass=*)",
+                    base_dn=config.connection.search_base,
+                    filter_str=config.connection.search_filter or "(objectClass=*)",
                     scope=search_scope,
-                    attributes=config.attributes or ["*"],
+                    attributes=config.connection.attributes or ["*"],
                 )
                 search_result = await flext_api.search(search_request)
 
@@ -632,7 +561,7 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
 
         # Test basic search to validate configuration using flext-ldap API
         search_result = await self._flext_api.search_simple(
-            search_base=self.domain_model.search_base,
+            search_base=self.domain_model.connection.search_base,
             search_filter="(objectClass=*)",
             size_limit=1,
         )
@@ -673,7 +602,7 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
             schema_result = await self._SchemaHelper.discover_schema(
                 self._flext_api,
                 session_id,
-                self.domain_model.search_base,
+                self.domain_model.connection.search_base,
             )
 
             if schema_result.is_failure:
@@ -818,7 +747,7 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
             )
 
             server_info = {
-                "server_uri": f"{'ldaps' if self.domain_model.use_ssl else 'ldap'}://{self.domain_model.host}:{self.domain_model.port}",
+                "server_uri": f"{'ldaps' if self.domain_model.connection.use_ssl else 'ldap'}://{self.domain_model.connection.host}:{self.domain_model.connection.port}",
                 "connected": True,
                 "search_test": search_result.is_success,
                 "connection_method": "flext-ldap API",
@@ -839,14 +768,14 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
             return FlextResult[LdapTapResult].fail("No configuration provided")
 
         # Health check first
-        health_result = await self.health_check()
+        health_result: FlextResult[object] = await self.health_check()
         if health_result.is_failure:
             return FlextResult[LdapTapResult].fail(
                 f"Health check failed: {health_result.error}",
             )
 
         # Discover catalog
-        catalog_result = await self.discover_catalog()
+        catalog_result: FlextResult[object] = await self.discover_catalog()
         if catalog_result.is_failure:
             return FlextResult[LdapTapResult].fail(
                 f"Catalog discovery failed: {catalog_result.error}",
@@ -855,7 +784,7 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
         catalog = catalog_result.unwrap()
 
         # Sync data
-        sync_result = await self.sync_data(catalog)
+        sync_result: FlextResult[object] = await self.sync_data(catalog)
         if sync_result.is_failure:
             return FlextResult[LdapTapResult].fail(
                 f"Data sync failed: {sync_result.error}",
@@ -884,11 +813,11 @@ class FlextTapLDAPPlugin:
     def __init__(self, config: FlextTypes.Core.Dict) -> None:
         """Initialize LDAP tap plugin."""
         # Convert dict config to TapLDAPConfig
-        self._config = TapLDAPConfig(**config)
+        self._config: TapLDAPConfig = TapLDAPConfig(**config)
         self._tap_instance: FlextTapLDAP | None = None
 
     @property
-    def version(self) -> str:
+    def version(self: object) -> str:
         """Get plugin version."""
         try:
             return importlib.metadata.version("flext-tap-ldap")
@@ -899,7 +828,7 @@ class FlextTapLDAPPlugin:
             )
             return "0.9.0"
 
-    def initialize(self) -> FlextResult[None]:
+    def initialize(self: object) -> FlextResult[None]:
         """Initialize the tap instance."""
         try:
             logger.info("Initializing FLEXT Tap LDAP plugin")
@@ -914,7 +843,7 @@ class FlextTapLDAPPlugin:
             logger.exception("Failed to initialize FLEXT Tap LDAP plugin")
             return FlextResult[None].fail(f"Plugin initialization failed: {e}")
 
-    def shutdown(self) -> FlextResult[None]:
+    def shutdown(self: object) -> FlextResult[None]:
         """Shutdown the plugin."""
         try:
             if self._tap_instance:
@@ -932,7 +861,7 @@ class FlextTapLDAPPlugin:
     ) -> FlextResult[FlextTypes.Core.Dict]:
         """Execute plugin operations via tap instance."""
         if not self._tap_instance:
-            init_result = self.initialize()
+            init_result: FlextResult[object] = self.initialize()
             if not init_result.is_success:
                 return FlextResult[FlextTypes.Core.Dict].fail(
                     f"Plugin initialization failed: {init_result.error}",
@@ -960,10 +889,10 @@ class FlextTapLDAPPlugin:
                 f"Operation {operation} failed: {e}",
             )
 
-    def discover_streams(self) -> FlextResult[FlextTypes.Core.List]:
+    def discover_streams(self: object) -> FlextResult[FlextTypes.Core.List]:
         """Discover available streams."""
         if not self._tap_instance:
-            init_result = self.initialize()
+            init_result: FlextResult[object] = self.initialize()
             if not init_result.is_success:
                 return FlextResult[FlextTypes.Core.List].fail(
                     f"Plugin initialization failed: {init_result.error}",
@@ -992,7 +921,7 @@ class FlextTapLDAPPlugin:
         _parameters: FlextTypes.Core.Dict,
     ) -> FlextResult[FlextTypes.Core.Dict]:
         """Execute discover operation through tap."""
-        streams_result = self.discover_streams()
+        streams_result: FlextResult[object] = self.discover_streams()
         if not streams_result.is_success:
             return FlextResult[FlextTypes.Core.Dict].fail(
                 streams_result.error or "Discovery failed",

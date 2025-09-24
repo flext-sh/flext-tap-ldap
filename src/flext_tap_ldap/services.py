@@ -42,7 +42,7 @@ class LDAPConnectionParams:
     page_size: int = 1000
     max_retries: int = 3
 
-    def __post_init__(self) -> None:
+    def __post_init__(self: object) -> None:
         """Validate connection parameters after initialization."""
         # Constants for port validation
         max_port_number = 65535
@@ -81,7 +81,7 @@ class StreamCreationParams:
     replication_method: str = "FULL_TABLE"
     replication_key: str | None = None
 
-    def __post_init__(self) -> None:
+    def __post_init__(self: object) -> None:
         """Validate stream creation parameters after initialization."""
         if not self.stream_type:
             msg = "Stream type is required"
@@ -97,7 +97,7 @@ class StreamCreationParams:
 class LDAPConnectionService:
     """Service for managing LDAP connections."""
 
-    def __init__(self) -> None:
+    def __init__(self: object) -> None:
         """Initialize the connection service."""
         self._connections: dict[
             FlextModels,
@@ -178,7 +178,7 @@ class LDAPConnectionService:
 class LDAPStreamService:
     """Service for managing LDAP streams."""
 
-    def __init__(self) -> None:
+    def __init__(self: object) -> None:
         """Initialize the stream service."""
         self._streams: dict[
             FlextModels,
@@ -272,7 +272,7 @@ class LDAPStreamService:
 class TapExecutionService:
     """Service for managing tap executions."""
 
-    def __init__(self) -> None:
+    def __init__(self: object) -> None:
         """Initialize the execution service."""
         self._executions: dict[
             UUID,
@@ -408,7 +408,7 @@ class TapExecutionService:
 class LDAPRecordService:
     """Service for managing LDAP records."""
 
-    def __init__(self) -> None:
+    def __init__(self: object) -> None:
         """Initialize the record service."""
         self._records: dict[
             UUID,

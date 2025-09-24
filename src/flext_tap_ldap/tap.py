@@ -95,7 +95,7 @@ class FlextTapLDAP(Tap):
         },
     }
 
-    def discover_streams(self) -> list[Stream]:
+    def discover_streams(self: object) -> list[Stream]:
         """Discover available streams."""
         streams: list[Stream] = []
 
@@ -119,7 +119,7 @@ class FlextTapLDAP(Tap):
             )
 
         # Add custom streams if configured:
-        custom_streams_config = self.config.get("custom_streams", [])
+        custom_streams_config: dict[str, object] = self.config.get("custom_streams", [])
         for custom_config in custom_streams_config:
             params = CustomStreamParams(
                 name=custom_config["name"],

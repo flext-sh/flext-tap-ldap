@@ -4,17 +4,34 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
-import sys
 from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
 
-# Add docker directory to path to import shared fixtures
-docker_dir = Path("/home/marlonsc/flext/docker")
-if str(docker_dir) not in sys.path:
-    sys.path.insert(0, str(docker_dir))
+from flext_tests import FlextTestDocker
+
+# Import shared LDAP fixtures from docker directory
+
+
+# Docker container management with FlextTestDocker
+@pytest.fixture(scope="session")
+def docker_control() -> FlextTestDocker:
+    """Provide Docker control instance for tests."""
+    return FlextTestDocker()
+
+
+@pytest.fixture(scope="session")
+def shared_ldap_container(docker_control: FlextTestDocker) -> FlextTestDocker:
+    """Managed LDAP container using FlextTestDocker with auto-start."""
+    result = docker_control.start_container("flext-openldap-test")
+    if result.is_failure:
+        pytest.skip(f"Failed to start LDAP container: {result.error}")
+
+    yield "flext-openldap-test"
+
+    docker_control.stop_container("flext-openldap-test", remove=False)
 
 
 def pytest_configure(config: pytest.Config) -> None:
@@ -26,11 +43,11 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line("markers", "e2e: End-to-end tests")
 
 
-# Shared LDAP container fixture
+# Shared LDAP container fixture (auto-use existing container)
 @pytest.fixture(scope="session", autouse=True)
 def ensure_shared_docker_container(shared_ldap_container: object) -> None:
     """Ensure shared Docker container is started for the test session.
-    
+
     This fixture automatically starts the shared LDAP container if not running,
     and ensures it's available for all tests in the session.
     """
