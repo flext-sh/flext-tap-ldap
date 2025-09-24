@@ -55,7 +55,7 @@ class TestLDAPAttribute:
         """Test domain validation."""
         attr = LDAPAttribute(name="test", values=["value"])
         # Should not raise exception
-        attr.validate_domain_rules()
+        attr.validate_business_rules()
 
 
 class TestLDAPEntry:
@@ -65,7 +65,7 @@ class TestLDAPEntry:
         """Test method."""
         """Test creating LDAP entry."""
         entry = LDAPEntry(
-            id="uid=jdoe,ou=users,dc=example,dc=com",
+            dn="uid=jdoe,ou=users,dc=example,dc=com",
             object_classes=["inetOrgPerson", "person"],
         )
 
@@ -77,19 +77,19 @@ class TestLDAPEntry:
         """Test entry validation."""
         # Valid entry
         entry = LDAPEntry(
-            id="uid=test,dc=example,dc=com",
+            dn="uid=test,dc=example,dc=com",
             object_classes=["person"],
         )
-        result = entry.validate_domain_rules()
-        assert result.success
+        result = entry.validate_business_rules()
+        assert result.is_success
 
         # Invalid entry (empty DN)
         invalid_entry = LDAPEntry(
-            id="",
+            dn="",
             object_classes=["person"],
         )
-        result = invalid_entry.validate_domain_rules()
-        assert not result.success
+        result = invalid_entry.validate_business_rules()
+        assert not result.is_success
         assert "DN cannot be empty" in result.error
 
 
@@ -112,7 +112,7 @@ class TestLDAPSchema:
         """Test schema validation."""
         schema = LDAPSchema()
         # Should not raise exception
-        schema.validate_domain_rules()
+        schema.validate_business_rules()
 
     def test_has_oracle_extensions(self) -> None:
         """Test method."""

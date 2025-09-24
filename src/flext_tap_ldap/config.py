@@ -11,7 +11,7 @@ from pydantic_settings import SettingsConfigDict
 from flext_core import FlextConstants, FlextModels, FlextResult, FlextTypes
 
 
-class LDAPConnectionConfig(FlextModels.Config):
+class LDAPConnectionConfig(FlextModels.ArbitraryTypesModel):
     """LDAP connection configuration using FlextModels pattern."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -51,7 +51,7 @@ class LDAPConnectionConfig(FlextModels.Config):
     )
 
 
-class CustomStreamConfig(FlextModels.Config):
+class CustomStreamConfig(FlextModels.ArbitraryTypesModel):
     """Configuration for custom LDAP streams using flext-core patterns."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -78,7 +78,7 @@ class CustomStreamConfig(FlextModels.Config):
     )
 
 
-class LDIFProcessingConfig(FlextModels.Config):
+class LDIFProcessingConfig(FlextModels.ArbitraryTypesModel):
     """Configuration for LDIF file processing using flext-core patterns."""
 
     def validate_business_rules(self) -> FlextResult[None]:
@@ -138,7 +138,7 @@ class LDIFProcessingConfig(FlextModels.Config):
     )
 
 
-class TapLDAPConfig(FlextModels.Config):
+class TapLDAPConfig(FlextModels.ArbitraryTypesModel):
     """Complete configuration for tap-ldap using flext-core patterns.
 
     Combines LDAP connection and LDIF processing configurations with FlextConfig.BaseModel.

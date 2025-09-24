@@ -25,7 +25,6 @@ from flext_core import (
 )
 from flext_ldap import (
     FlextLdapClient,
-    FlextLdapEntities,
     FlextLdapModels,
 )
 from flext_tap_ldap.tap_config import TapLDAPConfig
@@ -176,11 +175,11 @@ class LDAPClient:
 
     def _convert_entry_to_dict(
         self,
-        entry_data: FlextLdapEntities.Entry | FlextTypes.Core.Dict,
+        entry_data: FlextLdapModels.Entry | FlextTypes.Core.Dict,
     ) -> FlextTypes.Core.Dict:
-        """Convert FlextLdapEntities.Entry to dict format for testing convenience."""
+        """Convert FlextLdapModels.Entry to dict format for testing convenience."""
         if hasattr(entry_data, "dn") and hasattr(entry_data, "attributes"):
-            # It's a FlextLdapEntities.Entry model object - flatten attributes
+            # It's a FlextLdapModels.Entry model object - flatten attributes
             entry_dict = {"dn": entry_data.dn}
             # Add flattened attributes to the entry dict
             for attr_name, attr_values in entry_data.attributes.items():
@@ -196,7 +195,7 @@ class LDAPClient:
 
     def _process_search_results(
         self,
-        result: FlextResult[list[FlextLdapEntities.Entry]],
+        result: FlextResult[list[FlextLdapModels.Entry]],
         size_limit: int,
     ) -> list[FlextTypes.Core.Dict]:
         """Process LDAP search results with size limiting."""
@@ -1098,7 +1097,7 @@ def main() -> None:
 
 # Type aliases for testing convenience
 LDAPConnectionConfig = FlextLdapModels.ConnectionConfig
-LDAPEntry = FlextLdapEntities.Entry
+LDAPEntry = FlextLdapModels.Entry
 
 __all__ = [
     # Main Classes

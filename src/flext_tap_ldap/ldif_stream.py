@@ -11,7 +11,8 @@ from singer_sdk import Stream
 from flext_core import FlextLogger, FlextTypes
 from flext_ldap import FlextLdapClient
 from flext_ldif import FlextLdifAPI, FlextLdifModels
-from flext_tap_ldap.tap import FlextTapLDAP
+
+# from flext_tap_ldap.tap import FlextTapLDAP  # Circular import - removed
 
 logger = FlextLogger(__name__)
 
