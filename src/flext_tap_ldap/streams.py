@@ -512,9 +512,9 @@ class CustomStream(LDAPBaseStream):
             Property("dn", StringType, description="Distinguished Name"),
         ]
         for prop_name, prop_config in (params.schema_properties or {}).items():
-            prop_type: type[
-                StringType | ArrayType | BooleanType | IntegerType | DateTimeType
-            ] = StringType  # Default type
+            prop_type: (
+                type[StringType | ArrayType, BooleanType] | IntegerType | DateTimeType
+            ) = StringType  # Default type
             if isinstance(prop_config, dict):
                 prop_type_str = prop_config.get("type")
                 if prop_type_str == "array":

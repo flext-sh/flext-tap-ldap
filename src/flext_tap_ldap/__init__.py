@@ -9,9 +9,26 @@ from __future__ import annotations
 from flext_core import FlextTypes
 from flext_tap_ldap.client import LDAPClient, LDAPClientConfig
 from flext_tap_ldap.exceptions import (
+    FlextTapLdapAuthenticationError,
+    FlextTapLdapConfigurationError,
     FlextTapLdapConnectionError,
     FlextTapLdapError,
+    FlextTapLdapProcessingError,
+    FlextTapLdapSearchError,
+    FlextTapLdapStreamError,
+    FlextTapLdapTimeoutError,
     FlextTapLdapValidationError,
+)
+from flext_tap_ldap.ldif_processor import (
+    FlextLdifProcessor,
+    LDIFEntry,
+    LDIFParseError,
+    LDIFTransformer,
+    LDIFValidator,
+)
+from flext_tap_ldap.ldif_stream import (
+    LDIFAnalysisStream,
+    LDIFStream,
 )
 from flext_tap_ldap.models import (
     LDAPAttribute,
@@ -20,17 +37,30 @@ from flext_tap_ldap.models import (
     LDAPSchema,
     LDAPUser,
 )
+from flext_tap_ldap.services import (
+    LDAPConnectionParams,
+    LDAPConnectionService,
+    LDAPRecordService,
+    LDAPStreamService,
+    StreamCreationParams,
+    TapExecutionService,
+)
 from flext_tap_ldap.tap_client import FlextTapLDAP, FlextTapLDAPPlugin
 from flext_tap_ldap.tap_config import (
     CustomStreamConfig,
     LDIFProcessingConfig,
     TapLDAPConfig,
 )
-from flext_tap_ldap.tap_services import (
-    LDAPConnectionService,
-    LDAPRecordService,
-    LDAPStreamService,
-    TapExecutionService,
+from flext_tap_ldap.tap_models import (
+    ConnectionTestedEvent,
+    LDAPConnection,
+    LDAPRecord,
+    LDAPStream,
+    RecordExtractedEvent,
+    StreamDiscoveredEvent,
+    TapExecution,
+    TapExecutionCompletedEvent,
+    TapExecutionStartedEvent,
 )
 from flext_tap_ldap.tap_streams import (
     CustomStream,
@@ -43,27 +73,51 @@ __version__ = "0.9.0-reorganized"
 __version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 
 __all__: FlextTypes.Core.StringList = [
+    "ConnectionTestedEvent",
     "CustomStream",
     "CustomStreamConfig",
+    "FlextLdifProcessor",
     "FlextTapLDAP",
     "FlextTapLDAPPlugin",
+    "FlextTapLdapAuthenticationError",
+    "FlextTapLdapConfigurationError",
     "FlextTapLdapConnectionError",
     "FlextTapLdapError",
+    "FlextTapLdapProcessingError",
+    "FlextTapLdapSearchError",
+    "FlextTapLdapStreamError",
+    "FlextTapLdapTimeoutError",
     "FlextTapLdapValidationError",
     "GroupsStream",
     "LDAPAttribute",
     "LDAPBaseStream",
     "LDAPClient",
     "LDAPClientConfig",
+    "LDAPConnection",
+    "LDAPConnectionParams",
     "LDAPConnectionService",
     "LDAPEntry",
     "LDAPGroup",
+    "LDAPRecord",
     "LDAPRecordService",
     "LDAPSchema",
+    "LDAPStream",
     "LDAPStreamService",
     "LDAPUser",
+    "LDIFAnalysisStream",
+    "LDIFEntry",
+    "LDIFParseError",
     "LDIFProcessingConfig",
+    "LDIFStream",
+    "LDIFTransformer",
+    "LDIFValidator",
+    "RecordExtractedEvent",
+    "StreamCreationParams",
+    "StreamDiscoveredEvent",
+    "TapExecution",
+    "TapExecutionCompletedEvent",
     "TapExecutionService",
+    "TapExecutionStartedEvent",
     "TapLDAPConfig",
     "UsersStream",
     "__version__",

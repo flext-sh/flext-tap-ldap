@@ -200,7 +200,7 @@ class TestFlextTapLDAPIntegration:
                     )
                     raise AssertionError(msg)
 
-    def test_custom_streams_config(self, runner: CliRunner, tmp_path: Path) -> None:
+    def test_self(self, runner: CliRunner, tmp_path: Path) -> None:
         """Test method."""
         config = {
             "ldap_host": "test.ldap.com",
@@ -286,7 +286,7 @@ class TestFlextTapLDAPIntegration:
 
         # Mock flext-ldap client search method with async context manager
         async def mock_search(
-            *_args: object,
+            *_args,
             **_kwargs: object,
         ) -> AsyncGenerator[FlextTypes.Core.Dict]:
             await asyncio.sleep(0)  # Make it truly async

@@ -414,7 +414,7 @@ class LDIFValidator:
         """Validate a list of LDIF entries using flext-ldif."""
         valid_count = 0
         invalid_count = 0
-        errors = []
+        errors: list[str] = []
 
         try:
             # Convert to FlextLdifEntry objects

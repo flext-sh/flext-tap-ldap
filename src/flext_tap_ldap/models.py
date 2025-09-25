@@ -55,7 +55,7 @@ def _safe_list_str(value: object) -> FlextTypes.Core.StringList:
 
 def _safe_first_str(value: object) -> str | None:
     """Safely get the first string from a possibly list-like value."""
-    if isinstance(value, list | tuple):
+    if isinstance(value, (list, tuple)):
         return str(value[0]) if value else None
     if isinstance(value, str):
         return value

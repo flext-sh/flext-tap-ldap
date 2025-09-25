@@ -43,7 +43,7 @@ class TestLDAPBaseStream:
         tap.logger = Mock()
         return tap
 
-    def test_base_stream_attributes(self, mock_tap: Mock) -> None:
+    def test_self(self, mock_tap: Mock) -> None:
         """Test method."""
         """Test base stream has required attributes."""
         # Use UsersStream as concrete implementation
@@ -75,7 +75,7 @@ class TestUsersStream:
         tap.logger = Mock()
         return tap
 
-    def test_users_stream_creation(self, mock_tap: Mock) -> None:
+    def test_self(self, mock_tap: Mock) -> None:
         """Test method."""
         """Test users stream creation."""
         stream = UsersStream(mock_tap)
@@ -84,7 +84,7 @@ class TestUsersStream:
         assert stream.name == "users"
         assert stream.tap == mock_tap
 
-    def test_users_stream_schema(self, mock_tap: Mock) -> None:
+    def test_self(self, mock_tap: Mock) -> None:
         """Test method."""
         """Test users stream schema definition."""
         stream = UsersStream(mock_tap)
@@ -231,7 +231,7 @@ class TestGroupsStream:
         tap.logger = Mock()
         return tap
 
-    def test_groups_stream_creation(self, mock_tap: Mock) -> None:
+    def test_self(self, mock_tap: Mock) -> None:
         """Test method."""
         """Test groups stream creation."""
         stream = GroupsStream(mock_tap)
@@ -240,7 +240,7 @@ class TestGroupsStream:
         assert stream.name == "groups"
         assert stream.tap == mock_tap
 
-    def test_groups_stream_schema(self, mock_tap: Mock) -> None:
+    def test_self(self, mock_tap: Mock) -> None:
         """Test method."""
         """Test groups stream schema definition."""
         stream = GroupsStream(mock_tap)
@@ -274,7 +274,7 @@ class TestOrganizationalUnitsStream:
         tap.logger = Mock()
         return tap
 
-    def test_organizational_units_stream_creation(self, mock_tap: Mock) -> None:
+    def test_self(self, mock_tap: Mock) -> None:
         """Test method."""
         """Test organizational units stream creation."""
         stream = OrganizationalUnitsStream(mock_tap)
@@ -283,7 +283,7 @@ class TestOrganizationalUnitsStream:
         assert stream.name == "organizational_units"
         assert stream.tap == mock_tap
 
-    def test_organizational_units_stream_schema(self, mock_tap: Mock) -> None:
+    def test_self(self, mock_tap: Mock) -> None:
         """Test method."""
         """Test organizational units stream schema definition."""
         stream = OrganizationalUnitsStream(mock_tap)
@@ -317,7 +317,7 @@ class TestSchemaStream:
         tap.logger = Mock()
         return tap
 
-    def test_schema_stream_creation(self, mock_tap: Mock) -> None:
+    def test_self(self, mock_tap: Mock) -> None:
         """Test method."""
         """Test schema stream creation."""
         stream = SchemaStream(mock_tap)
@@ -326,7 +326,7 @@ class TestSchemaStream:
         assert stream.name == "schema"
         assert stream.tap == mock_tap
 
-    def test_schema_stream_schema_definition(self, mock_tap: Mock) -> None:
+    def test_self(self, mock_tap: Mock) -> None:
         """Test method."""
         """Test schema stream schema definition."""
         stream = SchemaStream(mock_tap)
@@ -407,7 +407,7 @@ class TestCustomStream:
         tap.logger = Mock()
         return tap
 
-    def test_custom_stream_creation(self, mock_tap: Mock) -> None:
+    def test_self(self, mock_tap: Mock) -> None:
         """Test method."""
         """Test custom stream creation."""
         params = CustomStreamParams(
@@ -427,7 +427,7 @@ class TestCustomStream:
         assert stream.name == "service_accounts"
         assert stream.tap == mock_tap
 
-    def test_custom_stream_with_minimal_config(self, mock_tap: Mock) -> None:
+    def test_self(self, mock_tap: Mock) -> None:
         """Test method."""
         """Test custom stream with minimal configuration."""
         params = CustomStreamParams(
@@ -440,7 +440,7 @@ class TestCustomStream:
         assert stream.name == "minimal_custom"
         assert stream.tap == mock_tap
 
-    def test_custom_stream_schema_properties(self, mock_tap: Mock) -> None:
+    def test_self(self, mock_tap: Mock) -> None:
         """Test method."""
         """Test custom stream schema properties."""
         custom_properties = {
@@ -491,7 +491,7 @@ class TestCustomStream:
         assert "cn=custom_entry,dc=test,dc=com" in records[0]["dn"]
         mock_client_class.assert_called_once()
 
-    def test_custom_stream_schema_type_mappings(self, mock_tap: Mock) -> None:
+    def test_self(self, mock_tap: Mock) -> None:
         """Test method."""
         """Test custom stream schema type mappings."""
         custom_properties = {
@@ -578,7 +578,7 @@ class TestStreamIntegration:
         custom_stream = next(s for s in streams if s.name == "custom_test_stream")
         assert isinstance(custom_stream, CustomStream)
 
-    def test_ldif_streams_when_enabled(self, tap_config: FlextTypes.Core.Dict) -> None:
+    def test_self(self, tap_config: FlextTypes.Core.Dict) -> None:
         """Test method."""
         """Test LDIF streams are included when enabled."""
         tap_config["enable_ldif_streams"] = True
@@ -608,7 +608,7 @@ class TestLDAPBaseStreamDirectUsage:
         tap.logger = Mock()
         return tap
 
-    def test_base_stream_get_records_empty(self, mock_tap: Mock) -> None:
+    def test_self(self, mock_tap: Mock) -> None:
         """Test method."""
         """Test base stream get_records method (covers line 68)."""
 
