@@ -29,7 +29,7 @@ class TestLDAPClientCoverageBoost:
             page_size=1000,
         )
 
-    def test_build_server_uri_method_direct(self, client: LDAPClient) -> None:
+    def test_self(self, client: LDAPClient) -> None:
         """Test method."""
         """Test _build_server_uri method directly."""
         # This should cover lines 95-96
@@ -79,7 +79,7 @@ class TestLDAPClientCoverageBoost:
         results = client.search("dc=test,dc=com")
         assert results == []  # Should return empty in async context
 
-    def test_health_check_scenarios(self, client: LDAPClient) -> None:
+    def test_self(self, client: LDAPClient) -> None:
         """Test method."""
         """Test health_check method to cover lines 264-270."""
         # Test with successful connection

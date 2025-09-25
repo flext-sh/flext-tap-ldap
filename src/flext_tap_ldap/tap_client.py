@@ -516,7 +516,7 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
                         f"Entry extraction search failed: {search_result.error}",
                     )
 
-                entries = []
+                entries: list[dict[str, object]] = []
                 for entry in search_result.unwrap():
                     entry_dict = {}
 
