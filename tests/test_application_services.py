@@ -202,9 +202,10 @@ class TestLDAPStreamService:
         """Create stream service instance."""
         return LDAPStreamService()
 
-    async def test_self(self, service: LDAPStreamService) -> None:
-        """Test method."""
-        """Test successful stream creation."""
+    async def test_create_stream_with_attributes(
+        self, service: LDAPStreamService
+    ) -> None:
+        """Test successful stream creation with specific attributes."""
         connection_id = uuid4()
         params = StreamCreationParams(
             connection_id=connection_id,
@@ -237,9 +238,8 @@ class TestLDAPStreamService:
         assert result.data.key_properties == ["dn"]
         assert result.data.replication_method == "FULL_TABLE"
 
-    async def test_self(self, service: LDAPStreamService) -> None:
-        """Test method."""
-        """Test schema discovery."""
+    async def test_schema_discovery(self, service: LDAPStreamService) -> None:
+        """Test schema discovery functionality."""
         connection_id = uuid4()
         params = StreamCreationParams(
             connection_id=connection_id,
@@ -289,8 +289,7 @@ class TestTapExecutionService:
         """Create execution service instance."""
         return TapExecutionService()
 
-    async def test_self(self, service: TapExecutionService) -> None:
-        """Test method."""
+    async def test_create_execution(self, service: TapExecutionService) -> None:
         """Test execution creation."""
         connection_id = uuid4()
         result = await service.create_execution(
@@ -304,8 +303,7 @@ class TestTapExecutionService:
         assert result.data.command == "discover"
         assert result.data.tap_status == "created"
 
-    async def test_self(self, service: TapExecutionService) -> None:
-        """Test method."""
+    async def test_start_execution(self, service: TapExecutionService) -> None:
         """Test starting execution."""
         connection_id = uuid4()
         create_result = await service.create_execution(connection_id, "sync")
@@ -317,8 +315,7 @@ class TestTapExecutionService:
         assert start_result.data.tap_status == "discovering"
         assert start_result.data.started_at is not None
 
-    async def test_self(self, service: TapExecutionService) -> None:
-        """Test method."""
+    async def test_complete_execution(self, service: TapExecutionService) -> None:
         """Test completing execution."""
         connection_id = uuid4()
         create_result = await service.create_execution(connection_id, "sync")
@@ -335,8 +332,7 @@ class TestTapExecutionService:
         assert complete_result.data.tap_status == "completed"
         assert complete_result.data.exit_code == 0
 
-    async def test_self(self, service: TapExecutionService) -> None:
-        """Test method."""
+    async def test_update_execution_metrics(self, service: TapExecutionService) -> None:
         """Test updating execution metrics."""
         connection_id = uuid4()
         create_result = await service.create_execution(connection_id, "sync")
@@ -361,8 +357,7 @@ class TestLDAPRecordService:
         """Create record service instance."""
         return LDAPRecordService()
 
-    async def test_self(self, service: LDAPRecordService) -> None:
-        """Test method."""
+    async def test_create_record(self, service: LDAPRecordService) -> None:
         """Test record creation."""
         stream_id = uuid4()
         execution_id = uuid4()
@@ -380,8 +375,7 @@ class TestLDAPRecordService:
         assert result.data.attributes["uid"] == "jdoe"
         assert "singer_record" in result.data.__dict__
 
-    async def test_self(self, service: LDAPRecordService) -> None:
-        """Test method."""
+    async def test_list_records_with_filters(self, service: LDAPRecordService) -> None:
         """Test listing records with filters."""
         stream_id1 = uuid4()
         stream_id2 = uuid4()
@@ -400,8 +394,7 @@ class TestLDAPRecordService:
         filtered_result = await service.list_records(stream_id=stream_id1)
         assert len(filtered_result.data) == 2
 
-    async def test_self(self, service: LDAPRecordService) -> None:
-        """Test method."""
+    async def test_count_records(self, service: LDAPRecordService) -> None:
         """Test counting records."""
         stream_id = uuid4()
         execution_id = uuid4()

@@ -6,7 +6,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import asyncio
 import json
 import time
 from collections.abc import Generator, Iterator
@@ -16,6 +15,7 @@ import pytest
 from ldap3 import ALL, Connection, Server
 
 from flext_core import FlextLogger, FlextTypes
+from flext_tests import FlextTestDocker
 
 logger = FlextLogger(__name__)
 
@@ -49,37 +49,22 @@ def sample_catalog() -> FlextTypes.Core.Dict:
 
 @pytest.fixture(scope="session")
 def ldap_container(project_root: Path) -> Iterator[None]:
-    """Start and manage LDAP test container."""
+    """Start and manage LDAP test container using FlextTestDocker."""
     compose_file = project_root / "docker-compose.yml"
-    # Start containers
     logger.info("Starting OpenLDAP container...")
 
-    async def _run(
-        cmd_list: FlextTypes.Core.StringList,
-        cwd: str | None = None,
-        timeout_seconds: int = 120,
-    ) -> int:
-        process = await asyncio.create_subprocess_exec(
-            *cmd_list,
-            cwd=cwd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        try:
-            async with asyncio.timeout(timeout_seconds):
-                await process.communicate()
-        except TimeoutError:
-            process.kill()
-            await process.communicate()
-            raise
-        return process.returncode
+    # Use FlextTestDocker for unified Docker management
+    docker_manager = FlextTestDocker(workspace_root=project_root)
 
-    asyncio.run(
-        _run(
-            ["/usr/bin/env", "docker-compose", "-f", str(compose_file), "up", "-d"],
-            cwd=str(project_root),
-        ),
+    # Start containers using FlextTestDocker
+    start_result = docker_manager.compose_up(
+        compose_file=str(compose_file), detached=True
     )
+
+    if start_result.is_failure:
+        logger.error(f"Failed to start OpenLDAP container: {start_result.error}")
+        raise RuntimeError(f"Container startup failed: {start_result.error}")
+
     # Wait for LDAP to be ready
     max_retries = 30
     for i in range(max_retries):
@@ -103,16 +88,15 @@ def ldap_container(project_root: Path) -> Iterator[None]:
     yield
     # Cleanup
     logger.info("Stopping OpenLDAP container...")
-    asyncio.run(
-        _run(
-            ["/usr/bin/env", "docker-compose", "-f", str(compose_file), "down", "-v"],
-            cwd=str(project_root),
-        ),
+    stop_result = docker_manager.compose_down(
+        compose_file=str(compose_file), volumes=True
     )
+    if stop_result.is_failure:
+        logger.warning(f"Failed to stop container cleanly: {stop_result.error}")
 
 
 @pytest.fixture
-def ldap_connection(_ldap_container: None) -> Generator[Connection]:
+def ldap_connection(ldap_container: None) -> Generator[Connection]:
     """Create LDAP connection for testing."""
     server = Server("localhost", port=10389, get_info=ALL)
     conn = Connection(
@@ -126,7 +110,7 @@ def ldap_connection(_ldap_container: None) -> Generator[Connection]:
 
 
 @pytest.fixture
-def tap_config_file(tmp_path: Path, _ldap_container: None) -> Path:
+def tap_config_file(tmp_path: Path, ldap_container: None) -> Path:
     """Create tap configuration file for testing."""
     config = {
         "ldap_host": "localhost",

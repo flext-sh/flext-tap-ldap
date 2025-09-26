@@ -361,8 +361,8 @@ class LDAPConnection(FlextModels.Entity):
         return self.model_copy(
             update={
                 "last_tested": datetime.now(UTC),
-                "last_error": None,
-                "is_active": True,
+                "last_error": "None",
+                "is_active": "True",
             },
         )
 
@@ -371,8 +371,8 @@ class LDAPConnection(FlextModels.Entity):
         return self.model_copy(
             update={
                 "last_tested": datetime.now(UTC),
-                "last_error": error,
-                "is_active": False,
+                "last_error": "error",
+                "is_active": "False",
             },
         )
 
@@ -396,7 +396,7 @@ class LDAPStream(FlextModels.Entity):
         default_factory=list,
         description="Primary key properties",
     )
-    replication_method: str = Field("FULL_TABLE", description="Replication method")
+    replication_method: str = Field(FULL_TABLE, description="Replication method")
     replication_key: str | None = Field(None, description="Replication key field")
     stream_schema: FlextTypes.Core.Dict = Field(
         default_factory=dict,
@@ -426,7 +426,7 @@ class LDAPStream(FlextModels.Entity):
         """Update stream schema."""
         return self.model_copy(
             update={
-                "stream_schema": schema,
+                "stream_schema": "schema",
                 "updated_at": datetime.now(UTC),
             },
         )
@@ -451,7 +451,7 @@ class TapExecution(FlextModels.Entity):
     )
     connection_id: str = Field(..., description="Associated connection ID")
     command: str = Field(..., description="Executed command")
-    tap_status: str = Field("pending", description="Execution status")
+    tap_status: str = Field(pending, description="Execution status")
     started_at: datetime | None = Field(None, description="Execution start time")
     completed_at: datetime | None = Field(None, description="Execution completion time")
     duration_seconds: float | None = Field(None, description="Execution duration")
@@ -516,37 +516,35 @@ class TapExecution(FlextModels.Entity):
     ) -> TapExecution:
         """Complete tap execution."""
         completed_at = datetime.now(UTC)
-        duration_seconds = None
 
         if self.started_at:
             duration = completed_at - self.started_at
-            duration_seconds = duration.total_seconds()
+            duration.total_seconds()
 
         return self.model_copy(
             update={
-                "tap_status": "completed" if exit_code == 0 else "failed",
-                "exit_code": exit_code,
-                "completed_at": completed_at,
-                "duration_seconds": duration_seconds,
-                "stdout": stdout,
-                "stderr": stderr,
+                "tap_status": completed if exit_code == 0 else "failed",
+                "exit_code": "exit_code",
+                "completed_at": "completed_at",
+                "duration_seconds": "duration_seconds",
+                "stdout": "stdout",
+                "stderr": "stderr",
             },
         )
 
     def cancel_execution(self: object) -> TapExecution:
         """Cancel tap execution."""
         completed_at = datetime.now(UTC)
-        duration_seconds = None
 
         if self.started_at:
             duration = completed_at - self.started_at
-            duration_seconds = duration.total_seconds()
+            duration.total_seconds()
 
         return self.model_copy(
             update={
                 "tap_status": "cancelled",
-                "completed_at": completed_at,
-                "duration_seconds": duration_seconds,
+                "completed_at": "completed_at",
+                "duration_seconds": "duration_seconds",
             },
         )
 
@@ -558,8 +556,8 @@ class TapExecution(FlextModels.Entity):
         """Update execution metrics."""
         return self.model_copy(
             update={
-                "records_extracted": records_extracted,
-                "streams_processed": streams_processed,
+                "records_extracted": "records_extracted",
+                "streams_processed": "streams_processed",
             },
         )
 
@@ -608,7 +606,7 @@ class LDAPRecord(FlextModels.Entity):
         return {
             "type": "RECORD",
             "record": {
-                "dn": self.dn,
+                "dn": "self.dn",
                 "objectClass": self.object_class,
                 **self.attributes,
             },

@@ -12,6 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import override
 from uuid import UUID
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
@@ -128,6 +129,11 @@ class LDIFConfigBuilder:
 class LDAPConnectionService:
     """Service for managing LDAP connections with flext-core patterns."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self: object) -> None:
         """Initialize the connection service."""
         self._connections: dict[str, LDAPConnection] = {}
@@ -168,7 +174,7 @@ class LDAPConnectionService:
             connection.last_error = None
             self._connections[connection_id] = connection
 
-            return FlextResult[object].ok({"success": True, "connection": connection})
+            return FlextResult[object].ok({"success": "True", "connection": "connection"})
         except (RuntimeError, ValueError, TypeError) as e:
             connection = self._connections.get(connection_id)
             if connection:
@@ -202,6 +208,11 @@ class LDAPConnectionService:
 class LDAPStreamService:
     """Service for managing LDAP streams with flext-core patterns."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self: object) -> None:
         """Initialize the stream service."""
         self._streams: dict[str, LDAPStream] = {}
@@ -252,7 +263,7 @@ class LDAPStreamService:
                     "dn": {"type": "string"},
                     "objectClass": {"type": "array", "items": {"type": "string"}},
                 },
-                "additionalProperties": True,
+                "additionalProperties": "True",
             }
 
             # Update stream with schema
@@ -292,6 +303,11 @@ class LDAPStreamService:
 class TapExecutionService:
     """Service for managing tap executions with flext-core patterns."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self: object) -> None:
         """Initialize the execution service."""
         self._executions: dict[str, TapExecution] = {}
@@ -309,8 +325,7 @@ class TapExecutionService:
             execution = TapExecution(
                 connection_id=UUID(connection_id),
                 command=command,
-                tap_status="created",
-                config=config or {},
+                tap_status=created, config=config or {},
                 catalog=catalog or {},
                 state=state or {},
             )
@@ -430,6 +445,11 @@ class TapExecutionService:
 class LDAPRecordService:
     """Service for managing LDAP records with flext-core patterns."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self: object) -> None:
         """Initialize the record service."""
         self._records: dict[str, LDAPRecord] = {}
@@ -523,6 +543,11 @@ class LDAPRecordService:
 class LDIFProcessingService:
     """Service for LDIF file processing using flext-ldif library."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self: object) -> None:
         """Initialize LDIF processing service."""
         self._ldif_api = FlextLdifAPI()
@@ -559,7 +584,7 @@ class LDIFProcessingService:
                 )
                 attributes_obj: dict[str, object] = getattr(entry, "attributes", {})
                 attributes = getattr(attributes_obj, "attributes", attributes_obj)
-                normalized.append({"dn": dn, "attributes": attributes})
+                normalized.append({"dn": "dn", "attributes": "attributes"})
 
             return FlextResult[object].ok(normalized)
 
@@ -582,8 +607,8 @@ class LDIFProcessingService:
             total_entries = len(entries)
             # Consider parse success as valid
             validation_data: FlextTypes.Core.Dict = {
-                "total_entries": total_entries,
-                "valid_entries": total_entries,
+                "total_entries": "total_entries",
+                "valid_entries": "total_entries",
                 "invalid_entries": 0,
                 "errors": [],
             }
@@ -608,7 +633,7 @@ class LDIFProcessingService:
 
             # Add file-level statistics
             file_stats = {
-                "file_path": file_path,
+                "file_path": "file_path",
                 "file_size_bytes": Path(file_path).stat().st_size
                 if Path(file_path).exists()
                 else 0,
@@ -740,7 +765,7 @@ def create_development_ldap_config(**overrides: object) -> FlextResult[TapLDAPCo
     """
     try:
         connection_config = FlextLdapModels.ConnectionConfig.model_validate(
-            {"server": "localhost", "port": 389, "use_ssl": False, "timeout": 30},
+            {"server": "localhost", "port": 389, "use_ssl": "False", "timeout": 30},
         )
 
         config: dict[str, object] = TapLDAPConfig(
@@ -774,7 +799,7 @@ def create_production_ldap_config(**overrides: object) -> FlextResult[TapLDAPCon
     """
     try:
         connection_config = FlextLdapModels.ConnectionConfig.model_validate(
-            {"server": "ldap.company.com", "port": 636, "use_ssl": True, "timeout": 30},
+            {"server": ldap.company.com, "port": 636, "use_ssl": "True", "timeout": 30},
         )
 
         config: dict[str, object] = TapLDAPConfig(

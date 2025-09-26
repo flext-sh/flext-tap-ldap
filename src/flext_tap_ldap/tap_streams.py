@@ -14,6 +14,7 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from itertools import starmap
 from pathlib import Path
+from typing import override
 
 from singer_sdk import Stream
 from singer_sdk.typing import (
@@ -141,6 +142,14 @@ class CustomStreamParams:
 class LDAPBaseStream(Stream):
     """Base class for LDAP streams with flext-ldap integration."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(
         self,
         tap: FlextTapLDAP,
@@ -230,6 +239,14 @@ class LDAPBaseStream(Stream):
 class UsersStream(LDAPBaseStream):
     """Stream for LDAP user entries."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize users stream."""
         name = "users"
@@ -301,6 +318,14 @@ class UsersStream(LDAPBaseStream):
 class GroupsStream(LDAPBaseStream):
     """Stream for LDAP group entries."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize groups stream."""
         name = "groups"
@@ -366,6 +391,14 @@ class GroupsStream(LDAPBaseStream):
 class OrganizationalUnitsStream(LDAPBaseStream):
     """Stream for LDAP organizational unit entries."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize organizational units stream."""
         name = "organizational_units"
@@ -417,6 +450,14 @@ class OrganizationalUnitsStream(LDAPBaseStream):
 class SchemaStream(LDAPBaseStream):
     """Stream for LDAP schema information."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize schema stream."""
         name = "schema"
@@ -500,6 +541,14 @@ class SchemaStream(LDAPBaseStream):
 class CustomStream(LDAPBaseStream):
     """Custom LDAP stream with configurable filter and schema."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self, tap: FlextTapLDAP, params: CustomStreamParams) -> None:
         """Initialize custom stream with parameters."""
         self.params = params
@@ -579,6 +628,14 @@ class CustomStream(LDAPBaseStream):
 class LDIFStream(Stream):
     """LDIF stream using flext-ldif for ALL processing."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize LDIF stream with library delegation."""
         # Set required attributes BEFORE calling super().__init__()
@@ -703,10 +760,10 @@ class LDIFStream(Stream):
 
             return {
                 "dn": str(entry.dn),
-                "entry_type": entry_type,
-                "objectClass": object_classes,
+                "entry_type": "entry_type",
+                "objectClass": "object_classes",
                 "attributes": entry.attributes,
-                "source_file": source_file,
+                "source_file": "source_file",
                 "line_number": 0,
             }
 
@@ -718,6 +775,14 @@ class LDIFStream(Stream):
 class LDIFAnalysisStream(Stream):
     """LDIF analysis stream for migration statistics and validation."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize LDIF analysis stream."""
         self.name = "ldif_analysis"
@@ -826,8 +891,8 @@ class LDIFAnalysisStream(Stream):
             )
 
             analysis_data = {
-                "file_path": file_path,
-                "file_size_bytes": file_size,
+                "file_path": "file_path",
+                "file_size_bytes": "file_size",
                 "processing_time_seconds": time.time() - start_time,
                 "total_entries": 0,
                 "valid_entries": 0,
@@ -869,7 +934,7 @@ class LDIFAnalysisStream(Stream):
         except Exception as e:
             logger.exception("Error analyzing LDIF file %s", file_path)
             yield {
-                "file_path": file_path,
+                "file_path": "file_path",
                 "file_size_bytes": 0,
                 "processing_time_seconds": time.time() - start_time,
                 "total_entries": 0,

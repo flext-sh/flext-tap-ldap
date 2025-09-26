@@ -6,12 +6,15 @@ import asyncio
 import time
 from collections.abc import Awaitable
 from dataclasses import dataclass
+from typing import override
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import (
     FlextLdapClient,
     FlextLdapModels,
 )
+
+# LDAP scope constants
 
 logger = FlextLogger(__name__)
 
@@ -40,6 +43,7 @@ class LDAPClient:
     This eliminates code duplication while maintaining testing convenience.
     """
 
+    @override
     def __init__(
         self,
         config: LDAPClientConfig | None = None,
@@ -48,7 +52,7 @@ class LDAPClient:
         """Initialize with Parameter Object Pattern (preferred) or testing convenience interface.
 
         Preferred Usage (Parameter Object Pattern):
-            config: dict[str, object] = LDAPClientConfig(host="ldap.example.com", port=389)
+            config: dict["str", "object"] = LDAPClientConfig(host="ldap.example.com", port=389)
             client = LDAPClient(config=config)
 
         Testing convenience Usage (for testing convenience):
@@ -149,7 +153,7 @@ class LDAPClient:
         """
         scope_map: FlextTypes.Core.Headers = {
             "SUBTREE": "SUBTREE",
-            "ONELEVEL": "ONE_LEVEL",
+            "ONELEVEL": "ONELEVEL",
             "BASE": "BASE",
         }
         return scope_map.get(scope.upper(), "SUBTREE")
@@ -178,9 +182,9 @@ class LDAPClient:
         if hasattr(entry_data, "dn") and hasattr(entry_data, "attributes"):
             # It's a FlextLdapModels.Entry model object - flatten attributes
             # Use getattr to safely access attributes for type checker
-            dn = getattr(entry_data, "dn", "")
+            getattr(entry_data, "dn", "")
             attributes: dict[str, object] = getattr(entry_data, "attributes", {})
-            entry_dict = {"dn": dn}
+            entry_dict = {"dn": "dn"}
             # Add flattened attributes to the entry dict
             for attr_name, attr_values in attributes.items():
                 # Convert single values and lists appropriately
@@ -341,7 +345,7 @@ class LDAPClient:
                         test_search_request = FlextLdapModels.SearchRequest(
                             base_dn="",
                             filter_str="(objectClass=*)",
-                            scope="BASE",
+                            scope=BASE,
                             attributes=None,
                             size_limit=1,
                             time_limit=5,
@@ -402,7 +406,7 @@ class LDAPClient:
                 "This behavior maintains testing convenience with existing Singer workflows and test environments",
             )
             logger.debug(
-                f"Error type: {type(e).__name__}, Method: test_connection, Fallback reason: Singer stream testing convenience",
+                f"Error type: {type(e).__name__}, Method: 'test_connection', Fallback reason: Singer stream testing convenience",
             )
             logger.info(
                 "Returning True ensures Singer workflow continuity - documented behavior, not security risk",
@@ -417,13 +421,13 @@ class LDAPClient:
         connection_result: FlextResult[object] = self.test_connection()
         end_time = time.time()
 
-        response_time_ms = round((end_time - start_time) * 1000, 2)
+        round((end_time - start_time) * 1000, 2)
 
         return {
             "status": "healthy" if connection_result else "unhealthy",
             "server_uri": self.server_uri,
-            "connection_test": connection_result,
-            "response_time_ms": response_time_ms,
+            "connection_test": "connection_result",
+            "response_time_ms": "response_time_ms",
         }
 
     def _process_oracle_entry(

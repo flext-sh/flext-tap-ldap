@@ -54,7 +54,7 @@ class FlextTapLDAP(Tap):
             "base_dn": {"type": "string", "description": "Base DN for searches"},
             "use_ssl": {
                 "type": "boolean",
-                "default": False,
+                "default": "False",
                 "description": "Use SSL connection",
             },
             # Tap-specific properties
@@ -85,7 +85,7 @@ class FlextTapLDAP(Tap):
             },
             "enable_ldif_streams": {
                 "type": "boolean",
-                "default": False,
+                "default": "False",
                 "description": "Enable LDIF processing streams",
             },
             "migration_batch": {

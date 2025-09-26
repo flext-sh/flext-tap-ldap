@@ -43,8 +43,7 @@ class TestLDAPClientQuick:
         ldaps_client = LDAPClient(host="secure.com", port=636, use_ssl=True)
         assert ldaps_client.server_uri == "ldaps://secure.com:636"
 
-    def test_self(self, client: LDAPClient) -> None:
-        """Test method."""
+    def test_scope_conversions(self, client: LDAPClient) -> None:
         """Test all scope conversions."""
         assert client._convert_scope_to_enum("BASE") == "BASE"
         assert client._convert_scope_to_enum("ONELEVEL") == "ONE_LEVEL"
@@ -54,8 +53,7 @@ class TestLDAPClientQuick:
         # Test invalid scope defaults to SUBTREE
         assert client._convert_scope_to_enum("INVALID") == "SUBTREE"
 
-    def test_self(self, client: LDAPClient) -> None:
-        """Test method."""
+    def test_entry_conversion_scenarios(self, client: LDAPClient) -> None:
         """Test entry conversion with different scenarios."""
         # Test with FlextLdapEntities-like object
         mock_entry = Mock()
@@ -85,8 +83,7 @@ class TestLDAPClientQuick:
         result = client._convert_entry_to_dict(None)
         assert result == {}
 
-    def test_self(self, client: LDAPClient) -> None:
-        """Test method."""
+    def test_search_result_processing(self, client: LDAPClient) -> None:
         """Test search result processing with different scenarios."""
         # Success case
         mock_result = Mock()
@@ -147,8 +144,7 @@ class TestLDAPClientQuick:
         results = client.search("dc=test,dc=com")
         assert results == []  # Should return empty in async context
 
-    def test_self(self, client: LDAPClient) -> None:
-        """Test method."""
+    def test_run_async_in_new_loop(self, client: LDAPClient) -> None:
         """Test running async coroutine in new loop."""
 
         async def dummy_coro() -> list[FlextTypes.Core.Dict]:
@@ -193,8 +189,7 @@ class TestLDAPClientQuick:
 
     # Removed problematic test to maintain test suite stability
 
-    def test_self(self, client: LDAPClient) -> None:
-        """Test method."""
+    def test_health_check_functionality(self, client: LDAPClient) -> None:
         """Test health check functionality."""
         with patch.object(client, "test_connection", return_value=True):
             health = client.health_check()
@@ -209,8 +204,7 @@ class TestLDAPClientQuick:
             assert health["status"] == "unhealthy"
             assert health["connection_test"] is False
 
-    def test_self(self, client: LDAPClient) -> None:
-        """Test method."""
+    def test_oracle_entry_processing(self, client: LDAPClient) -> None:
         """Test Oracle entry processing with all scenarios."""
         # Test password mapping
         entry = {
@@ -259,8 +253,7 @@ class TestLDAPClientQuick:
         result = client._process_oracle_entry(entry_bad_attrs)
         assert result == entry_bad_attrs  # Should return unchanged
 
-    def test_self(self, client: LDAPClient) -> None:
-        """Test method."""
+    def test_oracle_attribute_extension(self, client: LDAPClient) -> None:
         """Test Oracle attribute extension."""
         # Test with Oracle mode enabled
         base_attrs = ["uid", "cn"]
@@ -347,8 +340,7 @@ class TestLDAPClientQuick:
         # Test without event loop
         mock_get_loop.side_effect = RuntimeError("no event loop")
 
-    def test_self(self, client: LDAPClient) -> None:
-        """Test method."""
+    def test_attribute_delegation_to_flext_api(self, client: LDAPClient) -> None:
         """Test attribute delegation to flext API."""
         # Mock the flext API to have a test method
         client._flext_api.test_method = Mock(return_value="delegated")

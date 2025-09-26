@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from pathlib import Path
+from typing import override
 
 from flext_meltano.singer_types import FlextSingerTypes
 from singer_sdk import Stream
@@ -21,6 +22,8 @@ th: FlextSingerTypes = FlextSingerTypes()
 class LDIFStream(Stream):
     """LDIF stream using flext-ldif for ALL processing."""
 
+    @override
+    @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize LDIF stream with library delegation."""
         # Set required attributes BEFORE calling super().__init__()
@@ -94,11 +97,11 @@ class LDIFStream(Stream):
         """Convert flext-ldif entry to Singer record."""
         # Delegate entry type classification to flext-ldap
         object_classes = flext_entry.attributes.get_values("objectClass")
-        entry_type = self._classify_entry_type(object_classes)
+        self._classify_entry_type(object_classes)
         return {
             "dn": flext_entry.dn.value,
-            "entry_type": entry_type,
-            "object_classes": object_classes,
+            "entry_type": "entry_type",
+            "object_classes": "object_classes",
             "attributes": flext_entry.attributes.attributes,
         }
 
@@ -117,6 +120,8 @@ class LDIFStream(Stream):
 class LDIFAnalysisStream(Stream):
     """LDIF analysis stream using flext-ldif for ALL analysis."""
 
+    @override
+    @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize LDIF analysis stream with library delegation."""
         # Set required attributes BEFORE calling super().__init__()
@@ -197,9 +202,9 @@ class LDIFAnalysisStream(Stream):
                 )
             yield {
                 "analysis_id": "ldif_summary",
-                "total_entries": total_entries,
-                "entry_types": entry_types,
-                "object_classes": object_classes,
+                "total_entries": "total_entries",
+                "entry_types": "entry_types",
+                "object_classes": "object_classes",
             }
         except Exception:
             logger.exception("LDIF analysis error")
@@ -221,7 +226,7 @@ class LDIFAnalysisStream(Stream):
             result: FlextResult[object] = self._ldif_api.parse(content)
             if result.success and result.data:
                 # Generate statistics from parsed entries
-                total_entries = len(result.data)
+                len(result.data)
                 entry_types: dict[str, int] = {}
                 object_classes: dict[str, int] = {}
                 for entry in result.data:
@@ -233,9 +238,9 @@ class LDIFAnalysisStream(Stream):
                     for oc in oc_list:
                         object_classes[oc] = object_classes.get(oc, 0) + 1
                 return {
-                    "total_entries": total_entries,
-                    "entry_types": entry_types,
-                    "object_classes": object_classes,
+                    "total_entries": "total_entries",
+                    "entry_types": "entry_types",
+                    "object_classes": "object_classes",
                 }
             logger.error(f"Failed to analyze LDIF file {ldif_file}: {result.error}")
             return {"total_entries": 0, "entry_types": {}, "object_classes": {}}

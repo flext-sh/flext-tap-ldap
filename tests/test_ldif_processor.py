@@ -298,8 +298,7 @@ sn: doe
 mail: john.doe@example.com
 """
 
-    def test_self(self, processor: FlextLdifProcessor) -> None:
-        """Test method."""
+    def test_processor_initialization(self, processor: FlextLdifProcessor) -> None:
         """Test LDIF processor initialization."""
         assert processor is not None
 
@@ -338,8 +337,9 @@ mail: john.doe@example.com
         entries = result.data
         assert len(entries) == 3
 
-    def test_self(self, processor: FlextLdifProcessor) -> None:
-        """Test method."""
+    def test_invalid_ldif_content_processing(
+        self, processor: FlextLdifProcessor
+    ) -> None:
         """Test processing invalid LDIF content."""
         invalid_content = "this is not valid ldif content"
 
@@ -354,8 +354,9 @@ mail: john.doe@example.com
         # or fail - adjust based on actual behavior
         assert isinstance(result, FlextResult)
 
-    def test_self(self, processor: FlextLdifProcessor) -> None:
-        """Test method."""
+    def test_ldif_processing_with_validation_errors(
+        self, processor: FlextLdifProcessor
+    ) -> None:
         """Test LDIF processing with validation errors."""
         content_with_errors = """dnClass: domain
 
@@ -375,8 +376,9 @@ invalidAttribute:
         if result.is_failure:
             assert result.error is not None
 
-    def test_self(self, processor: FlextLdifProcessor) -> None:
-        """Test method."""
+    def test_processor_statistics_functionality(
+        self, processor: FlextLdifProcessor
+    ) -> None:
         """Test processor statistics functionality."""
         stats = processor.get_statistics()
         assert isinstance(stats, dict)
@@ -470,8 +472,7 @@ invalidAttribute:
 class TestLDIFProcessorIntegration:
     """Integration tests for LDIF processor."""
 
-    def test_self(self, tmp_path: str) -> None:
-        """Test method."""
+    def test_end_to_end_ldif_processing(self, tmp_path: str) -> None:
         """Test end-to-end LDIF processing."""
         # Create sample LDIF file
         ldif_content = """dn: dc=test,dc=com
@@ -506,8 +507,7 @@ mail: user1@test.com
         user_entry = next(e for e in entries if "cn=user1" in e.dn)
         assert user_entry.get_attribute("mail") == ["user1@test.com"]
 
-    def test_self(self, tmp_path: str) -> None:
-        """Test method."""
+    def test_multiple_ldif_files_processing(self, tmp_path: str) -> None:
         """Test processing multiple LDIF files."""
         processor = FlextLdifProcessor()
 

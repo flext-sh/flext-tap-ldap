@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import override
 from uuid import UUID
 
 from flext_core import (
@@ -97,6 +98,10 @@ class StreamCreationParams:
 class LDAPConnectionService:
     """Service for managing LDAP connections."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(self: object) -> None:
         """Initialize the connection service."""
         self._connections: dict[
@@ -142,7 +147,7 @@ class LDAPConnectionService:
             # Here you would actually test the LDAP connection
             # For now, we just mark it as tested
             connection.last_tested = datetime.now(UTC)
-            return FlextResult[FlextTypes.Core.Dict].ok({"success": True})
+            return FlextResult[FlextTypes.Core.Dict].ok({"success": "True"})
         except (RuntimeError, ValueError, TypeError) as e:
             connection = self._connections.get(connection_id)
             if connection:
@@ -178,6 +183,10 @@ class LDAPConnectionService:
 class LDAPStreamService:
     """Service for managing LDAP streams."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(self: object) -> None:
         """Initialize the stream service."""
         self._streams: dict[
@@ -235,7 +244,7 @@ class LDAPStreamService:
                     "dn": {"type": "string"},
                     "objectClass": {"type": "array", "items": {"type": "string"}},
                 },
-                "additionalProperties": True,
+                "additionalProperties": "True",
             }
 
             stream.update_schema(schema)
@@ -272,6 +281,10 @@ class LDAPStreamService:
 class TapExecutionService:
     """Service for managing tap executions."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(self: object) -> None:
         """Initialize the execution service."""
         self._executions: dict[
@@ -292,7 +305,7 @@ class TapExecutionService:
             execution = TapExecution(
                 connection_id=connection_id,
                 command=command,
-                tap_status="created",
+                tap_status=created,
                 config=config or {},
                 catalog=catalog or {},
                 state=state or {},
@@ -408,6 +421,10 @@ class TapExecutionService:
 class LDAPRecordService:
     """Service for managing LDAP records."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(self: object) -> None:
         """Initialize the record service."""
         self._records: dict[

@@ -171,7 +171,7 @@ class LDAPEntry(FlextModels.Entity):
 
         """
         result = {
-            "dn": self.dn,
+            "dn": "self.dn",
             "objectClass": self.object_classes,
         }
 
