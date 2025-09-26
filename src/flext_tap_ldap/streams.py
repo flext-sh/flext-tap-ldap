@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
+from typing import override
 
 from singer_sdk import Stream
 from singer_sdk.typing import (
@@ -96,6 +97,12 @@ class CustomStreamParams:
 class LDAPBaseStream(Stream):
     """Base class for LDAP streams."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(
         self,
         tap: FlextTapLDAP,
@@ -123,6 +130,12 @@ class UsersStream(LDAPBaseStream):
     replication_method = "INCREMENTAL"
     replication_key = "modifyTimestamp"
 
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize users stream."""
         # Set required attributes BEFORE calling super().__init__()
@@ -203,6 +216,12 @@ class UsersStream(LDAPBaseStream):
 class GroupsStream(LDAPBaseStream):
     """Stream for LDAP groups."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize groups stream."""
         # Set required attributes BEFORE calling super().__init__()
@@ -304,6 +323,12 @@ class GroupsStream(LDAPBaseStream):
 class OrganizationalUnitsStream(LDAPBaseStream):
     """Stream for organizational units."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize organizational units stream."""
         # Set required attributes BEFORE calling super().__init__()
@@ -395,6 +420,12 @@ class OrganizationalUnitsStream(LDAPBaseStream):
 class SchemaStream(LDAPBaseStream):
     """Stream for LDAP schema."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize schema stream."""
         # Set required attributes BEFORE calling super().__init__()
@@ -461,7 +492,7 @@ class SchemaStream(LDAPBaseStream):
                                     :100
                                 ],  # Truncate for safety
                                 "syntax": "parsed_syntax",
-                                "single_value": False,
+                                "single_value": "False",
                             }
                             yield record
             else:  # No LDAP schema data, provide fallback
@@ -472,7 +503,7 @@ class SchemaStream(LDAPBaseStream):
                     "oid": "2.5.4.3",
                     "description": "Common Name",
                     "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-                    "single_value": False,
+                    "single_value": "False",
                 }
 
         except Exception:
@@ -484,13 +515,19 @@ class SchemaStream(LDAPBaseStream):
                 "oid": "2.5.4.3",
                 "description": "Common Name",
                 "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-                "single_value": False,
+                "single_value": "False",
             }
 
 
 class CustomStream(LDAPBaseStream):
     """Custom stream for LDAP queries."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(
         self,
         tap: FlextTapLDAP,

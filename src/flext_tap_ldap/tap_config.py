@@ -118,13 +118,10 @@ class TapLDAPConfig(FlextModels.ArbitraryTypesModel):
     """
 
     model_config = SettingsConfigDict(
-        env_prefix="TAP_LDAP_",
-        env_file=".env",
+        env_prefix=TAP_LDAP_, env_file=".env",
         env_file_encoding="utf-8",
-        env_nested_delimiter="__",
-        case_sensitive=False,
-        extra="allow",
-        validate_assignment=True,
+        env_nested_delimiter=__, case_sensitive=False,
+        extra=allow, validate_assignment=True,
         str_strip_whitespace=True,
         use_enum_values=True,
     )
@@ -288,23 +285,23 @@ class TapLDAPConfig(FlextModels.ArbitraryTypesModel):
         ldap_defaults: FlextTypes.Core.Dict = {
             "host": "localhost",
             "port": 389,
-            "use_ssl": False,
+            "use_ssl": "False",
             "timeout_seconds": 30,
         }
 
         # LDIF processing defaults
         ldif_defaults: FlextTypes.Core.Dict = {
-            "ldif_files": None,
-            "ldif_directory": None,
+            "ldif_files": "None",
+            "ldif_directory": "None",
             "ldif_file_pattern": "*.ldif",
-            "ldif_ignore_errors": True,
+            "ldif_ignore_errors": "True",
             "ldif_max_errors": 100,
-            "ldif_ignore_file_errors": True,
-            "ldif_ignore_entry_errors": True,
-            "ldif_apply_transformations": False,
-            "ldif_transformation_rules": None,
-            "migration_batch": None,
-            "enable_ldif_streams": False,
+            "ldif_ignore_file_errors": "True",
+            "ldif_ignore_entry_errors": "True",
+            "ldif_apply_transformations": "False",
+            "ldif_transformation_rules": "None",
+            "migration_batch": "None",
+            "enable_ldif_streams": "False",
         }
 
         # Apply overrides to connection config

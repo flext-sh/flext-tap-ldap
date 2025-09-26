@@ -12,22 +12,35 @@ from flext_core import FlextConstants
 
 
 class FlextTapLdapConstants(FlextConstants):
-    """LDAP tap extraction-specific constants following flext-core patterns."""
+    """LDAP tap extraction-specific constants following FLEXT unified pattern with nested domains."""
 
-    # LDAP Connection Configuration
-    DEFAULT_LDAP_HOST = "localhost"
-    DEFAULT_LDAP_PORT = 389
-    DEFAULT_LDAPS_PORT = 636
-    DEFAULT_LDAP_TIMEOUT = 30
-    DEFAULT_PAGE_SIZE = 1000
+    class Connection:
+        """LDAP connection configuration constants."""
 
-    # Singer Tap Configuration
-    DEFAULT_BATCH_SIZE = 1000
-    MAX_BATCH_SIZE = 10000
+        class Ldap:
+            """Standard LDAP connection settings."""
 
-    # LDAP Search Configuration
-    DEFAULT_SEARCH_SCOPE = "SUBTREE"
-    SEARCH_SCOPES: ClassVar[list[str]] = ["BASE", "ONELEVEL", "SUBTREE"]
+            DEFAULT_HOST = FlextConstants.Platform.DEFAULT_HOST
+            DEFAULT_PORT = FlextConstants.Platform.LDAP_DEFAULT_PORT
+            DEFAULT_TIMEOUT = FlextConstants.Network.DEFAULT_TIMEOUT
+
+        class Ldaps:
+            """Secure LDAP connection settings."""
+
+            DEFAULT_PORT = FlextConstants.Platform.LDAPS_DEFAULT_PORT
+
+    class Processing:
+        """Singer tap data processing configuration."""
+
+        DEFAULT_PAGE_SIZE = FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE
+        DEFAULT_BATCH_SIZE = FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE
+        MAX_BATCH_SIZE = FlextConstants.Performance.BatchProcessing.MAX_ITEMS
+
+    class Search:
+        """LDAP search operation configuration."""
+
+        DEFAULT_SCOPE = "SUBTREE"
+        SCOPES: ClassVar[list[str]] = ["BASE", "ONELEVEL", "SUBTREE"]
 
 
 __all__ = ["FlextTapLdapConstants"]

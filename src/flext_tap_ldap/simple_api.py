@@ -270,7 +270,7 @@ def create_ldif_processing_config(
 
     Keyword Args:
       **kwargs: Optional keyword-only parameters, including:
-          - ldif_file_pattern: Pattern for LDIF files (default: "*.ldif").
+          - ldif_file_pattern: Pattern for LDIF files (default: *.ldif).
           - ldif_ignore_errors: Continue on parsing errors (default: True).
           - ldif_max_errors: Max errors before stopping (default: 100).
           - ldif_ignore_file_errors: Continue if a file fails (default: True).
@@ -380,7 +380,7 @@ def create_development_ldap_config(**overrides: object) -> FlextResult[TapLDAPCo
     """
     try:
         connection_config = LDAPConnectionConfig(
-            host="localhost",
+            host=localhost,
             port=389,
             use_ssl=False,
             bind_dn="cn=admin,dc=example,dc=com",
@@ -476,7 +476,7 @@ def create_ldif_processing_config_advanced(
     try:
         # Minimal connection config (not used for LDIF processing)
         connection_config = LDAPConnectionConfig(
-            host="dummy",
+            host=dummy,
             base_dn="dc=migration,dc=temp",
         )
 

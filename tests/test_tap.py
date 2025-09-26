@@ -42,16 +42,16 @@ class TestFlextTapLDAPUnit:
             "page_size": 1000,
         }
 
-    def test_self(self, config: FlextTypes.Core.Dict) -> None:
-        """Test method."""
+    def test_tap_initialization(self, config: FlextTypes.Core.Dict) -> None:
+        """Test tap initialization."""
         tap = FlextTapLDAP(config=config)
         if tap.name != "tap-ldap":
             msg: str = f"Expected {'tap-ldap'}, got {tap.name}"
             raise AssertionError(msg)
         assert tap.config == config
 
-    def test_self(self, config: FlextTypes.Core.Dict) -> None:
-        """Test method."""
+    def test_stream_discovery(self, config: FlextTypes.Core.Dict) -> None:
+        """Test stream discovery."""
         tap = FlextTapLDAP(config=config)
         streams = tap.discover_streams()
 
@@ -69,8 +69,8 @@ class TestFlextTapLDAPUnit:
             msg: str = f"Expected {4}, got {len(streams)}"
             raise AssertionError(msg)
 
-    def test_self(self, config: FlextTypes.Core.Dict) -> None:
-        """Test method."""
+    def test_custom_streams_configuration(self, config: FlextTypes.Core.Dict) -> None:
+        """Test custom streams configuration."""
         config["custom_streams"] = [
             {
                 "name": "service_accounts",
@@ -97,8 +97,8 @@ class TestFlextTapLDAPUnit:
             msg: str = f"Expected {5}, got {len(streams)}"
             raise AssertionError(msg)
 
-    def test_self(self, config: FlextTypes.Core.Dict) -> None:
-        """Test method."""
+    def test_catalog_generation(self, config: FlextTypes.Core.Dict) -> None:
+        """Test catalog generation and metadata."""
         tap = FlextTapLDAP(config=config)
         catalog = tap.catalog_dict
 

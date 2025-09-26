@@ -15,6 +15,7 @@ import time
 from collections.abc import Awaitable
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import override
 
 from flext_core import (
     FlextContainer,
@@ -66,6 +67,9 @@ class LDAPClient:
     This eliminates code duplication while maintaining testing convenience.
     """
 
+    @override
+    @override
+    @override
     def __init__(self, client_config: LDAPClientConfig) -> None:
         """Initialize the LDAP client."""
         # Store for testing convenience - these are what tests expect
@@ -317,7 +321,7 @@ class LDAPClient:
                 "This behavior maintains testing convenience with existing Singer workflows and test environments",
             )
             logger.debug(
-                f"Error type: {type(e).__name__}, Method: test_connection, Fallback reason: Singer stream testing convenience",
+                f'Error type: {type(e).__name__}, Method: "test_connection", Fallback reason: Singer stream testing convenience',
             )
             logger.info(
                 "Returning True ensures Singer workflow continuity - documented behavior, not security risk",
@@ -337,7 +341,7 @@ class LDAPClient:
         return {
             "status": "healthy" if connection_result else "unhealthy",
             "server_uri": self.server_uri,
-            "connection_test": connection_result,
+            "connection_test": "connection_result",
             "response_time_ms": response_time_ms,
         }
 
@@ -353,6 +357,9 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
     Follows flext-core patterns with explicit error handling.
     """
 
+    @override
+    @override
+    @override
     def __init__(self, **_data: object) -> None:
         """Initialize LDAP tap with flext-core foundation."""
         super().__init__()
@@ -408,8 +415,7 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
                 search_request = FlextLdapModels.SearchRequest(
                     base_dn=search_base,
                     filter_str="(objectClass=*)",
-                    scope="base",
-                    attributes=["objectClass"],
+                    scope=base, attributes=["objectClass"],
                 )
                 search_result = await flext_api.search(search_request)
 
@@ -438,8 +444,7 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
                 search_request = FlextLdapModels.SearchRequest(
                     base_dn=search_base,
                     filter_str="(objectClass=*)",
-                    scope="subtree",
-                    attributes=["*"],
+                    scope=subtree, attributes=["*"],
                     size_limit=10,
                 )
                 search_result = await flext_api.search(search_request)
@@ -610,7 +615,7 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
                     f"Schema discovery failed: {schema_result.error}",
                 )
 
-            schema = schema_result.unwrap()
+            schema_result.unwrap()
 
             # Build Singer catalog
             catalog = {
@@ -618,13 +623,13 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
                     {
                         "tap_stream_id": "ldap_entries",
                         "stream": "ldap_entries",
-                        "schema": schema,
+                        "schema": "schema",
                         "metadata": [
                             {
                                 "breadcrumb": [],
                                 "metadata": {
                                     "inclusion": "available",
-                                    "selected": True,
+                                    "selected": "True",
                                 },
                             },
                         ],
@@ -736,7 +741,7 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
                 f"Connection test failed: {connection_result.error}",
             )
 
-        session_id = connection_result.unwrap()
+        connection_result.unwrap()
 
         try:
             # Test basic search to get server info using flext-ldap API
@@ -748,10 +753,10 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
 
             server_info = {
                 "server_uri": f"{'ldaps' if self.domain_model.connection.use_ssl else 'ldap'}://{self.domain_model.connection.host}:{self.domain_model.connection.port}",
-                "connected": True,
+                "connected": "True",
                 "search_test": search_result.is_success,
                 "connection_method": "flext-ldap API",
-                "session_id": session_id,
+                "session_id": "session_id",
             }
 
             return FlextResult[FlextTypes.Core.Dict].ok(server_info)
@@ -760,6 +765,7 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
             # Disconnect when done
             await self._flext_api.disconnect()
 
+    @override
     async def execute(self) -> FlextResult[LdapTapResult]:
         """Execute LDAP tap operation."""
         self._logger.info("Executing LDAP tap operation")
@@ -810,6 +816,9 @@ class FlextTapLDAPPlugin:
     following the FLEXT plugin architecture patterns.
     """
 
+    @override
+    @override
+    @override
     def __init__(self, config: FlextTypes.Core.Dict) -> None:
         """Initialize LDAP tap plugin."""
         # Convert dict config to TapLDAPConfig
@@ -854,6 +863,8 @@ class FlextTapLDAPPlugin:
             logger.exception("Failed to shutdown FLEXT Tap LDAP plugin")
             return FlextResult[None].fail(f"Plugin shutdown failed: {e}")
 
+    @override
+    @override
     def execute(
         self,
         operation: str,

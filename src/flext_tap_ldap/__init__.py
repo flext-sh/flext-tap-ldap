@@ -6,7 +6,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextTypes
 from flext_tap_ldap.client import LDAPClient, LDAPClientConfig
 from flext_tap_ldap.exceptions import (
     FlextTapLdapAuthenticationError,
@@ -68,11 +67,12 @@ from flext_tap_ldap.tap_streams import (
     LDAPBaseStream,
     UsersStream,
 )
+from flext_tap_ldap.typings import FlextTapLdapTypes
 
 __version__ = "0.9.0-reorganized"
 __version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 
-__all__: FlextTypes.Core.StringList = [
+__all__: FlextTapLdapTypes.Core.StringList = [
     "ConnectionTestedEvent",
     "CustomStream",
     "CustomStreamConfig",

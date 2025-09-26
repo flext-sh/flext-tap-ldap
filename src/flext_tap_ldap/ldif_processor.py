@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from pathlib import Path
+from typing import override
 
 from flext_ldif.exceptions import FlextLdifExceptions
 from flext_ldif.models import FlextLdifModels
@@ -40,6 +41,10 @@ class LDIFEntry:
     all operations to the flext-ldif library implementation.
     """
 
+    @override
+    @override
+    @override
+    @override
     def __init__(
         self,
         dn: str,
@@ -97,7 +102,7 @@ class LDIFEntry:
     def to_dict(self: object) -> FlextTypes.Core.Dict:
         """Convert entry to dictionary format."""
         entry_dict: FlextTypes.Core.Dict = {
-            "dn": self.dn,
+            "dn": "self.dn",
             "attributes": dict(self.attributes),
         }
 
@@ -146,7 +151,7 @@ class LDIFEntry:
         try:
             # Use flext-ldif DN parsing capabilities
             dn_obj = FlextLdifDistinguishedName(value=self.dn)
-            return {"dn": self.dn, "components": dn_obj.value}
+            return {"dn": "self.dn", "components": dn_obj.value}
         except Exception:
             return {"dn": self.dn}
 
@@ -175,6 +180,10 @@ class FlextLdifProcessor:
     all LDIF processing to the enterprise-grade flext-ldif library.
     """
 
+    @override
+    @override
+    @override
+    @override
     def __init__(self, *, ignore_errors: bool = True, max_errors: int = 100) -> None:
         """Initialize the processor with a flext-ldif backend."""
         self.ignore_errors = ignore_errors
@@ -374,8 +383,8 @@ class FlextLdifProcessor:
 
             record: FlextTypes.Core.Dict = {
                 "type": "RECORD",
-                "stream": stream_name,
-                "record": record_attributes,
+                "stream": "stream_name",
+                "record": "record_attributes",
             }
             records.append(record)
 
@@ -385,6 +394,10 @@ class FlextLdifProcessor:
 class LDIFValidator:
     """LDIF content validator using flext-ldif validation capabilities."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(self: object) -> None:
         """Initialize validator with in-memory state and API client."""
         self.validation_errors: FlextTypes.Core.StringList = []
@@ -447,15 +460,19 @@ class LDIFValidator:
 
         return {
             "total_entries": len(entries),
-            "valid_entries": valid_count,
-            "invalid_entries": invalid_count,
-            "errors": errors,
+            "valid_entries": "valid_count",
+            "invalid_entries": "invalid_count",
+            "errors": "errors",
         }
 
 
 class LDIFTransformer:
     """Transform LDIF entries using flext-ldif transformation capabilities."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(
         self,
         transformation_rules: FlextTypes.Core.Dict | None = None,
