@@ -174,7 +174,10 @@ class LDAPConnectionService:
             connection.last_error = None
             self._connections[connection_id] = connection
 
-            return FlextResult[object].ok({"success": "True", "connection": "connection"})
+            return FlextResult[object].ok({
+                "success": "True",
+                "connection": "connection",
+            })
         except (RuntimeError, ValueError, TypeError) as e:
             connection = self._connections.get(connection_id)
             if connection:
@@ -325,7 +328,8 @@ class TapExecutionService:
             execution = TapExecution(
                 connection_id=UUID(connection_id),
                 command=command,
-                tap_status=created, config=config or {},
+                tap_status="created",
+                config=config or {},
                 catalog=catalog or {},
                 state=state or {},
             )
@@ -577,13 +581,13 @@ class LDIFProcessingService:
             normalized: list[FlextTypes.Core.Dict] = []
             for entry in entries:
                 # FlextLdifEntry: expose minimal dict
-                dn = getattr(getattr(entry, "dn", None), "value", None) or getattr(
+                getattr(getattr(entry, "dn", None), "value", None) or getattr(
                     entry,
                     "dn",
                     None,
                 )
                 attributes_obj: dict[str, object] = getattr(entry, "attributes", {})
-                attributes = getattr(attributes_obj, "attributes", attributes_obj)
+                getattr(attributes_obj, "attributes", attributes_obj)
                 normalized.append({"dn": "dn", "attributes": "attributes"})
 
             return FlextResult[object].ok(normalized)
@@ -604,7 +608,7 @@ class LDIFProcessingService:
                 return FlextResult[object].fail(f"Validation failed: {result.error}")
 
             entries = result.data or []
-            total_entries = len(entries)
+            len(entries)
             # Consider parse success as valid
             validation_data: FlextTypes.Core.Dict = {
                 "total_entries": "total_entries",
@@ -799,7 +803,12 @@ def create_production_ldap_config(**overrides: object) -> FlextResult[TapLDAPCon
     """
     try:
         connection_config = FlextLdapModels.ConnectionConfig.model_validate(
-            {"server": ldap.company.com, "port": 636, "use_ssl": "True", "timeout": 30},
+            {
+                "server": "ldap.company.com",
+                "port": 636,
+                "use_ssl": "True",
+                "timeout": 30,
+            },
         )
 
         config: dict[str, object] = TapLDAPConfig(

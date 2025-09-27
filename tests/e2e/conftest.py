@@ -96,7 +96,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
 
 
 @pytest.fixture
-def ldap_connection(ldap_container: None) -> Generator[Connection]:
+def ldap_connection(_ldap_container: None) -> Generator[Connection]:
     """Create LDAP connection for testing."""
     server = Server("localhost", port=10389, get_info=ALL)
     conn = Connection(
@@ -110,7 +110,7 @@ def ldap_connection(ldap_container: None) -> Generator[Connection]:
 
 
 @pytest.fixture
-def tap_config_file(tmp_path: Path, ldap_container: None) -> Path:
+def tap_config_file(tmp_path: Path, _ldap_container: None) -> Path:
     """Create tap configuration file for testing."""
     config = {
         "ldap_host": "localhost",

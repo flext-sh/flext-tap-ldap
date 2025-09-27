@@ -750,13 +750,13 @@ class LDIFStream(Stream):
     def _convert_ldif_entry_to_record(
         self,
         entry: FlextLdifModels.Entry,
-        source_file: str,
+        _source_file: str,
     ) -> FlextTypes.Core.Dict | None:
         """Convert LDIF entry to stream record."""
         try:
             # Classify entry type by object classes
             object_classes: list[object] = entry.get_attribute("objectClass") or []
-            entry_type = self._classify_entry_type(object_classes)
+            self._classify_entry_type(object_classes)
 
             return {
                 "dn": str(entry.dn),
@@ -881,9 +881,7 @@ class LDIFAnalysisStream(Stream):
             logger.info(f"Analyzing LDIF file: {file_path}")
 
             # Get file size
-            file_size = (
-                Path(file_path).stat().st_size if Path(file_path).exists() else 0
-            )
+            (Path(file_path).stat().st_size if Path(file_path).exists() else 0)
 
             # Use flext-ldif to parse and analyze the file
             validation_result: FlextResult[object] = self._ldif_api.parse_file(

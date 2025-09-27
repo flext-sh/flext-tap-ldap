@@ -380,7 +380,7 @@ def create_development_ldap_config(**overrides: object) -> FlextResult[TapLDAPCo
     """
     try:
         connection_config = LDAPConnectionConfig(
-            host=localhost,
+            host="localhost",
             port=389,
             use_ssl=False,
             bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=example,dc=com",
@@ -476,7 +476,7 @@ def create_ldif_processing_config_advanced(
     try:
         # Minimal connection config (not used for LDIF processing)
         connection_config = LDAPConnectionConfig(
-            host=dummy,
+            host="dummy",
             base_dn="dc=migration,dc=temp",
         )
 
