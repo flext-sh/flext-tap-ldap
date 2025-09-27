@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_tap_ldap.client import LDAPClient, LDAPClientConfig
+from flext_tap_ldap.config import FlextTapLdapConfig
 from flext_tap_ldap.exceptions import (
     FlextTapLdapAuthenticationError,
     FlextTapLdapConfigurationError,
@@ -30,6 +31,8 @@ from flext_tap_ldap.ldif_stream import (
     LDIFStream,
 )
 from flext_tap_ldap.models import (
+    FlextTapLdapModels,
+    FlextTapLdapUtilities,
     LDAPAttribute,
     LDAPEntry,
     LDAPGroup,
@@ -48,7 +51,6 @@ from flext_tap_ldap.tap_client import FlextTapLDAP, FlextTapLDAPPlugin
 from flext_tap_ldap.tap_config import (
     CustomStreamConfig,
     LDIFProcessingConfig,
-    TapLDAPConfig,
 )
 from flext_tap_ldap.tap_models import (
     ConnectionTestedEvent,
@@ -80,13 +82,16 @@ __all__: FlextTapLdapTypes.Core.StringList = [
     "FlextTapLDAP",
     "FlextTapLDAPPlugin",
     "FlextTapLdapAuthenticationError",
+    "FlextTapLdapConfig",
     "FlextTapLdapConfigurationError",
     "FlextTapLdapConnectionError",
     "FlextTapLdapError",
+    "FlextTapLdapModels",
     "FlextTapLdapProcessingError",
     "FlextTapLdapSearchError",
     "FlextTapLdapStreamError",
     "FlextTapLdapTimeoutError",
+    "FlextTapLdapUtilities",
     "FlextTapLdapValidationError",
     "GroupsStream",
     "LDAPAttribute",
@@ -118,7 +123,6 @@ __all__: FlextTapLdapTypes.Core.StringList = [
     "TapExecutionCompletedEvent",
     "TapExecutionService",
     "TapExecutionStartedEvent",
-    "TapLDAPConfig",
     "UsersStream",
     "__version__",
     "__version_info__",

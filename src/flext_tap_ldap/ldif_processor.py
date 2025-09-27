@@ -373,7 +373,7 @@ class FlextLdifProcessor:
         """Filter entries that have a specific attribute."""
         return [entry for entry in self.entries if entry.get_attribute(attr_name)]
 
-    def to_singer_format(self, stream_name: str) -> list[FlextTypes.Core.Dict]:
+    def to_singer_format(self, _stream_name: str) -> list[FlextTypes.Core.Dict]:
         """Convert LDIF entries to Singer record format."""
         records: list[FlextTypes.Core.Dict] = []
 

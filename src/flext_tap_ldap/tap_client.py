@@ -26,6 +26,7 @@ from flext_core import (
 )
 from flext_ldap import (
     FlextLdapClient,
+    FlextLdapConstants,
     FlextLdapModels,
 )
 from flext_tap_ldap.tap_config import TapLDAPConfig
@@ -415,7 +416,8 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
                 search_request = FlextLdapModels.SearchRequest(
                     base_dn=search_base,
                     filter_str="(objectClass=*)",
-                    scope=base, attributes=["objectClass"],
+                    scope=FlextLdapConstants.Scope.BASE,
+                    attributes=["objectClass"],
                 )
                 search_result = await flext_api.search(search_request)
 
@@ -444,7 +446,8 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
                 search_request = FlextLdapModels.SearchRequest(
                     base_dn=search_base,
                     filter_str="(objectClass=*)",
-                    scope=subtree, attributes=["*"],
+                    scope=FlextLdapConstants.Scope.SUBTREE,
+                    attributes=["*"],
                     size_limit=10,
                 )
                 search_result = await flext_api.search(search_request)

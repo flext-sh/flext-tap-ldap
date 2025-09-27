@@ -14,7 +14,7 @@ from typing import ClassVar
 from singer_sdk import Stream, Tap
 
 from flext_core import FlextLogger, FlextTypes
-from flext_tap_ldap.config import TapLDAPConfig
+from flext_tap_ldap.config import FlextTapLdapConfig
 from flext_tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
 from flext_tap_ldap.streams import (
     CustomStream,
@@ -32,7 +32,7 @@ class FlextTapLDAP(Tap):
     """Singer tap for LDAP data extraction using FLEXT centralized patterns."""
 
     name: str = "tap-ldap"
-    config_class = TapLDAPConfig
+    config_class = FlextTapLdapConfig
 
     # NOTE(@flext-team): Use centralized LDAP schema when flext-meltano common_schemas is available
     # Issue: https://github.com/flext-team/flext-meltano/issues/1

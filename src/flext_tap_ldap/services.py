@@ -305,7 +305,7 @@ class TapExecutionService:
             execution = TapExecution(
                 connection_id=connection_id,
                 command=command,
-                tap_status=created,
+                tap_status="created",
                 config=config or {},
                 catalog=catalog or {},
                 state=state or {},

@@ -11,6 +11,7 @@ from typing import override
 from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import (
     FlextLdapClient,
+    FlextLdapConstants,
     FlextLdapModels,
 )
 
@@ -345,7 +346,7 @@ class LDAPClient:
                         test_search_request = FlextLdapModels.SearchRequest(
                             base_dn="",
                             filter_str="(objectClass=*)",
-                            scope=BASE,
+                            scope=FlextLdapConstants.Scope.BASE,
                             attributes=None,
                             size_limit=1,
                             time_limit=5,

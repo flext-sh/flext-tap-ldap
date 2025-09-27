@@ -9,16 +9,16 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from pydantic import Field, field_validator
+from pydantic import Extra, Field, field_validator
 from pydantic_settings import SettingsConfigDict
 
-from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
+from flext_core import FlextConfig, FlextLogger, FlextResult, FlextTypes
 from flext_ldap import FlextLdapModels
 
 logger = FlextLogger(__name__)
 
 
-class CustomStreamConfig(FlextModels.ArbitraryTypesModel):
+class CustomStreamConfig(FlextConfig):
     """Configuration for custom LDAP streams using flext-core patterns."""
 
     name: str = Field(..., description="Stream name")
@@ -46,7 +46,7 @@ class CustomStreamConfig(FlextModels.ArbitraryTypesModel):
         return FlextResult[None].ok(None)
 
 
-class LDIFProcessingConfig(FlextModels.ArbitraryTypesModel):
+class LDIFProcessingConfig(FlextConfig):
     """Configuration for LDIF file processing using flext-core patterns."""
 
     ldif_files: FlextTypes.Core.StringList | None = Field(
@@ -110,7 +110,7 @@ class LDIFProcessingConfig(FlextModels.ArbitraryTypesModel):
         return FlextResult[None].ok(None)
 
 
-class TapLDAPConfig(FlextModels.ArbitraryTypesModel):
+class TapLDAPConfig(FlextConfig):
     """Complete configuration for tap-ldap using flext-core and flext-ldap patterns.
 
     Combines LDAP connection and LDIF processing configurations with Pydantic settings.
@@ -118,10 +118,13 @@ class TapLDAPConfig(FlextModels.ArbitraryTypesModel):
     """
 
     model_config = SettingsConfigDict(
-        env_prefix=TAP_LDAP_, env_file=".env",
+        env_prefix="TAP_LDAP_",
+        env_file=".env",
         env_file_encoding="utf-8",
-        env_nested_delimiter=__, case_sensitive=False,
-        extra=allow, validate_assignment=True,
+        env_nested_delimiter="__",
+        case_sensitive=False,
+        extra=Extra.allow,
+        validate_assignment=True,
         str_strip_whitespace=True,
         use_enum_values=True,
     )

@@ -366,7 +366,7 @@ class LDAPConnection(FlextModels.Entity):
             },
         )
 
-    def test_connection_failure(self, error: str) -> LDAPConnection:
+    def test_connection_failure(self, _error: str) -> LDAPConnection:
         """Mark connection test as failed."""
         return self.model_copy(
             update={
@@ -396,7 +396,7 @@ class LDAPStream(FlextModels.Entity):
         default_factory=list,
         description="Primary key properties",
     )
-    replication_method: str = Field(FULL_TABLE, description="Replication method")
+    replication_method: str = Field("FULL_TABLE", description="Replication method")
     replication_key: str | None = Field(None, description="Replication key field")
     stream_schema: FlextTypes.Core.Dict = Field(
         default_factory=dict,
@@ -422,7 +422,7 @@ class LDAPStream(FlextModels.Entity):
         """Validate business rules for LDAP streams."""
         return FlextResult[None].ok(None)
 
-    def update_schema(self, schema: FlextTypes.Core.Dict) -> LDAPStream:
+    def update_schema(self, _schema: FlextTypes.Core.Dict) -> LDAPStream:
         """Update stream schema."""
         return self.model_copy(
             update={
@@ -451,7 +451,7 @@ class TapExecution(FlextModels.Entity):
     )
     connection_id: str = Field(..., description="Associated connection ID")
     command: str = Field(..., description="Executed command")
-    tap_status: str = Field(pending, description="Execution status")
+    tap_status: str = Field("pending", description="Execution status")
     started_at: datetime | None = Field(None, description="Execution start time")
     completed_at: datetime | None = Field(None, description="Execution completion time")
     duration_seconds: float | None = Field(None, description="Execution duration")
@@ -511,8 +511,8 @@ class TapExecution(FlextModels.Entity):
     def complete_execution(
         self,
         exit_code: int,
-        stdout: str | None = None,
-        stderr: str | None = None,
+        _stdout: str | None = None,
+        _stderr: str | None = None,
     ) -> TapExecution:
         """Complete tap execution."""
         completed_at = datetime.now(UTC)
@@ -523,7 +523,7 @@ class TapExecution(FlextModels.Entity):
 
         return self.model_copy(
             update={
-                "tap_status": completed if exit_code == 0 else "failed",
+                "tap_status": "completed" if exit_code == 0 else "failed",
                 "exit_code": "exit_code",
                 "completed_at": "completed_at",
                 "duration_seconds": "duration_seconds",
@@ -550,8 +550,8 @@ class TapExecution(FlextModels.Entity):
 
     def update_metrics(
         self,
-        records_extracted: int,
-        streams_processed: int,
+        _records_extracted: int,
+        _streams_processed: int,
     ) -> TapExecution:
         """Update execution metrics."""
         return self.model_copy(

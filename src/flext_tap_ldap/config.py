@@ -9,8 +9,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import threading
-from typing import ClassVar
+from typing import Self
 
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
@@ -24,21 +23,17 @@ class FlextTapLdapConfig(FlextConfig):
     Single flat configuration class for FLEXT LDAP tap following [Project]Config pattern:
     - Extends FlextConfig from flext-core
     - Uses Pydantic 2 Settings with SecretStr for sensitive data
-    - Singleton pattern with thread-safe access
+    - Enhanced singleton pattern with thread-safe access
     - Flat structure without nested configuration classes
     """
 
-    # Singleton pattern attributes
-    _global_instance: ClassVar[FlextTapLdapConfig | None] = None
-    _lock: ClassVar[threading.Lock] = threading.Lock()
-
     model_config = SettingsConfigDict(
-        env_prefix=FLEXT_TAP_LDAP_,
+        env_prefix="FLEXT_TAP_LDAP_",
         case_sensitive=False,
-        extra=ignore,
+        extra="ignore",
         env_file=".env",
         env_file_encoding="utf-8",
-        env_nested_delimiter=__,
+        env_nested_delimiter="__",
         use_enum_values=True,
         validate_assignment=True,
         validate_default=True,
@@ -159,20 +154,56 @@ class FlextTapLdapConfig(FlextConfig):
             raise ValueError(msg)
         return v
 
-    # Singleton pattern override for proper typing
+    # Enhanced singleton pattern methods
     @classmethod
-    def get_global_instance(cls) -> FlextTapLdapConfig:
-        """Get the global singleton instance of FlextTapLdapConfig."""
-        if cls._global_instance is None:
-            with cls._lock:
-                if cls._global_instance is None:
-                    cls._global_instance = cls()
-        return cls._global_instance
+    def get_global_instance(cls) -> Self:
+        """Get the global singleton instance using enhanced FlextConfig pattern."""
+        return cls.get_or_create_shared_instance(project_name="flext-tap-ldap")
 
     @classmethod
-    def reset_global_instance(cls) -> None:
-        """Reset the global FlextTapLdapConfig instance (mainly for testing)."""
-        cls._global_instance = None
+    def create_for_development(cls, **overrides) -> Self:
+        """Create development configuration instance."""
+        dev_defaults = {
+            "ldap_host": "localhost",
+            "ldap_port": 10389,
+            "ldap_use_ssl": False,
+            "ldap_use_tls": False,
+            "ldap_timeout": 10,
+            "ldap_page_size": 100,
+            "ldif_ignore_errors": True,
+            "ldif_max_errors": 10,
+        }
+        dev_defaults.update(overrides)
+        return cls(**dev_defaults)
+
+    @classmethod
+    def create_for_production(cls, **overrides) -> Self:
+        """Create production configuration instance."""
+        prod_defaults = {
+            "ldap_use_ssl": True,
+            "ldap_timeout": 30,
+            "ldap_page_size": 1000,
+            "ldap_max_retries": 5,
+            "ldif_ignore_errors": False,
+            "ldif_max_errors": 0,
+        }
+        prod_defaults.update(overrides)
+        return cls(**prod_defaults)
+
+    @classmethod
+    def create_for_testing(cls, **overrides) -> Self:
+        """Create testing configuration instance."""
+        test_defaults = {
+            "ldap_host": "test-ldap",
+            "ldap_port": 3389,
+            "ldap_use_ssl": False,
+            "ldap_timeout": 5,
+            "ldap_page_size": 50,
+            "ldif_ignore_errors": True,
+            "ldif_max_errors": 1,
+        }
+        test_defaults.update(overrides)
+        return cls(**test_defaults)
 
     def validate_configuration(self) -> FlextResult[None]:
         """Validate the complete LDAP tap configuration."""
@@ -204,12 +235,7 @@ class FlextTapLdapConfig(FlextConfig):
             return FlextResult[None].fail(f"Configuration validation error: {e}")
 
 
-# Legacy compatibility aliases
-TapLDAPConfig = FlextTapLdapConfig
-LDAPConnectionConfig = FlextTapLdapConfig  # Legacy alias
-
 # Export main configuration class
 __all__ = [
     "FlextTapLdapConfig",
-    "TapLDAPConfig",  # Legacy compatibility
 ]
