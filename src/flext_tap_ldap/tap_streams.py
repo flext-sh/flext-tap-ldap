@@ -990,7 +990,6 @@ class LDAPBaseStream(Stream):
     """Base class for LDAP streams with flext-ldap integration."""
 
     @override
-    @override
     def __init__(
         self,
         tap: FlextTapLDAP,
@@ -1081,7 +1080,6 @@ class UsersStream(LDAPBaseStream):
     """Stream for LDAP user entries."""
 
     @override
-    @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize users stream."""
         name = "users"
@@ -1154,7 +1152,6 @@ class GroupsStream(LDAPBaseStream):
     """Stream for LDAP group entries."""
 
     @override
-    @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize groups stream."""
         name = "groups"
@@ -1221,7 +1218,6 @@ class OrganizationalUnitsStream(LDAPBaseStream):
     """Stream for LDAP organizational unit entries."""
 
     @override
-    @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize organizational units stream."""
         name = "organizational_units"
@@ -1273,7 +1269,6 @@ class OrganizationalUnitsStream(LDAPBaseStream):
 class SchemaStream(LDAPBaseStream):
     """Stream for LDAP schema information."""
 
-    @override
     @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize schema stream."""
@@ -1359,7 +1354,6 @@ class CustomStream(LDAPBaseStream):
     """Custom LDAP stream with configurable filter and schema."""
 
     @override
-    @override
     def __init__(self, tap: FlextTapLDAP, params: CustomStreamParams) -> None:
         """Initialize custom stream with parameters."""
         self.params = params
@@ -1439,7 +1433,6 @@ class CustomStream(LDAPBaseStream):
 class LDIFStream(Stream):
     """LDIF stream using flext-ldif for ALL processing."""
 
-    @override
     @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize LDIF stream with library delegation."""
@@ -1580,7 +1573,6 @@ class LDIFStream(Stream):
 class LDIFAnalysisStream(Stream):
     """LDIF analysis stream for migration statistics and validation."""
 
-    @override
     @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize LDIF analysis stream."""

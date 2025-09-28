@@ -57,9 +57,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
     docker_manager = FlextTestDocker(workspace_root=project_root)
 
     # Start containers using FlextTestDocker
-    start_result = docker_manager.compose_up(
-        compose_file=str(compose_file), detached=True
-    )
+    start_result = docker_manager.compose_up(compose_file=str(compose_file))
 
     if start_result.is_failure:
         logger.error(f"Failed to start OpenLDAP container: {start_result.error}")
@@ -88,9 +86,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
     yield
     # Cleanup
     logger.info("Stopping OpenLDAP container...")
-    stop_result = docker_manager.compose_down(
-        compose_file=str(compose_file), volumes=True
-    )
+    stop_result = docker_manager.compose_down(compose_file=str(compose_file))
     if stop_result.is_failure:
         logger.warning(f"Failed to stop container cleanly: {stop_result.error}")
 

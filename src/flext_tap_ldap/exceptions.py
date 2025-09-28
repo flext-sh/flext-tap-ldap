@@ -18,7 +18,6 @@ class FlextTapLdapError(FlextExceptions.BaseError):
     """Base LDAP tap error."""
 
     @override
-    @override
     def __init__(
         self,
         message: str,
@@ -39,7 +38,6 @@ class FlextTapLdapError(FlextExceptions.BaseError):
 class FlextTapLdapValidationError(FlextExceptions.BaseError):
     """LDAP tap validation error."""
 
-    @override
     @override
     def __init__(
         self,
@@ -72,7 +70,6 @@ class FlextTapLdapConfigurationError(FlextExceptions.BaseError):
     """LDAP tap configuration error."""
 
     @override
-    @override
     def __init__(
         self,
         message: str,
@@ -97,7 +94,6 @@ class FlextTapLdapConfigurationError(FlextExceptions.BaseError):
 class FlextTapLdapProcessingError(FlextExceptions.BaseError):
     """LDAP tap processing error."""
 
-    @override
     @override
     def __init__(
         self,
@@ -124,7 +120,6 @@ class FlextTapLdapConnectionError(FlextExceptions.BaseError):
     """LDAP tap connection error."""
 
     @override
-    @override
     def __init__(
         self,
         message: str,
@@ -150,7 +145,6 @@ class FlextTapLdapAuthenticationError(FlextExceptions.BaseError):
     """LDAP tap authentication error."""
 
     @override
-    @override
     def __init__(
         self,
         message: str,
@@ -175,7 +169,6 @@ class FlextTapLdapAuthenticationError(FlextExceptions.BaseError):
 class FlextTapLdapTimeoutError(FlextExceptions.BaseError):
     """LDAP tap timeout error."""
 
-    @override
     @override
     def __init__(
         self,
