@@ -173,7 +173,7 @@ class LDAPClient:
 
     def _convert_entry_to_dict(
         self,
-        entry_data: FlextLdapModels.Entry | FlextTypes.Core.Dict,
+        entry_data: FlextLdapModels.Entry | dict[str, Any] | None,
     ) -> dict[str, object]:
         """Convert FlextLdapModels.Entry to dict format for testing convenience.
 
@@ -433,8 +433,8 @@ class LDAPClient:
 
     def _process_oracle_entry(
         self,
-        entry: FlextTypes.Core.Dict,
-    ) -> FlextTypes.Core.Dict:
+        entry: dict[str, Any],
+    ) -> dict[str, object]:
         """Process Oracle-specific LDAP entries for testing convenience."""
         attributes: dict[str, object] = entry.get("attributes", {})
         if not isinstance(attributes, dict):
@@ -490,10 +490,10 @@ class LDAPClient:
 
     def _process_search_results_with_oracle_support(
         self,
-        search_result: list[FlextLdapModels.Entry] | list[FlextTypes.Core.Dict],
+        search_result: list[FlextLdapModels.Entry] | list[dict[str, Any]],
         *,
         oracle_oid_mode: bool,
-    ) -> list[FlextTypes.Core.Dict]:
+    ) -> list[dict[str, object]]:
         """Process search results with Oracle OID support.
 
         Single Responsibility: Handle only result processing logic.
@@ -545,7 +545,7 @@ class LDAPClient:
         attributes: FlextTypes.Core.StringList | None = None,
         *,
         oracle_oid_mode: bool = False,
-    ) -> object:
+    ) -> list[FlextTypes.Core.Dict]:
         """Search with Oracle OID support for testing convenience.
 
         Refactored using Single Responsibility Principle to reduce complexity.

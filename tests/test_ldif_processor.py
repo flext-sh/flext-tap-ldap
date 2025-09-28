@@ -312,7 +312,7 @@ mail: john.doe@example.com
             list(processor.parse_content(sample_ldif_content)),
         )
 
-        assert result.success
+        assert result.is_success
         entries = result.data
         assert len(entries) == 3
 
@@ -333,7 +333,7 @@ mail: john.doe@example.com
 
         result = FlextResult[None].ok(list(processor.parse_file(ldif_file)))
 
-        assert result.success
+        assert result.is_success
         entries = result.data
         assert len(entries) == 3
 
@@ -399,7 +399,7 @@ invalidAttribute:
             sample_ldif_content,
             source_name="test_string",
         )
-        assert result.success
+        assert result.is_success
         entries = result.data
         assert len(entries) >= 1
 
@@ -411,7 +411,7 @@ invalidAttribute:
         """Test processor filter methods."""
         # First load some entries
         result = processor.load_from_string(sample_ldif_content, source_name="test")
-        assert result.success
+        assert result.is_success
 
         # Test filter by object class
         person_entries = processor.filter_by_objectclass("person")
@@ -437,7 +437,7 @@ invalidAttribute:
         """Test converting to Singer format."""
         # Load entries first
         result = processor.load_from_string(sample_ldif_content, source_name="test")
-        assert result.success
+        assert result.is_success
 
         # Convert to Singer format
         singer_records = processor.to_singer_format("test_stream")
@@ -464,7 +464,7 @@ invalidAttribute:
         ldif_file.write_text(sample_ldif_content)
 
         result = processor.load_from_file(ldif_file)
-        assert result.success
+        assert result.is_success
         entries = result.data
         assert len(entries) >= 1
 
@@ -496,7 +496,7 @@ mail: user1@test.com
         processor = FlextLdifProcessor()
         result = FlextResult[None].ok(list(processor.parse_file(ldif_file)))
 
-        assert result.success
+        assert result.is_success
         entries = result.data
         assert len(entries) == 3
 
@@ -529,7 +529,7 @@ sn: User {i}
             results.append(result)
 
         assert len(results) == 3
-        assert all(r.success for r in results)
+        assert all(r.is_success for r in results)
 
 
 class TestLDIFTransformer:
@@ -613,7 +613,7 @@ cn: another
             result = FlextResult[None].ok(
                 list(processor.parse_content(problematic_content)),
             )
-            if result.success:
+            if result.is_success:
                 entries = result.data
                 # Should still process valid entries
                 assert len(entries) >= 1

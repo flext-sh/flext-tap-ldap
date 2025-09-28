@@ -131,6 +131,7 @@ class TestLDAPConnectionService:
         get_result = await service.get_connection(connection_id)
 
         assert get_result.is_success
+        assert get_result.data is not None
         assert get_result.data.id == connection_id
 
     async def test_get_nonexistent_connection(
@@ -138,7 +139,7 @@ class TestLDAPConnectionService:
         service: LDAPConnectionService,
     ) -> None:
         """Test getting non-existent connection."""
-        result = await service.get_connection(uuid4())
+        result = await service.get_connection("non-existent-id")
 
         assert result.is_success
         assert result.data is None
@@ -188,9 +189,10 @@ class TestLDAPConnectionService:
         service: LDAPConnectionService,
     ) -> None:
         """Test testing non-existent connection."""
-        result = await service.test_connection(uuid4())
+        result = await service.test_connection("non-existent-id")
 
         assert result.is_failure
+        assert result.error is not None
         assert "Connection not found" in result.error
 
 
@@ -206,7 +208,7 @@ class TestLDAPStreamService:
         self, service: LDAPStreamService
     ) -> None:
         """Test successful stream creation with specific attributes."""
-        connection_id = uuid4()
+        connection_id = str(uuid4())
         params = StreamCreationParams(
             connection_id=connection_id,
             stream_type="users",
@@ -225,7 +227,7 @@ class TestLDAPStreamService:
         service: LDAPStreamService,
     ) -> None:
         """Test stream creation with default values."""
-        connection_id = uuid4()
+        connection_id = str(uuid4())
         params = StreamCreationParams(
             connection_id=connection_id,
             stream_type="users",
@@ -240,7 +242,7 @@ class TestLDAPStreamService:
 
     async def test_schema_discovery(self, service: LDAPStreamService) -> None:
         """Test schema discovery functionality."""
-        connection_id = uuid4()
+        connection_id = str(uuid4())
         params = StreamCreationParams(
             connection_id=connection_id,
             stream_type="users",
@@ -252,15 +254,18 @@ class TestLDAPStreamService:
         schema_result = await service.discover_schema(stream_id)
 
         assert schema_result.is_success
+        assert schema_result.data is not None
         assert "type" in schema_result.data
         assert "properties" in schema_result.data
-        assert "dn" in schema_result.data["properties"]
+        properties = schema_result.data["properties"]
+        assert isinstance(properties, dict)
+        assert "dn" in properties
 
     async def test_self(self, service: LDAPStreamService) -> None:
         """Test method."""
         """Test listing streams filtered by connection."""
-        connection_id1 = uuid4()
-        connection_id2 = uuid4()
+        connection_id1 = str(uuid4())
+        connection_id2 = str(uuid4())
 
         await service.create_stream(
             StreamCreationParams(connection_id1, "users", "(objectClass=person)"),
@@ -291,7 +296,7 @@ class TestTapExecutionService:
 
     async def test_create_execution(self, service: TapExecutionService) -> None:
         """Test execution creation."""
-        connection_id = uuid4()
+        connection_id = str(uuid4())
         result = await service.create_execution(
             connection_id=connection_id,
             command="discover",
@@ -305,7 +310,7 @@ class TestTapExecutionService:
 
     async def test_start_execution(self, service: TapExecutionService) -> None:
         """Test starting execution."""
-        connection_id = uuid4()
+        connection_id = str(uuid4())
         create_result = await service.create_execution(connection_id, "sync")
         execution_id = create_result.data.id
 
@@ -317,7 +322,7 @@ class TestTapExecutionService:
 
     async def test_complete_execution(self, service: TapExecutionService) -> None:
         """Test completing execution."""
-        connection_id = uuid4()
+        connection_id = str(uuid4())
         create_result = await service.create_execution(connection_id, "sync")
         execution_id = create_result.data.id
 
@@ -334,7 +339,7 @@ class TestTapExecutionService:
 
     async def test_update_execution_metrics(self, service: TapExecutionService) -> None:
         """Test updating execution metrics."""
-        connection_id = uuid4()
+        connection_id = str(uuid4())
         create_result = await service.create_execution(connection_id, "sync")
         execution_id = create_result.data.id
 
@@ -359,8 +364,8 @@ class TestLDAPRecordService:
 
     async def test_create_record(self, service: LDAPRecordService) -> None:
         """Test record creation."""
-        stream_id = uuid4()
-        execution_id = uuid4()
+        stream_id = str(uuid4())
+        execution_id = str(uuid4())
 
         result = await service.create_record(
             stream_id=stream_id,
@@ -377,9 +382,9 @@ class TestLDAPRecordService:
 
     async def test_list_records_with_filters(self, service: LDAPRecordService) -> None:
         """Test listing records with filters."""
-        stream_id1 = uuid4()
-        stream_id2 = uuid4()
-        execution_id = uuid4()
+        stream_id1 = str(uuid4())
+        stream_id2 = str(uuid4())
+        execution_id = str(uuid4())
 
         # Create records for different streams
         await service.create_record(stream_id1, execution_id, "uid=user1,dc=test", {})
@@ -396,8 +401,8 @@ class TestLDAPRecordService:
 
     async def test_count_records(self, service: LDAPRecordService) -> None:
         """Test counting records."""
-        stream_id = uuid4()
-        execution_id = uuid4()
+        stream_id = str(uuid4())
+        execution_id = str(uuid4())
 
         # Create some records
         await service.create_record(stream_id, execution_id, "uid=user1,dc=test", {})

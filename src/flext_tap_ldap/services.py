@@ -9,10 +9,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import override
-from uuid import UUID
+from uuid import uuid4
 
 from flext_core import (
-    FlextModels,
     FlextResult,
     FlextTypes,
 )
@@ -73,7 +72,7 @@ class StreamCreationParams:
     following SOLID principles for better maintainability.
     """
 
-    connection_id: UUID
+    connection_id: str
     stream_type: str
     search_filter: str
     attributes: FlextTypes.Core.StringList | None = None
@@ -102,7 +101,7 @@ class LDAPConnectionService:
     def __init__(self: object) -> None:
         """Initialize the connection service."""
         self._connections: dict[
-            FlextModels,
+            str,
             LDAPConnection,
         ] = {}  # Initialized inline for immediate availability
 
@@ -120,7 +119,7 @@ class LDAPConnectionService:
             connection = LDAPConnection(
                 host=params.host,
                 port=params.port,
-                bind_dn=params.bind_dn,
+                bind_dn=params.bind_dn or "",
                 password=params.bind_password,
                 use_ssl=params.use_ssl,
                 timeout=params.timeout_seconds,
@@ -133,7 +132,7 @@ class LDAPConnectionService:
 
     async def test_connection(
         self,
-        connection_id: UUID,
+        connection_id: str,
     ) -> FlextResult[FlextTypes.Core.Dict]:
         """Test LDAP connection."""
         try:
@@ -155,7 +154,7 @@ class LDAPConnectionService:
 
     async def get_connection(
         self,
-        connection_id: UUID,
+        connection_id: str,
     ) -> FlextResult[LDAPConnection | None]:
         """Get LDAP connection by ID."""
         try:
@@ -184,7 +183,7 @@ class LDAPStreamService:
     def __init__(self: object) -> None:
         """Initialize the stream service."""
         self._streams: dict[
-            FlextModels,
+            str,
             LDAPStream,
         ] = {}  # Initialized inline for immediate availability
 
@@ -204,6 +203,7 @@ class LDAPStreamService:
                 tap_stream_id = f"{params.stream_type.lower()}_stream"
 
             stream = LDAPStream(
+                name=params.stream_type,
                 connection_id=params.connection_id,
                 stream_type=params.stream_type.lower(),
                 search_filter=params.search_filter,
@@ -222,7 +222,7 @@ class LDAPStreamService:
 
     async def discover_schema(
         self,
-        stream_id: UUID,
+        stream_id: str,
     ) -> FlextResult[FlextTypes.Core.Dict]:
         """Discover schema for LDAP stream."""
         try:
@@ -248,7 +248,7 @@ class LDAPStreamService:
                 f"Failed to discover schema: {e}",
             )
 
-    async def get_stream(self, stream_id: UUID) -> FlextResult[LDAPStream | None]:
+    async def get_stream(self, stream_id: str) -> FlextResult[LDAPStream | None]:
         """Get LDAP stream by ID."""
         try:
             stream = self._streams.get(stream_id)
@@ -258,7 +258,7 @@ class LDAPStreamService:
 
     async def list_streams(
         self,
-        connection_id: UUID | None = None,
+        connection_id: str | None = None,
     ) -> FlextResult[list[LDAPStream]]:
         """List LDAP streams, optionally filtered by connection ID."""
         try:
@@ -279,13 +279,13 @@ class TapExecutionService:
     def __init__(self: object) -> None:
         """Initialize the execution service."""
         self._executions: dict[
-            UUID,
+            str,
             TapExecution,
         ] = {}  # Initialized inline for immediate availability
 
     async def create_execution(
         self,
-        connection_id: UUID,
+        connection_id: str,
         command: str,
         config: FlextTypes.Core.Dict | None = None,
         catalog: FlextTypes.Core.Dict | None = None,
@@ -294,6 +294,7 @@ class TapExecutionService:
         """Create tap execution."""
         try:
             execution = TapExecution(
+                execution_id=str(uuid4()),
                 connection_id=connection_id,
                 command=command,
                 tap_status="created",
@@ -309,7 +310,7 @@ class TapExecutionService:
 
     async def start_execution(
         self,
-        execution_id: UUID,
+        execution_id: str,
     ) -> FlextResult[TapExecution]:
         """Start tap execution."""
         try:
@@ -324,7 +325,7 @@ class TapExecutionService:
 
     async def complete_execution(
         self,
-        execution_id: UUID,
+        execution_id: str,
         exit_code: int,
         stdout: str | None = None,
         stderr: str | None = None,
@@ -342,7 +343,7 @@ class TapExecutionService:
 
     async def cancel_execution(
         self,
-        execution_id: UUID,
+        execution_id: str,
     ) -> FlextResult[TapExecution]:
         """Cancel tap execution."""
         try:
@@ -357,7 +358,7 @@ class TapExecutionService:
 
     async def update_metrics(
         self,
-        execution_id: UUID,
+        execution_id: str,
         records_extracted: int,
         streams_processed: int,
     ) -> FlextResult[TapExecution]:
@@ -374,7 +375,7 @@ class TapExecutionService:
 
     async def get_execution(
         self,
-        execution_id: UUID,
+        execution_id: str,
     ) -> FlextResult[TapExecution | None]:
         """Get tap execution by ID."""
         try:
@@ -387,7 +388,7 @@ class TapExecutionService:
 
     async def list_executions(
         self,
-        connection_id: UUID | None = None,
+        connection_id: str | None = None,
     ) -> FlextResult[list[TapExecution]]:
         """List tap executions, optionally filtered by connection ID."""
         try:
@@ -416,14 +417,14 @@ class LDAPRecordService:
     def __init__(self: object) -> None:
         """Initialize the record service."""
         self._records: dict[
-            UUID,
+            str,
             LDAPRecord,
         ] = {}  # Initialized inline for immediate availability
 
     async def create_record(
         self,
-        stream_id: UUID,
-        execution_id: UUID,
+        stream_id: str,
+        execution_id: str,
         dn: str,
         attributes: FlextTypes.Core.Dict,
         object_class: FlextTypes.Core.StringList | None = None,
@@ -452,7 +453,7 @@ class LDAPRecordService:
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[LDAPRecord].fail(f"Failed to create record: {e}")
 
-    async def get_record(self, record_id: UUID) -> FlextResult[LDAPRecord | None]:
+    async def get_record(self, record_id: str) -> FlextResult[LDAPRecord | None]:
         """Get LDAP record by ID."""
         try:
             record = self._records.get(record_id)
@@ -462,8 +463,8 @@ class LDAPRecordService:
 
     async def list_records(
         self,
-        stream_id: UUID | None = None,
-        execution_id: UUID | None = None,
+        stream_id: str | None = None,
+        execution_id: str | None = None,
         limit: int = 100,
     ) -> FlextResult[list[LDAPRecord]]:
         """List LDAP records, optionally filtered by stream or execution ID."""
@@ -485,8 +486,8 @@ class LDAPRecordService:
 
     async def count_records(
         self,
-        stream_id: UUID | None = None,
-        execution_id: UUID | None = None,
+        stream_id: str | None = None,
+        execution_id: str | None = None,
     ) -> FlextResult[FlextTypes.Core.Dict]:
         """Count LDAP records, optionally filtered by stream or execution ID."""
         try:

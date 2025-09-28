@@ -119,8 +119,7 @@ class TestLDAPClientCoverageBoost:
             )
 
             mock_exec.assert_called_once()
-            result_list = list(results)
-            assert result_list == [{"oracle": "data"}]
+            assert results == [{"oracle": "data"}]
 
     def test_execute_oracle_search_in_new_loop_comprehensive(
         self,
@@ -173,4 +172,4 @@ class TestLDAPClientCoverageBoost:
         )
 
         # Should return empty list in async context
-        assert list(results) == []
+        assert results == []
