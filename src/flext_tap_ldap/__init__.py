@@ -31,13 +31,23 @@ from flext_tap_ldap.ldif_stream import (
     LDIFStream,
 )
 from flext_tap_ldap.models import (
+    # Additional models now available from unified class
+    ConnectionTestedEvent,
     FlextTapLdapModels,
     FlextTapLdapUtilities,
     LDAPAttribute,
+    LDAPConnection,
     LDAPEntry,
     LDAPGroup,
+    LDAPRecord,
     LDAPSchema,
+    LDAPStream,
     LDAPUser,
+    RecordExtractedEvent,
+    StreamDiscoveredEvent,
+    TapExecution,
+    TapExecutionCompletedEvent,
+    TapExecutionStartedEvent,
 )
 from flext_tap_ldap.services import (
     LDAPConnectionParams,
@@ -51,17 +61,6 @@ from flext_tap_ldap.tap_client import FlextTapLDAP, FlextTapLDAPPlugin
 from flext_tap_ldap.tap_config import (
     CustomStreamConfig,
     LDIFProcessingConfig,
-)
-from flext_tap_ldap.tap_models import (
-    ConnectionTestedEvent,
-    LDAPConnection,
-    LDAPRecord,
-    LDAPStream,
-    RecordExtractedEvent,
-    StreamDiscoveredEvent,
-    TapExecution,
-    TapExecutionCompletedEvent,
-    TapExecutionStartedEvent,
 )
 from flext_tap_ldap.tap_streams import (
     CustomStream,

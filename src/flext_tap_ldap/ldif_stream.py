@@ -23,7 +23,6 @@ class LDIFStream(Stream):
     """LDIF stream using flext-ldif for ALL processing."""
 
     @override
-    @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize LDIF stream with library delegation."""
         # Set required attributes BEFORE calling super().__init__()
@@ -120,7 +119,6 @@ class LDIFStream(Stream):
 class LDIFAnalysisStream(Stream):
     """LDIF analysis stream using flext-ldif for ALL analysis."""
 
-    @override
     @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize LDIF analysis stream with library delegation."""
