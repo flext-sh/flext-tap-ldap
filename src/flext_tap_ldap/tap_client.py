@@ -69,8 +69,6 @@ class LDAPClient:
     """
 
     @override
-    @override
-    @override
     def __init__(self, client_config: LDAPClientConfig) -> None:
         """Initialize the LDAP client."""
         # Store for testing convenience - these are what tests expect
@@ -358,8 +356,6 @@ class FlextTapLDAP(FlextService[TapLDAPConfig]):
     Follows flext-core patterns with explicit error handling.
     """
 
-    @override
-    @override
     @override
     def __init__(self, **_data: object) -> None:
         """Initialize LDAP tap with flext-core foundation."""
@@ -820,8 +816,6 @@ class FlextTapLDAPPlugin:
     """
 
     @override
-    @override
-    @override
     def __init__(self, config: FlextTypes.Core.Dict) -> None:
         """Initialize LDAP tap plugin."""
         # Convert dict config to TapLDAPConfig
@@ -866,7 +860,6 @@ class FlextTapLDAPPlugin:
             logger.exception("Failed to shutdown FLEXT Tap LDAP plugin")
             return FlextResult[None].fail(f"Plugin shutdown failed: {e}")
 
-    @override
     @override
     def execute(
         self,

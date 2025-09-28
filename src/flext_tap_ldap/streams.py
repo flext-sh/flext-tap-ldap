@@ -99,10 +99,6 @@ class LDAPBaseStream(Stream):
 
     @override
     @override
-    @override
-    @override
-    @override
-    @override
     def __init__(
         self,
         tap: FlextTapLDAP,
@@ -130,10 +126,6 @@ class UsersStream(LDAPBaseStream):
     replication_method = "INCREMENTAL"
     replication_key = "modifyTimestamp"
 
-    @override
-    @override
-    @override
-    @override
     @override
     @override
     def __init__(self, tap: FlextTapLDAP) -> None:
@@ -216,10 +208,6 @@ class UsersStream(LDAPBaseStream):
 class GroupsStream(LDAPBaseStream):
     """Stream for LDAP groups."""
 
-    @override
-    @override
-    @override
-    @override
     @override
     @override
     def __init__(self, tap: FlextTapLDAP) -> None:
@@ -325,10 +313,6 @@ class OrganizationalUnitsStream(LDAPBaseStream):
 
     @override
     @override
-    @override
-    @override
-    @override
-    @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize organizational units stream."""
         # Set required attributes BEFORE calling super().__init__()
@@ -420,10 +404,6 @@ class OrganizationalUnitsStream(LDAPBaseStream):
 class SchemaStream(LDAPBaseStream):
     """Stream for LDAP schema."""
 
-    @override
-    @override
-    @override
-    @override
     @override
     @override
     def __init__(self, tap: FlextTapLDAP) -> None:
@@ -522,10 +502,6 @@ class SchemaStream(LDAPBaseStream):
 class CustomStream(LDAPBaseStream):
     """Custom stream for LDAP queries."""
 
-    @override
-    @override
-    @override
-    @override
     @override
     @override
     def __init__(
