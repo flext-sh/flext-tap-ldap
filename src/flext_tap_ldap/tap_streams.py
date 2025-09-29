@@ -28,11 +28,12 @@ from singer_sdk.typing import (
     StringType,
 )
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextLogger, FlextResult
 from flext_ldap import FlextLdapClient
 from flext_ldif import FlextLdifAPI, FlextLdifModels
 from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.tap_client import FlextTapLDAP
+from flext_tap_ldap.typings import FlextTapLdapTypes
 
 # "FlextTapLDAP" imported locally to avoid circular imports
 
@@ -81,7 +82,7 @@ class FlextTapLdapStreams:
         """
 
         @staticmethod
-        def create_test_user_record() -> FlextTypes.Core.Dict:
+        def create_test_user_record() -> FlextTapLdapTypes.Core.Dict:
             """Create standardized test user record for fallback scenarios."""
             return {
                 "dn": "uid=jdoe,ou=users,dc=test,dc=com",
@@ -102,7 +103,7 @@ class FlextTapLdapStreams:
             }
 
         @staticmethod
-        def create_test_group_record() -> FlextTypes.Core.Dict:
+        def create_test_group_record() -> FlextTapLdapTypes.Core.Dict:
             """Create standardized test group record for fallback scenarios."""
             return {
                 "dn": "cn=developers,ou=groups,dc=test,dc=com",
@@ -117,7 +118,7 @@ class FlextTapLdapStreams:
             }
 
         @staticmethod
-        def create_test_ou_record() -> FlextTypes.Core.Dict:
+        def create_test_ou_record() -> FlextTapLdapTypes.Core.Dict:
             """Create standardized test organizational unit record."""
             return {
                 "dn": "ou=users,dc=test,dc=com",
@@ -128,7 +129,7 @@ class FlextTapLdapStreams:
             }
 
         @staticmethod
-        def create_test_schema_record() -> FlextTypes.Core.Dict:
+        def create_test_schema_record() -> FlextTapLdapTypes.Core.Dict:
             """Create standardized test schema record."""
             return {
                 "dn": "cn=schema",
@@ -149,8 +150,8 @@ class FlextTapLdapStreams:
 
         name: str
         search_filter: str
-        schema_properties: FlextTypes.Core.Dict | None = None
-        primary_keys: FlextTypes.Core.StringList | None = None
+        schema_properties: FlextTapLdapTypes.Core.Dict | None = None
+        primary_keys: FlextTapLdapTypes.Core.StringList | None = None
         replication_key: str | None = None
 
         def __post_init__(self: object) -> None:
@@ -176,7 +177,7 @@ class FlextTapLdapStreams:
             self,
             tap: FlextTapLDAP,
             name: str | None = None,
-            schema: FlextTypes.Core.Dict | None = None,
+            schema: FlextTapLdapTypes.Core.Dict | None = None,
         ) -> None:
             """Initialize the LDAP stream."""
             super().__init__(tap, name=name, schema=schema)
@@ -212,7 +213,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[FlextTypes.Core.Dict]:
+        ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
             """Get records from LDAP - base implementation."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -223,8 +224,8 @@ class FlextTapLdapStreams:
             self,
             search_filter: str,
             base_dn: str | None = None,
-            attributes: FlextTypes.Core.StringList | None = None,
-        ) -> list[FlextTypes.Core.Dict]:
+            attributes: FlextTapLdapTypes.Core.StringList | None = None,
+        ) -> list[FlextTapLdapTypes.Core.Dict]:
             """Search LDAP directory with error handling."""
             if not self.client:
                 logger.warning("LDAP client not available, using fallback data")
@@ -255,7 +256,7 @@ class FlextTapLdapStreams:
                 logger.warning(f"LDAP search failed: {e}, using fallback data")
                 return self._get_fallback_data()
 
-        def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
+        def _get_fallback_data(self: object) -> list[FlextTapLdapTypes.Core.Dict]:
             """Get fallback data for testing/demo purposes."""
             return []
 
@@ -290,7 +291,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[FlextTypes.Core.Dict]:
+        ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
             """Get user records from LDAP."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -328,7 +329,7 @@ class FlextTapLdapStreams:
 
             yield from results
 
-        def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
+        def _get_fallback_data(self: object) -> list[FlextTapLdapTypes.Core.Dict]:
             """Get fallback user data."""
             return [FlextTapLdapStreams.FallbackDataFactory.create_test_user_record()]
 
@@ -368,7 +369,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[FlextTypes.Core.Dict]:
+        ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
             """Get group records from LDAP."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -395,7 +396,7 @@ class FlextTapLdapStreams:
 
             yield from results
 
-        def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
+        def _get_fallback_data(self: object) -> list[FlextTapLdapTypes.Core.Dict]:
             """Get fallback group data."""
             return [FlextTapLdapStreams.FallbackDataFactory.create_test_group_record()]
 
@@ -425,7 +426,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[FlextTypes.Core.Dict]:
+        ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
             """Get organizational unit records from LDAP."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -446,7 +447,7 @@ class FlextTapLdapStreams:
 
             yield from results
 
-        def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
+        def _get_fallback_data(self: object) -> list[FlextTapLdapTypes.Core.Dict]:
             """Get fallback organizational unit data."""
             return [FlextTapLdapStreams.FallbackDataFactory.create_test_ou_record()]
 
@@ -491,7 +492,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[FlextTypes.Core.Dict]:
+        ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
             """Get schema records from LDAP."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -529,7 +530,7 @@ class FlextTapLdapStreams:
             for record in self._get_fallback_data():
                 yield record
 
-        def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
+        def _get_fallback_data(self: object) -> list[FlextTapLdapTypes.Core.Dict]:
             """Get fallback schema data."""
             return [FlextTapLdapStreams.FallbackDataFactory.create_test_schema_record()]
 
@@ -593,7 +594,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[FlextTypes.Core.Dict]:
+        ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
             """Get records using custom filter."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -605,7 +606,7 @@ class FlextTapLdapStreams:
 
             yield from results
 
-        def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
+        def _get_fallback_data(self: object) -> list[FlextTapLdapTypes.Core.Dict]:
             """Get fallback data for custom stream."""
             return [
                 {
@@ -664,7 +665,7 @@ class FlextTapLdapStreams:
             # Helper: simple classifier
 
         def _classify_entry_type(
-            self, object_classes: FlextTypes.Core.StringList
+            self, object_classes: FlextTapLdapTypes.Core.StringList
         ) -> str:
             """Classify entry type by simple objectClass heuristics."""
             lowered = {oc.lower() for oc in object_classes}
@@ -679,7 +680,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[FlextTypes.Core.Dict]:
+        ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
             """Get LDIF records using flext-ldif processing."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -700,7 +701,9 @@ class FlextTapLdapStreams:
                     for ldif_file in ldif_dir.glob(pattern):
                         yield from self._process_ldif_file(str(ldif_file))
 
-        def _process_ldif_file(self, file_path: str) -> Iterable[FlextTypes.Core.Dict]:
+        def _process_ldif_file(
+            self, file_path: str
+        ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
             """Process a single LDIF file using flext-ldif."""
             try:
                 logger.info(f"Processing LDIF file: {file_path}")
@@ -738,7 +741,7 @@ class FlextTapLdapStreams:
             self,
             entry: FlextLdifModels.Entry,
             _source_file: str,
-        ) -> FlextTypes.Core.Dict | None:
+        ) -> FlextTapLdapTypes.Core.Dict | None:
             """Convert LDIF entry to stream record."""
             try:
                 # Classify entry type by object classes
@@ -831,7 +834,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[FlextTypes.Core.Dict]:
+        ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
             """Get LDIF analysis records."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -852,7 +855,9 @@ class FlextTapLdapStreams:
                     for ldif_file in ldif_dir.glob(pattern):
                         yield from self._analyze_ldif_file(str(ldif_file))
 
-        def _analyze_ldif_file(self, file_path: str) -> Iterable[FlextTypes.Core.Dict]:
+        def _analyze_ldif_file(
+            self, file_path: str
+        ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
             """Analyze a single LDIF file."""
             start_time = time.time()
 
@@ -966,8 +971,8 @@ class CustomStreamParams:
 
     name: str
     search_filter: str
-    schema_properties: FlextTypes.Core.Dict | None = None
-    primary_keys: FlextTypes.Core.StringList | None = None
+    schema_properties: FlextTapLdapTypes.Core.Dict | None = None
+    primary_keys: FlextTapLdapTypes.Core.StringList | None = None
     replication_key: str | None = None
 
     def __post_init__(self: object) -> None:
@@ -994,7 +999,7 @@ class LDAPBaseStream(Stream):
         self,
         tap: FlextTapLDAP,
         name: str | None = None,
-        schema: FlextTypes.Core.Dict | None = None,
+        schema: FlextTapLdapTypes.Core.Dict | None = None,
     ) -> None:
         """Initialize the LDAP stream."""
         super().__init__(tap, name=name, schema=schema)
@@ -1028,7 +1033,7 @@ class LDAPBaseStream(Stream):
     def get_records(
         self,
         context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTypes.Core.Dict]:
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Get records from LDAP - base implementation."""
         # Use context parameter to avoid unused argument warning
         _context = context  # Acknowledge the parameter
@@ -1039,8 +1044,8 @@ class LDAPBaseStream(Stream):
         self,
         search_filter: str,
         base_dn: str | None = None,
-        attributes: FlextTypes.Core.StringList | None = None,
-    ) -> list[FlextTypes.Core.Dict]:
+        attributes: FlextTapLdapTypes.Core.StringList | None = None,
+    ) -> list[FlextTapLdapTypes.Core.Dict]:
         """Search LDAP directory with error handling."""
         if not self.client:
             logger.warning("LDAP client not available, using fallback data")
@@ -1071,7 +1076,7 @@ class LDAPBaseStream(Stream):
             logger.warning(f"LDAP search failed: {e}, using fallback data")
             return self._get_fallback_data()
 
-    def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
+    def _get_fallback_data(self: object) -> list[FlextTapLdapTypes.Core.Dict]:
         """Get fallback data for testing/demo purposes."""
         return []
 
@@ -1107,7 +1112,7 @@ class UsersStream(LDAPBaseStream):
     def get_records(
         self,
         context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTypes.Core.Dict]:
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Get user records from LDAP."""
         # Use context parameter to avoid unused argument warning
         _context = context  # Acknowledge the parameter
@@ -1143,7 +1148,7 @@ class UsersStream(LDAPBaseStream):
 
         yield from results
 
-    def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
+    def _get_fallback_data(self: object) -> list[FlextTapLdapTypes.Core.Dict]:
         """Get fallback user data."""
         return [FallbackDataFactory.create_test_user_record()]
 
@@ -1184,7 +1189,7 @@ class GroupsStream(LDAPBaseStream):
     def get_records(
         self,
         context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTypes.Core.Dict]:
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Get group records from LDAP."""
         # Use context parameter to avoid unused argument warning
         _context = context  # Acknowledge the parameter
@@ -1209,7 +1214,7 @@ class GroupsStream(LDAPBaseStream):
 
         yield from results
 
-    def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
+    def _get_fallback_data(self: object) -> list[FlextTapLdapTypes.Core.Dict]:
         """Get fallback group data."""
         return [FallbackDataFactory.create_test_group_record()]
 
@@ -1240,7 +1245,7 @@ class OrganizationalUnitsStream(LDAPBaseStream):
     def get_records(
         self,
         context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTypes.Core.Dict]:
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Get organizational unit records from LDAP."""
         # Use context parameter to avoid unused argument warning
         _context = context  # Acknowledge the parameter
@@ -1261,7 +1266,7 @@ class OrganizationalUnitsStream(LDAPBaseStream):
 
         yield from results
 
-    def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
+    def _get_fallback_data(self: object) -> list[FlextTapLdapTypes.Core.Dict]:
         """Get fallback organizational unit data."""
         return [FallbackDataFactory.create_test_ou_record()]
 
@@ -1307,7 +1312,7 @@ class SchemaStream(LDAPBaseStream):
     def get_records(
         self,
         context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTypes.Core.Dict]:
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Get schema records from LDAP."""
         # Use context parameter to avoid unused argument warning
         _context = context  # Acknowledge the parameter
@@ -1345,7 +1350,7 @@ class SchemaStream(LDAPBaseStream):
         for record in self._get_fallback_data():
             yield record
 
-    def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
+    def _get_fallback_data(self: object) -> list[FlextTapLdapTypes.Core.Dict]:
         """Get fallback schema data."""
         return [FallbackDataFactory.create_test_schema_record()]
 
@@ -1406,7 +1411,7 @@ class CustomStream(LDAPBaseStream):
     def get_records(
         self,
         context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTypes.Core.Dict]:
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Get records using custom filter."""
         # Use context parameter to avoid unused argument warning
         _context = context  # Acknowledge the parameter
@@ -1416,7 +1421,7 @@ class CustomStream(LDAPBaseStream):
 
         yield from results
 
-    def _get_fallback_data(self: object) -> list[FlextTypes.Core.Dict]:
+    def _get_fallback_data(self: object) -> list[FlextTapLdapTypes.Core.Dict]:
         """Get fallback data for custom stream."""
         return [
             {
@@ -1476,7 +1481,9 @@ class LDIFStream(Stream):
 
         # Helper: simple classifier
 
-    def _classify_entry_type(self, object_classes: FlextTypes.Core.StringList) -> str:
+    def _classify_entry_type(
+        self, object_classes: FlextTapLdapTypes.Core.StringList
+    ) -> str:
         """Classify entry type by simple objectClass heuristics."""
         lowered = {oc.lower() for oc in object_classes}
         if "inetorgperson" in lowered or "person" in lowered:
@@ -1490,7 +1497,7 @@ class LDIFStream(Stream):
     def get_records(
         self,
         context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTypes.Core.Dict]:
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Get LDIF records using flext-ldif processing."""
         # Use context parameter to avoid unused argument warning
         _context = context  # Acknowledge the parameter
@@ -1511,7 +1518,9 @@ class LDIFStream(Stream):
                 for ldif_file in ldif_dir.glob(pattern):
                     yield from self._process_ldif_file(str(ldif_file))
 
-    def _process_ldif_file(self, file_path: str) -> Iterable[FlextTypes.Core.Dict]:
+    def _process_ldif_file(
+        self, file_path: str
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Process a single LDIF file using flext-ldif."""
         try:
             logger.info(f"Processing LDIF file: {file_path}")
@@ -1549,7 +1558,7 @@ class LDIFStream(Stream):
         self,
         entry: FlextLdifModels.Entry,
         _source_file: str,
-    ) -> FlextTypes.Core.Dict | None:
+    ) -> FlextTapLdapTypes.Core.Dict | None:
         """Convert LDIF entry to stream record."""
         try:
             # Classify entry type by object classes
@@ -1643,7 +1652,7 @@ class LDIFAnalysisStream(Stream):
     def get_records(
         self,
         context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTypes.Core.Dict]:
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Get LDIF analysis records."""
         # Use context parameter to avoid unused argument warning
         _context = context  # Acknowledge the parameter
@@ -1664,7 +1673,9 @@ class LDIFAnalysisStream(Stream):
                 for ldif_file in ldif_dir.glob(pattern):
                     yield from self._analyze_ldif_file(str(ldif_file))
 
-    def _analyze_ldif_file(self, file_path: str) -> Iterable[FlextTypes.Core.Dict]:
+    def _analyze_ldif_file(
+        self, file_path: str
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Analyze a single LDIF file."""
         start_time = time.time()
 

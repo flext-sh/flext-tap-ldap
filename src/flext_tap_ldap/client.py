@@ -6,14 +6,15 @@ import asyncio
 import time
 from collections.abc import Awaitable
 from dataclasses import dataclass
-from typing import override
+from typing import Any, override
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextLogger, FlextResult
 from flext_ldap import (
     FlextLdapClient,
     FlextLdapConstants,
     FlextLdapModels,
 )
+from flext_tap_ldap.typings import FlextTapLdapTypes
 
 # LDAP scope constants
 
@@ -152,7 +153,7 @@ class LDAPClient:
 
         Single Responsibility: Handle only scope conversion logic.
         """
-        scope_map: FlextTypes.Core.Headers = {
+        scope_map: FlextTapLdapTypes.Core.Headers = {
             "SUBTREE": "SUBTREE",
             "ONELEVEL": "ONELEVEL",
             "BASE": "BASE",
@@ -207,12 +208,12 @@ class LDAPClient:
         self,
         result: FlextResult[list[FlextLdapModels.Entry]],
         size_limit: int,
-    ) -> list[FlextTypes.Core.Dict]:
+    ) -> list[FlextTapLdapTypes.Core.Dict]:
         """Process LDAP search results with size limiting.
 
         Single Responsibility: Handle only result processing logic.
         """
-        entries: list[FlextTypes.Core.Dict] = []
+        entries: list[FlextTapLdapTypes.Core.Dict] = []
         if not (result.success and result.data):
             return entries
 
@@ -229,10 +230,10 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str,
-        attributes: FlextTypes.Core.StringList | None,
+        attributes: FlextTapLdapTypes.Core.StringList | None,
         ldap_scope: str,
         size_limit: int,
-    ) -> list[FlextTypes.Core.Dict]:
+    ) -> list[FlextTapLdapTypes.Core.Dict]:
         """Perform actual async LDAP search.
 
         Single Responsibility: Handle only async search execution.
@@ -269,8 +270,8 @@ class LDAPClient:
 
     def _run_async_in_new_loop(
         self,
-        coro: Awaitable[list[FlextTypes.Core.Dict]],
-    ) -> list[FlextTypes.Core.Dict]:
+        coro: Awaitable[list[FlextTapLdapTypes.Core.Dict]],
+    ) -> list[FlextTapLdapTypes.Core.Dict]:
         """Run async coroutine in new event loop.
 
         Single Responsibility: Handle only event loop management.
@@ -287,10 +288,10 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
-        attributes: FlextTypes.Core.StringList | None = None,
+        attributes: FlextTapLdapTypes.Core.StringList | None = None,
         scope: str = "SUBTREE",
         size_limit: int = 0,
-    ) -> list[FlextTypes.Core.Dict]:
+    ) -> list[FlextTapLdapTypes.Core.Dict]:
         """Search for entries using flext-ldap infrastructure (synchronous wrapper).
 
         Returns a list of entries for testing convenience with Singer streams.
@@ -416,7 +417,7 @@ class LDAPClient:
             # Required for Singer protocol compliance - NOT security-sensitive data generation
             return True
 
-    def health_check(self: object) -> FlextTypes.Core.Dict:
+    def health_check(self: object) -> FlextTapLdapTypes.Core.Dict:
         """Perform health check for testing convenience."""
         start_time = time.time()
         connection_result: FlextResult[object] = self.test_connection()
@@ -468,10 +469,10 @@ class LDAPClient:
 
     def _extend_attributes_with_oracle_support(
         self,
-        attributes: FlextTypes.Core.StringList | None,
+        attributes: FlextTapLdapTypes.Core.StringList | None,
         *,
         oracle_oid_mode: bool,
-    ) -> FlextTypes.Core.StringList | None:
+    ) -> FlextTapLdapTypes.Core.StringList | None:
         """Extend attributes list with Oracle-specific attributes.
 
         Single Responsibility: Handle only Oracle attribute extension logic.
@@ -498,7 +499,7 @@ class LDAPClient:
 
         Single Responsibility: Handle only result processing logic.
         """
-        results: list[FlextTypes.Core.Dict] = []
+        results: list[FlextTapLdapTypes.Core.Dict] = []
         for entry in search_result:
             if isinstance(entry, dict):
                 entry_dict = entry
@@ -515,10 +516,10 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str,
-        attributes: FlextTypes.Core.StringList | None,
+        attributes: FlextTapLdapTypes.Core.StringList | None,
         *,
         oracle_oid_mode: bool,
-    ) -> list[FlextTypes.Core.Dict]:
+    ) -> list[FlextTapLdapTypes.Core.Dict]:
         """Execute Oracle search in new event loop.
 
         Single Responsibility: Handle only event loop management for Oracle search.
@@ -542,10 +543,10 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
-        attributes: FlextTypes.Core.StringList | None = None,
+        attributes: FlextTapLdapTypes.Core.StringList | None = None,
         *,
         oracle_oid_mode: bool = False,
-    ) -> list[FlextTypes.Core.Dict]:
+    ) -> list[FlextTapLdapTypes.Core.Dict]:
         """Search with Oracle OID support for testing convenience.
 
         Refactored using Single Responsibility Principle to reduce complexity.
@@ -581,7 +582,7 @@ class LDAPClient:
 LDAPConnectionConfig = FlextLdapModels.ConnectionConfig
 LDAPEntry = FlextLdapModels.Entry
 
-__all__: FlextTypes.Core.StringList = [
+__all__: FlextTapLdapTypes.Core.StringList = [
     "LDAPClient",
     "LDAPConnectionConfig",
     "LDAPEntry",
