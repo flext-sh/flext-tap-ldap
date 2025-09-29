@@ -15,6 +15,99 @@ from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
 
 from flext_core import FlextConfig, FlextConstants, FlextResult
+from flext_tap_ldap.typings import FlextTapLdapTypes
+
+
+class CustomStreamConfig(FlextConfig):
+    """Configuration for custom LDAP streams using flext-core patterns."""
+
+    name: str = Field(..., description="Stream name")
+    search_filter: str = Field(..., description="LDAP search filter")
+    primary_keys: FlextTapLdapTypes.Core.StringList | None = Field(
+        default=None,
+        description="Primary key fields",
+    )
+    replication_key: str | None = Field(
+        default=None,
+        description="Replication key field",
+    )
+    json_schema: FlextTapLdapTypes.Core.Dict | None = Field(
+        default=None,
+        description="JSON schema for the stream",
+    )
+
+    def validate_business_rules(self: object) -> FlextResult[None]:
+        """Validate business rules for custom streams."""
+        if not self.name or not self.search_filter:
+            return FlextResult[None].fail(
+                "Custom stream requires name and search_filter",
+            )
+
+        return FlextResult[None].ok(None)
+
+
+class LDIFProcessingConfig(FlextConfig):
+    """Configuration for LDIF file processing using flext-core patterns."""
+
+    ldif_files: FlextTapLdapTypes.Core.StringList | None = Field(
+        default=None,
+        description="List of LDIF files to process",
+    )
+    ldif_directory: str | None = Field(
+        default=None,
+        description="Directory containing LDIF files",
+    )
+    ldif_file_pattern: str = Field(
+        default="*.ldif",
+        description="File pattern for LDIF files in directory",
+    )
+    ldif_ignore_errors: bool = Field(
+        default=True,
+        description="Continue processing on LDIF parsing errors",
+    )
+    ldif_max_errors: int = Field(
+        default=FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE // 10,
+        description="Maximum number of parsing errors before stopping",
+        gt=0,
+    )
+    ldif_ignore_file_errors: bool = Field(
+        default=True,
+        description="Continue processing if a file fails completely",
+    )
+    ldif_ignore_entry_errors: bool = Field(
+        default=True,
+        description="Continue processing if an entry fails",
+    )
+    ldif_apply_transformations: bool = Field(
+        default=False,
+        description="Apply transformation rules to LDIF entries",
+    )
+    ldif_transformation_rules: FlextTapLdapTypes.Core.Dict | None = Field(
+        default=None,
+        description="Transformation rules for LDIF processing",
+    )
+    migration_batch: str | None = Field(
+        default=None,
+        description="Migration batch identifier for tracking",
+    )
+    enable_ldif_streams: bool = Field(
+        default=False,
+        description="Enable LDIF processing streams",
+    )
+
+    def validate_business_rules(self: object) -> FlextResult[None]:
+        """Validate business rules for LDIF processing."""
+        if self.ldif_files and self.ldif_directory:
+            return FlextResult[None].fail(
+                "Cannot specify both ldif_files and ldif_directory",
+            )
+
+        if self.enable_ldif_streams and not (self.ldif_files or self.ldif_directory):
+            return FlextResult[None].fail(
+                "LDIF streams enabled but no files or directory specified",
+            )
+
+        return FlextResult[None].ok(None)
 
 
 class FlextTapLdapConfig(FlextConfig):
@@ -43,7 +136,10 @@ class FlextTapLdapConfig(FlextConfig):
 
     # LDAP Connection Configuration - flat structure
     ldap_host: str = Field(description="LDAP server host")
-    ldap_port: int = Field(default=389, description="LDAP server port")
+    ldap_port: int = Field(
+        default=FlextConstants.Platform.LDAP_DEFAULT_PORT,
+        description="LDAP server port",
+    )
     ldap_use_ssl: bool = Field(default=False, description="Use SSL connection")
     ldap_use_tls: bool = Field(default=False, description="Use TLS connection")
     ldap_bind_dn: str | None = Field(
@@ -84,7 +180,7 @@ class FlextTapLdapConfig(FlextConfig):
         description="Continue processing on LDIF parsing errors",
     )
     ldif_max_errors: int = Field(
-        default=100,
+        default=FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
         description="Maximum number of parsing errors before stopping",
         gt=0,
     )
@@ -237,5 +333,7 @@ class FlextTapLdapConfig(FlextConfig):
 
 # Export main configuration class
 __all__ = [
+    "CustomStreamConfig",
     "FlextTapLdapConfig",
+    "LDIFProcessingConfig",
 ]

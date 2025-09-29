@@ -7,11 +7,18 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Self
 
-from pydantic import Field
+from pydantic import (
+    ConfigDict,
+    Field,
+    computed_field,
+    field_serializer,
+    model_validator,
+)
 
-from flext_core import FlextModels, FlextResult, FlextTypes
+from flext_core import FlextConstants, FlextModels, FlextResult
+from flext_tap_ldap.typings import FlextTapLdapTypes
 
 
 class FlextTapLdapModels(FlextModels):
@@ -175,7 +182,7 @@ class FlextTapLdapModels(FlextModels):
 
         @staticmethod
         def get_entry_value(
-            entry: FlextTypes.Core.Dict | Any,
+            entry: FlextTapLdapTypes.Core.Dict | Any,
             key: str,
             default: object = None,
         ) -> object:
@@ -246,7 +253,9 @@ class FlextTapLdapModels(FlextModels):
         )
 
         name: str = Field(..., description="Attribute name")
-        values: FlextTypes.Core.StringList = Field(..., description="Attribute values")
+        values: FlextTapLdapTypes.Core.StringList = Field(
+            ..., description="Attribute values"
+        )
         is_binary: bool = Field(
             default=False,
             description="Whether the attribute contains binary data",
@@ -329,7 +338,12 @@ class FlextTapLdapModels(FlextModels):
 
         # LDAP Connection (required)
         host: str = Field(..., description="LDAP server hostname")
-        port: int = Field(default=389, ge=1, le=65535, description="LDAP server port")
+        port: int = Field(
+            default=FlextConstants.Platform.LDAP_DEFAULT_PORT,
+            ge=1,
+            le=65535,
+            description="LDAP server port",
+        )
         bind_dn: str = Field(..., description="Bind DN for authentication")
         password: str = Field(..., description="Password for bind DN")
         base_dn: str = Field(..., description="Base DN for searches")
@@ -349,13 +363,22 @@ class FlextTapLdapModels(FlextModels):
 
         # Performance Settings
         timeout: int = Field(
-            default=30, ge=1, le=300, description="Connection timeout in seconds"
+            default=FlextConstants.Network.DEFAULT_TIMEOUT,
+            ge=1,
+            le=300,
+            description="Connection timeout in seconds",
         )
         page_size: int = Field(
-            default=1000, ge=1, le=10000, description="LDAP paging size"
+            default=FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
+            ge=1,
+            le=10000,
+            description="LDAP paging size",
         )
         connection_pool_size: int = Field(
-            default=5, ge=1, le=20, description="Connection pool size"
+            default=FlextConstants.Container.DEFAULT_WORKERS,
+            ge=1,
+            le=20,
+            description="Connection pool size",
         )
 
         # LDIF Processing
@@ -372,7 +395,10 @@ class FlextTapLdapModels(FlextModels):
             default=True, description="Continue processing on LDIF errors"
         )
         ldif_max_errors: int = Field(
-            default=100, ge=0, le=10000, description="Maximum LDIF errors allowed"
+            default=FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE // 10,
+            ge=0,
+            le=10000,
+            description="Maximum LDIF errors allowed",
         )
 
         @computed_field
@@ -445,7 +471,10 @@ class FlextTapLdapModels(FlextModels):
 
         # LDAP-specific settings
         search_scope: str = Field(default="SUBTREE", description="LDAP search scope")
-        page_size: int = Field(default=1000, description="Results page size")
+        page_size: int = Field(
+            default=FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
+            description="Results page size",
+        )
         follow_referrals: bool = Field(
             default=True, description="Follow LDAP referrals"
         )
@@ -497,7 +526,7 @@ class FlextTapLdapModels(FlextModels):
         )
 
         dn: str = Field(..., description="Distinguished Name")
-        object_classes: FlextTypes.Core.StringList = Field(
+        object_classes: FlextTapLdapTypes.Core.StringList = Field(
             ...,
             description="Object classes",
         )
@@ -538,7 +567,7 @@ class FlextTapLdapModels(FlextModels):
             # Additional LDAP entry validation can be added here
             return FlextResult[None].ok(None)
 
-        attributes: FlextTypes.Core.Dict = Field(
+        attributes: FlextTapLdapTypes.Core.Dict = Field(
             default_factory=dict,
             description="Entry attributes",
         )
@@ -563,7 +592,7 @@ class FlextTapLdapModels(FlextModels):
             None,
             description="LDIF change type (add, modify, delete)",
         )
-        controls: FlextTypes.Core.StringList = Field(
+        controls: FlextTapLdapTypes.Core.StringList = Field(
             default_factory=list,
             description="LDAP controls",
         )
@@ -596,7 +625,7 @@ class FlextTapLdapModels(FlextModels):
             """
             return any(oc.lower() == object_class.lower() for oc in self.object_classes)
 
-        def to_dict(self: object) -> FlextTypes.Core.Dict:
+        def to_dict(self: object) -> FlextTapLdapTypes.Core.Dict:
             """Convert entry to dictionary format.
 
             Returns:
@@ -618,7 +647,9 @@ class FlextTapLdapModels(FlextModels):
             return result
 
         @classmethod
-        def from_dict(cls, data: FlextTypes.Core.Dict) -> FlextTapLdapModels.LdapEntry:
+        def from_dict(
+            cls, data: FlextTapLdapTypes.Core.Dict
+        ) -> FlextTapLdapModels.LdapEntry:
             """Create LdapEntry from dictionary.
 
             Args:
@@ -859,8 +890,14 @@ class FlextTapLdapModels(FlextModels):
         bind_dn: str = Field(..., description="Bind DN")
         password: str | None = Field(default=None, description="Bind password")
         use_ssl: bool = Field(default=False, description="Use SSL connection")
-        timeout: int = Field(default=30, description="Connection timeout in seconds")
-        pool_size: int = Field(default=5, description="Connection pool size")
+        timeout: int = Field(
+            default=FlextConstants.Network.DEFAULT_TIMEOUT,
+            description="Connection timeout in seconds",
+        )
+        pool_size: int = Field(
+            default=FlextConstants.Container.DEFAULT_WORKERS,
+            description="Connection pool size",
+        )
         is_active: bool = Field(default=True, description="Connection active status")
         is_connected: bool = Field(default=False, description="Connection status")
         connection_time: float = Field(

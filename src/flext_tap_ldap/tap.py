@@ -13,7 +13,7 @@ from typing import ClassVar
 
 from singer_sdk import Stream, Tap
 
-from flext_core import FlextLogger, FlextTypes
+from flext_core import FlextLogger
 from flext_tap_ldap.config import FlextTapLdapConfig
 from flext_tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
 from flext_tap_ldap.streams import (
@@ -24,6 +24,7 @@ from flext_tap_ldap.streams import (
     SchemaStream,
     UsersStream,
 )
+from flext_tap_ldap.typings import FlextTapLdapTypes
 
 logger = FlextLogger(__name__)
 
@@ -36,7 +37,7 @@ class FlextTapLDAP(Tap):
 
     # NOTE(@flext-team): Use centralized LDAP schema when flext-meltano common_schemas is available
     # Issue: https://github.com/flext-team/flext-meltano/issues/1
-    config_jsonschema: ClassVar[FlextTypes.Core.Dict] = {
+    config_jsonschema: ClassVar[FlextTapLdapTypes.Core.Dict] = {
         "type": "object",
         "properties": {
             # Basic LDAP connection properties

@@ -9,10 +9,11 @@ from typing import override
 from flext_meltano.singer_types import FlextSingerTypes
 from singer_sdk import Stream
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextLogger, FlextResult
 from flext_ldap import FlextLdapClient
 from flext_ldif import FlextLdifAPI, FlextLdifModels
 from flext_tap_ldap.tap_client import FlextTapLDAP
+from flext_tap_ldap.typings import FlextTapLdapTypes
 
 logger = FlextLogger(__name__)
 
@@ -58,7 +59,7 @@ class LDIFStream(Stream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTypes.Core.Dict]:
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Get LDIF records using flext-ldif processing."""
         logger.info("Processing LDIF files using flext-ldif library")
         # Get LDIF files from config
@@ -73,7 +74,9 @@ class LDIFStream(Stream):
                 "Directory processing not yet implemented in flext-ldif library",
             )
 
-    def _process_ldif_file(self, ldif_file: str) -> Iterable[FlextTypes.Core.Dict]:
+    def _process_ldif_file(
+        self, ldif_file: str
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Process single LDIF file using flext-ldif."""
         logger.info(f"Processing LDIF file: {ldif_file}")
         try:
@@ -92,7 +95,7 @@ class LDIFStream(Stream):
     def _convert_entry_to_record(
         self,
         flext_entry: FlextLdifModels.Entry,
-    ) -> FlextTypes.Core.Dict:
+    ) -> FlextTapLdapTypes.Core.Dict:
         """Convert flext-ldif entry to Singer record."""
         # Delegate entry type classification to flext-ldap
         object_classes = flext_entry.attributes.get_values("objectClass")
@@ -104,7 +107,9 @@ class LDIFStream(Stream):
             "attributes": flext_entry.attributes.attributes,
         }
 
-    def _classify_entry_type(self, object_classes: FlextTypes.Core.StringList) -> str:
+    def _classify_entry_type(
+        self, object_classes: FlextTapLdapTypes.Core.StringList
+    ) -> str:
         """Classify entry type by simple objectClass heuristics."""
         lowered = {oc.lower() for oc in object_classes}
         if "inetorgperson" in lowered or "person" in lowered:
@@ -159,7 +164,7 @@ class LDIFAnalysisStream(Stream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTypes.Core.Dict]:
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Get analysis records using flext-ldif analysis capabilities."""
         logger.info("Generating LDIF analysis using flext-ldif library")
         # Get LDIF files from config
@@ -214,7 +219,7 @@ class LDIFAnalysisStream(Stream):
                 "object_classes": {},
             }
 
-    def _analyze_ldif_file(self, ldif_file: str) -> FlextTypes.Core.Dict:
+    def _analyze_ldif_file(self, ldif_file: str) -> FlextTapLdapTypes.Core.Dict:
         """Analyze single LDIF file using flext-ldif."""
         logger.info(f"Analyzing LDIF file: {ldif_file}")
         try:
@@ -246,7 +251,9 @@ class LDIFAnalysisStream(Stream):
             logger.exception(f"Error analyzing LDIF file {ldif_file}")
             return {"total_entries": 0, "entry_types": {}, "object_classes": {}}
 
-    def _classify_entry_type(self, object_classes: FlextTypes.Core.StringList) -> str:
+    def _classify_entry_type(
+        self, object_classes: FlextTapLdapTypes.Core.StringList
+    ) -> str:
         """Classify entry type by simple objectClass heuristics."""
         lowered = {oc.lower() for oc in object_classes}
         if "inetorgperson" in lowered or "person" in lowered:
@@ -259,4 +266,4 @@ class LDIFAnalysisStream(Stream):
 
 
 # Export what we can
-__all__: FlextTypes.Core.StringList = ["LDIFAnalysisStream", "LDIFStream"]
+__all__: FlextTapLdapTypes.Core.StringList = ["LDIFAnalysisStream", "LDIFStream"]

@@ -24,11 +24,11 @@ from singer_sdk.typing import (
 
 from flext_core import (
     FlextLogger,
-    FlextTypes,
 )
 from flext_meltano import FlextSingerTypes
 from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.tap_client import FlextTapLDAP
+from flext_tap_ldap.typings import FlextTapLdapTypes
 
 th = FlextSingerTypes()
 
@@ -43,7 +43,7 @@ class FallbackDataFactory:
     """
 
     @staticmethod
-    def create_test_user_record() -> FlextTypes.Core.Dict:
+    def create_test_user_record() -> FlextTapLdapTypes.Core.Dict:
         """Create standardized test user record for fallback scenarios."""
         return {
             "dn": "uid=jdoe,ou=users,dc=test,dc=com",
@@ -74,8 +74,8 @@ class CustomStreamParams:
 
     name: str
     search_filter: str
-    schema_properties: FlextTypes.Core.Dict | None = None
-    primary_keys: FlextTypes.Core.StringList | None = None
+    schema_properties: FlextTapLdapTypes.Core.Dict | None = None
+    primary_keys: FlextTapLdapTypes.Core.StringList | None = None
     replication_key: str | None = None
 
     def __post_init__(self: object) -> None:
@@ -102,7 +102,7 @@ class LDAPBaseStream(Stream):
         self,
         tap: FlextTapLDAP,
         name: str | None = None,
-        schema: FlextTypes.Core.Dict | None = None,
+        schema: FlextTapLdapTypes.Core.Dict | None = None,
     ) -> None:
         """Initialize the LDAP stream."""
         super().__init__(tap, name=name, schema=schema)
@@ -111,7 +111,7 @@ class LDAPBaseStream(Stream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTypes.Core.Dict]:
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Get records from LDAP."""
         # This is a base implementation that yields empty records
         # Subclasses should override this method
@@ -166,7 +166,7 @@ class UsersStream(LDAPBaseStream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTypes.Core.Dict]:
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Get user records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
@@ -240,7 +240,7 @@ class GroupsStream(LDAPBaseStream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTypes.Core.Dict]:
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Get group records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
@@ -336,7 +336,7 @@ class OrganizationalUnitsStream(LDAPBaseStream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTypes.Core.Dict]:
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Get organizational unit records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
@@ -425,7 +425,7 @@ class SchemaStream(LDAPBaseStream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTypes.Core.Dict]:
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Get schema records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
@@ -550,7 +550,7 @@ class CustomStream(LDAPBaseStream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTypes.Core.Dict]:
+    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
         """Get custom records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
@@ -616,7 +616,7 @@ class CustomStream(LDAPBaseStream):
             }
 
 
-__all__: FlextTypes.Core.StringList = [
+__all__: FlextTapLdapTypes.Core.StringList = [
     "CustomStream",
     "GroupsStream",
     "LDAPBaseStream",

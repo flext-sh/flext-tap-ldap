@@ -7,7 +7,11 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_tap_ldap.client import LDAPClient, LDAPClientConfig
-from flext_tap_ldap.config import FlextTapLdapConfig
+from flext_tap_ldap.config import (
+    CustomStreamConfig,
+    FlextTapLdapConfig,
+    LDIFProcessingConfig,
+)
 from flext_tap_ldap.exceptions import (
     FlextTapLdapAuthenticationError,
     FlextTapLdapConfigurationError,
@@ -49,6 +53,7 @@ from flext_tap_ldap.models import (
     TapExecutionCompletedEvent,
     TapExecutionStartedEvent,
 )
+from flext_tap_ldap.protocols import FlextTapLdapProtocols
 from flext_tap_ldap.services import (
     LDAPConnectionParams,
     LDAPConnectionService,
@@ -58,10 +63,6 @@ from flext_tap_ldap.services import (
     TapExecutionService,
 )
 from flext_tap_ldap.tap_client import FlextTapLDAP, FlextTapLDAPPlugin
-from flext_tap_ldap.tap_config import (
-    CustomStreamConfig,
-    LDIFProcessingConfig,
-)
 from flext_tap_ldap.tap_streams import (
     CustomStream,
     GroupsStream,
@@ -87,6 +88,7 @@ __all__: FlextTapLdapTypes.Core.StringList = [
     "FlextTapLdapError",
     "FlextTapLdapModels",
     "FlextTapLdapProcessingError",
+    "FlextTapLdapProtocols",
     "FlextTapLdapSearchError",
     "FlextTapLdapStreamError",
     "FlextTapLdapTimeoutError",

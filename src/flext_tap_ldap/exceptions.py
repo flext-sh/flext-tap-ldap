@@ -10,7 +10,8 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextExceptions, FlextTypes
+from flext_core import FlextExceptions
+from flext_tap_ldap.typings import FlextTapLdapTypes
 
 
 # LDAP Tap specific exceptions using FlextExceptions base patterns
@@ -196,7 +197,7 @@ FlextTapLdapSearchError = FlextTapLdapProcessingError  # Search is processing
 FlextTapLdapStreamError = FlextTapLdapProcessingError  # Stream errors are processing
 
 
-__all__: FlextTypes.Core.StringList = [
+__all__: FlextTapLdapTypes.Core.StringList = [
     "FlextTapLdapAuthenticationError",
     "FlextTapLdapConfigurationError",
     "FlextTapLdapConnectionError",
