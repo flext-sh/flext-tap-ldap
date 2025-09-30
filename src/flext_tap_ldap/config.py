@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Self
+from typing import Any, Self
 
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
@@ -257,7 +257,7 @@ class FlextTapLdapConfig(FlextConfig):
         return cls.get_or_create_shared_instance(project_name="flext-tap-ldap")
 
     @classmethod
-    def create_for_development(cls, **overrides) -> Self:
+    def create_for_development(cls, **overrides: Any) -> Self:
         """Create development configuration instance."""
         dev_defaults = {
             "ldap_host": "localhost",
@@ -273,7 +273,7 @@ class FlextTapLdapConfig(FlextConfig):
         return cls(**dev_defaults)
 
     @classmethod
-    def create_for_production(cls, **overrides) -> Self:
+    def create_for_production(cls, **overrides: Any) -> Self:
         """Create production configuration instance."""
         prod_defaults = {
             "ldap_use_ssl": True,
@@ -287,7 +287,7 @@ class FlextTapLdapConfig(FlextConfig):
         return cls(**prod_defaults)
 
     @classmethod
-    def create_for_testing(cls, **overrides) -> Self:
+    def create_for_testing(cls, **overrides: Any) -> Self:
         """Create testing configuration instance."""
         test_defaults = {
             "ldap_host": "test-ldap",

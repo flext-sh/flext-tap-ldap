@@ -14,8 +14,11 @@ from typing import override
 from uuid import uuid4
 
 from flext_core import (
+from flext_tap_ldap.utilities import FlextTapLdapUtilities
     FlextResult,
+from flext_tap_ldap.utilities import FlextTapLdapUtilities
 )
+from flext_tap_ldap.utilities import FlextTapLdapUtilities
 from flext_tap_ldap.models import (
     LDAPConnection,
     LDAPRecord,
