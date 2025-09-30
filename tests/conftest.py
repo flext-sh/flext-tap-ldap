@@ -6,34 +6,36 @@ SPDX-License-Identifier: MIT
 
 from collections.abc import Generator
 from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
 import pytest
 
-from flext_tests import FlextTestDocker
+# Import centralized Docker fixtures
+
+if TYPE_CHECKING:
+    from flext_tests import FlextTestDocker
 
 # Import shared LDAP fixtures from docker directory
 
 
-# Docker container management with FlextTestDocker
 @pytest.fixture(scope="session")
-def docker_control() -> FlextTestDocker:
-    """Provide Docker control instance for tests."""
-    return FlextTestDocker()
+def shared_ldap_container(flext_docker: "FlextTestDocker") -> Generator[str]:
+    """Managed LDAP container using centralized FlextTestDocker with docker-compose."""
+    import os
 
+    # Use centralized docker-compose file for OpenLDAP
+    compose_file = os.path.expanduser("~/flext/docker/docker-compose.openldap.yml")
 
-@pytest.fixture(scope="session")
-def shared_ldap_container(
-    docker_control: FlextTestDocker,
-) -> Generator[FlextTestDocker]:
-    """Managed LDAP container using FlextTestDocker with auto-start."""
-    result = docker_control.start_container("flext-openldap-test")
-    if result.is_failure:
-        pytest.skip(f"Failed to start LDAP container: {result.error}")
+    # Start OpenLDAP stack using docker-compose
+    start_result = flext_docker.start_compose_stack(compose_file)
+    if start_result.is_failure:
+        pytest.skip(f"OpenLDAP container failed to start: {start_result.error}")
 
-    yield docker_control
+    container_name = "flext-openldap-test"
+    return container_name
 
-    docker_control.stop_container("flext-openldap-test", remove=False)
+    # Cleanup handled by FlextTestDocker automatically
 
 
 def pytest_configure(config: pytest.Config) -> None:
@@ -43,20 +45,6 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line("markers", "slow: Slow tests")
     config.addinivalue_line("markers", "smoke: Smoke tests")
     config.addinivalue_line("markers", "e2e: End-to-end tests")
-
-
-# Shared LDAP container fixture (auto-use existing container)
-@pytest.fixture(scope="session", autouse=True)
-def ensure_shared_docker_container(shared_ldap_container: object) -> None:
-    """Ensure shared Docker container is started for the test session.
-
-    This fixture automatically starts the shared LDAP container if not running,
-    and ensures it's available for all tests in the session.
-    """
-    # Suppress unused parameter warning - fixture is used for side effects
-    _ = shared_ldap_container
-    # The shared_ldap_container fixture will be invoked automatically
-    # and will start/stop the container for the entire test session
 
 
 @pytest.fixture(scope="session")
