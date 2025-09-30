@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any, Self
+from typing import Any, Self, cast
 
 from pydantic import (
     ConfigDict,
@@ -127,25 +127,20 @@ class FlextTapLdapModels(FlextModels):
     def validate_tap_system_consistency(self) -> Self:
         """Validate Singer LDAP tap system consistency and configuration."""
         # Singer tap extraction validation
-        if (
-            hasattr(self, "_extraction_streams")
-            and self._extraction_streams
-            and not hasattr(self, "LdapStreamMetadata")
-        ):
+        extraction_streams = getattr(self, "_extraction_streams", None)
+        if extraction_streams and not hasattr(self, "LdapStreamMetadata"):
             msg = "LdapStreamMetadata required when extraction streams configured"
             raise ValueError(msg)
 
         # LDAP connection validation
-        if (
-            hasattr(self, "_ldap_config")
-            and self._ldap_config
-            and not hasattr(self, "LdapConnectionConfig")
-        ):
+        ldap_config = getattr(self, "_ldap_config", None)
+        if ldap_config and not hasattr(self, "LdapConnectionConfig"):
             msg = "LdapConnectionConfig required for LDAP tap operations"
             raise ValueError(msg)
 
         # Singer protocol compliance validation
-        if hasattr(self, "_singer_mode") and self._singer_mode:
+        singer_mode = getattr(self, "_singer_mode", False)
+        if singer_mode:
             required_models = ["LdapStream", "TapExecution", "LdapRecord"]
             for model in required_models:
                 if not hasattr(self, model):
@@ -155,7 +150,7 @@ class FlextTapLdapModels(FlextModels):
         return self
 
     @field_serializer("*", when_used="json")
-    def serialize_with_tap_metadata(self, value: Any, _info: Any) -> Any:
+    def serialize_with_tap_metadata(self, value: object, _info: object) -> object:
         """Add Singer LDAP tap metadata to all serialized fields."""
         if isinstance(value, dict):
             return {
@@ -187,8 +182,8 @@ class FlextTapLdapModels(FlextModels):
         """Utility functions for model data processing."""
 
         @staticmethod
-        def get_entry_value(  # type: ignore[ANN401]
-            entry: FlextTapLdapTypes.Core.Dict | Any,
+        def get_entry_value(
+            entry: FlextTapLdapTypes.Core.Dict | dict[str, object],
             key: str,
             default: object = None,
         ) -> object:
@@ -296,32 +291,34 @@ class FlextTapLdapModels(FlextModels):
             # LDAP attributes can have any name and values
             return FlextResult[None].ok(None)
 
-        def validate_business_rules(self: object) -> FlextResult[None]:
+        def validate_business_rules(self) -> FlextResult[None]:
             """Validate business rules for LDAP attributes."""
             # Business validation for LDAP attributes
             return FlextResult[None].ok(None)
 
         @property
-        def single_value(self: object) -> str | None:
+        def single_value(self) -> str | None:
             """Get first value if exists, None otherwise.
 
             Returns:
                 First value from values list or None if empty.
 
             """
-            return self.values[0] if self.values else None
+            values = getattr(self, "values", None)
+            return values[0] if values else None
 
         @property
-        def is_multi_valued(self: object) -> bool:
+        def is_multi_valued(self) -> bool:
             """Check if attribute has multiple values.
 
             Returns:
                 True if attribute has more than one value.
 
             """
-            return len(self.values) > 1
+            values = getattr(self, "values", None)
+            return len(values) > 1 if values else False
 
-    class LdapConnectionConfig(FlextModels.BaseConfig):
+    class LdapConnectionConfig(FlextModels.ArbitraryTypesModel):
         """LDAP connection configuration with comprehensive settings."""
 
         # Pydantic 2.11 Configuration - Connection Features
@@ -566,7 +563,7 @@ class FlextTapLdapModels(FlextModels):
                 raise ValueError(msg)
             return self
 
-        def validate_business_rules(self: object) -> FlextResult[None]:
+        def validate_business_rules(self) -> FlextResult[None]:
             """Validate business rules for LDAP entries."""
             if not self.dn:
                 return FlextResult[None].fail("DN cannot be empty")
@@ -586,7 +583,7 @@ class FlextTapLdapModels(FlextModels):
         entry_uuid: str | None = Field(
             default=None, description="LDAP entry UUID if available"
         )
-        created_at: datetime | None = Field(None, description="Entry creation time")
+        # created_at is inherited from TimestampedModel
         modified_at: datetime | None = Field(
             None, description="Entry modification time"
         )
@@ -631,7 +628,7 @@ class FlextTapLdapModels(FlextModels):
             """
             return any(oc.lower() == object_class.lower() for oc in self.object_classes)
 
-        def to_dict(self: object) -> FlextTapLdapTypes.Core.Dict:
+        def to_dict(self) -> FlextTapLdapTypes.Core.Dict:
             """Convert entry to dictionary format.
 
             Returns:
@@ -666,15 +663,23 @@ class FlextTapLdapModels(FlextModels):
 
             """
             return cls(
-                dn=str(data.get("dn", "")),
+                dn=cast("str", data.get("dn", "")),
                 object_classes=FlextTapLdapModels.UtilityFunctions.safe_list_str(
                     data.get("objectClass", [])
                 ),
-                attributes=data.get("attributes", {}),
-                extracted_at=data.get("extracted_at", datetime.now(UTC).isoformat()),
+                attributes=cast(
+                    "FlextTapLdapTypes.Core.Dict", data.get("attributes", {})
+                ),
+                extracted_at=cast(
+                    "str", data.get("extracted_at", datetime.now(UTC).isoformat())
+                ),
+                modified_at=cast("datetime | None", data.get("modified_at")),
+                created_by=cast("str | None", data.get("created_by")),
+                modified_by=cast("str | None", data.get("modified_by")),
+                change_type=cast("str | None", data.get("change_type")),
             )
 
-    class LdapUser(FlextModels.BaseModel):
+    class LdapUser(FlextModels.ArbitraryTypesModel):
         """LDAP user entry with standard inetOrgPerson attributes."""
 
         # Pydantic 2.11 Configuration - User Features
@@ -759,7 +764,7 @@ class FlextTapLdapModels(FlextModels):
                 raise ValueError(msg)
             return self
 
-    class LdapGroup(FlextModels.BaseModel):
+    class LdapGroup(FlextModels.ArbitraryTypesModel):
         """LDAP group entry with membership management."""
 
         # Pydantic 2.11 Configuration - Group Features
@@ -830,7 +835,7 @@ class FlextTapLdapModels(FlextModels):
                 raise ValueError(msg)
             return self
 
-    class LdapSchema(FlextModels.BaseModel):
+    class LdapSchema(FlextModels.ArbitraryTypesModel):
         """LDAP schema information with object classes and attributes."""
 
         # Pydantic 2.11 Configuration - Schema Features
@@ -941,7 +946,7 @@ class FlextTapLdapModels(FlextModels):
             if not self.host:
                 msg = "LDAP host is required"
                 raise ValueError(msg)
-            if not (1 <= self.port <= 65535):
+            if not (1 <= self.port <= FlextConstants.Network.MAX_PORT):
                 msg = "Invalid port number"
                 raise ValueError(msg)
             return self
@@ -986,7 +991,9 @@ class FlextTapLdapModels(FlextModels):
         stream_schema: dict[str, Any] = Field(
             default_factory=dict, description="Stream JSON schema"
         )
-        schema: dict[str, Any] = Field(default_factory=dict, description="JSON schema")
+        json_schema: dict[str, Any] = Field(
+            default_factory=dict, description="JSON schema"
+        )
         metadata: list[dict[str, Any]] = Field(
             default_factory=list, description="Stream metadata"
         )
@@ -1000,7 +1007,7 @@ class FlextTapLdapModels(FlextModels):
                 "extraction_type": self.replication_method,
                 "ldap_filter": self.search_filter,
                 "attribute_count": len(self.attributes),
-                "has_schema": bool(self.schema),
+                "has_schema": bool(self.json_schema),
                 "is_incremental": bool(self.replication_key),
             }
 
@@ -1017,7 +1024,7 @@ class FlextTapLdapModels(FlextModels):
 
         def update_schema(self, schema: dict[str, Any]) -> None:
             """Update stream schema."""
-            self.schema = schema
+            self.json_schema = schema
             self.stream_schema = schema
 
     class TapExecution(FlextModels.Entity):
@@ -1123,7 +1130,7 @@ class FlextTapLdapModels(FlextModels):
             self.records_extracted = records_extracted
             self.streams_processed = streams_processed
 
-    class LdapRecord(FlextModels.BaseModel):
+    class LdapRecord(FlextModels.ArbitraryTypesModel):
         """Individual LDAP record for Singer output."""
 
         # Pydantic 2.11 Configuration - Record Features
@@ -1268,7 +1275,7 @@ class FlextTapLdapModels(FlextModels):
         )
 
         stream_name: str = Field(..., description="Discovered stream name")
-        schema: dict[str, Any] = Field(..., description="Stream schema")
+        stream_schema: dict[str, Any] = Field(..., description="Stream schema")
 
         @computed_field
         @property
@@ -1277,8 +1284,8 @@ class FlextTapLdapModels(FlextModels):
             return {
                 "event_type": "stream_discovered",
                 "stream_name": self.stream_name,
-                "schema_properties": len(self.schema.get("properties", {})),
-                "has_key_properties": bool(self.schema.get("key_properties")),
+                "schema_properties": len(self.stream_schema.get("properties", {})),
+                "has_key_properties": bool(self.stream_schema.get("key_properties")),
             }
 
     class RecordExtractedEvent(FlextModels.DomainEvent):
@@ -1350,7 +1357,7 @@ class FlextTapLdapModels(FlextModels):
 
     # Processing and Performance Models with Enhanced Features
 
-    class LdifProcessingState(FlextModels.BaseModel):
+    class LdifProcessingState(FlextModels.ArbitraryTypesModel):
         """LDIF file processing state and statistics."""
 
         # Pydantic 2.11 Configuration - Processing Features
@@ -1440,7 +1447,7 @@ class FlextTapLdapModels(FlextModels):
                 raise ValueError(msg)
             return self
 
-    class LdapTapPerformanceMetrics(FlextModels.BaseModel):
+    class LdapTapPerformanceMetrics(FlextModels.ArbitraryTypesModel):
         """Performance metrics for LDAP tap operations."""
 
         # Pydantic 2.11 Configuration - Metrics Features
@@ -1553,7 +1560,9 @@ class FlextTapLdapModels(FlextModels):
 
     # Convenience accessors for backward compatibility
     @classmethod
-    def get_entry_value(cls, entry: Any, key: str, default: object = None) -> object:  # type: ignore[ANN401]
+    def get_entry_value(
+        cls, entry: dict[str, object], key: str, default: object = None
+    ) -> object:
         """Convenience method for getting entry values."""
         return cls.UtilityFunctions.get_entry_value(entry, key, default)
 

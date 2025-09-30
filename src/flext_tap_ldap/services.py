@@ -1,5 +1,4 @@
 """Application services for FLEXT-TAP-LDAP.
-from flext_tap_ldap.utilities import FlextTapLdapUtilities.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -14,11 +13,8 @@ from typing import override
 from uuid import uuid4
 
 from flext_core import (
-from flext_tap_ldap.utilities import FlextTapLdapUtilities
     FlextResult,
-from flext_tap_ldap.utilities import FlextTapLdapUtilities
 )
-from flext_tap_ldap.utilities import FlextTapLdapUtilities
 from flext_tap_ldap.models import (
     LDAPConnection,
     LDAPRecord,
@@ -26,6 +22,7 @@ from flext_tap_ldap.models import (
     TapExecution,
 )
 from flext_tap_ldap.typings import FlextTapLdapTypes
+from flext_tap_ldap.utilities import FlextTapLdapUtilities
 
 
 @dataclass
