@@ -127,16 +127,22 @@ class FlextTapLdapModels(FlextModels):
     def validate_tap_system_consistency(self) -> Self:
         """Validate Singer LDAP tap system consistency and configuration."""
         # Singer tap extraction validation
-        if hasattr(self, "_extraction_streams") and self._extraction_streams:
-            if not hasattr(self, "LdapStreamMetadata"):
-                msg = "LdapStreamMetadata required when extraction streams configured"
-                raise ValueError(msg)
+        if (
+            hasattr(self, "_extraction_streams")
+            and self._extraction_streams
+            and not hasattr(self, "LdapStreamMetadata")
+        ):
+            msg = "LdapStreamMetadata required when extraction streams configured"
+            raise ValueError(msg)
 
         # LDAP connection validation
-        if hasattr(self, "_ldap_config") and self._ldap_config:
-            if not hasattr(self, "LdapConnectionConfig"):
-                msg = "LdapConnectionConfig required for LDAP tap operations"
-                raise ValueError(msg)
+        if (
+            hasattr(self, "_ldap_config")
+            and self._ldap_config
+            and not hasattr(self, "LdapConnectionConfig")
+        ):
+            msg = "LdapConnectionConfig required for LDAP tap operations"
+            raise ValueError(msg)
 
         # Singer protocol compliance validation
         if hasattr(self, "_singer_mode") and self._singer_mode:
@@ -149,7 +155,7 @@ class FlextTapLdapModels(FlextModels):
         return self
 
     @field_serializer("*", when_used="json")
-    def serialize_with_tap_metadata(self, value: Any, _info) -> Any:
+    def serialize_with_tap_metadata(self, value: Any, _info: Any) -> Any:
         """Add Singer LDAP tap metadata to all serialized fields."""
         if isinstance(value, dict):
             return {
@@ -181,7 +187,7 @@ class FlextTapLdapModels(FlextModels):
         """Utility functions for model data processing."""
 
         @staticmethod
-        def get_entry_value(
+        def get_entry_value(  # type: ignore[ANN401]
             entry: FlextTapLdapTypes.Core.Dict | Any,
             key: str,
             default: object = None,
@@ -1547,7 +1553,7 @@ class FlextTapLdapModels(FlextModels):
 
     # Convenience accessors for backward compatibility
     @classmethod
-    def get_entry_value(cls, entry: Any, key: str, default: object = None) -> object:
+    def get_entry_value(cls, entry: Any, key: str, default: object = None) -> object:  # type: ignore[ANN401]
         """Convenience method for getting entry values."""
         return cls.UtilityFunctions.get_entry_value(entry, key, default)
 
