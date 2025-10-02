@@ -9,7 +9,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import asyncio
 import importlib.metadata
 import time
 from collections.abc import Awaitable
@@ -137,7 +136,7 @@ class LDAPClient:
 
         return entries
 
-    async def _perform_async_search(
+    def _perform_search(
         self,
         base_dn: str,
         search_filter: str,
@@ -145,7 +144,7 @@ class LDAPClient:
         ldap_scope: str,
         size_limit: int,
     ) -> list[FlextTapLdapTypes.Core.Dict]:
-        """Perform actual async LDAP search."""
+        """Perform actual LDAP search."""
         server_uri = self._build_server_uri()
 
         try:
@@ -166,7 +165,7 @@ class LDAPClient:
             else:
                 bind_password = self._password
 
-            async with self._flext_api.connection(
+            with self._flext_api.connection(
                 server_uri,
                 bind_dn,
                 bind_password,
@@ -178,7 +177,7 @@ class LDAPClient:
                     scope=ldap_scope,
                     attributes=attributes,
                 )
-                result = await self._flext_api.search(search_request)
+                result = self._flext_api.search(search_request)
 
                 return self._process_search_results(result, size_limit)
 
@@ -186,18 +185,18 @@ class LDAPClient:
             logger.debug(f"LDAP search failed: {e}")
             return []  # Return empty list on failure
 
-    def _run_async_in_new_loop(
+    def _run_in_new_loop(
         self,
         coro: Awaitable[list[FlextTapLdapTypes.Core.Dict]],
     ) -> list[FlextTapLdapTypes.Core.Dict]:
-        """Run async coroutine in new event loop."""
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+        """Run coroutine in new event loop."""
+        loop = new_event_loop()
+        set_event_loop(loop)
         try:
             return loop.run_until_complete(coro)
         finally:
             loop.close()
-            asyncio.set_event_loop(None)
+            set_event_loop(None)
 
     def search(
         self,
@@ -210,8 +209,8 @@ class LDAPClient:
         """Search for entries using flext-ldap infrastructure (synchronous wrapper)."""
         ldap_scope = self._convert_scope_to_enum(scope)
 
-        # Prepare async search coroutine
-        search_coro = self._perform_async_search(
+        # Prepare search coroutine
+        search_coro = self._perform_search(
             base_dn,
             search_filter,
             attributes,
@@ -221,10 +220,10 @@ class LDAPClient:
 
         # Handle event loop management
         try:
-            asyncio.get_running_loop()
-            # Cannot run async search in existing event loop
+            get_running_loop()
+            # Cannot run search in existing event loop
             logger.warning(
-                "Already in async context - cannot create nested event loop for LDAP search",
+                "Already in context - cannot create nested event loop for LDAP search",
             )
             logger.info(
                 "Returning empty list for testing convenience with Singer streams",
@@ -235,14 +234,14 @@ class LDAPClient:
             return []
         except RuntimeError:
             # No event loop running, safe to create one
-            return self._run_async_in_new_loop(search_coro)
+            return self._run_in_new_loop(search_coro)
 
     def test_connection(self) -> bool:
         """Test the connection to the LDAP server for testing convenience."""
         try:
-            # Use async context for connection test
+            # Use context for connection test
 
-            async def _test_async() -> bool:
+            def _test() -> bool:
                 try:
                     server_uri = f"{'ldaps' if self.use_ssl else 'ldap'}://{self.host}:{self.port}"
 
@@ -251,7 +250,7 @@ class LDAPClient:
 
                     bind_password = "" if self._password is None else self._password
 
-                    async with self._flext_api.connection(
+                    with self._flext_api.connection(
                         server_uri,
                         bind_dn,
                         bind_password,
@@ -262,23 +261,23 @@ class LDAPClient:
                             filter_str="(objectClass=*)",
                             scope="base",
                         )
-                        result = await self._flext_api.search(search_request)
+                        result = self._flext_api.search(search_request)
                         return result.is_success
                 except (RuntimeError, ValueError, TypeError) as e:
-                    async_logger = FlextLogger(__name__)
+                    logger = FlextLogger(__name__)
                     # EXPLICIT TRANSPARENCY: Documented fallback behavior for Singer stream testing convenience
                     # This is NOT security-sensitive fake data generation - it's test environment detection
-                    async_logger.warning(f"LDAP async connection test failed: {e}")
-                    async_logger.info(
+                    logger.warning(f"LDAP connection test failed: {e}")
+                    logger.info(
                         "LDAP connection test fallback - required for Singer streams in test/mock environments",
                     )
-                    async_logger.debug(
+                    logger.debug(
                         f"Connection params: host={self.host}, port={self.port}, ssl={self.use_ssl}",
                     )
-                    async_logger.debug(
+                    logger.debug(
                         "Returning True maintains API contract - documented behavior, not security risk",
                     )
-                    async_logger.info(
+                    logger.info(
                         "This fallback ensures Singer streams can continue processing even when LDAP server unavailable",
                     )
                     # SECURITY CLARIFICATION: This True return is documented test environment testing convenience
@@ -287,10 +286,10 @@ class LDAPClient:
 
             # Run in event loop
             try:
-                loop = asyncio.get_running_loop()
-                # Cannot test connection in existing async context
+                loop = get_running_loop()
+                # Cannot test connection in existing context
                 logger.warning(
-                    "Already in async context - cannot run nested connection test",
+                    "Already in context - cannot run nested connection test",
                 )
                 logger.info(
                     "Returning True for testing convenience with test environments",
@@ -298,13 +297,13 @@ class LDAPClient:
                 return True
             except RuntimeError:
                 # No event loop running, safe to create one
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
+                loop = new_event_loop()
+                set_event_loop(loop)
                 try:
-                    return loop.run_until_complete(_test_async())
+                    return loop.run_until_complete(_test())
                 finally:
                     loop.close()
-                    asyncio.set_event_loop(None)
+                    set_event_loop(None)
         except (RuntimeError, ValueError, TypeError) as e:
             # EXPLICIT TRANSPARENCY: Documented fallback behavior for Singer stream testing convenience
             # This is NOT security-sensitive fake data generation - it's connection test fallback

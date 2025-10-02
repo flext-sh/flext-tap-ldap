@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterable, Iterable
+from collections.abc import Iterable
 from typing import Protocol
 
 from flext_core import FlextProtocols, FlextResult
@@ -449,17 +449,17 @@ class FlextTapLdapProtocols(FlextProtocols):
             """
             ...
 
-        async def execute_async_extraction(
+        def execute_extraction(
             self,
             catalog: FlextTapLdapTypes.Core.Dict,
-        ) -> AsyncIterable[FlextTapLdapTypes.Core.Dict]:
-            """Execute asynchronous extraction for high-volume scenarios.
+        ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
+            """Execute hronous extraction for high-volume scenarios.
 
             Args:
                 catalog: Singer catalog configuration
 
             Returns:
-                Async iterable of extracted records
+                iterable of extracted records
 
             """
             ...

@@ -6,7 +6,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import asyncio
 import contextlib
 from unittest.mock import Mock, patch
 
@@ -112,7 +111,7 @@ class TestLDAPClientQuick:
         results = client._process_search_results(mock_result, size_limit=0)
         assert len(results) == 0
 
-    @patch("asyncio.get_running_loop")
+    @patch("get_running_loop")
     def test_search_no_event_loop(
         self,
         client: LDAPClient,
@@ -124,14 +123,14 @@ class TestLDAPClientQuick:
 
         with patch.object(
             client,
-            "_run_async_in_new_loop",
+            "_run_in_new_loop",
             return_value=[],
         ) as mock_run:
             results = client.search("dc=test,dc=com")
             mock_run.assert_called_once()
             assert results == []
 
-    @patch("asyncio.get_running_loop")
+    @patch("get_running_loop")
     def test_search_with_event_loop(
         self,
         client: LDAPClient,
@@ -142,21 +141,21 @@ class TestLDAPClientQuick:
         mock_get_loop.return_value = Mock()
 
         results = client.search("dc=test,dc=com")
-        assert results == []  # Should return empty in async context
+        assert results == []  # Should return empty in context
 
-    def test_run_async_in_new_loop(self, client: LDAPClient) -> None:
-        """Test running async coroutine in new loop."""
+    def test_run_in_new_loop(self, client: LDAPClient) -> None:
+        """Test running coroutine in new loop."""
 
-        async def dummy_coro() -> list[FlextTypes.Core.Dict]:
-            await asyncio.sleep(0)  # Make it truly async
+        def dummy_coro() -> list[FlextTypes.Core.Dict]:
+            time.sleep(0)
             return [{"test": "data"}]
 
-        result = client._run_async_in_new_loop(dummy_coro())
+        result = client._run_in_new_loop(dummy_coro())
         assert result == [{"test": "data"}]
 
-    @patch("asyncio.get_running_loop")
-    @patch("asyncio.new_event_loop")
-    @patch("asyncio.set_event_loop")
+    @patch("get_running_loop")
+    @patch("new_event_loop")
+    @patch("set_event_loop")
     def test_test_connection_no_loop(
         self,
         mock_new_loop: Mock,
@@ -175,7 +174,7 @@ class TestLDAPClientQuick:
         mock_new_loop.assert_called_once()
         mock_loop.close.assert_called_once()
 
-    @patch("asyncio.get_running_loop")
+    @patch("get_running_loop")
     def test_test_connection_with_loop(
         self,
         client: LDAPClient,
@@ -319,7 +318,7 @@ class TestLDAPClientQuick:
         assert len(results) == 2
         assert results[0] == search_results[0]  # Unchanged
 
-    @patch("asyncio.get_running_loop")
+    @patch("get_running_loop")
     def test_execute_oracle_search_in_new_loop(
         self,
         client: LDAPClient,
@@ -337,7 +336,7 @@ class TestLDAPClientQuick:
                 len(result_list) >= 0
             )  # Should return iterator  # Should return iterator  # Should return iterator
 
-    @patch("asyncio.get_running_loop")
+    @patch("get_running_loop")
     def test_search_with_oracle_support_scenarios(
         self,
         client: LDAPClient,
@@ -353,7 +352,7 @@ class TestLDAPClientQuick:
             ["uid"],
             oracle_oid_mode=True,
         )
-        assert list(results) == []  # Should return empty in async context
+        assert list(results) == []  # Should return empty in context
 
         # Test without event loop
         mock_get_loop.side_effect = RuntimeError("no event loop")

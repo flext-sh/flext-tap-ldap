@@ -38,7 +38,6 @@ from flext_tap_ldap.models import (
     # Additional models now available from unified class
     ConnectionTestedEvent,
     FlextTapLdapModels,
-    FlextTapLdapUtilities,
     LDAPAttribute,
     LDAPConnection,
     LDAPEntry,
@@ -92,7 +91,6 @@ __all__: FlextTapLdapTypes.Core.StringList = [
     "FlextTapLdapSearchError",
     "FlextTapLdapStreamError",
     "FlextTapLdapTimeoutError",
-    "FlextTapLdapUtilities",
     "FlextTapLdapValidationError",
     "GroupsStream",
     "LDAPAttribute",

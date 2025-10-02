@@ -40,7 +40,7 @@ class TestLDAPClientCoverageBoost:
         ssl_uri = ssl_client._build_server_uri()
         assert ssl_uri == "ldaps://secure.com:636"
 
-    @patch("asyncio.get_running_loop")
+    @patch("get_running_loop")
     def test_search_method_coverage(
         self,
         mock_get_loop: Mock,
@@ -52,7 +52,7 @@ class TestLDAPClientCoverageBoost:
 
         with patch.object(
             client,
-            "_run_async_in_new_loop",
+            "_run_in_new_loop",
             return_value=[{"test": "data"}],
         ) as mock_run:
             results = client.search(
@@ -63,7 +63,7 @@ class TestLDAPClientCoverageBoost:
                 size_limit=100,
             )
 
-            # Should call _run_async_in_new_loop
+            # Should call _run_in_new_loop
             mock_run.assert_called_once()
             assert results == [{"test": "data"}]
 
@@ -76,7 +76,7 @@ class TestLDAPClientCoverageBoost:
         mock_get_loop.return_value = Mock()
 
         results = client.search("dc=test,dc=com")
-        assert results == []  # Should return empty in async context
+        assert results == []  # Should return empty in context
 
     def test_health_check_coverage(self, client: LDAPClient) -> None:
         """Test health_check method to cover lines 264-270."""
@@ -97,7 +97,7 @@ class TestLDAPClientCoverageBoost:
             assert health["status"] == "unhealthy"
             assert health["connection_test"] is False
 
-    @patch("asyncio.get_running_loop")
+    @patch("get_running_loop")
     def test_search_with_oracle_support_no_loop(
         self,
         mock_get_loop: Mock,
@@ -156,7 +156,7 @@ class TestLDAPClientCoverageBoost:
             result_list = list(result)
             assert result_list == [{"processed": "entry"}]
 
-    @patch("asyncio.get_running_loop")
+    @patch("get_running_loop")
     def test_search_with_oracle_support_with_loop(
         self,
         mock_get_loop: Mock,
@@ -171,5 +171,5 @@ class TestLDAPClientCoverageBoost:
             oracle_oid_mode=True,
         )
 
-        # Should return empty list in async context
+        # Should return empty list in context
         assert results == []

@@ -6,9 +6,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import asyncio
 import json
-from collections.abc import AsyncGenerator
+from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -284,12 +283,12 @@ class TestFlextTapLDAPIntegration:
         # Mock flext-ldap client for pagination testing
         mock_client_instance = mock_ldap_client.return_value
 
-        # Mock flext-ldap client search method with async context manager
-        async def mock_search(
+        # Mock flext-ldap client search method with context manager
+        def mock_search(
             *_args: object,
             **_kwargs: object,
-        ) -> AsyncGenerator[FlextTypes.Core.Dict]:
-            await asyncio.sleep(0)  # Make it truly async
+        ) -> Generator[FlextTypes.Core.Dict]:
+            time.sleep(0)
             yield {
                 "dn": "uid=user1,ou=users,dc=test,dc=com",
                 "attributes": {"uid": "user1", "cn": "User One"},
