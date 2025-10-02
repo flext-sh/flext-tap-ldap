@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any, Self, cast
+from typing import Self, cast
 
 from pydantic import (
     ConfigDict,
@@ -94,7 +94,7 @@ class FlextTapLdapModels(FlextModels):
 
     @computed_field
     @property
-    def tap_system_summary(self) -> dict[str, Any]:
+    def tap_system_summary(self) -> dict[str, object]:
         """Comprehensive Singer LDAP tap system summary with extraction capabilities."""
         return {
             "total_models": self.active_tap_models_count,
@@ -264,7 +264,7 @@ class FlextTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def attribute_summary(self) -> dict[str, Any]:
+        def attribute_summary(self) -> dict[str, object]:
             """LDAP attribute analysis summary."""
             return {
                 "name": self.name,
@@ -406,7 +406,7 @@ class FlextTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def connection_summary(self) -> dict[str, Any]:
+        def connection_summary(self) -> dict[str, object]:
             """LDAP connection configuration summary."""
             return {
                 "server": f"{self.host}:{self.port}",
@@ -484,7 +484,7 @@ class FlextTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def stream_config_summary(self) -> dict[str, Any]:
+        def stream_config_summary(self) -> dict[str, object]:
             """Singer stream configuration summary."""
             return {
                 "stream_name": self.stream_name,
@@ -536,7 +536,7 @@ class FlextTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def entry_summary(self) -> dict[str, Any]:
+        def entry_summary(self) -> dict[str, object]:
             """LDAP entry analysis summary."""
             return {
                 "dn": self.dn,
@@ -734,7 +734,7 @@ class FlextTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def user_profile_summary(self) -> dict[str, Any]:
+        def user_profile_summary(self) -> dict[str, object]:
             """LDAP user profile summary."""
             return {
                 "user_id": self.uid,
@@ -811,7 +811,7 @@ class FlextTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def group_membership_summary(self) -> dict[str, Any]:
+        def group_membership_summary(self) -> dict[str, object]:
             """LDAP group membership summary."""
             return {
                 "group_name": self.cn,
@@ -866,7 +866,7 @@ class FlextTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def schema_analysis_summary(self) -> dict[str, Any]:
+        def schema_analysis_summary(self) -> dict[str, object]:
             """LDAP schema analysis summary."""
             return {
                 "object_class_count": len(self.object_classes),
@@ -924,7 +924,7 @@ class FlextTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def connection_health_summary(self) -> dict[str, Any]:
+        def connection_health_summary(self) -> dict[str, object]:
             """LDAP connection health summary."""
             return {
                 "server": f"{self.host}:{self.port}",
@@ -988,19 +988,19 @@ class FlextTapLdapModels(FlextModels):
         replication_key: str | None = Field(
             default=None, description="Replication key attribute"
         )
-        stream_schema: dict[str, Any] = Field(
+        stream_schema: dict[str, object] = Field(
             default_factory=dict, description="Stream JSON schema"
         )
-        json_schema: dict[str, Any] = Field(
+        json_schema: dict[str, object] = Field(
             default_factory=dict, description="JSON schema"
         )
-        metadata: list[dict[str, Any]] = Field(
+        metadata: list[dict[str, object]] = Field(
             default_factory=list, description="Stream metadata"
         )
 
         @computed_field
         @property
-        def stream_extraction_summary(self) -> dict[str, Any]:
+        def stream_extraction_summary(self) -> dict[str, object]:
             """Singer stream extraction summary."""
             return {
                 "stream_id": self.tap_stream_id,
@@ -1022,7 +1022,7 @@ class FlextTapLdapModels(FlextModels):
                 raise ValueError(msg)
             return self
 
-        def update_schema(self, schema: dict[str, Any]) -> None:
+        def update_schema(self, schema: dict[str, object]) -> None:
             """Update stream schema."""
             self.json_schema = schema
             self.stream_schema = schema
@@ -1051,11 +1051,13 @@ class FlextTapLdapModels(FlextModels):
         connection_id: str = Field(..., description="Associated connection ID")
         command: str = Field(..., description="Tap command executed")
         tap_status: str = Field(default="created", description="Tap execution status")
-        config: dict[str, Any] = Field(
+        config: dict[str, object] = Field(
             default_factory=dict, description="Tap configuration"
         )
-        catalog: dict[str, Any] = Field(default_factory=dict, description="Tap catalog")
-        state: dict[str, Any] = Field(default_factory=dict, description="Tap state")
+        catalog: dict[str, object] = Field(
+            default_factory=dict, description="Tap catalog"
+        )
+        state: dict[str, object] = Field(default_factory=dict, description="Tap state")
         started_at: datetime = Field(
             default_factory=lambda: datetime.now(UTC),
             description="Execution start time",
@@ -1074,7 +1076,7 @@ class FlextTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def execution_performance_summary(self) -> dict[str, Any]:
+        def execution_performance_summary(self) -> dict[str, object]:
             """Tap execution performance summary."""
             duration = 0.0
             if self.completed_at and self.started_at:
@@ -1151,7 +1153,7 @@ class FlextTapLdapModels(FlextModels):
         )
 
         stream: str = Field(..., description="Source stream name")
-        record: dict[str, Any] = Field(..., description="Record data")
+        record: dict[str, object] = Field(..., description="Record data")
         time_extracted: datetime = Field(
             default_factory=lambda: datetime.now(UTC),
             description="Extraction timestamp",
@@ -1159,7 +1161,7 @@ class FlextTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def record_analysis_summary(self) -> dict[str, Any]:
+        def record_analysis_summary(self) -> dict[str, object]:
             """LDAP record analysis summary."""
             return {
                 "stream": self.stream,
@@ -1199,11 +1201,11 @@ class FlextTapLdapModels(FlextModels):
         )
 
         execution_id: str = Field(..., description="Execution identifier")
-        config: dict[str, Any] = Field(..., description="Tap configuration")
+        config: dict[str, object] = Field(..., description="Tap configuration")
 
         @computed_field
         @property
-        def event_summary(self) -> dict[str, Any]:
+        def event_summary(self) -> dict[str, object]:
             """Tap execution started event summary."""
             return {
                 "event_type": "tap_execution_started",
@@ -1240,7 +1242,7 @@ class FlextTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def completion_summary(self) -> dict[str, Any]:
+        def completion_summary(self) -> dict[str, object]:
             """Tap execution completion summary."""
             return {
                 "event_type": "tap_execution_completed",
@@ -1275,11 +1277,11 @@ class FlextTapLdapModels(FlextModels):
         )
 
         stream_name: str = Field(..., description="Discovered stream name")
-        stream_schema: dict[str, Any] = Field(..., description="Stream schema")
+        stream_schema: dict[str, object] = Field(..., description="Stream schema")
 
         @computed_field
         @property
-        def discovery_summary(self) -> dict[str, Any]:
+        def discovery_summary(self) -> dict[str, object]:
             """Stream discovery summary."""
             return {
                 "event_type": "stream_discovered",
@@ -1308,11 +1310,11 @@ class FlextTapLdapModels(FlextModels):
         )
 
         stream_name: str = Field(..., description="Source stream")
-        record: dict[str, Any] = Field(..., description="Extracted record")
+        record: dict[str, object] = Field(..., description="Extracted record")
 
         @computed_field
         @property
-        def extraction_summary(self) -> dict[str, Any]:
+        def extraction_summary(self) -> dict[str, object]:
             """Record extraction summary."""
             return {
                 "event_type": "record_extracted",
@@ -1346,7 +1348,7 @@ class FlextTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def connection_test_summary(self) -> dict[str, Any]:
+        def connection_test_summary(self) -> dict[str, object]:
             """Connection test summary."""
             return {
                 "event_type": "connection_tested",
@@ -1409,7 +1411,7 @@ class FlextTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def processing_performance_summary(self) -> dict[str, Any]:
+        def processing_performance_summary(self) -> dict[str, object]:
             """LDIF processing performance summary."""
             success_rate = 0.0
             if self.entries_processed > 0:
@@ -1508,7 +1510,7 @@ class FlextTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def performance_analysis_summary(self) -> dict[str, Any]:
+        def performance_analysis_summary(self) -> dict[str, object]:
             """LDAP tap performance analysis summary."""
             total_errors = (
                 self.connection_errors + self.search_errors + self.timeout_errors

@@ -6,7 +6,6 @@ SPDX-License-Identifier: MIT
 
 from collections.abc import Generator
 from pathlib import Path
-from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
 import pytest

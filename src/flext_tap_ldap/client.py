@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import time
+from asyncio import get_running_loop, new_event_loop, set_event_loop
 from collections.abc import Awaitable
 from dataclasses import dataclass
-from typing import Any, override
+from typing import override
 
 from flext_core import FlextLogger, FlextResult
 from flext_ldap import (
@@ -171,7 +172,7 @@ class LDAPClient:
 
     def _convert_entry_to_dict(
         self,
-        entry_data: FlextLdapModels.Entry | dict[str, Any] | None,
+        entry_data: FlextLdapModels.Entry | dict[str, object] | None,
     ) -> dict[str, object]:
         """Convert FlextLdapModels.Entry to dict format for testing convenience.
 
@@ -424,7 +425,7 @@ class LDAPClient:
 
     def _process_oracle_entry(
         self,
-        entry: dict[str, Any],
+        entry: dict[str, object],
     ) -> dict[str, object]:
         """Process Oracle-specific LDAP entries for testing convenience."""
         attributes: dict[str, object] = entry.get("attributes", {})
@@ -481,7 +482,7 @@ class LDAPClient:
 
     def _process_search_results_with_oracle_support(
         self,
-        search_result: list[FlextLdapModels.Entry] | list[dict[str, Any]],
+        search_result: list[FlextLdapModels.Entry] | list[dict[str, object]],
         *,
         oracle_oid_mode: bool,
     ) -> list[dict[str, object]]:

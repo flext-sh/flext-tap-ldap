@@ -193,7 +193,7 @@ class TestLDAPConnectionService:
 
         assert result.is_failure
         assert result.error is not None
-        assert "Connection not found" in result.error
+        assert result.error is not None and "Connection not found" in result.error
 
 
 class TestLDAPStreamService:

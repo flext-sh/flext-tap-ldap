@@ -90,7 +90,7 @@ class TestLDAPEntry:
         )
         result = invalid_entry.validate_business_rules()
         assert not result.is_success
-        assert "DN cannot be empty" in result.error
+        assert result.error is not None and "DN cannot be empty" in result.error
 
 
 class TestLDAPSchema:

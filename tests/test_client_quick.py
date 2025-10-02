@@ -10,8 +10,8 @@ import contextlib
 from unittest.mock import Mock, patch
 
 import pytest
-
 from flext_core import FlextTypes
+
 from flext_tap_ldap import LDAPClient
 
 
