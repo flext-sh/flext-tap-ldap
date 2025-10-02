@@ -1209,8 +1209,8 @@ class FlextTapLdapModels(FlextModels):
                 "event_type": "tap_execution_started",
                 "execution_id": self.execution_id,
                 "config_keys": list(self.config.keys()),
-                "timestamp": self.occurred_at.isoformat()
-                if hasattr(self, "occurred_at")
+                "timestamp": self.created_at.isoformat()
+                if hasattr(self, "created_at")
                 else None,
             }
 

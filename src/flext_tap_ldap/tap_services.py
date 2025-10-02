@@ -17,7 +17,7 @@ from uuid import UUID
 
 from flext_core import FlextLogger, FlextResult
 from flext_ldap import FlextLdapModels
-from flext_ldif import FlextLdifAPI
+from flext_ldif import FlextLdif
 from flext_tap_ldap.config import (
     FlextTapLdapConfig,
     LDIFProcessingConfig,
@@ -146,7 +146,7 @@ class FlextTapLdapServices:
             """Initialize the connection service."""
             self._connections: dict[str, LDAPConnection] = {}
 
-        async def create_connection(
+        def create_connection(
             self,
             params: FlextTapLdapServices.LDAPConnectionParams,
         ) -> FlextResult[LDAPConnection]:
@@ -167,7 +167,7 @@ class FlextTapLdapServices:
             except (RuntimeError, ValueError, TypeError) as e:
                 return FlextResult[object].fail(f"Failed to create connection: {e}")
 
-        async def test_connection(
+        def test_connection(
             self,
             connection_id: str,
         ) -> FlextResult[FlextTapLdapTypes.Core.Dict]:
@@ -194,7 +194,7 @@ class FlextTapLdapServices:
                     self._connections[connection_id] = connection
                 return FlextResult[object].fail(f"Failed to test connection: {e}")
 
-        async def get_connection(
+        def get_connection(
             self,
             connection_id: str,
         ) -> FlextResult[LDAPConnection]:
@@ -207,7 +207,7 @@ class FlextTapLdapServices:
             except (RuntimeError, ValueError, TypeError) as e:
                 return FlextResult[object].fail(f"Failed to get connection: {e}")
 
-        async def list_connections(self) -> FlextResult[list[LDAPConnection]]:
+        def list_connections(self) -> FlextResult[list[LDAPConnection]]:
             """List all LDAP connections."""
             try:
                 connections = list(self._connections.values())
@@ -223,7 +223,7 @@ class FlextTapLdapServices:
             """Initialize the stream service."""
             self._streams: dict[str, LDAPStream] = {}
 
-        async def create_stream(
+        def create_stream(
             self,
             params: FlextTapLdapServices.StreamCreationParams,
         ) -> FlextResult[LDAPStream]:
@@ -252,7 +252,7 @@ class FlextTapLdapServices:
             except (RuntimeError, ValueError, TypeError) as e:
                 return FlextResult[object].fail(f"Failed to create stream: {e}")
 
-        async def discover_schema(
+        def discover_schema(
             self,
             stream_id: str,
         ) -> FlextResult[FlextTapLdapTypes.Core.Dict]:
@@ -280,7 +280,7 @@ class FlextTapLdapServices:
             except (RuntimeError, ValueError, TypeError) as e:
                 return FlextResult[object].fail(f"Failed to discover schema: {e}")
 
-        async def get_stream(self, stream_id: str) -> FlextResult[LDAPStream]:
+        def get_stream(self, stream_id: str) -> FlextResult[LDAPStream]:
             """Get LDAP stream by ID."""
             try:
                 stream = self._streams.get(stream_id)
@@ -290,7 +290,7 @@ class FlextTapLdapServices:
             except (RuntimeError, ValueError, TypeError) as e:
                 return FlextResult[object].fail(f"Failed to get stream: {e}")
 
-        async def list_streams(
+        def list_streams(
             self,
             connection_id: str | None = None,
         ) -> FlextResult[list[LDAPStream]]:
@@ -313,7 +313,7 @@ class FlextTapLdapServices:
             """Initialize the execution service."""
             self._executions: dict[str, TapExecution] = {}
 
-        async def create_execution(
+        def create_execution(
             self,
             connection_id: str,
             command: str,
@@ -337,7 +337,7 @@ class FlextTapLdapServices:
             except (RuntimeError, ValueError, TypeError) as e:
                 return FlextResult[object].fail(f"Failed to create execution: {e}")
 
-        async def start_execution(
+        def start_execution(
             self,
             execution_id: str,
         ) -> FlextResult[TapExecution]:
@@ -353,7 +353,7 @@ class FlextTapLdapServices:
             except (RuntimeError, ValueError, TypeError) as e:
                 return FlextResult[object].fail(f"Failed to start execution: {e}")
 
-        async def complete_execution(
+        def complete_execution(
             self,
             execution_id: str,
             exit_code: int,
@@ -372,7 +372,7 @@ class FlextTapLdapServices:
             except (RuntimeError, ValueError, TypeError) as e:
                 return FlextResult[object].fail(f"Failed to complete execution: {e}")
 
-        async def cancel_execution(
+        def cancel_execution(
             self,
             execution_id: str,
         ) -> FlextResult[TapExecution]:
@@ -388,7 +388,7 @@ class FlextTapLdapServices:
             except (RuntimeError, ValueError, TypeError) as e:
                 return FlextResult[object].fail(f"Failed to cancel execution: {e}")
 
-        async def update_metrics(
+        def update_metrics(
             self,
             execution_id: str,
             records_extracted: int,
@@ -409,7 +409,7 @@ class FlextTapLdapServices:
             except (RuntimeError, ValueError, TypeError) as e:
                 return FlextResult[object].fail(f"Failed to update metrics: {e}")
 
-        async def get_execution(
+        def get_execution(
             self,
             execution_id: str,
         ) -> FlextResult[TapExecution]:
@@ -422,7 +422,7 @@ class FlextTapLdapServices:
             except (RuntimeError, ValueError, TypeError) as e:
                 return FlextResult[object].fail(f"Failed to get execution: {e}")
 
-        async def list_executions(
+        def list_executions(
             self,
             connection_id: str | None = None,
         ) -> FlextResult[list[TapExecution]]:
@@ -453,7 +453,7 @@ class FlextTapLdapServices:
             """Initialize the record service."""
             self._records: dict[str, LDAPRecord] = {}
 
-        async def create_record(
+        def create_record(
             self,
             stream_id: str | UUID,
             execution_id: str | UUID,
@@ -487,7 +487,7 @@ class FlextTapLdapServices:
             except (RuntimeError, ValueError, TypeError) as e:
                 return FlextResult[object].fail(f"Failed to create record: {e}")
 
-        async def get_record(self, record_id: str) -> FlextResult[LDAPRecord]:
+        def get_record(self, record_id: str) -> FlextResult[LDAPRecord]:
             """Get LDAP record by ID."""
             try:
                 record = self._records.get(record_id)
@@ -497,7 +497,7 @@ class FlextTapLdapServices:
             except (RuntimeError, ValueError, TypeError) as e:
                 return FlextResult[object].fail(f"Failed to get record: {e}")
 
-        async def list_records(
+        def list_records(
             self,
             stream_id: str | None = None,
             execution_id: str | None = None,
@@ -520,7 +520,7 @@ class FlextTapLdapServices:
             except (RuntimeError, ValueError, TypeError) as e:
                 return FlextResult[object].fail(f"Failed to list records: {e}")
 
-        async def count_records(
+        def count_records(
             self,
             stream_id: str | None = None,
             execution_id: str | None = None,
@@ -547,7 +547,7 @@ class FlextTapLdapServices:
         @override
         def __init__(self: object) -> None:
             """Initialize LDIF processing service."""
-            self._ldif_api = FlextLdifAPI()
+            self._ldif_api = FlextLdif()
 
         def process_ldif_file(
             self,

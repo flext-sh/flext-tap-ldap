@@ -92,104 +92,104 @@ class TestLDAPConnectionService:
             bind_password="password",
         )
 
-    async def test_create_connection_success(
+    def test_create_connection_success(
         self,
         service: LDAPConnectionService,
         valid_params: LDAPConnectionParams,
     ) -> None:
         """Test successful connection creation."""
-        result = await service.create_connection(valid_params)
+        result = service.create_connection(valid_params)
 
         assert result.is_success
         assert result.data is not None
         # Verify connection is stored
         assert len(service._connections) == 1
 
-    async def test_create_connection_stores_multiple(
+    def test_create_connection_stores_multiple(
         self,
         service: LDAPConnectionService,
         valid_params: LDAPConnectionParams,
     ) -> None:
         """Test creating multiple connections."""
-        result1 = await service.create_connection(valid_params)
-        result2 = await service.create_connection(valid_params)
+        result1 = service.create_connection(valid_params)
+        result2 = service.create_connection(valid_params)
 
         assert result1.is_success
         assert result2.is_success
         assert len(service._connections) == 2
         assert result1.data.id != result2.data.id
 
-    async def test_get_connection_success(
+    def test_get_connection_success(
         self,
         service: LDAPConnectionService,
         valid_params: LDAPConnectionParams,
     ) -> None:
         """Test getting existing connection."""
-        create_result = await service.create_connection(valid_params)
+        create_result = service.create_connection(valid_params)
         connection_id = create_result.data.id
 
-        get_result = await service.get_connection(connection_id)
+        get_result = service.get_connection(connection_id)
 
         assert get_result.is_success
         assert get_result.data is not None
         assert get_result.data.id == connection_id
 
-    async def test_get_nonexistent_connection(
+    def test_get_nonexistent_connection(
         self,
         service: LDAPConnectionService,
     ) -> None:
         """Test getting non-existent connection."""
-        result = await service.get_connection("non-existent-id")
+        result = service.get_connection("non-existent-id")
 
         assert result.is_success
         assert result.data is None
 
-    async def test_list_connections_empty(
+    def test_list_connections_empty(
         self,
         service: LDAPConnectionService,
     ) -> None:
         """Test listing connections when empty."""
-        result = await service.list_connections()
+        result = service.list_connections()
 
         assert result.is_success
         assert result.data == []
 
-    async def test_list_connections_with_data(
+    def test_list_connections_with_data(
         self,
         service: LDAPConnectionService,
         valid_params: LDAPConnectionParams,
     ) -> None:
         """Test listing connections with data."""
-        await service.create_connection(valid_params)
-        await service.create_connection(valid_params)
+        service.create_connection(valid_params)
+        service.create_connection(valid_params)
 
-        result = await service.list_connections()
+        result = service.list_connections()
 
         assert result.is_success
         assert len(result.data) == 2
 
-    async def test_test_connection_success(
+    def test_test_connection_success(
         self,
         service: LDAPConnectionService,
         valid_params: LDAPConnectionParams,
     ) -> None:
         """Test connection testing."""
-        create_result = await service.create_connection(valid_params)
+        create_result = service.create_connection(valid_params)
         connection_id = create_result.data.id
 
-        test_result = await service.test_connection(connection_id)
+        test_result = service.test_connection(connection_id)
 
         assert test_result.is_success
         # Connection should have updated timestamp
         connection = service._connections[connection_id]
         assert connection.last_tested is not None
 
-    async def test_test_nonexistent_connection(
+    def test_test_nonexistent_connection(
         self,
         service: LDAPConnectionService,
     ) -> None:
         """Test testing non-existent connection."""
-        result = await service.test_connection("non-existent-id")
+        result = service.test_connection("non-existent-id")
 
         assert result.is_failure
         assert result.error is not None
@@ -204,9 +204,7 @@ class TestLDAPStreamService:
         """Create stream service instance."""
         return LDAPStreamService()
 
-    async def test_create_stream_with_attributes(
-        self, service: LDAPStreamService
-    ) -> None:
+    def test_create_stream_with_attributes(self, service: LDAPStreamService) -> None:
         """Test successful stream creation with specific attributes."""
         connection_id = str(uuid4())
         params = StreamCreationParams(
@@ -215,14 +213,14 @@ class TestLDAPStreamService:
             search_filter="(objectClass=inetOrgPerson)",
             attributes=["uid", "cn", "mail"],
         )
-        result = await service.create_stream(params)
+        result = service.create_stream(params)
 
         assert result.is_success
         assert result.data.connection_id == connection_id
         assert result.data.stream_type == "users"
         assert result.data.search_filter == "(objectClass=inetOrgPerson)"
 
-    async def test_create_stream_with_defaults(
+    def test_create_stream_with_defaults(
         self,
         service: LDAPStreamService,
     ) -> None:
@@ -233,14 +231,14 @@ class TestLDAPStreamService:
             stream_type="users",
             search_filter="(objectClass=inetOrgPerson)",
         )
-        result = await service.create_stream(params)
+        result = service.create_stream(params)
 
         assert result.is_success
         assert result.data.tap_stream_id == "users_stream"
         assert result.data.key_properties == ["dn"]
         assert result.data.replication_method == "FULL_TABLE"
 
-    async def test_schema_discovery(self, service: LDAPStreamService) -> None:
+    def test_schema_discovery(self, service: LDAPStreamService) -> None:
         """Test schema discovery functionality."""
         connection_id = str(uuid4())
         params = StreamCreationParams(
@@ -248,10 +246,10 @@ class TestLDAPStreamService:
             stream_type="users",
             search_filter="(objectClass=inetOrgPerson)",
         )
-        create_result = await service.create_stream(params)
+        create_result = service.create_stream(params)
         stream_id = create_result.data.id
 
-        schema_result = await service.discover_schema(stream_id)
+        schema_result = service.discover_schema(stream_id)
 
         assert schema_result.is_success
         assert schema_result.data is not None
@@ -261,28 +259,28 @@ class TestLDAPStreamService:
         assert isinstance(properties, dict)
         assert "dn" in properties
 
-    async def test_self(self, service: LDAPStreamService) -> None:
+    def test_self(self, service: LDAPStreamService) -> None:
         """Test method."""
         """Test listing streams filtered by connection."""
         connection_id1 = str(uuid4())
         connection_id2 = str(uuid4())
 
-        await service.create_stream(
+        service.create_stream(
             StreamCreationParams(connection_id1, "users", "(objectClass=person)"),
         )
-        await service.create_stream(
+        service.create_stream(
             StreamCreationParams(connection_id1, "groups", "(objectClass=group)"),
         )
-        await service.create_stream(
+        service.create_stream(
             StreamCreationParams(connection_id2, "users", "(objectClass=person)"),
         )
 
         # List all streams
-        all_result = await service.list_streams()
+        all_result = service.list_streams()
         assert len(all_result.data) == 3
 
         # List streams for connection 1
-        filtered_result = await service.list_streams(connection_id1)
+        filtered_result = service.list_streams(connection_id1)
         assert len(filtered_result.data) == 2
 
 
@@ -294,10 +292,10 @@ class TestTapExecutionService:
         """Create execution service instance."""
         return TapExecutionService()
 
-    async def test_create_execution(self, service: TapExecutionService) -> None:
+    def test_create_execution(self, service: TapExecutionService) -> None:
         """Test execution creation."""
         connection_id = str(uuid4())
-        result = await service.create_execution(
+        result = service.create_execution(
             connection_id=connection_id,
             command="discover",
             config={"ldap_host": "localhost"},
@@ -308,26 +306,26 @@ class TestTapExecutionService:
         assert result.data.command == "discover"
         assert result.data.tap_status == "created"
 
-    async def test_start_execution(self, service: TapExecutionService) -> None:
+    def test_start_execution(self, service: TapExecutionService) -> None:
         """Test starting execution."""
         connection_id = str(uuid4())
-        create_result = await service.create_execution(connection_id, "sync")
+        create_result = service.create_execution(connection_id, "sync")
         execution_id = create_result.data.id
 
-        start_result = await service.start_execution(execution_id)
+        start_result = service.start_execution(execution_id)
 
         assert start_result.is_success
         assert start_result.data.tap_status == "discovering"
         assert start_result.data.started_at is not None
 
-    async def test_complete_execution(self, service: TapExecutionService) -> None:
+    def test_complete_execution(self, service: TapExecutionService) -> None:
         """Test completing execution."""
         connection_id = str(uuid4())
-        create_result = await service.create_execution(connection_id, "sync")
+        create_result = service.create_execution(connection_id, "sync")
         execution_id = create_result.data.id
 
-        await service.start_execution(execution_id)
-        complete_result = await service.complete_execution(
+        service.start_execution(execution_id)
+        complete_result = service.complete_execution(
             execution_id,
             exit_code=0,
             stdout="Success",
@@ -337,13 +335,13 @@ class TestTapExecutionService:
         assert complete_result.data.tap_status == "completed"
         assert complete_result.data.exit_code == 0
 
-    async def test_update_execution_metrics(self, service: TapExecutionService) -> None:
+    def test_update_execution_metrics(self, service: TapExecutionService) -> None:
         """Test updating execution metrics."""
         connection_id = str(uuid4())
-        create_result = await service.create_execution(connection_id, "sync")
+        create_result = service.create_execution(connection_id, "sync")
         execution_id = create_result.data.id
 
-        metrics_result = await service.update_metrics(
+        metrics_result = service.update_metrics(
             execution_id,
             records_extracted=100,
             streams_processed=3,
@@ -362,12 +360,12 @@ class TestLDAPRecordService:
         """Create record service instance."""
         return LDAPRecordService()
 
-    async def test_create_record(self, service: LDAPRecordService) -> None:
+    def test_create_record(self, service: LDAPRecordService) -> None:
         """Test record creation."""
         stream_id = str(uuid4())
         execution_id = str(uuid4())
 
-        result = await service.create_record(
+        result = service.create_record(
             stream_id=stream_id,
             execution_id=execution_id,
             dn="uid=jdoe,ou=users,dc=test,dc=com",
@@ -380,35 +378,35 @@ class TestLDAPRecordService:
         assert result.data.attributes["uid"] == "jdoe"
         assert "singer_record" in result.data.__dict__
 
-    async def test_list_records_with_filters(self, service: LDAPRecordService) -> None:
+    def test_list_records_with_filters(self, service: LDAPRecordService) -> None:
         """Test listing records with filters."""
         stream_id1 = str(uuid4())
         stream_id2 = str(uuid4())
         execution_id = str(uuid4())
 
         # Create records for different streams
-        await service.create_record(stream_id1, execution_id, "uid=user1,dc=test", {})
-        await service.create_record(stream_id1, execution_id, "uid=user2,dc=test", {})
-        await service.create_record(stream_id2, execution_id, "uid=user3,dc=test", {})
+        service.create_record(stream_id1, execution_id, "uid=user1,dc=test", {})
+        service.create_record(stream_id1, execution_id, "uid=user2,dc=test", {})
+        service.create_record(stream_id2, execution_id, "uid=user3,dc=test", {})
 
         # List all records
-        all_result = await service.list_records()
+        all_result = service.list_records()
         assert len(all_result.data) == 3
 
         # List records for stream 1
-        filtered_result = await service.list_records(stream_id=stream_id1)
+        filtered_result = service.list_records(stream_id=stream_id1)
         assert len(filtered_result.data) == 2
 
-    async def test_count_records(self, service: LDAPRecordService) -> None:
+    def test_count_records(self, service: LDAPRecordService) -> None:
         """Test counting records."""
         stream_id = str(uuid4())
         execution_id = str(uuid4())
 
         # Create some records
-        await service.create_record(stream_id, execution_id, "uid=user1,dc=test", {})
-        await service.create_record(stream_id, execution_id, "uid=user2,dc=test", {})
+        service.create_record(stream_id, execution_id, "uid=user1,dc=test", {})
+        service.create_record(stream_id, execution_id, "uid=user2,dc=test", {})
 
-        count_result = await service.count_records(stream_id=stream_id)
+        count_result = service.count_records(stream_id=stream_id)
 
         assert count_result.is_success
         assert count_result.value == 2

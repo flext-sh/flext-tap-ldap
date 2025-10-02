@@ -1,20 +1,42 @@
 # CLAUDE.md - FLEXT Tap LDAP Quality Refactoring Guide
 
-**Project**: FLEXT Tap LDAP - Enterprise LDAP Data Extraction  
-**Status**: Quality Refactoring Required · 1.0.0 Release Preparation | **Architecture**: Clean Architecture + DDD  
-**Dependencies**: Python 3.13+, flext-core, flext-ldap, flext-meltano, singer-sdk  
+**Project**: FLEXT Tap LDAP - Enterprise LDAP Data Extraction
+**Status**: Quality Refactoring Required · 1.0.0 Release Preparation | **Architecture**: Clean Architecture + DDD
+**Dependencies**: Python 3.13+, flext-core, flext-ldap, flext-meltano, singer-sdk
 **Coverage Target**: 75% minimum (proven achievable), 100% aspirational target | **Current Type Status**: Requires Assessment
 **Authority**: FLEXT-TAP-LDAP | **Last Updated**: 2025-01-08
 
 **Hierarchy**: This document provides project-specific standards based on workspace-level patterns defined in [../CLAUDE.md](../CLAUDE.md). For architectural principles, quality gates, and MCP server usage, reference the main workspace standards.
 
-## 🔗 MCP SERVER INTEGRATION
+## 📋 DOCUMENT STRUCTURE & REFERENCES
 
-| MCP Server              | Purpose                                                   | Status     |
-| ----------------------- | --------------------------------------------------------- | ---------- |
-| **serena**              | Singer tap codebase analysis and LDAP extraction patterns | **ACTIVE** |
-| **sequential-thinking** | LDAP data processing and Singer protocol architecture     | **ACTIVE** |
-| **github**              | Singer ecosystem integration and tap PRs                  | **ACTIVE** |
+**Quick Links**:
+- **[~/.claude/commands/flext.md](~/.claude/commands/flext.md)**: Optimization command for module refactoring (USE with `/flext` command)
+- **[../CLAUDE.md](../CLAUDE.md)**: FLEXT ecosystem standards and domain library rules
+
+**Document Purpose**:
+- **This file (CLAUDE.md)**: Project-specific flext-tap-ldap standards, Singer LDAP extraction patterns, and LDAP directory extraction authority
+- **flext.md command**: Practical refactoring workflows and MCP tool usage patterns (HOW-TO)
+- **Workspace CLAUDE.md**: Domain library standards and ecosystem architectural principles (WHAT and WHY)
+
+**DO NOT DUPLICATE**: This file focuses on flext-tap-ldap Singer tap authority with MANDATORY use of flext-meltano, flext-ldap, and flext-core.
+
+**Usage**: Reference [~/.claude/commands/flext.md](~/.claude/commands/flext.md) for MCP workflows. Use `/flext` command for Singer tap module optimization and Clean Architecture refactoring.
+
+**CRITICAL INTEGRATION DEPENDENCIES**:
+- **flext-meltano**: MANDATORY for ALL Singer operations (ZERO TOLERANCE for direct singer-sdk without flext-meltano)
+- **flext-ldap**: MANDATORY for ALL LDAP operations (ZERO TOLERANCE for direct ldap3 imports)
+- **flext-core**: Foundation patterns (FlextResult, FlextService, FlextContainer)
+- **flext-cli**: MANDATORY for ALL CLI operations (ZERO TOLERANCE for direct click/rich imports)
+
+## 🔗 MCP SERVER INTEGRATION (MANDATORY)
+
+| MCP Server              | Purpose                                                   | Status          |
+| ----------------------- | --------------------------------------------------------- | --------------- |
+| **serena-flext**        | Semantic code analysis, symbol manipulation, refactoring  | **MANDATORY**   |
+| **sequential-thinking** | LDAP data processing and Singer protocol architecture     | **RECOMMENDED** |
+| **context7**            | Third-party library documentation (Singer SDK, LDAP)      | **RECOMMENDED** |
+| **github**              | Repository operations and Singer ecosystem PRs            | **ACTIVE**      |
 
 **Usage**: `claude mcp list` for available servers, leverage for Singer-specific development patterns and LDAP extraction analysis.
 

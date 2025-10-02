@@ -58,17 +58,17 @@ def test_data_dir(project_root: Path) -> Path:
 
 @pytest.fixture
 def _mock_get_loop() -> Generator[Mock]:
-    """Mock fixture for asyncio.get_running_loop."""
+    """Mock fixture for get_running_loop."""
     with pytest.MonkeyPatch().context() as m:
         mock_loop = Mock()
-        m.setattr("asyncio.get_running_loop", mock_loop)
+        m.setattr("get_running_loop", mock_loop)
         yield mock_loop
 
 
 @pytest.fixture
 def _mock_set_loop() -> Generator[Mock]:
-    """Mock fixture for asyncio.set_event_loop."""
+    """Mock fixture for set_event_loop."""
     with pytest.MonkeyPatch().context() as m:
         mock_set_loop = Mock()
-        m.setattr("asyncio.set_event_loop", mock_set_loop)
+        m.setattr("set_event_loop", mock_set_loop)
         yield mock_set_loop

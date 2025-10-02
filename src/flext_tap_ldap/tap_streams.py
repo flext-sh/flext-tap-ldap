@@ -30,9 +30,9 @@ from singer_sdk.typing import (
 
 from flext_core import FlextLogger, FlextResult
 from flext_ldap import FlextLdapClient
-from flext_ldif import FlextLdifAPI, FlextLdifModels
+from flext_ldif import FlextLdif, FlextLdifModels
 from flext_tap_ldap.client import LDAPClient
-from flext_tap_ldap.tap_client import FlextTapLDAP
+from flext_tap_ldap.tap import FlextTapLDAP
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
 # "FlextTapLDAP" imported locally to avoid circular imports
@@ -633,7 +633,7 @@ class FlextTapLdapStreams:
             self.tap = tap
 
             # Initialize flext-ldif API for processing
-            self._ldif_api = FlextLdifAPI()
+            self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapClient()
 
             # Define schema
@@ -773,7 +773,7 @@ class FlextTapLdapStreams:
             self.tap = tap
 
             # Initialize flext-ldif API
-            self._ldif_api = FlextLdifAPI()
+            self._ldif_api = FlextLdif()
 
             # Define schema for analysis results
             schema: dict[str, object] = PropertiesList(
@@ -1450,7 +1450,7 @@ class LDIFStream(Stream):
         self.tap = tap
 
         # Initialize flext-ldif API for processing
-        self._ldif_api = FlextLdifAPI()
+        self._ldif_api = FlextLdif()
         self._ldap_api = FlextLdapClient()
 
         # Define schema
@@ -1582,16 +1582,17 @@ class LDIFStream(Stream):
 class LDIFAnalysisStream(Stream):
     """LDIF analysis stream for migration statistics and validation."""
 
+    primary_keys = ["file_path"]
+
     @override
     def __init__(self, tap: FlextTapLDAP) -> None:
         """Initialize LDIF analysis stream."""
         self.name = "ldif_analysis"
         self.path = "/ldif_analysis"
-        self.primary_keys = ["file_path"]
         self.tap = tap
 
         # Initialize flext-ldif API
-        self._ldif_api = FlextLdifAPI()
+        self._ldif_api = FlextLdif()
 
         # Define schema for analysis results
         schema: dict[str, object] = PropertiesList(

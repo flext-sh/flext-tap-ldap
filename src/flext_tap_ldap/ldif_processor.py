@@ -21,7 +21,7 @@ from flext_core import (
     FlextLogger,
     FlextResult,
 )
-from flext_ldif import FlextLdifAPI
+from flext_ldif import FlextLdif
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
 # Type aliases for cleaner code
@@ -60,7 +60,7 @@ class LDIFEntry:
         """Create FlextLdifEntry from current data."""
         try:
             # Use flext-ldif to create proper entry
-            api = FlextLdifAPI()
+            api = FlextLdif()
             # Convert attributes to the format expected by flext-ldif
             ldif_content = f"dn: {self.dn}\n"
             for attr_name, attr_values in self.attributes.items():
@@ -128,7 +128,7 @@ class LDIFEntry:
         """Check if the entry is valid using flext-ldif validation."""
         try:
             # Delegate to flext-ldif for validation
-            api = FlextLdifAPI()
+            api = FlextLdif()
             result: FlextResult[object] = api.validate([self._flext_entry])
             return result.success and bool(result.data)
         except Exception:
@@ -195,7 +195,7 @@ class FlextLdifProcessor:
         }
 
         # Create flext-ldif API instance
-        self._api = FlextLdifAPI()
+        self._api = FlextLdif()
 
     def _raise_parse_error(self, message: str) -> None:
         """Raise ValueError with the given message."""
@@ -395,7 +395,7 @@ class LDIFValidator:
         """Initialize validator with in-memory state and API client."""
         self.validation_errors: FlextTapLdapTypes.Core.StringList = []
         self.warnings: FlextTapLdapTypes.Core.StringList = []
-        self._api = FlextLdifAPI()
+        self._api = FlextLdif()
 
     def validate_entry(self, entry: LDIFEntry) -> bool:
         """Validate LDIF entry using flext-ldif validation."""
@@ -469,7 +469,7 @@ class LDIFTransformer:
     ) -> None:
         """Initialize transformer with optional transformation rules."""
         self.transformation_rules = transformation_rules or {}
-        self._api = FlextLdifAPI()
+        self._api = FlextLdif()
 
     def transform_entry(self, entry: LDIFEntry) -> LDIFEntry:
         """Transform LDIF entry - placeholder for future enhancements."""

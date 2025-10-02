@@ -11,7 +11,7 @@ from singer_sdk import Stream
 
 from flext_core import FlextLogger, FlextResult
 from flext_ldap import FlextLdapClient
-from flext_ldif import FlextLdifAPI, FlextLdifModels
+from flext_ldif import FlextLdif, FlextLdifModels
 from flext_tap_ldap.tap_client import FlextTapLDAP
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
@@ -33,7 +33,7 @@ class LDIFStream(Stream):
         # Store tap reference
         self.tap = tap
         # Initialize flext-ldif API for processing
-        self._ldif_api = FlextLdifAPI()
+        self._ldif_api = FlextLdif()
         self._ldap_api = FlextLdapClient()
         # Define schema
         schema = th.PropertiesList(
@@ -134,7 +134,7 @@ class LDIFAnalysisStream(Stream):
         # Store tap reference
         self.tap = tap
         # Initialize flext-ldif API for analysis
-        self._ldif_api = FlextLdifAPI()
+        self._ldif_api = FlextLdif()
         self._ldap_api = FlextLdapClient()
         # Define schema
         schema = th.PropertiesList(
