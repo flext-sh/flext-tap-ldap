@@ -16,6 +16,9 @@ from itertools import starmap
 from pathlib import Path
 from typing import override
 
+from flext_core import FlextLogger, FlextResult
+from flext_ldap import FlextLdapClient
+from flext_ldif import FlextLdif, FlextLdifModels
 from singer_sdk import Stream
 from singer_sdk.typing import (
     ArrayType,
@@ -28,9 +31,6 @@ from singer_sdk.typing import (
     StringType,
 )
 
-from flext_core import FlextLogger, FlextResult
-from flext_ldap import FlextLdapClient
-from flext_ldif import FlextLdif, FlextLdifModels
 from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.tap import FlextTapLDAP
 from flext_tap_ldap.typings import FlextTapLdapTypes

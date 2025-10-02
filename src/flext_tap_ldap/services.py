@@ -15,6 +15,7 @@ from uuid import uuid4
 from flext_core import (
     FlextResult,
 )
+
 from flext_tap_ldap.models import (
     LDAPConnection,
     LDAPRecord,

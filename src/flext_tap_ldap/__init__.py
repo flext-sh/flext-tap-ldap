@@ -6,6 +6,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from typing import Final
+
 from flext_tap_ldap.client import LDAPClient, LDAPClientConfig
 from flext_tap_ldap.config import (
     CustomStreamConfig,
@@ -35,7 +37,6 @@ from flext_tap_ldap.ldif_stream import (
     LDIFStream,
 )
 from flext_tap_ldap.models import (
-    # Additional models now available from unified class
     ConnectionTestedEvent,
     FlextTapLdapModels,
     LDAPAttribute,
@@ -69,11 +70,16 @@ from flext_tap_ldap.tap_streams import (
     UsersStream,
 )
 from flext_tap_ldap.typings import FlextTapLdapTypes
+from flext_tap_ldap.version import VERSION, FlextTapLdapVersion
 
-__version__ = "0.9.0-reorganized"
-__version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
+PROJECT_VERSION: Final[FlextTapLdapVersion] = VERSION
 
-__all__: FlextTapLdapTypes.Core.StringList = [
+__version__: str = VERSION.version
+__version_info__: tuple[int | str, ...] = VERSION.version_info
+
+__all__ = [
+    "PROJECT_VERSION",
+    "VERSION",
     "ConnectionTestedEvent",
     "CustomStream",
     "CustomStreamConfig",
@@ -91,7 +97,9 @@ __all__: FlextTapLdapTypes.Core.StringList = [
     "FlextTapLdapSearchError",
     "FlextTapLdapStreamError",
     "FlextTapLdapTimeoutError",
+    "FlextTapLdapTypes",
     "FlextTapLdapValidationError",
+    "FlextTapLdapVersion",
     "GroupsStream",
     "LDAPAttribute",
     "LDAPBaseStream",
