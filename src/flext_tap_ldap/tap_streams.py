@@ -43,27 +43,6 @@ th = None  # Not needed anymore, using direct imports
 logger = FlextLogger(__name__)
 
 
-"""LDAP Streams for flext-tap-ldap with integrated LDIF processing.
-
-Consolidates all stream definitions including LDAP directory streams
-and LDIF file processing streams using flext-ldap and flext-ldif integration.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
-
-from __future__ import annotations
-
-from flext_core import FlextLogger
-
-# "FlextTapLDAP" imported locally to avoid circular imports
-
-# Use Singer SDK types directly for schema definitions
-th = None  # Not needed anymore, using direct imports
-
-logger = FlextLogger(__name__)
-
-
 class FlextTapLdapStreams:
     """Unified streams class for LDAP tap operations with comprehensive stream management.
 
