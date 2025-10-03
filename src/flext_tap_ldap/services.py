@@ -14,8 +14,8 @@ from uuid import uuid4
 
 from flext_core import (
     FlextResult,
+    FlextTypes,
 )
-
 from flext_tap_ldap.models import (
     LDAPConnection,
     LDAPRecord,
@@ -490,7 +490,7 @@ class LDAPStreamService:
         *,
         ldap_filter: str | None = None,
         base_dn: str | None = None,
-        attributes: list[str] | None = None,
+        attributes: FlextTypes.StringList | None = None,
     ) -> FlextResult[Iterable[FlextTapLdapTypes.Core.Dict]]:
         """Extract records from LDAP stream.
 
@@ -1383,7 +1383,7 @@ class LDAPRecordService:
                 components.append({"attribute": attr.strip(), "value": value.strip()})
         return components
 
-    def _classify_entry_type(self, object_classes: list[str]) -> str:
+    def _classify_entry_type(self, object_classes: FlextTypes.StringList) -> str:
         """Classify entry type based on objectClass values."""
         lowered_classes = [oc.lower() for oc in object_classes]
 

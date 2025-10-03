@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextExceptions
+from flext_core import FlextExceptions, FlextTypes
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
 
@@ -24,7 +24,7 @@ class FlextTapLdapError(FlextExceptions.BaseError):
         message: str,
         *,
         code: str | None = None,
-        context: dict[str, object] | None = None,
+        context: FlextTypes.Dict | None = None,
         correlation_id: str | None = None,
     ) -> None:
         """Initialize base LDAP tap error."""
@@ -46,23 +46,28 @@ class FlextTapLdapValidationError(FlextExceptions.BaseError):
         *,
         field: str | None = None,
         value: object | None = None,
-        code: str | None = None,
-        context: dict[str, object] | None = None,
-        correlation_id: str | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize LDAP tap validation error."""
-        # Merge extra kwargs and field/value into context
-        merged_context: dict[str, object] = dict(context) if context else {}
-        if field is not None:
-            merged_context["field"] = field
-        if value is not None:
-            merged_context["value"] = value
-        merged_context.update(kwargs)
+        # Store field and value before extracting common kwargs
+        self.field = field
+        self.value = value
+
+        # Extract common parameters using helper
+        base_context, correlation_id, error_code = self._extract_common_kwargs(kwargs)
+
+        # Build context with validation-specific fields
+        context = self._build_context(
+            base_context,
+            field=field,
+            value=value,
+        )
+
+        # Call parent with complete error information
         super().__init__(
             message,
-            code=code,
-            context=merged_context or None,
+            code=error_code or "TAP_LDAP_VALIDATION_ERROR",
+            context=context,
             correlation_id=correlation_id,
         )
 
@@ -74,20 +79,20 @@ class FlextTapLdapConfigurationError(FlextExceptions.BaseError):
     def __init__(
         self,
         message: str,
-        *,
-        code: str | None = None,
-        context: dict[str, object] | None = None,
-        correlation_id: str | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize LDAP tap configuration error."""
-        # Merge extra kwargs into context
-        merged_context: dict[str, object] = dict(context) if context else {}
-        merged_context.update(kwargs)
+        # Extract common parameters using helper
+        base_context, correlation_id, error_code = self._extract_common_kwargs(kwargs)
+
+        # Build context (configuration errors use base context only)
+        context = self._build_context(base_context)
+
+        # Call parent with complete error information
         super().__init__(
             message,
-            code=code,
-            context=merged_context or None,
+            code=error_code or "TAP_LDAP_CONFIGURATION_ERROR",
+            context=context,
             correlation_id=correlation_id,
         )
 
@@ -99,20 +104,20 @@ class FlextTapLdapProcessingError(FlextExceptions.BaseError):
     def __init__(
         self,
         message: str,
-        *,
-        code: str | None = None,
-        context: dict[str, object] | None = None,
-        correlation_id: str | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize LDAP tap processing error."""
-        # Merge extra kwargs into context
-        merged_context: dict[str, object] = dict(context) if context else {}
-        merged_context.update(kwargs)
+        # Extract common parameters using helper
+        base_context, correlation_id, error_code = self._extract_common_kwargs(kwargs)
+
+        # Build context (processing errors use base context only)
+        context = self._build_context(base_context)
+
+        # Call parent with complete error information
         super().__init__(
             message,
-            code=code,
-            context=merged_context or None,
+            code=error_code or "TAP_LDAP_PROCESSING_ERROR",
+            context=context,
             correlation_id=correlation_id,
         )
 
@@ -124,20 +129,20 @@ class FlextTapLdapConnectionError(FlextExceptions.BaseError):
     def __init__(
         self,
         message: str,
-        *,
-        code: str | None = None,
-        context: dict[str, object] | None = None,
-        correlation_id: str | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize LDAP tap connection error."""
-        # Merge extra kwargs into context
-        merged_context: dict[str, object] = dict(context) if context else {}
-        merged_context.update(kwargs)
+        # Extract common parameters using helper
+        base_context, correlation_id, error_code = self._extract_common_kwargs(kwargs)
+
+        # Build context (connection errors use base context only)
+        context = self._build_context(base_context)
+
+        # Call parent with complete error information
         super().__init__(
             message,
-            code=code,
-            context=merged_context or None,
+            code=error_code or "TAP_LDAP_CONNECTION_ERROR",
+            context=context,
             correlation_id=correlation_id,
         )
 
@@ -149,20 +154,20 @@ class FlextTapLdapAuthenticationError(FlextExceptions.BaseError):
     def __init__(
         self,
         message: str,
-        *,
-        code: str | None = None,
-        context: dict[str, object] | None = None,
-        correlation_id: str | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize LDAP tap authentication error."""
-        # Merge extra kwargs into context
-        merged_context: dict[str, object] = dict(context) if context else {}
-        merged_context.update(kwargs)
+        # Extract common parameters using helper
+        base_context, correlation_id, error_code = self._extract_common_kwargs(kwargs)
+
+        # Build context (authentication errors use base context only)
+        context = self._build_context(base_context)
+
+        # Call parent with complete error information
         super().__init__(
             message,
-            code=code,
-            context=merged_context or None,
+            code=error_code or "TAP_LDAP_AUTHENTICATION_ERROR",
+            context=context,
             correlation_id=correlation_id,
         )
 
@@ -174,20 +179,20 @@ class FlextTapLdapTimeoutError(FlextExceptions.BaseError):
     def __init__(
         self,
         message: str,
-        *,
-        code: str | None = None,
-        context: dict[str, object] | None = None,
-        correlation_id: str | None = None,
         **kwargs: object,
     ) -> None:
-        # Merge extra kwargs into context
         """Initialize LDAP timeout error."""
-        merged_context: dict[str, object] = dict(context) if context else {}
-        merged_context.update(kwargs)
+        # Extract common parameters using helper
+        base_context, correlation_id, error_code = self._extract_common_kwargs(kwargs)
+
+        # Build context (timeout errors use base context only)
+        context = self._build_context(base_context)
+
+        # Call parent with complete error information
         super().__init__(
             message,
-            code=code,
-            context=merged_context or None,
+            code=error_code or "TAP_LDAP_TIMEOUT_ERROR",
+            context=context,
             correlation_id=correlation_id,
         )
 

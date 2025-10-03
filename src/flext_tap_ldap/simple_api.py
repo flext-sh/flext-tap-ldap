@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 
 from flext_core import (
     FlextResult,
+    FlextTypes,
 )
 from flext_tap_ldap.config import (
     FlextTapLdapConfig,
@@ -200,7 +201,7 @@ def create_ldap_connection_config(
 
     """
     try:
-        config: dict[str, object] = LDAPConnectionConfig(
+        config: FlextTypes.Dict = LDAPConnectionConfig(
             host=params.host,
             base_dn=params.base_dn,
             port=params.port,
@@ -303,7 +304,7 @@ def create_ldif_processing_config(
         default=False,
     )
     rules = kwargs.get("ldif_transformation_rules")
-    rules_dict: dict[str, object] = rules if isinstance(rules, dict) else None
+    rules_dict: FlextTypes.Dict = rules if isinstance(rules, dict) else None
     builder.with_transformations(enable=apply_transformations, rules=rules_dict)
 
     batch = _coerce_str_optional(kwargs.get("migration_batch"))
@@ -404,7 +405,7 @@ def create_development_ldap_config(
 
         # Apply overrides
         if overrides:
-            config_dict: dict[str, object] = config.model_dump()
+            config_dict: FlextTypes.Dict = config.model_dump()
             config_dict.update(overrides)
             config = FlextTapLdapConfig(**config_dict)
 
@@ -451,7 +452,7 @@ def create_production_ldap_config(
 
         # Apply overrides
         if overrides:
-            config_dict: dict[str, object] = config.model_dump()
+            config_dict: FlextTypes.Dict = config.model_dump()
             config_dict.update(overrides)
             config = FlextTapLdapConfig(**config_dict)
 
@@ -506,7 +507,7 @@ def create_ldif_processing_config_advanced(
 
         # Apply overrides
         if overrides:
-            config_dict: dict[str, object] = config.model_dump()
+            config_dict: FlextTypes.Dict = config.model_dump()
             config_dict.update(overrides)
             config = FlextTapLdapConfig(**config_dict)
 

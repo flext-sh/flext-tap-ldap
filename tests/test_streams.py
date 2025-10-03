@@ -514,7 +514,7 @@ class TestStreamIntegration:
     """Integration tests for stream functionality."""
 
     @pytest.fixture
-    def tap_config(self) -> FlextTypes.Core.Dict:
+    def tap_config(self) -> FlextTypes.Dict:
         """Standard tap configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -529,7 +529,7 @@ class TestStreamIntegration:
 
     def test_all_default_streams_creation(
         self,
-        tap_config: FlextTypes.Core.Dict,
+        tap_config: FlextTypes.Dict,
     ) -> None:
         """Test that all default streams can be created."""
         tap = FlextTapLDAP(config=tap_config)
@@ -545,7 +545,7 @@ class TestStreamIntegration:
 
     def test_streams_with_custom_configuration(
         self,
-        tap_config: FlextTypes.Core.Dict,
+        tap_config: FlextTypes.Dict,
     ) -> None:
         """Test streams with custom configuration."""
         tap_config["custom_streams"] = [
@@ -568,7 +568,7 @@ class TestStreamIntegration:
         custom_stream = next(s for s in streams if s.name == "custom_test_stream")
         assert isinstance(custom_stream, CustomStream)
 
-    def test_self(self, tap_config: FlextTypes.Core.Dict) -> None:
+    def test_self(self, tap_config: FlextTypes.Dict) -> None:
         """Test method."""
         """Test LDIF streams are included when enabled."""
         tap_config["enable_ldif_streams"] = True
@@ -605,7 +605,7 @@ class TestLDAPBaseStreamDirectUsage:
         # Create a subclass to test the base functionality
         class TestBaseStream(LDAPBaseStream):
             name = "test_base"
-            schema: ClassVar[FlextTypes.Core.Dict] = {
+            schema: ClassVar[FlextTypes.Dict] = {
                 "properties": {"dn": {"type": "string"}},
             }
 

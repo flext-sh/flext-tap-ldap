@@ -11,6 +11,7 @@ from pydantic import Field
 from flext_core import (
     FlextConstants,
     FlextModels,
+    FlextTypes,
 )
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
@@ -39,7 +40,9 @@ class LDAPEntry(FlextModels.Entity):
         default_factory=dict,
         description="Entry attributes",
     )
-    object_class: list[str] = Field(default_factory=list, description="Object classes")
+    object_class: FlextTypes.StringList = Field(
+        default_factory=list, description="Object classes"
+    )
 
 
 __all__: FlextTapLdapTypes.Core.StringList = [

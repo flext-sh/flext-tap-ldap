@@ -13,7 +13,7 @@ from typing import ClassVar
 
 from singer_sdk import Stream, Tap
 
-from flext_core import FlextLogger
+from flext_core import FlextLogger, FlextTypes
 from flext_tap_ldap.config import FlextTapLdapConfig
 from flext_tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
 from flext_tap_ldap.streams import (
@@ -120,7 +120,7 @@ class FlextTapLDAP(Tap):
             )
 
         # Add custom streams if configured:
-        custom_streams_config: dict[str, object] = self.config.get("custom_streams", [])
+        custom_streams_config: FlextTypes.Dict = self.config.get("custom_streams", [])
         for custom_config in custom_streams_config:
             params = CustomStreamParams(
                 name=custom_config["name"],
