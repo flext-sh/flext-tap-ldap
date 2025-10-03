@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import importlib.metadata
 import time
-from asyncio import new_event_loop, set_event_loop
+from asyncio import get_running_loop, new_event_loop, set_event_loop
 from collections.abc import Awaitable
 from dataclasses import dataclass
 from typing import override
