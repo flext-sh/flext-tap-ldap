@@ -10,432 +10,440 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Iterable
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
-from flext_core import FlextProtocols, FlextResult
+from flext_core import FlextProtocols, FlextResult, FlextTypes
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
 
-class FlextTapLdapProtocols(FlextProtocols):
-    """LDAP Tap protocol hierarchy extending FlextProtocols.
+class FlextTapLdapProtocols:
+    """Singer Tap LDAP protocols with explicit re-exports from FlextProtocols foundation.
 
-    Provides domain-specific protocols for LDAP tap operations including:
-    - LDAP connection and client protocols
-    - Singer stream extraction protocols
-    - LDIF processing protocols
-    - Tap execution and orchestration protocols
-    - Record processing and transformation protocols
+    This class provides protocol definitions for Singer tap operations with LDAP data extraction,
+    directory service integration, schema discovery, and enterprise LDAP data pipelines.
 
-    All nested protocols extend appropriate FlextProtocols base protocols
-    to maintain consistency with the FLEXT architecture.
+    Domain Extension Pattern (Phase 3):
+    - Explicit re-export of foundation protocols (not inheritance)
+    - Domain-specific protocols organized in TapLdap namespace
+    - 100% backward compatibility through aliases
     """
 
-    class LdapConnectionProtocol(FlextProtocols.Domain.Service, Protocol):
-        """Protocol for LDAP connection management in tap operations.
+    # ============================================================================
+    # RE-EXPORT FOUNDATION PROTOCOLS (EXPLICIT PATTERN)
+    # ============================================================================
 
-        Defines the interface for establishing, managing, and validating
-        LDAP connections specifically for data extraction scenarios.
-        """
+    Foundation = FlextProtocols.Foundation
+    Domain = FlextProtocols.Domain
+    Application = FlextProtocols.Application
+    Infrastructure = FlextProtocols.Infrastructure
+    Extensions = FlextProtocols.Extensions
+    Commands = FlextProtocols.Commands
 
-        def connect(
-            self,
-            host: str,
-            port: int = 389,
-            *,
-            bind_dn: str | None = None,
-            password: str | None = None,
-            use_ssl: bool = False,
-            timeout: int = 30,
-        ) -> FlextResult[bool]:
-            """Establish connection to LDAP server.
+    # ============================================================================
+    # SINGER TAP LDAP-SPECIFIC PROTOCOLS (DOMAIN NAMESPACE)
+    # ============================================================================
 
-            Args:
-                host: LDAP server hostname
-                port: LDAP server port (default 389)
-                bind_dn: Distinguished name for binding
-                password: Password for authentication
-                use_ssl: Whether to use SSL/TLS
-                timeout: Connection timeout in seconds
+    class TapLdap:
+        """Singer Tap LDAP domain protocols for LDAP data extraction and integration."""
 
-            Returns:
-                FlextResult containing connection success status
+        @runtime_checkable
+        class LdapConnectionProtocol(FlextProtocols.Domain.Service, Protocol):
+            """Protocol for LDAP connection management in Singer tap operations."""
 
-            """
+            def connect(self, config: FlextTypes.Dict) -> FlextResult[FlextTypes.Any]:
+                """Establish connection to LDAP server for data extraction.
 
-        def disconnect(self) -> FlextResult[None]:
-            """Disconnect from LDAP server.
+                Args:
+                    config: LDAP connection configuration
 
-            Returns:
-                FlextResult indicating disconnection status
+                Returns:
+                    FlextResult[FlextTypes.Any]: LDAP connection object or error
 
-            """
+                """
 
-        def is_connected(self) -> bool:
-            """Check if currently connected to LDAP server.
+            def disconnect(self) -> FlextResult[None]:
+                """Disconnect from LDAP server.
 
-            Returns:
-                True if connected, False otherwise
+                Returns:
+                    FlextResult[None]: Success status or error
 
-            """
+                """
 
-        def test_connection(self) -> FlextResult[FlextTapLdapTypes.Core.Dict]:
-            """Test LDAP connection and return diagnostics.
+            def test_connection(self, config: FlextTypes.Dict) -> FlextResult[bool]:
+                """Test LDAP server connectivity.
 
-            Returns:
-                FlextResult containing connection test results and metrics
+                Args:
+                    config: LDAP connection configuration
 
-            """
+                Returns:
+                    FlextResult[bool]: Connection test result or error
 
-        def get_connection_info(self) -> FlextTapLdapTypes.Core.Dict:
-            """Get current connection information.
+                """
 
-            Returns:
-                Dictionary with connection details and status
+            def get_server_info(self) -> FlextResult[FlextTypes.Dict]:
+                """Get LDAP server information and capabilities.
 
-            """
+                Returns:
+                    FlextResult[FlextTypes.Dict]: Server information or error
 
-    class SingerStreamProtocol(FlextProtocols.Domain.Service, Protocol):
-        """Protocol for Singer stream operations in LDAP taps.
+                """
 
-        Defines the interface for discovering, configuring, and executing
-        Singer streams for LDAP data extraction.
-        """
+            def bind_with_credentials(
+                self, username: str, password: str
+            ) -> FlextResult[bool]:
+                """Bind to LDAP server with credentials.
 
-        def discover_streams(self) -> FlextResult[list[FlextTapLdapTypes.Core.Dict]]:
-            """Discover available LDAP streams for extraction.
+                Args:
+                    username: LDAP bind username
+                    password: LDAP bind password
 
-            Returns:
-                FlextResult containing list of discoverable stream definitions
+                Returns:
+                    FlextResult[bool]: Bind success status or error
 
-            """
+                """
 
-        def get_stream_schema(
-            self,
-            stream_name: str,
-        ) -> FlextResult[FlextTapLdapTypes.Core.Dict]:
-            """Get JSON schema for specified stream.
+        @runtime_checkable
+        class SingerStreamProtocol(FlextProtocols.Domain.Service, Protocol):
+            """Protocol for Singer stream generation from LDAP data."""
 
-            Args:
-                stream_name: Name of the stream
+            def discover_streams(
+                self, config: FlextTypes.Dict
+            ) -> FlextResult[list[FlextTypes.Dict]]:
+                """Discover available LDAP streams for extraction.
 
-            Returns:
-                FlextResult containing the stream's JSON schema
+                Args:
+                    config: Discovery configuration
 
-            """
+                Returns:
+                    FlextResult[list[FlextTypes.Dict]]: Discovered streams or error
 
-        def extract_records(
-            self,
-            stream_name: str,
-            *,
-            ldap_filter: str | None = None,
-            base_dn: str | None = None,
-            attributes: list[str] | None = None,
-        ) -> FlextResult[Iterable[FlextTapLdapTypes.Core.Dict]]:
-            """Extract records from LDAP stream.
+                """
 
-            Args:
-                stream_name: Name of the stream to extract
-                ldap_filter: LDAP search filter
-                base_dn: Base distinguished name for search
-                attributes: List of attributes to retrieve
+            def get_stream_schema(
+                self, stream_name: str
+            ) -> FlextResult[FlextTypes.Dict]:
+                """Get schema definition for LDAP stream.
 
-            Returns:
-                FlextResult containing iterable of extracted records
+                Args:
+                    stream_name: Name of the stream
 
-            """
+                Returns:
+                    FlextResult[FlextTypes.Dict]: Stream schema or error
 
-        def get_stream_metadata(
-            self,
-            stream_name: str,
-        ) -> FlextResult[FlextTapLdapTypes.Core.Dict]:
-            """Get metadata for specified stream.
+                """
 
-            Args:
-                stream_name: Name of the stream
+            def sync_stream(
+                self, stream_name: str, state: FlextTypes.Dict
+            ) -> FlextResult[FlextTypes.Dict]:
+                """Synchronize LDAP stream data.
 
-            Returns:
-                FlextResult containing stream metadata
+                Args:
+                    stream_name: Name of the stream to sync
+                    state: Current sync state
 
-            """
+                Returns:
+                    FlextResult[FlextTypes.Dict]: Sync results or error
 
-    class LdifProcessingProtocol(FlextProtocols.Domain.Service, Protocol):
-        """Protocol for LDIF file processing in taps.
+                """
 
-        Defines the interface for parsing, analyzing, and extracting
-        data from LDIF files as part of tap operations.
-        """
+            def write_schema_message(
+                self, stream_name: str, schema: FlextTypes.Dict
+            ) -> FlextResult[None]:
+                """Write Singer schema message for LDAP stream.
 
-        def parse_ldif_file(
-            self,
-            file_path: str,
-        ) -> FlextResult[Iterable[FlextTapLdapTypes.Core.Dict]]:
-            """Parse LDIF file and extract entries.
+                Args:
+                    stream_name: Name of the stream
+                    schema: Stream schema
 
-            Args:
-                file_path: Path to LDIF file
+                Returns:
+                    FlextResult[None]: Success status or error
 
-            Returns:
-                FlextResult containing iterable of parsed LDIF entries
+                """
 
-            """
+        @runtime_checkable
+        class LdifProcessingProtocol(FlextProtocols.Domain.Service, Protocol):
+            """Protocol for LDIF processing in Singer tap operations."""
 
-        def analyze_ldif_file(
-            self,
-            file_path: str,
-        ) -> FlextResult[FlextTapLdapTypes.Core.Dict]:
-            """Analyze LDIF file structure and statistics.
+            def parse_ldif_entry(self, ldif_entry: str) -> FlextResult[FlextTypes.Dict]:
+                """Parse LDIF entry to dictionary.
 
-            Args:
-                file_path: Path to LDIF file
+                Args:
+                    ldif_entry: LDIF entry string
 
-            Returns:
-                FlextResult containing analysis results and statistics
+                Returns:
+                    FlextResult[FlextTypes.Dict]: Parsed entry or error
 
-            """
+                """
 
-        def validate_ldif_file(
-            self,
-            file_path: str,
-        ) -> FlextResult[FlextTapLdapTypes.Core.Dict]:
-            """Validate LDIF file format and content.
+            def convert_to_singer_record(
+                self, ldap_entry: FlextTypes.Dict
+            ) -> FlextResult[FlextTypes.Dict]:
+                """Convert LDAP entry to Singer record format.
 
-            Args:
-                file_path: Path to LDIF file
+                Args:
+                    ldap_entry: LDAP entry dictionary
 
-            Returns:
-                FlextResult containing validation results
+                Returns:
+                    FlextResult[FlextTypes.Dict]: Singer record or error
 
-            """
+                """
 
-        def process_ldif_directory(
-            self,
-            directory_path: str,
-        ) -> FlextResult[Iterable[FlextTapLdapTypes.Core.Dict]]:
-            """Process all LDIF files in a directory.
+            def handle_binary_attributes(
+                self, attributes: FlextTypes.Dict
+            ) -> FlextResult[FlextTypes.Dict]:
+                """Handle binary LDAP attributes for Singer format.
 
-            Args:
-                directory_path: Path to directory containing LDIF files
+                Args:
+                    attributes: LDAP attributes
 
-            Returns:
-                FlextResult containing iterable of all processed entries
+                Returns:
+                    FlextResult[FlextTypes.Dict]: Processed attributes or error
 
-            """
+                """
 
-    class TapExecutionProtocol(FlextProtocols.Application.Handler, Protocol):
-        """Protocol for tap execution orchestration.
+            def normalize_attribute_names(
+                self, attributes: FlextTypes.Dict
+            ) -> FlextResult[FlextTypes.Dict]:
+                """Normalize LDAP attribute names for Singer compatibility.
 
-        Defines the interface for managing complete tap execution
-        workflows including discovery, extraction, and state management.
-        """
+                Args:
+                    attributes: LDAP attributes
 
-        def execute_discovery(self) -> FlextResult[FlextTapLdapTypes.Core.Dict]:
-            """Execute tap discovery phase.
+                Returns:
+                    FlextResult[FlextTypes.Dict]: Normalized attributes or error
 
-            Returns:
-                FlextResult containing discovery catalog
+                """
 
-            """
+        @runtime_checkable
+        class TapExecutionProtocol(FlextProtocols.Domain.Service, Protocol):
+            """Protocol for Singer tap execution operations."""
 
-        def execute_extraction(
-            self,
-            catalog: FlextTapLdapTypes.Core.Dict,
-            *,
-            state: FlextTapLdapTypes.Core.Dict | None = None,
-        ) -> FlextResult[Iterable[FlextTapLdapTypes.Core.Dict]]:
-            """Execute tap extraction phase.
+            def run_discovery_mode(
+                self, config: FlextTypes.Dict
+            ) -> FlextResult[FlextTypes.Dict]:
+                """Run tap in discovery mode.
 
-            Args:
-                catalog: Singer catalog configuration
-                state: Optional state for incremental extraction
+                Args:
+                    config: Tap configuration
 
-            Returns:
-                FlextResult containing extracted records
+                Returns:
+                    FlextResult[FlextTypes.Dict]: Discovery results or error
 
-            """
+                """
 
-        def get_execution_metrics(self) -> FlextTapLdapTypes.Core.Dict:
-            """Get execution performance metrics.
+            def run_sync_mode(
+                self,
+                config: FlextTypes.Dict,
+                catalog: FlextTypes.Dict,
+                state: FlextTypes.Dict,
+            ) -> FlextResult[FlextTypes.Dict]:
+                """Run tap in sync mode.
 
-            Returns:
-                Dictionary containing execution metrics and statistics
+                Args:
+                    config: Tap configuration
+                    catalog: Stream catalog
+                    state: Current state
 
-            """
+                Returns:
+                    FlextResult[FlextTypes.Dict]: Sync results or error
 
-        def handle_execution_errors(
-            self,
-            error: Exception,
-        ) -> FlextResult[None]:
-            """Handle and process execution errors.
+                """
 
-            Args:
-                error: Exception that occurred during execution
+            def handle_interrupt(self, state: FlextTypes.Dict) -> FlextResult[None]:
+                """Handle tap interruption and save state.
 
-            Returns:
-                FlextResult indicating error handling status
+                Args:
+                    state: Current state to save
 
-            """
+                Returns:
+                    FlextResult[None]: Success status or error
 
-    class RecordProcessingProtocol(FlextProtocols.Domain.Service, Protocol):
-        """Protocol for LDAP record processing and transformation.
+                """
 
-        Defines the interface for transforming LDAP entries into
-        Singer-compatible records with proper type handling.
-        """
+            def emit_state_message(self, state: FlextTypes.Dict) -> FlextResult[None]:
+                """Emit Singer state message.
 
-        def transform_ldap_entry(
-            self,
-            entry: FlextTapLdapTypes.Core.Dict,
-        ) -> FlextResult[FlextTapLdapTypes.Core.Dict]:
-            """Transform LDAP entry to Singer record format.
+                Args:
+                    state: State to emit
 
-            Args:
-                entry: Raw LDAP entry data
+                Returns:
+                    FlextResult[None]: Success status or error
 
-            Returns:
-                FlextResult containing transformed Singer record
+                """
 
-            """
+        @runtime_checkable
+        class RecordProcessingProtocol(FlextProtocols.Domain.Service, Protocol):
+            """Protocol for LDAP record processing in Singer tap."""
 
-        def validate_record_schema(
-            self,
-            record: FlextTapLdapTypes.Core.Dict,
-            schema: FlextTapLdapTypes.Core.Dict,
-        ) -> FlextResult[bool]:
-            """Validate record against JSON schema.
+            def transform_ldap_record(
+                self, ldap_record: FlextTypes.Dict, stream_schema: FlextTypes.Dict
+            ) -> FlextResult[FlextTypes.Dict]:
+                """Transform LDAP record to match stream schema.
 
-            Args:
-                record: Record to validate
-                schema: JSON schema for validation
+                Args:
+                    ldap_record: LDAP record
+                    stream_schema: Target schema
 
-            Returns:
-                FlextResult containing validation status
+                Returns:
+                    FlextResult[FlextTypes.Dict]: Transformed record or error
 
-            """
+                """
 
-        def apply_record_filters(
-            self,
-            record: FlextTapLdapTypes.Core.Dict,
-            filters: FlextTapLdapTypes.Core.Dict,
-        ) -> FlextResult[bool]:
-            """Apply filtering rules to record.
+            def validate_record_schema(
+                self, record: FlextTypes.Dict, schema: FlextTypes.Dict
+            ) -> FlextResult[bool]:
+                """Validate record against schema.
 
-            Args:
-                record: Record to filter
-                filters: Filter configuration
+                Args:
+                    record: Record to validate
+                    schema: Schema to validate against
 
-            Returns:
-                FlextResult indicating if record passes filters
+                Returns:
+                    FlextResult[bool]: Validation result or error
 
-            """
+                """
 
-        def enrich_record_metadata(
-            self,
-            record: FlextTapLdapTypes.Core.Dict,
-        ) -> FlextResult[FlextTapLdapTypes.Core.Dict]:
-            """Enrich record with extraction metadata.
+            def emit_record_message(
+                self, stream_name: str, record: FlextTypes.Dict
+            ) -> FlextResult[None]:
+                """Emit Singer record message.
 
-            Args:
-                record: Record to enrich
+                Args:
+                    stream_name: Name of the stream
+                    record: Record to emit
 
-            Returns:
-                FlextResult containing enriched record
+                Returns:
+                    FlextResult[None]: Success status or error
 
-            """
+                """
 
-    class ConfigurationProtocol(FlextProtocols.Infrastructure.Configurable, Protocol):
-        """Protocol for tap configuration management.
+            def handle_record_errors(
+                self, record: FlextTypes.Dict, error: str
+            ) -> FlextResult[None]:
+                """Handle record processing errors.
 
-        Defines the interface for managing tap configuration,
-        validation, and runtime settings.
-        """
+                Args:
+                    record: Record that caused error
+                    error: Error description
 
-        def load_tap_config(
-            self,
-            config_path: str | None = None,
-        ) -> FlextResult[FlextTapLdapTypes.Core.Dict]:
-            """Load tap configuration from file or environment.
+                Returns:
+                    FlextResult[None]: Success status or error
 
-            Args:
-                config_path: Optional path to configuration file
+                """
 
-            Returns:
-                FlextResult containing loaded configuration
+        @runtime_checkable
+        class ConfigurationProtocol(FlextProtocols.Domain.Service, Protocol):
+            """Protocol for Singer tap configuration management."""
 
-            """
+            def validate_config(self, config: FlextTypes.Dict) -> FlextResult[bool]:
+                """Validate tap configuration.
 
-        def validate_tap_config(
-            self,
-            config: FlextTapLdapTypes.Core.Dict,
-        ) -> FlextResult[None]:
-            """Validate tap configuration completeness and correctness.
+                Args:
+                    config: Configuration to validate
 
-            Args:
-                config: Configuration to validate
+                Returns:
+                    FlextResult[bool]: Validation result or error
 
-            Returns:
-                FlextResult indicating validation status
+                """
 
-            """
+            def get_ldap_base_dn(self, config: FlextTypes.Dict) -> FlextResult[str]:
+                """Get LDAP base DN from configuration.
 
-        def get_default_config(self) -> FlextTapLdapTypes.Core.Dict:
-            """Get default tap configuration.
+                Args:
+                    config: Tap configuration
 
-            Returns:
-                Dictionary containing default configuration values
+                Returns:
+                    FlextResult[str]: Base DN or error
 
-            """
+                """
 
-        def merge_config_sources(
-            self,
-            *configs: FlextTapLdapTypes.Core.Dict,
-        ) -> FlextResult[FlextTapLdapTypes.Core.Dict]:
-            """Merge multiple configuration sources with precedence.
+            def get_ldap_filter(self, config: FlextTypes.Dict) -> FlextResult[str]:
+                """Get LDAP search filter from configuration.
 
-            Args:
-                configs: Configuration dictionaries to merge
+                Args:
+                    config: Tap configuration
 
-            Returns:
-                FlextResult containing merged configuration
+                Returns:
+                    FlextResult[str]: Search filter or error
 
-            """
+                """
 
-    # Protocol composition for complete tap implementations
-    class CompleteTapProtocol(
-        LdapConnectionProtocol,
-        SingerStreamProtocol,
-        TapExecutionProtocol,
-        ConfigurationProtocol,
-        Protocol,
-    ):
-        """Composite protocol for complete LDAP tap implementations.
+            def get_selected_attributes(
+                self, config: FlextTypes.Dict
+            ) -> FlextResult[list[str]]:
+                """Get list of selected LDAP attributes.
 
-        Combines all essential protocols for a fully functional
-        LDAP tap that can handle connection, stream discovery,
-        extraction, and configuration management.
-        """
+                Args:
+                    config: Tap configuration
 
-        def get_tap_info(self) -> FlextTapLdapTypes.Core.Dict:
-            """Get comprehensive tap information and capabilities.
+                Returns:
+                    FlextResult[list[str]]: Selected attributes or error
 
-            Returns:
-                Dictionary containing tap metadata and capabilities
+                """
 
-            """
+            def get_replication_method(
+                self, stream_name: str, config: FlextTypes.Dict
+            ) -> FlextResult[str]:
+                """Get replication method for stream.
 
-        def execute_extraction(
-            self,
-            catalog: FlextTapLdapTypes.Core.Dict,
-        ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
-            """Execute hronous extraction for high-volume scenarios.
+                Args:
+                    stream_name: Name of the stream
+                    config: Tap configuration
 
-            Args:
-                catalog: Singer catalog configuration
+                Returns:
+                    FlextResult[str]: Replication method or error
 
-            Returns:
-                iterable of extracted records
+                """
 
-            """
+        @runtime_checkable
+        class CompleteTapProtocol(
+            FlextProtocols.Domain.Service,
+            Protocol,
+        ):
+            """Complete Singer tap protocol combining all LDAP tap operations."""
+
+            def run_tap(
+                self,
+                config: FlextTypes.Dict,
+                catalog: FlextTypes.Dict | None = None,
+                state: FlextTypes.Dict | None = None,
+            ) -> FlextResult[FlextTypes.Dict]:
+                """Run complete Singer tap operation.
+
+                Args:
+                    config: Tap configuration
+                    catalog: Stream catalog (optional, discovery mode if None)
+                    state: Current state (optional)
+
+                Returns:
+                    FlextResult[FlextTypes.Dict]: Tap execution results or error
+
+                """
+
+    # ============================================================================
+    # BACKWARD COMPATIBILITY ALIASES (100% COMPATIBILITY)
+    # ============================================================================
+
+    # LDAP connection
+    LdapConnectionProtocol = TapLdap.LdapConnectionProtocol
+
+    # Singer streams
+    SingerStreamProtocol = TapLdap.SingerStreamProtocol
+
+    # LDIF processing
+    LdifProcessingProtocol = TapLdap.LdifProcessingProtocol
+
+    # Tap execution
+    TapExecutionProtocol = TapLdap.TapExecutionProtocol
+
+    # Record processing
+    RecordProcessingProtocol = TapLdap.RecordProcessingProtocol
+
+    # Configuration
+    ConfigurationProtocol = TapLdap.ConfigurationProtocol
+
+    # Complete tap
+    CompleteTapProtocol = TapLdap.CompleteTapProtocol
 
 
 __all__: FlextTapLdapTypes.Core.StringList = [

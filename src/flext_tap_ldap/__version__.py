@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Final, cast
+
 from flext_core.metadata import build_metadata_exports
 
 _metadata = build_metadata_exports(__file__)
@@ -13,4 +15,3 @@ __version_info__: Final[tuple[int | str, ...]] = cast(
 )
 
 __all__ = ["__version__", "__version_info__"]
-from typing import Final

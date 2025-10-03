@@ -14,7 +14,7 @@ from typing import Self
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
 
-from flext_core import FlextConfig, FlextConstants, FlextResult
+from flext_core import FlextConfig, FlextConstants, FlextResult, FlextTypes
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
 
@@ -163,7 +163,7 @@ class FlextTapLdapConfig(FlextConfig):
     )
 
     # LDIF Processing Configuration - flat structure
-    ldif_files: list[str] | None = Field(
+    ldif_files: FlextTypes.StringList | None = Field(
         default=None,
         description="List of LDIF files to process",
     )
@@ -196,7 +196,7 @@ class FlextTapLdapConfig(FlextConfig):
         default=False,
         description="Apply transformation rules to LDIF entries",
     )
-    ldif_transformation_rules: dict[str, str] | None = Field(
+    ldif_transformation_rules: FlextTypes.StringDict | None = Field(
         default=None,
         description="Transformation rules for LDIF processing",
     )
@@ -210,7 +210,7 @@ class FlextTapLdapConfig(FlextConfig):
     )
 
     # Custom Streams Configuration - flat structure
-    custom_streams: list[dict[str, str]] | None = Field(
+    custom_streams: list[FlextTypes.StringDict] | None = Field(
         default=None,
         description="Custom stream definitions",
     )
@@ -220,8 +220,8 @@ class FlextTapLdapConfig(FlextConfig):
     @classmethod
     def validate_custom_streams(
         cls,
-        v: list[dict[str, str]] | None,
-    ) -> list[dict[str, str]] | None:
+        v: list[FlextTypes.StringDict] | None,
+    ) -> list[FlextTypes.StringDict] | None:
         """Validate custom stream configurations."""
         if v is not None:
             for stream_config in v:

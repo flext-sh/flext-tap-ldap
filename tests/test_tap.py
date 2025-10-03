@@ -30,7 +30,7 @@ class TestFlextTapLDAPUnit:
     """Unit tests for FlextTapLDAP."""
 
     @pytest.fixture
-    def config(self) -> FlextTypes.Core.Dict:
+    def config(self) -> FlextTypes.Dict:
         """Create a test configuration fixture."""
         return {
             "ldap_host": "test.ldap.com",
@@ -42,7 +42,7 @@ class TestFlextTapLDAPUnit:
             "page_size": 1000,
         }
 
-    def test_tap_initialization(self, config: FlextTypes.Core.Dict) -> None:
+    def test_tap_initialization(self, config: FlextTypes.Dict) -> None:
         """Test tap initialization."""
         tap = FlextTapLDAP(config=config)
         if tap.name != "tap-ldap":
@@ -50,7 +50,7 @@ class TestFlextTapLDAPUnit:
             raise AssertionError(msg)
         assert tap.config == config
 
-    def test_stream_discovery(self, config: FlextTypes.Core.Dict) -> None:
+    def test_stream_discovery(self, config: FlextTypes.Dict) -> None:
         """Test stream discovery."""
         tap = FlextTapLDAP(config=config)
         streams = tap.discover_streams()
@@ -69,7 +69,7 @@ class TestFlextTapLDAPUnit:
             msg: str = f"Expected {4}, got {len(streams)}"
             raise AssertionError(msg)
 
-    def test_custom_streams_configuration(self, config: FlextTypes.Core.Dict) -> None:
+    def test_custom_streams_configuration(self, config: FlextTypes.Dict) -> None:
         """Test custom streams configuration."""
         config["custom_streams"] = [
             {
@@ -97,7 +97,7 @@ class TestFlextTapLDAPUnit:
             msg: str = f"Expected {5}, got {len(streams)}"
             raise AssertionError(msg)
 
-    def test_catalog_generation(self, config: FlextTypes.Core.Dict) -> None:
+    def test_catalog_generation(self, config: FlextTypes.Dict) -> None:
         """Test catalog generation and metadata."""
         tap = FlextTapLDAP(config=config)
         catalog = tap.catalog_dict
@@ -129,7 +129,7 @@ class TestFlextTapLDAPUnit:
     def test_stream_records(
         self,
         mock_client_class: MagicMock,
-        config: FlextTypes.Core.Dict,
+        config: FlextTypes.Dict,
     ) -> None:
         """Test streaming records from LDAP."""
         # Mock LDAP client
@@ -156,7 +156,7 @@ class TestFlextTapLDAPUnit:
         # Singer SDK get_records returns tuples (record, context) or just records
         # We need to handle both cases
         raw_records = list(users_stream.get_records(None))
-        records: list[FlextTypes.Core.Dict] = []
+        records: list[FlextTypes.Dict] = []
         for item in raw_records:
             if isinstance(item, tuple):
                 record, _context = item

@@ -10,7 +10,7 @@ from typing import ClassVar
 
 from flext_ldap.constants import FlextLdapConstants
 
-from flext_core import FlextConstants
+from flext_core import FlextConstants, FlextTypes
 
 
 class FlextTapLdapConstants(FlextConstants):
@@ -51,7 +51,9 @@ class FlextTapLdapConstants(FlextConstants):
         """LDAP search operation configuration."""
 
         DEFAULT_SCOPE = FlextLdapConstants.Scopes.SUBTREE
-        SCOPES: ClassVar[list[str]] = list(FlextLdapConstants.Scopes.VALID_SCOPES)
+        SCOPES: ClassVar[FlextTypes.StringList] = list(
+            FlextLdapConstants.Scopes.VALID_SCOPES
+        )
 
     class Extraction:
         """Singer tap specific extraction constants."""

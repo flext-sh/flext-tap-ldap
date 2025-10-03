@@ -11,19 +11,21 @@ from __future__ import annotations
 
 import importlib.metadata
 import time
+from asyncio import new_event_loop, set_event_loop
 from collections.abc import Awaitable
 from dataclasses import dataclass
 from typing import override
+
+from flext_ldap import (
+    FlextLdapModels,
+)
 
 from flext_core import (
     FlextLogger,
     FlextResult,
     FlextService,
+    FlextTypes,
 )
-from flext_ldap import (
-    FlextLdapModels,
-)
-
 from flext_tap_ldap.config import FlextTapLdapConfig
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
@@ -141,7 +143,7 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str,
-        attributes: list[str] | None,
+        attributes: FlextTypes.StringList | None,
         ldap_scope: str,
         size_limit: int,
     ) -> list[FlextTapLdapTypes.Core.Dict]:
@@ -203,7 +205,7 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
-        attributes: list[str] | None = None,
+        attributes: FlextTypes.StringList | None = None,
         scope: str = "SUBTREE",
         size_limit: int = 0,
     ) -> list[FlextTapLdapTypes.Core.Dict]:
@@ -380,24 +382,24 @@ class FlextTapLDAP(FlextService[FlextTapLdapConfig]):
     def execute_extraction(
         self,
         config: FlextTapLdapConfig,
-    ) -> FlextResult[dict[str, object]]:
+    ) -> FlextResult[FlextTypes.Dict]:
         """Execute LDAP extraction using standard FlextTapLdapConfig."""
         try:
             if not self.domain_model:
                 configure_result = self.configure_service(config)
                 if configure_result.is_failure:
-                    return FlextResult[dict[str, object]].fail(
+                    return FlextResult[FlextTypes.Dict].fail(
                         f"Configuration failed: {configure_result.error}"
                     )
 
             # Use FlextTapLdapConfig directly - no conversion needed
             extraction_result = self._perform_ldap_extraction(config)
             if extraction_result.is_failure:
-                return FlextResult[dict[str, object]].fail(
+                return FlextResult[FlextTypes.Dict].fail(
                     f"Extraction failed: {extraction_result.error}"
                 )
 
-            return FlextResult[dict[str, object]].ok({
+            return FlextResult[FlextTypes.Dict].ok({
                 "status": "success",
                 "config_type": "FlextTapLdapConfig",
                 "host": config.ldap_host,
@@ -406,7 +408,7 @@ class FlextTapLDAP(FlextService[FlextTapLdapConfig]):
                 "page_size": config.ldap_page_size,
             })
         except Exception as e:
-            return FlextResult[dict[str, object]].fail(
+            return FlextResult[FlextTypes.Dict].fail(
                 f"Extraction execution failed: {e}"
             )
 
