@@ -11,22 +11,14 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from typing import override
 
-from flext_meltano import FlextSingerTypes
-from singer_sdk import Stream
-from singer_sdk.typing import (
-    ArrayType,
-    BooleanType,
-    DateTimeType,
-    IntegerType,
-    PropertiesList,
-    Property,
-    StringType,
-)
-
 from flext_core import (
     FlextLogger,
     FlextTypes,
 )
+
+# Use FLEXT Meltano wrappers instead of direct singer_sdk imports (domain separation)
+from flext_meltano import FlextMeltanoTypes, FlextSingerTypes, FlextStream as Stream
+
 from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.tap_client import FlextTapLDAP
 from flext_tap_ldap.typings import FlextTapLdapTypes
@@ -135,31 +127,53 @@ class UsersStream(LDAPBaseStream):
         self.primary_keys = ["dn"]
         super().__init__(tap, name=self.name, schema=self.schema)
 
-    schema = PropertiesList(
-        Property("dn", StringType, description="Distinguished Name"),
-        Property("uid", StringType, description="User ID"),
-        Property("cn", StringType, description="Common Name"),
-        Property("mail", StringType, description="Email address"),
-        Property("sn", StringType, description="Surname"),
-        Property("givenName", StringType, description="Given name"),
-        Property(
+    schema = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "dn",
+            FlextMeltanoTypes.Singer.Typing.StringType,
+            description="Distinguished Name",
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "uid", FlextMeltanoTypes.Singer.Typing.StringType, description="User ID"
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "cn", FlextMeltanoTypes.Singer.Typing.StringType, description="Common Name"
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "mail",
+            FlextMeltanoTypes.Singer.Typing.StringType,
+            description="Email address",
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "sn", FlextMeltanoTypes.Singer.Typing.StringType, description="Surname"
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "givenName",
+            FlextMeltanoTypes.Singer.Typing.StringType,
+            description="Given name",
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
             "userPrincipalName",
-            StringType,
+            FlextMeltanoTypes.Singer.Typing.StringType,
             description="User Principal Name",
         ),
-        Property(
+        FlextMeltanoTypes.Singer.Typing.Property(
             "memberOf",
-            ArrayType(StringType),
+            FlextMeltanoTypes.Singer.Typing.ArrayType(
+                FlextMeltanoTypes.Singer.Typing.StringType
+            ),
             description="Group memberships",
         ),
-        Property(
+        FlextMeltanoTypes.Singer.Typing.Property(
             "objectClass",
-            ArrayType(StringType),
+            FlextMeltanoTypes.Singer.Typing.ArrayType(
+                FlextMeltanoTypes.Singer.Typing.StringType
+            ),
             description="Object classes",
         ),
-        Property(
+        FlextMeltanoTypes.Singer.Typing.Property(
             "modifyTimestamp",
-            DateTimeType,
+            FlextMeltanoTypes.Singer.Typing.DateTimeType,
             description="Last modification timestamp",
         ),
     ).to_dict()
@@ -216,24 +230,44 @@ class GroupsStream(LDAPBaseStream):
         self.primary_keys = ["dn"]
         super().__init__(tap, name=self.name, schema=self.schema)
 
-    schema = PropertiesList(
-        Property("dn", StringType, description="Distinguished Name"),
-        Property("cn", StringType, description="Common Name"),
-        Property("description", StringType, description="Group description"),
-        Property("member", ArrayType(StringType), description="Group members"),
-        Property(
+    schema = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "dn",
+            FlextMeltanoTypes.Singer.Typing.StringType,
+            description="Distinguished Name",
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "cn", FlextMeltanoTypes.Singer.Typing.StringType, description="Common Name"
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "description",
+            FlextMeltanoTypes.Singer.Typing.StringType,
+            description="Group description",
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "member",
+            FlextMeltanoTypes.Singer.Typing.ArrayType(
+                FlextMeltanoTypes.Singer.Typing.StringType
+            ),
+            description="Group members",
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
             "memberOf",
-            ArrayType(StringType),
+            FlextMeltanoTypes.Singer.Typing.ArrayType(
+                FlextMeltanoTypes.Singer.Typing.StringType
+            ),
             description="Parent groups",
         ),
-        Property(
+        FlextMeltanoTypes.Singer.Typing.Property(
             "objectClass",
-            ArrayType(StringType),
+            FlextMeltanoTypes.Singer.Typing.ArrayType(
+                FlextMeltanoTypes.Singer.Typing.StringType
+            ),
             description="Object classes",
         ),
-        Property(
+        FlextMeltanoTypes.Singer.Typing.Property(
             "modifyTimestamp",
-            DateTimeType,
+            FlextMeltanoTypes.Singer.Typing.DateTimeType,
             description="Last modification timestamp",
         ),
     ).to_dict()
@@ -318,18 +352,32 @@ class OrganizationalUnitsStream(LDAPBaseStream):
         self.primary_keys = ["dn"]
         super().__init__(tap, name=self.name, schema=self.schema)
 
-    schema = PropertiesList(
-        Property("dn", StringType, description="Distinguished Name"),
-        Property("ou", StringType, description="Organizational Unit name"),
-        Property("description", StringType, description="OU description"),
-        Property(
+    schema = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "dn",
+            FlextMeltanoTypes.Singer.Typing.StringType,
+            description="Distinguished Name",
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "ou",
+            FlextMeltanoTypes.Singer.Typing.StringType,
+            description="Organizational Unit name",
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "description",
+            FlextMeltanoTypes.Singer.Typing.StringType,
+            description="OU description",
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
             "objectClass",
-            ArrayType(StringType),
+            FlextMeltanoTypes.Singer.Typing.ArrayType(
+                FlextMeltanoTypes.Singer.Typing.StringType
+            ),
             description="Object classes",
         ),
-        Property(
+        FlextMeltanoTypes.Singer.Typing.Property(
             "modifyTimestamp",
-            DateTimeType,
+            FlextMeltanoTypes.Singer.Typing.DateTimeType,
             description="Last modification timestamp",
         ),
     ).to_dict()
@@ -410,15 +458,35 @@ class SchemaStream(LDAPBaseStream):
         self.primary_keys = ["name"]
         super().__init__(tap, name=self.name, schema=self.schema)
 
-    schema = PropertiesList(
-        Property("name", StringType, description="Schema element name"),
-        Property("type", StringType, description="Schema element type"),
-        Property("oid", StringType, description="Object identifier"),
-        Property("description", StringType, description="Schema description"),
-        Property("syntax", StringType, description="Attribute syntax"),
-        Property(
+    schema = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "name",
+            FlextMeltanoTypes.Singer.Typing.StringType,
+            description="Schema element name",
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "type",
+            FlextMeltanoTypes.Singer.Typing.StringType,
+            description="Schema element type",
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "oid",
+            FlextMeltanoTypes.Singer.Typing.StringType,
+            description="Object identifier",
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "description",
+            FlextMeltanoTypes.Singer.Typing.StringType,
+            description="Schema description",
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
+            "syntax",
+            FlextMeltanoTypes.Singer.Typing.StringType,
+            description="Attribute syntax",
+        ),
+        FlextMeltanoTypes.Singer.Typing.Property(
             "single_value",
-            BooleanType,
+            FlextMeltanoTypes.Singer.Typing.BooleanType,
             description="Single-valued attribute",
         ),
     ).to_dict()
@@ -517,26 +585,38 @@ class CustomStream(LDAPBaseStream):
 
         # Build schema from properties
         properties = [
-            Property("dn", StringType, description="Distinguished Name"),
+            FlextMeltanoTypes.Singer.Typing.Property(
+                "dn",
+                FlextMeltanoTypes.Singer.Typing.StringType,
+                description="Distinguished Name",
+            ),
         ]
         for prop_name, prop_config in (params.schema_properties or {}).items():
             prop_type: (
-                type[StringType | ArrayType, BooleanType] | IntegerType | DateTimeType
-            ) = StringType  # Default type
+                type[
+                    FlextMeltanoTypes.Singer.Typing.StringType
+                    | FlextMeltanoTypes.Singer.Typing.ArrayType
+                    | FlextMeltanoTypes.Singer.Typing.BooleanType
+                ]
+                | FlextMeltanoTypes.Singer.Typing.IntegerType
+                | FlextMeltanoTypes.Singer.Typing.DateTimeType
+            ) = FlextMeltanoTypes.Singer.Typing.StringType  # Default type
             if isinstance(prop_config, dict):
                 prop_type_str = prop_config.get("type")
                 if prop_type_str == "array":
-                    prop_type = ArrayType(StringType)
+                    prop_type = FlextMeltanoTypes.Singer.Typing.ArrayType(
+                        FlextMeltanoTypes.Singer.Typing.StringType
+                    )
                 elif prop_type_str == "boolean":
-                    prop_type = BooleanType
+                    prop_type = FlextMeltanoTypes.Singer.Typing.BooleanType
                 elif prop_type_str == "integer":
-                    prop_type = IntegerType
+                    prop_type = FlextMeltanoTypes.Singer.Typing.IntegerType
                 elif prop_type_str == "datetime":
-                    prop_type = DateTimeType
+                    prop_type = FlextMeltanoTypes.Singer.Typing.DateTimeType
 
                 description = prop_config.get("description", f"{prop_name} field")
                 properties.append(
-                    Property(
+                    FlextMeltanoTypes.Singer.Typing.Property(
                         prop_name,
                         prop_type,
                         description=str(description),
@@ -544,7 +624,9 @@ class CustomStream(LDAPBaseStream):
                 )
 
         # Set schema using internal attribute BEFORE calling super().__init__()
-        schema_dict: FlextTypes.Dict = PropertiesList(*properties).to_dict()
+        schema_dict: FlextTypes.Dict = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+            *properties
+        ).to_dict()
         # Now call super().__init__()
         super().__init__(tap=tap, name=params.name, schema=schema_dict)
 

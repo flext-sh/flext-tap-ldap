@@ -12,10 +12,9 @@ from collections.abc import Generator, Iterator
 from pathlib import Path
 
 import pytest
+from flext_core import FlextLogger, FlextTypes
 from flext_tests import FlextTestDocker
 from ldap3 import ALL, Connection, Server
-
-from flext_core import FlextLogger, FlextTypes
 
 logger = FlextLogger(__name__)
 

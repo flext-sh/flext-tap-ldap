@@ -11,10 +11,10 @@ from __future__ import annotations
 
 from typing import Self
 
+from flext_core import FlextConfig, FlextConstants, FlextResult, FlextTypes
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
 
-from flext_core import FlextConfig, FlextConstants, FlextResult, FlextTypes
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
 

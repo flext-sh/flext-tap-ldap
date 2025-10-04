@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from pydantic import Field
-
 from flext_core import (
     FlextConstants,
     FlextModels,
     FlextTypes,
 )
+from pydantic import Field
+
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
 # Constants

@@ -1,4 +1,5 @@
 """Configuração pytest para flext-tap-ldap - Now using shared container.
+from typing import TYPE_CHECKING.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT

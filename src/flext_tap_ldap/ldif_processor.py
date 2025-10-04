@@ -14,15 +14,15 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import override
 
-from flext_ldif import FlextLdif
-from flext_ldif.exceptions import FlextLdifExceptions
-from flext_ldif.models import FlextLdifModels
-
 from flext_core import (
     FlextLogger,
     FlextResult,
     FlextTypes,
 )
+from flext_ldif import FlextLdif
+from flext_ldif.exceptions import FlextLdifExceptions
+from flext_ldif.models import FlextLdifModels
+
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
 # Type aliases for cleaner code

@@ -1,4 +1,5 @@
 """Quick comprehensive tests for LDAP client to maximize coverage efficiently.
+import time.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -10,8 +11,8 @@ import contextlib
 from unittest.mock import Mock, patch
 
 import pytest
-
 from flext_core import FlextTypes
+
 from flext_tap_ldap import LDAPClient
 
 
