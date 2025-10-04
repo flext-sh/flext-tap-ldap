@@ -16,29 +16,18 @@ from itertools import starmap
 from pathlib import Path
 from typing import override
 
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import FlextLdapClient
 from flext_ldif import FlextLdif, FlextLdifModels
-from singer_sdk import Stream
-from singer_sdk.typing import (
-    ArrayType,
-    BooleanType,
-    IntegerType,
-    NumberType,
-    ObjectType,
-    PropertiesList,
-    Property,
-    StringType,
-)
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+# Use FLEXT Meltano wrappers instead of direct singer_sdk imports (domain separation)
+from flext_meltano import FlextMeltanoTypes, FlextStream as Stream
+
 from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.tap import FlextTapLDAP
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
 # "FlextTapLDAP" imported locally to avoid circular imports
-
-# Use Singer SDK types directly for schema definitions
-th = None  # Not needed anymore, using direct imports
 
 logger = FlextLogger(__name__)
 
@@ -246,20 +235,24 @@ class FlextTapLdapStreams:
         def __init__(self, tap: FlextTapLDAP) -> None:
             """Initialize users stream."""
             name = "users"
-            schema: FlextTypes.Dict = PropertiesList(
-                Property(
+            schema: FlextTypes.Dict = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "objectClass",
-                    ArrayType(StringType),
+                    FlextMeltanoTypes.Singer.Typing.ArrayType(
+                        FlextMeltanoTypes.Singer.Typing.StringType
+                    ),
                     description="Object Classes",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "memberOf",
-                    ArrayType(StringType),
+                    FlextMeltanoTypes.Singer.Typing.ArrayType(
+                        FlextMeltanoTypes.Singer.Typing.StringType
+                    ),
                     description="Group Memberships",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "modifyTimestamp",
-                    StringType,
+                    FlextMeltanoTypes.Singer.Typing.StringType,
                     description="Modification Time",
                 ),
             ).to_dict()
@@ -319,25 +312,31 @@ class FlextTapLdapStreams:
         def __init__(self, tap: FlextTapLDAP) -> None:
             """Initialize groups stream."""
             name = "groups"
-            schema: FlextTypes.Dict = PropertiesList(
-                Property(
+            schema: FlextTypes.Dict = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "member",
-                    ArrayType(StringType),
+                    FlextMeltanoTypes.Singer.Typing.ArrayType(
+                        FlextMeltanoTypes.Singer.Typing.StringType
+                    ),
                     description="Group Members",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "uniqueMember",
-                    ArrayType(StringType),
+                    FlextMeltanoTypes.Singer.Typing.ArrayType(
+                        FlextMeltanoTypes.Singer.Typing.StringType
+                    ),
                     description="Unique Members",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "objectClass",
-                    ArrayType(StringType),
+                    FlextMeltanoTypes.Singer.Typing.ArrayType(
+                        FlextMeltanoTypes.Singer.Typing.StringType
+                    ),
                     description="Object Classes",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "modifyTimestamp",
-                    StringType,
+                    FlextMeltanoTypes.Singer.Typing.StringType,
                     description="Modification Time",
                 ),
             ).to_dict()
@@ -386,15 +385,17 @@ class FlextTapLdapStreams:
         def __init__(self, tap: FlextTapLDAP) -> None:
             """Initialize organizational units stream."""
             name = "organizational_units"
-            schema: FlextTypes.Dict = PropertiesList(
-                Property(
+            schema: FlextTypes.Dict = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "objectClass",
-                    ArrayType(StringType),
+                    FlextMeltanoTypes.Singer.Typing.ArrayType(
+                        FlextMeltanoTypes.Singer.Typing.StringType
+                    ),
                     description="Object Classes",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "modifyTimestamp",
-                    StringType,
+                    FlextMeltanoTypes.Singer.Typing.StringType,
                     description="Modification Time",
                 ),
             ).to_dict()
@@ -437,30 +438,38 @@ class FlextTapLdapStreams:
         def __init__(self, tap: FlextTapLDAP) -> None:
             """Initialize schema stream."""
             name = "schema"
-            schema: FlextTypes.Dict = PropertiesList(
-                Property(
+            schema: FlextTypes.Dict = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "objectClass",
-                    ArrayType(StringType),
+                    FlextMeltanoTypes.Singer.Typing.ArrayType(
+                        FlextMeltanoTypes.Singer.Typing.StringType
+                    ),
                     description="Object Classes",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "objectClasses",
-                    ArrayType(StringType),
+                    FlextMeltanoTypes.Singer.Typing.ArrayType(
+                        FlextMeltanoTypes.Singer.Typing.StringType
+                    ),
                     description="Available Object Classes",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "attributeTypes",
-                    ArrayType(StringType),
+                    FlextMeltanoTypes.Singer.Typing.ArrayType(
+                        FlextMeltanoTypes.Singer.Typing.StringType
+                    ),
                     description="Available Attribute Types",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "ldapSyntaxes",
-                    ArrayType(StringType),
+                    FlextMeltanoTypes.Singer.Typing.ArrayType(
+                        FlextMeltanoTypes.Singer.Typing.StringType
+                    ),
                     description="LDAP Syntaxes",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "modifyTimestamp",
-                    StringType,
+                    FlextMeltanoTypes.Singer.Typing.StringType,
                     description="Modification Time",
                 ),
             ).to_dict()
@@ -528,40 +537,74 @@ class FlextTapLdapStreams:
                     prop_type = str(definition.get("type", "string"))
                     prop_desc = str(definition.get("description", f"{name} field"))
                     if prop_type == "integer":
-                        return Property(name, IntegerType, description=prop_desc)
-                    if prop_type == "number":
-                        return Property(name, NumberType, description=prop_desc)
-                    if prop_type == "boolean":
-                        return Property(name, BooleanType, description=prop_desc)
-                    if prop_type == "array":
-                        return Property(
+                        return FlextMeltanoTypes.Singer.Typing.Property(
                             name,
-                            ArrayType(StringType),
+                            FlextMeltanoTypes.Singer.Typing.IntegerType,
                             description=prop_desc,
                         )
-                    return Property(name, StringType, description=prop_desc)
+                    if prop_type == "number":
+                        return FlextMeltanoTypes.Singer.Typing.Property(
+                            name,
+                            FlextMeltanoTypes.Singer.Typing.NumberType,
+                            description=prop_desc,
+                        )
+                    if prop_type == "boolean":
+                        return FlextMeltanoTypes.Singer.Typing.Property(
+                            name,
+                            FlextMeltanoTypes.Singer.Typing.BooleanType,
+                            description=prop_desc,
+                        )
+                    if prop_type == "array":
+                        return FlextMeltanoTypes.Singer.Typing.Property(
+                            name,
+                            FlextMeltanoTypes.Singer.Typing.ArrayType(
+                                FlextMeltanoTypes.Singer.Typing.StringType
+                            ),
+                            description=prop_desc,
+                        )
+                    return FlextMeltanoTypes.Singer.Typing.Property(
+                        name,
+                        FlextMeltanoTypes.Singer.Typing.StringType,
+                        description=prop_desc,
+                    )
                 # Fallback simple type
-                return Property(name, StringType, description=f"{name} field")
+                return FlextMeltanoTypes.Singer.Typing.Property(
+                    name,
+                    FlextMeltanoTypes.Singer.Typing.StringType,
+                    description=f"{name} field",
+                )
 
             # Build schema from parameters
             if params.schema_properties:
                 schema_props = list(
                     starmap(_map_prop, params.schema_properties.items())
                 )
-                # Ensure all are Property
-                typed_props = [p for p in schema_props if isinstance(p, Property)]
-                schema = PropertiesList(*typed_props).to_dict()
+                # Ensure all are FlextMeltanoTypes.Singer.Typing.Property
+                typed_props = [
+                    p
+                    for p in schema_props
+                    if isinstance(p, FlextMeltanoTypes.Singer.Typing.Property)
+                ]
+                schema = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+                    *typed_props
+                ).to_dict()
             else:
-                schema = PropertiesList(
-                    Property("dn", StringType, description="Distinguished Name"),
-                    Property(
+                schema = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+                    FlextMeltanoTypes.Singer.Typing.Property(
+                        "dn",
+                        FlextMeltanoTypes.Singer.Typing.StringType,
+                        description="Distinguished Name",
+                    ),
+                    FlextMeltanoTypes.Singer.Typing.Property(
                         "objectClass",
-                        ArrayType(StringType),
+                        FlextMeltanoTypes.Singer.Typing.ArrayType(
+                            FlextMeltanoTypes.Singer.Typing.StringType
+                        ),
                         description="Object Classes",
                     ),
-                    Property(
+                    FlextMeltanoTypes.Singer.Typing.Property(
                         "modifyTimestamp",
-                        StringType,
+                        FlextMeltanoTypes.Singer.Typing.StringType,
                         description="Modification Time",
                     ),
                 ).to_dict()
@@ -616,25 +659,27 @@ class FlextTapLdapStreams:
             self._ldap_api = FlextLdapClient()
 
             # Define schema
-            schema: FlextTypes.Dict = PropertiesList(
-                Property(
+            schema: FlextTypes.Dict = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "entry_type",
-                    StringType,
+                    FlextMeltanoTypes.Singer.Typing.StringType,
                     description="Entry type classification",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "objectClass",
-                    ArrayType(StringType),
+                    FlextMeltanoTypes.Singer.Typing.ArrayType(
+                        FlextMeltanoTypes.Singer.Typing.StringType
+                    ),
                     description="Object classes",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "attributes",
-                    ObjectType(),
+                    FlextMeltanoTypes.Singer.Typing.ObjectType(),
                     description="Entry attributes",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "line_number",
-                    IntegerType,
+                    FlextMeltanoTypes.Singer.Typing.IntegerType,
                     description="Line number in file",
                 ),
             ).to_dict()
@@ -757,55 +802,57 @@ class FlextTapLdapStreams:
             self._ldif_api = FlextLdif()
 
             # Define schema for analysis results
-            schema: FlextTypes.Dict = PropertiesList(
-                Property(
+            schema: FlextTypes.Dict = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "total_entries",
-                    IntegerType,
+                    FlextMeltanoTypes.Singer.Typing.IntegerType,
                     description="Total entries in file",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "valid_entries",
-                    IntegerType,
+                    FlextMeltanoTypes.Singer.Typing.IntegerType,
                     description="Valid entries count",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "invalid_entries",
-                    IntegerType,
+                    FlextMeltanoTypes.Singer.Typing.IntegerType,
                     description="Invalid entries count",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "user_entries",
-                    IntegerType,
+                    FlextMeltanoTypes.Singer.Typing.IntegerType,
                     description="User entries count",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "group_entries",
-                    IntegerType,
+                    FlextMeltanoTypes.Singer.Typing.IntegerType,
                     description="Group entries count",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "other_entries",
-                    IntegerType,
+                    FlextMeltanoTypes.Singer.Typing.IntegerType,
                     description="Other entries count",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "object_class_distribution",
-                    ObjectType(),
+                    FlextMeltanoTypes.Singer.Typing.ObjectType(),
                     description="Object class distribution",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "file_size_bytes",
-                    IntegerType,
+                    FlextMeltanoTypes.Singer.Typing.IntegerType,
                     description="File size in bytes",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "processing_time_seconds",
-                    NumberType,
+                    FlextMeltanoTypes.Singer.Typing.NumberType,
                     description="Processing time",
                 ),
-                Property(
+                FlextMeltanoTypes.Singer.Typing.Property(
                     "errors",
-                    ArrayType(StringType),
+                    FlextMeltanoTypes.Singer.Typing.ArrayType(
+                        FlextMeltanoTypes.Singer.Typing.StringType
+                    ),
                     description="Processing errors",
                 ),
             ).to_dict()
@@ -923,7 +970,6 @@ SchemaStream = FlextTapLdapStreams.SchemaStream
 CustomStream = FlextTapLdapStreams.CustomStream
 LDIFStream = FlextTapLdapStreams.LDIFStream
 LDIFAnalysisStream = FlextTapLdapStreams.LDIFAnalysisStream
-
 
 __all__ = [
     "CustomStream",

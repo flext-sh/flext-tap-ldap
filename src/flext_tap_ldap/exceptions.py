@@ -11,6 +11,7 @@ from __future__ import annotations
 from typing import override
 
 from flext_core import FlextExceptions, FlextTypes
+
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
 

@@ -11,9 +11,11 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from singer_sdk import Stream, Tap
-
 from flext_core import FlextLogger, FlextTypes
+
+# Use FLEXT Meltano wrappers instead of direct singer_sdk imports (domain separation)
+from flext_meltano import FlextStream as Stream, FlextTap as Tap
+
 from flext_tap_ldap.config import FlextTapLdapConfig
 from flext_tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
 from flext_tap_ldap.streams import (

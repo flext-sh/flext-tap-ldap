@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import Protocol, runtime_checkable
 
 from flext_core import FlextProtocols, FlextResult, FlextTypes
+
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
 

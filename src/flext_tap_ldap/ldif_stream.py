@@ -6,12 +6,13 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import override
 
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import FlextLdapClient
 from flext_ldif import FlextLdif, FlextLdifModels
-from flext_meltano.singer_types import FlextSingerTypes
-from singer_sdk import Stream
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+# Use FLEXT Meltano wrappers instead of direct singer_sdk imports (domain separation)
+from flext_meltano import FlextSingerTypes, FlextStream as Stream
+
 from flext_tap_ldap.tap_client import FlextTapLDAP
 from flext_tap_ldap.typings import FlextTapLdapTypes
 

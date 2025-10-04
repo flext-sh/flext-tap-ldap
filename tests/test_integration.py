@@ -1,4 +1,5 @@
 """Integration tests for tap-ldap.
+import time.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -13,8 +14,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 from click.testing import CliRunner
-
 from flext_core import FlextTypes
+
 from flext_tap_ldap import FlextTapLDAP
 
 

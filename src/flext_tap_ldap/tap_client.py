@@ -16,16 +16,16 @@ from collections.abc import Awaitable
 from dataclasses import dataclass
 from typing import override
 
-from flext_ldap import (
-    FlextLdapModels,
-)
-
 from flext_core import (
     FlextLogger,
     FlextResult,
     FlextService,
     FlextTypes,
 )
+from flext_ldap import (
+    FlextLdapModels,
+)
+
 from flext_tap_ldap.config import FlextTapLdapConfig
 from flext_tap_ldap.typings import FlextTapLdapTypes
 

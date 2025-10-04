@@ -8,13 +8,13 @@ from collections.abc import Awaitable
 from dataclasses import dataclass
 from typing import override
 
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import (
     FlextLdapClient,
     FlextLdapConstants,
     FlextLdapModels,
 )
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
 # LDAP scope constants

@@ -10,7 +10,7 @@ import re
 from datetime import UTC, datetime
 from typing import ClassVar, override
 
-from flext_core import FlextResult, FlextTypes, FlextUtilities
+from flext_core import FlextConstants, FlextResult, FlextTypes, FlextUtilities
 
 
 class FlextTapLdapUtilities(FlextUtilities):
@@ -174,16 +174,19 @@ class FlextTapLdapUtilities(FlextUtilities):
             """
             try:
                 # Handle LDAP generalized time format (YYYYMMDDHHMMSSZ)
-                if len(timestamp) == 15 and timestamp.endswith("Z"):
-                    dt = datetime.strptime(timestamp, "%Y%m%d%H%M%SZ")
-                    dt = dt.replace(tzinfo=UTC)
+                ldap_generalized_time_length = 15
+                if len(
+                    timestamp
+                ) == ldap_generalized_time_length and timestamp.endswith("Z"):
+                    dt = datetime.strptime(timestamp[:-1], "%Y%m%d%H%M%S").replace(
+                        tzinfo=UTC
+                    )
                     return FlextResult[str].ok(dt.isoformat())
 
                 # Handle other common formats
                 for fmt in ["%Y-%m-%d %H:%M:%S", "%Y/%m/%d %H:%M:%S"]:
                     try:
-                        dt = datetime.strptime(timestamp, fmt)
-                        dt = dt.replace(tzinfo=UTC)
+                        dt = datetime.strptime(timestamp, fmt).replace(tzinfo=UTC)
                         return FlextResult[str].ok(dt.isoformat())
                     except ValueError:
                         continue
@@ -224,7 +227,7 @@ class FlextTapLdapUtilities(FlextUtilities):
         @staticmethod
         def generate_stream_schema(
             sample_records: list[FlextTypes.Dict],
-            stream_name: str,
+            _stream_name: str,
         ) -> FlextTypes.Dict:
             """Generate JSON schema from sample records.
 
@@ -249,7 +252,7 @@ class FlextTapLdapUtilities(FlextUtilities):
                 for key, value in record.items():
                     if key not in properties:
                         properties[key] = (
-                            FlextTapLdapUtilities.StreamUtilities._infer_type(value)
+                            FlextTapLdapUtilities.StreamUtilities.infer_type(value)
                         )
 
             return {
@@ -259,7 +262,7 @@ class FlextTapLdapUtilities(FlextUtilities):
             }
 
         @staticmethod
-        def _infer_type(value: object) -> FlextTypes.Dict:
+        def infer_type(value: object) -> FlextTypes.Dict:
             """Infer JSON schema type from value.
 
             Args:
@@ -280,7 +283,7 @@ class FlextTapLdapUtilities(FlextUtilities):
             if isinstance(value, list):
                 if value:
                     # Infer type from first element
-                    item_type = FlextTapLdapUtilities.StreamUtilities._infer_type(
+                    item_type = FlextTapLdapUtilities.StreamUtilities.infer_type(
                         value[0]
                     )
                     return {"type": "array", "items": item_type}
@@ -348,7 +351,11 @@ class FlextTapLdapUtilities(FlextUtilities):
             # Validate port if provided
             if "port" in config:
                 port = config["port"]
-                if not isinstance(port, int) or port <= 0 or port > 65535:
+                if (
+                    not isinstance(port, int)
+                    or port <= 0
+                    or port > FlextConstants.Network.MAX_PORT
+                ):
                     return FlextResult[FlextTypes.Dict].fail(
                         "Port must be a valid integer between 1 and 65535"
                     )

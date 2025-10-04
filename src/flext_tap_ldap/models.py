@@ -9,6 +9,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Self, cast
 
+from flext_core import FlextConstants, FlextModels, FlextResult, FlextTypes
 from pydantic import (
     ConfigDict,
     Field,
@@ -17,7 +18,6 @@ from pydantic import (
     model_validator,
 )
 
-from flext_core import FlextConstants, FlextModels, FlextResult, FlextTypes
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
 
