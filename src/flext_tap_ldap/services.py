@@ -102,7 +102,7 @@ class FlextTapLdapServices:
                     f"Failed to create connection: {e}"
                 )
 
-        def test_connection(self, _connection: LDAPConnection) -> FlextResult[bool]:  # noqa: PT019
+        def test_connection(self, _connection: LDAPConnection) -> FlextResult[bool]:
             """Test LDAP connection."""
             try:
                 # Implementation would test actual LDAP connection
