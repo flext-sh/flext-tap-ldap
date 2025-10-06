@@ -75,7 +75,7 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize connection service."""
-            self._logger = FlextTapLdapUtilities.get_logger()
+            self.logger = FlextTapLdapUtilities.get_logger()
 
         def create_connection(
             self, params: FlextTapLdapServices.LDAPConnectionParams
@@ -104,7 +104,7 @@ class FlextTapLdapServices:
             """Test LDAP connection."""
             try:
                 # Implementation would test actual LDAP connection
-                self._logger.debug(
+                self.logger.debug(
                     "Testing LDAP connection",
                     host=connection.host,
                     port=connection.port,
@@ -122,7 +122,7 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize stream service."""
-            self._logger = FlextTapLdapUtilities.get_logger()
+            self.logger = FlextTapLdapUtilities.get_logger()
 
         def create_stream(
             self, params: FlextTapLdapServices.StreamCreationParams
@@ -145,7 +145,7 @@ class FlextTapLdapServices:
         ) -> FlextResult[list[LDAPStream]]:
             """Discover available LDAP streams."""
             try:
-                self._logger.debug(
+                self.logger.debug(
                     "Discovering LDAP streams",
                     base_dn=connection.base_dn,
                 )
@@ -173,7 +173,7 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize execution service."""
-            self._logger = FlextTapLdapUtilities.get_logger()
+            self.logger = FlextTapLdapUtilities.get_logger()
             self._executions: dict[str, TapExecution] = {}
 
         def start_execution(
@@ -216,7 +216,7 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize record service."""
-            self._logger = FlextTapLdapUtilities.get_logger()
+            self.logger = FlextTapLdapUtilities.get_logger()
 
         def extract_records(
             self,
