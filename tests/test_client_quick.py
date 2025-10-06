@@ -55,7 +55,7 @@ class TestLDAPClientQuick:
 
     def test_entry_conversion_scenarios(self, client: LDAPClient) -> None:
         """Test entry conversion with different scenarios."""
-        # Test with FlextLDAPEntities-like object
+        # Test with FlextLdapEntities-like object
         mock_entry = Mock()
         mock_entry.dn = "uid=test,dc=example,dc=com"
         mock_entry.attributes = {
@@ -362,7 +362,7 @@ class TestLDAPClientQuick:
         """Test attribute delegation to flext API."""
         # Test that __getattr__ delegates to flext API
         # This test verifies the delegation mechanism works
-        # We'll test with a method that actually exists on FlextLDAPClient
+        # We'll test with a method that actually exists on FlextLdapClients
         result = client.search
         assert callable(result)
 

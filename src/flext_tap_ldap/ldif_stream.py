@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import override
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
-from flext_ldap import FlextLDAPClient
+from flext_ldap import FlextLdapClients
 from flext_ldif import FlextLdif, FlextLdifModels
 
 # Use FLEXT Meltano wrappers instead of direct singer_sdk imports (domain separation)
@@ -35,7 +35,7 @@ class LDIFStream(Stream):
         self.tap = tap
         # Initialize flext-ldif API for processing
         self._ldif_api = FlextLdif()
-        self._ldap_api = FlextLDAPClient()
+        self._ldap_api = FlextLdapClients()
         # Define schema
         schema = th.PropertiesList(
             th.Property("dn", th.StringType, description="Distinguished Name"),
@@ -136,7 +136,7 @@ class LDIFAnalysisStream(Stream):
         self.tap = tap
         # Initialize flext-ldif API for analysis
         self._ldif_api = FlextLdif()
-        self._ldap_api = FlextLDAPClient()
+        self._ldap_api = FlextLdapClients()
         # Define schema
         schema = th.PropertiesList(
             th.Property(

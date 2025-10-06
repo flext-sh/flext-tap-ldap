@@ -10,9 +10,9 @@ from typing import override
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import (
-    FlextLDAPClient,
-    FlextLDAPConstants,
-    FlextLDAPModels,
+    FlextLdapClients,
+    FlextLdapConstants,
+    FlextLdapModels,
 )
 
 from flext_tap_ldap.typings import FlextTapLdapTypes
@@ -42,7 +42,7 @@ class LDAPClientConfig:
 class LDAPClient:
     """Testing convenience LDAP client wrapper.
 
-    Provides the old interface while using FlextLDAPClient internally.
+    Provides the old interface while using FlextLdapClients internally.
     This eliminates code duplication while maintaining testing convenience.
     """
 
@@ -117,7 +117,7 @@ class LDAPClient:
             )
 
         # Create flext-ldap configuration
-        flext_config = FlextLDAPModels.ConnectionConfig(
+        flext_config = FlextLdapModels.ConnectionConfig(
             server=client_config.host,
             port=int(client_config.port),
             use_ssl=bool(client_config.use_ssl),
@@ -125,7 +125,7 @@ class LDAPClient:
         )
 
         # Initialize the real flext-ldap API
-        self._flext_api = FlextLDAPClient()
+        self._flext_api = FlextLdapClients()
         self._config = flext_config
 
         # Store for testing convenience - these are what tests expect
@@ -173,15 +173,15 @@ class LDAPClient:
 
     def _convert_entry_to_dict(
         self,
-        entry_data: FlextLDAPModels.Entry | FlextTypes.Dict | None,
+        entry_data: FlextLdapModels.Entry | FlextTypes.Dict | None,
     ) -> FlextTypes.Dict:
-        """Convert FlextLDAPModels.Entry to dict format for testing convenience.
+        """Convert FlextLdapModels.Entry to dict format for testing convenience.
 
         Single Responsibility: Handle only entry format conversion.
         """
         # Check if it's an Entry object using hasattr for attributes
         if hasattr(entry_data, "dn") and hasattr(entry_data, "attributes"):
-            # It's a FlextLDAPModels.Entry model object - flatten attributes
+            # It's a FlextLdapModels.Entry model object - flatten attributes
             # Use getattr to safely access attributes for type checker
             getattr(entry_data, "dn", "")
             attributes: FlextTypes.Dict = getattr(entry_data, "attributes", {})
@@ -205,7 +205,7 @@ class LDAPClient:
 
     def _process_search_results(
         self,
-        result: FlextResult[FlextLDAPModels.SearchResponse],
+        result: FlextResult[FlextLdapModels.SearchResponse],
         size_limit: int,
     ) -> list[FlextTapLdapTypes.Core.Dict]:
         """Process LDAP search results with size limiting.
@@ -241,8 +241,8 @@ class LDAPClient:
 
         try:
             # Ensure bind_dn and password are not None for the API call
-            # Create search request using FlextLDAP models
-            search_request = FlextLDAPModels.SearchRequest(
+            # Create search request using FlextLdap models
+            search_request = FlextLdapModels.SearchRequest(
                 base_dn=base_dn,
                 filter_str=search_filter,
                 scope=ldap_scope,
@@ -250,7 +250,7 @@ class LDAPClient:
                 size_limit=size_limit,
                 time_limit=30,
             )
-            result: FlextResult[FlextLDAPModels.SearchResponse] = (
+            result: FlextResult[FlextLdapModels.SearchResponse] = (
                 self._flext_api.search_with_request(search_request)
             )
 
@@ -336,10 +336,10 @@ class LDAPClient:
                         password,
                     ) as _session:
                         # Try a simple search to test connection
-                        test_search_request = FlextLDAPModels.SearchRequest(
+                        test_search_request = FlextLdapModels.SearchRequest(
                             base_dn="",
                             filter_str="(objectClass=*)",
-                            scope=FlextLDAPConstants.Scope.BASE,
+                            scope=FlextLdapConstants.Scope.BASE,
                             attributes=None,
                             size_limit=1,
                             time_limit=5,
@@ -483,7 +483,7 @@ class LDAPClient:
 
     def _process_search_results_with_oracle_support(
         self,
-        search_result: list[FlextLDAPModels.Entry] | list[FlextTypes.Dict],
+        search_result: list[FlextLdapModels.Entry] | list[FlextTypes.Dict],
         *,
         oracle_oid_mode: bool,
     ) -> list[FlextTypes.Dict]:
@@ -571,8 +571,8 @@ class LDAPClient:
 
 
 # Type aliases for testing convenience
-LDAPConnectionConfig = FlextLDAPModels.ConnectionConfig
-LDAPEntry = FlextLDAPModels.Entry
+LDAPConnectionConfig = FlextLdapModels.ConnectionConfig
+LDAPEntry = FlextLdapModels.Entry
 
 __all__: FlextTapLdapTypes.Core.StringList = [
     "LDAPClient",

@@ -187,14 +187,14 @@ class FlextTapLdapModels(FlextModels):
             key: str,
             default: object = None,
         ) -> object:
-            """Get a value from either a dict or FlextLDAPModels.Entry.
+            """Get a value from either a dict or FlextLdapModels.Entry.
 
             Returns the attribute value by name from a plain dict or an attribute of
-            a FlextLDAPModels.Entry, falling back to default when not present.
+            a FlextLdapModels.Entry, falling back to default when not present.
             """
             if isinstance(entry, dict):
                 return entry.get(key, default)
-            # FlextLDAPModels.Entry - use getattr or similar access pattern
+            # FlextLdapModels.Entry - use getattr or similar access pattern
             return getattr(entry, key, default)
 
         @staticmethod
