@@ -16,7 +16,7 @@ from typing import override
 from uuid import UUID
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
-from flext_ldap import FlextLDAPModels
+from flext_ldap import FlextLdapModels
 from flext_ldif import FlextLdif
 
 from flext_tap_ldap.config import (
@@ -817,7 +817,7 @@ class FlextTapLdapServices:
 
         """
         try:
-            connection_config = FlextLDAPModels.ConnectionConfig.model_validate(
+            connection_config = FlextLdapModels.ConnectionConfig.model_validate(
                 {"server": "localhost", "port": 389, "use_ssl": "False", "timeout": 30},
             )
 
@@ -855,7 +855,7 @@ class FlextTapLdapServices:
 
         """
         try:
-            connection_config = FlextLDAPModels.ConnectionConfig.model_validate(
+            connection_config = FlextLdapModels.ConnectionConfig.model_validate(
                 {
                     "server": "ldap.company.com",
                     "port": 636,
