@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import override
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
-from flext_ldap import FlextLdapClient
+from flext_ldap import FlextLDAPClient
 from flext_ldif import FlextLdif, FlextLdifModels
 
 # Use FLEXT Meltano wrappers instead of direct singer_sdk imports (domain separation)
@@ -656,7 +656,7 @@ class FlextTapLdapStreams:
 
             # Initialize flext-ldif API for processing
             self._ldif_api = FlextLdif()
-            self._ldap_api = FlextLdapClient()
+            self._ldap_api = FlextLDAPClient()
 
             # Define schema
             schema: FlextTypes.Dict = FlextMeltanoTypes.Singer.Typing.PropertiesList(

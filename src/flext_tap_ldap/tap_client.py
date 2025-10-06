@@ -23,7 +23,7 @@ from flext_core import (
     FlextTypes,
 )
 from flext_ldap import (
-    FlextLdapModels,
+    FlextLDAPModels,
 )
 
 from flext_tap_ldap.config import FlextTapLdapConfig
@@ -62,7 +62,7 @@ class LDAPClientConfig:
 class LDAPClient:
     """Testing convenience LDAP client wrapper.
 
-    Provides the old interface while using FlextLdapClient internally.
+    Provides the old interface while using FlextLDAPClient internally.
     This eliminates code duplication while maintaining testing convenience.
     """
 
@@ -102,11 +102,11 @@ class LDAPClient:
 
     def _convert_entry_to_dict(
         self,
-        entry_data: FlextLdapModels.Entry | FlextTapLdapTypes.Core.Dict,
+        entry_data: FlextLDAPModels.Entry | FlextTapLdapTypes.Core.Dict,
     ) -> FlextTapLdapTypes.Core.Dict:
-        """Convert FlextLdapModels.Entry to dict format for testing convenience."""
-        if isinstance(entry_data, FlextLdapModels.Entry):
-            # It's a FlextLdapModels.Entry model object - flatten attributes
+        """Convert FlextLDAPModels.Entry to dict format for testing convenience."""
+        if isinstance(entry_data, FlextLDAPModels.Entry):
+            # It's a FlextLDAPModels.Entry model object - flatten attributes
             entry_dict: FlextTapLdapTypes.Core.Dict = {"dn": entry_data.dn}
             # Add flattened attributes to the entry dict
             for attr_name, attr_values in entry_data.attributes.items():
@@ -122,7 +122,7 @@ class LDAPClient:
 
     def _process_search_results(
         self,
-        result: FlextResult[list[FlextLdapModels.Entry]],
+        result: FlextResult[list[FlextLDAPModels.Entry]],
         size_limit: int,
     ) -> list[FlextTapLdapTypes.Core.Dict]:
         """Process LDAP search results with size limiting."""
@@ -174,7 +174,7 @@ class LDAPClient:
                 bind_password,
             ):
                 # Use the context manager - search operations happen within the connection
-                search_request = FlextLdapModels.SearchRequest(
+                search_request = FlextLDAPModels.SearchRequest(
                     base_dn=base_dn,
                     filter_str=search_filter,
                     scope=ldap_scope,
@@ -259,7 +259,7 @@ class LDAPClient:
                         bind_password,
                     ):
                         # Try a simple search to test connection
-                        search_request = FlextLdapModels.SearchRequest(
+                        search_request = FlextLDAPModels.SearchRequest(
                             base_dn="",
                             filter_str="(objectClass=*)",
                             scope="base",
@@ -658,8 +658,8 @@ def main() -> None:
 
 
 # Type aliases for testing convenience
-LDAPConnectionConfig = FlextLdapModels.ConnectionConfig
-LDAPEntry = FlextLdapModels.Entry
+LDAPConnectionConfig = FlextLDAPModels.ConnectionConfig
+LDAPEntry = FlextLDAPModels.Entry
 
 __all__ = [
     # Main Classes

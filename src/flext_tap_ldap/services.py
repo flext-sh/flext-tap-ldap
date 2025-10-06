@@ -28,45 +28,43 @@ from flext_tap_ldap.typings import FlextTapLdapTypes
 from flext_tap_ldap.utilities import FlextTapLdapUtilities
 
 
-@dataclass
-class LDAPConnectionParams:
-    """Parameter object for LDAP connection creation."""
-
-    host: str
-    port: int = 389
-    bind_dn: str | None = None
-    bind_password: str | None = None
-    base_dn: str = ""
-    use_ssl: bool = False
-    use_tls: bool = False
-    timeout_seconds: int = 30
-    page_size: int = 1000
-    max_retries: int = 3
-
-    def __post_init__(self: object) -> None:
-        """Validate connection parameters after initialization."""
-        if self.port <= 0 or self.port > FlextConstants.Network.MAX_PORT:
-            msg = f"Port must be between 1 and 65535, got {self.port}"
-            raise ValueError(msg)
-
-
-@dataclass
-class StreamCreationParams:
-    """Parameter object for stream creation."""
-
-    stream_name: str
-    base_dn: str
-    search_filter: str = "(objectClass=*)"
-    attributes: list[str] | None = None
-    scope: str = "subtree"
-
-
 class FlextTapLdapServices:
     """UNIFIED LDAP tap services following FLEXT 'one class per module' pattern.
 
     Consolidates all LDAP service functionality into a single class with nested
     helper classes for connection, streaming, execution, and record operations.
     """
+
+    @dataclass
+    class LDAPConnectionParams:
+        """Parameter object for LDAP connection creation."""
+
+        host: str
+        port: int = 389
+        bind_dn: str | None = None
+        bind_password: str | None = None
+        base_dn: str = ""
+        use_ssl: bool = False
+        use_tls: bool = False
+        timeout_seconds: int = 30
+        page_size: int = 1000
+        max_retries: int = 3
+
+        def __post_init__(self: object) -> None:
+            """Validate connection parameters after initialization."""
+            if self.port <= 0 or self.port > FlextConstants.Network.MAX_PORT:
+                msg = f"Port must be between 1 and 65535, got {self.port}"
+                raise ValueError(msg)
+
+    @dataclass
+    class StreamCreationParams:
+        """Parameter object for stream creation."""
+
+        stream_name: str
+        base_dn: str
+        search_filter: str = "(objectClass=*)"
+        attributes: list[str] | None = None
+        scope: str = "subtree"
 
     # ========================================================================
     # NESTED HELPER CLASSES - Connection Services
@@ -80,7 +78,7 @@ class FlextTapLdapServices:
             self._logger = FlextTapLdapUtilities.get_logger()
 
         def create_connection(
-            self, params: LDAPConnectionParams
+            self, params: FlextTapLdapServices.LDAPConnectionParams
         ) -> FlextResult[LDAPConnection]:
             """Create LDAP connection from parameters."""
             try:
@@ -122,7 +120,7 @@ class FlextTapLdapServices:
             self._logger = FlextTapLdapUtilities.get_logger()
 
         def create_stream(
-            self, params: StreamCreationParams
+            self, params: FlextTapLdapServices.StreamCreationParams
         ) -> FlextResult[LDAPStream]:
             """Create LDAP stream from parameters."""
             try:
@@ -251,7 +249,7 @@ class FlextTapLdapServices:
 
     # Connection operations
     def create_connection(
-        self, params: LDAPConnectionParams
+        self, params: FlextTapLdapServices.LDAPConnectionParams
     ) -> FlextResult[LDAPConnection]:
         """Create LDAP connection."""
         return self._connection_service.create_connection(params)
@@ -261,7 +259,9 @@ class FlextTapLdapServices:
         return self._connection_service.test_connection(connection)
 
     # Stream operations
-    def create_stream(self, params: StreamCreationParams) -> FlextResult[LDAPStream]:
+    def create_stream(
+        self, params: FlextTapLdapServices.StreamCreationParams
+    ) -> FlextResult[LDAPStream]:
         """Create LDAP stream."""
         return self._stream_service.create_stream(params)
 
@@ -300,19 +300,6 @@ class FlextTapLdapServices:
         )
 
 
-# Aliases for backward compatibility
-LDAPConnectionService = FlextTapLdapServices
-LDAPRecordService = FlextTapLdapServices
-LDAPStreamService = FlextTapLdapServices
-TapExecutionService = FlextTapLdapServices
-
-
 __all__ = [
     "FlextTapLdapServices",
-    "LDAPConnectionParams",
-    "LDAPConnectionService",
-    "LDAPRecordService",
-    "LDAPStreamService",
-    "StreamCreationParams",
-    "TapExecutionService",
 ]
