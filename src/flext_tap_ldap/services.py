@@ -100,10 +100,15 @@ class FlextTapLdapServices:
                     f"Failed to create connection: {e}"
                 )
 
-        def test_connection(self, _connection: LDAPConnection) -> FlextResult[bool]:
+        def test_connection(self, connection: LDAPConnection) -> FlextResult[bool]:
             """Test LDAP connection."""
             try:
                 # Implementation would test actual LDAP connection
+                self._logger.debug(
+                    "Testing LDAP connection",
+                    host=connection.host,
+                    port=connection.port,
+                )
                 return FlextResult[bool].ok(data=True)
             except Exception as e:
                 return FlextResult[bool].fail(f"Connection test failed: {e}")
@@ -136,10 +141,14 @@ class FlextTapLdapServices:
                 return FlextResult[LDAPStream].fail(f"Failed to create stream: {e}")
 
         def discover_streams(
-            self, _connection: LDAPConnection
+            self, connection: LDAPConnection
         ) -> FlextResult[list[LDAPStream]]:
             """Discover available LDAP streams."""
             try:
+                self._logger.debug(
+                    "Discovering LDAP streams",
+                    base_dn=connection.base_dn,
+                )
                 # Implementation would discover actual LDAP streams
                 streams = [
                     LDAPStream(
