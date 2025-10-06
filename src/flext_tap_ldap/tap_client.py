@@ -357,7 +357,7 @@ class FlextTapLDAP(FlextService[FlextTapLdapConfig]):
     def __init__(self) -> None:
         """Initialize FLEXT LDAP Tap service."""
         super().__init__()
-        self._logger = FlextLogger(__name__)
+        self.logger = FlextLogger(__name__)
         self.domain_model: FlextTapLdapConfig | None = None
 
     def configure_service(
@@ -374,7 +374,7 @@ class FlextTapLDAP(FlextService[FlextTapLdapConfig]):
                 )
 
             self.domain_model = config
-            self._logger.info("LDAP tap service configured successfully")
+            self.logger.info("LDAP tap service configured successfully")
             return FlextResult[None].ok(None)
         except Exception as e:
             return FlextResult[None].fail(f"Service configuration failed: {e}")
@@ -415,13 +415,13 @@ class FlextTapLDAP(FlextService[FlextTapLdapConfig]):
     def _perform_ldap_extraction(self, config: FlextTapLdapConfig) -> FlextResult[None]:
         """Perform LDAP extraction with direct config usage."""
         try:
-            self._logger.info(
+            self.logger.info(
                 f"Starting LDAP extraction from {config.ldap_host}:{config.ldap_port}"
             )
 
             # Use config fields directly - no legacy conversion
             if config.ldif_files or config.ldif_directory:
-                self._logger.info("Processing LDIF files")
+                self.logger.info("Processing LDIF files")
 
             return FlextResult[None].ok(None)
         except Exception as e:
