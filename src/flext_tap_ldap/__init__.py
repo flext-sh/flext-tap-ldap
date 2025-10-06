@@ -54,14 +54,7 @@ from flext_tap_ldap.models import (
     TapExecutionStartedEvent,
 )
 from flext_tap_ldap.protocols import FlextTapLdapProtocols
-from flext_tap_ldap.services import (
-    LDAPConnectionParams,
-    LDAPConnectionService,
-    LDAPRecordService,
-    LDAPStreamService,
-    StreamCreationParams,
-    TapExecutionService,
-)
+from flext_tap_ldap.services import FlextTapLdapServices
 from flext_tap_ldap.tap_client import FlextTapLDAP, FlextTapLDAPPlugin
 from flext_tap_ldap.tap_streams import (
     CustomStream,
@@ -95,6 +88,12 @@ __all__ = [
     "FlextTapLdapProcessingError",
     "FlextTapLdapProtocols",
     "FlextTapLdapSearchError",
+    "FlextTapLdapServices",
+    "FlextTapLdapServices.LDAPConnectionService",
+    "FlextTapLdapServices.LDAPRecordService",
+    "FlextTapLdapServices.LDAPStreamService",
+    "FlextTapLdapServices.StreamCreationParams",
+    "FlextTapLdapServices.TapExecutionService",
     "FlextTapLdapStreamError",
     "FlextTapLdapTimeoutError",
     "FlextTapLdapTypes",
@@ -106,15 +105,11 @@ __all__ = [
     "LDAPClient",
     "LDAPClientConfig",
     "LDAPConnection",
-    "LDAPConnectionParams",
-    "LDAPConnectionService",
     "LDAPEntry",
     "LDAPGroup",
     "LDAPRecord",
-    "LDAPRecordService",
     "LDAPSchema",
     "LDAPStream",
-    "LDAPStreamService",
     "LDAPUser",
     "LDIFAnalysisStream",
     "LDIFEntry",
@@ -124,11 +119,9 @@ __all__ = [
     "LDIFTransformer",
     "LDIFValidator",
     "RecordExtractedEvent",
-    "StreamCreationParams",
     "StreamDiscoveredEvent",
     "TapExecution",
     "TapExecutionCompletedEvent",
-    "TapExecutionService",
     "TapExecutionStartedEvent",
     "UsersStream",
     "__version__",
