@@ -1,5 +1,4 @@
 """Integration tests for tap-ldap.
-import time.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -8,6 +7,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import json
+import time
 from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import Mock, patch

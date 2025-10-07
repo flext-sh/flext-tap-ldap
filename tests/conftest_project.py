@@ -1,5 +1,4 @@
-"""Configuração pytest para flext-tap-ldap - Now using shared container.
-from typing import TYPE_CHECKING.
+"""Configuração pytest para flext-tap-ldap.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -10,13 +9,7 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
-
-# Import centralized Docker fixtures
-
-if TYPE_CHECKING:
-    from flext_tests import FlextTestDocker
-
-# Import shared LDAP fixtures from docker directory
+from flext_tests import FlextTestDocker
 
 
 @pytest.fixture(scope="session")

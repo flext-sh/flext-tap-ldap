@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import override
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import FlextLdapModels
@@ -245,9 +245,10 @@ class FlextTapLdapServices:
                 if not tap_stream_id:
                     tap_stream_id = f"{params.stream_type.lower()}_stream"
 
-                # Convert string to UUID for domain model
+                # Create stream using the correct model
                 stream = LDAPStream(
-                    connection_id=UUID(params.connection_id),
+                    name=params.stream_type.lower(),
+                    connection_id=params.connection_id,
                     stream_type=params.stream_type.lower(),
                     search_filter=params.search_filter,
                     attributes=params.attributes or [],
@@ -341,7 +342,8 @@ class FlextTapLdapServices:
             """Create tap execution."""
             try:
                 execution = TapExecution(
-                    connection_id=UUID(connection_id),
+                    execution_id=f"exec_{uuid4().hex[:8]}",
+                    connection_id=connection_id,
                     command=command,
                     tap_status="created",
                     config=config or {},
@@ -488,26 +490,22 @@ class FlextTapLdapServices:
         ) -> FlextResult[LDAPRecord]:
             """Create LDAP record."""
             try:
-                # Convert to UUID if not already
-                stream_uuid = (
-                    stream_id if isinstance(stream_id, UUID) else UUID(stream_id)
-                )
-                execution_uuid = (
-                    execution_id
-                    if isinstance(execution_id, UUID)
-                    else UUID(execution_id)
-                )
+                # Generate a simple UUID-based ID for the record
+                record_id = str(uuid4())
 
                 record = LDAPRecord(
-                    stream_id=stream_uuid,
-                    execution_id=execution_uuid,
-                    dn=dn,
-                    attributes=attributes,
-                    object_class=object_class or [],
-                    singer_record={},  # Will be set by to_singer_record()
+                    stream="ldap_record",
+                    record={
+                        "id": record_id,
+                        "dn": dn,
+                        "attributes": attributes,
+                        "object_class": object_class or [],
+                        "stream_id": str(stream_id),
+                        "execution_id": str(execution_id),
+                    },
+                    time_extracted=datetime.now(UTC),
                 )
-
-                self._records[str(record.id)] = record
+                self._records[record_id] = record
                 return FlextResult[LDAPRecord].ok(record)
             except (RuntimeError, ValueError, TypeError) as e:
                 return FlextResult[LDAPRecord].fail(f"Failed to create record: {e}")
