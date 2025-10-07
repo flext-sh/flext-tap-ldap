@@ -1,5 +1,4 @@
-"""Quick comprehensive tests for LDAP client to maximize coverage efficiently.
-import time.
+"""Quick comprehensive tests for LDAP client to maximize coverag efficiently.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -8,6 +7,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import contextlib
+import time
 from unittest.mock import Mock, patch
 
 import pytest

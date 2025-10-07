@@ -175,8 +175,8 @@ class FlextTapLdapModels(FlextModels):
         return value
 
     # Legacy type aliases for backward compatibility
-    LDAPRecord = FlextTypes.Dict
-    LDAPRecords = list[LDAPRecord]
+    # LDAPRecord = FlextTypes.Dict  # Replaced with proper dataclass below
+    LDAPRecords = list[FlextTypes.Dict]
 
     class UtilityFunctions:
         """Utility functions for model data processing."""
