@@ -51,14 +51,16 @@ class FlextTapLdapProtocols:
         class LdapConnectionProtocol(FlextProtocols.Domain.Service, Protocol):
             """Protocol for LDAP connection management in Singer tap operations."""
 
-            def connect(self, config: FlextTypes.Dict) -> FlextResult[FlextTypes.Any]:
+            def connect(
+                self, config: FlextTypes.Dict
+            ) -> FlextResult[FlextTypes.object]:
                 """Establish connection to LDAP server for data extraction.
 
                 Args:
                     config: LDAP connection configuration
 
                 Returns:
-                    FlextResult[FlextTypes.Any]: LDAP connection object or error
+                    FlextResult[FlextTypes.object]: LDAP connection object or error
 
                 """
 
