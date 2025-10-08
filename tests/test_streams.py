@@ -15,7 +15,7 @@ from flext_core import FlextTypes
 from flext_tap_ldap import (
     CustomStream,
     CustomStreamParams,
-    FlextTapLDAP,
+    FlextMeltanoTapLDAP,
     GroupsStream,
     LDAPBaseStream,
     OrganizationalUnitsStream,
@@ -30,7 +30,7 @@ class TestLDAPBaseStream:
     @pytest.fixture
     def mock_tap(self) -> Mock:
         """Create mock tap instance."""
-        tap = Mock(spec=FlextTapLDAP)
+        tap = Mock(spec=FlextMeltanoTapLDAP)
         tap.config = {
             "ldap_host": "test.ldap.com",
             "ldap_port": 389,
@@ -61,7 +61,7 @@ class TestUsersStream:
     @pytest.fixture
     def mock_tap(self) -> Mock:
         """Create mock tap instance."""
-        tap = Mock(spec=FlextTapLDAP)
+        tap = Mock(spec=FlextMeltanoTapLDAP)
         tap.config = {
             "ldap_host": "test.ldap.com",
             "ldap_port": 389,
@@ -215,7 +215,7 @@ class TestGroupsStream:
     @pytest.fixture
     def mock_tap(self) -> Mock:
         """Create mock tap instance."""
-        tap = Mock(spec=FlextTapLDAP)
+        tap = Mock(spec=FlextMeltanoTapLDAP)
         tap.config = {
             "ldap_host": "test.ldap.com",
             "ldap_port": 389,
@@ -257,7 +257,7 @@ class TestOrganizationalUnitsStream:
     @pytest.fixture
     def mock_tap(self) -> Mock:
         """Create mock tap instance."""
-        tap = Mock(spec=FlextTapLDAP)
+        tap = Mock(spec=FlextMeltanoTapLDAP)
         tap.config = {
             "ldap_host": "test.ldap.com",
             "ldap_port": 389,
@@ -300,7 +300,7 @@ class TestSchemaStream:
     @pytest.fixture
     def mock_tap(self) -> Mock:
         """Create mock tap instance."""
-        tap = Mock(spec=FlextTapLDAP)
+        tap = Mock(spec=FlextMeltanoTapLDAP)
         tap.config = {
             "ldap_host": "test.ldap.com",
             "ldap_port": 389,
@@ -388,7 +388,7 @@ class TestCustomStream:
     @pytest.fixture
     def mock_tap(self) -> Mock:
         """Create mock tap instance."""
-        tap = Mock(spec=FlextTapLDAP)
+        tap = Mock(spec=FlextMeltanoTapLDAP)
         tap.config = {
             "ldap_host": "test.ldap.com",
             "ldap_port": 389,
@@ -532,7 +532,7 @@ class TestStreamIntegration:
         tap_config: FlextTypes.Dict,
     ) -> None:
         """Test that all default streams can be created."""
-        tap = FlextTapLDAP(config=tap_config)
+        tap = FlextMeltanoTapLDAP(config=tap_config)
         streams = tap.discover_streams()
 
         assert len(streams) >= 4  # users, groups, organizational_units, schema
@@ -558,7 +558,7 @@ class TestStreamIntegration:
             },
         ]
 
-        tap = FlextTapLDAP(config=tap_config)
+        tap = FlextMeltanoTapLDAP(config=tap_config)
         streams = tap.discover_streams()
 
         stream_names = [s.name for s in streams]
@@ -573,7 +573,7 @@ class TestStreamIntegration:
         """Test LDIF streams are included when enabled."""
         tap_config["enable_ldif_streams"] = True
 
-        tap = FlextTapLDAP(config=tap_config)
+        tap = FlextMeltanoTapLDAP(config=tap_config)
         streams = tap.discover_streams()
 
         stream_names = [s.name for s in streams]
@@ -588,7 +588,7 @@ class TestLDAPBaseStreamDirectUsage:
     @pytest.fixture
     def mock_tap(self) -> Mock:
         """Create mock tap instance."""
-        tap = Mock(spec=FlextTapLDAP)
+        tap = Mock(spec=FlextMeltanoTapLDAP)
         tap.config = {
             "ldap_host": "test.ldap.com",
             "ldap_port": 389,
@@ -623,7 +623,7 @@ class TestStreamExceptionHandling:
     @pytest.fixture
     def mock_tap_failing(self) -> Mock:
         """Create mock tap that will cause exceptions."""
-        tap = Mock(spec=FlextTapLDAP)
+        tap = Mock(spec=FlextMeltanoTapLDAP)
         tap.config = {
             "ldap_host": "failing.ldap.com",
             "ldap_port": 389,

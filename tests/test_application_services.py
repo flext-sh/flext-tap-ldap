@@ -10,16 +10,16 @@ from uuid import uuid4
 
 import pytest
 
-from flext_tap_ldap.tap_services import FlextTapLdapServices
+from flext_tap_ldap.tap_services import FlextMeltanoTapLdapServices
 
 
 class TestLDAPConnectionParams:
-    """Test FlextTapLdapServices.LDAPConnectionParams parameter object."""
+    """Test FlextMeltanoTapLdapServices.LDAPConnectionParams parameter object."""
 
     def test_valid_params_creation(self) -> None:
         """Test method."""
         """Test creating valid connection parameters."""
-        params = FlextTapLdapServices.LDAPConnectionParams(
+        params = FlextMeltanoTapLdapServices.LDAPConnectionParams(
             host="localhost",
             base_dn="dc=test,dc=com",
             port=389,
@@ -37,7 +37,7 @@ class TestLDAPConnectionParams:
         """Test method."""
         """Test host validation."""
         with pytest.raises(ValueError, match="Host is required"):
-            FlextTapLdapServices.LDAPConnectionParams(
+            FlextMeltanoTapLdapServices.LDAPConnectionParams(
                 host="", base_dn="dc=test,dc=com", port=389
             )
 
@@ -45,12 +45,12 @@ class TestLDAPConnectionParams:
         """Test method."""
         """Test port validation."""
         with pytest.raises(ValueError, match="Port must be between 1 and 65535"):
-            FlextTapLdapServices.LDAPConnectionParams(
+            FlextMeltanoTapLdapServices.LDAPConnectionParams(
                 host="localhost", base_dn="dc=test,dc=com", port=0
             )
 
         with pytest.raises(ValueError, match="Port must be between 1 and 65535"):
-            FlextTapLdapServices.LDAPConnectionParams(
+            FlextMeltanoTapLdapServices.LDAPConnectionParams(
                 host="localhost", base_dn="dc=test,dc=com", port=70000
             )
 
@@ -58,7 +58,7 @@ class TestLDAPConnectionParams:
         """Test method."""
         """Test timeout validation."""
         with pytest.raises(ValueError, match="Timeout must be positive"):
-            FlextTapLdapServices.LDAPConnectionParams(
+            FlextMeltanoTapLdapServices.LDAPConnectionParams(
                 host="localhost", base_dn="dc=test,dc=com", timeout_seconds=0
             )
 
@@ -66,7 +66,7 @@ class TestLDAPConnectionParams:
         """Test method."""
         """Test page size validation."""
         with pytest.raises(ValueError, match="Page size must be positive"):
-            FlextTapLdapServices.LDAPConnectionParams(
+            FlextMeltanoTapLdapServices.LDAPConnectionParams(
                 host="localhost", base_dn="dc=test,dc=com", page_size=0
             )
 
@@ -74,7 +74,7 @@ class TestLDAPConnectionParams:
         """Test method."""
         """Test max retries validation."""
         with pytest.raises(ValueError, match="Max retries cannot be negative"):
-            FlextTapLdapServices.LDAPConnectionParams(
+            FlextMeltanoTapLdapServices.LDAPConnectionParams(
                 host="localhost", base_dn="dc=test,dc=com", max_retries=-1
             )
 
@@ -83,14 +83,14 @@ class TestLDAPConnectionService:
     """Test LDAP connection service."""
 
     @pytest.fixture
-    def service(self) -> FlextTapLdapServices.LDAPConnectionService:
+    def service(self) -> FlextMeltanoTapLdapServices.LDAPConnectionService:
         """Create connection service instance."""
-        return FlextTapLdapServices.LDAPConnectionService()
+        return FlextMeltanoTapLdapServices.LDAPConnectionService()
 
     @pytest.fixture
-    def valid_params(self) -> FlextTapLdapServices.LDAPConnectionParams:
+    def valid_params(self) -> FlextMeltanoTapLdapServices.LDAPConnectionParams:
         """Create valid connection parameters."""
-        return FlextTapLdapServices.LDAPConnectionParams(
+        return FlextMeltanoTapLdapServices.LDAPConnectionParams(
             host="localhost",
             base_dn="dc=test,dc=com",
             port=389,
@@ -100,12 +100,12 @@ class TestLDAPConnectionService:
 
     def test_create_connection_success(
         self,
-        service: FlextTapLdapServices.LDAPConnectionService,
-        valid_params: FlextTapLdapServices.LDAPConnectionParams,
+        service: FlextMeltanoTapLdapServices.LDAPConnectionService,
+        valid_params: FlextMeltanoTapLdapServices.LDAPConnectionParams,
     ) -> None:
         """Test successful connection creation."""
         result = service.create_connection(
-            FlextTapLdapServices.LDAPConnectionParams(
+            FlextMeltanoTapLdapServices.LDAPConnectionParams(
                 host=valid_params.host,
                 base_dn=valid_params.base_dn,
                 port=valid_params.port,
@@ -121,12 +121,12 @@ class TestLDAPConnectionService:
 
     def test_create_connection_stores_multiple(
         self,
-        service: FlextTapLdapServices.LDAPConnectionService,
-        valid_params: FlextTapLdapServices.LDAPConnectionParams,
+        service: FlextMeltanoTapLdapServices.LDAPConnectionService,
+        valid_params: FlextMeltanoTapLdapServices.LDAPConnectionParams,
     ) -> None:
         """Test creating multiple connections."""
         result1 = service.create_connection(
-            FlextTapLdapServices.LDAPConnectionParams(
+            FlextMeltanoTapLdapServices.LDAPConnectionParams(
                 host=valid_params.host,
                 base_dn=valid_params.base_dn,
                 port=valid_params.port,
@@ -135,7 +135,7 @@ class TestLDAPConnectionService:
             )
         )
         result2 = service.create_connection(
-            FlextTapLdapServices.LDAPConnectionParams(
+            FlextMeltanoTapLdapServices.LDAPConnectionParams(
                 host=valid_params.host,
                 base_dn=valid_params.base_dn,
                 port=valid_params.port,
@@ -151,8 +151,8 @@ class TestLDAPConnectionService:
 
     def test_get_connection_success(
         self,
-        service: FlextTapLdapServices.LDAPConnectionService,
-        valid_params: FlextTapLdapServices.LDAPConnectionParams,
+        service: FlextMeltanoTapLdapServices.LDAPConnectionService,
+        valid_params: FlextMeltanoTapLdapServices.LDAPConnectionParams,
     ) -> None:
         """Test getting existing connection."""
         create_result = service.create_connection(valid_params)
@@ -166,7 +166,7 @@ class TestLDAPConnectionService:
 
     def test_get_nonexistent_connection(
         self,
-        service: FlextTapLdapServices.LDAPConnectionService,
+        service: FlextMeltanoTapLdapServices.LDAPConnectionService,
     ) -> None:
         """Test getting non-existent connection."""
         result = service.get_connection("non-existent-id")
@@ -177,7 +177,7 @@ class TestLDAPConnectionService:
 
     def test_list_connections_empty(
         self,
-        service: FlextTapLdapServices.LDAPConnectionService,
+        service: FlextMeltanoTapLdapServices.LDAPConnectionService,
     ) -> None:
         """Test listing connections when empty."""
         result = service.list_connections()
@@ -187,12 +187,12 @@ class TestLDAPConnectionService:
 
     def test_list_connections_with_data(
         self,
-        service: FlextTapLdapServices.LDAPConnectionService,
-        valid_params: FlextTapLdapServices.LDAPConnectionParams,
+        service: FlextMeltanoTapLdapServices.LDAPConnectionService,
+        valid_params: FlextMeltanoTapLdapServices.LDAPConnectionParams,
     ) -> None:
         """Test listing connections with data."""
         service.create_connection(
-            FlextTapLdapServices.LDAPConnectionParams(
+            FlextMeltanoTapLdapServices.LDAPConnectionParams(
                 host=valid_params.host,
                 base_dn=valid_params.base_dn,
                 port=valid_params.port,
@@ -201,7 +201,7 @@ class TestLDAPConnectionService:
             )
         )
         service.create_connection(
-            FlextTapLdapServices.LDAPConnectionParams(
+            FlextMeltanoTapLdapServices.LDAPConnectionParams(
                 host=valid_params.host,
                 base_dn=valid_params.base_dn,
                 port=valid_params.port,
@@ -217,12 +217,12 @@ class TestLDAPConnectionService:
 
     def test_test_connection_success(
         self,
-        service: FlextTapLdapServices.LDAPConnectionService,
-        valid_params: FlextTapLdapServices.LDAPConnectionParams,
+        service: FlextMeltanoTapLdapServices.LDAPConnectionService,
+        valid_params: FlextMeltanoTapLdapServices.LDAPConnectionParams,
     ) -> None:
         """Test connection testing."""
         create_result = service.create_connection(
-            FlextTapLdapServices.LDAPConnectionParams(
+            FlextMeltanoTapLdapServices.LDAPConnectionParams(
                 host=valid_params.host,
                 base_dn=valid_params.base_dn,
                 port=valid_params.port,
@@ -241,7 +241,7 @@ class TestLDAPConnectionService:
 
     def test_test_nonexistent_connection(
         self,
-        service: FlextTapLdapServices.LDAPConnectionService,
+        service: FlextMeltanoTapLdapServices.LDAPConnectionService,
     ) -> None:
         """Test testing non-existent connection."""
         result = service.test_connection("non-existent-id")
@@ -255,16 +255,16 @@ class TestLDAPStreamService:
     """Test LDAP stream service."""
 
     @pytest.fixture
-    def service(self) -> FlextTapLdapServices.LDAPStreamService:
+    def service(self) -> FlextMeltanoTapLdapServices.LDAPStreamService:
         """Create stream service instance."""
-        return FlextTapLdapServices.LDAPStreamService()
+        return FlextMeltanoTapLdapServices.LDAPStreamService()
 
     def test_create_stream_with_attributes(
-        self, service: FlextTapLdapServices.LDAPStreamService
+        self, service: FlextMeltanoTapLdapServices.LDAPStreamService
     ) -> None:
         """Test successful stream creation with specific attributes."""
         connection_id = str(uuid4())
-        params = FlextTapLdapServices.StreamCreationParams(
+        params = FlextMeltanoTapLdapServices.StreamCreationParams(
             connection_id=connection_id,
             stream_type="users",
             search_filter="(objectClass=inetOrgPerson)",
@@ -280,11 +280,11 @@ class TestLDAPStreamService:
 
     def test_create_stream_with_defaults(
         self,
-        service: FlextTapLdapServices.LDAPStreamService,
+        service: FlextMeltanoTapLdapServices.LDAPStreamService,
     ) -> None:
         """Test stream creation with default values."""
         connection_id = str(uuid4())
-        params = FlextTapLdapServices.StreamCreationParams(
+        params = FlextMeltanoTapLdapServices.StreamCreationParams(
             connection_id=connection_id,
             stream_type="users",
             search_filter="(objectClass=inetOrgPerson)",
@@ -298,11 +298,11 @@ class TestLDAPStreamService:
         assert result.data.replication_method == "FULL_TABLE"
 
     def test_schema_discovery(
-        self, service: FlextTapLdapServices.LDAPStreamService
+        self, service: FlextMeltanoTapLdapServices.LDAPStreamService
     ) -> None:
         """Test schema discovery functionality."""
         connection_id = str(uuid4())
-        params = FlextTapLdapServices.StreamCreationParams(
+        params = FlextMeltanoTapLdapServices.StreamCreationParams(
             connection_id=connection_id,
             stream_type="users",
             search_filter="(objectClass=inetOrgPerson)",
@@ -321,14 +321,14 @@ class TestLDAPStreamService:
         assert isinstance(properties, dict)
         assert "dn" in properties
 
-    def test_self(self, service: FlextTapLdapServices.LDAPStreamService) -> None:
+    def test_self(self, service: FlextMeltanoTapLdapServices.LDAPStreamService) -> None:
         """Test method."""
         """Test listing streams filtered by connection."""
         connection_id1 = str(uuid4())
         connection_id2 = str(uuid4())
 
         service.create_stream(
-            FlextTapLdapServices.StreamCreationParams(
+            FlextMeltanoTapLdapServices.StreamCreationParams(
                 connection_id=connection_id1,
                 stream_type="users",
                 search_filter="(objectClass=person)",
@@ -336,7 +336,7 @@ class TestLDAPStreamService:
             ),
         )
         service.create_stream(
-            FlextTapLdapServices.StreamCreationParams(
+            FlextMeltanoTapLdapServices.StreamCreationParams(
                 connection_id=connection_id1,
                 stream_type="groups",
                 search_filter="(objectClass=group)",
@@ -344,7 +344,7 @@ class TestLDAPStreamService:
             ),
         )
         service.create_stream(
-            FlextTapLdapServices.StreamCreationParams(
+            FlextMeltanoTapLdapServices.StreamCreationParams(
                 connection_id=connection_id2,
                 stream_type="users",
                 search_filter="(objectClass=person)",
@@ -365,12 +365,12 @@ class TestTapExecutionService:
     """Test tap execution service."""
 
     @pytest.fixture
-    def service(self) -> FlextTapLdapServices.TapExecutionService:
+    def service(self) -> FlextMeltanoTapLdapServices.TapExecutionService:
         """Create execution service instance."""
-        return FlextTapLdapServices.TapExecutionService()
+        return FlextMeltanoTapLdapServices.TapExecutionService()
 
     def test_create_execution(
-        self, service: FlextTapLdapServices.TapExecutionService
+        self, service: FlextMeltanoTapLdapServices.TapExecutionService
     ) -> None:
         """Test execution creation."""
         connection_id = str(uuid4())
@@ -386,7 +386,7 @@ class TestTapExecutionService:
         assert result.data.tap_status == "created"
 
     def test_start_execution(
-        self, service: FlextTapLdapServices.TapExecutionService
+        self, service: FlextMeltanoTapLdapServices.TapExecutionService
     ) -> None:
         """Test starting execution."""
         connection_id = str(uuid4())
@@ -400,7 +400,7 @@ class TestTapExecutionService:
         assert start_result.data.started_at is not None
 
     def test_complete_execution(
-        self, service: FlextTapLdapServices.TapExecutionService
+        self, service: FlextMeltanoTapLdapServices.TapExecutionService
     ) -> None:
         """Test completing execution."""
         connection_id = str(uuid4())
@@ -419,7 +419,7 @@ class TestTapExecutionService:
         assert complete_result.data.exit_code == 0
 
     def test_update_execution_metrics(
-        self, service: FlextTapLdapServices.TapExecutionService
+        self, service: FlextMeltanoTapLdapServices.TapExecutionService
     ) -> None:
         """Test updating execution metrics."""
         connection_id = str(uuid4())
@@ -441,12 +441,12 @@ class TestLDAPRecordService:
     """Test LDAP record service."""
 
     @pytest.fixture
-    def service(self) -> FlextTapLdapServices.LDAPRecordService:
+    def service(self) -> FlextMeltanoTapLdapServices.LDAPRecordService:
         """Create record service instance."""
-        return FlextTapLdapServices.LDAPRecordService()
+        return FlextMeltanoTapLdapServices.LDAPRecordService()
 
     def test_create_record(
-        self, service: FlextTapLdapServices.LDAPRecordService
+        self, service: FlextMeltanoTapLdapServices.LDAPRecordService
     ) -> None:
         """Test record creation."""
         stream_id = str(uuid4())
@@ -466,7 +466,7 @@ class TestLDAPRecordService:
         assert "id" in result.data.record
 
     def test_list_records_with_filters(
-        self, service: FlextTapLdapServices.LDAPRecordService
+        self, service: FlextMeltanoTapLdapServices.LDAPRecordService
     ) -> None:
         """Test listing records with filters."""
         stream_id1 = str(uuid4())
@@ -487,7 +487,7 @@ class TestLDAPRecordService:
         assert len(filtered_result.data) == 2
 
     def test_count_records(
-        self, service: FlextTapLdapServices.LDAPRecordService
+        self, service: FlextMeltanoTapLdapServices.LDAPRecordService
     ) -> None:
         """Test counting records."""
         stream_id = str(uuid4())

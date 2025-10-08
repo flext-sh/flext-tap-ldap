@@ -23,7 +23,7 @@ from flext_core import FlextTypes
 
 
 # LDAP tap domain TypeVars
-class FlextTapLdapTypes(FlextTypes):
+class FlextMeltanoTapLdapTypes(FlextTypes):
     """LDAP tap-specific type definitions extending FlextTypes.
 
     Domain-specific type system for LDAP data extraction operations.
@@ -40,14 +40,14 @@ class FlextTapLdapTypes(FlextTypes):
 
         type ConnectionConfig = dict[str, str | int | bool | FlextTypes.Dict]
         type AuthenticationConfig = dict[
-            str, str | bool | dict[str, FlextTapLdapTypes.Core.JsonValue]
+            str, str | bool | dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue]
         ]
         type TlsConfig = dict[str, bool | str | FlextTypes.Dict]
         type ServerConfig = dict[
             str, str | int | FlextTypes.StringList | FlextTypes.Dict
         ]
         type PoolingConfig = dict[
-            str, int | bool | dict[str, FlextTapLdapTypes.Core.JsonValue]
+            str, int | bool | dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue]
         ]
         type TimeoutConfig = dict[str, int | float]
 
@@ -60,15 +60,19 @@ class FlextTapLdapTypes(FlextTypes):
 
         type LdapEntry = dict[
             str,
-            str | FlextTypes.StringList | dict[str, FlextTapLdapTypes.Core.JsonValue],
+            str
+            | FlextTypes.StringList
+            | dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue],
         ]
         type LdapAttribute = dict[
             str, str | FlextTypes.StringList | bytes | FlextTypes.Dict
         ]
-        type LdapDn = dict[str, str | dict[str, FlextTapLdapTypes.Core.JsonValue]]
+        type LdapDn = dict[
+            str, str | dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue]
+        ]
         type LdapObjectClass = dict[str, str | FlextTypes.StringList | FlextTypes.Dict]
         type LdapSchema = dict[
-            str, str | list[dict[str, FlextTapLdapTypes.Core.JsonValue]]
+            str, str | list[dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue]]
         ]
         type LdapFilter = dict[str, str | FlextTypes.Dict]
 
@@ -81,10 +85,12 @@ class FlextTapLdapTypes(FlextTypes):
 
         type LdifRecord = dict[
             str,
-            str | FlextTypes.StringList | dict[str, FlextTapLdapTypes.Core.JsonValue],
+            str
+            | FlextTypes.StringList
+            | dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue],
         ]
         type LdifChangeRecord = dict[
-            str, str | list[dict[str, FlextTapLdapTypes.Core.JsonValue]]
+            str, str | list[dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue]]
         ]
         type LdifParserConfig = dict[str, bool | str | int | FlextTypes.Dict]
         type LdifValidation = dict[
@@ -92,10 +98,10 @@ class FlextTapLdapTypes(FlextTypes):
             bool
             | str
             | FlextTypes.StringList
-            | dict[str, FlextTapLdapTypes.Core.JsonValue],
+            | dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue],
         ]
         type LdifBatch = dict[
-            str, int | list[dict[str, FlextTapLdapTypes.Core.JsonValue]]
+            str, int | list[dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue]]
         ]
         type LdifProcessingMetrics = dict[str, int | float | FlextTypes.Dict]
 
@@ -107,18 +113,20 @@ class FlextTapLdapTypes(FlextTypes):
         """Singer stream complex types for LDAP."""
 
         type StreamDefinition = dict[
-            str, str | dict[str, FlextTapLdapTypes.Core.JsonValue]
+            str, str | dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue]
         ]
         type StreamSchema = dict[str, str | FlextTypes.Dict]
         type StreamMetadata = dict[
-            str, str | bool | dict[str, FlextTapLdapTypes.Core.JsonValue]
+            str, str | bool | dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue]
         ]
         type StreamRecord = dict[
-            str, FlextTapLdapTypes.Core.JsonValue | FlextTypes.Dict
+            str, FlextMeltanoTapLdapTypes.Core.JsonValue | FlextTypes.Dict
         ]
-        type StreamState = dict[str, str | dict[str, FlextTapLdapTypes.Core.JsonValue]]
+        type StreamState = dict[
+            str, str | dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue]
+        ]
         type StreamCatalog = dict[
-            str, str | list[dict[str, FlextTapLdapTypes.Core.JsonValue]]
+            str, str | list[dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue]]
         ]
 
     # =========================================================================
@@ -128,15 +136,17 @@ class FlextTapLdapTypes(FlextTypes):
     class TapConfiguration:
         """LDAP tap configuration complex types."""
 
-        type TapConfig = dict[str, FlextTapLdapTypes.Core.ConfigValue | FlextTypes.Dict]
+        type TapConfig = dict[
+            str, FlextMeltanoTapLdapTypes.Core.ConfigValue | FlextTypes.Dict
+        ]
         type ExtractionConfig = dict[str, str | int | bool | FlextTypes.StringList]
         type FilteringConfig = dict[str, str | FlextTypes.StringList | FlextTypes.Dict]
         type BatchingConfig = dict[
-            str, int | bool | dict[str, FlextTapLdapTypes.Core.JsonValue]
+            str, int | bool | dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue]
         ]
         type ReplicationConfig = dict[str, str | bool | FlextTypes.Dict]
         type PerformanceConfig = dict[
-            str, int | float | dict[str, FlextTapLdapTypes.Core.JsonValue]
+            str, int | float | dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue]
         ]
 
     # =========================================================================
@@ -146,23 +156,28 @@ class FlextTapLdapTypes(FlextTypes):
     class LdapQuery:
         """LDAP query complex types."""
 
-        type SearchFilter = dict[str, str | dict[str, FlextTapLdapTypes.Core.JsonValue]]
+        type SearchFilter = dict[
+            str, str | dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue]
+        ]
         type SearchScope = dict[str, str | int | FlextTypes.Dict]
         type SearchAttributes = dict[
-            str, FlextTypes.StringList | dict[str, FlextTapLdapTypes.Core.JsonValue]
+            str,
+            FlextTypes.StringList | dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue],
         ]
-        type SearchResult = dict[str, list[dict[str, FlextTapLdapTypes.Core.JsonValue]]]
+        type SearchResult = dict[
+            str, list[dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue]]
+        ]
         type PaginationConfig = dict[str, int | str | FlextTypes.Dict]
         type QueryOptimization = dict[
-            str, bool | str | dict[str, FlextTapLdapTypes.Core.JsonValue]
+            str, bool | str | dict[str, FlextMeltanoTapLdapTypes.Core.JsonValue]
         ]
 
     # =========================================================================
-    # CORE TYPES - Essential LDAP tap types extending FlextTapLdapTypes.Core
+    # CORE TYPES - Essential LDAP tap types extending FlextMeltanoTapLdapTypes.Core
     # =========================================================================
 
     class Core(FlextTypes):
-        """Core LDAP tap types extending FlextTapLdapTypes.Core.
+        """Core LDAP tap types extending FlextMeltanoTapLdapTypes.Core.
 
         Essential domain-specific types for LDAP tap extraction operations.
         Replaces generic FlextTypes.Dict with semantic LDAP tap types.
@@ -241,12 +256,12 @@ class FlextTapLdapTypes(FlextTypes):
 
         # LDAP tap-specific project configurations
         type TapLdapProjectConfig = dict[
-            str, FlextTapLdapTypes.Core.ConfigValue | object
+            str, FlextMeltanoTapLdapTypes.Core.ConfigValue | object
         ]
         type LdapExtractionConfig = dict[str, str | int | bool | FlextTypes.StringList]
         type LdapIntegrationConfig = dict[str, bool | str | FlextTypes.Dict]
         type TapLdapPipelineConfig = dict[
-            str, FlextTapLdapTypes.Core.ConfigValue | object
+            str, FlextMeltanoTapLdapTypes.Core.ConfigValue | object
         ]
 
 
@@ -255,5 +270,5 @@ class FlextTapLdapTypes(FlextTypes):
 # =============================================================================
 
 __all__: FlextTypes.StringList = [
-    "FlextTapLdapTypes",
+    "FlextMeltanoTapLdapTypes",
 ]

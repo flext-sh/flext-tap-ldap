@@ -14,7 +14,7 @@ __version__: Final[str] = f"{MAJOR}.{MINOR}.{PATCH}"
 __version_info__: Final[tuple[int, int, int]] = (MAJOR, MINOR, PATCH)
 
 
-class FlextTapLdapVersion:
+class FlextMeltanoTapLdapVersion:
     """Version information container for flext-tap-ldap."""
 
     def __init__(self) -> None:
@@ -26,11 +26,11 @@ class FlextTapLdapVersion:
         self.version_info = __version_info__
 
     @classmethod
-    def current(cls) -> FlextTapLdapVersion:
+    def current(cls) -> FlextMeltanoTapLdapVersion:
         """Return current version information."""
         return cls()
 
 
-VERSION: Final[FlextTapLdapVersion] = FlextTapLdapVersion.current()
+VERSION: Final[FlextMeltanoTapLdapVersion] = FlextMeltanoTapLdapVersion.current()
 
-__all__ = ["VERSION", "FlextTapLdapVersion", "__version__", "__version_info__"]
+__all__ = ["VERSION", "FlextMeltanoTapLdapVersion", "__version__", "__version_info__"]

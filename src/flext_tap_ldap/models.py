@@ -18,10 +18,10 @@ from pydantic import (
     model_validator,
 )
 
-from flext_tap_ldap.typings import FlextTapLdapTypes
+from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 
-class FlextTapLdapModels(FlextModels):
+class FlextMeltanoTapLdapModels(FlextModels):
     """Comprehensive models for LDAP tap operations extending FlextModels.
 
     Provides standardized models for all LDAP tap domain entities including:
@@ -183,7 +183,7 @@ class FlextTapLdapModels(FlextModels):
 
         @staticmethod
         def get_entry_value(
-            entry: FlextTapLdapTypes.Core.Dict | FlextTypes.Dict,
+            entry: FlextMeltanoTapLdapTypes.Core.Dict | FlextTypes.Dict,
             key: str,
             default: object = None,
         ) -> object:
@@ -254,7 +254,7 @@ class FlextTapLdapModels(FlextModels):
         )
 
         name: str = Field(..., description="Attribute name")
-        values: FlextTapLdapTypes.Core.StringList = Field(
+        values: FlextMeltanoTapLdapTypes.Core.StringList = Field(
             ..., description="Attribute values"
         )
         is_binary: bool = Field(
@@ -529,7 +529,7 @@ class FlextTapLdapModels(FlextModels):
         )
 
         dn: str = Field(..., description="Distinguished Name")
-        object_classes: FlextTapLdapTypes.Core.StringList = Field(
+        object_classes: FlextMeltanoTapLdapTypes.Core.StringList = Field(
             ...,
             description="Object classes",
         )
@@ -570,7 +570,7 @@ class FlextTapLdapModels(FlextModels):
             # Additional LDAP entry validation can be added here
             return FlextResult[None].ok(None)
 
-        attributes: FlextTapLdapTypes.Core.Dict = Field(
+        attributes: FlextMeltanoTapLdapTypes.Core.Dict = Field(
             default_factory=dict,
             description="Entry attributes",
         )
@@ -595,7 +595,7 @@ class FlextTapLdapModels(FlextModels):
             None,
             description="LDIF change type (add, modify, delete)",
         )
-        controls: FlextTapLdapTypes.Core.StringList = Field(
+        controls: FlextMeltanoTapLdapTypes.Core.StringList = Field(
             default_factory=list,
             description="LDAP controls",
         )
@@ -628,7 +628,7 @@ class FlextTapLdapModels(FlextModels):
             """
             return any(oc.lower() == object_class.lower() for oc in self.object_classes)
 
-        def to_dict(self) -> FlextTapLdapTypes.Core.Dict:
+        def to_dict(self) -> FlextMeltanoTapLdapTypes.Core.Dict:
             """Convert entry to dictionary format.
 
             Returns:
@@ -642,7 +642,7 @@ class FlextTapLdapModels(FlextModels):
 
             # Add attributes
             for name, value in self.attributes.items():
-                if isinstance(value, FlextTapLdapModels.LdapAttribute):
+                if isinstance(value, FlextMeltanoTapLdapModels.LdapAttribute):
                     result[name] = value.values
                 else:
                     result[name] = value
@@ -651,8 +651,8 @@ class FlextTapLdapModels(FlextModels):
 
         @classmethod
         def from_dict(
-            cls, data: FlextTapLdapTypes.Core.Dict
-        ) -> FlextTapLdapModels.LdapEntry:
+            cls, data: FlextMeltanoTapLdapTypes.Core.Dict
+        ) -> FlextMeltanoTapLdapModels.LdapEntry:
             """Create LdapEntry from dictionary.
 
             Args:
@@ -664,11 +664,11 @@ class FlextTapLdapModels(FlextModels):
             """
             return cls(
                 dn=cast("str", data.get("dn", "")),
-                object_classes=FlextTapLdapModels.UtilityFunctions.safe_list_str(
+                object_classes=FlextMeltanoTapLdapModels.UtilityFunctions.safe_list_str(
                     data.get("objectClass", [])
                 ),
                 attributes=cast(
-                    "FlextTapLdapTypes.Core.Dict", data.get("attributes", {})
+                    "FlextMeltanoTapLdapTypes.Core.Dict", data.get("attributes", {})
                 ),
                 extracted_at=cast(
                     "str", data.get("extracted_at", datetime.now(UTC).isoformat())
@@ -1584,26 +1584,26 @@ class FlextTapLdapModels(FlextModels):
 
 
 # Legacy aliases for backward compatibility
-LDAPAttribute = FlextTapLdapModels.LdapAttribute
-LDAPEntry = FlextTapLdapModels.LdapEntry
-LDAPUser = FlextTapLdapModels.LdapUser
-LDAPGroup = FlextTapLdapModels.LdapGroup
-LDAPSchema = FlextTapLdapModels.LdapSchema
-LDAPConnection = FlextTapLdapModels.LdapConnection
-LDAPStream = FlextTapLdapModels.LdapStream
-LDAPRecord = FlextTapLdapModels.LdapRecord
-TapExecution = FlextTapLdapModels.TapExecution
-TapExecutionStartedEvent = FlextTapLdapModels.TapExecutionStartedEvent
-TapExecutionCompletedEvent = FlextTapLdapModels.TapExecutionCompletedEvent
-StreamDiscoveredEvent = FlextTapLdapModels.StreamDiscoveredEvent
-RecordExtractedEvent = FlextTapLdapModels.RecordExtractedEvent
-ConnectionTestedEvent = FlextTapLdapModels.ConnectionTestedEvent
+LDAPAttribute = FlextMeltanoTapLdapModels.LdapAttribute
+LDAPEntry = FlextMeltanoTapLdapModels.LdapEntry
+LDAPUser = FlextMeltanoTapLdapModels.LdapUser
+LDAPGroup = FlextMeltanoTapLdapModels.LdapGroup
+LDAPSchema = FlextMeltanoTapLdapModels.LdapSchema
+LDAPConnection = FlextMeltanoTapLdapModels.LdapConnection
+LDAPStream = FlextMeltanoTapLdapModels.LdapStream
+LDAPRecord = FlextMeltanoTapLdapModels.LdapRecord
+TapExecution = FlextMeltanoTapLdapModels.TapExecution
+TapExecutionStartedEvent = FlextMeltanoTapLdapModels.TapExecutionStartedEvent
+TapExecutionCompletedEvent = FlextMeltanoTapLdapModels.TapExecutionCompletedEvent
+StreamDiscoveredEvent = FlextMeltanoTapLdapModels.StreamDiscoveredEvent
+RecordExtractedEvent = FlextMeltanoTapLdapModels.RecordExtractedEvent
+ConnectionTestedEvent = FlextMeltanoTapLdapModels.ConnectionTestedEvent
 
 
 # Public API: expose unified models class and backward compatibility aliases
 __all__ = [
     "ConnectionTestedEvent",
-    "FlextTapLdapModels",
+    "FlextMeltanoTapLdapModels",
     # Legacy aliases for backward compatibility
     "LDAPAttribute",
     "LDAPConnection",

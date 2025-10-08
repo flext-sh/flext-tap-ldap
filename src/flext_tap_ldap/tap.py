@@ -14,9 +14,9 @@ from typing import ClassVar
 from flext_core import FlextLogger, FlextTypes
 
 # Use FLEXT Meltano wrappers instead of direct singer_sdk imports (domain separation)
-from flext_meltano import FlextStream as Stream, FlextTap as Tap
+from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
 
-from flext_tap_ldap.config import FlextTapLdapConfig
+from flext_tap_ldap.config import FlextMeltanoTapLdapConfig
 from flext_tap_ldap.ldif_stream import LDIFAnalysisStream, LDIFStream
 from flext_tap_ldap.streams import (
     CustomStream,
@@ -26,20 +26,20 @@ from flext_tap_ldap.streams import (
     SchemaStream,
     UsersStream,
 )
-from flext_tap_ldap.typings import FlextTapLdapTypes
+from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 logger = FlextLogger(__name__)
 
 
-class FlextTapLDAP(Tap):
+class FlextMeltanoTapLDAP(Tap):
     """Singer tap for LDAP data extraction using FLEXT centralized patterns."""
 
     name: str = "tap-ldap"
-    config_class = FlextTapLdapConfig
+    config_class = FlextMeltanoTapLdapConfig
 
     # NOTE(@flext-team): Use centralized LDAP schema when flext-meltano common_schemas is available
     # Issue: https://github.com/flext-team/flext-meltano/issues/1
-    config_jsonschema: ClassVar[FlextTapLdapTypes.Core.Dict] = {
+    config_jsonschema: ClassVar[FlextMeltanoTapLdapTypes.Core.Dict] = {
         "type": "object",
         "properties": {
             # Basic LDAP connection properties
@@ -139,7 +139,7 @@ class FlextTapLDAP(Tap):
 
 def main() -> None:
     """Run the main entry point for the tap."""
-    FlextTapLDAP.cli()
+    FlextMeltanoTapLDAP.cli()
 
 
 if __name__ == "__main__":

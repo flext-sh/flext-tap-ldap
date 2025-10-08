@@ -11,19 +11,19 @@ from typing import Final
 from flext_tap_ldap.client import LDAPClient, LDAPClientConfig
 from flext_tap_ldap.config import (
     CustomStreamConfig,
-    FlextTapLdapConfig,
+    FlextMeltanoTapLdapConfig,
     LDIFProcessingConfig,
 )
 from flext_tap_ldap.exceptions import (
-    FlextTapLdapAuthenticationError,
-    FlextTapLdapConfigurationError,
-    FlextTapLdapConnectionError,
-    FlextTapLdapError,
-    FlextTapLdapProcessingError,
-    FlextTapLdapSearchError,
-    FlextTapLdapStreamError,
-    FlextTapLdapTimeoutError,
-    FlextTapLdapValidationError,
+    FlextMeltanoTapLdapAuthenticationError,
+    FlextMeltanoTapLdapConfigurationError,
+    FlextMeltanoTapLdapConnectionError,
+    FlextMeltanoTapLdapError,
+    FlextMeltanoTapLdapProcessingError,
+    FlextMeltanoTapLdapSearchError,
+    FlextMeltanoTapLdapStreamError,
+    FlextMeltanoTapLdapTimeoutError,
+    FlextMeltanoTapLdapValidationError,
 )
 from flext_tap_ldap.ldif_processor import (
     FlextLdifProcessor,
@@ -38,7 +38,7 @@ from flext_tap_ldap.ldif_stream import (
 )
 from flext_tap_ldap.models import (
     ConnectionTestedEvent,
-    FlextTapLdapModels,
+    FlextMeltanoTapLdapModels,
     LDAPAttribute,
     LDAPConnection,
     LDAPEntry,
@@ -53,19 +53,19 @@ from flext_tap_ldap.models import (
     TapExecutionCompletedEvent,
     TapExecutionStartedEvent,
 )
-from flext_tap_ldap.protocols import FlextTapLdapProtocols
-from flext_tap_ldap.services import FlextTapLdapServices
-from flext_tap_ldap.tap_client import FlextTapLDAP, FlextTapLDAPPlugin
+from flext_tap_ldap.protocols import FlextMeltanoTapLdapProtocols
+from flext_tap_ldap.services import FlextMeltanoTapLdapServices
+from flext_tap_ldap.tap_client import FlextMeltanoTapLDAP, FlextMeltanoTapLDAPPlugin
 from flext_tap_ldap.tap_streams import (
     CustomStream,
     GroupsStream,
     LDAPBaseStream,
     UsersStream,
 )
-from flext_tap_ldap.typings import FlextTapLdapTypes
-from flext_tap_ldap.version import VERSION, FlextTapLdapVersion
+from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
+from flext_tap_ldap.version import VERSION, FlextMeltanoTapLdapVersion
 
-PROJECT_VERSION: Final[FlextTapLdapVersion] = VERSION
+PROJECT_VERSION: Final[FlextMeltanoTapLdapVersion] = VERSION
 
 __version__: str = VERSION.version
 __version_info__: tuple[int | str, ...] = VERSION.version_info
@@ -77,28 +77,28 @@ __all__ = [
     "CustomStream",
     "CustomStreamConfig",
     "FlextLdifProcessor",
-    "FlextTapLDAP",
-    "FlextTapLDAPPlugin",
-    "FlextTapLdapAuthenticationError",
-    "FlextTapLdapConfig",
-    "FlextTapLdapConfigurationError",
-    "FlextTapLdapConnectionError",
-    "FlextTapLdapError",
-    "FlextTapLdapModels",
-    "FlextTapLdapProcessingError",
-    "FlextTapLdapProtocols",
-    "FlextTapLdapSearchError",
-    "FlextTapLdapServices",
-    "FlextTapLdapServices.LDAPConnectionService",
-    "FlextTapLdapServices.LDAPRecordService",
-    "FlextTapLdapServices.LDAPStreamService",
-    "FlextTapLdapServices.StreamCreationParams",
-    "FlextTapLdapServices.TapExecutionService",
-    "FlextTapLdapStreamError",
-    "FlextTapLdapTimeoutError",
-    "FlextTapLdapTypes",
-    "FlextTapLdapValidationError",
-    "FlextTapLdapVersion",
+    "FlextMeltanoTapLDAP",
+    "FlextMeltanoTapLDAPPlugin",
+    "FlextMeltanoTapLdapAuthenticationError",
+    "FlextMeltanoTapLdapConfig",
+    "FlextMeltanoTapLdapConfigurationError",
+    "FlextMeltanoTapLdapConnectionError",
+    "FlextMeltanoTapLdapError",
+    "FlextMeltanoTapLdapModels",
+    "FlextMeltanoTapLdapProcessingError",
+    "FlextMeltanoTapLdapProtocols",
+    "FlextMeltanoTapLdapSearchError",
+    "FlextMeltanoTapLdapServices",
+    "FlextMeltanoTapLdapServices.LDAPConnectionService",
+    "FlextMeltanoTapLdapServices.LDAPRecordService",
+    "FlextMeltanoTapLdapServices.LDAPStreamService",
+    "FlextMeltanoTapLdapServices.StreamCreationParams",
+    "FlextMeltanoTapLdapServices.TapExecutionService",
+    "FlextMeltanoTapLdapStreamError",
+    "FlextMeltanoTapLdapTimeoutError",
+    "FlextMeltanoTapLdapTypes",
+    "FlextMeltanoTapLdapValidationError",
+    "FlextMeltanoTapLdapVersion",
     "GroupsStream",
     "LDAPAttribute",
     "LDAPBaseStream",
