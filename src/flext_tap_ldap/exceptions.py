@@ -12,11 +12,11 @@ from typing import override
 
 from flext_core import FlextExceptions, FlextTypes
 
-from flext_tap_ldap.typings import FlextTapLdapTypes
+from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 
 # LDAP Tap specific exceptions using FlextExceptions base patterns
-class FlextTapLdapError(FlextExceptions.BaseError):
+class FlextMeltanoTapLdapError(FlextExceptions.BaseError):
     """Base LDAP tap error."""
 
     @override
@@ -37,7 +37,7 @@ class FlextTapLdapError(FlextExceptions.BaseError):
         )
 
 
-class FlextTapLdapValidationError(FlextExceptions.BaseError):
+class FlextMeltanoTapLdapValidationError(FlextExceptions.BaseError):
     """LDAP tap validation error."""
 
     @override
@@ -73,7 +73,7 @@ class FlextTapLdapValidationError(FlextExceptions.BaseError):
         )
 
 
-class FlextTapLdapConfigurationError(FlextExceptions.BaseError):
+class FlextMeltanoTapLdapConfigurationError(FlextExceptions.BaseError):
     """LDAP tap configuration error."""
 
     @override
@@ -98,7 +98,7 @@ class FlextTapLdapConfigurationError(FlextExceptions.BaseError):
         )
 
 
-class FlextTapLdapProcessingError(FlextExceptions.BaseError):
+class FlextMeltanoTapLdapProcessingError(FlextExceptions.BaseError):
     """LDAP tap processing error."""
 
     @override
@@ -123,7 +123,7 @@ class FlextTapLdapProcessingError(FlextExceptions.BaseError):
         )
 
 
-class FlextTapLdapConnectionError(FlextExceptions.BaseError):
+class FlextMeltanoTapLdapConnectionError(FlextExceptions.BaseError):
     """LDAP tap connection error."""
 
     @override
@@ -148,7 +148,7 @@ class FlextTapLdapConnectionError(FlextExceptions.BaseError):
         )
 
 
-class FlextTapLdapAuthenticationError(FlextExceptions.BaseError):
+class FlextMeltanoTapLdapAuthenticationError(FlextExceptions.BaseError):
     """LDAP tap authentication error."""
 
     @override
@@ -173,7 +173,7 @@ class FlextTapLdapAuthenticationError(FlextExceptions.BaseError):
         )
 
 
-class FlextTapLdapTimeoutError(FlextExceptions.BaseError):
+class FlextMeltanoTapLdapTimeoutError(FlextExceptions.BaseError):
     """LDAP tap timeout error."""
 
     @override
@@ -199,18 +199,22 @@ class FlextTapLdapTimeoutError(FlextExceptions.BaseError):
 
 
 # Create convenience aliases for existing code
-FlextTapLdapSearchError = FlextTapLdapProcessingError  # Search is processing
-FlextTapLdapStreamError = FlextTapLdapProcessingError  # Stream errors are processing
+FlextMeltanoTapLdapSearchError = (
+    FlextMeltanoTapLdapProcessingError  # Search is processing
+)
+FlextMeltanoTapLdapStreamError = (
+    FlextMeltanoTapLdapProcessingError  # Stream errors are processing
+)
 
 
-__all__: FlextTapLdapTypes.Core.StringList = [
-    "FlextTapLdapAuthenticationError",
-    "FlextTapLdapConfigurationError",
-    "FlextTapLdapConnectionError",
-    "FlextTapLdapError",
-    "FlextTapLdapProcessingError",
-    "FlextTapLdapSearchError",
-    "FlextTapLdapStreamError",
-    "FlextTapLdapTimeoutError",
-    "FlextTapLdapValidationError",
+__all__: FlextMeltanoTapLdapTypes.Core.StringList = [
+    "FlextMeltanoTapLdapAuthenticationError",
+    "FlextMeltanoTapLdapConfigurationError",
+    "FlextMeltanoTapLdapConnectionError",
+    "FlextMeltanoTapLdapError",
+    "FlextMeltanoTapLdapProcessingError",
+    "FlextMeltanoTapLdapSearchError",
+    "FlextMeltanoTapLdapStreamError",
+    "FlextMeltanoTapLdapTimeoutError",
+    "FlextMeltanoTapLdapValidationError",
 ]

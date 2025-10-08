@@ -16,10 +16,10 @@ import pytest
 from click.testing import CliRunner
 from flext_core import FlextTypes
 
-from flext_tap_ldap import FlextTapLDAP
+from flext_tap_ldap import FlextMeltanoTapLDAP
 
 
-class TestFlextTapLDAPIntegration:
+class TestFlextMeltanoTapLDAPIntegration:
     """Integration tests for tap-ldap."""
 
     @pytest.fixture
@@ -100,7 +100,7 @@ class TestFlextTapLDAPIntegration:
         mock_client_instance = mock_ldap_client.return_value
         mock_client_instance.search.return_value.__aenter__.return_value = []
         result = runner.invoke(
-            FlextTapLDAP.cli,
+            FlextMeltanoTapLDAP.cli,
             ["--config", str(config_file), "--discover"],
             catch_exceptions=False,
         )
@@ -141,7 +141,7 @@ class TestFlextTapLDAPIntegration:
             },
         ]
         result = runner.invoke(
-            FlextTapLDAP.cli,
+            FlextMeltanoTapLDAP.cli,
             ["--config", str(config_file), "--catalog", str(catalog_file)],
             catch_exceptions=False,
         )
@@ -171,7 +171,7 @@ class TestFlextTapLDAPIntegration:
         mock_client_instance = mock_ldap_client.return_value
         mock_client_instance.search.return_value.__aenter__.return_value = []
         result = runner.invoke(
-            FlextTapLDAP.cli,
+            FlextMeltanoTapLDAP.cli,
             [
                 "--config",
                 str(config_file),
@@ -227,7 +227,7 @@ class TestFlextTapLDAPIntegration:
             mock_client_instance = mock_ldap_client.return_value
             mock_client_instance.search.return_value.__aenter__.return_value = []
             result = runner.invoke(
-                FlextTapLDAP.cli,
+                FlextMeltanoTapLDAP.cli,
                 ["--config", str(config_file), "--discover"],
                 catch_exceptions=False,
             )
@@ -253,7 +253,7 @@ class TestFlextTapLDAPIntegration:
         with Path(config_file).open("w", encoding="utf-8") as f:
             json.dump({"invalid": "config"}, f)  # Missing required fields
         result = runner.invoke(
-            FlextTapLDAP.cli,
+            FlextMeltanoTapLDAP.cli,
             ["--config", str(config_file), "--discover"],
         )
         # Check if validation warning occurred in captured logs or result indicates failure
@@ -301,7 +301,7 @@ class TestFlextTapLDAPIntegration:
 
         mock_client_instance.search = mock_search
         result = runner.invoke(
-            FlextTapLDAP.cli,
+            FlextMeltanoTapLDAP.cli,
             ["--config", str(config_file), "--catalog", str(catalog_file)],
             catch_exceptions=False,
         )

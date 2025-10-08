@@ -11,21 +11,21 @@ from flext_ldap import FlextLdapClients
 from flext_ldif import FlextLdif, FlextLdifModels
 
 # Use FLEXT Meltano wrappers instead of direct singer_sdk imports (domain separation)
-from flext_meltano import FlextSingerTypes, FlextStream as Stream
+from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTypes
 
-from flext_tap_ldap.tap_client import FlextTapLDAP
-from flext_tap_ldap.typings import FlextTapLdapTypes
+from flext_tap_ldap.tap_client import FlextMeltanoTapLDAP
+from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 logger = FlextLogger(__name__)
 
-th: FlextSingerTypes = FlextSingerTypes()
+th: FlextMeltanoTypes = FlextMeltanoTypes()
 
 
 class LDIFStream(Stream):
     """LDIF stream using flext-ldif for ALL processing."""
 
     @override
-    def __init__(self, tap: FlextTapLDAP) -> None:
+    def __init__(self, tap: FlextMeltanoTapLDAP) -> None:
         """Initialize LDIF stream with library delegation."""
         # Set required attributes BEFORE calling super().__init__()
         self.name = "ldif_entries"
@@ -60,7 +60,7 @@ class LDIFStream(Stream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
+    ) -> Iterable[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Get LDIF records using flext-ldif processing."""
         logger.info("Processing LDIF files using flext-ldif library")
         # Get LDIF files from config
@@ -77,7 +77,7 @@ class LDIFStream(Stream):
 
     def _process_ldif_file(
         self, ldif_file: str
-    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
+    ) -> Iterable[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Process single LDIF file using flext-ldif."""
         logger.info(f"Processing LDIF file: {ldif_file}")
         try:
@@ -96,7 +96,7 @@ class LDIFStream(Stream):
     def _convert_entry_to_record(
         self,
         flext_entry: FlextLdifModels.Entry,
-    ) -> FlextTapLdapTypes.Core.Dict:
+    ) -> FlextMeltanoTapLdapTypes.Core.Dict:
         """Convert flext-ldif entry to Singer record."""
         # Delegate entry type classification to flext-ldap
         object_classes = flext_entry.attributes.get_values("objectClass")
@@ -109,7 +109,7 @@ class LDIFStream(Stream):
         }
 
     def _classify_entry_type(
-        self, object_classes: FlextTapLdapTypes.Core.StringList
+        self, object_classes: FlextMeltanoTapLdapTypes.Core.StringList
     ) -> str:
         """Classify entry type by simple objectClass heuristics."""
         lowered = {oc.lower() for oc in object_classes}
@@ -126,7 +126,7 @@ class LDIFAnalysisStream(Stream):
     """LDIF analysis stream using flext-ldif for ALL analysis."""
 
     @override
-    def __init__(self, tap: FlextTapLDAP) -> None:
+    def __init__(self, tap: FlextMeltanoTapLDAP) -> None:
         """Initialize LDIF analysis stream with library delegation."""
         # Set required attributes BEFORE calling super().__init__()
         self.name = "ldif_analysis"
@@ -165,7 +165,7 @@ class LDIFAnalysisStream(Stream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
+    ) -> Iterable[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Get analysis records using flext-ldif analysis capabilities."""
         logger.info("Generating LDIF analysis using flext-ldif library")
         # Get LDIF files from config
@@ -220,7 +220,7 @@ class LDIFAnalysisStream(Stream):
                 "object_classes": {},
             }
 
-    def _analyze_ldif_file(self, ldif_file: str) -> FlextTapLdapTypes.Core.Dict:
+    def _analyze_ldif_file(self, ldif_file: str) -> FlextMeltanoTapLdapTypes.Core.Dict:
         """Analyze single LDIF file using flext-ldif."""
         logger.info(f"Analyzing LDIF file: {ldif_file}")
         try:
@@ -255,7 +255,7 @@ class LDIFAnalysisStream(Stream):
             return {"total_entries": 0, "entry_types": {}, "object_classes": {}}
 
     def _classify_entry_type(
-        self, object_classes: FlextTapLdapTypes.Core.StringList
+        self, object_classes: FlextMeltanoTapLdapTypes.Core.StringList
     ) -> str:
         """Classify entry type by simple objectClass heuristics."""
         lowered = {oc.lower() for oc in object_classes}
@@ -269,4 +269,4 @@ class LDIFAnalysisStream(Stream):
 
 
 # Export what we can
-__all__: FlextTapLdapTypes.Core.StringList = ["LDIFAnalysisStream", "LDIFStream"]
+__all__: FlextMeltanoTapLdapTypes.Core.StringList = ["LDIFAnalysisStream", "LDIFStream"]

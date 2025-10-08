@@ -17,13 +17,16 @@ from flext_core import (
 )
 
 # Use FLEXT Meltano wrappers instead of direct singer_sdk imports (domain separation)
-from flext_meltano import FlextMeltanoTypes, FlextSingerTypes, FlextStream as Stream
+from flext_meltano import (
+    FlextMeltanoStream as Stream,
+    FlextMeltanoTypes,
+)
 
 from flext_tap_ldap.client import LDAPClient
-from flext_tap_ldap.tap_client import FlextTapLDAP
-from flext_tap_ldap.typings import FlextTapLdapTypes
+from flext_tap_ldap.tap_client import FlextMeltanoTapLDAP
+from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
-th = FlextSingerTypes()
+th = FlextMeltanoTypes()
 
 logger = FlextLogger(__name__)
 
@@ -36,7 +39,7 @@ class FallbackDataFactory:
     """
 
     @staticmethod
-    def create_test_user_record() -> FlextTapLdapTypes.Core.Dict:
+    def create_test_user_record() -> FlextMeltanoTapLdapTypes.Core.Dict:
         """Create standardized test user record for fallback scenarios."""
         return {
             "dn": "uid=jdoe,ou=users,dc=test,dc=com",
@@ -67,8 +70,8 @@ class CustomStreamParams:
 
     name: str
     search_filter: str
-    schema_properties: FlextTapLdapTypes.Core.Dict | None = None
-    primary_keys: FlextTapLdapTypes.Core.StringList | None = None
+    schema_properties: FlextMeltanoTapLdapTypes.Core.Dict | None = None
+    primary_keys: FlextMeltanoTapLdapTypes.Core.StringList | None = None
     replication_key: str | None = None
 
     def __post_init__(self: object) -> None:
@@ -93,9 +96,9 @@ class LDAPBaseStream(Stream):
     @override
     def __init__(
         self,
-        tap: FlextTapLDAP,
+        tap: FlextMeltanoTapLDAP,
         name: str | None = None,
-        schema: FlextTapLdapTypes.Core.Dict | None = None,
+        schema: FlextMeltanoTapLdapTypes.Core.Dict | None = None,
     ) -> None:
         """Initialize the LDAP stream."""
         super().__init__(tap, name=name, schema=schema)
@@ -104,7 +107,7 @@ class LDAPBaseStream(Stream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
+    ) -> Iterable[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Get records from LDAP."""
         # This is a base implementation that yields empty records
         # Subclasses should override this method
@@ -119,7 +122,7 @@ class UsersStream(LDAPBaseStream):
     replication_key = "modifyTimestamp"
 
     @override
-    def __init__(self, tap: FlextTapLDAP) -> None:
+    def __init__(self, tap: FlextMeltanoTapLDAP) -> None:
         """Initialize users stream."""
         # Set required attributes BEFORE calling super().__init__()
         self.name = "users"
@@ -181,7 +184,7 @@ class UsersStream(LDAPBaseStream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
+    ) -> Iterable[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Get user records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
@@ -222,7 +225,7 @@ class GroupsStream(LDAPBaseStream):
     """Stream for LDAP groups."""
 
     @override
-    def __init__(self, tap: FlextTapLDAP) -> None:
+    def __init__(self, tap: FlextMeltanoTapLDAP) -> None:
         """Initialize groups stream."""
         # Set required attributes BEFORE calling super().__init__()
         self.name = "groups"
@@ -275,7 +278,7 @@ class GroupsStream(LDAPBaseStream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
+    ) -> Iterable[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Get group records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
@@ -344,7 +347,7 @@ class OrganizationalUnitsStream(LDAPBaseStream):
     """Stream for organizational units."""
 
     @override
-    def __init__(self, tap: FlextTapLDAP) -> None:
+    def __init__(self, tap: FlextMeltanoTapLDAP) -> None:
         """Initialize organizational units stream."""
         # Set required attributes BEFORE calling super().__init__()
         self.name = "organizational_units"
@@ -385,7 +388,7 @@ class OrganizationalUnitsStream(LDAPBaseStream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
+    ) -> Iterable[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Get organizational unit records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
@@ -450,7 +453,7 @@ class SchemaStream(LDAPBaseStream):
     """Stream for LDAP schema."""
 
     @override
-    def __init__(self, tap: FlextTapLDAP) -> None:
+    def __init__(self, tap: FlextMeltanoTapLDAP) -> None:
         """Initialize schema stream."""
         # Set required attributes BEFORE calling super().__init__()
         self.name = "schema"
@@ -494,7 +497,7 @@ class SchemaStream(LDAPBaseStream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
+    ) -> Iterable[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Get schema records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
@@ -569,7 +572,7 @@ class CustomStream(LDAPBaseStream):
     @override
     def __init__(
         self,
-        tap: FlextTapLDAP,
+        tap: FlextMeltanoTapLDAP,
         params: CustomStreamParams,
     ) -> None:
         """Initialize custom stream using parameter object pattern.
@@ -633,7 +636,7 @@ class CustomStream(LDAPBaseStream):
     def get_records(
         self,
         _context: Mapping[str, object] | None = None,
-    ) -> Iterable[FlextTapLdapTypes.Core.Dict]:
+    ) -> Iterable[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Get custom records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
@@ -699,7 +702,7 @@ class CustomStream(LDAPBaseStream):
             }
 
 
-__all__: FlextTapLdapTypes.Core.StringList = [
+__all__: FlextMeltanoTapLdapTypes.Core.StringList = [
     "CustomStream",
     "GroupsStream",
     "LDAPBaseStream",

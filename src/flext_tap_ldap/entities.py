@@ -13,7 +13,7 @@ from flext_core import (
 )
 from pydantic import Field
 
-from flext_tap_ldap.typings import FlextTapLdapTypes
+from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 # Constants
 MAX_PORT = 65535
@@ -36,7 +36,7 @@ class LDAPEntry(FlextModels.Entity):
     """LDAP entry entity."""
 
     dn: str = Field(..., description="Distinguished Name")
-    attributes: FlextTapLdapTypes.Core.Dict = Field(
+    attributes: FlextMeltanoTapLdapTypes.Core.Dict = Field(
         default_factory=dict,
         description="Entry attributes",
     )
@@ -45,7 +45,7 @@ class LDAPEntry(FlextModels.Entity):
     )
 
 
-__all__: FlextTapLdapTypes.Core.StringList = [
+__all__: FlextMeltanoTapLdapTypes.Core.StringList = [
     "MAX_PORT",
     "LDAPConnection",
     "LDAPEntry",

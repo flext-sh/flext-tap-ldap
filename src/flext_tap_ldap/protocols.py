@@ -1,7 +1,7 @@
 """LDAP Tap protocol definitions extending FlextProtocols.
 
 This module defines domain-specific protocols for LDAP tap operations,
-following the "one class per module" pattern with FlextTapLdapProtocols
+following the "one class per module" pattern with FlextMeltanoTapLdapProtocols
 extending FlextProtocols from flext-core.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -14,10 +14,10 @@ from typing import Protocol, runtime_checkable
 
 from flext_core import FlextProtocols, FlextResult, FlextTypes
 
-from flext_tap_ldap.typings import FlextTapLdapTypes
+from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 
-class FlextTapLdapProtocols:
+class FlextMeltanoTapLdapProtocols:
     """Singer Tap LDAP protocols with explicit re-exports from FlextProtocols foundation.
 
     This class provides protocol definitions for Singer tap operations with LDAP data extraction,
@@ -449,6 +449,6 @@ class FlextTapLdapProtocols:
     CompleteTapProtocol = TapLdap.CompleteTapProtocol
 
 
-__all__: FlextTapLdapTypes.Core.StringList = [
-    "FlextTapLdapProtocols",
+__all__: FlextMeltanoTapLdapTypes.Core.StringList = [
+    "FlextMeltanoTapLdapProtocols",
 ]

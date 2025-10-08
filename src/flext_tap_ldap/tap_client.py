@@ -26,8 +26,8 @@ from flext_ldap import (
     FlextLdapModels,
 )
 
-from flext_tap_ldap.config import FlextTapLdapConfig
-from flext_tap_ldap.typings import FlextTapLdapTypes
+from flext_tap_ldap.config import FlextMeltanoTapLdapConfig
+from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 logger = FlextLogger(__name__)
 
@@ -38,7 +38,7 @@ class LdapTapResult:
 
     success: bool
     message: str
-    catalog: FlextTapLdapTypes.Core.Dict  # Singer catalog structure
+    catalog: FlextMeltanoTapLdapTypes.Core.Dict  # Singer catalog structure
     records_processed: int
 
 
@@ -102,12 +102,12 @@ class LDAPClient:
 
     def _convert_entry_to_dict(
         self,
-        entry_data: FlextLdapModels.Entry | FlextTapLdapTypes.Core.Dict,
-    ) -> FlextTapLdapTypes.Core.Dict:
+        entry_data: FlextLdapModels.Entry | FlextMeltanoTapLdapTypes.Core.Dict,
+    ) -> FlextMeltanoTapLdapTypes.Core.Dict:
         """Convert FlextLdapModels.Entry to dict format for testing convenience."""
         if isinstance(entry_data, FlextLdapModels.Entry):
             # It's a FlextLdapModels.Entry model object - flatten attributes
-            entry_dict: FlextTapLdapTypes.Core.Dict = {"dn": entry_data.dn}
+            entry_dict: FlextMeltanoTapLdapTypes.Core.Dict = {"dn": entry_data.dn}
             # Add flattened attributes to the entry dict
             for attr_name, attr_values in entry_data.attributes.items():
                 # Convert single values and lists appropriately
@@ -124,9 +124,9 @@ class LDAPClient:
         self,
         result: FlextResult[list[FlextLdapModels.Entry]],
         size_limit: int,
-    ) -> list[FlextTapLdapTypes.Core.Dict]:
+    ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Process LDAP search results with size limiting."""
-        entries: list[FlextTapLdapTypes.Core.Dict] = []
+        entries: list[FlextMeltanoTapLdapTypes.Core.Dict] = []
         if not (result.is_success and result.value):
             return entries
 
@@ -146,7 +146,7 @@ class LDAPClient:
         attributes: FlextTypes.StringList | None,
         ldap_scope: str,
         size_limit: int,
-    ) -> list[FlextTapLdapTypes.Core.Dict]:
+    ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Perform actual LDAP search."""
         server_uri = self._build_server_uri()
 
@@ -190,8 +190,8 @@ class LDAPClient:
 
     def _run_in_new_loop(
         self,
-        coro: Awaitable[list[FlextTapLdapTypes.Core.Dict]],
-    ) -> list[FlextTapLdapTypes.Core.Dict]:
+        coro: Awaitable[list[FlextMeltanoTapLdapTypes.Core.Dict]],
+    ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Run coroutine in new event loop."""
         loop = new_event_loop()
         set_event_loop(loop)
@@ -208,7 +208,7 @@ class LDAPClient:
         attributes: FlextTypes.StringList | None = None,
         scope: str = "SUBTREE",
         size_limit: int = 0,
-    ) -> list[FlextTapLdapTypes.Core.Dict]:
+    ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Search for entries using flext-ldap infrastructure (synchronous wrapper)."""
         ldap_scope = self._convert_scope_to_enum(scope)
 
@@ -327,7 +327,7 @@ class LDAPClient:
             # Required for Singer protocol compliance - NOT security-sensitive data generation
             return True
 
-    def health_check(self) -> FlextTapLdapTypes.Core.Dict:
+    def health_check(self) -> FlextMeltanoTapLdapTypes.Core.Dict:
         """Perform health check for testing convenience."""
         start_time = time.time()
         connection_result = self.test_connection()
@@ -347,24 +347,24 @@ class LDAPClient:
         return getattr(self._flext_api, name)
 
 
-class FlextTapLDAP(FlextService[FlextTapLdapConfig]):
-    """FLEXT LDAP Tap service using standard FlextTapLdapConfig.
+class FlextMeltanoTapLDAP(FlextService[FlextMeltanoTapLdapConfig]):
+    """FLEXT LDAP Tap service using standard FlextMeltanoTapLdapConfig.
 
     Unified tap service following FLEXT standards with direct configuration usage.
-    NO wrappers, aliases, or legacy compatibility - uses FlextTapLdapConfig directly.
+    NO wrappers, aliases, or legacy compatibility - uses FlextMeltanoTapLdapConfig directly.
     """
 
     def __init__(self) -> None:
         """Initialize FLEXT LDAP Tap service."""
         super().__init__()
         self.logger = FlextLogger(__name__)
-        self.domain_model: FlextTapLdapConfig | None = None
+        self.domain_model: FlextMeltanoTapLdapConfig | None = None
 
     def configure_service(
         self,
-        config: FlextTapLdapConfig,
+        config: FlextMeltanoTapLdapConfig,
     ) -> FlextResult[None]:
-        """Configure the LDAP tap service with standard FlextTapLdapConfig."""
+        """Configure the LDAP tap service with standard FlextMeltanoTapLdapConfig."""
         try:
             # Validate configuration using standard config
             validation_result = config.validate_configuration()
@@ -381,9 +381,9 @@ class FlextTapLDAP(FlextService[FlextTapLdapConfig]):
 
     def execute_extraction(
         self,
-        config: FlextTapLdapConfig,
+        config: FlextMeltanoTapLdapConfig,
     ) -> FlextResult[FlextTypes.Dict]:
-        """Execute LDAP extraction using standard FlextTapLdapConfig."""
+        """Execute LDAP extraction using standard FlextMeltanoTapLdapConfig."""
         try:
             if not self.domain_model:
                 configure_result = self.configure_service(config)
@@ -392,7 +392,7 @@ class FlextTapLDAP(FlextService[FlextTapLdapConfig]):
                         f"Configuration failed: {configure_result.error}"
                     )
 
-            # Use FlextTapLdapConfig directly - no conversion needed
+            # Use FlextMeltanoTapLdapConfig directly - no conversion needed
             extraction_result = self._perform_ldap_extraction(config)
             if extraction_result.is_failure:
                 return FlextResult[FlextTypes.Dict].fail(
@@ -401,7 +401,7 @@ class FlextTapLDAP(FlextService[FlextTapLdapConfig]):
 
             return FlextResult[FlextTypes.Dict].ok({
                 "status": "success",
-                "config_type": "FlextTapLdapConfig",
+                "config_type": "FlextMeltanoTapLdapConfig",
                 "host": config.ldap_host,
                 "port": config.ldap_port,
                 "base_dn": config.ldap_base_dn,
@@ -412,7 +412,9 @@ class FlextTapLDAP(FlextService[FlextTapLdapConfig]):
                 f"Extraction execution failed: {e}"
             )
 
-    def _perform_ldap_extraction(self, config: FlextTapLdapConfig) -> FlextResult[None]:
+    def _perform_ldap_extraction(
+        self, config: FlextMeltanoTapLdapConfig
+    ) -> FlextResult[None]:
         """Perform LDAP extraction with direct config usage."""
         try:
             self.logger.info(
@@ -427,12 +429,12 @@ class FlextTapLDAP(FlextService[FlextTapLdapConfig]):
         except Exception as e:
             return FlextResult[None].fail(f"LDAP extraction failed: {e}")
 
-    def get_config(self) -> FlextTapLdapConfig | None:
-        """Get current configuration - returns standard FlextTapLdapConfig only."""
+    def get_config(self) -> FlextMeltanoTapLdapConfig | None:
+        """Get current configuration - returns standard FlextMeltanoTapLdapConfig only."""
         return self.domain_model
 
 
-class FlextTapLDAPPlugin:
+class FlextMeltanoTapLDAPPlugin:
     """Plugin interface for FLEXT Tap LDAP with flext-core integration.
 
     Provides a unified plugin interface for LDAP tap operations
@@ -440,11 +442,11 @@ class FlextTapLDAPPlugin:
     """
 
     @override
-    def __init__(self, config: FlextTapLdapTypes.Core.Dict) -> None:
+    def __init__(self, config: FlextMeltanoTapLdapTypes.Core.Dict) -> None:
         """Initialize LDAP tap plugin."""
-        # Convert dict config to FlextTapLdapConfig
-        self._config: FlextTapLdapConfig = FlextTapLdapConfig(**config)
-        self._tap_instance: FlextTapLDAP | None = None
+        # Convert dict config to FlextMeltanoTapLdapConfig
+        self._config: FlextMeltanoTapLdapConfig = FlextMeltanoTapLdapConfig(**config)
+        self._tap_instance: FlextMeltanoTapLDAP | None = None
 
     @property
     def version(self: object) -> str:
@@ -464,7 +466,7 @@ class FlextTapLDAPPlugin:
             logger.info("Initializing FLEXT Tap LDAP plugin")
 
             # Initialize tap instance
-            self._tap_instance = FlextTapLDAP(config=self._config)
+            self._tap_instance = FlextMeltanoTapLDAP(config=self._config)
 
             logger.info("FLEXT Tap LDAP plugin initialized successfully")
             return FlextResult[None].ok(None)
@@ -488,13 +490,13 @@ class FlextTapLDAPPlugin:
     def execute(
         self,
         operation: str,
-        parameters: FlextTapLdapTypes.Core.Dict | None = None,
-    ) -> FlextResult[FlextTapLdapTypes.Core.Dict]:
+        parameters: FlextMeltanoTapLdapTypes.Core.Dict | None = None,
+    ) -> FlextResult[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Execute plugin operations via tap instance."""
         if not self._tap_instance:
             init_result: FlextResult[object] = self.initialize()
             if not init_result.is_success:
-                return FlextResult[FlextTapLdapTypes.Core.Dict].fail(
+                return FlextResult[FlextMeltanoTapLdapTypes.Core.Dict].fail(
                     f"Plugin initialization failed: {init_result.error}",
                 )
 
@@ -508,7 +510,7 @@ class FlextTapLDAPPlugin:
             }
 
             if operation not in operation_handlers:
-                return FlextResult[FlextTapLdapTypes.Core.Dict].fail(
+                return FlextResult[FlextMeltanoTapLdapTypes.Core.Dict].fail(
                     f"Unknown operation: {operation}",
                 )
 
@@ -516,50 +518,52 @@ class FlextTapLDAPPlugin:
 
         except Exception as e:
             logger.exception(f"Plugin operation '{operation}' failed")
-            return FlextResult[FlextTapLdapTypes.Core.Dict].fail(
+            return FlextResult[FlextMeltanoTapLdapTypes.Core.Dict].fail(
                 f"Operation {operation} failed: {e}",
             )
 
-    def discover_streams(self: object) -> FlextResult[FlextTapLdapTypes.Core.List]:
+    def discover_streams(
+        self: object,
+    ) -> FlextResult[FlextMeltanoTapLdapTypes.Core.List]:
         """Discover available streams."""
         if not self._tap_instance:
             init_result: FlextResult[object] = self.initialize()
             if not init_result.is_success:
-                return FlextResult[FlextTapLdapTypes.Core.List].fail(
+                return FlextResult[FlextMeltanoTapLdapTypes.Core.List].fail(
                     f"Plugin initialization failed: {init_result.error}",
                 )
 
         try:
             if self._tap_instance is None:
-                return FlextResult[FlextTapLdapTypes.Core.List].fail(
+                return FlextResult[FlextMeltanoTapLdapTypes.Core.List].fail(
                     "Tap instance not properly initialized",
                 )
 
             # Get streams from tap using Singer SDK interface
             streams = self._tap_instance.discover_streams()
-            # Cast to FlextTapLdapTypes.Core.List for type compatibility
-            stream_objects: FlextTapLdapTypes.Core.List = list(streams)
-            return FlextResult[FlextTapLdapTypes.Core.List].ok(stream_objects)
+            # Cast to FlextMeltanoTapLdapTypes.Core.List for type compatibility
+            stream_objects: FlextMeltanoTapLdapTypes.Core.List = list(streams)
+            return FlextResult[FlextMeltanoTapLdapTypes.Core.List].ok(stream_objects)
 
         except Exception as e:
             logger.exception("Stream discovery failed")
-            return FlextResult[FlextTapLdapTypes.Core.List].fail(
+            return FlextResult[FlextMeltanoTapLdapTypes.Core.List].fail(
                 f"Stream discovery failed: {e}",
             )
 
     def _execute_discover(
         self,
-        _parameters: FlextTapLdapTypes.Core.Dict,
-    ) -> FlextResult[FlextTapLdapTypes.Core.Dict]:
+        _parameters: FlextMeltanoTapLdapTypes.Core.Dict,
+    ) -> FlextResult[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Execute discover operation through tap."""
         streams_result: FlextResult[object] = self.discover_streams()
         if not streams_result.is_success:
-            return FlextResult[FlextTapLdapTypes.Core.Dict].fail(
+            return FlextResult[FlextMeltanoTapLdapTypes.Core.Dict].fail(
                 streams_result.error or "Discovery failed",
             )
 
         streams = streams_result.value or []
-        catalog_data: FlextTapLdapTypes.Core.Dict = {
+        catalog_data: FlextMeltanoTapLdapTypes.Core.Dict = {
             "streams": [
                 {
                     "tap_stream_id": getattr(stream, "tap_stream_id", ""),
@@ -577,16 +581,16 @@ class FlextTapLDAPPlugin:
             "plugin_version": self.version,
         }
 
-        return FlextResult[FlextTapLdapTypes.Core.Dict].ok(catalog_data)
+        return FlextResult[FlextMeltanoTapLdapTypes.Core.Dict].ok(catalog_data)
 
     def _execute_sync(
         self,
-        _parameters: FlextTapLdapTypes.Core.Dict,
-    ) -> FlextResult[FlextTapLdapTypes.Core.Dict]:
+        _parameters: FlextMeltanoTapLdapTypes.Core.Dict,
+    ) -> FlextResult[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Execute sync operation through tap."""
         # This would need to integrate with Singer protocol for actual sync
         # For now, return placeholder indicating sync capability
-        return FlextResult[FlextTapLdapTypes.Core.Dict].ok(
+        return FlextResult[FlextMeltanoTapLdapTypes.Core.Dict].ok(
             {
                 "operation": "sync",
                 "status": "completed",
@@ -598,18 +602,18 @@ class FlextTapLDAPPlugin:
 
     def _execute_test(
         self,
-        _parameters: FlextTapLdapTypes.Core.Dict,
-    ) -> FlextResult[FlextTapLdapTypes.Core.Dict]:
+        _parameters: FlextMeltanoTapLdapTypes.Core.Dict,
+    ) -> FlextResult[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Execute test operation through tap."""
         try:
             if not self._tap_instance:
-                return FlextResult[FlextTapLdapTypes.Core.Dict].fail(
+                return FlextResult[FlextMeltanoTapLdapTypes.Core.Dict].fail(
                     "Tap instance not initialized",
                 )
 
             # Test configuration (Pydantic validation already occurred during creation)
             # Connection test could be added here in the future
-            return FlextResult[FlextTapLdapTypes.Core.Dict].ok(
+            return FlextResult[FlextMeltanoTapLdapTypes.Core.Dict].ok(
                 {
                     "operation": "test",
                     "status": "passed",
@@ -619,42 +623,44 @@ class FlextTapLDAPPlugin:
             )
 
         except Exception as e:
-            return FlextResult[FlextTapLdapTypes.Core.Dict].fail(
+            return FlextResult[FlextMeltanoTapLdapTypes.Core.Dict].fail(
                 f"Test operation failed: {e}"
             )
 
     def _execute_catalog(
         self,
-        parameters: FlextTapLdapTypes.Core.Dict,
-    ) -> FlextResult[FlextTapLdapTypes.Core.Dict]:
+        parameters: FlextMeltanoTapLdapTypes.Core.Dict,
+    ) -> FlextResult[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Execute catalog generation through tap."""
         return self._execute_discover(parameters)
 
 
 def create_ldap_tap_plugin(
-    config: FlextTapLdapTypes.Core.Dict,
-) -> FlextResult[FlextTapLDAPPlugin]:
+    config: FlextMeltanoTapLdapTypes.Core.Dict,
+) -> FlextResult[FlextMeltanoTapLDAPPlugin]:
     """Create an LDAP tap plugin instance.
 
     Args:
       config: Plugin configuration dictionary
 
     Returns:
-      FlextResult containing FlextTapLDAPPlugin instance or error
+      FlextResult containing FlextMeltanoTapLDAPPlugin instance or error
 
     """
     try:
-        plugin = FlextTapLDAPPlugin(config)
+        plugin = FlextMeltanoTapLDAPPlugin(config)
         logger.info("LDAP tap plugin created successfully")
-        return FlextResult[FlextTapLDAPPlugin].ok(plugin)
+        return FlextResult[FlextMeltanoTapLDAPPlugin].ok(plugin)
     except Exception as e:
         logger.exception("Failed to create LDAP tap plugin")
-        return FlextResult[FlextTapLDAPPlugin].fail(f"Plugin creation failed: {e}")
+        return FlextResult[FlextMeltanoTapLDAPPlugin].fail(
+            f"Plugin creation failed: {e}"
+        )
 
 
 def main() -> None:
     """Run the main entry point for the tap."""
-    FlextTapLDAP.cli()
+    FlextMeltanoTapLDAP.cli()
 
 
 # Type aliases for testing convenience
@@ -663,8 +669,8 @@ LDAPEntry = FlextLdapModels.Entry
 
 __all__ = [
     # Main Classes
-    "FlextTapLDAP",
-    "FlextTapLDAPPlugin",
+    "FlextMeltanoTapLDAP",
+    "FlextMeltanoTapLDAPPlugin",
     "LDAPClient",
     # Configuration
     "LDAPClientConfig",

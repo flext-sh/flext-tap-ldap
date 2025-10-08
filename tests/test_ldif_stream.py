@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tap_ldap import FlextTapLDAP, LDIFAnalysisStream, LDIFStream
+from flext_tap_ldap import FlextMeltanoTapLDAP, LDIFAnalysisStream, LDIFStream
 
 
 class TestLDIFStreamBasic:
@@ -23,7 +23,7 @@ class TestLDIFStreamBasic:
         """Test LDIF stream can be created."""
         # Test that stream can be instantiated
         try:
-            tap = FlextTapLDAP(
+            tap = FlextMeltanoTapLDAP(
                 config={
                     "ldap_host": "test.ldap.com",
                     "ldap_port": 389,

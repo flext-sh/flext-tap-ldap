@@ -12,7 +12,7 @@ from flext_core import FlextConstants, FlextTypes
 from flext_ldap.constants import FlextLdapConstants
 
 
-class FlextTapLdapConstants(FlextConstants):
+class FlextMeltanoTapLdapConstants(FlextConstants):
     """LDAP tap extraction-specific constants following FLEXT unified pattern with nested domains.
 
     Composes with FlextLdapConstants to avoid duplication and ensure consistency.
@@ -68,4 +68,4 @@ class FlextTapLdapConstants(FlextConstants):
         CONNECTION_MAX_RETRIES = FlextLdapConstants.LdapRetry.CONNECTION_MAX_RETRIES
 
 
-__all__ = ["FlextTapLdapConstants"]
+__all__ = ["FlextMeltanoTapLdapConstants"]

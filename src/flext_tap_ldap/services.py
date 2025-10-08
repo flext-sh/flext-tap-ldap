@@ -24,11 +24,11 @@ from flext_tap_ldap.models import (
     LDAPStream,
     TapExecution,
 )
-from flext_tap_ldap.typings import FlextTapLdapTypes
-from flext_tap_ldap.utilities import FlextTapLdapUtilities
+from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
+from flext_tap_ldap.utilities import FlextMeltanoTapLdapUtilities
 
 
-class FlextTapLdapServices:
+class FlextMeltanoTapLdapServices:
     """UNIFIED LDAP tap services following FLEXT 'one class per module' pattern.
 
     Consolidates all LDAP service functionality into a single class with nested
@@ -75,10 +75,10 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize connection service."""
-            self.logger = FlextTapLdapUtilities.get_logger()
+            self.logger = FlextMeltanoTapLdapUtilities.get_logger()
 
         def create_connection(
-            self, params: FlextTapLdapServices.LDAPConnectionParams
+            self, params: FlextMeltanoTapLdapServices.LDAPConnectionParams
         ) -> FlextResult[LDAPConnection]:
             """Create LDAP connection from parameters."""
             try:
@@ -122,10 +122,10 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize stream service."""
-            self.logger = FlextTapLdapUtilities.get_logger()
+            self.logger = FlextMeltanoTapLdapUtilities.get_logger()
 
         def create_stream(
-            self, params: FlextTapLdapServices.StreamCreationParams
+            self, params: FlextMeltanoTapLdapServices.StreamCreationParams
         ) -> FlextResult[LDAPStream]:
             """Create LDAP stream from parameters."""
             try:
@@ -173,7 +173,7 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize execution service."""
-            self.logger = FlextTapLdapUtilities.get_logger()
+            self.logger = FlextMeltanoTapLdapUtilities.get_logger()
             self._executions: dict[str, TapExecution] = {}
 
         def start_execution(
@@ -216,7 +216,7 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize record service."""
-            self.logger = FlextTapLdapUtilities.get_logger()
+            self.logger = FlextMeltanoTapLdapUtilities.get_logger()
 
         def extract_records(
             self,
@@ -225,7 +225,7 @@ class FlextTapLdapServices:
             _ldap_filter: str | None = None,
             _base_dn: str | None = None,
             _attributes: FlextTypes.StringList | None = None,
-        ) -> FlextResult[Iterable[FlextTapLdapTypes.Core.Dict]]:
+        ) -> FlextResult[Iterable[FlextMeltanoTapLdapTypes.Core.Dict]]:
             """Extract records from LDAP stream."""
             try:
                 # Implementation would extract actual LDAP records
@@ -237,11 +237,11 @@ class FlextTapLdapServices:
                         "uid": "user1",
                     }
                 ]
-                return FlextResult[Iterable[FlextTapLdapTypes.Core.Dict]].ok(
+                return FlextResult[Iterable[FlextMeltanoTapLdapTypes.Core.Dict]].ok(
                     data=records
                 )
             except Exception as e:
-                return FlextResult[Iterable[FlextTapLdapTypes.Core.Dict]].fail(
+                return FlextResult[Iterable[FlextMeltanoTapLdapTypes.Core.Dict]].fail(
                     f"Record extraction failed: {e}"
                 )
 
@@ -258,7 +258,7 @@ class FlextTapLdapServices:
 
     # Connection operations
     def create_connection(
-        self, params: FlextTapLdapServices.LDAPConnectionParams
+        self, params: FlextMeltanoTapLdapServices.LDAPConnectionParams
     ) -> FlextResult[LDAPConnection]:
         """Create LDAP connection."""
         return self._connection_service.create_connection(params)
@@ -269,7 +269,7 @@ class FlextTapLdapServices:
 
     # Stream operations
     def create_stream(
-        self, params: FlextTapLdapServices.StreamCreationParams
+        self, params: FlextMeltanoTapLdapServices.StreamCreationParams
     ) -> FlextResult[LDAPStream]:
         """Create LDAP stream."""
         return self._stream_service.create_stream(params)
@@ -302,7 +302,7 @@ class FlextTapLdapServices:
         ldap_filter: str | None = None,
         base_dn: str | None = None,
         attributes: FlextTypes.StringList | None = None,
-    ) -> FlextResult[Iterable[FlextTapLdapTypes.Core.Dict]]:
+    ) -> FlextResult[Iterable[FlextMeltanoTapLdapTypes.Core.Dict]]:
         """Extract records from LDAP stream."""
         return self._record_service.extract_records(
             stream, connection, ldap_filter, base_dn, attributes
@@ -310,5 +310,5 @@ class FlextTapLdapServices:
 
 
 __all__ = [
-    "FlextTapLdapServices",
+    "FlextMeltanoTapLdapServices",
 ]

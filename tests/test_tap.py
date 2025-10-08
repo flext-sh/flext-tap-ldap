@@ -11,11 +11,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 from flext_core import FlextTypes
 
-from flext_tap_ldap import FlextTapLDAP, get_tap_test_class
+from flext_tap_ldap import FlextMeltanoTapLDAP, get_tap_test_class
 
 # Basic tap tests - using correct field names from schema
-TestFlextTapLDAP = get_tap_test_class(
-    tap_class=FlextTapLDAP,
+TestFlextMeltanoTapLDAP = get_tap_test_class(
+    tap_class=FlextMeltanoTapLDAP,
     config={
         "ldap_host": "test.ldap.com",
         "ldap_port": 389,
@@ -26,8 +26,8 @@ TestFlextTapLDAP = get_tap_test_class(
 )
 
 
-class TestFlextTapLDAPUnit:
-    """Unit tests for FlextTapLDAP."""
+class TestFlextMeltanoTapLDAPUnit:
+    """Unit tests for FlextMeltanoTapLDAP."""
 
     @pytest.fixture
     def config(self) -> FlextTypes.Dict:
@@ -44,7 +44,7 @@ class TestFlextTapLDAPUnit:
 
     def test_tap_initialization(self, config: FlextTypes.Dict) -> None:
         """Test tap initialization."""
-        tap = FlextTapLDAP(config=config)
+        tap = FlextMeltanoTapLDAP(config=config)
         if tap.name != "tap-ldap":
             msg: str = f"Expected {'tap-ldap'}, got {tap.name}"
             raise AssertionError(msg)
@@ -52,7 +52,7 @@ class TestFlextTapLDAPUnit:
 
     def test_stream_discovery(self, config: FlextTypes.Dict) -> None:
         """Test stream discovery."""
-        tap = FlextTapLDAP(config=config)
+        tap = FlextMeltanoTapLDAP(config=config)
         streams = tap.discover_streams()
 
         # Check default streams
@@ -86,7 +86,7 @@ class TestFlextTapLDAPUnit:
             },
         ]
 
-        tap = FlextTapLDAP(config=config)
+        tap = FlextMeltanoTapLDAP(config=config)
         streams = tap.discover_streams()
 
         stream_names = [s.name for s in streams]
@@ -99,7 +99,7 @@ class TestFlextTapLDAPUnit:
 
     def test_catalog_generation(self, config: FlextTypes.Dict) -> None:
         """Test catalog generation and metadata."""
-        tap = FlextTapLDAP(config=config)
+        tap = FlextMeltanoTapLDAP(config=config)
         catalog = tap.catalog_dict
 
         if "streams" not in catalog:
@@ -149,7 +149,7 @@ class TestFlextTapLDAPUnit:
             },
         ]
 
-        tap = FlextTapLDAP(config=config)
+        tap = FlextMeltanoTapLDAP(config=config)
         streams = tap.discover_streams()
         users_stream = next(s for s in streams if s.name == "users")
 

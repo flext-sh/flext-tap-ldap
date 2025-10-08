@@ -23,7 +23,7 @@ from flext_ldif import FlextLdif
 from flext_ldif.exceptions import FlextLdifExceptions
 from flext_ldif.models import FlextLdifModels
 
-from flext_tap_ldap.typings import FlextTapLdapTypes
+from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 # Type aliases for cleaner code
 FlextLdifAttributes = FlextLdifModels.LdifAttributes
@@ -46,13 +46,13 @@ class LDIFEntry:
     def __init__(
         self,
         dn: str,
-        attributes: dict[str, FlextTapLdapTypes.Core.StringList] | None = None,
+        attributes: dict[str, FlextMeltanoTapLdapTypes.Core.StringList] | None = None,
     ) -> None:
         """Initialize LDIF entry with testing convenience."""
         self.dn = dn
         self.attributes = attributes or {}
         self.change_type: str | None = None
-        self.controls: FlextTapLdapTypes.Core.StringList = []
+        self.controls: FlextMeltanoTapLdapTypes.Core.StringList = []
 
         # Create internal flext-ldif entry for actual processing
         self._flext_entry = self._create_flext_entry()
@@ -85,7 +85,7 @@ class LDIFEntry:
                 attributes=FlextLdifAttributes(data=self.attributes),
             )
 
-    def get_attribute(self, name: str) -> FlextTapLdapTypes.Core.StringList:
+    def get_attribute(self, name: str) -> FlextMeltanoTapLdapTypes.Core.StringList:
         """Get attribute values by name (case-insensitive)."""
         for attr_name, values in self.attributes.items():
             if attr_name.lower() == name.lower():
@@ -97,9 +97,9 @@ class LDIFEntry:
         object_classes: FlextTypes.List = self.get_attribute("objectClass") or []
         return any(oc.lower() == object_class.lower() for oc in object_classes)
 
-    def to_dict(self: object) -> FlextTapLdapTypes.Core.Dict:
+    def to_dict(self: object) -> FlextMeltanoTapLdapTypes.Core.Dict:
         """Convert entry to dictionary format."""
-        entry_dict: FlextTapLdapTypes.Core.Dict = {
+        entry_dict: FlextMeltanoTapLdapTypes.Core.Dict = {
             "dn": "self.dn",
             "attributes": dict(self.attributes),
         }
@@ -113,7 +113,7 @@ class LDIFEntry:
         return entry_dict
 
     def add_attribute(
-        self, name: str, value: str | FlextTapLdapTypes.Core.StringList
+        self, name: str, value: str | FlextMeltanoTapLdapTypes.Core.StringList
     ) -> None:
         """Add an attribute to the entry."""
         if name not in self.attributes:
@@ -137,7 +137,7 @@ class LDIFEntry:
             return bool(self.dn and self.dn.strip())
 
     @property
-    def validation_errors(self: object) -> list[FlextTapLdapTypes.Core.Headers]:
+    def validation_errors(self: object) -> list[FlextMeltanoTapLdapTypes.Core.Headers]:
         """Get validation errors for this entry."""
         errors: list[FlextTypes.StringDict] = []
         if not self.is_valid():
@@ -146,7 +146,7 @@ class LDIFEntry:
             )
         return errors
 
-    def parse_dn(self: object) -> FlextTapLdapTypes.Core.Dict:
+    def parse_dn(self: object) -> FlextMeltanoTapLdapTypes.Core.Dict:
         """Parse DN into components using flext-ldif DN parsing."""
         try:
             # Use flext-ldif DN parsing capabilities
@@ -163,7 +163,7 @@ class LDIFEntry:
     def update_attribute(
         self,
         name: str,
-        value: str | FlextTapLdapTypes.Core.StringList,
+        value: str | FlextMeltanoTapLdapTypes.Core.StringList,
     ) -> None:
         """Update an attribute value, replacing existing values."""
         match value:
@@ -185,7 +185,7 @@ class FlextLdifProcessor:
         """Initialize the processor with a flext-ldif backend."""
         self.ignore_errors = ignore_errors
         self.max_errors = max_errors
-        self.errors: FlextTapLdapTypes.Core.StringList = []
+        self.errors: FlextMeltanoTapLdapTypes.Core.StringList = []
         self.processed_entries = 0
         self.skipped_entries = 0
         self.entries: list[LDIFEntry] = []
@@ -294,14 +294,14 @@ class FlextLdifProcessor:
         dn = flext_entry.dn.value if flext_entry.dn else ""
 
         # Extract attributes
-        attributes: dict[str, FlextTapLdapTypes.Core.StringList] = {}
+        attributes: dict[str, FlextMeltanoTapLdapTypes.Core.StringList] = {}
         if flext_entry.attributes and flext_entry.attributes.data:
             for attr_name, attr_values in flext_entry.attributes.data.items():
                 attributes[attr_name] = [str(v) for v in attr_values]
 
         return LDIFEntry(dn=dn, attributes=attributes)
 
-    def get_statistics(self: object) -> FlextTapLdapTypes.Core.Dict:
+    def get_statistics(self: object) -> FlextMeltanoTapLdapTypes.Core.Dict:
         """Get parsing statistics."""
         return {
             "processed_entries": self.processed_entries,
@@ -370,15 +370,17 @@ class FlextLdifProcessor:
         """Filter entries that have a specific attribute."""
         return [entry for entry in self.entries if entry.get_attribute(attr_name)]
 
-    def to_singer_format(self, _stream_name: str) -> list[FlextTapLdapTypes.Core.Dict]:
+    def to_singer_format(
+        self, _stream_name: str
+    ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Convert LDIF entries to Singer record format."""
-        records: list[FlextTapLdapTypes.Core.Dict] = []
+        records: list[FlextMeltanoTapLdapTypes.Core.Dict] = []
 
         for entry in self.entries:
-            record_attributes: FlextTapLdapTypes.Core.Dict = {"dn": entry.dn}
+            record_attributes: FlextMeltanoTapLdapTypes.Core.Dict = {"dn": entry.dn}
             record_attributes.update(dict(entry.attributes))
 
-            record: FlextTapLdapTypes.Core.Dict = {
+            record: FlextMeltanoTapLdapTypes.Core.Dict = {
                 "type": "RECORD",
                 "stream": "stream_name",
                 "record": "record_attributes",
@@ -394,8 +396,8 @@ class LDIFValidator:
     @override
     def __init__(self: object) -> None:
         """Initialize validator with in-memory state and API client."""
-        self.validation_errors: FlextTapLdapTypes.Core.StringList = []
-        self.warnings: FlextTapLdapTypes.Core.StringList = []
+        self.validation_errors: FlextMeltanoTapLdapTypes.Core.StringList = []
+        self.warnings: FlextMeltanoTapLdapTypes.Core.StringList = []
         self._api = FlextLdif()
 
     def validate_entry(self, entry: LDIFEntry) -> bool:
@@ -409,7 +411,7 @@ class LDIFValidator:
             self.validation_errors.append(f"Validation error for {entry.dn}: {e}")
             return False
 
-    def get_validation_results(self: object) -> FlextTapLdapTypes.Core.Dict:
+    def get_validation_results(self: object) -> FlextMeltanoTapLdapTypes.Core.Dict:
         """Get validation results."""
         return {
             "errors": self.validation_errors.copy(),
@@ -417,7 +419,9 @@ class LDIFValidator:
             "is_valid": len(self.validation_errors) == 0,
         }
 
-    def validate_entries(self, entries: list[LDIFEntry]) -> FlextTapLdapTypes.Core.Dict:
+    def validate_entries(
+        self, entries: list[LDIFEntry]
+    ) -> FlextMeltanoTapLdapTypes.Core.Dict:
         """Validate a list of LDIF entries using flext-ldif."""
         valid_count = 0
         invalid_count = 0
@@ -466,7 +470,7 @@ class LDIFTransformer:
     @override
     def __init__(
         self,
-        transformation_rules: FlextTapLdapTypes.Core.Dict | None = None,
+        transformation_rules: FlextMeltanoTapLdapTypes.Core.Dict | None = None,
     ) -> None:
         """Initialize transformer with optional transformation rules."""
         self.transformation_rules = transformation_rules or {}
@@ -481,10 +485,10 @@ class LDIFTransformer:
     def apply_attribute_mappings(
         self,
         entry: LDIFEntry,
-        mappings: FlextTapLdapTypes.Core.Headers,
+        mappings: FlextMeltanoTapLdapTypes.Core.Headers,
     ) -> LDIFEntry:
         """Apply attribute name mappings to entry."""
-        new_attributes: dict[str, FlextTapLdapTypes.Core.StringList] = {}
+        new_attributes: dict[str, FlextMeltanoTapLdapTypes.Core.StringList] = {}
 
         for attr_name, values in entry.attributes.items():
             new_name = mappings.get(attr_name, attr_name)

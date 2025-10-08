@@ -15,7 +15,7 @@ from flext_core import FlextConfig, FlextConstants, FlextResult, FlextTypes
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
 
-from flext_tap_ldap.typings import FlextTapLdapTypes
+from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 
 class CustomStreamConfig(FlextConfig):
@@ -23,7 +23,7 @@ class CustomStreamConfig(FlextConfig):
 
     name: str = Field(..., description="Stream name")
     search_filter: str = Field(..., description="LDAP search filter")
-    primary_keys: FlextTapLdapTypes.Core.StringList | None = Field(
+    primary_keys: FlextMeltanoTapLdapTypes.Core.StringList | None = Field(
         default=None,
         description="Primary key fields",
     )
@@ -31,7 +31,7 @@ class CustomStreamConfig(FlextConfig):
         default=None,
         description="Replication key field",
     )
-    json_schema: FlextTapLdapTypes.Core.Dict | None = Field(
+    json_schema: FlextMeltanoTapLdapTypes.Core.Dict | None = Field(
         default=None,
         description="JSON schema for the stream",
     )
@@ -49,7 +49,7 @@ class CustomStreamConfig(FlextConfig):
 class LDIFProcessingConfig(FlextConfig):
     """Configuration for LDIF file processing using flext-core patterns."""
 
-    ldif_files: FlextTapLdapTypes.Core.StringList | None = Field(
+    ldif_files: FlextMeltanoTapLdapTypes.Core.StringList | None = Field(
         default=None,
         description="List of LDIF files to process",
     )
@@ -82,7 +82,7 @@ class LDIFProcessingConfig(FlextConfig):
         default=False,
         description="Apply transformation rules to LDIF entries",
     )
-    ldif_transformation_rules: FlextTapLdapTypes.Core.Dict | None = Field(
+    ldif_transformation_rules: FlextMeltanoTapLdapTypes.Core.Dict | None = Field(
         default=None,
         description="Transformation rules for LDIF processing",
     )
@@ -110,7 +110,7 @@ class LDIFProcessingConfig(FlextConfig):
         return FlextResult[None].ok(None)
 
 
-class FlextTapLdapConfig(FlextConfig):
+class FlextMeltanoTapLdapConfig(FlextConfig):
     """FLEXT Tap LDAP Configuration extending FlextConfig.
 
     Single flat configuration class for FLEXT LDAP tap following [Project]Config pattern:
@@ -334,6 +334,6 @@ class FlextTapLdapConfig(FlextConfig):
 # Export main configuration class
 __all__ = [
     "CustomStreamConfig",
-    "FlextTapLdapConfig",
+    "FlextMeltanoTapLdapConfig",
     "LDIFProcessingConfig",
 ]

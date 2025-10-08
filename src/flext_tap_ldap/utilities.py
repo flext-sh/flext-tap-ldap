@@ -13,7 +13,7 @@ from typing import ClassVar, override
 from flext_core import FlextConstants, FlextResult, FlextTypes, FlextUtilities
 
 
-class FlextTapLdapUtilities(FlextUtilities):
+class FlextMeltanoTapLdapUtilities(FlextUtilities):
     """Single unified utilities class for Singer tap LDAP operations.
 
     Follows FLEXT unified class pattern with nested helper classes for
@@ -252,7 +252,9 @@ class FlextTapLdapUtilities(FlextUtilities):
                 for key, value in record.items():
                     if key not in properties:
                         properties[key] = (
-                            FlextTapLdapUtilities.StreamUtilities.infer_type(value)
+                            FlextMeltanoTapLdapUtilities.StreamUtilities.infer_type(
+                                value
+                            )
                         )
 
             return {
@@ -283,7 +285,7 @@ class FlextTapLdapUtilities(FlextUtilities):
             if isinstance(value, list):
                 if value:
                     # Infer type from first element
-                    item_type = FlextTapLdapUtilities.StreamUtilities.infer_type(
+                    item_type = FlextMeltanoTapLdapUtilities.StreamUtilities.infer_type(
                         value[0]
                     )
                     return {"type": "array", "items": item_type}
@@ -305,10 +307,10 @@ class FlextTapLdapUtilities(FlextUtilities):
 
             """
             if record_count <= 0:
-                return FlextTapLdapUtilities.DEFAULT_BATCH_SIZE
+                return FlextMeltanoTapLdapUtilities.DEFAULT_BATCH_SIZE
 
             calculated_size = max(1, record_count // target_batches)
-            return min(calculated_size, FlextTapLdapUtilities.DEFAULT_BATCH_SIZE)
+            return min(calculated_size, FlextMeltanoTapLdapUtilities.DEFAULT_BATCH_SIZE)
 
     class ConfigValidation:
         """Configuration validation utilities."""
@@ -460,8 +462,10 @@ class FlextTapLdapUtilities(FlextUtilities):
                 object: Bookmark value or None
 
             """
-            stream_state = FlextTapLdapUtilities.StateManagement.get_stream_state(
-                state, stream_name
+            stream_state = (
+                FlextMeltanoTapLdapUtilities.StateManagement.get_stream_state(
+                    state, stream_name
+                )
             )
             return stream_state.get(bookmark_key)
 
@@ -561,5 +565,5 @@ class FlextTapLdapUtilities(FlextUtilities):
 
 
 __all__ = [
-    "FlextTapLdapUtilities",
+    "FlextMeltanoTapLdapUtilities",
 ]
