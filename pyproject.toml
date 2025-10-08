@@ -21,7 +21,6 @@
     ]
     description = "FLEXT Tap LDAP - Singer Tap for LDAP Directory Services"
     keywords = [
-        "",
         "data-extraction",
         "enterprise",
         "etl",
