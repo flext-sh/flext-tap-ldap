@@ -6,6 +6,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from flext_tap_ldap.__version__ import __version__, __version_info__
+
 from typing import Final
 
 from flext_tap_ldap.client import LDAPClient, LDAPClientConfig
