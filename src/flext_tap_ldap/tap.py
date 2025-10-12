@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from flext_core import FlextLogger, FlextTypes
+from flext_core import FlextCore
 
 # Use FLEXT Meltano wrappers instead of direct singer_sdk imports (domain separation)
 from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
@@ -28,7 +28,7 @@ from flext_tap_ldap.streams import (
 )
 from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
-logger = FlextLogger(__name__)
+logger = FlextCore.Logger(__name__)
 
 
 class FlextMeltanoTapLDAP(Tap):
@@ -122,7 +122,9 @@ class FlextMeltanoTapLDAP(Tap):
             )
 
         # Add custom streams if configured:
-        custom_streams_config: FlextTypes.Dict = self.config.get("custom_streams", [])
+        custom_streams_config: FlextCore.Types.Dict = self.config.get(
+            "custom_streams", []
+        )
         for custom_config in custom_streams_config:
             params = CustomStreamParams(
                 name=custom_config["name"],

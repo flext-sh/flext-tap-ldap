@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Self, cast
 
-from flext_core import FlextConstants, FlextModels, FlextResult, FlextTypes
+from flext_core import FlextCore
 from pydantic import (
     ConfigDict,
     Field,
@@ -21,8 +21,8 @@ from pydantic import (
 from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 
-class FlextMeltanoTapLdapModels(FlextModels):
-    """Comprehensive models for LDAP tap operations extending FlextModels.
+class FlextMeltanoTapLdapModels(FlextCore.Models):
+    """Comprehensive models for LDAP tap operations extending FlextCore.Models.
 
     Provides standardized models for all LDAP tap domain entities including:
     - Singer stream metadata and configuration
@@ -32,7 +32,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
     - LDAP schema and directory operations
     - All utility functions for data processing
 
-    All nested classes inherit FlextModels validation and patterns.
+    All nested classes inherit FlextCore.Models validation and patterns.
     Consolidates ALL models from tap_models.py and other scattered classes.
     """
 
@@ -92,37 +92,6 @@ class FlextMeltanoTapLdapModels(FlextModels):
             count += 1
         return count
 
-    @computed_field
-    @property
-    def tap_system_summary(self) -> FlextTypes.Dict:
-        """Comprehensive Singer LDAP tap system summary with extraction capabilities."""
-        return {
-            "total_models": self.active_tap_models_count,
-            "tap_type": "singer_ldap_extractor",
-            "extraction_features": [
-                "ldap_directory_scanning",
-                "user_attribute_extraction",
-                "group_membership_tracking",
-                "schema_discovery",
-                "incremental_replication",
-                "performance_monitoring",
-            ],
-            "singer_compliance": {
-                "protocol_version": "singer_v1",
-                "stream_discovery": True,
-                "catalog_generation": True,
-                "state_management": True,
-                "bookmarking": True,
-            },
-            "ldap_capabilities": {
-                "connection_pooling": True,
-                "ssl_tls_support": True,
-                "paged_results": True,
-                "referral_following": True,
-                "schema_introspection": True,
-            },
-        }
-
     @model_validator(mode="after")
     def validate_tap_system_consistency(self) -> Self:
         """Validate Singer LDAP tap system consistency and configuration."""
@@ -175,15 +144,15 @@ class FlextMeltanoTapLdapModels(FlextModels):
         return value
 
     # Legacy type aliases for backward compatibility
-    # LDAPRecord = FlextTypes.Dict  # Replaced with proper dataclass below
-    LDAPRecords = list[FlextTypes.Dict]
+    # LDAPRecord = FlextCore.Types.Dict  # Replaced with proper dataclass below
+    LDAPRecords = list[FlextCore.Types.Dict]
 
     class UtilityFunctions:
         """Utility functions for model data processing."""
 
         @staticmethod
         def get_entry_value(
-            entry: FlextMeltanoTapLdapTypes.Core.Dict | FlextTypes.Dict,
+            entry: FlextMeltanoTapLdapTypes.Core.Dict | FlextCore.Types.Dict,
             key: str,
             default: object = None,
         ) -> object:
@@ -198,7 +167,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
             return getattr(entry, key, default)
 
         @staticmethod
-        def safe_list_str(value: object) -> FlextTypes.StringList:
+        def safe_list_str(value: object) -> FlextCore.Types.StringList:
             """Safely convert value to list of strings."""
             if value is None:
                 return []
@@ -220,7 +189,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
             return str(value)
 
         @staticmethod
-        def safe_list_value(value: object) -> FlextTypes.List:
+        def safe_list_value(value: object) -> FlextCore.Types.List:
             """Safely convert value to list."""
             if value is None:
                 return []
@@ -237,7 +206,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
                 return value[0] if value else None
             return value
 
-    class LdapAttribute(FlextModels.Value):
+    class LdapAttribute(FlextCore.Models.Value):
         """Represents an LDAP attribute with its values."""
 
         # Pydantic 2.11 Configuration - LDAP Attribute Features
@@ -264,7 +233,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def attribute_summary(self) -> FlextTypes.Dict:
+        def attribute_summary(self) -> FlextCore.Types.Dict:
             """LDAP attribute analysis summary."""
             return {
                 "name": self.name,
@@ -286,15 +255,15 @@ class FlextMeltanoTapLdapModels(FlextModels):
                 raise ValueError(msg)
             return self
 
-        def validate_domain_rules(self: object) -> FlextResult[None]:
+        def validate_domain_rules(self: object) -> FlextCore.Result[None]:
             """Validate domain-specific rules for LDAP attributes."""
             # LDAP attributes can have any name and values
-            return FlextResult[None].ok(None)
+            return FlextCore.Result[None].ok(None)
 
-        def validate_business_rules(self) -> FlextResult[None]:
+        def validate_business_rules(self) -> FlextCore.Result[None]:
             """Validate business rules for LDAP attributes."""
             # Business validation for LDAP attributes
-            return FlextResult[None].ok(None)
+            return FlextCore.Result[None].ok(None)
 
         @property
         def single_value(self) -> str | None:
@@ -318,7 +287,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
             values = getattr(self, "values", None)
             return len(values) > 1 if values else False
 
-    class LdapConnectionConfig(FlextModels.ArbitraryTypesModel):
+    class LdapConnectionConfig(FlextCore.Models.ArbitraryTypesModel):
         """LDAP connection configuration with comprehensive settings."""
 
         # Pydantic 2.11 Configuration - Connection Features
@@ -342,7 +311,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
         # LDAP Connection (required)
         host: str = Field(..., description="LDAP server hostname")
         port: int = Field(
-            default=FlextConstants.Platform.LDAP_DEFAULT_PORT,
+            default=FlextCore.Constants.Platform.LDAP_DEFAULT_PORT,
             ge=1,
             le=65535,
             description="LDAP server port",
@@ -366,19 +335,19 @@ class FlextMeltanoTapLdapModels(FlextModels):
 
         # Performance Settings
         timeout: int = Field(
-            default=FlextConstants.Network.DEFAULT_TIMEOUT,
+            default=FlextCore.Constants.Network.DEFAULT_TIMEOUT,
             ge=1,
             le=300,
             description="Connection timeout in seconds",
         )
         page_size: int = Field(
-            default=FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
+            default=FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE,
             ge=1,
             le=10000,
             description="LDAP paging size",
         )
         connection_pool_size: int = Field(
-            default=FlextConstants.Container.DEFAULT_WORKERS,
+            default=FlextCore.Constants.Container.DEFAULT_WORKERS,
             ge=1,
             le=20,
             description="Connection pool size",
@@ -388,7 +357,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
         enable_ldif_streams: bool = Field(
             default=False, description="Enable LDIF file processing"
         )
-        ldif_files: FlextTypes.StringList = Field(
+        ldif_files: FlextCore.Types.StringList = Field(
             default_factory=list, description="List of LDIF files to process"
         )
         ldif_directory: str | None = Field(
@@ -398,7 +367,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
             default=True, description="Continue processing on LDIF errors"
         )
         ldif_max_errors: int = Field(
-            default=FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE // 10,
+            default=FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE // 10,
             ge=0,
             le=10000,
             description="Maximum LDIF errors allowed",
@@ -406,7 +375,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def connection_summary(self) -> FlextTypes.Dict:
+        def connection_summary(self) -> FlextCore.Types.Dict:
             """LDAP connection configuration summary."""
             return {
                 "server": f"{self.host}:{self.port}",
@@ -434,7 +403,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
                 raise ValueError(msg)
             return self
 
-    class LdapStreamMetadata(FlextModels.Entity):
+    class LdapStreamMetadata(FlextCore.Models.Entity):
         """LDAP stream metadata with Singer protocol compliance."""
 
         # Pydantic 2.11 Configuration - Stream Features
@@ -460,7 +429,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
         base_dn: str | None = Field(
             default=None, description="Specific base DN for this stream"
         )
-        attributes: FlextTypes.StringList = Field(
+        attributes: FlextCore.Types.StringList = Field(
             default_factory=list, description="LDAP attributes to retrieve"
         )
 
@@ -475,7 +444,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
         # LDAP-specific settings
         search_scope: str = Field(default="SUBTREE", description="LDAP search scope")
         page_size: int = Field(
-            default=FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
+            default=FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE,
             description="Results page size",
         )
         follow_referrals: bool = Field(
@@ -484,7 +453,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def stream_config_summary(self) -> FlextTypes.Dict:
+        def stream_config_summary(self) -> FlextCore.Types.Dict:
             """Singer stream configuration summary."""
             return {
                 "stream_name": self.stream_name,
@@ -509,7 +478,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
                 raise ValueError(msg)
             return self
 
-    class LdapEntry(FlextModels.Entity):
+    class LdapEntry(FlextCore.Models.Entity):
         """Represents an LDAP directory entry with comprehensive attributes."""
 
         # Pydantic 2.11 Configuration - Entry Features
@@ -536,7 +505,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def entry_summary(self) -> FlextTypes.Dict:
+        def entry_summary(self) -> FlextCore.Types.Dict:
             """LDAP entry analysis summary."""
             return {
                 "dn": self.dn,
@@ -563,12 +532,12 @@ class FlextMeltanoTapLdapModels(FlextModels):
                 raise ValueError(msg)
             return self
 
-        def validate_business_rules(self) -> FlextResult[None]:
+        def validate_business_rules(self) -> FlextCore.Result[None]:
             """Validate business rules for LDAP entries."""
             if not self.dn:
-                return FlextResult[None].fail("DN cannot be empty")
+                return FlextCore.Result[None].fail("DN cannot be empty")
             # Additional LDAP entry validation can be added here
-            return FlextResult[None].ok(None)
+            return FlextCore.Result[None].ok(None)
 
         attributes: FlextMeltanoTapLdapTypes.Core.Dict = Field(
             default_factory=dict,
@@ -679,7 +648,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
                 change_type=cast("str | None", data.get("change_type")),
             )
 
-    class LdapUser(FlextModels.ArbitraryTypesModel):
+    class LdapUser(FlextCore.Models.ArbitraryTypesModel):
         """LDAP user entry with standard inetOrgPerson attributes."""
 
         # Pydantic 2.11 Configuration - User Features
@@ -728,13 +697,13 @@ class FlextMeltanoTapLdapModels(FlextModels):
         )
 
         # Group memberships
-        member_of: FlextTypes.StringList = Field(
+        member_of: FlextCore.Types.StringList = Field(
             default_factory=list, description="Group memberships"
         )
 
         @computed_field
         @property
-        def user_profile_summary(self) -> FlextTypes.Dict:
+        def user_profile_summary(self) -> FlextCore.Types.Dict:
             """LDAP user profile summary."""
             return {
                 "user_id": self.uid,
@@ -764,7 +733,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
                 raise ValueError(msg)
             return self
 
-    class LdapGroup(FlextModels.ArbitraryTypesModel):
+    class LdapGroup(FlextCore.Models.ArbitraryTypesModel):
         """LDAP group entry with membership management."""
 
         # Pydantic 2.11 Configuration - Group Features
@@ -796,10 +765,10 @@ class FlextMeltanoTapLdapModels(FlextModels):
         )
 
         # Membership
-        members: FlextTypes.StringList = Field(
+        members: FlextCore.Types.StringList = Field(
             default_factory=list, description="Group member DNs"
         )
-        member_of: FlextTypes.StringList = Field(
+        member_of: FlextCore.Types.StringList = Field(
             default_factory=list, description="Parent group memberships"
         )
 
@@ -813,7 +782,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def group_membership_summary(self) -> FlextTypes.Dict:
+        def group_membership_summary(self) -> FlextCore.Types.Dict:
             """LDAP group membership summary."""
             return {
                 "group_name": self.cn,
@@ -837,7 +806,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
                 raise ValueError(msg)
             return self
 
-    class LdapSchema(FlextModels.ArbitraryTypesModel):
+    class LdapSchema(FlextCore.Models.ArbitraryTypesModel):
         """LDAP schema information with object classes and attributes."""
 
         # Pydantic 2.11 Configuration - Schema Features
@@ -856,19 +825,19 @@ class FlextMeltanoTapLdapModels(FlextModels):
             },
         )
 
-        object_classes: FlextTypes.StringList = Field(
+        object_classes: FlextCore.Types.StringList = Field(
             default_factory=list, description="Available object classes"
         )
-        attributes: FlextTypes.StringList = Field(
+        attributes: FlextCore.Types.StringList = Field(
             default_factory=list, description="Available attributes"
         )
-        syntax_definitions: FlextTypes.StringDict = Field(
+        syntax_definitions: FlextCore.Types.StringDict = Field(
             default_factory=dict, description="Attribute syntax definitions"
         )
 
         @computed_field
         @property
-        def schema_analysis_summary(self) -> FlextTypes.Dict:
+        def schema_analysis_summary(self) -> FlextCore.Types.Dict:
             """LDAP schema analysis summary."""
             return {
                 "object_class_count": len(self.object_classes),
@@ -882,7 +851,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
                 ),
             }
 
-    class LdapConnection(FlextModels.Entity):
+    class LdapConnection(FlextCore.Models.Entity):
         """LDAP connection state and configuration."""
 
         # Pydantic 2.11 Configuration - Connection Features
@@ -904,11 +873,11 @@ class FlextMeltanoTapLdapModels(FlextModels):
         password: str | None = Field(default=None, description="Bind password")
         use_ssl: bool = Field(default=False, description="Use SSL connection")
         timeout: int = Field(
-            default=FlextConstants.Network.DEFAULT_TIMEOUT,
+            default=FlextCore.Constants.Network.DEFAULT_TIMEOUT,
             description="Connection timeout in seconds",
         )
         pool_size: int = Field(
-            default=FlextConstants.Container.DEFAULT_WORKERS,
+            default=FlextCore.Constants.Container.DEFAULT_WORKERS,
             description="Connection pool size",
         )
         is_active: bool = Field(default=True, description="Connection active status")
@@ -926,7 +895,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def connection_health_summary(self) -> FlextTypes.Dict:
+        def connection_health_summary(self) -> FlextCore.Types.Dict:
             """LDAP connection health summary."""
             return {
                 "server": f"{self.host}:{self.port}",
@@ -948,12 +917,12 @@ class FlextMeltanoTapLdapModels(FlextModels):
             if not self.host:
                 msg = "LDAP host is required"
                 raise ValueError(msg)
-            if not (1 <= self.port <= FlextConstants.Network.MAX_PORT):
+            if not (1 <= self.port <= FlextCore.Constants.Network.MAX_PORT):
                 msg = "Invalid port number"
                 raise ValueError(msg)
             return self
 
-    class LdapStream(FlextModels.Entity):
+    class LdapStream(FlextCore.Models.Entity):
         """Singer stream configuration for LDAP data."""
 
         # Pydantic 2.11 Configuration - Stream Features
@@ -977,11 +946,11 @@ class FlextMeltanoTapLdapModels(FlextModels):
         connection_id: str = Field(..., description="Associated connection ID")
         stream_type: str = Field(..., description="Type of LDAP stream")
         search_filter: str = Field(..., description="LDAP search filter")
-        attributes: FlextTypes.StringList = Field(
+        attributes: FlextCore.Types.StringList = Field(
             default_factory=list, description="LDAP attributes"
         )
         tap_stream_id: str = Field(..., description="Singer tap stream ID")
-        key_properties: FlextTypes.StringList = Field(
+        key_properties: FlextCore.Types.StringList = Field(
             default_factory=list, description="Key properties"
         )
         replication_method: str = Field(
@@ -990,19 +959,19 @@ class FlextMeltanoTapLdapModels(FlextModels):
         replication_key: str | None = Field(
             default=None, description="Replication key attribute"
         )
-        stream_schema: FlextTypes.Dict = Field(
+        stream_schema: FlextCore.Types.Dict = Field(
             default_factory=dict, description="Stream JSON schema"
         )
-        json_schema: FlextTypes.Dict = Field(
+        json_schema: FlextCore.Types.Dict = Field(
             default_factory=dict, description="JSON schema"
         )
-        metadata: list[FlextTypes.Dict] = Field(
+        metadata: list[FlextCore.Types.Dict] = Field(
             default_factory=list, description="Stream metadata"
         )
 
         @computed_field
         @property
-        def stream_extraction_summary(self) -> FlextTypes.Dict:
+        def stream_extraction_summary(self) -> FlextCore.Types.Dict:
             """Singer stream extraction summary."""
             return {
                 "stream_id": self.tap_stream_id,
@@ -1024,12 +993,12 @@ class FlextMeltanoTapLdapModels(FlextModels):
                 raise ValueError(msg)
             return self
 
-        def update_schema(self, schema: FlextTypes.Dict) -> None:
+        def update_schema(self, schema: FlextCore.Types.Dict) -> None:
             """Update stream schema."""
             self.json_schema = schema
             self.stream_schema = schema
 
-    class TapExecution(FlextModels.Entity):
+    class TapExecution(FlextCore.Models.Entity):
         """Tap execution tracking and state management."""
 
         # Pydantic 2.11 Configuration - Execution Features
@@ -1053,13 +1022,15 @@ class FlextMeltanoTapLdapModels(FlextModels):
         connection_id: str = Field(..., description="Associated connection ID")
         command: str = Field(..., description="Tap command executed")
         tap_status: str = Field(default="created", description="Tap execution status")
-        config: FlextTypes.Dict = Field(
+        config: FlextCore.Types.Dict = Field(
             default_factory=dict, description="Tap configuration"
         )
-        catalog: FlextTypes.Dict = Field(
+        catalog: FlextCore.Types.Dict = Field(
             default_factory=dict, description="Tap catalog"
         )
-        state: FlextTypes.Dict = Field(default_factory=dict, description="Tap state")
+        state: FlextCore.Types.Dict = Field(
+            default_factory=dict, description="Tap state"
+        )
         started_at: datetime = Field(
             default_factory=lambda: datetime.now(UTC),
             description="Execution start time",
@@ -1078,7 +1049,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def execution_performance_summary(self) -> FlextTypes.Dict:
+        def execution_performance_summary(self) -> FlextCore.Types.Dict:
             """Tap execution performance summary."""
             duration = 0.0
             if self.completed_at and self.started_at:
@@ -1134,7 +1105,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
             self.records_extracted = records_extracted
             self.streams_processed = streams_processed
 
-    class LdapRecord(FlextModels.ArbitraryTypesModel):
+    class LdapRecord(FlextCore.Models.ArbitraryTypesModel):
         """Individual LDAP record for Singer output."""
 
         # Pydantic 2.11 Configuration - Record Features
@@ -1155,7 +1126,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
         )
 
         stream: str = Field(..., description="Source stream name")
-        record: FlextTypes.Dict = Field(..., description="Record data")
+        record: FlextCore.Types.Dict = Field(..., description="Record data")
         time_extracted: datetime = Field(
             default_factory=lambda: datetime.now(UTC),
             description="Extraction timestamp",
@@ -1163,7 +1134,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def record_analysis_summary(self) -> FlextTypes.Dict:
+        def record_analysis_summary(self) -> FlextCore.Types.Dict:
             """LDAP record analysis summary."""
             return {
                 "stream": self.stream,
@@ -1186,7 +1157,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
 
     # Event Models with Enhanced Features
 
-    class TapExecutionStartedEvent(FlextModels.DomainEvent):
+    class TapExecutionStartedEvent(FlextCore.Models.DomainEvent):
         """Domain event for tap execution start."""
 
         # Pydantic 2.11 Configuration - Event Features
@@ -1203,11 +1174,11 @@ class FlextMeltanoTapLdapModels(FlextModels):
         )
 
         execution_id: str = Field(..., description="Execution identifier")
-        config: FlextTypes.Dict = Field(..., description="Tap configuration")
+        config: FlextCore.Types.Dict = Field(..., description="Tap configuration")
 
         @computed_field
         @property
-        def event_summary(self) -> FlextTypes.Dict:
+        def event_summary(self) -> FlextCore.Types.Dict:
             """Tap execution started event summary."""
             return {
                 "event_type": "tap_execution_started",
@@ -1218,7 +1189,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
                 else None,
             }
 
-    class TapExecutionCompletedEvent(FlextModels.DomainEvent):
+    class TapExecutionCompletedEvent(FlextCore.Models.DomainEvent):
         """Domain event for tap execution completion."""
 
         # Pydantic 2.11 Configuration - Event Features
@@ -1244,7 +1215,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def completion_summary(self) -> FlextTypes.Dict:
+        def completion_summary(self) -> FlextCore.Types.Dict:
             """Tap execution completion summary."""
             return {
                 "event_type": "tap_execution_completed",
@@ -1259,7 +1230,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
                 "success": True,
             }
 
-    class StreamDiscoveredEvent(FlextModels.DomainEvent):
+    class StreamDiscoveredEvent(FlextCore.Models.DomainEvent):
         """Domain event for stream discovery."""
 
         # Pydantic 2.11 Configuration - Event Features
@@ -1279,11 +1250,11 @@ class FlextMeltanoTapLdapModels(FlextModels):
         )
 
         stream_name: str = Field(..., description="Discovered stream name")
-        stream_schema: FlextTypes.Dict = Field(..., description="Stream schema")
+        stream_schema: FlextCore.Types.Dict = Field(..., description="Stream schema")
 
         @computed_field
         @property
-        def discovery_summary(self) -> FlextTypes.Dict:
+        def discovery_summary(self) -> FlextCore.Types.Dict:
             """Stream discovery summary."""
             return {
                 "event_type": "stream_discovered",
@@ -1292,7 +1263,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
                 "has_key_properties": bool(self.stream_schema.get("key_properties")),
             }
 
-    class RecordExtractedEvent(FlextModels.DomainEvent):
+    class RecordExtractedEvent(FlextCore.Models.DomainEvent):
         """Domain event for record extraction."""
 
         # Pydantic 2.11 Configuration - Event Features
@@ -1312,11 +1283,11 @@ class FlextMeltanoTapLdapModels(FlextModels):
         )
 
         stream_name: str = Field(..., description="Source stream")
-        record: FlextTypes.Dict = Field(..., description="Extracted record")
+        record: FlextCore.Types.Dict = Field(..., description="Extracted record")
 
         @computed_field
         @property
-        def extraction_summary(self) -> FlextTypes.Dict:
+        def extraction_summary(self) -> FlextCore.Types.Dict:
             """Record extraction summary."""
             return {
                 "event_type": "record_extracted",
@@ -1326,7 +1297,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
                 "record_type": "ldap_entry",
             }
 
-    class ConnectionTestedEvent(FlextModels.DomainEvent):
+    class ConnectionTestedEvent(FlextCore.Models.DomainEvent):
         """Domain event for connection testing."""
 
         # Pydantic 2.11 Configuration - Event Features
@@ -1350,7 +1321,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def connection_test_summary(self) -> FlextTypes.Dict:
+        def connection_test_summary(self) -> FlextCore.Types.Dict:
             """Connection test summary."""
             return {
                 "event_type": "connection_tested",
@@ -1361,7 +1332,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
 
     # Processing and Performance Models with Enhanced Features
 
-    class LdifProcessingState(FlextModels.ArbitraryTypesModel):
+    class LdifProcessingState(FlextCore.Models.ArbitraryTypesModel):
         """LDIF file processing state and statistics."""
 
         # Pydantic 2.11 Configuration - Processing Features
@@ -1406,16 +1377,16 @@ class FlextMeltanoTapLdapModels(FlextModels):
         )
 
         # Error tracking
-        errors: FlextTypes.StringList = Field(
+        errors: FlextCore.Types.StringList = Field(
             default_factory=list, description="Processing errors"
         )
-        warnings: FlextTypes.StringList = Field(
+        warnings: FlextCore.Types.StringList = Field(
             default_factory=list, description="Processing warnings"
         )
 
         @computed_field
         @property
-        def processing_performance_summary(self) -> FlextTypes.Dict:
+        def processing_performance_summary(self) -> FlextCore.Types.Dict:
             """LDIF processing performance summary."""
             success_rate = 0.0
             if self.entries_processed > 0:
@@ -1453,7 +1424,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
                 raise ValueError(msg)
             return self
 
-    class LdapTapPerformanceMetrics(FlextModels.ArbitraryTypesModel):
+    class LdapTapPerformanceMetrics(FlextCore.Models.ArbitraryTypesModel):
         """Performance metrics for LDAP tap operations."""
 
         # Pydantic 2.11 Configuration - Metrics Features
@@ -1514,7 +1485,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
 
         @computed_field
         @property
-        def performance_analysis_summary(self) -> FlextTypes.Dict:
+        def performance_analysis_summary(self) -> FlextCore.Types.Dict:
             """LDAP tap performance analysis summary."""
             total_errors = (
                 self.connection_errors + self.search_errors + self.timeout_errors
@@ -1561,19 +1532,19 @@ class FlextMeltanoTapLdapModels(FlextModels):
             return self
 
     # Legacy type aliases maintained for backward compatibility
-    TapConfiguration = FlextTypes.Dict
-    StreamConfiguration = FlextTypes.Dict
+    TapConfiguration = FlextCore.Types.Dict
+    StreamConfiguration = FlextCore.Types.Dict
 
     # Convenience accessors for backward compatibility
     @classmethod
     def get_entry_value(
-        cls, entry: FlextTypes.Dict, key: str, default: object = None
+        cls, entry: FlextCore.Types.Dict, key: str, default: object = None
     ) -> object:
         """Convenience method for getting entry values."""
         return cls.UtilityFunctions.get_entry_value(entry, key, default)
 
     @classmethod
-    def safe_list_str(cls, value: object) -> FlextTypes.StringList:
+    def safe_list_str(cls, value: object) -> FlextCore.Types.StringList:
         """Convenience method for safe list conversion."""
         return cls.UtilityFunctions.safe_list_str(value)
 

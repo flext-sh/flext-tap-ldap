@@ -10,7 +10,7 @@ from typing import ClassVar
 from unittest.mock import Mock, patch
 
 import pytest
-from flext_core import FlextTypes
+from flext_core import FlextCore
 
 from flext_tap_ldap import (
     CustomStream,
@@ -107,7 +107,7 @@ class TestUsersStream:
         mock_client = Mock()
         mock_client_class.return_value = mock_client
 
-        # Mock the search method to return list directly (not FlextResult)
+        # Mock the search method to return list directly (not FlextCore.Result)
         mock_client.search.return_value = [
             {
                 "dn": "cn=user1,ou=users,dc=test,dc=com",
@@ -514,7 +514,7 @@ class TestStreamIntegration:
     """Integration tests for stream functionality."""
 
     @pytest.fixture
-    def tap_config(self) -> FlextTypes.Dict:
+    def tap_config(self) -> FlextCore.Types.Dict:
         """Standard tap configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -529,7 +529,7 @@ class TestStreamIntegration:
 
     def test_all_default_streams_creation(
         self,
-        tap_config: FlextTypes.Dict,
+        tap_config: FlextCore.Types.Dict,
     ) -> None:
         """Test that all default streams can be created."""
         tap = FlextMeltanoTapLDAP(config=tap_config)
@@ -545,7 +545,7 @@ class TestStreamIntegration:
 
     def test_streams_with_custom_configuration(
         self,
-        tap_config: FlextTypes.Dict,
+        tap_config: FlextCore.Types.Dict,
     ) -> None:
         """Test streams with custom configuration."""
         tap_config["custom_streams"] = [
@@ -568,7 +568,7 @@ class TestStreamIntegration:
         custom_stream = next(s for s in streams if s.name == "custom_test_stream")
         assert isinstance(custom_stream, CustomStream)
 
-    def test_self(self, tap_config: FlextTypes.Dict) -> None:
+    def test_self(self, tap_config: FlextCore.Types.Dict) -> None:
         """Test method."""
         """Test LDIF streams are included when enabled."""
         tap_config["enable_ldif_streams"] = True
@@ -605,7 +605,7 @@ class TestLDAPBaseStreamDirectUsage:
         # Create a subclass to test the base functionality
         class TestBaseStream(LDAPBaseStream):
             name = "test_base"
-            schema: ClassVar[FlextTypes.Dict] = {
+            schema: ClassVar[FlextCore.Types.Dict] = {
                 "properties": {"dn": {"type": "string"}},
             }
 
