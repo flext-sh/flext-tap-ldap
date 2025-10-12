@@ -9,7 +9,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
-from flext_core import FlextTypes
+from flext_core import FlextCore
 
 from flext_tap_ldap import FlextMeltanoTapLDAP, get_tap_test_class
 
@@ -30,7 +30,7 @@ class TestFlextMeltanoTapLDAPUnit:
     """Unit tests for FlextMeltanoTapLDAP."""
 
     @pytest.fixture
-    def config(self) -> FlextTypes.Dict:
+    def config(self) -> FlextCore.Types.Dict:
         """Create a test configuration fixture."""
         return {
             "ldap_host": "test.ldap.com",
@@ -42,7 +42,7 @@ class TestFlextMeltanoTapLDAPUnit:
             "page_size": 1000,
         }
 
-    def test_tap_initialization(self, config: FlextTypes.Dict) -> None:
+    def test_tap_initialization(self, config: FlextCore.Types.Dict) -> None:
         """Test tap initialization."""
         tap = FlextMeltanoTapLDAP(config=config)
         if tap.name != "tap-ldap":
@@ -50,7 +50,7 @@ class TestFlextMeltanoTapLDAPUnit:
             raise AssertionError(msg)
         assert tap.config == config
 
-    def test_stream_discovery(self, config: FlextTypes.Dict) -> None:
+    def test_stream_discovery(self, config: FlextCore.Types.Dict) -> None:
         """Test stream discovery."""
         tap = FlextMeltanoTapLDAP(config=config)
         streams = tap.discover_streams()
@@ -69,7 +69,7 @@ class TestFlextMeltanoTapLDAPUnit:
             msg: str = f"Expected {4}, got {len(streams)}"
             raise AssertionError(msg)
 
-    def test_custom_streams_configuration(self, config: FlextTypes.Dict) -> None:
+    def test_custom_streams_configuration(self, config: FlextCore.Types.Dict) -> None:
         """Test custom streams configuration."""
         config["custom_streams"] = [
             {
@@ -97,7 +97,7 @@ class TestFlextMeltanoTapLDAPUnit:
             msg: str = f"Expected {5}, got {len(streams)}"
             raise AssertionError(msg)
 
-    def test_catalog_generation(self, config: FlextTypes.Dict) -> None:
+    def test_catalog_generation(self, config: FlextCore.Types.Dict) -> None:
         """Test catalog generation and metadata."""
         tap = FlextMeltanoTapLDAP(config=config)
         catalog = tap.catalog_dict
@@ -129,7 +129,7 @@ class TestFlextMeltanoTapLDAPUnit:
     def test_stream_records(
         self,
         mock_client_class: MagicMock,
-        config: FlextTypes.Dict,
+        config: FlextCore.Types.Dict,
     ) -> None:
         """Test streaming records from LDAP."""
         # Mock LDAP client
@@ -156,7 +156,7 @@ class TestFlextMeltanoTapLDAPUnit:
         # Singer SDK get_records returns tuples (record, context) or just records
         # We need to handle both cases
         raw_records = list(users_stream.get_records(None))
-        records: list[FlextTypes.Dict] = []
+        records: list[FlextCore.Types.Dict] = []
         for item in raw_records:
             if isinstance(item, tuple):
                 record, _context = item

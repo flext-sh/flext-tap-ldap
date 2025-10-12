@@ -1,6 +1,6 @@
 """FLEXT Tap LDAP Configuration - Settings using flext-core patterns.
 
-Provides LDAP tap configuration management extending FlextConfig
+Provides LDAP tap configuration management extending FlextCore.Config
 with Pydantic Settings for environment variable support and validation.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -11,14 +11,14 @@ from __future__ import annotations
 
 from typing import Self
 
-from flext_core import FlextConfig, FlextConstants, FlextResult, FlextTypes
+from flext_core import FlextCore
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
 
 from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 
-class CustomStreamConfig(FlextConfig):
+class CustomStreamConfig(FlextCore.Config):
     """Configuration for custom LDAP streams using flext-core patterns."""
 
     name: str = Field(..., description="Stream name")
@@ -36,17 +36,17 @@ class CustomStreamConfig(FlextConfig):
         description="JSON schema for the stream",
     )
 
-    def validate_business_rules(self: object) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextCore.Result[None]:
         """Validate business rules for custom streams."""
         if not self.name or not self.search_filter:
-            return FlextResult[None].fail(
+            return FlextCore.Result[None].fail(
                 "Custom stream requires name and search_filter",
             )
 
-        return FlextResult[None].ok(None)
+        return FlextCore.Result[None].ok(None)
 
 
-class LDIFProcessingConfig(FlextConfig):
+class LDIFProcessingConfig(FlextCore.Config):
     """Configuration for LDIF file processing using flext-core patterns."""
 
     ldif_files: FlextMeltanoTapLdapTypes.Core.StringList | None = Field(
@@ -66,7 +66,7 @@ class LDIFProcessingConfig(FlextConfig):
         description="Continue processing on LDIF parsing errors",
     )
     ldif_max_errors: int = Field(
-        default=FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE // 10,
+        default=FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE // 10,
         description="Maximum number of parsing errors before stopping",
         gt=0,
     )
@@ -95,26 +95,26 @@ class LDIFProcessingConfig(FlextConfig):
         description="Enable LDIF processing streams",
     )
 
-    def validate_business_rules(self: object) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextCore.Result[None]:
         """Validate business rules for LDIF processing."""
         if self.ldif_files and self.ldif_directory:
-            return FlextResult[None].fail(
+            return FlextCore.Result[None].fail(
                 "Cannot specify both ldif_files and ldif_directory",
             )
 
         if self.enable_ldif_streams and not (self.ldif_files or self.ldif_directory):
-            return FlextResult[None].fail(
+            return FlextCore.Result[None].fail(
                 "LDIF streams enabled but no files or directory specified",
             )
 
-        return FlextResult[None].ok(None)
+        return FlextCore.Result[None].ok(None)
 
 
-class FlextMeltanoTapLdapConfig(FlextConfig):
-    """FLEXT Tap LDAP Configuration extending FlextConfig.
+class FlextMeltanoTapLdapConfig(FlextCore.Config):
+    """FLEXT Tap LDAP Configuration extending FlextCore.Config.
 
     Single flat configuration class for FLEXT LDAP tap following [Project]Config pattern:
-    - Extends FlextConfig from flext-core
+    - Extends FlextCore.Config from flext-core
     - Uses Pydantic 2 Settings with SecretStr for sensitive data
     - Enhanced singleton pattern with thread-safe access
     - Flat structure without nested configuration classes
@@ -137,7 +137,7 @@ class FlextMeltanoTapLdapConfig(FlextConfig):
     # LDAP Connection Configuration - flat structure
     ldap_host: str = Field(description="LDAP server host")
     ldap_port: int = Field(
-        default=FlextConstants.Platform.LDAP_DEFAULT_PORT,
+        default=FlextCore.Constants.Platform.LDAP_DEFAULT_PORT,
         description="LDAP server port",
     )
     ldap_use_ssl: bool = Field(default=False, description="Use SSL connection")
@@ -150,20 +150,20 @@ class FlextMeltanoTapLdapConfig(FlextConfig):
     )
     ldap_base_dn: str = Field(default="", description="Base DN for searches")
     ldap_timeout: int = Field(
-        default=FlextConstants.Network.DEFAULT_TIMEOUT,
+        default=FlextCore.Constants.Network.DEFAULT_TIMEOUT,
         description="Connection timeout in seconds",
     )
     ldap_page_size: int = Field(
-        default=FlextConstants.Defaults.PAGE_SIZE * 10,
+        default=FlextCore.Constants.Defaults.PAGE_SIZE * 10,
         description="LDAP search page size",
     )
     ldap_max_retries: int = Field(
-        default=FlextConstants.Reliability.MAX_RETRY_ATTEMPTS,
+        default=FlextCore.Constants.Reliability.MAX_RETRY_ATTEMPTS,
         description="Maximum connection retries",
     )
 
     # LDIF Processing Configuration - flat structure
-    ldif_files: FlextTypes.StringList | None = Field(
+    ldif_files: FlextCore.Types.StringList | None = Field(
         default=None,
         description="List of LDIF files to process",
     )
@@ -180,7 +180,7 @@ class FlextMeltanoTapLdapConfig(FlextConfig):
         description="Continue processing on LDIF parsing errors",
     )
     ldif_max_errors: int = Field(
-        default=FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
+        default=FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE,
         description="Maximum number of parsing errors before stopping",
         gt=0,
     )
@@ -196,7 +196,7 @@ class FlextMeltanoTapLdapConfig(FlextConfig):
         default=False,
         description="Apply transformation rules to LDIF entries",
     )
-    ldif_transformation_rules: FlextTypes.StringDict | None = Field(
+    ldif_transformation_rules: FlextCore.Types.StringDict | None = Field(
         default=None,
         description="Transformation rules for LDIF processing",
     )
@@ -210,7 +210,7 @@ class FlextMeltanoTapLdapConfig(FlextConfig):
     )
 
     # Custom Streams Configuration - flat structure
-    custom_streams: list[FlextTypes.StringDict] | None = Field(
+    custom_streams: list[FlextCore.Types.StringDict] | None = Field(
         default=None,
         description="Custom stream definitions",
     )
@@ -220,8 +220,8 @@ class FlextMeltanoTapLdapConfig(FlextConfig):
     @classmethod
     def validate_custom_streams(
         cls,
-        v: list[FlextTypes.StringDict] | None,
-    ) -> list[FlextTypes.StringDict] | None:
+        v: list[FlextCore.Types.StringDict] | None,
+    ) -> list[FlextCore.Types.StringDict] | None:
         """Validate custom stream configurations."""
         if v is not None:
             for stream_config in v:
@@ -245,15 +245,15 @@ class FlextMeltanoTapLdapConfig(FlextConfig):
     @classmethod
     def validate_ldap_port(cls, v: int) -> int:
         """Validate LDAP port is in valid range."""
-        if v <= 0 or v > FlextConstants.Network.MAX_PORT:
-            msg = f"LDAP port must be between 1 and {FlextConstants.Network.MAX_PORT}"
+        if v <= 0 or v > FlextCore.Constants.Network.MAX_PORT:
+            msg = f"LDAP port must be between 1 and {FlextCore.Constants.Network.MAX_PORT}"
             raise ValueError(msg)
         return v
 
     # Enhanced singleton pattern methods
     @classmethod
     def get_global_instance(cls) -> Self:
-        """Get the global singleton instance using enhanced FlextConfig pattern."""
+        """Get the global singleton instance using enhanced FlextCore.Config pattern."""
         return cls.get_or_create_shared_instance(project_name="flext-tap-ldap")
 
     @classmethod
@@ -301,34 +301,34 @@ class FlextMeltanoTapLdapConfig(FlextConfig):
         test_defaults.update(overrides)
         return cls(**test_defaults)
 
-    def validate_configuration(self) -> FlextResult[None]:
+    def validate_configuration(self) -> FlextCore.Result[None]:
         """Validate the complete LDAP tap configuration."""
         try:
             # Validate LDAP connection settings
             if not self.ldap_host:
-                return FlextResult[None].fail("LDAP host is required")
+                return FlextCore.Result[None].fail("LDAP host is required")
 
             if self.ldap_port <= 0:
-                return FlextResult[None].fail("LDAP port must be positive")
+                return FlextCore.Result[None].fail("LDAP port must be positive")
 
             if self.ldap_timeout <= 0:
-                return FlextResult[None].fail("LDAP timeout must be positive")
+                return FlextCore.Result[None].fail("LDAP timeout must be positive")
 
             if self.ldap_page_size <= 0:
-                return FlextResult[None].fail("LDAP page size must be positive")
+                return FlextCore.Result[None].fail("LDAP page size must be positive")
 
             # Validate LDIF processing settings
             if self.ldif_files and self.ldif_directory:
-                return FlextResult[None].fail(
+                return FlextCore.Result[None].fail(
                     "Cannot specify both ldif_files and ldif_directory"
                 )
 
             if self.ldif_max_errors <= 0:
-                return FlextResult[None].fail("LDIF max errors must be positive")
+                return FlextCore.Result[None].fail("LDIF max errors must be positive")
 
-            return FlextResult[None].ok(None)
+            return FlextCore.Result[None].ok(None)
         except Exception as e:
-            return FlextResult[None].fail(f"Configuration validation error: {e}")
+            return FlextCore.Result[None].fail(f"Configuration validation error: {e}")
 
 
 # Export main configuration class

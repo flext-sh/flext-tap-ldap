@@ -8,11 +8,11 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from flext_core import FlextConstants, FlextTypes
+from flext_core import FlextCore
 from flext_ldap.constants import FlextLdapConstants
 
 
-class FlextMeltanoTapLdapConstants(FlextConstants):
+class FlextMeltanoTapLdapConstants(FlextCore.Constants):
     """LDAP tap extraction-specific constants following FLEXT unified pattern with nested domains.
 
     Composes with FlextLdapConstants to avoid duplication and ensure consistency.
@@ -29,7 +29,7 @@ class FlextMeltanoTapLdapConstants(FlextConstants):
             DEFAULT_HOST = (
                 FlextLdapConstants.Protocol.DEFAULT_HOST
                 if hasattr(FlextLdapConstants.Protocol, "DEFAULT_HOST")
-                else FlextConstants.Platform.DEFAULT_HOST
+                else FlextCore.Constants.Platform.DEFAULT_HOST
             )
             DEFAULT_PORT = FlextLdapConstants.Protocol.DEFAULT_PORT
             DEFAULT_TIMEOUT = FlextLdapConstants.Protocol.DEFAULT_TIMEOUT_SECONDS
@@ -43,14 +43,16 @@ class FlextMeltanoTapLdapConstants(FlextConstants):
         """Singer tap data processing configuration."""
 
         DEFAULT_PAGE_SIZE = FlextLdapConstants.Connection.DEFAULT_PAGE_SIZE
-        DEFAULT_BATCH_SIZE = FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE
-        MAX_BATCH_SIZE = FlextConstants.Performance.BatchProcessing.MAX_ITEMS
+        DEFAULT_BATCH_SIZE = (
+            FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE
+        )
+        MAX_BATCH_SIZE = FlextCore.Constants.Performance.BatchProcessing.MAX_ITEMS
 
     class Search:
         """LDAP search operation configuration."""
 
         DEFAULT_SCOPE = FlextLdapConstants.Scopes.SUBTREE
-        SCOPES: ClassVar[FlextTypes.StringList] = list(
+        SCOPES: ClassVar[FlextCore.Types.StringList] = list(
             FlextLdapConstants.Scopes.VALID_SCOPES
         )
 
