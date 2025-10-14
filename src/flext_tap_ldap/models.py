@@ -156,9 +156,9 @@ class FlextMeltanoTapLdapModels(FlextCore.Models):
             key: str,
             default: object = None,
         ) -> object:
-            """Get a value from either a dict or FlextLdapModels.Entry.
+            """Get a value from either a dict[str, object] or FlextLdapModels.Entry.
 
-            Returns the attribute value by name from a plain dict or an attribute of
+            Returns the attribute value by name from a plain dict[str, object] or an attribute of
             a FlextLdapModels.Entry, falling back to default when not present.
             """
             if isinstance(entry, dict):
