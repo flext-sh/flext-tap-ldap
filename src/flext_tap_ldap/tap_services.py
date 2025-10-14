@@ -5,6 +5,7 @@ with maximum integration to flext-core, flext-ldap, and flext-ldif libraries.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
+
 """
 
 from __future__ import annotations

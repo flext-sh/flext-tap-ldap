@@ -5,6 +5,7 @@ and LDIF file processing streams using flext-ldap and flext-ldif integration.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
+
 """
 
 from __future__ import annotations
