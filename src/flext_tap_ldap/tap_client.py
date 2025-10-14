@@ -99,7 +99,7 @@ class LDAPClient:
         self,
         entry_data: FlextLdapModels.Entry | FlextMeltanoTapLdapTypes.Core.Dict,
     ) -> FlextMeltanoTapLdapTypes.Core.Dict:
-        """Convert FlextLdapModels.Entry to dict format for testing convenience."""
+        """Convert FlextLdapModels.Entry to dict[str, object] format for testing convenience."""
         if isinstance(entry_data, FlextLdapModels.Entry):
             # It's a FlextLdapModels.Entry model object - flatten attributes
             entry_dict: FlextMeltanoTapLdapTypes.Core.Dict = {"dn": entry_data.dn}
@@ -112,8 +112,8 @@ class LDAPClient:
                     # Keep as list or whatever type it is
                     entry_dict[attr_name] = attr_values
             return entry_dict
-        # It's already a dict (from mock)
-        return dict(entry_data) if entry_data else {}
+        # It's already a dict[str, object] (from mock)
+        return dict[str, object](entry_data) if entry_data else {}
 
     def _process_search_results(
         self,
@@ -439,7 +439,7 @@ class FlextMeltanoTapLDAPPlugin:
     @override
     def __init__(self, config: FlextMeltanoTapLdapTypes.Core.Dict) -> None:
         """Initialize LDAP tap plugin."""
-        # Convert dict config to FlextMeltanoTapLdapConfig
+        # Convert dict[str, object] config to FlextMeltanoTapLdapConfig
         self._config: FlextMeltanoTapLdapConfig = FlextMeltanoTapLdapConfig(**config)
         self._tap_instance: FlextMeltanoTapLDAP | None = None
 

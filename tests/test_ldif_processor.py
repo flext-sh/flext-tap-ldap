@@ -104,7 +104,7 @@ class TestLDIFEntry:
 
     def test_entry_to_dict(self) -> None:
         """Test method."""
-        """Test entry to dict conversion."""
+        """Test entry to dict[str, object] conversion."""
         entry = LDIFEntry("cn=test,dc=example,dc=com")
         entry.add_attribute("cn", "test")
         entry.add_attribute("sn", "user")

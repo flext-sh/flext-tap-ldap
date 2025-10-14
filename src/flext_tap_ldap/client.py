@@ -175,7 +175,7 @@ class LDAPClient:
         self,
         entry_data: FlextLdapModels.Entry | FlextCore.Types.Dict | None,
     ) -> FlextCore.Types.Dict:
-        """Convert FlextLdapModels.Entry to dict format for testing convenience.
+        """Convert FlextLdapModels.Entry to dict[str, object] format for testing convenience.
 
         Single Responsibility: Handle only entry format conversion.
         """
@@ -195,12 +195,14 @@ class LDAPClient:
                     # Keep as list or whatever type it is
                     entry_dict[attr_name] = attr_values
             return entry_dict
-        # It's already a dict (from mock) - ensure proper type conversion
+        # It's already a dict[str, object] (from mock) - ensure proper type conversion
         if entry_data:
             if isinstance(entry_data, dict):
                 return entry_data
-            # Convert to dict if it's not already
-            return dict(entry_data) if hasattr(entry_data, "__iter__") else {}
+            # Convert to dict[str, object] if it's not already
+            return (
+                dict[str, object](entry_data) if hasattr(entry_data, "__iter__") else {}
+            )
         return {}
 
     def _process_search_results(

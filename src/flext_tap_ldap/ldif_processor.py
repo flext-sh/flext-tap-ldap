@@ -97,7 +97,7 @@ class LDIFEntry:
         """Convert entry to dictionary format."""
         entry_dict: FlextMeltanoTapLdapTypes.Core.Dict = {
             "dn": "self.dn",
-            "attributes": dict(self.attributes),
+            "attributes": dict[str, object](self.attributes),
         }
 
         if self.change_type:
