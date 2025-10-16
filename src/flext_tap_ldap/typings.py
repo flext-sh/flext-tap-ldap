@@ -177,7 +177,7 @@ class FlextMeltanoTapLdapTypes(FlextTypes):
     # CORE TYPES - Essential LDAP tap types extending FlextMeltanoTapLdapTypes.Core
     # =========================================================================
 
-    class Core(FlextTypes):
+    class Core(FlextTypes.Dict):
         """Core LDAP tap types extending FlextMeltanoTapLdapTypes.Core.
 
         Essential domain-specific types for LDAP tap extraction operations.

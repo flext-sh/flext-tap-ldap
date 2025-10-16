@@ -395,16 +395,14 @@ class FlextMeltanoTapLDAP(FlextService[FlextMeltanoTapLdapConfig]):
                     f"Extraction failed: {extraction_result.error}"
                 )
 
-            return FlextResult[FlextTypes.Dict].ok(
-                {
-                    "status": "success",
-                    "config_type": "FlextMeltanoTapLdapConfig",
-                    "host": config.ldap_host,
-                    "port": config.ldap_port,
-                    "base_dn": config.ldap_base_dn,
-                    "page_size": config.ldap_page_size,
-                }
-            )
+            return FlextResult[FlextTypes.Dict].ok({
+                "status": "success",
+                "config_type": "FlextMeltanoTapLdapConfig",
+                "host": config.ldap_host,
+                "port": config.ldap_port,
+                "base_dn": config.ldap_base_dn,
+                "page_size": config.ldap_page_size,
+            })
         except Exception as e:
             return FlextResult[FlextTypes.Dict].fail(
                 f"Extraction execution failed: {e}"

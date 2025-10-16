@@ -15,16 +15,6 @@ from flext_tap_ldap.config import (
     FlextTapLdapConfig,
     LDIFProcessingConfig,
 )
-    FlextMeltanoTapLdapAuthenticationError,
-    FlextMeltanoTapLdapConfigurationError,
-    FlextMeltanoTapLdapConnectionError,
-    FlextMeltanoTapLdapError,
-    FlextMeltanoTapLdapProcessingError,
-    FlextMeltanoTapLdapSearchError,
-    FlextMeltanoTapLdapStreamError,
-    FlextMeltanoTapLdapTimeoutError,
-    FlextMeltanoTapLdapValidationError,
-)
 from flext_tap_ldap.ldif_processor import (
     FlextLdifProcessor,
     LDIFEntry,
@@ -99,6 +89,7 @@ __all__ = [
     "FlextMeltanoTapLdapTypes",
     "FlextMeltanoTapLdapValidationError",
     "FlextMeltanoTapLdapVersion",
+    "FlextTapLdapConfig",
     "GroupsStream",
     "LDAPAttribute",
     "LDAPBaseStream",
