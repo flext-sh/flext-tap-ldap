@@ -15,7 +15,7 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import override
 
-from flext_core import FlextCore
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldif import FlextLdif
 from flext_ldif.exceptions import FlextLdifExceptions
 from flext_ldif.models import FlextLdifModels
@@ -27,7 +27,7 @@ FlextLdifAttributes = FlextLdifModels.LdifAttributes
 FlextLdifDistinguishedName = FlextLdifModels.DistinguishedName
 FlextLdifEntry = FlextLdifModels.Entry
 
-logger = FlextCore.Logger(__name__)
+logger = FlextLogger(__name__)
 # Testing convenience aliases that delegate to flext-ldif
 LDIFParseError = FlextLdifExceptions.parse_error
 
@@ -66,7 +66,7 @@ class LDIFEntry:
                     ldif_content += f"{attr_name}: {value}\n"
             ldif_content += "\n"
 
-            result: FlextCore.Result[object] = api.parse(ldif_content)
+            result: FlextResult[object] = api.parse(ldif_content)
             if result.success and result.data and len(result.data) > 0:
                 return result.data[0]
 
@@ -91,7 +91,7 @@ class LDIFEntry:
 
     def has_object_class(self, object_class: str) -> bool:
         """Check if entry has specific object class."""
-        object_classes: FlextCore.Types.List = self.get_attribute("objectClass") or []
+        object_classes: FlextTypes.List = self.get_attribute("objectClass") or []
         return any(oc.lower() == object_class.lower() for oc in object_classes)
 
     def to_dict(self: object) -> FlextMeltanoTapLdapTypes.Core.Dict:
@@ -127,7 +127,7 @@ class LDIFEntry:
         try:
             # Delegate to flext-ldif for validation
             api = FlextLdif()
-            result: FlextCore.Result[object] = api.validate([self._flext_entry])
+            result: FlextResult[object] = api.validate([self._flext_entry])
             return result.success and bool(result.data)
         except Exception:
             # Fallback to basic validation for testing convenience
@@ -136,7 +136,7 @@ class LDIFEntry:
     @property
     def validation_errors(self: object) -> list[FlextMeltanoTapLdapTypes.Core.Headers]:
         """Get validation errors for this entry."""
-        errors: list[FlextCore.Types.StringDict] = []
+        errors: list[FlextTypes.StringDict] = []
         if not self.is_valid():
             errors.append(
                 {"code": "invalid_entry", "message": "Entry failed validation"},
@@ -212,7 +212,7 @@ class FlextLdifProcessor:
                 content = f.read()
 
             # Use flext-ldif to parse
-            result: FlextCore.Result[object] = self._api.parse(content)
+            result: FlextResult[object] = self._api.parse(content)
             if not result.success:
                 error_msg = f"Failed to parse LDIF file {file_path}: {result.error}"
                 if self.ignore_errors:
@@ -236,7 +236,7 @@ class FlextLdifProcessor:
                 with file_path.open(encoding="latin-1") as f:
                     content = f.read()
 
-                result: FlextCore.Result[object] = self._api.parse(content)
+                result: FlextResult[object] = self._api.parse(content)
                 if result.success and result.data:
                     for flext_entry in result.data:
                         convenience_entry = self._convert_from_flext_entry(flext_entry)
@@ -259,7 +259,7 @@ class FlextLdifProcessor:
         logger.info(f"Parsing LDIF content with flext-ldif from {source_name}")
 
         try:
-            result: FlextCore.Result[object] = self._api.parse(content)
+            result: FlextResult[object] = self._api.parse(content)
             if not result.success:
                 error_msg = (
                     f"Failed to parse LDIF content from {source_name}: {result.error}"
@@ -307,31 +307,29 @@ class FlextLdifProcessor:
             "error_messages": self.errors.copy(),
         }
 
-    def load_from_file(self, file_path: Path) -> FlextCore.Result[str]:
-        """Load LDIF entries from file and return as FlextCore.Result."""
+    def load_from_file(self, file_path: Path) -> FlextResult[str]:
+        """Load LDIF entries from file and return as FlextResult."""
         try:
             self.entries = list(self.parse_file(file_path))
             self._update_stats()
-            return FlextCore.Result[str].ok(
-                "LDIF file loaded successfully using flext-ldif"
-            )
+            return FlextResult[str].ok("LDIF file loaded successfully using flext-ldif")
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextCore.Result[str].fail(f"Failed to load LDIF file: {e}")
+            return FlextResult[str].fail(f"Failed to load LDIF file: {e}")
 
     def load_from_string(
         self,
         content: str,
         source_name: str = "string",
-    ) -> FlextCore.Result[str]:
-        """Load LDIF entries from string and return as FlextCore.Result."""
+    ) -> FlextResult[str]:
+        """Load LDIF entries from string and return as FlextResult."""
         try:
             self.entries = list(self.parse_content(content, source_name))
             self._update_stats()
-            return FlextCore.Result[str].ok(
+            return FlextResult[str].ok(
                 "LDIF content loaded successfully using flext-ldif",
             )
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextCore.Result[str].fail(f"Failed to load LDIF content: {e}")
+            return FlextResult[str].fail(f"Failed to load LDIF content: {e}")
 
     def _update_stats(self: object) -> None:
         """Update statistics based on loaded entries."""
@@ -403,7 +401,7 @@ class LDIFValidator:
         """Validate LDIF entry using flext-ldif validation."""
         try:
             # Use flext-ldif validation
-            # result: FlextCore.Result[object] = self._api.validate([entry._flext_entry])
+            # result: FlextResult[object] = self._api.validate([entry._flext_entry])
             # return result.success and bool(result.data)
             return True  # Placeholder - always return True for now
         except Exception as e:
@@ -424,14 +422,14 @@ class LDIFValidator:
         """Validate a list of LDIF entries using flext-ldif."""
         valid_count = 0
         invalid_count = 0
-        errors: FlextCore.Types.StringList = []
+        errors: FlextTypes.StringList = []
 
         try:
             # Convert to FlextLdifEntry objects
             # flext_entries = [entry._flext_entry for entry in entries]
 
             # Use flext-ldif batch validation
-            # result: FlextCore.Result[object] = self._api.validate(flext_entries)
+            # result: FlextResult[object] = self._api.validate(flext_entries)
 
             # if result.success and result.data:
             #     valid_count = len(entries)

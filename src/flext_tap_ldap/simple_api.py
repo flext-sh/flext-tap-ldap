@@ -10,10 +10,10 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 
-from flext_core import FlextCore
+from flext_core import FlextResult, FlextTypes
 
 from flext_tap_ldap.config import (
-    FlextMeltanoTapLdapConfig,
+    FlextTapLdapConfig,
     LDAPConnectionConfig,
     LDIFProcessingConfig,
 )
@@ -148,10 +148,10 @@ class FlextMeltanoTapLdapServices:
             self.migration_batch = batch_name
             return self
 
-        def build(self: object) -> FlextCore.Result[LDIFProcessingConfig]:
+        def build(self: object) -> FlextResult[LDIFProcessingConfig]:
             """Build the LDIF processing configuration."""
             try:
-                return FlextCore.Result[LDIFProcessingConfig].ok(
+                return FlextResult[LDIFProcessingConfig].ok(
                     LDIFProcessingConfig(
                         ldif_files=self.ldif_files,
                         ldif_directory=self.ldif_directory,
@@ -167,51 +167,54 @@ class FlextMeltanoTapLdapServices:
                     ),
                 )
             except (RuntimeError, ValueError, TypeError) as e:
-                return FlextCore.Result[LDIFProcessingConfig].fail(
+                return FlextResult[LDIFProcessingConfig].fail(
                     f"Failed to build LDIF processing config: {e}",
                 )
 
     def setup_ldap_tap(
-        self: FlextMeltanoTapLdapConfig | None = None,
-    ) -> FlextCore.Result[FlextMeltanoTapLdapConfig]:
+        self: FlextTapLdapConfig | None = None,
+    ) -> FlextResult[FlextTapLdapConfig]:
         """Set up the LDAP tap with configuration.
 
         Args:
         config: Optional configuration. If None, creates defaults.
 
         Returns:
-        FlextCore.Result with FlextMeltanoTapLdapConfig or error message.
+        FlextResult with FlextTapLdapConfig or error message.
 
         """
         try:
-            if self is None:
-                # Create with intelligent defaults
-                self = FlextMeltanoTapLdapConfig.create_with_defaults()
+            # Use local variable to avoid reassigning self
+            config = (
+                self
+                if self is not None
+                else FlextMeltanoTapLdapConfig.create_with_defaults()
+            )
 
             # Validate configuration
-            self.model_validate(self.model_dump())
+            config.model_validate(config.model_dump())
 
-            return FlextCore.Result[FlextMeltanoTapLdapConfig].ok(self)
+            return FlextResult[FlextTapLdapConfig].ok(config)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextCore.Result[FlextMeltanoTapLdapConfig].fail(
+            return FlextResult[FlextMeltanoTapLdapConfig].fail(
                 f"Failed to setup LDAP tap: {e}"
             )
 
     def create_ldap_connection_config(
         self: FlextMeltanoTapLdapServices.LDAPConnectionParams,
-    ) -> FlextCore.Result[LDAPConnectionConfig]:
+    ) -> FlextResult[LDAPConnectionConfig]:
         """Create LDAP connection configuration using Parameter Object Pattern.
 
         Args:
         params: LDAP connection parameters object
 
         Returns:
-        FlextCore.Result with LDAPConnectionConfig or error message.
+        FlextResult with LDAPConnectionConfig or error message.
 
         """
         try:
-            config: FlextCore.Types.Dict = LDAPConnectionConfig(
+            config: FlextTypes.Dict = LDAPConnectionConfig(
                 host=self.host,
                 base_dn=self.base_dn,
                 port=self.port,
@@ -220,10 +223,10 @@ class FlextMeltanoTapLdapServices:
                 bind_password=self.bind_password,
             )
 
-            return FlextCore.Result[LDAPConnectionConfig].ok(config)
+            return FlextResult[LDAPConnectionConfig].ok(config)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextCore.Result[LDAPConnectionConfig].fail(
+            return FlextResult[LDAPConnectionConfig].fail(
                 f"Failed to create LDAP connection config: {e}",
             )
 
@@ -232,7 +235,7 @@ class FlextMeltanoTapLdapServices:
         base_dn: str,
         port: int = 389,
         **kwargs: object,
-    ) -> FlextCore.Result[LDAPConnectionConfig]:
+    ) -> FlextResult[LDAPConnectionConfig]:
         """Create LDAP connection configuration (testing convenience interface).
 
         Testing convenience wrapper for the Parameter Object Pattern implementation.
@@ -249,7 +252,7 @@ class FlextMeltanoTapLdapServices:
             )
             return FlextMeltanoTapLdapServices.create_ldap_connection_config(params)
         except Exception as e:
-            return FlextCore.Result[LDAPConnectionConfig].fail(
+            return FlextResult[LDAPConnectionConfig].fail(
                 f"Failed to create convenience connection config: {e}",
             )
 
@@ -257,7 +260,7 @@ class FlextMeltanoTapLdapServices:
         self: FlextMeltanoTapLdapTypes.Core.StringList | None = None,
         ldif_directory: str | None = None,
         **kwargs: object,
-    ) -> FlextCore.Result[LDIFProcessingConfig]:
+    ) -> FlextResult[LDIFProcessingConfig]:
         """Create LDIF processing configuration.
 
         REFACTORED: Now uses Builder Pattern internally to eliminate parameter proliferation.
@@ -277,7 +280,7 @@ class FlextMeltanoTapLdapServices:
         enable_ldif_streams: Enable LDIF processing streams
 
         Returns:
-        FlextCore.Result with LDIFProcessingConfig or error message.
+        FlextResult with LDIFProcessingConfig or error message.
 
         Keyword Args:
         **kwargs: Optional keyword-only parameters, including:
@@ -314,7 +317,7 @@ class FlextMeltanoTapLdapServices:
             default=False,
         )
         rules = kwargs.get("ldif_transformation_rules")
-        rules_dict: FlextCore.Types.Dict = rules if isinstance(rules, dict) else None
+        rules_dict: FlextTypes.Dict = rules if isinstance(rules, dict) else None
         builder.with_transformations(enable=apply_transformations, rules=rules_dict)
 
         batch = self._coerce_str_optional(kwargs.get("migration_batch"))
@@ -338,18 +341,18 @@ class FlextMeltanoTapLdapServices:
         try:
             return builder.build()
         except Exception as e:
-            return FlextCore.Result[LDIFProcessingConfig].fail(
+            return FlextResult[LDIFProcessingConfig].fail(
                 f"Failed to create LDIF processing config: {e}",
             )
 
-    def validate_ldap_config(self: FlextMeltanoTapLdapConfig) -> FlextCore.Result[bool]:
+    def validate_ldap_config(self: FlextMeltanoTapLdapConfig) -> FlextResult[bool]:
         """Validate the LDAP tap configuration.
 
         Args:
         config: Configuration to validate
 
         Returns:
-        FlextCore.Result with validation success or error message.
+        FlextResult with validation success or error message.
 
         """
         try:
@@ -361,112 +364,98 @@ class FlextMeltanoTapLdapServices:
 
             # Additional business rule validations
             if self.connection.port <= 0 or self.connection.port > max_port_number:
-                return FlextCore.Result[bool].fail(
+                return FlextResult[bool].fail(
                     f"Port must be between 1 and {max_port_number}",
                 )
 
             if not self.connection.base_dn:
-                return FlextCore.Result[bool].fail("Base DN is required")
+                return FlextResult[bool].fail("Base DN is required")
 
             default_ldap_port = 389
             if self.connection.use_ssl and self.connection.port == default_ldap_port:
-                return FlextCore.Result[bool].fail(
+                return FlextResult[bool].fail(
                     "SSL enabled but port is 389 (consider using port 636 for LDAPS)",
                 )
 
-            return FlextCore.Result[bool].ok(data=True)
+            return FlextResult[bool].ok(data=True)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextCore.Result[bool].fail(f"Configuration validation failed: {e}")
+            return FlextResult[bool].fail(f"Configuration validation failed: {e}")
 
     def create_development_ldap_config(
         **overrides: object,
-    ) -> FlextCore.Result[FlextMeltanoTapLdapConfig]:
+    ) -> FlextResult[FlextMeltanoTapLdapConfig]:
         """Create development LDAP configuration with defaults.
 
         Args:
         **overrides: Configuration overrides
 
         Returns:
-        FlextCore.Result with FlextMeltanoTapLdapConfig for development use.
+        FlextResult with FlextTapLdapConfig for development use.
 
         """
         try:
-            connection_config = LDAPConnectionConfig(
-                host="localhost",
-                port=389,
-                use_ssl=False,
-                bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=example,dc=com",
-                bind_password=os.getenv(
+            config = FlextTapLdapConfig(
+                ldap_host="localhost",
+                ldap_port=389,
+                ldap_use_ssl=False,
+                ldap_bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=example,dc=com",
+                ldap_bind_password=os.getenv(
                     "LDAP_PASSWORD",
                     "REDACTED_LDAP_BIND_PASSWORD",
                 ),  # nosec B106 - Uses env var in production
-                base_dn="dc=example,dc=com",
-            )
-
-            config = FlextMeltanoTapLdapConfig(
-                connection=connection_config,
-                ldif_processing=LDIFProcessingConfig(enable_ldif_streams=False),
-                project_name="flext-data.taps.flext-tap-ldap",
-                project_version="0.9.0",
+                ldap_base_dn="dc=example,dc=com",
+                enable_ldif_streams=False,
             )
 
             # Apply overrides
             if overrides:
-                config_dict: FlextCore.Types.Dict = config.model_dump()
+                config_dict: FlextTypes.Dict = config.model_dump()
                 config_dict.update(overrides)
-                config = FlextMeltanoTapLdapConfig(**config_dict)
+                config = FlextTapLdapConfig(**config_dict)
 
-            return FlextCore.Result[FlextMeltanoTapLdapConfig].ok(config)
+            return FlextResult[FlextTapLdapConfig].ok(config)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextCore.Result[FlextMeltanoTapLdapConfig].fail(
+            return FlextResult[FlextMeltanoTapLdapConfig].fail(
                 f"Failed to create development config: {e}",
             )
 
     def create_production_ldap_config(
         **overrides: object,
-    ) -> FlextCore.Result[FlextMeltanoTapLdapConfig]:
+    ) -> FlextResult[FlextMeltanoTapLdapConfig]:
         """Create production LDAP configuration with security defaults.
 
         Args:
         **overrides: Configuration overrides
 
         Returns:
-        FlextCore.Result with FlextMeltanoTapLdapConfig for production use.
+        FlextResult with FlextMeltanoTapLdapConfig for production use.
 
         """
         try:
-            connection_config = LDAPConnectionConfig(
-                host="ldap.company.com",
-                port=636,
-                use_ssl=True,
-                bind_dn="",  # Should be configured via environment
-                bind_password="",  # Should be configured via environment
-                base_dn="dc=company,dc=com",
-            )
-
-            config = FlextMeltanoTapLdapConfig(
-                connection=connection_config,
-                ldif_processing=LDIFProcessingConfig(
-                    enable_ldif_streams=False,
-                    ldif_ignore_errors=False,
-                    ldif_max_errors=10,
-                ),
-                project_name="flext-data.taps.flext-tap-ldap",
-                project_version="0.9.0",
+            config = FlextTapLdapConfig(
+                ldap_host="ldap.company.com",
+                ldap_port=636,
+                ldap_use_ssl=True,
+                ldap_bind_dn="",  # Should be configured via environment
+                ldap_bind_password="",  # Should be configured via environment
+                ldap_base_dn="dc=company,dc=com",
+                enable_ldif_streams=False,
+                ldif_ignore_errors=False,
+                ldif_max_errors=10,
             )
 
             # Apply overrides
             if overrides:
-                config_dict: FlextCore.Types.Dict = config.model_dump()
+                config_dict: FlextTypes.Dict = config.model_dump()
                 config_dict.update(overrides)
-                config = FlextMeltanoTapLdapConfig(**config_dict)
+                config = FlextTapLdapConfig(**config_dict)
 
-            return FlextCore.Result[FlextMeltanoTapLdapConfig].ok(config)
+            return FlextResult[FlextTapLdapConfig].ok(config)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextCore.Result[FlextMeltanoTapLdapConfig].fail(
+            return FlextResult[FlextMeltanoTapLdapConfig].fail(
                 f"Failed to create production config: {e}",
             )
 
@@ -474,7 +463,7 @@ class FlextMeltanoTapLdapServices:
         self: str | None = None,
         ldif_files: FlextMeltanoTapLdapTypes.Core.StringList | None = None,
         **overrides: object,
-    ) -> FlextCore.Result[FlextMeltanoTapLdapConfig]:
+    ) -> FlextResult[FlextMeltanoTapLdapConfig]:
         """Create LDIF processing configuration for migration scenarios.
 
         Args:
@@ -483,7 +472,7 @@ class FlextMeltanoTapLdapServices:
         **overrides: Additional configuration overrides
 
         Returns:
-        FlextCore.Result with FlextMeltanoTapLdapConfig optimized for LDIF processing.
+        FlextResult with FlextTapLdapConfig optimized for LDIF processing.
 
         """
         try:
@@ -504,7 +493,7 @@ class FlextMeltanoTapLdapServices:
                 ldif_apply_transformations=False,
             )
 
-            config = FlextMeltanoTapLdapConfig(
+            config = FlextTapLdapConfig(
                 connection=connection_config,
                 ldif_processing=ldif_config,
                 project_name="flext-data.taps.flext-tap-ldap",
@@ -513,14 +502,14 @@ class FlextMeltanoTapLdapServices:
 
             # Apply overrides
             if overrides:
-                config_dict: FlextCore.Types.Dict = config.model_dump()
+                config_dict: FlextTypes.Dict = config.model_dump()
                 config_dict.update(overrides)
-                config = FlextMeltanoTapLdapConfig(**config_dict)
+                config = FlextTapLdapConfig(**config_dict)
 
-            return FlextCore.Result[FlextMeltanoTapLdapConfig].ok(config)
+            return FlextResult[FlextTapLdapConfig].ok(config)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextCore.Result[FlextMeltanoTapLdapConfig].fail(
+            return FlextResult[FlextMeltanoTapLdapConfig].fail(
                 f"Failed to create LDIF processing config: {e}",
             )
 

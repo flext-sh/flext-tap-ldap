@@ -8,7 +8,7 @@ from collections.abc import Awaitable
 from dataclasses import dataclass
 from typing import override
 
-from flext_core import FlextCore
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import (
     FlextLdapClients,
     FlextLdapConstants,
@@ -19,7 +19,7 @@ from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 # LDAP scope constants
 
-logger = FlextCore.Logger(__name__)
+logger = FlextLogger(__name__)
 
 
 @dataclass
@@ -173,8 +173,8 @@ class LDAPClient:
 
     def _convert_entry_to_dict(
         self,
-        entry_data: FlextLdapModels.Entry | FlextCore.Types.Dict | None,
-    ) -> FlextCore.Types.Dict:
+        entry_data: FlextLdapModels.Entry | FlextTypes.Dict | None,
+    ) -> FlextTypes.Dict:
         """Convert FlextLdapModels.Entry to dict[str, object] format for testing convenience.
 
         Single Responsibility: Handle only entry format conversion.
@@ -184,7 +184,7 @@ class LDAPClient:
             # It's a FlextLdapModels.Entry model object - flatten attributes
             # Use getattr to safely access attributes for type checker
             getattr(entry_data, "dn", "")
-            attributes: FlextCore.Types.Dict = getattr(entry_data, "attributes", {})
+            attributes: FlextTypes.Dict = getattr(entry_data, "attributes", {})
             entry_dict = {"dn": "dn"}
             # Add flattened attributes to the entry dict
             for attr_name, attr_values in attributes.items():
@@ -207,7 +207,7 @@ class LDAPClient:
 
     def _process_search_results(
         self,
-        result: FlextCore.Result[FlextLdapModels.SearchResponse],
+        result: FlextResult[FlextLdapModels.SearchResponse],
         size_limit: int,
     ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Process LDAP search results with size limiting.
@@ -222,7 +222,7 @@ class LDAPClient:
             if size_limit > 0 and entries_returned >= size_limit:
                 break
 
-            entry_dict: FlextCore.Types.Dict = self._convert_entry_to_dict(entry_data)
+            entry_dict: FlextTypes.Dict = self._convert_entry_to_dict(entry_data)
             entries.append(entry_dict)
 
         return entries
@@ -252,7 +252,7 @@ class LDAPClient:
                 size_limit=size_limit,
                 time_limit=30,
             )
-            result: FlextCore.Result[FlextLdapModels.SearchResponse] = (
+            result: FlextResult[FlextLdapModels.SearchResponse] = (
                 self._flext_api.search_with_request(search_request)
             )
 
@@ -346,12 +346,12 @@ class LDAPClient:
                             size_limit=1,
                             time_limit=5,
                         )
-                        result: FlextCore.Result[object] = self._flext_api.search(
+                        result: FlextResult[object] = self._flext_api.search(
                             test_search_request
                         )
                         return result.is_success
                 except (RuntimeError, ValueError, TypeError) as e:
-                    logger = FlextCore.Logger(__name__)
+                    logger = FlextLogger(__name__)
                     # EXPLICIT TRANSPARENCY: Documented fallback behavior for Singer stream testing convenience
                     # This is NOT security-sensitive fake data generation - it's test environment detection
                     logger.warning(f"LDAP connection test failed: {e}")
@@ -414,7 +414,7 @@ class LDAPClient:
     def health_check(self: object) -> FlextMeltanoTapLdapTypes.Core.Dict:
         """Perform health check for testing convenience."""
         start_time = time.time()
-        connection_result: FlextCore.Result[object] = self.test_connection()
+        connection_result: FlextResult[object] = self.test_connection()
         end_time = time.time()
 
         round((end_time - start_time) * 1000, 2)
@@ -428,10 +428,10 @@ class LDAPClient:
 
     def _process_oracle_entry(
         self,
-        entry: FlextCore.Types.Dict,
-    ) -> FlextCore.Types.Dict:
+        entry: FlextTypes.Dict,
+    ) -> FlextTypes.Dict:
         """Process Oracle-specific LDAP entries for testing convenience."""
-        attributes: FlextCore.Types.Dict = entry.get("attributes", {})
+        attributes: FlextTypes.Dict = entry.get("attributes", {})
         if not isinstance(attributes, dict):
             return entry
 
@@ -485,10 +485,10 @@ class LDAPClient:
 
     def _process_search_results_with_oracle_support(
         self,
-        search_result: list[FlextLdapModels.Entry] | list[FlextCore.Types.Dict],
+        search_result: list[FlextLdapModels.Entry] | list[FlextTypes.Dict],
         *,
         oracle_oid_mode: bool,
-    ) -> list[FlextCore.Types.Dict]:
+    ) -> list[FlextTypes.Dict]:
         """Process search results with Oracle OID support.
 
         Single Responsibility: Handle only result processing logic.
@@ -498,7 +498,7 @@ class LDAPClient:
             if isinstance(entry, dict):
                 entry_dict = entry
             else:
-                entry_dict: FlextCore.Types.Dict = self._convert_entry_to_dict(entry)
+                entry_dict: FlextTypes.Dict = self._convert_entry_to_dict(entry)
             if oracle_oid_mode:
                 processed_entry = self._process_oracle_entry(entry_dict)
                 results.append(processed_entry)
@@ -522,7 +522,7 @@ class LDAPClient:
         set_event_loop(loop)
         try:
             # Perform synchronous search using existing method
-            search_result: FlextCore.Result[object] = self.search(
+            search_result: FlextResult[object] = self.search(
                 base_dn, search_filter, attributes
             )
             return self._process_search_results_with_oracle_support(
