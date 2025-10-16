@@ -707,15 +707,13 @@ class FlextMeltanoTapLdapModels(FlextModels):
                 "department": self.department,
                 "group_count": len(self.member_of),
                 "has_manager": bool(self.manager),
-                "profile_completeness": sum(
-                    [
-                        bool(self.uid),
-                        bool(self.mail),
-                        bool(self.given_name),
-                        bool(self.sn),
-                        bool(self.department),
-                    ]
-                )
+                "profile_completeness": sum([
+                    bool(self.uid),
+                    bool(self.mail),
+                    bool(self.given_name),
+                    bool(self.sn),
+                    bool(self.department),
+                ])
                 / 5,
             }
 
