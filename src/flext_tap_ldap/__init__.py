@@ -9,14 +9,12 @@ from __future__ import annotations
 
 from typing import Final
 
-from flext_tap_ldap.__version__ import __version__, __version_info__
 from flext_tap_ldap.client import LDAPClient, LDAPClientConfig
 from flext_tap_ldap.config import (
     CustomStreamConfig,
-    FlextMeltanoTapLdapConfig,
+    FlextTapLdapConfig,
     LDIFProcessingConfig,
 )
-from flext_tap_ldap.exceptions import (
     FlextMeltanoTapLdapAuthenticationError,
     FlextMeltanoTapLdapConfigurationError,
     FlextMeltanoTapLdapConnectionError,

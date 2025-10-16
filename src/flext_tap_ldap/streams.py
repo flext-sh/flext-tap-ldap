@@ -11,7 +11,7 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from typing import override
 
-from flext_core import FlextCore
+from flext_core import FlextLogger, FlextTypes
 
 # Use FLEXT Meltano wrappers instead of direct singer_sdk imports (domain separation)
 from flext_meltano import (
@@ -25,7 +25,7 @@ from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 th = FlextMeltanoTypes()
 
-logger = FlextCore.Logger(__name__)
+logger = FlextLogger(__name__)
 
 
 class FallbackDataFactory:
@@ -185,7 +185,7 @@ class UsersStream(LDAPBaseStream):
         """Get user records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
-            config: FlextCore.Types.Dict = self.tap.config
+            config: FlextTypes.Dict = self.tap.config
 
             # Create LDAP client with configuration
             ldap_client = LDAPClient(
@@ -279,7 +279,7 @@ class GroupsStream(LDAPBaseStream):
         """Get group records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
-            config: FlextCore.Types.Dict = self.tap.config
+            config: FlextTypes.Dict = self.tap.config
 
             # Create LDAP client with configuration
             ldap_client = LDAPClient(
@@ -389,7 +389,7 @@ class OrganizationalUnitsStream(LDAPBaseStream):
         """Get organizational unit records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
-            config: FlextCore.Types.Dict = self.tap.config
+            config: FlextTypes.Dict = self.tap.config
 
             # Create LDAP client with configuration
             ldap_client = LDAPClient(
@@ -498,7 +498,7 @@ class SchemaStream(LDAPBaseStream):
         """Get schema records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
-            config: FlextCore.Types.Dict = self.tap.config
+            config: FlextTypes.Dict = self.tap.config
 
             # Create LDAP client with configuration
             ldap_client = LDAPClient(
@@ -524,9 +524,7 @@ class SchemaStream(LDAPBaseStream):
             if schemas:  # If we got real LDAP schema data
                 for schema_entry in schemas:
                     # Parse attributeTypes from schema
-                    attr_types: FlextCore.Types.List = schema_entry.get(
-                        "attributeTypes", []
-                    )
+                    attr_types: FlextTypes.List = schema_entry.get("attributeTypes", [])
                     if isinstance(attr_types, list):
                         for attr_type in attr_types:
                             # Basic parsing - real implementation would parse LDAP schema syntax
@@ -626,9 +624,9 @@ class CustomStream(LDAPBaseStream):
                 )
 
         # Set schema using internal attribute BEFORE calling super().__init__()
-        schema_dict: FlextCore.Types.Dict = (
-            FlextMeltanoTypes.Singer.Typing.PropertiesList(*properties).to_dict()
-        )
+        schema_dict: FlextTypes.Dict = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+            *properties
+        ).to_dict()
         # Now call super().__init__()
         super().__init__(tap=tap, name=params.name, schema=schema_dict)
 
@@ -639,7 +637,7 @@ class CustomStream(LDAPBaseStream):
         """Get custom records from LDAP server using flext-ldap integration."""
         try:
             # Extract connection config from tap configuration (flat format)
-            config: FlextCore.Types.Dict = self.tap.config
+            config: FlextTypes.Dict = self.tap.config
 
             # Create LDAP client with configuration
             ldap_client = LDAPClient(
@@ -676,7 +674,7 @@ class CustomStream(LDAPBaseStream):
                 logger.info("No LDAP custom data returned, using fallback test data")
                 # Fallback to minimal test data for development
                 try:
-                    config: FlextCore.Types.Dict = self.tap.config
+                    config: FlextTypes.Dict = self.tap.config
                     base_dn = config["base_dn"]
                 except Exception:
                     base_dn = "dc=example,dc=com"
@@ -690,7 +688,7 @@ class CustomStream(LDAPBaseStream):
             logger.exception("Failed to get custom stream records")
             # Fallback to minimal test data for development
             try:
-                config: FlextCore.Types.Dict = self.tap.config
+                config: FlextTypes.Dict = self.tap.config
                 base_dn = config["base_dn"]
             except Exception:
                 base_dn = "dc=example,dc=com"

@@ -15,7 +15,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from click.testing import CliRunner
-from flext_core import FlextCore
+from flext_core import FlextTypes
 
 from flext_tap_ldap import FlextMeltanoTapLDAP
 
@@ -29,7 +29,7 @@ class TestFlextMeltanoTapLDAPIntegration:
         return CliRunner()
 
     @pytest.fixture
-    def mock_ldap_config(self) -> FlextCore.Types.Dict:
+    def mock_ldap_config(self) -> FlextTypes.Dict:
         """Mock LDAP configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -40,7 +40,7 @@ class TestFlextMeltanoTapLDAPIntegration:
         }
 
     @pytest.fixture
-    def sample_catalog(self) -> FlextCore.Types.Dict:
+    def sample_catalog(self) -> FlextTypes.Dict:
         """Sample catalog for testing."""
         return {
             "streams": [
@@ -53,7 +53,7 @@ class TestFlextMeltanoTapLDAPIntegration:
         }
 
     @pytest.fixture
-    def sample_state(self) -> FlextCore.Types.Dict:
+    def sample_state(self) -> FlextTypes.Dict:
         """Sample state for testing."""
         return {"bookmarks": {}}
 
@@ -61,7 +61,7 @@ class TestFlextMeltanoTapLDAPIntegration:
     def config_file(
         self,
         tmp_path: Path,
-        mock_ldap_config: FlextCore.Types.Dict,
+        mock_ldap_config: FlextTypes.Dict,
     ) -> Path:
         """Create temporary config file."""
         config_path = tmp_path / "config.json"
@@ -73,7 +73,7 @@ class TestFlextMeltanoTapLDAPIntegration:
     def catalog_file(
         self,
         tmp_path: Path,
-        sample_catalog: FlextCore.Types.Dict,
+        sample_catalog: FlextTypes.Dict,
     ) -> Path:
         """Create temporary catalog file."""
         catalog_path = tmp_path / "catalog.json"
@@ -82,7 +82,7 @@ class TestFlextMeltanoTapLDAPIntegration:
         return catalog_path
 
     @pytest.fixture
-    def state_file(self, tmp_path: Path, sample_state: FlextCore.Types.Dict) -> Path:
+    def state_file(self, tmp_path: Path, sample_state: FlextTypes.Dict) -> Path:
         """Create a state file fixture for testing."""
         state_path = tmp_path / "state.json"
         with Path(state_path).open("w", encoding="utf-8") as f:
@@ -289,7 +289,7 @@ class TestFlextMeltanoTapLDAPIntegration:
         def mock_search(
             *_args: object,
             **_kwargs: object,
-        ) -> Generator[FlextCore.Types.Dict]:
+        ) -> Generator[FlextTypes.Dict]:
             time.sleep(0)
             yield {
                 "dn": "uid=user1,ou=users,dc=test,dc=com",

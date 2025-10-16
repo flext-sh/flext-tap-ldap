@@ -6,7 +6,7 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import override
 
-from flext_core import FlextCore
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import FlextLdapClients
 from flext_ldif import FlextLdif, FlextLdifModels
 
@@ -16,7 +16,7 @@ from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTypes
 from flext_tap_ldap.tap_client import FlextMeltanoTapLDAP
 from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
-logger = FlextCore.Logger(__name__)
+logger = FlextLogger(__name__)
 
 th: FlextMeltanoTypes = FlextMeltanoTypes()
 
@@ -64,7 +64,7 @@ class LDIFStream(Stream):
         """Get LDIF records using flext-ldif processing."""
         logger.info("Processing LDIF files using flext-ldif library")
         # Get LDIF files from config
-        ldif_files: FlextCore.Types.List = self.tap.config.get("ldif_files", [])
+        ldif_files: FlextTypes.List = self.tap.config.get("ldif_files", [])
         ldif_directory = self.tap.config.get("ldif_directory")
         if ldif_files:
             for ldif_file in ldif_files:
@@ -84,7 +84,7 @@ class LDIFStream(Stream):
             # Read file and delegate to flext-ldif
             with Path(ldif_file).open(encoding="utf-8") as f:
                 content = f.read()
-            result: FlextCore.Result[object] = self._ldif_api.parse(content)
+            result: FlextResult[object] = self._ldif_api.parse(content)
             if result.success and result.data:
                 for entry in result.data:
                     yield self._convert_entry_to_record(entry)
@@ -169,7 +169,7 @@ class LDIFAnalysisStream(Stream):
         """Get analysis records using flext-ldif analysis capabilities."""
         logger.info("Generating LDIF analysis using flext-ldif library")
         # Get LDIF files from config
-        ldif_files: FlextCore.Types.List = self.tap.config.get("ldif_files", [])
+        ldif_files: FlextTypes.List = self.tap.config.get("ldif_files", [])
         ldif_directory = self.tap.config.get("ldif_directory")
         # Delegate ALL analysis to flext-ldif library
         try:
@@ -183,16 +183,14 @@ class LDIFAnalysisStream(Stream):
                     if isinstance(total_count, int):
                         total_entries += total_count
                     # Merge counts
-                    stats_entry_types: FlextCore.Types.Dict = stats.get(
-                        "entry_types", {}
-                    )
+                    stats_entry_types: FlextTypes.Dict = stats.get("entry_types", {})
                     if isinstance(stats_entry_types, dict):
                         for entry_type, count in stats_entry_types.items():
                             entry_types[entry_type] = entry_types.get(
                                 entry_type,
                                 0,
                             ) + int(count)
-                    stats_object_classes: FlextCore.Types.Dict = stats.get(
+                    stats_object_classes: FlextTypes.Dict = stats.get(
                         "object_classes", {}
                     )
                     if isinstance(stats_object_classes, dict):
@@ -229,7 +227,7 @@ class LDIFAnalysisStream(Stream):
             # Read file and delegate analysis to flext-ldif
             with Path(ldif_file).open(encoding="utf-8") as f:
                 content = f.read()
-            result: FlextCore.Result[object] = self._ldif_api.parse(content)
+            result: FlextResult[object] = self._ldif_api.parse(content)
             if result.success and result.data:
                 # Generate statistics from parsed entries
                 len(result.data)
@@ -237,7 +235,7 @@ class LDIFAnalysisStream(Stream):
                 object_classes: dict[str, int] = {}
                 for entry in result.data:
                     # Use library delegation for classification
-                    oc_list: FlextCore.Types.List = entry.attributes.get_values(
+                    oc_list: FlextTypes.List = entry.attributes.get_values(
                         "objectClass"
                     )
                     entry_type = self._classify_entry_type(oc_list)

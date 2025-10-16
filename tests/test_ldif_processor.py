@@ -10,7 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from flext_core import FlextCore
+from flext_core import FlextLogger, FlextResult
 
 from flext_tap_ldap import (
     FlextLdifProcessor,
@@ -20,7 +20,7 @@ from flext_tap_ldap import (
     LDIFValidator,
 )
 
-logger = FlextCore.Logger(__name__)
+logger = FlextLogger(__name__)
 
 
 class TestLDIFEntry:
@@ -309,7 +309,7 @@ mail: john.doe@example.com
         sample_ldif_content: str,
     ) -> None:
         """Test parsing LDIF content."""
-        result = FlextCore.Result[None].ok(
+        result = FlextResult[None].ok(
             list(processor.parse_content(sample_ldif_content)),
         )
 
@@ -332,7 +332,7 @@ mail: john.doe@example.com
         ldif_file = tmp_path / "test.ldif"
         ldif_file.write_text(sample_ldif_content)
 
-        result = FlextCore.Result[None].ok(list(processor.parse_file(ldif_file)))
+        result = FlextResult[None].ok(list(processor.parse_file(ldif_file)))
 
         assert result.is_success
         entries = result.data
@@ -345,15 +345,15 @@ mail: john.doe@example.com
         invalid_content = "this is not valid ldif content"
 
         try:
-            result = FlextCore.Result[None].ok(
+            result = FlextResult[None].ok(
                 list(processor.parse_content(invalid_content)),
             )
         except Exception as e:
-            result = FlextCore.Result[None].fail(str(e))
+            result = FlextResult[None].fail(str(e))
 
         # Depending on implementation, this might succeed with warnings
         # or fail - adjust based on actual behavior
-        assert isinstance(result, FlextCore.Result)
+        assert isinstance(result, FlextResult)
 
     def test_ldif_processing_with_validation_errors(
         self, processor: FlextLdifProcessor
@@ -366,14 +366,14 @@ invalidAttribute:
 """
 
         try:
-            result = FlextCore.Result[None].ok(
+            result = FlextResult[None].ok(
                 list(processor.parse_content(content_with_errors)),
             )
         except Exception as e:
-            result = FlextCore.Result[None].fail(str(e))
+            result = FlextResult[None].fail(str(e))
 
         # Should handle errors gracefully
-        assert isinstance(result, FlextCore.Result)
+        assert isinstance(result, FlextResult)
         if result.is_failure:
             assert result.error is not None
 
@@ -495,7 +495,7 @@ mail: user1@test.com
         ldif_file.write_text(ldif_content)
 
         processor = FlextLdifProcessor()
-        result = FlextCore.Result[None].ok(list(processor.parse_file(ldif_file)))
+        result = FlextResult[None].ok(list(processor.parse_file(ldif_file)))
 
         assert result.is_success
         entries = result.data
@@ -526,7 +526,7 @@ sn: User {i}
         # Process all files
         results = []
         for ldif_file in tmp_path.glob("batch_*.ldif"):
-            result = FlextCore.Result[None].ok(list(processor.parse_file(ldif_file)))
+            result = FlextResult[None].ok(list(processor.parse_file(ldif_file)))
             results.append(result)
 
         assert len(results) == 3
@@ -611,7 +611,7 @@ cn: another
 """
 
         try:
-            result = FlextCore.Result[None].ok(
+            result = FlextResult[None].ok(
                 list(processor.parse_content(problematic_content)),
             )
             if result.is_success:
@@ -631,9 +631,9 @@ cn: another
         # Create content with many errors
         error_content = "\n".join([f"invalid_line_{i}" for i in range(10)])
 
-        result = FlextCore.Result[None].ok(list(processor.parse_content(error_content)))
+        result = FlextResult[None].ok(list(processor.parse_content(error_content)))
         # Should handle gracefully due to error limits
-        assert isinstance(result, FlextCore.Result)
+        assert isinstance(result, FlextResult)
 
     def test_processor_ignore_errors_false(self) -> None:
         """Test method."""
@@ -643,11 +643,11 @@ cn: another
         invalid_content = "clearly invalid ldif content"
 
         try:
-            result = FlextCore.Result[None].ok(
+            result = FlextResult[None].ok(
                 list(processor.parse_content(invalid_content)),
             )
             # Should either succeed or fail, but handle gracefully
-            assert isinstance(result, FlextCore.Result)
+            assert isinstance(result, FlextResult)
         except Exception as exc:
             # Should raise exception when not ignoring errors - this is expected
             pytest.skip(f"Strict parser raised as expected: {exc}")

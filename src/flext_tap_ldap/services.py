@@ -14,7 +14,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from uuid import uuid4
 
-from flext_core import FlextCore
+from flext_core import FlextConstants, FlextResult, FlextTypes
 
 from flext_tap_ldap.models import (
     LDAPConnection,
@@ -49,7 +49,7 @@ class FlextMeltanoTapLdapServices:
 
         def __post_init__(self: object) -> None:
             """Validate connection parameters after initialization."""
-            if self.port <= 0 or self.port > FlextCore.Constants.Network.MAX_PORT:
+            if self.port <= 0 or self.port > FlextConstants.Network.MAX_PORT:
                 msg = f"Port must be between 1 and 65535, got {self.port}"
                 raise ValueError(msg)
 
@@ -60,7 +60,7 @@ class FlextMeltanoTapLdapServices:
         stream_name: str
         base_dn: str
         search_filter: str = "(objectClass=*)"
-        attributes: FlextCore.Types.StringList | None = None
+        attributes: FlextTypes.StringList | None = None
         scope: str = "subtree"
 
     # ========================================================================
@@ -76,7 +76,7 @@ class FlextMeltanoTapLdapServices:
 
         def create_connection(
             self, params: FlextMeltanoTapLdapServices.LDAPConnectionParams
-        ) -> FlextCore.Result[LDAPConnection]:
+        ) -> FlextResult[LDAPConnection]:
             """Create LDAP connection from parameters."""
             try:
                 connection = LDAPConnection(
@@ -91,13 +91,13 @@ class FlextMeltanoTapLdapServices:
                     page_size=params.page_size,
                     max_retries=params.max_retries,
                 )
-                return FlextCore.Result[LDAPConnection].ok(data=connection)
+                return FlextResult[LDAPConnection].ok(data=connection)
             except Exception as e:
-                return FlextCore.Result[LDAPConnection].fail(
+                return FlextResult[LDAPConnection].fail(
                     f"Failed to create connection: {e}"
                 )
 
-        def test_connection(self, connection: LDAPConnection) -> FlextCore.Result[bool]:
+        def test_connection(self, connection: LDAPConnection) -> FlextResult[bool]:
             """Test LDAP connection."""
             try:
                 # Implementation would test actual LDAP connection
@@ -106,9 +106,9 @@ class FlextMeltanoTapLdapServices:
                     host=connection.host,
                     port=connection.port,
                 )
-                return FlextCore.Result[bool].ok(data=True)
+                return FlextResult[bool].ok(data=True)
             except Exception as e:
-                return FlextCore.Result[bool].fail(f"Connection test failed: {e}")
+                return FlextResult[bool].fail(f"Connection test failed: {e}")
 
     # ========================================================================
     # NESTED HELPER CLASSES - Stream Services
@@ -123,7 +123,7 @@ class FlextMeltanoTapLdapServices:
 
         def create_stream(
             self, params: FlextMeltanoTapLdapServices.StreamCreationParams
-        ) -> FlextCore.Result[LDAPStream]:
+        ) -> FlextResult[LDAPStream]:
             """Create LDAP stream from parameters."""
             try:
                 stream = LDAPStream(
@@ -133,15 +133,13 @@ class FlextMeltanoTapLdapServices:
                     attributes=params.attributes,
                     scope=params.scope,
                 )
-                return FlextCore.Result[LDAPStream].ok(data=stream)
+                return FlextResult[LDAPStream].ok(data=stream)
             except Exception as e:
-                return FlextCore.Result[LDAPStream].fail(
-                    f"Failed to create stream: {e}"
-                )
+                return FlextResult[LDAPStream].fail(f"Failed to create stream: {e}")
 
         def discover_streams(
             self, connection: LDAPConnection
-        ) -> FlextCore.Result[list[LDAPStream]]:
+        ) -> FlextResult[list[LDAPStream]]:
             """Discover available LDAP streams."""
             try:
                 self.logger.debug(
@@ -157,9 +155,9 @@ class FlextMeltanoTapLdapServices:
                         attributes=["cn", "mail", "uid"],
                     )
                 ]
-                return FlextCore.Result[list[LDAPStream]].ok(data=streams)
+                return FlextResult[list[LDAPStream]].ok(data=streams)
             except Exception as e:
-                return FlextCore.Result[list[LDAPStream]].fail(
+                return FlextResult[list[LDAPStream]].fail(
                     f"Stream discovery failed: {e}"
                 )
 
@@ -179,8 +177,8 @@ class FlextMeltanoTapLdapServices:
             self,
             _connection: LDAPConnection,
             _streams: list[LDAPStream],
-            config: FlextCore.Types.Dict | None = None,
-        ) -> FlextCore.Result[TapExecution]:
+            config: FlextTypes.Dict | None = None,
+        ) -> FlextResult[TapExecution]:
             """Start tap execution."""
             try:
                 execution = TapExecution(
@@ -193,22 +191,18 @@ class FlextMeltanoTapLdapServices:
                     state={},
                 )
                 self._executions[execution.id] = execution
-                return FlextCore.Result[TapExecution].ok(data=execution)
+                return FlextResult[TapExecution].ok(data=execution)
             except Exception as e:
-                return FlextCore.Result[TapExecution].fail(
-                    f"Failed to start execution: {e}"
-                )
+                return FlextResult[TapExecution].fail(f"Failed to start execution: {e}")
 
-        def get_execution_status(
-            self, execution_id: str
-        ) -> FlextCore.Result[TapExecution]:
+        def get_execution_status(self, execution_id: str) -> FlextResult[TapExecution]:
             """Get execution status."""
             execution = self._executions.get(execution_id)
             if not execution:
-                return FlextCore.Result[TapExecution].fail(
+                return FlextResult[TapExecution].fail(
                     f"Execution {execution_id} not found"
                 )
-            return FlextCore.Result[TapExecution].ok(data=execution)
+            return FlextResult[TapExecution].ok(data=execution)
 
     # ========================================================================
     # NESTED HELPER CLASSES - Record Services
@@ -227,8 +221,8 @@ class FlextMeltanoTapLdapServices:
             _connection: LDAPConnection,
             _ldap_filter: str | None = None,
             _base_dn: str | None = None,
-            _attributes: FlextCore.Types.StringList | None = None,
-        ) -> FlextCore.Result[Iterable[FlextMeltanoTapLdapTypes.Core.Dict]]:
+            _attributes: FlextTypes.StringList | None = None,
+        ) -> FlextResult[Iterable[FlextMeltanoTapLdapTypes.Core.Dict]]:
             """Extract records from LDAP stream."""
             try:
                 # Implementation would extract actual LDAP records
@@ -240,13 +234,13 @@ class FlextMeltanoTapLdapServices:
                         "uid": "user1",
                     }
                 ]
-                return FlextCore.Result[
-                    Iterable[FlextMeltanoTapLdapTypes.Core.Dict]
-                ].ok(data=records)
+                return FlextResult[Iterable[FlextMeltanoTapLdapTypes.Core.Dict]].ok(
+                    data=records
+                )
             except Exception as e:
-                return FlextCore.Result[
-                    Iterable[FlextMeltanoTapLdapTypes.Core.Dict]
-                ].fail(f"Record extraction failed: {e}")
+                return FlextResult[Iterable[FlextMeltanoTapLdapTypes.Core.Dict]].fail(
+                    f"Record extraction failed: {e}"
+                )
 
     # ========================================================================
     # MAIN UNIFIED CLASS INTERFACE
@@ -262,24 +256,24 @@ class FlextMeltanoTapLdapServices:
     # Connection operations
     def create_connection(
         self, params: FlextMeltanoTapLdapServices.LDAPConnectionParams
-    ) -> FlextCore.Result[LDAPConnection]:
+    ) -> FlextResult[LDAPConnection]:
         """Create LDAP connection."""
         return self._connection_service.create_connection(params)
 
-    def test_connection(self, connection: LDAPConnection) -> FlextCore.Result[bool]:
+    def test_connection(self, connection: LDAPConnection) -> FlextResult[bool]:
         """Test LDAP connection."""
         return self._connection_service.test_connection(connection)
 
     # Stream operations
     def create_stream(
         self, params: FlextMeltanoTapLdapServices.StreamCreationParams
-    ) -> FlextCore.Result[LDAPStream]:
+    ) -> FlextResult[LDAPStream]:
         """Create LDAP stream."""
         return self._stream_service.create_stream(params)
 
     def discover_streams(
         self, connection: LDAPConnection
-    ) -> FlextCore.Result[list[LDAPStream]]:
+    ) -> FlextResult[list[LDAPStream]]:
         """Discover LDAP streams."""
         return self._stream_service.discover_streams(connection)
 
@@ -288,12 +282,12 @@ class FlextMeltanoTapLdapServices:
         self,
         connection: LDAPConnection,
         streams: list[LDAPStream],
-        config: FlextCore.Types.Dict | None = None,
-    ) -> FlextCore.Result[TapExecution]:
+        config: FlextTypes.Dict | None = None,
+    ) -> FlextResult[TapExecution]:
         """Start tap execution."""
         return self._execution_service.start_execution(connection, streams, config)
 
-    def get_execution_status(self, execution_id: str) -> FlextCore.Result[TapExecution]:
+    def get_execution_status(self, execution_id: str) -> FlextResult[TapExecution]:
         """Get execution status."""
         return self._execution_service.get_execution_status(execution_id)
 
@@ -304,8 +298,8 @@ class FlextMeltanoTapLdapServices:
         connection: LDAPConnection,
         ldap_filter: str | None = None,
         base_dn: str | None = None,
-        attributes: FlextCore.Types.StringList | None = None,
-    ) -> FlextCore.Result[Iterable[FlextMeltanoTapLdapTypes.Core.Dict]]:
+        attributes: FlextTypes.StringList | None = None,
+    ) -> FlextResult[Iterable[FlextMeltanoTapLdapTypes.Core.Dict]]:
         """Extract records from LDAP stream."""
         return self._record_service.extract_records(
             stream, connection, ldap_filter, base_dn, attributes
