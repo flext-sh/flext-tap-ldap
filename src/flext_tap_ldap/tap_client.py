@@ -17,7 +17,7 @@ from collections.abc import Awaitable
 from dataclasses import dataclass
 from typing import override
 
-from flext_core import FlextLogger, FlextResult, FlextService, FlextTypes
+from flext_core import FlextLogger, FlextResult, FlextService
 from flext_ldap import (
     FlextLdapModels,
 )
@@ -139,7 +139,7 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str,
-        attributes: FlextTypes.StringList | None,
+        attributes: list[str] | None,
         ldap_scope: str,
         size_limit: int,
     ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
@@ -201,7 +201,7 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
-        attributes: FlextTypes.StringList | None = None,
+        attributes: list[str] | None = None,
         scope: str = "SUBTREE",
         size_limit: int = 0,
     ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
@@ -378,24 +378,24 @@ class FlextMeltanoTapLDAP(FlextService[FlextMeltanoTapLdapConfig]):
     def execute_extraction(
         self,
         config: FlextMeltanoTapLdapConfig,
-    ) -> FlextResult[FlextTypes.Dict]:
+    ) -> FlextResult[dict[str, object]]:
         """Execute LDAP extraction using standard FlextMeltanoTapLdapConfig."""
         try:
             if not self.domain_model:
                 configure_result = self.configure_service(config)
                 if configure_result.is_failure:
-                    return FlextResult[FlextTypes.Dict].fail(
+                    return FlextResult[dict[str, object]].fail(
                         f"Configuration failed: {configure_result.error}"
                     )
 
             # Use FlextMeltanoTapLdapConfig directly - no conversion needed
             extraction_result = self._perform_ldap_extraction(config)
             if extraction_result.is_failure:
-                return FlextResult[FlextTypes.Dict].fail(
+                return FlextResult[dict[str, object]].fail(
                     f"Extraction failed: {extraction_result.error}"
                 )
 
-            return FlextResult[FlextTypes.Dict].ok({
+            return FlextResult[dict[str, object]].ok({
                 "status": "success",
                 "config_type": "FlextMeltanoTapLdapConfig",
                 "host": config.ldap_host,
@@ -404,7 +404,7 @@ class FlextMeltanoTapLDAP(FlextService[FlextMeltanoTapLdapConfig]):
                 "page_size": config.ldap_page_size,
             })
         except Exception as e:
-            return FlextResult[FlextTypes.Dict].fail(
+            return FlextResult[dict[str, object]].fail(
                 f"Extraction execution failed: {e}"
             )
 

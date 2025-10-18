@@ -14,7 +14,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from uuid import uuid4
 
-from flext_core import FlextConstants, FlextResult, FlextTypes
+from flext_core import FlextConstants, FlextResult
 
 from flext_tap_ldap.models import (
     LDAPConnection,
@@ -60,7 +60,7 @@ class FlextMeltanoTapLdapServices:
         stream_name: str
         base_dn: str
         search_filter: str = "(objectClass=*)"
-        attributes: FlextTypes.StringList | None = None
+        attributes: list[str] | None = None
         scope: str = "subtree"
 
     # ========================================================================
@@ -177,7 +177,7 @@ class FlextMeltanoTapLdapServices:
             self,
             _connection: LDAPConnection,
             _streams: list[LDAPStream],
-            config: FlextTypes.Dict | None = None,
+            config: dict[str, object] | None = None,
         ) -> FlextResult[TapExecution]:
             """Start tap execution."""
             try:
@@ -221,7 +221,7 @@ class FlextMeltanoTapLdapServices:
             _connection: LDAPConnection,
             _ldap_filter: str | None = None,
             _base_dn: str | None = None,
-            _attributes: FlextTypes.StringList | None = None,
+            _attributes: list[str] | None = None,
         ) -> FlextResult[Iterable[FlextMeltanoTapLdapTypes.Core.Dict]]:
             """Extract records from LDAP stream."""
             try:
@@ -282,7 +282,7 @@ class FlextMeltanoTapLdapServices:
         self,
         connection: LDAPConnection,
         streams: list[LDAPStream],
-        config: FlextTypes.Dict | None = None,
+        config: dict[str, object] | None = None,
     ) -> FlextResult[TapExecution]:
         """Start tap execution."""
         return self._execution_service.start_execution(connection, streams, config)
@@ -298,7 +298,7 @@ class FlextMeltanoTapLdapServices:
         connection: LDAPConnection,
         ldap_filter: str | None = None,
         base_dn: str | None = None,
-        attributes: FlextTypes.StringList | None = None,
+        attributes: list[str] | None = None,
     ) -> FlextResult[Iterable[FlextMeltanoTapLdapTypes.Core.Dict]]:
         """Extract records from LDAP stream."""
         return self._record_service.extract_records(

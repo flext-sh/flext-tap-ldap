@@ -17,7 +17,7 @@ from itertools import starmap
 from pathlib import Path
 from typing import override
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextLogger, FlextResult
 from flext_ldap import FlextLdapClients
 from flext_ldif import FlextLdif, FlextLdifModels
 
@@ -159,7 +159,7 @@ class FlextMeltanoTapLdapStreams:
             """Create LDAP client from tap configuration."""
             self.client: LDAPClient | None = None
             try:
-                connection_config: FlextTypes.Dict = self.tap.config.get(
+                connection_config: dict[str, object] = self.tap.config.get(
                     "connection", {}
                 )
                 self.client = LDAPClient(
@@ -203,7 +203,7 @@ class FlextMeltanoTapLdapStreams:
             try:
                 # Use base DN from config if not specified
                 if base_dn is None:
-                    connection_config: FlextTypes.Dict = self.tap.config.get(
+                    connection_config: dict[str, object] = self.tap.config.get(
                         "connection", {}
                     )
                     base_dn = connection_config.get("base_dn", "")
@@ -238,7 +238,7 @@ class FlextMeltanoTapLdapStreams:
         def __init__(self, tap: FlextMeltanoTapLDAP) -> None:
             """Initialize users stream."""
             name = "users"
-            schema: FlextTypes.Dict = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+            schema: dict[str, object] = FlextMeltanoTypes.Singer.Typing.PropertiesList(
                 FlextMeltanoTypes.Singer.Typing.Property(
                     "objectClass",
                     FlextMeltanoTypes.Singer.Typing.ArrayType(
@@ -319,7 +319,7 @@ class FlextMeltanoTapLdapStreams:
         def __init__(self, tap: FlextMeltanoTapLDAP) -> None:
             """Initialize groups stream."""
             name = "groups"
-            schema: FlextTypes.Dict = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+            schema: dict[str, object] = FlextMeltanoTypes.Singer.Typing.PropertiesList(
                 FlextMeltanoTypes.Singer.Typing.Property(
                     "member",
                     FlextMeltanoTypes.Singer.Typing.ArrayType(
@@ -396,7 +396,7 @@ class FlextMeltanoTapLdapStreams:
         def __init__(self, tap: FlextMeltanoTapLDAP) -> None:
             """Initialize organizational units stream."""
             name = "organizational_units"
-            schema: FlextTypes.Dict = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+            schema: dict[str, object] = FlextMeltanoTypes.Singer.Typing.PropertiesList(
                 FlextMeltanoTypes.Singer.Typing.Property(
                     "objectClass",
                     FlextMeltanoTypes.Singer.Typing.ArrayType(
@@ -453,7 +453,7 @@ class FlextMeltanoTapLdapStreams:
         def __init__(self, tap: FlextMeltanoTapLDAP) -> None:
             """Initialize schema stream."""
             name = "schema"
-            schema: FlextTypes.Dict = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+            schema: dict[str, object] = FlextMeltanoTypes.Singer.Typing.PropertiesList(
                 FlextMeltanoTypes.Singer.Typing.Property(
                     "objectClass",
                     FlextMeltanoTypes.Singer.Typing.ArrayType(
@@ -682,7 +682,7 @@ class FlextMeltanoTapLdapStreams:
             self._ldap_api = FlextLdapClients()
 
             # Define schema
-            schema: FlextTypes.Dict = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+            schema: dict[str, object] = FlextMeltanoTypes.Singer.Typing.PropertiesList(
                 FlextMeltanoTypes.Singer.Typing.Property(
                     "entry_type",
                     FlextMeltanoTypes.Singer.Typing.StringType,
@@ -734,7 +734,7 @@ class FlextMeltanoTapLdapStreams:
             logger.info("Processing LDIF files using flext-ldif library")
 
             # Get LDIF files from config
-            ldif_files: FlextTypes.List = self.tap.config.get("ldif_files", [])
+            ldif_files: list[object] = self.tap.config.get("ldif_files", [])
             ldif_directory = self.tap.config.get("ldif_directory")
 
             if ldif_files:
@@ -792,9 +792,7 @@ class FlextMeltanoTapLdapStreams:
             """Convert LDIF entry to stream record."""
             try:
                 # Classify entry type by object classes
-                object_classes: FlextTypes.List = (
-                    entry.get_attribute("objectClass") or []
-                )
+                object_classes: list[object] = entry.get_attribute("objectClass") or []
                 self._classify_entry_type(object_classes)
 
                 return {
@@ -825,7 +823,7 @@ class FlextMeltanoTapLdapStreams:
             self._ldif_api = FlextLdif()
 
             # Define schema for analysis results
-            schema: FlextTypes.Dict = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+            schema: dict[str, object] = FlextMeltanoTypes.Singer.Typing.PropertiesList(
                 FlextMeltanoTypes.Singer.Typing.Property(
                     "total_entries",
                     FlextMeltanoTypes.Singer.Typing.IntegerType,
@@ -892,7 +890,7 @@ class FlextMeltanoTapLdapStreams:
             logger.info("Analyzing LDIF files")
 
             # Get LDIF files from config
-            ldif_files: FlextTypes.List = self.tap.config.get("ldif_files", [])
+            ldif_files: list[object] = self.tap.config.get("ldif_files", [])
             ldif_directory = self.tap.config.get("ldif_directory")
 
             if ldif_files:
@@ -955,7 +953,9 @@ class FlextMeltanoTapLdapStreams:
                             oc_dist[oc] = oc_dist.get(oc, 0) + 1
                     analysis_data["object_class_distribution"] = oc_dist
                 else:
-                    analysis_data_errors: FlextTypes.Dict = analysis_data.get("errors")
+                    analysis_data_errors: dict[str, object] = analysis_data.get(
+                        "errors"
+                    )
                     if isinstance(analysis_data_errors, list):
                         analysis_data_errors.append(
                             f"Validation failed: {validation_result.error}",

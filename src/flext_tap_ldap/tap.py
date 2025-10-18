@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from flext_core import FlextLogger, FlextTypes
+from flext_core import FlextLogger
 
 # Use FLEXT Meltano wrappers instead of direct singer_sdk imports (domain separation)
 from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
@@ -122,7 +122,7 @@ class FlextMeltanoTapLDAP(Tap):
             )
 
         # Add custom streams if configured:
-        custom_streams_config: FlextTypes.Dict = self.config.get("custom_streams", [])
+        custom_streams_config: dict[str, object] = self.config.get("custom_streams", [])
         for custom_config in custom_streams_config:
             params = CustomStreamParams(
                 name=custom_config["name"],

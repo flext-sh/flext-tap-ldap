@@ -46,7 +46,7 @@ class FlextMeltanoTapLdapProtocols:
             """Protocol for LDAP connection management in Singer tap operations."""
 
             def connect(
-                self, config: FlextTypes.Dict
+                self, config: dict[str, object]
             ) -> FlextResult[FlextTypes.object]:
                 """Establish connection to LDAP server for data extraction.
 
@@ -66,7 +66,7 @@ class FlextMeltanoTapLdapProtocols:
 
                 """
 
-            def test_connection(self, config: FlextTypes.Dict) -> FlextResult[bool]:
+            def test_connection(self, config: dict[str, object]) -> FlextResult[bool]:
                 """Test LDAP server connectivity.
 
                 Args:
@@ -77,11 +77,11 @@ class FlextMeltanoTapLdapProtocols:
 
                 """
 
-            def get_server_info(self) -> FlextResult[FlextTypes.Dict]:
+            def get_server_info(self) -> FlextResult[dict[str, object]]:
                 """Get LDAP server information and capabilities.
 
                 Returns:
-                    FlextResult[FlextTypes.Dict]: Server information or error
+                    FlextResult[dict[str, object]]: Server information or error
 
                 """
 
@@ -104,34 +104,34 @@ class FlextMeltanoTapLdapProtocols:
             """Protocol for Singer stream generation from LDAP data."""
 
             def discover_streams(
-                self, config: FlextTypes.Dict
-            ) -> FlextResult[list[FlextTypes.Dict]]:
+                self, config: dict[str, object]
+            ) -> FlextResult[list[dict[str, object]]]:
                 """Discover available LDAP streams for extraction.
 
                 Args:
                     config: Discovery configuration
 
                 Returns:
-                    FlextResult[list[FlextTypes.Dict]]: Discovered streams or error
+                    FlextResult[list[dict[str, object]]]: Discovered streams or error
 
                 """
 
             def get_stream_schema(
                 self, stream_name: str
-            ) -> FlextResult[FlextTypes.Dict]:
+            ) -> FlextResult[dict[str, object]]:
                 """Get schema definition for LDAP stream.
 
                 Args:
                     stream_name: Name of the stream
 
                 Returns:
-                    FlextResult[FlextTypes.Dict]: Stream schema or error
+                    FlextResult[dict[str, object]]: Stream schema or error
 
                 """
 
             def sync_stream(
-                self, stream_name: str, state: FlextTypes.Dict
-            ) -> FlextResult[FlextTypes.Dict]:
+                self, stream_name: str, state: dict[str, object]
+            ) -> FlextResult[dict[str, object]]:
                 """Synchronize LDAP stream data.
 
                 Args:
@@ -139,12 +139,12 @@ class FlextMeltanoTapLdapProtocols:
                     state: Current sync state
 
                 Returns:
-                    FlextResult[FlextTypes.Dict]: Sync results or error
+                    FlextResult[dict[str, object]]: Sync results or error
 
                 """
 
             def write_schema_message(
-                self, stream_name: str, schema: FlextTypes.Dict
+                self, stream_name: str, schema: dict[str, object]
             ) -> FlextResult[None]:
                 """Write Singer schema message for LDAP stream.
 
@@ -161,53 +161,55 @@ class FlextMeltanoTapLdapProtocols:
         class LdifProcessingProtocol(FlextProtocols.Service, Protocol):
             """Protocol for LDIF processing in Singer tap operations."""
 
-            def parse_ldif_entry(self, ldif_entry: str) -> FlextResult[FlextTypes.Dict]:
+            def parse_ldif_entry(
+                self, ldif_entry: str
+            ) -> FlextResult[dict[str, object]]:
                 """Parse LDIF entry to dictionary.
 
                 Args:
                     ldif_entry: LDIF entry string
 
                 Returns:
-                    FlextResult[FlextTypes.Dict]: Parsed entry or error
+                    FlextResult[dict[str, object]]: Parsed entry or error
 
                 """
 
             def convert_to_singer_record(
-                self, ldap_entry: FlextTypes.Dict
-            ) -> FlextResult[FlextTypes.Dict]:
+                self, ldap_entry: dict[str, object]
+            ) -> FlextResult[dict[str, object]]:
                 """Convert LDAP entry to Singer record format.
 
                 Args:
                     ldap_entry: LDAP entry dictionary
 
                 Returns:
-                    FlextResult[FlextTypes.Dict]: Singer record or error
+                    FlextResult[dict[str, object]]: Singer record or error
 
                 """
 
             def handle_binary_attributes(
-                self, attributes: FlextTypes.Dict
-            ) -> FlextResult[FlextTypes.Dict]:
+                self, attributes: dict[str, object]
+            ) -> FlextResult[dict[str, object]]:
                 """Handle binary LDAP attributes for Singer format.
 
                 Args:
                     attributes: LDAP attributes
 
                 Returns:
-                    FlextResult[FlextTypes.Dict]: Processed attributes or error
+                    FlextResult[dict[str, object]]: Processed attributes or error
 
                 """
 
             def normalize_attribute_names(
-                self, attributes: FlextTypes.Dict
-            ) -> FlextResult[FlextTypes.Dict]:
+                self, attributes: dict[str, object]
+            ) -> FlextResult[dict[str, object]]:
                 """Normalize LDAP attribute names for Singer compatibility.
 
                 Args:
                     attributes: LDAP attributes
 
                 Returns:
-                    FlextResult[FlextTypes.Dict]: Normalized attributes or error
+                    FlextResult[dict[str, object]]: Normalized attributes or error
 
                 """
 
@@ -216,24 +218,24 @@ class FlextMeltanoTapLdapProtocols:
             """Protocol for Singer tap execution operations."""
 
             def run_discovery_mode(
-                self, config: FlextTypes.Dict
-            ) -> FlextResult[FlextTypes.Dict]:
+                self, config: dict[str, object]
+            ) -> FlextResult[dict[str, object]]:
                 """Run tap in discovery mode.
 
                 Args:
                     config: Tap configuration
 
                 Returns:
-                    FlextResult[FlextTypes.Dict]: Discovery results or error
+                    FlextResult[dict[str, object]]: Discovery results or error
 
                 """
 
             def run_sync_mode(
                 self,
-                config: FlextTypes.Dict,
-                catalog: FlextTypes.Dict,
-                state: FlextTypes.Dict,
-            ) -> FlextResult[FlextTypes.Dict]:
+                config: dict[str, object],
+                catalog: dict[str, object],
+                state: dict[str, object],
+            ) -> FlextResult[dict[str, object]]:
                 """Run tap in sync mode.
 
                 Args:
@@ -242,11 +244,11 @@ class FlextMeltanoTapLdapProtocols:
                     state: Current state
 
                 Returns:
-                    FlextResult[FlextTypes.Dict]: Sync results or error
+                    FlextResult[dict[str, object]]: Sync results or error
 
                 """
 
-            def handle_interrupt(self, state: FlextTypes.Dict) -> FlextResult[None]:
+            def handle_interrupt(self, state: dict[str, object]) -> FlextResult[None]:
                 """Handle tap interruption and save state.
 
                 Args:
@@ -257,7 +259,7 @@ class FlextMeltanoTapLdapProtocols:
 
                 """
 
-            def emit_state_message(self, state: FlextTypes.Dict) -> FlextResult[None]:
+            def emit_state_message(self, state: dict[str, object]) -> FlextResult[None]:
                 """Emit Singer state message.
 
                 Args:
@@ -274,9 +276,9 @@ class FlextMeltanoTapLdapProtocols:
 
             def transform_ldap_record(
                 self,
-                ldap_record: FlextTypes.Dict,
-                stream_schema: FlextTypes.Dict,
-            ) -> FlextResult[FlextTypes.Dict]:
+                ldap_record: dict[str, object],
+                stream_schema: dict[str, object],
+            ) -> FlextResult[dict[str, object]]:
                 """Transform LDAP record to match stream schema.
 
                 Args:
@@ -284,12 +286,12 @@ class FlextMeltanoTapLdapProtocols:
                     stream_schema: Target schema
 
                 Returns:
-                    FlextResult[FlextTypes.Dict]: Transformed record or error
+                    FlextResult[dict[str, object]]: Transformed record or error
 
                 """
 
             def validate_record_schema(
-                self, record: FlextTypes.Dict, schema: FlextTypes.Dict
+                self, record: dict[str, object], schema: dict[str, object]
             ) -> FlextResult[bool]:
                 """Validate record against schema.
 
@@ -303,7 +305,7 @@ class FlextMeltanoTapLdapProtocols:
                 """
 
             def emit_record_message(
-                self, stream_name: str, record: FlextTypes.Dict
+                self, stream_name: str, record: dict[str, object]
             ) -> FlextResult[None]:
                 """Emit Singer record message.
 
@@ -317,7 +319,7 @@ class FlextMeltanoTapLdapProtocols:
                 """
 
             def handle_record_errors(
-                self, record: FlextTypes.Dict, error: str
+                self, record: dict[str, object], error: str
             ) -> FlextResult[None]:
                 """Handle record processing errors.
 
@@ -334,7 +336,7 @@ class FlextMeltanoTapLdapProtocols:
         class ConfigurationProtocol(FlextProtocols.Service, Protocol):
             """Protocol for Singer tap configuration management."""
 
-            def validate_config(self, config: FlextTypes.Dict) -> FlextResult[bool]:
+            def validate_config(self, config: dict[str, object]) -> FlextResult[bool]:
                 """Validate tap configuration.
 
                 Args:
@@ -345,7 +347,7 @@ class FlextMeltanoTapLdapProtocols:
 
                 """
 
-            def get_ldap_base_dn(self, config: FlextTypes.Dict) -> FlextResult[str]:
+            def get_ldap_base_dn(self, config: dict[str, object]) -> FlextResult[str]:
                 """Get LDAP base DN from configuration.
 
                 Args:
@@ -356,7 +358,7 @@ class FlextMeltanoTapLdapProtocols:
 
                 """
 
-            def get_ldap_filter(self, config: FlextTypes.Dict) -> FlextResult[str]:
+            def get_ldap_filter(self, config: dict[str, object]) -> FlextResult[str]:
                 """Get LDAP search filter from configuration.
 
                 Args:
@@ -368,20 +370,20 @@ class FlextMeltanoTapLdapProtocols:
                 """
 
             def get_selected_attributes(
-                self, config: FlextTypes.Dict
-            ) -> FlextResult[FlextTypes.StringList]:
+                self, config: dict[str, object]
+            ) -> FlextResult[list[str]]:
                 """Get list of selected LDAP attributes.
 
                 Args:
                     config: Tap configuration
 
                 Returns:
-                    FlextResult[FlextTypes.StringList]: Selected attributes or error
+                    FlextResult[list[str]]: Selected attributes or error
 
                 """
 
             def get_replication_method(
-                self, stream_name: str, config: FlextTypes.Dict
+                self, stream_name: str, config: dict[str, object]
             ) -> FlextResult[str]:
                 """Get replication method for stream.
 
@@ -403,10 +405,10 @@ class FlextMeltanoTapLdapProtocols:
 
             def run_tap(
                 self,
-                config: FlextTypes.Dict,
-                catalog: FlextTypes.Dict | None = None,
-                state: FlextTypes.Dict | None = None,
-            ) -> FlextResult[FlextTypes.Dict]:
+                config: dict[str, object],
+                catalog: dict[str, object] | None = None,
+                state: dict[str, object] | None = None,
+            ) -> FlextResult[dict[str, object]]:
                 """Run complete Singer tap operation.
 
                 Args:
@@ -415,7 +417,7 @@ class FlextMeltanoTapLdapProtocols:
                     state: Current state (optional)
 
                 Returns:
-                    FlextResult[FlextTypes.Dict]: Tap execution results or error
+                    FlextResult[dict[str, object]]: Tap execution results or error
 
                 """
 

@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 
-from flext_core import FlextResult, FlextTypes
+from flext_core import FlextResult
 
 from flext_tap_ldap.config import (
     FlextTapLdapConfig,
@@ -214,7 +214,7 @@ class FlextMeltanoTapLdapServices:
 
         """
         try:
-            config: FlextTypes.Dict = LDAPConnectionConfig(
+            config: dict[str, object] = LDAPConnectionConfig(
                 host=self.host,
                 base_dn=self.base_dn,
                 port=self.port,
@@ -317,7 +317,7 @@ class FlextMeltanoTapLdapServices:
             default=False,
         )
         rules = kwargs.get("ldif_transformation_rules")
-        rules_dict: FlextTypes.Dict = rules if isinstance(rules, dict) else None
+        rules_dict: dict[str, object] = rules if isinstance(rules, dict) else None
         builder.with_transformations(enable=apply_transformations, rules=rules_dict)
 
         batch = self._coerce_str_optional(kwargs.get("migration_batch"))
@@ -410,7 +410,7 @@ class FlextMeltanoTapLdapServices:
 
             # Apply overrides
             if overrides:
-                config_dict: FlextTypes.Dict = config.model_dump()
+                config_dict: dict[str, object] = config.model_dump()
                 config_dict.update(overrides)
                 config = FlextTapLdapConfig(**config_dict)
 
@@ -448,7 +448,7 @@ class FlextMeltanoTapLdapServices:
 
             # Apply overrides
             if overrides:
-                config_dict: FlextTypes.Dict = config.model_dump()
+                config_dict: dict[str, object] = config.model_dump()
                 config_dict.update(overrides)
                 config = FlextTapLdapConfig(**config_dict)
 
@@ -502,7 +502,7 @@ class FlextMeltanoTapLdapServices:
 
             # Apply overrides
             if overrides:
-                config_dict: FlextTypes.Dict = config.model_dump()
+                config_dict: dict[str, object] = config.model_dump()
                 config_dict.update(overrides)
                 config = FlextTapLdapConfig(**config_dict)
 
