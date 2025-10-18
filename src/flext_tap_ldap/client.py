@@ -8,7 +8,7 @@ from collections.abc import Awaitable
 from dataclasses import dataclass
 from typing import override
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextLogger, FlextResult
 from flext_ldap import (
     FlextLdapClients,
     FlextLdapConstants,
@@ -173,8 +173,8 @@ class LDAPClient:
 
     def _convert_entry_to_dict(
         self,
-        entry_data: FlextLdapModels.Entry | FlextTypes.Dict | None,
-    ) -> FlextTypes.Dict:
+        entry_data: FlextLdapModels.Entry | dict[str, object] | None,
+    ) -> dict[str, object]:
         """Convert FlextLdapModels.Entry to dict[str, object] format for testing convenience.
 
         Single Responsibility: Handle only entry format conversion.
@@ -184,7 +184,7 @@ class LDAPClient:
             # It's a FlextLdapModels.Entry model object - flatten attributes
             # Use getattr to safely access attributes for type checker
             getattr(entry_data, "dn", "")
-            attributes: FlextTypes.Dict = getattr(entry_data, "attributes", {})
+            attributes: dict[str, object] = getattr(entry_data, "attributes", {})
             entry_dict = {"dn": "dn"}
             # Add flattened attributes to the entry dict
             for attr_name, attr_values in attributes.items():
@@ -222,7 +222,7 @@ class LDAPClient:
             if size_limit > 0 and entries_returned >= size_limit:
                 break
 
-            entry_dict: FlextTypes.Dict = self._convert_entry_to_dict(entry_data)
+            entry_dict: dict[str, object] = self._convert_entry_to_dict(entry_data)
             entries.append(entry_dict)
 
         return entries
@@ -428,10 +428,10 @@ class LDAPClient:
 
     def _process_oracle_entry(
         self,
-        entry: FlextTypes.Dict,
-    ) -> FlextTypes.Dict:
+        entry: dict[str, object],
+    ) -> dict[str, object]:
         """Process Oracle-specific LDAP entries for testing convenience."""
-        attributes: FlextTypes.Dict = entry.get("attributes", {})
+        attributes: dict[str, object] = entry.get("attributes", {})
         if not isinstance(attributes, dict):
             return entry
 
@@ -485,10 +485,10 @@ class LDAPClient:
 
     def _process_search_results_with_oracle_support(
         self,
-        search_result: list[FlextLdapModels.Entry] | list[FlextTypes.Dict],
+        search_result: list[FlextLdapModels.Entry] | list[dict[str, object]],
         *,
         oracle_oid_mode: bool,
-    ) -> list[FlextTypes.Dict]:
+    ) -> list[dict[str, object]]:
         """Process search results with Oracle OID support.
 
         Single Responsibility: Handle only result processing logic.
@@ -498,7 +498,7 @@ class LDAPClient:
             if isinstance(entry, dict):
                 entry_dict = entry
             else:
-                entry_dict: FlextTypes.Dict = self._convert_entry_to_dict(entry)
+                entry_dict: dict[str, object] = self._convert_entry_to_dict(entry)
             if oracle_oid_mode:
                 processed_entry = self._process_oracle_entry(entry_dict)
                 results.append(processed_entry)

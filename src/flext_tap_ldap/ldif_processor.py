@@ -15,7 +15,7 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import override
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextLogger, FlextResult
 from flext_ldif import FlextLdif
 from flext_ldif.exceptions import FlextLdifExceptions
 from flext_ldif.models import FlextLdifModels
@@ -91,7 +91,7 @@ class LDIFEntry:
 
     def has_object_class(self, object_class: str) -> bool:
         """Check if entry has specific object class."""
-        object_classes: FlextTypes.List = self.get_attribute("objectClass") or []
+        object_classes: list[object] = self.get_attribute("objectClass") or []
         return any(oc.lower() == object_class.lower() for oc in object_classes)
 
     def to_dict(self: object) -> FlextMeltanoTapLdapTypes.Core.Dict:
@@ -136,7 +136,7 @@ class LDIFEntry:
     @property
     def validation_errors(self: object) -> list[FlextMeltanoTapLdapTypes.Core.Headers]:
         """Get validation errors for this entry."""
-        errors: list[FlextTypes.StringDict] = []
+        errors: list[dict[str, str]] = []
         if not self.is_valid():
             errors.append(
                 {"code": "invalid_entry", "message": "Entry failed validation"},
@@ -422,7 +422,7 @@ class LDIFValidator:
         """Validate a list of LDIF entries using flext-ldif."""
         valid_count = 0
         invalid_count = 0
-        errors: FlextTypes.StringList = []
+        errors: list[str] = []
 
         try:
             # Convert to FlextLdifEntry objects

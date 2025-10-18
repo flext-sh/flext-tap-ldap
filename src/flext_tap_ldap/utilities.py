@@ -11,7 +11,7 @@ import re
 from datetime import UTC, datetime
 from typing import ClassVar, override
 
-from flext_core import FlextConstants, FlextResult, FlextTypes, FlextUtilities
+from flext_core import FlextConstants, FlextResult, FlextUtilities
 
 
 class FlextMeltanoTapLdapUtilities(FlextUtilities):
@@ -38,9 +38,9 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
         @staticmethod
         def create_schema_message(
             stream_name: str,
-            schema: FlextTypes.Dict,
-            key_properties: FlextTypes.StringList | None = None,
-        ) -> FlextTypes.Dict:
+            schema: dict[str, object],
+            key_properties: list[str] | None = None,
+        ) -> dict[str, object]:
             """Create Singer schema message.
 
             Args:
@@ -49,7 +49,7 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
                 key_properties: List of key property names
 
             Returns:
-                FlextTypes.Dict: Singer schema message
+                dict[str, object]: Singer schema message
 
             """
             return {
@@ -62,9 +62,9 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
         @staticmethod
         def create_record_message(
             stream_name: str,
-            record: FlextTypes.Dict,
+            record: dict[str, object],
             time_extracted: datetime | None = None,
-        ) -> FlextTypes.Dict:
+        ) -> dict[str, object]:
             """Create Singer record message.
 
             Args:
@@ -73,7 +73,7 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
                 time_extracted: Timestamp when record was extracted
 
             Returns:
-                FlextTypes.Dict: Singer record message
+                dict[str, object]: Singer record message
 
             """
             extracted_time = time_extracted or datetime.now(UTC)
@@ -85,14 +85,14 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             }
 
         @staticmethod
-        def create_state_message(state: FlextTypes.Dict) -> FlextTypes.Dict:
+        def create_state_message(state: dict[str, object]) -> dict[str, object]:
             """Create Singer state message.
 
             Args:
                 state: State data
 
             Returns:
-                FlextTypes.Dict: Singer state message
+                dict[str, object]: Singer state message
 
             """
             return {
@@ -101,7 +101,7 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             }
 
         @staticmethod
-        def write_message(message: FlextTypes.Dict) -> None:
+        def write_message(message: dict[str, object]) -> None:
             """Write Singer message to stdout.
 
             Args:
@@ -147,14 +147,14 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             return match.group(1).strip() if match else ""
 
         @staticmethod
-        def extract_ou_from_dn(dn: str) -> FlextTypes.StringList:
+        def extract_ou_from_dn(dn: str) -> list[str]:
             """Extract Organizational Units from Distinguished Name.
 
             Args:
                 dn: Distinguished Name
 
             Returns:
-                FlextTypes.StringList: List of organizational units
+                list[str]: List of organizational units
 
             """
             if not dn:
@@ -227,9 +227,9 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
 
         @staticmethod
         def generate_stream_schema(
-            sample_records: list[FlextTypes.Dict],
+            sample_records: list[dict[str, object]],
             _stream_name: str,
-        ) -> FlextTypes.Dict:
+        ) -> dict[str, object]:
             """Generate JSON schema from sample records.
 
             Args:
@@ -237,7 +237,7 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
                 stream_name: Name of the stream
 
             Returns:
-                FlextTypes.Dict: JSON schema
+                dict[str, object]: JSON schema
 
             """
             if not sample_records:
@@ -247,7 +247,7 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
                     "additionalProperties": True,
                 }
 
-            properties: FlextTypes.Dict = {}
+            properties: dict[str, object] = {}
 
             for record in sample_records:
                 for key, value in record.items():
@@ -265,14 +265,14 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             }
 
         @staticmethod
-        def infer_type(value: object) -> FlextTypes.Dict:
+        def infer_type(value: object) -> dict[str, object]:
             """Infer JSON schema type from value.
 
             Args:
                 value: Value to analyze
 
             Returns:
-                FlextTypes.Dict: JSON schema type definition
+                dict[str, object]: JSON schema type definition
 
             """
             if value is None:
@@ -318,36 +318,36 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
 
         @staticmethod
         def validate_ldap_connection_config(
-            config: FlextTypes.Dict,
-        ) -> FlextResult[FlextTypes.Dict]:
+            config: dict[str, object],
+        ) -> FlextResult[dict[str, object]]:
             """Validate LDAP connection configuration.
 
             Args:
                 config: Configuration dictionary
 
             Returns:
-                FlextResult[FlextTypes.Dict]: Validated config or error
+                FlextResult[dict[str, object]]: Validated config or error
 
             """
             required_fields = ["host", "base_dn"]
             missing_fields = [field for field in required_fields if field not in config]
 
             if missing_fields:
-                return FlextResult[FlextTypes.Dict].fail(
+                return FlextResult[dict[str, object]].fail(
                     f"Missing required fields: {', '.join(missing_fields)}"
                 )
 
             # Validate host format
             host = config["host"]
             if not isinstance(host, str) or not host.strip():
-                return FlextResult[FlextTypes.Dict].fail(
+                return FlextResult[dict[str, object]].fail(
                     "Host must be a non-empty string"
                 )
 
             # Validate base DN format
             base_dn = config["base_dn"]
             if not isinstance(base_dn, str) or not base_dn.strip():
-                return FlextResult[FlextTypes.Dict].fail(
+                return FlextResult[dict[str, object]].fail(
                     "Base DN must be a non-empty string"
                 )
 
@@ -359,58 +359,58 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
                     or port <= 0
                     or port > FlextConstants.Network.MAX_PORT
                 ):
-                    return FlextResult[FlextTypes.Dict].fail(
+                    return FlextResult[dict[str, object]].fail(
                         "Port must be a valid integer between 1 and 65535"
                     )
 
-            return FlextResult[FlextTypes.Dict].ok(config)
+            return FlextResult[dict[str, object]].ok(config)
 
         @staticmethod
         def validate_stream_config(
-            config: FlextTypes.Dict,
-        ) -> FlextResult[FlextTypes.Dict]:
+            config: dict[str, object],
+        ) -> FlextResult[dict[str, object]]:
             """Validate stream configuration.
 
             Args:
                 config: Stream configuration
 
             Returns:
-                FlextResult[FlextTypes.Dict]: Validated config or error
+                FlextResult[dict[str, object]]: Validated config or error
 
             """
             if "streams" not in config:
-                return FlextResult[FlextTypes.Dict].fail(
+                return FlextResult[dict[str, object]].fail(
                     "Configuration must include 'streams' section"
                 )
 
             streams = config["streams"]
             if not isinstance(streams, dict):
-                return FlextResult[FlextTypes.Dict].fail(
+                return FlextResult[dict[str, object]].fail(
                     "Streams configuration must be a dictionary"
                 )
 
             # Validate each stream
             for stream_name, stream_config in streams.items():
                 if not isinstance(stream_config, dict):
-                    return FlextResult[FlextTypes.Dict].fail(
+                    return FlextResult[dict[str, object]].fail(
                         f"Stream '{stream_name}' configuration must be a dictionary"
                     )
 
                 # Check for required stream fields
                 if "selected" not in stream_config:
-                    return FlextResult[FlextTypes.Dict].fail(
+                    return FlextResult[dict[str, object]].fail(
                         f"Stream '{stream_name}' must have 'selected' field"
                     )
 
-            return FlextResult[FlextTypes.Dict].ok(config)
+            return FlextResult[dict[str, object]].ok(config)
 
     class StateManagement:
         """State management utilities for incremental syncs."""
 
         @staticmethod
         def get_stream_state(
-            state: FlextTypes.Dict, stream_name: str
-        ) -> FlextTypes.Dict:
+            state: dict[str, object], stream_name: str
+        ) -> dict[str, object]:
             """Get state for a specific stream.
 
             Args:
@@ -418,17 +418,17 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
                 stream_name: Name of the stream
 
             Returns:
-                FlextTypes.Dict: Stream state
+                dict[str, object]: Stream state
 
             """
             return state.get("bookmarks", {}).get(stream_name, {})
 
         @staticmethod
         def set_stream_state(
-            state: FlextTypes.Dict,
+            state: dict[str, object],
             stream_name: str,
-            stream_state: FlextTypes.Dict,
-        ) -> FlextTypes.Dict:
+            stream_state: dict[str, object],
+        ) -> dict[str, object]:
             """Set state for a specific stream.
 
             Args:
@@ -437,7 +437,7 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
                 stream_state: State data for the stream
 
             Returns:
-                FlextTypes.Dict: Updated state
+                dict[str, object]: Updated state
 
             """
             if "bookmarks" not in state:
@@ -448,7 +448,7 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
 
         @staticmethod
         def get_bookmark(
-            state: FlextTypes.Dict,
+            state: dict[str, object],
             stream_name: str,
             bookmark_key: str,
         ) -> object:
@@ -472,11 +472,11 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
 
         @staticmethod
         def set_bookmark(
-            state: FlextTypes.Dict,
+            state: dict[str, object],
             stream_name: str,
             bookmark_key: str,
             bookmark_value: object,
-        ) -> FlextTypes.Dict:
+        ) -> dict[str, object]:
             """Set bookmark value for a stream.
 
             Args:
@@ -486,7 +486,7 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
                 bookmark_value: Bookmark value
 
             Returns:
-                FlextTypes.Dict: Updated state
+                dict[str, object]: Updated state
 
             """
             if "bookmarks" not in state:
@@ -502,9 +502,9 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
     def create_schema_message(
         cls,
         stream_name: str,
-        schema: FlextTypes.Dict,
-        key_properties: FlextTypes.StringList | None = None,
-    ) -> FlextTypes.Dict:
+        schema: dict[str, object],
+        key_properties: list[str] | None = None,
+    ) -> dict[str, object]:
         """Proxy method for SingerUtilities.create_schema_message()."""
         return cls.SingerUtilities.create_schema_message(
             stream_name, schema, key_properties
@@ -514,9 +514,9 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
     def create_record_message(
         cls,
         stream_name: str,
-        record: FlextTypes.Dict,
+        record: dict[str, object],
         time_extracted: datetime | None = None,
-    ) -> FlextTypes.Dict:
+    ) -> dict[str, object]:
         """Proxy method for SingerUtilities.create_record_message()."""
         return cls.SingerUtilities.create_record_message(
             stream_name, record, time_extracted
@@ -539,26 +539,26 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
 
     @classmethod
     def validate_ldap_connection_config(
-        cls, config: FlextTypes.Dict
-    ) -> FlextResult[FlextTypes.Dict]:
+        cls, config: dict[str, object]
+    ) -> FlextResult[dict[str, object]]:
         """Proxy method for ConfigValidation.validate_ldap_connection_config()."""
         return cls.ConfigValidation.validate_ldap_connection_config(config)
 
     @classmethod
     def get_stream_state(
-        cls, state: FlextTypes.Dict, stream_name: str
-    ) -> FlextTypes.Dict:
+        cls, state: dict[str, object], stream_name: str
+    ) -> dict[str, object]:
         """Proxy method for StateManagement.get_stream_state()."""
         return cls.StateManagement.get_stream_state(state, stream_name)
 
     @classmethod
     def set_bookmark(
         cls,
-        state: FlextTypes.Dict,
+        state: dict[str, object],
         stream_name: str,
         bookmark_key: str,
         bookmark_value: object,
-    ) -> FlextTypes.Dict:
+    ) -> dict[str, object]:
         """Proxy method for StateManagement.set_bookmark()."""
         return cls.StateManagement.set_bookmark(
             state, stream_name, bookmark_key, bookmark_value

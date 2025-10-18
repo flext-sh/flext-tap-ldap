@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from flext_core import FlextConstants, FlextTypes
+from flext_core import FlextConstants
 from flext_ldap.constants import FlextLdapConstants
 
 
@@ -51,9 +51,7 @@ class FlextMeltanoTapLdapConstants(FlextConstants):
         """LDAP search operation configuration."""
 
         DEFAULT_SCOPE = FlextLdapConstants.Scopes.SUBTREE
-        SCOPES: ClassVar[FlextTypes.StringList] = list(
-            FlextLdapConstants.Scopes.VALID_SCOPES
-        )
+        SCOPES: ClassVar[list[str]] = list(FlextLdapConstants.Scopes.VALID_SCOPES)
 
     class Extraction:
         """Singer tap specific extraction constants."""

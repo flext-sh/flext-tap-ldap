@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextConstants, FlextModels, FlextTypes
+from flext_core import FlextConstants, FlextModels
 from pydantic import Field
 
 from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
@@ -37,9 +37,7 @@ class LDAPEntry(FlextModels.Entity):
         default_factory=dict,
         description="Entry attributes",
     )
-    object_class: FlextTypes.StringList = Field(
-        default_factory=list, description="Object classes"
-    )
+    object_class: list[str] = Field(default_factory=list, description="Object classes")
 
 
 __all__: FlextMeltanoTapLdapTypes.Core.StringList = [

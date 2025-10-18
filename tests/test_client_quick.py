@@ -12,7 +12,6 @@ import time
 from unittest.mock import Mock, patch
 
 import pytest
-from flext_core import FlextTypes
 
 from flext_tap_ldap import LDAPClient
 
@@ -148,7 +147,7 @@ class TestLDAPClientQuick:
     def test_run_in_new_loop(self, client: LDAPClient) -> None:
         """Test running coroutine in new loop."""
 
-        def dummy_coro() -> list[FlextTypes.Dict]:
+        def dummy_coro() -> list[dict[str, object]]:
             time.sleep(0)
             return [{"test": "data"}]
 

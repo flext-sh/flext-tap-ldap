@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import override
 from uuid import UUID, uuid4
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextLogger, FlextResult
 from flext_ldap import FlextLdapModels
 from flext_ldif import FlextLdif
 
@@ -607,7 +607,7 @@ class FlextMeltanoTapLdapServices:
                         "dn",
                         None,
                     )
-                    attributes_obj: FlextTypes.Dict = getattr(entry, "attributes", {})
+                    attributes_obj: dict[str, object] = getattr(entry, "attributes", {})
                     getattr(attributes_obj, "attributes", attributes_obj)
                     normalized.append({"dn": "dn", "attributes": "attributes"})
 
@@ -743,7 +743,7 @@ class FlextMeltanoTapLdapServices:
 
         """
         try:
-            config: FlextTypes.Dict = {
+            config: dict[str, object] = {
                 "host": params.host,
                 "port": params.port,
                 "bind_dn": params.bind_dn,
@@ -837,7 +837,7 @@ class FlextMeltanoTapLdapServices:
 
             # Apply overrides
             if overrides:
-                config_dict: FlextTypes.Dict = config.model_dump()
+                config_dict: dict[str, object] = config.model_dump()
                 config_dict.update(overrides)
                 config = FlextMeltanoTapLdapConfig(**config_dict)
 
@@ -884,7 +884,7 @@ class FlextMeltanoTapLdapServices:
 
             # Apply overrides
             if overrides:
-                config_dict: FlextTypes.Dict = config.model_dump()
+                config_dict: dict[str, object] = config.model_dump()
                 config_dict.update(overrides)
                 config = FlextMeltanoTapLdapConfig(**config_dict)
 
