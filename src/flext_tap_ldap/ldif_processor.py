@@ -2,7 +2,7 @@
 
 This module provides LDIF file processing capabilities by delegating
 to the flext-ldif library to eliminate code duplication and leverage
-enterprise-grade LDIF processing infrastructure.
+ LDIF processing infrastructure.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -174,7 +174,7 @@ class FlextLdifProcessor:
     """LDIF file processor using flext-ldif library.
 
     This class provides testing convenience while delegating
-    all LDIF processing to the enterprise-grade flext-ldif library.
+    all LDIF processing to the flext-ldif library.
     """
 
     @override

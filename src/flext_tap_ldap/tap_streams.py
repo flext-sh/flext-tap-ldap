@@ -34,13 +34,13 @@ logger = FlextLogger(__name__)
 
 
 class FlextMeltanoTapLdapStreams:
-    """Unified streams class for LDAP tap operations with comprehensive stream management.
+    """Unified streams class for LDAP tap operations with complete stream management.
 
     This class consolidates all LDAP and LDIF stream implementations following
     the unified class pattern with Clean Architecture and Domain-Driven Design.
 
     Contains all stream classes as nested classes to maintain single responsibility
-    while providing comprehensive LDAP/LDIF data extraction capabilities.
+    while providing complete LDAP/LDIF data extraction capabilities.
     """
 
     class FallbackDataFactory:

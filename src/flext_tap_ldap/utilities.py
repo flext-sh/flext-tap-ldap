@@ -44,12 +44,12 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Create Singer schema message.
 
             Args:
-                stream_name: Name of the stream
-                schema: JSON schema for the stream
-                key_properties: List of key property names
+            stream_name: Name of the stream
+            schema: JSON schema for the stream
+            key_properties: List of key property names
 
             Returns:
-                dict[str, object]: Singer schema message
+            dict[str, object]: Singer schema message
 
             """
             return {
@@ -68,12 +68,12 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Create Singer record message.
 
             Args:
-                stream_name: Name of the stream
-                record: Record data
-                time_extracted: Timestamp when record was extracted
+            stream_name: Name of the stream
+            record: Record data
+            time_extracted: Timestamp when record was extracted
 
             Returns:
-                dict[str, object]: Singer record message
+            dict[str, object]: Singer record message
 
             """
             extracted_time = time_extracted or datetime.now(UTC)
@@ -89,10 +89,10 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Create Singer state message.
 
             Args:
-                state: State data
+            state: State data
 
             Returns:
-                dict[str, object]: Singer state message
+            dict[str, object]: Singer state message
 
             """
             return {
@@ -105,7 +105,7 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Write Singer message to stdout.
 
             Args:
-                message: Singer message to write
+            message: Singer message to write
 
             """
 
@@ -117,10 +117,10 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Normalize LDAP Distinguished Name.
 
             Args:
-                dn: Distinguished Name to normalize
+            dn: Distinguished Name to normalize
 
             Returns:
-                str: Normalized DN
+            str: Normalized DN
 
             """
             if not dn:
@@ -134,10 +134,10 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Extract Common Name from Distinguished Name.
 
             Args:
-                dn: Distinguished Name
+            dn: Distinguished Name
 
             Returns:
-                str: Common Name or empty string if not found
+            str: Common Name or empty string if not found
 
             """
             if not dn:
@@ -151,10 +151,10 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Extract Organizational Units from Distinguished Name.
 
             Args:
-                dn: Distinguished Name
+            dn: Distinguished Name
 
             Returns:
-                list[str]: List of organizational units
+            list[str]: List of organizational units
 
             """
             if not dn:
@@ -167,10 +167,10 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Convert LDAP timestamp to ISO format.
 
             Args:
-                timestamp: LDAP timestamp string
+            timestamp: LDAP timestamp string
 
             Returns:
-                FlextResult[str]: ISO formatted timestamp or error
+            FlextResult[str]: ISO formatted timestamp or error
 
             """
             try:
@@ -204,10 +204,10 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Sanitize LDAP attribute name for JSON schema.
 
             Args:
-                attr_name: LDAP attribute name
+            attr_name: LDAP attribute name
 
             Returns:
-                str: Sanitized attribute name
+            str: Sanitized attribute name
 
             """
             if not attr_name:
@@ -233,11 +233,11 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Generate JSON schema from sample records.
 
             Args:
-                sample_records: List of sample records
-                stream_name: Name of the stream
+            sample_records: List of sample records
+            stream_name: Name of the stream
 
             Returns:
-                dict[str, object]: JSON schema
+            dict[str, object]: JSON schema
 
             """
             if not sample_records:
@@ -269,10 +269,10 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Infer JSON schema type from value.
 
             Args:
-                value: Value to analyze
+            value: Value to analyze
 
             Returns:
-                dict[str, object]: JSON schema type definition
+            dict[str, object]: JSON schema type definition
 
             """
             if value is None:
@@ -300,11 +300,11 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Calculate optimal batch size for processing.
 
             Args:
-                record_count: Total number of records
-                target_batches: Target number of batches
+            record_count: Total number of records
+            target_batches: Target number of batches
 
             Returns:
-                int: Optimal batch size
+            int: Optimal batch size
 
             """
             if record_count <= 0:
@@ -323,10 +323,10 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Validate LDAP connection configuration.
 
             Args:
-                config: Configuration dictionary
+            config: Configuration dictionary
 
             Returns:
-                FlextResult[dict[str, object]]: Validated config or error
+            FlextResult[dict[str, object]]: Validated config or error
 
             """
             required_fields = ["host", "base_dn"]
@@ -372,10 +372,10 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Validate stream configuration.
 
             Args:
-                config: Stream configuration
+            config: Stream configuration
 
             Returns:
-                FlextResult[dict[str, object]]: Validated config or error
+            FlextResult[dict[str, object]]: Validated config or error
 
             """
             if "streams" not in config:
@@ -414,11 +414,11 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Get state for a specific stream.
 
             Args:
-                state: Complete state dictionary
-                stream_name: Name of the stream
+            state: Complete state dictionary
+            stream_name: Name of the stream
 
             Returns:
-                dict[str, object]: Stream state
+            dict[str, object]: Stream state
 
             """
             return state.get("bookmarks", {}).get(stream_name, {})
@@ -432,12 +432,12 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Set state for a specific stream.
 
             Args:
-                state: Complete state dictionary
-                stream_name: Name of the stream
-                stream_state: State data for the stream
+            state: Complete state dictionary
+            stream_name: Name of the stream
+            stream_state: State data for the stream
 
             Returns:
-                dict[str, object]: Updated state
+            dict[str, object]: Updated state
 
             """
             if "bookmarks" not in state:
@@ -455,12 +455,12 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Get bookmark value for a stream.
 
             Args:
-                state: Complete state dictionary
-                stream_name: Name of the stream
-                bookmark_key: Bookmark key
+            state: Complete state dictionary
+            stream_name: Name of the stream
+            bookmark_key: Bookmark key
 
             Returns:
-                object: Bookmark value or None
+            object: Bookmark value or None
 
             """
             stream_state = (
@@ -480,13 +480,13 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             """Set bookmark value for a stream.
 
             Args:
-                state: Complete state dictionary
-                stream_name: Name of the stream
-                bookmark_key: Bookmark key
-                bookmark_value: Bookmark value
+            state: Complete state dictionary
+            stream_name: Name of the stream
+            bookmark_key: Bookmark key
+            bookmark_value: Bookmark value
 
             Returns:
-                dict[str, object]: Updated state
+            dict[str, object]: Updated state
 
             """
             if "bookmarks" not in state:

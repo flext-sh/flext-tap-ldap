@@ -23,7 +23,7 @@ from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 
 class FlextMeltanoTapLdapModels(FlextModels):
-    """Comprehensive models for LDAP tap operations extending FlextModels.
+    """Complete models for LDAP tap operations extending FlextModels.
 
     Provides standardized models for all LDAP tap domain entities including:
     - Singer stream metadata and configuration
@@ -269,7 +269,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
             """Get first value if exists, None otherwise.
 
             Returns:
-                First value from values list or None if empty.
+            First value from values list or None if empty.
 
             """
             values = getattr(self, "values", None)
@@ -280,14 +280,14 @@ class FlextMeltanoTapLdapModels(FlextModels):
             """Check if attribute has multiple values.
 
             Returns:
-                True if attribute has more than one value.
+            True if attribute has more than one value.
 
             """
             values = getattr(self, "values", None)
             return len(values) > 1 if values else False
 
     class LdapConnectionConfig(FlextModels.ArbitraryTypesModel):
-        """LDAP connection configuration with comprehensive settings."""
+        """LDAP connection configuration with complete settings."""
 
         # Pydantic 2.11 Configuration - Connection Features
         model_config = ConfigDict(
@@ -476,7 +476,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
             return self
 
     class LdapEntry(FlextModels.Entity):
-        """Represents an LDAP directory entry with comprehensive attributes."""
+        """Represents an LDAP directory entry with complete attributes."""
 
         # Pydantic 2.11 Configuration - Entry Features
         model_config = ConfigDict(
@@ -569,10 +569,10 @@ class FlextMeltanoTapLdapModels(FlextModels):
             """Get attribute value by name (case-insensitive).
 
             Args:
-                name: Attribute name to retrieve.
+            name: Attribute name to retrieve.
 
             Returns:
-                Attribute value if found, None otherwise.
+            Attribute value if found, None otherwise.
 
             """
             # LDAP attributes are case-insensitive
@@ -585,10 +585,10 @@ class FlextMeltanoTapLdapModels(FlextModels):
             """Check if entry has specific object class.
 
             Args:
-                object_class: Object class name to check.
+            object_class: Object class name to check.
 
             Returns:
-                True if entry has the specified object class (case-insensitive).
+            True if entry has the specified object class (case-insensitive).
 
             """
             return any(oc.lower() == object_class.lower() for oc in self.object_classes)
@@ -597,7 +597,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
             """Convert entry to dictionary format.
 
             Returns:
-                Dictionary representation of the LDAP entry.
+            Dictionary representation of the LDAP entry.
 
             """
             result = {
@@ -621,10 +621,10 @@ class FlextMeltanoTapLdapModels(FlextModels):
             """Create LdapEntry from dictionary.
 
             Args:
-                data: Dictionary with entry data.
+            data: Dictionary with entry data.
 
             Returns:
-                LdapEntry instance.
+            LdapEntry instance.
 
             """
             return cls(
@@ -1321,7 +1321,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
             extra="forbid",
             frozen=False,
             json_schema_extra={
-                "description": "LDIF file processing state with comprehensive statistics",
+                "description": "LDIF file processing state with complete statistics",
                 "examples": [
                     {
                         "file_path": "/data/users.ldif",
@@ -1410,7 +1410,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
             extra="forbid",
             frozen=False,
             json_schema_extra={
-                "description": "LDAP tap performance metrics with comprehensive monitoring",
+                "description": "LDAP tap performance metrics with complete monitoring",
                 "examples": [
                     {
                         "connection_time": 0.5,

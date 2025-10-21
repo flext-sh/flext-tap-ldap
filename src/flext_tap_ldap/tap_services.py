@@ -36,14 +36,14 @@ logger = FlextLogger(__name__)
 
 
 class FlextMeltanoTapLdapServices:
-    """Unified services class for LDAP tap operations with comprehensive service management.
+    """Unified services class for LDAP tap operations with complete service management.
 
     This class consolidates all LDAP tap services including connection management,
     stream processing, record handling, and LDIF processing following the unified
     class pattern with Clean Architecture and Domain-Driven Design.
 
     Contains all service classes and utility functions as nested classes and methods
-    to maintain single responsibility while providing comprehensive LDAP/LDIF
+    to maintain single responsibility while providing complete LDAP/LDIF
     data extraction and processing capabilities.
     """
 
@@ -702,10 +702,10 @@ class FlextMeltanoTapLdapServices:
         """Set up the LDAP tap with configuration.
 
         Args:
-          config: Optional configuration. If None, creates defaults.
+        config: Optional configuration. If None, creates defaults.
 
         Returns:
-          FlextResult with FlextMeltanoTapLdapConfig or error message.
+        FlextResult with FlextMeltanoTapLdapConfig or error message.
 
         """
         try:
@@ -736,10 +736,10 @@ class FlextMeltanoTapLdapServices:
         """Create LDAP connection configuration using Parameter Object Pattern.
 
         Args:
-          params: LDAP connection parameters object
+        params: LDAP connection parameters object
 
         Returns:
-          FlextResult with connection configuration or error message.
+        FlextResult with connection configuration or error message.
 
         """
         try:
@@ -797,10 +797,10 @@ class FlextMeltanoTapLdapServices:
         """Validate LDAP tap configuration.
 
         Args:
-          config: Configuration to validate
+        config: Configuration to validate
 
         Returns:
-          FlextResult with validation success or error message.
+        FlextResult with validation success or error message.
 
         """
         try:
@@ -817,10 +817,10 @@ class FlextMeltanoTapLdapServices:
         """Create development LDAP configuration with defaults.
 
         Args:
-          **overrides: Configuration overrides
+        **overrides: Configuration overrides
 
         Returns:
-          FlextResult with FlextMeltanoTapLdapConfig for development use.
+        FlextResult with FlextMeltanoTapLdapConfig for development use.
 
         """
         try:
@@ -855,10 +855,10 @@ class FlextMeltanoTapLdapServices:
         """Create production LDAP configuration with security defaults.
 
         Args:
-          **overrides: Configuration overrides
+        **overrides: Configuration overrides
 
         Returns:
-          FlextResult with FlextMeltanoTapLdapConfig for production use.
+        FlextResult with FlextMeltanoTapLdapConfig for production use.
 
         """
         try:
