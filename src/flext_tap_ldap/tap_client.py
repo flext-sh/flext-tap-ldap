@@ -637,10 +637,10 @@ def create_ldap_tap_plugin(
     """Create an LDAP tap plugin instance.
 
     Args:
-      config: Plugin configuration dictionary
+    config: Plugin configuration dictionary
 
     Returns:
-      FlextResult containing FlextMeltanoTapLDAPPlugin instance or error
+    FlextResult containing FlextMeltanoTapLDAPPlugin instance or error
 
     """
     try:

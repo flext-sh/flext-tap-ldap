@@ -165,7 +165,7 @@ class LDAPClient:
         Single Responsibility: Handle only URI construction.
 
         Returns:
-            str:: Description of return value.
+        str:: Description of return value.
 
         """
         protocol = "ldaps" if self.use_ssl else "ldap"

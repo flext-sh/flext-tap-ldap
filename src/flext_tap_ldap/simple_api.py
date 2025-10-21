@@ -284,15 +284,15 @@ class FlextMeltanoTapLdapServices:
 
         Keyword Args:
         **kwargs: Optional keyword-only parameters, including:
-            - ldif_file_pattern: Pattern for LDIF files (default: *.ldif).
-            - ldif_ignore_errors: Continue on parsing errors (default: True).
-            - ldif_max_errors: Max errors before stopping (default: 100).
-            - ldif_ignore_file_errors: Continue if a file fails (default: True).
-            - ldif_ignore_entry_errors: Continue if an entry fails (default: True).
-            - ldif_apply_transformations: Apply transformation rules (default: False).
-            - ldif_transformation_rules: Dict of transformation rules.
-            - migration_batch: Identifier for batch processing.
-            - enable_ldif_streams: Enable LDIF streams (default: False).
+        - ldif_file_pattern: Pattern for LDIF files (default: *.ldif).
+        - ldif_ignore_errors: Continue on parsing errors (default: True).
+        - ldif_max_errors: Max errors before stopping (default: 100).
+        - ldif_ignore_file_errors: Continue if a file fails (default: True).
+        - ldif_ignore_entry_errors: Continue if an entry fails (default: True).
+        - ldif_apply_transformations: Apply transformation rules (default: False).
+        - ldif_transformation_rules: Dict of transformation rules.
+        - migration_batch: Identifier for batch processing.
+        - enable_ldif_streams: Enable LDIF streams (default: False).
 
         """
         # Use Builder Pattern to construct configuration
