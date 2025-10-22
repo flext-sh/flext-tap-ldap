@@ -580,3 +580,21 @@ docker-compose up -d && make ldap-test  # ✅ LDAP integration
 **REFACTORING AUTHORITY**: Evidence-based validation required for all success claims  
 **QUALITY AUTHORITY**: Zero tolerance - 90% coverage, zero type errors, full Singer compliance  
 **INTEGRATION AUTHORITY**: Must integrate seamlessly with FLEXT ecosystem (flext-core, flext-ldap, flext-ldif)
+
+---
+
+## Pydantic v2 Compliance Standards
+
+**Status**: ✅ Fully Pydantic v2 Compliant
+**Verified**: October 22, 2025 (Phase 7 Ecosystem Audit)
+
+### Verification
+
+```bash
+make audit-pydantic-v2     # Expected: Status: PASS, Violations: 0
+```
+
+### Reference
+
+- **Complete Guide**: `../flext-core/docs/pydantic-v2-modernization/PYDANTIC_V2_STANDARDS_GUIDE.md`
+- **Phase 7 Report**: `../flext-core/docs/pydantic-v2-modernization/PHASE_7_COMPLETION_REPORT.md`

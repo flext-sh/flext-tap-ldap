@@ -114,7 +114,7 @@ class LDIFProcessingConfig(FlextConfig):
 class FlextTapLdapConfig(FlextConfig):
     """FLEXT Tap LDAP Configuration extending FlextConfig.
 
-    Single flat configuration class for FLEXT LDAP tap following FlextTapLdapConfig pattern:
+    Single flat configuration class for FLEXT LDAP tap with enterprise features:
     - Extends FlextConfig from flext-core
     - Uses Pydantic 2 Settings with SecretStr for sensitive data
     - Enhanced singleton pattern with thread-safe access
@@ -136,9 +136,9 @@ class FlextTapLdapConfig(FlextConfig):
     )
 
     # LDAP Connection Configuration - flat structure
-    ldap_host: str = Field(description="LDAP server host")
+    ldap_host: str = Field(min_length=1, description="LDAP server host")
     ldap_port: int = Field(
-        default=FlextConstants.Platform.LDAP_DEFAULT_PORT,
+        default=389,
         description="LDAP server port",
     )
     ldap_use_ssl: bool = Field(default=False, description="Use SSL connection")
@@ -232,15 +232,6 @@ class FlextTapLdapConfig(FlextConfig):
                     msg = "Custom stream must have 'name' and 'search_filter'"
                     raise ValueError(msg)
         return v
-
-    @field_validator("ldap_host")
-    @classmethod
-    def validate_ldap_host(cls, v: str) -> str:
-        """Validate LDAP host is not empty."""
-        if not v or not v.strip():
-            msg = "LDAP host is required"
-            raise ValueError(msg)
-        return v.strip()
 
     @field_validator("ldap_port")
     @classmethod

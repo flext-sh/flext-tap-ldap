@@ -186,9 +186,7 @@ class FlextMeltanoTapLdapServices:
         try:
             # Use local variable to avoid reassigning self
             config = (
-                self
-                if self is not None
-                else FlextMeltanoTapLdapConfig.create_with_defaults()
+                self if self is not None else FlextTapLdapConfig.create_with_defaults()
             )
 
             # Validate configuration
@@ -197,7 +195,7 @@ class FlextMeltanoTapLdapServices:
             return FlextResult[FlextTapLdapConfig].ok(config)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[FlextMeltanoTapLdapConfig].fail(
+            return FlextResult[FlextTapLdapConfig].fail(
                 f"Failed to setup LDAP tap: {e}"
             )
 
@@ -345,7 +343,7 @@ class FlextMeltanoTapLdapServices:
                 f"Failed to create LDIF processing config: {e}",
             )
 
-    def validate_ldap_config(self: FlextMeltanoTapLdapConfig) -> FlextResult[bool]:
+    def validate_ldap_config(self: FlextTapLdapConfig) -> FlextResult[bool]:
         """Validate the LDAP tap configuration.
 
         Args:
@@ -384,7 +382,7 @@ class FlextMeltanoTapLdapServices:
 
     def create_development_ldap_config(
         **overrides: object,
-    ) -> FlextResult[FlextMeltanoTapLdapConfig]:
+    ) -> FlextResult[FlextTapLdapConfig]:
         """Create development LDAP configuration with defaults.
 
         Args:
@@ -417,13 +415,13 @@ class FlextMeltanoTapLdapServices:
             return FlextResult[FlextTapLdapConfig].ok(config)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[FlextMeltanoTapLdapConfig].fail(
+            return FlextResult[FlextTapLdapConfig].fail(
                 f"Failed to create development config: {e}",
             )
 
     def create_production_ldap_config(
         **overrides: object,
-    ) -> FlextResult[FlextMeltanoTapLdapConfig]:
+    ) -> FlextResult[FlextTapLdapConfig]:
         """Create production LDAP configuration with security defaults.
 
         Args:
@@ -455,7 +453,7 @@ class FlextMeltanoTapLdapServices:
             return FlextResult[FlextTapLdapConfig].ok(config)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[FlextMeltanoTapLdapConfig].fail(
+            return FlextResult[FlextTapLdapConfig].fail(
                 f"Failed to create production config: {e}",
             )
 
@@ -463,7 +461,7 @@ class FlextMeltanoTapLdapServices:
         self: str | None = None,
         ldif_files: FlextMeltanoTapLdapTypes.Core.StringList | None = None,
         **overrides: object,
-    ) -> FlextResult[FlextMeltanoTapLdapConfig]:
+    ) -> FlextResult[FlextTapLdapConfig]:
         """Create LDIF processing configuration for migration scenarios.
 
         Args:
@@ -509,7 +507,7 @@ class FlextMeltanoTapLdapServices:
             return FlextResult[FlextTapLdapConfig].ok(config)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[FlextMeltanoTapLdapConfig].fail(
+            return FlextResult[FlextTapLdapConfig].fail(
                 f"Failed to create LDIF processing config: {e}",
             )
 

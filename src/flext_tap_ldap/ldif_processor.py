@@ -17,7 +17,6 @@ from typing import override
 
 from flext_core import FlextLogger, FlextResult
 from flext_ldif import FlextLdif
-from flext_ldif.exceptions import FlextLdifExceptions
 from flext_ldif.models import FlextLdifModels
 
 from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
@@ -28,8 +27,6 @@ FlextLdifDistinguishedName = FlextLdifModels.DistinguishedName
 FlextLdifEntry = FlextLdifModels.Entry
 
 logger = FlextLogger(__name__)
-# Testing convenience aliases that delegate to flext-ldif
-LDIFParseError = FlextLdifExceptions.parse_error
 
 
 class LDIFEntry:

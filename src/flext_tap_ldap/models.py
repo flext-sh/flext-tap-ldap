@@ -310,7 +310,7 @@ class FlextMeltanoTapLdapModels(FlextModels):
         # LDAP Connection (required)
         host: str = Field(..., description="LDAP server hostname")
         port: int = Field(
-            default=FlextConstants.Platform.LDAP_DEFAULT_PORT,
+            default=389,
             ge=1,
             le=65535,
             description="LDAP server port",
