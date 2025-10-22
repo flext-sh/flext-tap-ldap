@@ -22,7 +22,7 @@ from flext_ldap import (
     FlextLdapModels,
 )
 
-from flext_tap_ldap.config import FlextMeltanoTapLdapConfig
+from flext_tap_ldap.config import FlextTapLdapConfig
 from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 logger = FlextLogger(__name__)
@@ -343,24 +343,24 @@ class LDAPClient:
         return getattr(self._flext_api, name)
 
 
-class FlextMeltanoTapLDAP(FlextService[FlextMeltanoTapLdapConfig]):
-    """FLEXT LDAP Tap service using standard FlextMeltanoTapLdapConfig.
+class FlextMeltanoTapLDAP(FlextService[FlextTapLdapConfig]):
+    """FLEXT LDAP Tap service using standard FlextTapLdapConfig.
 
     Unified tap service following FLEXT standards with direct configuration usage.
-    NO wrappers, aliases, or legacy compatibility - uses FlextMeltanoTapLdapConfig directly.
+    NO wrappers, aliases, or legacy compatibility - uses FlextTapLdapConfig directly.
     """
 
     def __init__(self) -> None:
         """Initialize FLEXT LDAP Tap service."""
         super().__init__()
         self.logger = FlextLogger(__name__)
-        self.domain_model: FlextMeltanoTapLdapConfig | None = None
+        self.domain_model: FlextTapLdapConfig | None = None
 
     def configure_service(
         self,
-        config: FlextMeltanoTapLdapConfig,
+        config: FlextTapLdapConfig,
     ) -> FlextResult[None]:
-        """Configure the LDAP tap service with standard FlextMeltanoTapLdapConfig."""
+        """Configure the LDAP tap service with standard FlextTapLdapConfig."""
         try:
             # Validate configuration using standard config
             validation_result = config.validate_configuration()
@@ -377,9 +377,9 @@ class FlextMeltanoTapLDAP(FlextService[FlextMeltanoTapLdapConfig]):
 
     def execute_extraction(
         self,
-        config: FlextMeltanoTapLdapConfig,
+        config: FlextTapLdapConfig,
     ) -> FlextResult[dict[str, object]]:
-        """Execute LDAP extraction using standard FlextMeltanoTapLdapConfig."""
+        """Execute LDAP extraction using standard FlextTapLdapConfig."""
         try:
             if not self.domain_model:
                 configure_result = self.configure_service(config)
@@ -388,7 +388,7 @@ class FlextMeltanoTapLDAP(FlextService[FlextMeltanoTapLdapConfig]):
                         f"Configuration failed: {configure_result.error}"
                     )
 
-            # Use FlextMeltanoTapLdapConfig directly - no conversion needed
+            # Use FlextTapLdapConfig directly - no conversion needed
             extraction_result = self._perform_ldap_extraction(config)
             if extraction_result.is_failure:
                 return FlextResult[dict[str, object]].fail(
@@ -397,7 +397,7 @@ class FlextMeltanoTapLDAP(FlextService[FlextMeltanoTapLdapConfig]):
 
             return FlextResult[dict[str, object]].ok({
                 "status": "success",
-                "config_type": "FlextMeltanoTapLdapConfig",
+                "config_type": "FlextTapLdapConfig",
                 "host": config.ldap_host,
                 "port": config.ldap_port,
                 "base_dn": config.ldap_base_dn,
@@ -408,9 +408,7 @@ class FlextMeltanoTapLDAP(FlextService[FlextMeltanoTapLdapConfig]):
                 f"Extraction execution failed: {e}"
             )
 
-    def _perform_ldap_extraction(
-        self, config: FlextMeltanoTapLdapConfig
-    ) -> FlextResult[None]:
+    def _perform_ldap_extraction(self, config: FlextTapLdapConfig) -> FlextResult[None]:
         """Perform LDAP extraction with direct config usage."""
         try:
             self.logger.info(
@@ -425,8 +423,8 @@ class FlextMeltanoTapLDAP(FlextService[FlextMeltanoTapLdapConfig]):
         except Exception as e:
             return FlextResult[None].fail(f"LDAP extraction failed: {e}")
 
-    def get_config(self) -> FlextMeltanoTapLdapConfig | None:
-        """Get current configuration - returns standard FlextMeltanoTapLdapConfig only."""
+    def get_config(self) -> FlextTapLdapConfig | None:
+        """Get current configuration - returns standard FlextTapLdapConfig only."""
         return self.domain_model
 
 
@@ -440,8 +438,8 @@ class FlextMeltanoTapLDAPPlugin:
     @override
     def __init__(self, config: FlextMeltanoTapLdapTypes.Core.Dict) -> None:
         """Initialize LDAP tap plugin."""
-        # Convert dict[str, object] config to FlextMeltanoTapLdapConfig
-        self._config: FlextMeltanoTapLdapConfig = FlextMeltanoTapLdapConfig(**config)
+        # Convert dict[str, object] config to FlextTapLdapConfig
+        self._config: FlextTapLdapConfig = FlextTapLdapConfig(**config)
         self._tap_instance: FlextMeltanoTapLDAP | None = None
 
     @property

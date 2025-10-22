@@ -174,6 +174,13 @@ class FlextMeltanoTapLdapTypes(FlextTypes):
         Replaces generic dict[str, object] with semantic LDAP tap types.
         """
 
+        # Base types (inherited from FlextTypes)
+        type JsonValue = (
+            bool | float | int | str | list[object] | dict[str, object] | None
+        )
+        type ConfigValue = bool | int | str | list[str] | dict[str, object] | None
+        type Dict = dict[str, object]
+
         # LDAP connection and authentication types
         type ConnectionDict = dict[str, str | int | bool | dict[str, object]]
         type AuthDict = dict[str, str | bool | dict[str, object]]

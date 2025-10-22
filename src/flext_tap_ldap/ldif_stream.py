@@ -18,7 +18,8 @@ from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 logger = FlextLogger(__name__)
 
-th: FlextMeltanoTypes = FlextMeltanoTypes()
+# Access Singer SDK typing through FLEXT domain namespace
+typing_utils = FlextMeltanoTypes.Singer.Typing
 
 
 class LDIFStream(Stream):
@@ -37,21 +38,23 @@ class LDIFStream(Stream):
         self._ldif_api = FlextLdif()
         self._ldap_api = FlextLdapClients()
         # Define schema
-        schema = th.PropertiesList(
-            th.Property("dn", th.StringType, description="Distinguished Name"),
-            th.Property(
+        schema = typing_utils.PropertiesList(
+            typing_utils.Property(
+                "dn", typing_utils.StringType, description="Distinguished Name"
+            ),
+            typing_utils.Property(
                 "entry_type",
-                th.StringType,
+                typing_utils.StringType,
                 description="Entry type classification",
             ),
-            th.Property(
+            typing_utils.Property(
                 "object_classes",
-                th.ArrayType(th.StringType),
+                typing_utils.ArrayType(typing_utils.StringType),
                 description="Object classes",
             ),
-            th.Property(
+            typing_utils.Property(
                 "attributes",
-                th.ObjectType(),
+                typing_utils.ObjectType(),
                 description="Entry attributes",
             ),
         ).to_dict()
@@ -138,25 +141,25 @@ class LDIFAnalysisStream(Stream):
         self._ldif_api = FlextLdif()
         self._ldap_api = FlextLdapClients()
         # Define schema
-        schema = th.PropertiesList(
-            th.Property(
+        schema = typing_utils.PropertiesList(
+            typing_utils.Property(
                 "analysis_id",
-                th.StringType,
+                typing_utils.StringType,
                 description="Analysis identifier",
             ),
-            th.Property(
+            typing_utils.Property(
                 "total_entries",
-                th.IntegerType,
+                typing_utils.IntegerType,
                 description="Total number of entries",
             ),
-            th.Property(
+            typing_utils.Property(
                 "entry_types",
-                th.ObjectType(),
+                typing_utils.ObjectType(),
                 description="Count by entry type",
             ),
-            th.Property(
+            typing_utils.Property(
                 "object_classes",
-                th.ObjectType(),
+                typing_utils.ObjectType(),
                 description="Count by object class",
             ),
         ).to_dict()

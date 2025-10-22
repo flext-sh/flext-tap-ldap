@@ -18,7 +18,6 @@ from flext_tap_ldap.config import (
 from flext_tap_ldap.ldif_processor import (
     FlextLdifProcessor,
     LDIFEntry,
-    LDIFParseError,
     LDIFTransformer,
     LDIFValidator,
 )
@@ -104,7 +103,6 @@ __all__ = [
     "LDAPUser",
     "LDIFAnalysisStream",
     "LDIFEntry",
-    "LDIFParseError",
     "LDIFProcessingConfig",
     "LDIFStream",
     "LDIFTransformer",
