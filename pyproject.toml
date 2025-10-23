@@ -18,6 +18,8 @@
         "Typing :: Typed",
     ]
     dependencies = [
+    "pydantic (>=2.12.3)",
+    "pydantic-core (>=2.41.4)"
     ]
     description = "FLEXT Tap LDAP - Singer Tap for LDAP Directory Services"
     keywords = [
@@ -67,8 +69,8 @@
     ]
 
     [tool.poetry.dependencies]
-        pydantic          = ">=2.11.7"
-        pydantic-settings = ">=2.10.1"
+        pydantic = ">=2.12.3"
+        pydantic-settings = ">=2.11.0"
         python            = ">=3.13,<3.14"
 
 [tool.pytest.ini_options]
@@ -106,15 +108,15 @@
             develop = true
             path    = "../flext-ldap"
 
-        [tool.poetry.dependencies.flext-ldif]
+                [tool.poetry.dependencies.flext-ldif]
             develop = true
             path    = "../flext-ldif"
 
-        [tool.poetry.dependencies.flext-core]
+                        [tool.poetry.dependencies.flext-core]
             develop = true
             path    = "../flext-core"
 
-        [tool.poetry.dependencies.flext-observability]
+                                [tool.poetry.dependencies.flext-observability]
             develop = true
             path    = "../flext-observability"
 
@@ -134,17 +136,18 @@
         vulture        = ">=2.13"
 
     [tool.poetry.group.test.dependencies]
-        factory-boy         = ">=3.3.1"
+        
+        
+factory-boy         = ">=3.3.1"
         faker               = ">=37.4.0"
         hypothesis          = ">=6.125.0"
         pytest              = ">=8.4.0"
         pytest-benchmark    = ">=5.1.0"
         pytest-clarity      = ">=1.0.1"
-        pytest-cov          = ">=6.2.0"
+        pytest-cov = "=7.0.0"
         pytest-deadfixtures = ">=2.2.1"
         pytest-env          = ">=1.1.5"
         pytest-mock         = ">=3.14.0"
-        pytest-randomly     = ">=3.16.0"
         pytest-sugar        = ">=1.0.0"
         pytest-timeout      = ">=2.4.0"
         pytest-xdist        = ">=3.8.0"
