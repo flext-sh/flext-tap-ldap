@@ -11,16 +11,16 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from flext_tap_ldap import LDAPClient
+from flext_tap_ldap import FlextTapLdapClient
 
 
 class TestLDAPClientCoverageBoost:
     """Tests designed to cover remaining gaps in client.py."""
 
     @pytest.fixture
-    def client(self) -> LDAPClient:
+    def client(self) -> FlextTapLdapClient.LDAPClient:
         """Create a test LDAP client fixture."""
-        return LDAPClient(
+        return FlextTapLdapClient.LDAPClient(
             host="test.ldap.com",
             port=389,
             bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
@@ -30,22 +30,24 @@ class TestLDAPClientCoverageBoost:
             page_size=1000,
         )
 
-    def test_build_server_uri(self, client: LDAPClient) -> None:
+    def test_build_server_uri(self, client: FlextTapLdapClient.LDAPClient) -> None:
         """Test _build_server_uri method directly."""
         # This should cover lines 95-96
         uri = client._build_server_uri()
         assert uri == "ldap://test.ldap.com:389"
 
         # Test with SSL client
-        ssl_client = LDAPClient(host="secure.com", port=636, use_ssl=True)
+        ssl_client = FlextTapLdapClient.LDAPClient(
+            host="secure.com", port=636, use_ssl=True
+        )
         ssl_uri = ssl_client._build_server_uri()
         assert ssl_uri == "ldaps://secure.com:636"
 
-    @patch("get_running_loop")
+    @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_method_coverage(
         self,
         mock_get_loop: Mock,
-        client: LDAPClient,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test search method to cover lines 199-214."""
         # Test with no event loop (covers lines 212-214)
@@ -79,7 +81,7 @@ class TestLDAPClientCoverageBoost:
         results = client.search("dc=test,dc=com")
         assert results == []  # Should return empty in context
 
-    def test_health_check_coverage(self, client: LDAPClient) -> None:
+    def test_health_check_coverage(self, client: FlextTapLdapClient.LDAPClient) -> None:
         """Test health_check method to cover lines 264-270."""
         # Test with successful connection
         with patch.object(client, "test_connection", return_value=True) as mock_test:
@@ -98,11 +100,11 @@ class TestLDAPClientCoverageBoost:
             assert health["status"] == "unhealthy"
             assert health["connection_test"] is False
 
-    @patch("get_running_loop")
+    @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_with_oracle_support_no_loop(
         self,
         mock_get_loop: Mock,
-        client: LDAPClient,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test oracle support search without event loop."""
         mock_get_loop.side_effect = RuntimeError("no event loop")
@@ -120,11 +122,11 @@ class TestLDAPClientCoverageBoost:
             )
 
             mock_exec.assert_called_once()
-            assert results == [{"oracle": "data"}]
+            assert list(results) == [{"oracle": "data"}]
 
     def test_execute_oracle_search_in_new_loop_comprehensive(
         self,
-        client: LDAPClient,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test Oracle search execution to cover lines 350-361."""
         with (
@@ -151,17 +153,19 @@ class TestLDAPClientCoverageBoost:
                 "(uid=*)",
                 ["uid"],
             )
-            mock_process.assert_called_once_with([{"test": "entry"}], True)
+            mock_process.assert_called_once_with(
+                [{"test": "entry"}], oracle_oid_mode=True
+            )
 
             # Should return iterator
             result_list = list(result)
             assert result_list == [{"processed": "entry"}]
 
-    @patch("get_running_loop")
+    @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_with_oracle_support_with_loop(
         self,
         mock_get_loop: Mock,
-        client: LDAPClient,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test oracle support search with existing loop (covers lines 381-385)."""
         mock_get_loop.return_value = Mock()  # Existing loop

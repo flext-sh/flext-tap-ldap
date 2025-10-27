@@ -19,98 +19,6 @@ from pydantic_settings import SettingsConfigDict
 from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 
-class CustomStreamConfig(FlextConfig):
-    """Configuration for custom LDAP streams using flext-core patterns."""
-
-    name: str = Field(..., description="Stream name")
-    search_filter: str = Field(..., description="LDAP search filter")
-    primary_keys: FlextMeltanoTapLdapTypes.Core.StringList | None = Field(
-        default=None,
-        description="Primary key fields",
-    )
-    replication_key: str | None = Field(
-        default=None,
-        description="Replication key field",
-    )
-    json_schema: FlextMeltanoTapLdapTypes.Core.Dict | None = Field(
-        default=None,
-        description="JSON schema for the stream",
-    )
-
-    def validate_business_rules(self: object) -> FlextResult[None]:
-        """Validate business rules for custom streams."""
-        if not self.name or not self.search_filter:
-            return FlextResult[None].fail(
-                "Custom stream requires name and search_filter",
-            )
-
-        return FlextResult[None].ok(None)
-
-
-class LDIFProcessingConfig(FlextConfig):
-    """Configuration for LDIF file processing using flext-core patterns."""
-
-    ldif_files: FlextMeltanoTapLdapTypes.Core.StringList | None = Field(
-        default=None,
-        description="List of LDIF files to process",
-    )
-    ldif_directory: str | None = Field(
-        default=None,
-        description="Directory containing LDIF files",
-    )
-    ldif_file_pattern: str = Field(
-        default="*.ldif",
-        description="File pattern for LDIF files in directory",
-    )
-    ldif_ignore_errors: bool = Field(
-        default=True,
-        description="Continue processing on LDIF parsing errors",
-    )
-    ldif_max_errors: int = Field(
-        default=FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE // 10,
-        description="Maximum number of parsing errors before stopping",
-        gt=0,
-    )
-    ldif_ignore_file_errors: bool = Field(
-        default=True,
-        description="Continue processing if a file fails completely",
-    )
-    ldif_ignore_entry_errors: bool = Field(
-        default=True,
-        description="Continue processing if an entry fails",
-    )
-    ldif_apply_transformations: bool = Field(
-        default=False,
-        description="Apply transformation rules to LDIF entries",
-    )
-    ldif_transformation_rules: FlextMeltanoTapLdapTypes.Core.Dict | None = Field(
-        default=None,
-        description="Transformation rules for LDIF processing",
-    )
-    migration_batch: str | None = Field(
-        default=None,
-        description="Migration batch identifier for tracking",
-    )
-    enable_ldif_streams: bool = Field(
-        default=False,
-        description="Enable LDIF processing streams",
-    )
-
-    def validate_business_rules(self: object) -> FlextResult[None]:
-        """Validate business rules for LDIF processing."""
-        if self.ldif_files and self.ldif_directory:
-            return FlextResult[None].fail(
-                "Cannot specify both ldif_files and ldif_directory",
-            )
-
-        if self.enable_ldif_streams and not (self.ldif_files or self.ldif_directory):
-            return FlextResult[None].fail(
-                "LDIF streams enabled but no files or directory specified",
-            )
-
-        return FlextResult[None].ok(None)
-
-
 class FlextTapLdapConfig(FlextConfig):
     """FLEXT Tap LDAP Configuration extending FlextConfig.
 
@@ -118,8 +26,100 @@ class FlextTapLdapConfig(FlextConfig):
     - Extends FlextConfig from flext-core
     - Uses Pydantic 2 Settings with SecretStr for sensitive data
     - Enhanced singleton pattern with thread-safe access
-    - Flat structure without nested configuration classes
+    - Consolidates custom stream and LDIF processing configurations
     """
+
+    class CustomStreamConfig(FlextConfig):
+        """Nested configuration for custom LDAP streams."""
+
+        name: str = Field(..., description="Stream name")
+        search_filter: str = Field(..., description="LDAP search filter")
+        primary_keys: FlextMeltanoTapLdapTypes.Core.StringList | None = Field(
+            default=None,
+            description="Primary key fields",
+        )
+        replication_key: str | None = Field(
+            default=None,
+            description="Replication key field",
+        )
+        json_schema: FlextMeltanoTapLdapTypes.Core.Dict | None = Field(
+            default=None,
+            description="JSON schema for the stream",
+        )
+
+        def validate_business_rules(self) -> FlextResult[None]:
+            """Validate business rules for custom streams."""
+            if not self.name or not self.search_filter:
+                return FlextResult[None].fail(
+                    "Custom stream requires name and search_filter",
+                )
+
+            return FlextResult[None].ok(None)
+
+    class LDIFProcessingConfig(FlextConfig):
+        """Nested configuration for LDIF file processing."""
+
+        ldif_files: FlextMeltanoTapLdapTypes.Core.StringList | None = Field(
+            default=None,
+            description="List of LDIF files to process",
+        )
+        ldif_directory: str | None = Field(
+            default=None,
+            description="Directory containing LDIF files",
+        )
+        ldif_file_pattern: str = Field(
+            default="*.ldif",
+            description="File pattern for LDIF files in directory",
+        )
+        ldif_ignore_errors: bool = Field(
+            default=True,
+            description="Continue processing on LDIF parsing errors",
+        )
+        ldif_max_errors: int = Field(
+            default=FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE // 10,
+            description="Maximum number of parsing errors before stopping",
+            gt=0,
+        )
+        ldif_ignore_file_errors: bool = Field(
+            default=True,
+            description="Continue processing if a file fails completely",
+        )
+        ldif_ignore_entry_errors: bool = Field(
+            default=True,
+            description="Continue processing if an entry fails",
+        )
+        ldif_apply_transformations: bool = Field(
+            default=False,
+            description="Apply transformation rules to LDIF entries",
+        )
+        ldif_transformation_rules: FlextMeltanoTapLdapTypes.Core.Dict | None = Field(
+            default=None,
+            description="Transformation rules for LDIF processing",
+        )
+        migration_batch: str | None = Field(
+            default=None,
+            description="Migration batch identifier for tracking",
+        )
+        enable_ldif_streams: bool = Field(
+            default=False,
+            description="Enable LDIF processing streams",
+        )
+
+        def validate_business_rules(self) -> FlextResult[None]:
+            """Validate business rules for LDIF processing."""
+            if self.ldif_files and self.ldif_directory:
+                return FlextResult[None].fail(
+                    "Cannot specify both ldif_files and ldif_directory",
+                )
+
+            if self.enable_ldif_streams and not (
+                self.ldif_files or self.ldif_directory
+            ):
+                return FlextResult[None].fail(
+                    "LDIF streams enabled but no files or directory specified",
+                )
+
+            return FlextResult[None].ok(None)
 
     model_config = SettingsConfigDict(
         env_prefix="FLEXT_TAP_LDAP_",
@@ -323,7 +323,11 @@ class FlextTapLdapConfig(FlextConfig):
             return FlextResult[None].fail(f"Configuration validation error: {e}")
 
 
-# Export main configuration class
+# Re-export nested classes at module level for backwards compatibility during transition
+CustomStreamConfig = FlextTapLdapConfig.CustomStreamConfig
+LDIFProcessingConfig = FlextTapLdapConfig.LDIFProcessingConfig
+
+# Export all configuration classes
 __all__ = [
     "CustomStreamConfig",
     "FlextTapLdapConfig",

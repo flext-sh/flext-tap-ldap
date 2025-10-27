@@ -1,4 +1,4 @@
-"""Simple tests for LDAP domain models.
+"""Tests for FLEXT Tap LDAP models.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -7,125 +7,136 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tap_ldap import (
-    LDAPAttribute,
-    LDAPEntry,
-    LDAPSchema,
-)
+from datetime import datetime
+
+from flext_tap_ldap import FlextTapLdapModels
 
 
-class TestLDAPAttribute:
-    """Test LDAP attribute model."""
+class TestTapExecutionStartedEvent:
+    """Test tap execution started event."""
 
-    def test_attribute_creation(self) -> None:
-        """Test method."""
-        """Test creating LDAP attribute."""
-        attr = LDAPAttribute(
-            name="cn",
-            values=["John Doe"],
+    def test_event_creation(self) -> None:
+        """Test creating tap execution started event."""
+        event = FlextTapLdapModels.TapExecutionStartedEvent(
+            execution_id="exec-123",
+            config_hash="hash-abc",
         )
 
-        assert attr.name == "cn"
-        assert attr.values == ["John Doe"]
-        assert attr.is_binary is False
+        assert event.execution_id == "exec-123"
+        assert event.config_hash == "hash-abc"
+        assert event.tap_name == "tap-ldap"
+        assert isinstance(event.timestamp, datetime)
 
-    def test_single_value_property(self) -> None:
-        """Test method."""
-        """Test single_value property."""
-        # Single value
-        single_attr = LDAPAttribute(name="uid", values=["jdoe"])
-        assert single_attr.single_value == "jdoe"
-
-        # Empty values
-        empty_attr = LDAPAttribute(name="empty", values=[])
-        assert empty_attr.single_value is None
-
-    def test_is_multi_valued_property(self) -> None:
-        """Test method."""
-        """Test is_multi_valued property."""
-        # Single value
-        single_attr = LDAPAttribute(name="uid", values=["jdoe"])
-        assert single_attr.is_multi_valued is False
-
-        # Multiple values
-        multi_attr = LDAPAttribute(name="cn", values=["John Doe", "J. Doe"])
-        assert multi_attr.is_multi_valued is True
-
-    def test_validate_domain_rules(self) -> None:
-        """Test method."""
-        """Test domain validation."""
-        attr = LDAPAttribute(name="test", values=["value"])
-        # Should not raise exception
-        attr.validate_business_rules()
-
-
-class TestLDAPEntry:
-    """Test LDAP entry model."""
-
-    def test_entry_creation(self) -> None:
-        """Test method."""
-        """Test creating LDAP entry."""
-        entry = LDAPEntry(
-            dn="uid=jdoe,ou=users,dc=example,dc=com",
-            object_classes=["inetOrgPerson", "person"],
+    def test_event_defaults(self) -> None:
+        """Test event default values."""
+        event = FlextTapLdapModels.TapExecutionStartedEvent(
+            execution_id="exec-456",
         )
 
-        assert entry.dn == "uid=jdoe,ou=users,dc=example,dc=com"
-        assert entry.object_classes == ["inetOrgPerson", "person"]
-
-    def test_entry_validation(self) -> None:
-        """Test method."""
-        """Test entry validation."""
-        # Valid entry
-        entry = LDAPEntry(
-            dn="uid=test,dc=example,dc=com",
-            object_classes=["person"],
-        )
-        result = entry.validate_business_rules()
-        assert result.is_success
-
-        # Invalid entry (empty DN)
-        invalid_entry = LDAPEntry(
-            dn="",
-            object_classes=["person"],
-        )
-        result = invalid_entry.validate_business_rules()
-        assert not result.is_success
-        assert result.error is not None and "DN cannot be empty" in result.error
+        assert event.execution_id == "exec-456"
+        assert event.config_hash is None
+        assert event.tap_name == "tap-ldap"
 
 
-class TestLDAPSchema:
-    """Test LDAP schema model."""
+class TestTapExecutionCompletedEvent:
+    """Test tap execution completed event."""
 
-    def test_schema_creation(self) -> None:
-        """Test method."""
-        """Test creating LDAP schema."""
-        schema = LDAPSchema(
-            object_classes=["person", "inetOrgPerson"],
-            attribute_types=["cn", "sn", "uid"],
+    def test_event_creation(self) -> None:
+        """Test creating tap execution completed event."""
+        event = FlextTapLdapModels.TapExecutionCompletedEvent(
+            execution_id="exec-789",
+            records_processed=100,
+            streams_discovered=4,
+            duration_seconds=15.5,
         )
 
-        assert "person" in schema.object_classes
-        assert "cn" in schema.attribute_types
+        assert event.execution_id == "exec-789"
+        assert event.records_processed == 100
+        assert event.streams_discovered == 4
+        assert event.duration_seconds == 15.5
 
-    def test_schema_validation(self) -> None:
-        """Test method."""
-        """Test schema validation."""
-        schema = LDAPSchema()
-        # Should not raise exception
-        schema.validate_business_rules()
-
-    def test_has_oracle_extensions(self) -> None:
-        """Test method."""
-        """Test Oracle extensions detection."""
-        # Schema without Oracle extensions
-        normal_schema = LDAPSchema(
-            object_classes=["person", "inetOrgPerson"],
+    def test_event_defaults(self) -> None:
+        """Test event default values."""
+        event = FlextTapLdapModels.TapExecutionCompletedEvent(
+            execution_id="exec-000",
         )
-        assert normal_schema.has_oracle_extensions is False
 
-        # Schema with Oracle extensions
-        oracle_schema = LDAPSchema(
-            object_classes=["person", "orclContainer"],
+        assert event.records_processed == 0
+        assert event.streams_discovered == 0
+        assert event.duration_seconds == 0.0
+
+
+class TestStreamDiscoveredEvent:
+    """Test stream discovered event."""
+
+    def test_event_creation(self) -> None:
+        """Test creating stream discovered event."""
+        event = FlextTapLdapModels.StreamDiscoveredEvent(
+            stream_name="users",
+            stream_key_properties=["dn"],
+            bookmark_key="modifyTimestamp",
         )
-        assert oracle_schema.has_oracle_extensions is True
+
+        assert event.stream_name == "users"
+        assert event.stream_key_properties == ["dn"]
+        assert event.bookmark_key == "modifyTimestamp"
+
+    def test_event_defaults(self) -> None:
+        """Test event default values."""
+        event = FlextTapLdapModels.StreamDiscoveredEvent(
+            stream_name="groups",
+        )
+
+        assert event.stream_key_properties == []
+        assert event.bookmark_key is None
+
+
+class TestRecordExtractedEvent:
+    """Test record extracted event."""
+
+    def test_event_creation(self) -> None:
+        """Test creating record extracted event."""
+        event = FlextTapLdapModels.RecordExtractedEvent(
+            stream_name="users",
+            record_id="uid=jdoe,ou=users,dc=example,dc=com",
+            record_size_bytes=256,
+        )
+
+        assert event.stream_name == "users"
+        assert event.record_id == "uid=jdoe,ou=users,dc=example,dc=com"
+        assert event.record_size_bytes == 256
+
+    def test_event_defaults(self) -> None:
+        """Test event default values."""
+        event = FlextTapLdapModels.RecordExtractedEvent(
+            stream_name="groups",
+        )
+
+        assert event.record_id is None
+        assert event.record_size_bytes == 0
+
+
+class TestConnectionTestedEvent:
+    """Test connection tested event."""
+
+    def test_event_creation_success(self) -> None:
+        """Test creating successful connection tested event."""
+        event = FlextTapLdapModels.ConnectionTestedEvent(
+            success=True,
+            server_uri="ldap://localhost:389",
+        )
+
+        assert event.success is True
+        assert event.server_uri == "ldap://localhost:389"
+        assert event.error_message is None
+
+    def test_event_creation_failure(self) -> None:
+        """Test creating failed connection tested event."""
+        event = FlextTapLdapModels.ConnectionTestedEvent(
+            success=False,
+            server_uri="ldap://invalid:389",
+            error_message="Connection refused",
+        )
+
+        assert event.success is False
+        assert event.error_message == "Connection refused"

@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tap_ldap import FlextMeltanoTapLDAP, LDIFAnalysisStream, LDIFStream
+from flext_tap_ldap import FlextTapLdapLdifStreams, FlextTapLdapTap
 
 
 class TestLDIFStreamBasic:
@@ -16,15 +16,15 @@ class TestLDIFStreamBasic:
     def test_imports(self) -> None:
         """Test method."""
         """Test that LDIF stream modules can be imported."""
-        assert LDIFStream is not None
-        assert LDIFAnalysisStream is not None
+        assert FlextTapLdapLdifStreams.LdifStream is not None
+        assert FlextTapLdapLdifStreams.LdifAnalysisStream is not None
 
     def test_ldif_stream_creation(self) -> None:
         """Test method."""
         """Test LDIF stream can be created."""
         # Test that stream can be instantiated
         try:
-            tap = FlextMeltanoTapLDAP(
+            tap = FlextTapLdapTap(
                 config={
                     "ldap_host": "test.ldap.com",
                     "ldap_port": 389,
@@ -33,8 +33,10 @@ class TestLDIFStreamBasic:
                     "bind_password": "test_password",
                 },
             )
-            stream = LDIFStream(tap=tap, name="test_stream", schema={}, path=[])
+            stream = FlextTapLdapLdifStreams.LdifStream(
+                tap=tap, name="test_stream", schema={}, path=[]
+            )
             assert stream is not None
         except (TypeError, AttributeError, ImportError):
             # If constructor signature is different, just test the class exists
-            assert LDIFStream is not None
+            assert FlextTapLdapLdifStreams.LdifStream is not None

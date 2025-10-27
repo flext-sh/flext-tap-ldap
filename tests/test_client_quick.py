@@ -13,16 +13,16 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from flext_tap_ldap import LDAPClient
+from flext_tap_ldap import FlextTapLdapClient
 
 
 class TestLDAPClientQuick:
     """Quick tests to maximize client.py coverage efficiently."""
 
     @pytest.fixture
-    def client(self) -> LDAPClient:
+    def client(self) -> FlextTapLdapClient.LDAPClient:
         """Create LDAP client fixture for testing."""
-        return LDAPClient(
+        return FlextTapLdapClient.LDAPClient(
             host="test.ldap.com",
             port=389,
             bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
@@ -36,24 +36,30 @@ class TestLDAPClientQuick:
         """Test method."""
         """Test server_uri property for both LDAP and LDAPS."""
         # Test LDAP
-        ldap_client = LDAPClient(host="test.com", port=389, use_ssl=False)
+        ldap_client = FlextTapLdapClient.LDAPClient(
+            host="test.com", port=389, use_ssl=False
+        )
         assert ldap_client.server_uri == "ldap://test.com:389"
 
         # Test LDAPS
-        ldaps_client = LDAPClient(host="secure.com", port=636, use_ssl=True)
+        ldaps_client = FlextTapLdapClient.LDAPClient(
+            host="secure.com", port=636, use_ssl=True
+        )
         assert ldaps_client.server_uri == "ldaps://secure.com:636"
 
-    def test_scope_conversions(self, client: LDAPClient) -> None:
+    def test_scope_conversions(self, client: FlextTapLdapClient.LDAPClient) -> None:
         """Test all scope conversions."""
         assert client._convert_scope_to_enum("BASE") == "BASE"
-        assert client._convert_scope_to_enum("ONELEVEL") == "ONE_LEVEL"
+        assert client._convert_scope_to_enum("ONELEVEL") == "ONELEVEL"
         assert client._convert_scope_to_enum("SUBTREE") == "SUBTREE"
         # Test case insensitive
         assert client._convert_scope_to_enum("base") == "BASE"
         # Test invalid scope defaults to SUBTREE
         assert client._convert_scope_to_enum("INVALID") == "SUBTREE"
 
-    def test_entry_conversion_scenarios(self, client: LDAPClient) -> None:
+    def test_entry_conversion_scenarios(
+        self, client: FlextTapLdapClient.LDAPClient
+    ) -> None:
         """Test entry conversion with different scenarios."""
         # Test with FlextLdapEntities-like object
         mock_entry = Mock()
@@ -87,7 +93,7 @@ class TestLDAPClientQuick:
         """Test search result processing with different scenarios."""
         # Success case
         mock_result = Mock()
-        mock_result.success = True
+        mock_result.is_success = True
         mock_result.data = [
             Mock(dn="uid=user1,dc=test,dc=com", attributes={"uid": ["user1"]}),
             Mock(dn="uid=user2,dc=test,dc=com", attributes={"uid": ["user2"]}),
@@ -102,21 +108,21 @@ class TestLDAPClientQuick:
         assert len(results) == 1
 
         # Failure case
-        mock_result.success = False
+        mock_result.is_success = False
         results = client._process_search_results(mock_result, size_limit=0)
         assert len(results) == 0
 
         # No data case
-        mock_result.success = True
+        mock_result.is_success = True
         mock_result.data = None
         results = client._process_search_results(mock_result, size_limit=0)
         assert len(results) == 0
 
-    @patch("get_running_loop")
+    @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_no_event_loop(
         self,
-        client: LDAPClient,
         mock_get_loop: Mock,
+        client: LDAPClient,
     ) -> None:
         """Test search when no event loop is running."""
         # Mock no event loop
@@ -131,7 +137,7 @@ class TestLDAPClientQuick:
             mock_run.assert_called_once()
             assert results == []
 
-    @patch("get_running_loop")
+    @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_with_event_loop(
         self,
         client: LDAPClient,
@@ -154,14 +160,13 @@ class TestLDAPClientQuick:
         result = client._run_in_new_loop(dummy_coro())
         assert result == [{"test": "data"}]
 
-    @patch("get_running_loop")
-    @patch("new_event_loop")
-    @patch("set_event_loop")
+    @patch("flext_tap_ldap.client.get_running_loop")
+    @patch("flext_tap_ldap.client.new_event_loop")
     def test_test_connection_no_loop(
         self,
         mock_new_loop: Mock,
         mock_get_loop: Mock,
-        client: LDAPClient,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test connection test when no event loop."""
         mock_get_loop.side_effect = RuntimeError("no event loop")
@@ -175,7 +180,7 @@ class TestLDAPClientQuick:
         mock_new_loop.assert_called_once()
         mock_loop.close.assert_called_once()
 
-    @patch("get_running_loop")
+    @patch("flext_tap_ldap.client.get_running_loop")
     def test_test_connection_with_loop(
         self,
         client: LDAPClient,
@@ -319,7 +324,7 @@ class TestLDAPClientQuick:
         assert len(results) == 2
         assert results[0] == search_results[0]  # Unchanged
 
-    @patch("get_running_loop")
+    @patch("flext_tap_ldap.client.get_running_loop")
     def test_execute_oracle_search_in_new_loop(
         self,
         client: LDAPClient,
@@ -337,7 +342,7 @@ class TestLDAPClientQuick:
                 len(result_list) >= 0
             )  # Should return iterator  # Should return iterator  # Should return iterator
 
-    @patch("get_running_loop")
+    @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_with_oracle_support_scenarios(
         self,
         client: LDAPClient,
