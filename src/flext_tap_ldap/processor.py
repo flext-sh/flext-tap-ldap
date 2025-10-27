@@ -29,7 +29,7 @@ FlextLdifEntry = FlextLdifModels.Entry
 logger = FlextLogger(__name__)
 
 
-class LDIFEntry:
+class Entry:
     """Testing convenience wrapper for FlextLdifEntry.
 
     This class maintains the existing interface while delegating
@@ -167,7 +167,7 @@ class LDIFEntry:
                 self.attributes[name] = [value_str]
 
 
-class FlextLdifProcessor:
+class FlextTapLdapProcessor:
     """LDIF file processor using flext-ldif library.
 
     This class provides testing convenience while delegating
@@ -182,7 +182,7 @@ class FlextLdifProcessor:
         self.errors: FlextMeltanoTapLdapTypes.Core.StringList = []
         self.processed_entries = 0
         self.skipped_entries = 0
-        self.entries: list[LDIFEntry] = []
+        self.entries: list[Entry] = []
         self.stats = {
             "total_entries": 0,
             "valid_entries": 0,
@@ -196,7 +196,7 @@ class FlextLdifProcessor:
         """Raise ValueError with the given message."""
         raise ValueError(message)
 
-    def parse_file(self, file_path: Path) -> Iterator[LDIFEntry]:
+    def parse_file(self, file_path: Path) -> Iterator[Entry]:
         """Parse LDIF file using flext-ldif and yield testing convenience entries."""
         if not file_path.exists():
             msg = f"LDIF file not found: {file_path}"
@@ -221,7 +221,7 @@ class FlextLdifProcessor:
 
             if result.data:
                 for flext_entry in result.data:
-                    # Convert FlextLdifEntry back to testing convenience LDIFEntry
+                    # Convert FlextLdifEntry back to testing convenience Entry
                     convenience_entry = self._convert_from_flext_entry(flext_entry)
                     yield convenience_entry
                     self.processed_entries += 1
@@ -251,7 +251,7 @@ class FlextLdifProcessor:
         self,
         content: str,
         source_name: str = "content",
-    ) -> Iterator[LDIFEntry]:
+    ) -> Iterator[Entry]:
         """Parse LDIF content using flext-ldif and yield testing convenience entries."""
         logger.info(f"Parsing LDIF content with flext-ldif from {source_name}")
 
@@ -282,8 +282,8 @@ class FlextLdifProcessor:
             else:
                 raise ValueError(error_msg) from e
 
-    def _convert_from_flext_entry(self, flext_entry: FlextLdifEntry) -> LDIFEntry:
-        """Convert FlextLdifEntry to testing convenience LDIFEntry."""
+    def _convert_from_flext_entry(self, flext_entry: FlextLdifEntry) -> Entry:
+        """Convert FlextLdifEntry to testing convenience Entry."""
         # Extract DN
         dn = flext_entry.dn.value if flext_entry.dn else ""
 
@@ -293,7 +293,7 @@ class FlextLdifProcessor:
             for attr_name, attr_values in flext_entry.attributes.data.items():
                 attributes[attr_name] = [str(v) for v in attr_values]
 
-        return LDIFEntry(dn=dn, attributes=attributes)
+        return Entry(dn=dn, attributes=attributes)
 
     def get_statistics(self: object) -> FlextMeltanoTapLdapTypes.Core.Dict:
         """Get parsing statistics."""
@@ -344,11 +344,11 @@ class FlextLdifProcessor:
         self.stats["valid_entries"] = valid_count
         self.stats["invalid_entries"] = invalid_count
 
-    def filter_by_objectclass(self, object_class: str) -> list[LDIFEntry]:
+    def filter_by_objectclass(self, object_class: str) -> list[Entry]:
         """Filter entries by object class."""
         return [entry for entry in self.entries if entry.has_object_class(object_class)]
 
-    def filter_by_dn_pattern(self, dn_pattern: str) -> list[LDIFEntry]:
+    def filter_by_dn_pattern(self, dn_pattern: str) -> list[Entry]:
         """Filter entries by DN pattern - entries under the pattern."""
         return [
             entry
@@ -356,11 +356,11 @@ class FlextLdifProcessor:
             if dn_pattern in entry.dn and entry.dn != dn_pattern
         ]
 
-    def filter_by_dn_contains(self, substring: str) -> list[LDIFEntry]:
+    def filter_by_dn_contains(self, substring: str) -> list[Entry]:
         """Filter entries by DN containing substring."""
         return [entry for entry in self.entries if substring in entry.dn]
 
-    def filter_by_attribute_exists(self, attr_name: str) -> list[LDIFEntry]:
+    def filter_by_attribute_exists(self, attr_name: str) -> list[Entry]:
         """Filter entries that have a specific attribute."""
         return [entry for entry in self.entries if entry.get_attribute(attr_name)]
 
@@ -384,7 +384,7 @@ class FlextLdifProcessor:
         return records
 
 
-class LDIFValidator:
+class Validator:
     """LDIF content validator using flext-ldif validation capabilities."""
 
     @override
@@ -394,7 +394,7 @@ class LDIFValidator:
         self.warnings: FlextMeltanoTapLdapTypes.Core.StringList = []
         self._api = FlextLdif()
 
-    def validate_entry(self, entry: LDIFEntry) -> bool:
+    def validate_entry(self, entry: Entry) -> bool:
         """Validate LDIF entry using flext-ldif validation."""
         try:
             # Use flext-ldif validation
@@ -414,7 +414,7 @@ class LDIFValidator:
         }
 
     def validate_entries(
-        self, entries: list[LDIFEntry]
+        self, entries: list[Entry]
     ) -> FlextMeltanoTapLdapTypes.Core.Dict:
         """Validate a list of LDIF entries using flext-ldif."""
         valid_count = 0
@@ -458,7 +458,7 @@ class LDIFValidator:
         }
 
 
-class LDIFTransformer:
+class Transformer:
     """Transform LDIF entries using flext-ldif transformation capabilities."""
 
     @override
@@ -470,7 +470,7 @@ class LDIFTransformer:
         self.transformation_rules = transformation_rules or {}
         self._api = FlextLdif()
 
-    def transform_entry(self, entry: LDIFEntry) -> LDIFEntry:
+    def transform_entry(self, entry: Entry) -> Entry:
         """Transform LDIF entry - placeholder for future enhancements."""
         # For now, return entry as-is
         # Future: integrate with flext-ldif transformation capabilities
@@ -478,9 +478,9 @@ class LDIFTransformer:
 
     def apply_attribute_mappings(
         self,
-        entry: LDIFEntry,
+        entry: Entry,
         mappings: FlextMeltanoTapLdapTypes.Core.Headers,
-    ) -> LDIFEntry:
+    ) -> Entry:
         """Apply attribute name mappings to entry."""
         new_attributes: dict[str, FlextMeltanoTapLdapTypes.Core.StringList] = {}
 
@@ -488,7 +488,7 @@ class LDIFTransformer:
             new_name = mappings.get(attr_name, attr_name)
             new_attributes[new_name] = values
 
-        transformed_entry = LDIFEntry(entry.dn, new_attributes)
+        transformed_entry = Entry(entry.dn, new_attributes)
         transformed_entry.change_type = entry.change_type
         transformed_entry.controls = entry.controls.copy()
 
