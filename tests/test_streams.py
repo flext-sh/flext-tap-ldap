@@ -559,7 +559,7 @@ class TestStreamIntegration:
 
         # Find the custom stream
         custom_stream = next(s for s in streams if s.name == "custom_test_stream")
-        assert isinstance(custom_stream, CustomStream)
+        assert isinstance(custom_stream, FlextTapLdapStreams.CustomStream)
 
     def test_self(self, tap_config: dict[str, object]) -> None:
         """Test method."""

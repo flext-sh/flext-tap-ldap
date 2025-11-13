@@ -15,6 +15,8 @@ import pytest
 
 from flext_tap_ldap import FlextTapLdapClient
 
+LDAPClient = FlextTapLdapClient.LDAPClient
+
 
 class TestLDAPClientQuick:
     """Quick tests to maximize client.py coverage efficiently."""

@@ -58,78 +58,57 @@ class FlextTapLdapClient:
         """
 
         @override
-        def __init__(
-            self,
-            config: FlextTapLdapClient.LDAPClientConfig | None = None,
-            **convenience_kwargs: object,
-        ) -> None:
-            """Initialize with Parameter Object Pattern (preferred) or testing convenience interface.
+        def _coerce_int(self, value: object, default: int) -> int:
+            """Coerce value to int using pattern matching for better type safety."""
+            match value:
+                case int() as int_val:
+                    return int_val
+                case str() as str_val:
+                    try:
+                        return int(str_val)
+                    except ValueError:
+                        return default
+                case float() as float_val:
+                    try:
+                        return int(float_val)
+                    except (ValueError, OverflowError):
+                        return default
+                case _:
+                    return default
 
-            Preferred Usage (Parameter Object Pattern):
-                config = FlextTapLdapClient.LDAPClientConfig(host="ldap.example.com", port=389)
-                client = FlextTapLdapClient.LDAPClient(config=config)
+        def _coerce_str_opt(self, value: object) -> str | None:
+            """Coerce value to optional string using pattern matching."""
+            match value:
+                case str() as str_val if str_val:
+                    return str_val
+                case _:
+                    return None
 
-            Testing convenience Usage (for testing convenience):
-                client = FlextTapLdapClient.LDAPClient(host="ldap.example.com", port=389)
-            """
-            # Support both new Parameter Object Pattern and testing convenience
-            if config is not None:
-                # New way: Parameter Object Pattern (SOLID)
-                client_config: FlextTapLdapClient.LDAPClientConfig = config
-            else:
-                # Testing convenience: create config from individual parameters
-                raw_host = convenience_kwargs.get("host")
-                if not isinstance(raw_host, str) or not raw_host:
-                    msg = "Either 'config' or valid string 'host' must be provided"
-                    raise ValueError(msg)
+        def _create_config_from_kwargs(
+            self, **convenience_kwargs: object
+        ) -> FlextTapLdapClient.LDAPClientConfig:
+            """Create config from convenience keyword arguments."""
+            raw_host = convenience_kwargs.get("host")
+            if not isinstance(raw_host, str) or not raw_host:
+                msg = "Either 'config' or valid string 'host' must be provided"
+                raise ValueError(msg)
 
-                def _coerce_int(value: object, default: int) -> int:
-                    """Coerce value to int using pattern matching for better type safety."""
-                    match value:
-                        case int() as int_val:
-                            return int_val
-                        case str() as str_val:
-                            try:
-                                return int(str_val)
-                            except ValueError:
-                                return default
-                        case float() as float_val:
-                            try:
-                                return int(float_val)
-                            except (ValueError, OverflowError):
-                                return default
-                        case _:
-                            return default
-
-                def _coerce_str_opt(value: object) -> str | None:
-                    """Coerce value to optional string using pattern matching."""
-                    match value:
-                        case str() as str_val if str_val:
-                            return str_val
-                        case _:
-                            return None
-
-                host_str = raw_host
-                port_int = _coerce_int(convenience_kwargs.get("port", 389), 389)
-                bind_dn_str = _coerce_str_opt(convenience_kwargs.get("bind_dn"))
-                password_str = _coerce_str_opt(convenience_kwargs.get("password"))
-                use_ssl_bool = bool(convenience_kwargs.get("use_ssl"))
-                timeout_int = _coerce_int(convenience_kwargs.get("timeout", 30), 30)
-                page_size_int = _coerce_int(
+            return FlextTapLdapClient.LDAPClientConfig(
+                host=raw_host,
+                port=self._coerce_int(convenience_kwargs.get("port", 389), 389),
+                bind_dn=self._coerce_str_opt(convenience_kwargs.get("bind_dn")),
+                password=self._coerce_str_opt(convenience_kwargs.get("password")),
+                use_ssl=bool(convenience_kwargs.get("use_ssl")),
+                timeout=self._coerce_int(convenience_kwargs.get("timeout", 30), 30),
+                page_size=self._coerce_int(
                     convenience_kwargs.get("page_size", 1000), 1000
-                )
+                ),
+            )
 
-                client_config = FlextTapLdapClient.LDAPClientConfig(
-                    host=host_str,
-                    port=port_int,
-                    bind_dn=bind_dn_str,
-                    password=password_str,
-                    use_ssl=use_ssl_bool,
-                    timeout=timeout_int,
-                    page_size=page_size_int,
-                )
-
-            # Create flext-ldap configuration
+        def _initialize_flext_api(
+            self, client_config: FlextTapLdapClient.LDAPClientConfig
+        ) -> None:
+            """Initialize the FlextLdap API with the given configuration."""
             flext_config = FlextLdapModels.ConnectionConfig(
                 server=client_config.host,
                 port=int(client_config.port),
@@ -137,7 +116,6 @@ class FlextTapLdapClient:
                 timeout=int(client_config.timeout),
             )
 
-            # Initialize the real flext-ldap API
             self._flext_api = FlextLdapClients()
             self._config = flext_config
 
@@ -153,6 +131,30 @@ class FlextTapLdapClient:
             # Add testing convenience attributes that tests expect
             self._bind_dn = client_config.bind_dn  # Tests expect _bind_dn attribute
             self._password = client_config.password  # Tests expect _password attribute
+
+        def __init__(
+            self,
+            config: FlextTapLdapClient.LDAPClientConfig | None = None,
+            **convenience_kwargs: object,
+        ) -> None:
+            """Initialize with Parameter Object Pattern (preferred) or testing convenience interface.
+
+            Preferred Usage (Parameter Object Pattern):
+                config = FlextTapLdapClient.LDAPClientConfig(host="ldap.example.com", port=389)
+                client = FlextTapLdapClient.LDAPClient(config=config)
+
+            Testing convenience Usage (for testing convenience):
+                client = FlextTapLdapClient.LDAPClient(host="ldap.example.com", port=389)
+            """
+            # Support both new Parameter Object Pattern and testing convenience
+            client_config = (
+                config
+                if config is not None
+                else self._create_config_from_kwargs(**convenience_kwargs)
+            )
+
+            # Initialize the FlextLdap API
+            self._initialize_flext_api(client_config)
 
         @property
         def server_uri(self) -> str:
