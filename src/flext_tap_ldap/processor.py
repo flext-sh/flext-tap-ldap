@@ -196,56 +196,70 @@ class FlextTapLdapProcessor:
         """Raise ValueError with the given message."""
         raise ValueError(message)
 
-    def parse_file(self, file_path: Path) -> Iterator[Entry]:
-        """Parse LDIF file using flext-ldif and yield testing convenience entries."""
+    def _validate_file_exists(self, file_path: Path) -> None:
+        """Validate that the file exists."""
         if not file_path.exists():
             msg = f"LDIF file not found: {file_path}"
             raise ValueError(msg)
 
+    def _read_file_content(self, file_path: Path, encoding: str = "utf-8") -> str:
+        """Read file content with specified encoding."""
+        with file_path.open(encoding=encoding) as f:
+            return f.read()
+
+    def _parse_ldif_content(self, content: str, file_path: Path) -> FlextResult[object]:
+        """Parse LDIF content using flext-ldif API."""
+        result: FlextResult[object] = self._api.parse(content)
+        if not result.success:
+            error_msg = f"Failed to parse LDIF file {file_path}: {result.error}"
+            if self.ignore_errors:
+                logger.error(error_msg)
+                self.errors.append(error_msg)
+            else:
+                raise ValueError(error_msg)
+        return result
+
+    def _yield_entries_from_result(
+        self, result: FlextResult[object]
+    ) -> Iterator[Entry]:
+        """Yield testing convenience entries from parse result."""
+        if result.data:
+            for flext_entry in result.data:
+                convenience_entry = self._convert_from_flext_entry(flext_entry)
+                yield convenience_entry
+                self.processed_entries += 1
+
+    def _handle_parsing_error(
+        self, file_path: Path, error: Exception, encoding: str
+    ) -> None:
+        """Handle parsing errors based on ignore_errors setting."""
+        error_msg = f"Failed to parse LDIF file {file_path}: {error}"
+        if self.ignore_errors:
+            logger.error(error_msg)
+            self.errors.append(error_msg)
+        else:
+            raise ValueError(error_msg) from error
+
+    def parse_file(self, file_path: Path) -> Iterator[Entry]:
+        """Parse LDIF file using flext-ldif and yield testing convenience entries."""
+        self._validate_file_exists(file_path)
         logger.info(f"Starting LDIF parsing with flext-ldif: {file_path}")
+
         try:
-            # Read file content
-            with file_path.open(encoding="utf-8") as f:
-                content = f.read()
-
-            # Use flext-ldif to parse
-            result: FlextResult[object] = self._api.parse(content)
-            if not result.success:
-                error_msg = f"Failed to parse LDIF file {file_path}: {result.error}"
-                if self.ignore_errors:
-                    logger.error(error_msg)
-                    self.errors.append(error_msg)
-                    return
-                else:
-                    raise ValueError(error_msg)
-
-            if result.data:
-                for flext_entry in result.data:
-                    # Convert FlextLdifEntry back to testing convenience Entry
-                    convenience_entry = self._convert_from_flext_entry(flext_entry)
-                    yield convenience_entry
-                    self.processed_entries += 1
+            # Try UTF-8 first
+            content = self._read_file_content(file_path, "utf-8")
+            result = self._parse_ldif_content(content, file_path)
+            yield from self._yield_entries_from_result(result)
 
         except UnicodeDecodeError:
             # Try with latin-1 encoding if UTF-8 fails
             logger.warning(f"UTF-8 decoding failed, trying latin-1 for: {file_path}")
             try:
-                with file_path.open(encoding="latin-1") as f:
-                    content = f.read()
-
-                result: FlextResult[object] = self._api.parse(content)
-                if result.success and result.data:
-                    for flext_entry in result.data:
-                        convenience_entry = self._convert_from_flext_entry(flext_entry)
-                        yield convenience_entry
-                        self.processed_entries += 1
+                content = self._read_file_content(file_path, "latin-1")
+                result = self._parse_ldif_content(content, file_path)
+                yield from self._yield_entries_from_result(result)
             except Exception as e:
-                error_msg = f"Failed to parse LDIF file {file_path}: {e}"
-                if self.ignore_errors:
-                    logger.exception(error_msg)
-                    self.errors.append(error_msg)
-                else:
-                    raise ValueError(error_msg) from e
+                self._handle_parsing_error(file_path, e, "latin-1")
 
     def parse_content(
         self,
