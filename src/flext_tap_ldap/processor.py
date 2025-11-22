@@ -230,7 +230,7 @@ class FlextTapLdapProcessor:
                 self.processed_entries += 1
 
     def _handle_parsing_error(
-        self, file_path: Path, error: Exception, encoding: str
+        self, file_path: Path, error: Exception, _encoding: str
     ) -> None:
         """Handle parsing errors based on ignore_errors setting."""
         error_msg = f"Failed to parse LDIF file {file_path}: {error}"
