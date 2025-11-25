@@ -23,5 +23,4 @@ class TestPlaceholder:
 
     def test_placeholder(self) -> None:
         """Placeholder test to satisfy pytest collection."""
-        # TODO: Implement tests using FlextTapLdapProcessor nested classes
         assert FlextTapLdapProcessor is not None

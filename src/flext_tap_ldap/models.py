@@ -24,7 +24,7 @@ class FlextTapLdapModels(FlextModels):
     LDIF processing models are inherited from flext-ldif.
     """
 
-    class TapExecutionStartedEvent(DomainEvent):
+    class TapExecutionStartedEvent(FlextModels.DomainEvent):
         """Event raised when tap execution starts."""
 
         timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
@@ -54,9 +54,10 @@ class FlextTapLdapModels(FlextModels):
         @property
         def config(self) -> dict[str, object] | None:
             """Get config from data field."""
-            return self.data.get("config")
+            config_data = self.data.get("config")
+            return config_data if isinstance(config_data, dict) else None
 
-    class TapExecutionCompletedEvent(DomainEvent):
+    class TapExecutionCompletedEvent(FlextModels.DomainEvent):
         """Event raised when tap execution completes."""
 
         timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
