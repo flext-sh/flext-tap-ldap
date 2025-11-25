@@ -10,13 +10,27 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Self
+from typing import Self, TypedDict
 
 from flext_core import FlextConfig, FlextConstants, FlextResult
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
 
 from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
+
+
+class ConfigDefaults(TypedDict, total=False):
+    """Type-safe configuration defaults."""
+
+    ldap_host: str
+    ldap_port: int
+    ldap_use_ssl: bool
+    ldap_use_tls: bool
+    ldap_timeout: int
+    ldap_page_size: int
+    ldap_max_retries: int
+    ldif_ignore_errors: bool
+    ldif_max_errors: int
 
 
 class FlextTapLdapConfig(FlextConfig):
@@ -246,12 +260,12 @@ class FlextTapLdapConfig(FlextConfig):
     @classmethod
     def get_global_instance(cls) -> Self:
         """Get the global singleton instance using enhanced FlextConfig pattern."""
-        return cls.get_or_create_shared_instance(project_name="flext-tap-ldap")
+        return cls()
 
     @classmethod
     def create_for_development(cls, **overrides: object) -> Self:
         """Create development configuration instance."""
-        dev_defaults = {
+        dev_defaults: ConfigDefaults = {
             "ldap_host": "localhost",
             "ldap_port": 10389,
             "ldap_use_ssl": False,
@@ -261,13 +275,13 @@ class FlextTapLdapConfig(FlextConfig):
             "ldif_ignore_errors": True,
             "ldif_max_errors": 10,
         }
-        dev_defaults.update(overrides)
+        dev_defaults.update(overrides)  # type: ignore[typeddict-item]
         return cls(**dev_defaults)
 
     @classmethod
     def create_for_production(cls, **overrides: object) -> Self:
         """Create production configuration instance."""
-        prod_defaults = {
+        prod_defaults: ConfigDefaults = {
             "ldap_use_ssl": True,
             "ldap_timeout": 30,
             "ldap_page_size": 1000,
@@ -275,13 +289,13 @@ class FlextTapLdapConfig(FlextConfig):
             "ldif_ignore_errors": False,
             "ldif_max_errors": 0,
         }
-        prod_defaults.update(overrides)
+        prod_defaults.update(overrides)  # type: ignore[typeddict-item]
         return cls(**prod_defaults)
 
     @classmethod
     def create_for_testing(cls, **overrides: object) -> Self:
         """Create testing configuration instance."""
-        test_defaults = {
+        test_defaults: ConfigDefaults = {
             "ldap_host": "test-ldap",
             "ldap_port": 3389,
             "ldap_use_ssl": False,
@@ -290,37 +304,37 @@ class FlextTapLdapConfig(FlextConfig):
             "ldif_ignore_errors": True,
             "ldif_max_errors": 1,
         }
-        test_defaults.update(overrides)
+        test_defaults.update(overrides)  # type: ignore[typeddict-item]
         return cls(**test_defaults)
 
-    def validate_configuration(self) -> FlextResult[None]:
+    def validate_configuration(self) -> FlextResult[bool]:  # type: ignore[override]
         """Validate the complete LDAP tap configuration."""
         try:
             # Validate LDAP connection settings
             if not self.ldap_host:
-                return FlextResult[None].fail("LDAP host is required")
+                return FlextResult[bool].fail("LDAP host is required")
 
             if self.ldap_port <= 0:
-                return FlextResult[None].fail("LDAP port must be positive")
+                return FlextResult[bool].fail("LDAP port must be positive")
 
             if self.ldap_timeout <= 0:
-                return FlextResult[None].fail("LDAP timeout must be positive")
+                return FlextResult[bool].fail("LDAP timeout must be positive")
 
             if self.ldap_page_size <= 0:
-                return FlextResult[None].fail("LDAP page size must be positive")
+                return FlextResult[bool].fail("LDAP page size must be positive")
 
             # Validate LDIF processing settings
             if self.ldif_files and self.ldif_directory:
-                return FlextResult[None].fail(
+                return FlextResult[bool].fail(
                     "Cannot specify both ldif_files and ldif_directory"
                 )
 
             if self.ldif_max_errors <= 0:
-                return FlextResult[None].fail("LDIF max errors must be positive")
+                return FlextResult[bool].fail("LDIF max errors must be positive")
 
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(True)
         except Exception as e:
-            return FlextResult[None].fail(f"Configuration validation error: {e}")
+            return FlextResult[bool].fail(f"Configuration validation error: {e}")
 
 
 # Re-export nested classes at module level for backwards compatibility during transition

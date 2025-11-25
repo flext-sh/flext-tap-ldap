@@ -122,7 +122,7 @@ class FlextTapLdapStreams:
         primary_keys: FlextMeltanoTapLdapTypes.Core.StringList | None = None
         replication_key: str | None = None
 
-        def __post_init__(self: object) -> None:
+        def __post_init__(self) -> None:
             """Validate custom stream parameters after initialization."""
             if not self.name:
                 msg = "Stream name is required"
@@ -154,7 +154,7 @@ class FlextTapLdapStreams:
             # Create LDAP client for directory operations
             self._create_ldap_client()
 
-        def _create_ldap_client(self: object) -> None:
+        def _create_ldap_client(self) -> None:
             """Create LDAP client from tap configuration."""
             self.client: LDAPClient | None = None
             try:
@@ -225,7 +225,7 @@ class FlextTapLdapStreams:
                 return self._get_fallback_data()
 
         def _get_fallback_data(
-            self: object,
+            self,
         ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
             """Get fallback data for testing/demo purposes."""
             return []
@@ -397,7 +397,7 @@ class FlextTapLdapStreams:
             yield from results
 
         def _get_fallback_data(
-            self: object,
+            self,
         ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
             """Get fallback group data."""
             return [FlextTapLdapStreams.FallbackDataFactory.create_test_group_record()]
@@ -457,7 +457,7 @@ class FlextTapLdapStreams:
             yield from results
 
         def _get_fallback_data(
-            self: object,
+            self,
         ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
             """Get fallback organizational unit data."""
             return [FlextTapLdapStreams.FallbackDataFactory.create_test_ou_record()]
@@ -550,7 +550,7 @@ class FlextTapLdapStreams:
                 yield record
 
         def _get_fallback_data(
-            self: object,
+            self,
         ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
             """Get fallback schema data."""
             return [FlextTapLdapStreams.FallbackDataFactory.create_test_schema_record()]
