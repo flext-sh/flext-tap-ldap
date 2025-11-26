@@ -275,7 +275,7 @@ class FlextTapLdapConfig(FlextConfig):
             "ldif_ignore_errors": True,
             "ldif_max_errors": 10,
         }
-        dev_defaults.update(overrides)  # type: ignore[typeddict-item]
+        dev_defaults.update(overrides)
         return cls(**dev_defaults)
 
     @classmethod
@@ -289,7 +289,7 @@ class FlextTapLdapConfig(FlextConfig):
             "ldif_ignore_errors": False,
             "ldif_max_errors": 0,
         }
-        prod_defaults.update(overrides)  # type: ignore[typeddict-item]
+        prod_defaults.update(overrides)
         return cls(**prod_defaults)
 
     @classmethod
@@ -304,10 +304,10 @@ class FlextTapLdapConfig(FlextConfig):
             "ldif_ignore_errors": True,
             "ldif_max_errors": 1,
         }
-        test_defaults.update(overrides)  # type: ignore[typeddict-item]
+        test_defaults.update(overrides)
         return cls(**test_defaults)
 
-    def validate_configuration(self) -> FlextResult[bool]:  # type: ignore[override]
+    def validate_configuration(self) -> FlextResult[bool]:
         """Validate the complete LDAP tap configuration."""
         try:
             # Validate LDAP connection settings
