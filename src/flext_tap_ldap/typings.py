@@ -1,11 +1,11 @@
 """FLEXT Tap LDAP Types - Domain-specific LDAP tap type definitions.
 
-This module provides LDAP tap-specific type definitions extending FlextTypes.
+This module provides LDAP tap-specific type definitions extending t.
 Follows FLEXT standards:
 - Domain-specific complex types only
 - No simple aliases to primitive types
 - Python 3.13+ syntax
-- Extends FlextTypes properly
+- Extends t properly
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -17,7 +17,7 @@ from __future__ import annotations
 from collections import UserDict
 from typing import Literal
 
-from flext_core import FlextTypes
+from flext_core import t
 
 # =============================================================================
 # TAP-LDAP-SPECIFIC TYPE VARIABLES - Domain-specific TypeVars for LDAP tap operations
@@ -25,8 +25,8 @@ from flext_core import FlextTypes
 
 
 # LDAP tap domain TypeVars
-class FlextMeltanoTapLdapTypes(FlextTypes):
-    """LDAP tap-specific type definitions extending FlextTypes.
+class FlextMeltanoTapLdapTypes(t):
+    """LDAP tap-specific type definitions extending t.
 
     Domain-specific type system for LDAP data extraction operations.
     Contains ONLY complex LDAP tap-specific types, no simple aliases.
@@ -174,7 +174,7 @@ class FlextMeltanoTapLdapTypes(FlextTypes):
         Replaces generic dict[str, object] with semantic LDAP tap types.
         """
 
-        # Base types (inherited from FlextTypes)
+        # Base types (inherited from t)
         type JsonValue = (
             bool | float | int | str | list[object] | dict[str, object] | None
         )
@@ -219,20 +219,20 @@ class FlextMeltanoTapLdapTypes(FlextTypes):
         type StringList = list[str]
 
     # =========================================================================
-    # TAP-LDAP PROJECT TYPES - Domain-specific project types extending FlextTypes
+    # TAP-LDAP PROJECT TYPES - Domain-specific project types extending t
     # =========================================================================
 
-    class Project(FlextTypes):
-        """LDAP tap-specific project types extending FlextTypes.
+    class Project(t):
+        """LDAP tap-specific project types extending t.
 
         Adds LDAP tap extraction-specific project types while inheriting
-        generic types from FlextTypes. Follows domain separation principle:
+        generic types from t. Follows domain separation principle:
         LDAP tap domain owns LDAP data extraction-specific types.
         """
 
         # LDAP tap-specific project types extending the generic ones
         type ProjectType = Literal[
-            # Generic types inherited from FlextTypes
+            # Generic types inherited from t
             "library",
             "application",
             "service",
