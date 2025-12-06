@@ -270,7 +270,8 @@ class TestOrganizationalUnitsStream:
         assert stream.tap == mock_tap
 
     def test_organizational_units_stream_schema_definition(
-        self, mock_tap: Mock
+        self,
+        mock_tap: Mock,
     ) -> None:
         """Test organizational units stream schema definition."""
         stream = FlextTapLdapStreams.OrganizationalUnitsStream(mock_tap)
@@ -359,7 +360,8 @@ class TestCustomStreamParams:
         # Invalid - empty name
         with pytest.raises(ValueError, match="Stream name is required"):
             FlextTapLdapStreams.CustomStreamParams(
-                name="", search_filter="(objectClass=*)"
+                name="",
+                search_filter="(objectClass=*)",
             )
 
         # Invalid - empty search filter

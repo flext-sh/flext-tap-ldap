@@ -34,7 +34,10 @@ class TestLDIFStreamBasic:
                 },
             )
             stream = FlextTapLdapLdifStreams.LdifStream(
-                tap=tap, name="test_stream", schema={}, path=[]
+                tap=tap,
+                name="test_stream",
+                schema={},
+                path=[],
             )
             assert stream is not None
         except (TypeError, AttributeError, ImportError):

@@ -39,13 +39,17 @@ class TestLDAPClientQuick:
         """Test server_uri property for both LDAP and LDAPS."""
         # Test LDAP
         ldap_client = FlextTapLdapClient.LDAPClient(
-            host="test.com", port=389, use_ssl=False
+            host="test.com",
+            port=389,
+            use_ssl=False,
         )
         assert ldap_client.server_uri == "ldap://test.com:389"
 
         # Test LDAPS
         ldaps_client = FlextTapLdapClient.LDAPClient(
-            host="secure.com", port=636, use_ssl=True
+            host="secure.com",
+            port=636,
+            use_ssl=True,
         )
         assert ldaps_client.server_uri == "ldaps://secure.com:636"
 
@@ -60,7 +64,8 @@ class TestLDAPClientQuick:
         assert client._convert_scope_to_enum("INVALID") == "SUBTREE"
 
     def test_entry_conversion_scenarios(
-        self, client: FlextTapLdapClient.LDAPClient
+        self,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test entry conversion with different scenarios."""
         # Test with FlextLdapEntities-like object
@@ -274,7 +279,8 @@ class TestLDAPClientQuick:
         # Test with Oracle mode enabled
         base_attrs = ["uid", "cn"]
         extended = client._extend_attributes_with_oracle_support(
-            base_attrs, oracle_oid_mode=True
+            base_attrs,
+            oracle_oid_mode=True,
         )
 
         assert extended is not None
@@ -285,13 +291,15 @@ class TestLDAPClientQuick:
 
         # Test with Oracle mode disabled
         result = client._extend_attributes_with_oracle_support(
-            base_attrs, oracle_oid_mode=False
+            base_attrs,
+            oracle_oid_mode=False,
         )
         assert result == base_attrs
 
         # Test with None attributes
         result = client._extend_attributes_with_oracle_support(
-            None, oracle_oid_mode=True
+            None,
+            oracle_oid_mode=True,
         )
         assert result is None
 

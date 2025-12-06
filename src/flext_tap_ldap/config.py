@@ -158,10 +158,12 @@ class FlextTapLdapConfig(FlextConfig):
     ldap_use_ssl: bool = Field(default=False, description="Use SSL connection")
     ldap_use_tls: bool = Field(default=False, description="Use TLS connection")
     ldap_bind_dn: str | None = Field(
-        default=None, description="Bind DN for authentication"
+        default=None,
+        description="Bind DN for authentication",
     )
     ldap_bind_password: SecretStr | None = Field(
-        default=None, description="Bind password"
+        default=None,
+        description="Bind password",
     )
     ldap_base_dn: str = Field(default="", description="Base DN for searches")
     ldap_timeout: int = Field(
@@ -326,7 +328,7 @@ class FlextTapLdapConfig(FlextConfig):
             # Validate LDIF processing settings
             if self.ldif_files and self.ldif_directory:
                 return FlextResult[bool].fail(
-                    "Cannot specify both ldif_files and ldif_directory"
+                    "Cannot specify both ldif_files and ldif_directory",
                 )
 
             if self.ldif_max_errors <= 0:
@@ -337,9 +339,14 @@ class FlextTapLdapConfig(FlextConfig):
             return FlextResult[bool].fail(f"Configuration validation error: {e}")
 
 
-# Re-export nested classes at module level for backwards compatibility during transition
-CustomStreamConfig = FlextTapLdapConfig.CustomStreamConfig
-LDIFProcessingConfig = FlextTapLdapConfig.LDIFProcessingConfig
+# Re-export nested classes at module level with real inheritance for backwards compatibility
+class CustomStreamConfig(FlextTapLdapConfig.CustomStreamConfig):
+    """CustomStreamConfig - real inheritance from FlextTapLdapConfig.CustomStreamConfig."""
+
+
+class LDIFProcessingConfig(FlextTapLdapConfig.LDIFProcessingConfig):
+    """LDIFProcessingConfig - real inheritance from FlextTapLdapConfig.LDIFProcessingConfig."""
+
 
 # Export all configuration classes
 __all__ = [
