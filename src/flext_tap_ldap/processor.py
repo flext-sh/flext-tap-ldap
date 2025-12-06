@@ -21,10 +21,19 @@ from flext_ldif.models import FlextLdifModels
 
 from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
-# Type aliases for cleaner code
-FlextLdifAttributes = FlextLdifModels.LdifAttributes
-FlextLdifDistinguishedName = FlextLdifModels.DistinguishedName
-FlextLdifEntry = FlextLdifModels.Entry
+
+# Type classes with real inheritance for cleaner code
+class FlextLdifAttributes(FlextLdifModels.LdifAttributes):
+    """FlextLdifAttributes - real inheritance from FlextLdifModels.LdifAttributes."""
+
+
+class FlextLdifDistinguishedName(FlextLdifModels.DistinguishedName):
+    """FlextLdifDistinguishedName - real inheritance from FlextLdifModels.DistinguishedName."""
+
+
+class FlextLdifEntry(FlextLdifModels.Entry):
+    """FlextLdifEntry - real inheritance from FlextLdifModels.Entry."""
+
 
 logger = FlextLogger(__name__)
 
@@ -107,7 +116,9 @@ class Entry:
         return entry_dict
 
     def add_attribute(
-        self, name: str, value: str | FlextMeltanoTapLdapTypes.Core.StringList
+        self,
+        name: str,
+        value: str | FlextMeltanoTapLdapTypes.Core.StringList,
     ) -> None:
         """Add an attribute to the entry."""
         if name not in self.attributes:
@@ -126,7 +137,7 @@ class Entry:
             api = FlextLdif()
             result = api.validate_entries([self._flext_entry])
             return result.is_success and bool(
-                result.value and result.value.valid_entries > 0
+                result.value and result.value.valid_entries > 0,
             )
         except Exception:
             # Fallback to basic validation for testing convenience
@@ -210,7 +221,9 @@ class FlextTapLdapProcessor:
             return f.read()
 
     def _parse_ldif_content(
-        self, content: str, file_path: Path
+        self,
+        content: str,
+        file_path: Path,
     ) -> FlextResult[list[FlextLdifEntry]]:
         """Parse LDIF content using flext-ldif API."""
         result: FlextResult[list[FlextLdifEntry]] = self._api.parse(content)
@@ -224,7 +237,8 @@ class FlextTapLdapProcessor:
         return result
 
     def _yield_entries_from_result(
-        self, result: FlextResult[list[FlextLdifEntry]]
+        self,
+        result: FlextResult[list[FlextLdifEntry]],
     ) -> Iterator[Entry]:
         """Yield testing convenience entries from parse result."""
         if result.value:
@@ -234,7 +248,10 @@ class FlextTapLdapProcessor:
                 self.processed_entries += 1
 
     def _handle_parsing_error(
-        self, file_path: Path, error: Exception, _encoding: str
+        self,
+        file_path: Path,
+        error: Exception,
+        _encoding: str,
     ) -> None:
         """Handle parsing errors based on ignore_errors setting."""
         error_msg = f"Failed to parse LDIF file {file_path}: {error}"
@@ -247,7 +264,7 @@ class FlextTapLdapProcessor:
     def parse_file(self, file_path: Path) -> Iterator[Entry]:
         """Parse LDIF file using flext-ldif and yield testing convenience entries."""
         self._validate_file_exists(file_path)
-        logger.info(f"Starting LDIF parsing with flext-ldif: {file_path}")
+        logger.info("Starting LDIF parsing with flext-ldif: %s", file_path)
 
         try:
             # Try UTF-8 first
@@ -257,7 +274,7 @@ class FlextTapLdapProcessor:
 
         except UnicodeDecodeError:
             # Try with latin-1 encoding if UTF-8 fails
-            logger.warning(f"UTF-8 decoding failed, trying latin-1 for: {file_path}")
+            logger.warning("UTF-8 decoding failed, trying latin-1 for: %s", file_path)
             try:
                 content = self._read_file_content(file_path, "latin-1")
                 result = self._parse_ldif_content(content, file_path)
@@ -271,7 +288,7 @@ class FlextTapLdapProcessor:
         source_name: str = "content",
     ) -> Iterator[Entry]:
         """Parse LDIF content using flext-ldif and yield testing convenience entries."""
-        logger.info(f"Parsing LDIF content with flext-ldif from {source_name}")
+        logger.info("Parsing LDIF content with flext-ldif from %s", source_name)
 
         try:
             result: FlextResult[list[FlextLdifEntry]] = self._api.parse(content)
@@ -383,7 +400,8 @@ class FlextTapLdapProcessor:
         return [entry for entry in self.entries if entry.get_attribute(attr_name)]
 
     def to_singer_format(
-        self, _stream_name: str
+        self,
+        _stream_name: str,
     ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
         """Convert LDIF entries to Singer record format."""
         records: list[FlextMeltanoTapLdapTypes.Core.Dict] = []
@@ -432,7 +450,8 @@ class Validator:
         }
 
     def validate_entries(
-        self, entries: list[Entry]
+        self,
+        entries: list[Entry],
     ) -> FlextMeltanoTapLdapTypes.Core.Dict:
         """Validate a list of LDIF entries using flext-ldif."""
         valid_count = 0

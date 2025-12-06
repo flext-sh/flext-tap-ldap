@@ -85,7 +85,8 @@ class FlextTapLdapClient:
                     return None
 
         def _create_config_from_kwargs(
-            self, **convenience_kwargs: object
+            self,
+            **convenience_kwargs: object,
         ) -> FlextTapLdapClient.LDAPClientConfig:
             """Create config from convenience keyword arguments."""
             raw_host = convenience_kwargs.get("host")
@@ -101,12 +102,14 @@ class FlextTapLdapClient:
                 use_ssl=bool(convenience_kwargs.get("use_ssl")),
                 timeout=self._coerce_int(convenience_kwargs.get("timeout", 30), 30),
                 page_size=self._coerce_int(
-                    convenience_kwargs.get("page_size", 1000), 1000
+                    convenience_kwargs.get("page_size", 1000),
+                    1000,
                 ),
             )
 
         def _initialize_flext_api(
-            self, client_config: FlextTapLdapClient.LDAPClientConfig
+            self,
+            client_config: FlextTapLdapClient.LDAPClientConfig,
         ) -> None:
             """Initialize the FlextLdap API with the given configuration."""
             flext_config = FlextLdapModels.ConnectionConfig(
@@ -277,7 +280,7 @@ class FlextTapLdapClient:
                 return self._process_search_results(result, size_limit)
 
             except Exception as e:
-                logger.debug(f"LDAP search failed: {e}")
+                logger.debug("LDAP search failed: %s", e)
                 return []  # Return empty list on failure
 
         def _run_in_new_loop(
@@ -332,7 +335,9 @@ class FlextTapLdapClient:
                     "Returning empty list for testing convenience with Singer streams",
                 )
                 logger.debug(
-                    f"Search parameters: base_dn='{base_dn}', filter='{search_filter}'",
+                    "Search parameters: base_dn='%s', filter='%s'",
+                    base_dn,
+                    search_filter,
                 )
                 return []
             except RuntimeError:
@@ -365,14 +370,14 @@ class FlextTapLdapClient:
                                 time_limit=5,
                             )
                             result: FlextResult[object] = self._flext_api.search(
-                                test_search_request
+                                test_search_request,
                             )
                             return result.is_success
                     except (RuntimeError, ValueError, TypeError) as e:
                         logger = FlextLogger(__name__)
                         # EXPLICIT TRANSPARENCY: Documented fallback behavior for Singer stream testing convenience
                         # This is NOT security-sensitive fake data generation - it's test environment detection
-                        logger.warning(f"LDAP connection test failed: {e}")
+                        logger.warning("LDAP connection test failed: %s", e)
                         logger.info(
                             "LDAP connection test fallback - required for Singer streams in test/mock environments",
                         )
@@ -412,7 +417,7 @@ class FlextTapLdapClient:
             except (RuntimeError, ValueError, TypeError) as e:
                 # EXPLICIT TRANSPARENCY: Documented fallback behavior for Singer stream testing convenience
                 # This is NOT security-sensitive fake data generation - it's connection test fallback
-                logger.warning(f"LDAP connection test failed with error: {e}")
+                logger.warning("LDAP connection test failed with error: %s", e)
                 logger.info(
                     "LDAP connection test fallback - required for Singer streams in test/mock environments",
                 )
@@ -541,7 +546,9 @@ class FlextTapLdapClient:
             try:
                 # Perform synchronous search using existing method
                 search_result: FlextResult[object] = self.search(
-                    base_dn, search_filter, attributes
+                    base_dn,
+                    search_filter,
+                    attributes,
                 )
                 return self._process_search_results_with_oracle_support(
                     search_result,
@@ -590,13 +597,23 @@ class FlextTapLdapClient:
             return getattr(self._flext_api, name)
 
 
-# Type aliases for testing convenience
-LDAPConnectionConfig = FlextLdapModels.ConnectionConfig
-LDAPEntry = FlextLdapModels.Entry
+# Type classes with real inheritance for testing convenience
+class LDAPConnectionConfig(FlextLdapModels.ConnectionConfig):
+    """LDAPConnectionConfig - real inheritance from FlextLdapModels.ConnectionConfig."""
 
-# Re-export at module level for backwards compatibility during transition
-LDAPClient = FlextTapLdapClient.LDAPClient
-LDAPClientConfig = FlextTapLdapClient.LDAPClientConfig
+
+class LDAPEntry(FlextLdapModels.Entry):
+    """LDAPEntry - real inheritance from FlextLdapModels.Entry."""
+
+
+# Re-export at module level with real inheritance for backwards compatibility
+class LDAPClient(FlextTapLdapClient.LDAPClient):
+    """LDAPClient - real inheritance from FlextTapLdapClient.LDAPClient."""
+
+
+class LDAPClientConfig(FlextTapLdapClient.LDAPClientConfig):
+    """LDAPClientConfig - real inheritance from FlextTapLdapClient.LDAPClientConfig."""
+
 
 __all__: FlextMeltanoTapLdapTypes.Core.StringList = [
     "FlextTapLdapClient",

@@ -51,7 +51,9 @@ class FlextTapLdapLdifStreams:
             # Define schema
             schema = typing_utils.PropertiesList(
                 typing_utils.Property(
-                    "dn", typing_utils.StringType, description="Distinguished Name"
+                    "dn",
+                    typing_utils.StringType,
+                    description="Distinguished Name",
                 ),
                 typing_utils.Property(
                     "entry_type",
@@ -90,10 +92,11 @@ class FlextTapLdapLdifStreams:
                 )
 
         def _process_ldif_file(
-            self, ldif_file: str
+            self,
+            ldif_file: str,
         ) -> Iterable[FlextMeltanoTapLdapTypes.Core.Dict]:
             """Process single LDIF file using flext-ldif."""
-            logger.info(f"Processing LDIF file: {ldif_file}")
+            logger.info("Processing LDIF file: %s", ldif_file)
             try:
                 # Read file and delegate to flext-ldif
                 with Path(ldif_file).open(encoding="utf-8") as f:
@@ -104,10 +107,10 @@ class FlextTapLdapLdifStreams:
                         yield self._convert_entry_to_record(entry)
                 else:
                     logger.error(
-                        f"Failed to parse LDIF file {ldif_file}: {result.error}"
+                        f"Failed to parse LDIF file {ldif_file}: {result.error}",
                     )
             except Exception:
-                logger.exception(f"Error processing LDIF file {ldif_file}")
+                logger.exception("Error processing LDIF file %s", ldif_file)
 
         def _convert_entry_to_record(
             self,
@@ -125,7 +128,8 @@ class FlextTapLdapLdifStreams:
             }
 
         def _classify_entry_type(
-            self, object_classes: FlextMeltanoTapLdapTypes.Core.StringList
+            self,
+            object_classes: FlextMeltanoTapLdapTypes.Core.StringList,
         ) -> str:
             """Classify entry type by simple objectClass heuristics."""
             lowered = {oc.lower() for oc in object_classes}
@@ -199,7 +203,8 @@ class FlextTapLdapLdifStreams:
                             total_entries += total_count
                         # Merge counts
                         stats_entry_types: dict[str, object] = stats.get(
-                            "entry_types", {}
+                            "entry_types",
+                            {},
                         )
                         if isinstance(stats_entry_types, dict):
                             for entry_type, count in stats_entry_types.items():
@@ -208,7 +213,8 @@ class FlextTapLdapLdifStreams:
                                     0,
                                 ) + int(count)
                         stats_object_classes: dict[str, object] = stats.get(
-                            "object_classes", {}
+                            "object_classes",
+                            {},
                         )
                         if isinstance(stats_object_classes, dict):
                             for obj_class, count in stats_object_classes.items():
@@ -238,10 +244,11 @@ class FlextTapLdapLdifStreams:
                 }
 
         def _analyze_ldif_file(
-            self, ldif_file: str
+            self,
+            ldif_file: str,
         ) -> FlextMeltanoTapLdapTypes.Core.Dict:
             """Analyze single LDIF file using flext-ldif."""
-            logger.info(f"Analyzing LDIF file: {ldif_file}")
+            logger.info("Analyzing LDIF file: %s", ldif_file)
             try:
                 # Read file and delegate analysis to flext-ldif
                 with Path(ldif_file).open(encoding="utf-8") as f:
@@ -255,7 +262,7 @@ class FlextTapLdapLdifStreams:
                     for entry in result.data:
                         # Use library delegation for classification
                         oc_list: list[object] = entry.attributes.get_values(
-                            "objectClass"
+                            "objectClass",
                         )
                         entry_type = self._classify_entry_type(oc_list)
                         entry_types[entry_type] = entry_types.get(entry_type, 0) + 1
@@ -270,11 +277,12 @@ class FlextTapLdapLdifStreams:
                 logger.error(f"Failed to analyze LDIF file {ldif_file}: {result.error}")
                 return {"total_entries": 0, "entry_types": {}, "object_classes": {}}
             except Exception:
-                logger.exception(f"Error analyzing LDIF file {ldif_file}")
+                logger.exception("Error analyzing LDIF file %s", ldif_file)
                 return {"total_entries": 0, "entry_types": {}, "object_classes": {}}
 
         def _classify_entry_type(
-            self, object_classes: FlextMeltanoTapLdapTypes.Core.StringList
+            self,
+            object_classes: FlextMeltanoTapLdapTypes.Core.StringList,
         ) -> str:
             """Classify entry type by simple objectClass heuristics."""
             lowered = {oc.lower() for oc in object_classes}

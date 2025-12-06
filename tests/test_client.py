@@ -38,7 +38,9 @@ class TestLDAPClientCoverageBoost:
 
         # Test with SSL client
         ssl_client = FlextTapLdapClient.LDAPClient(
-            host="secure.com", port=636, use_ssl=True
+            host="secure.com",
+            port=636,
+            use_ssl=True,
         )
         ssl_uri = ssl_client._build_server_uri()
         assert ssl_uri == "ldaps://secure.com:636"
@@ -154,7 +156,8 @@ class TestLDAPClientCoverageBoost:
                 ["uid"],
             )
             mock_process.assert_called_once_with(
-                [{"test": "entry"}], oracle_oid_mode=True
+                [{"test": "entry"}],
+                oracle_oid_mode=True,
             )
 
             # Should return iterator

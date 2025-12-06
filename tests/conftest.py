@@ -10,12 +10,12 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
-from flext_tests import FlextTestDocker
+from flext_tests import FlextTestsDocker
 
 
 @pytest.fixture(scope="session")
-def shared_ldap_container(flext_docker: "FlextTestDocker") -> Generator[str]:
-    """Managed LDAP container using centralized FlextTestDocker with docker-compose."""
+def shared_ldap_container(flext_docker: "FlextTestsDocker") -> Generator[str]:
+    """Managed LDAP container using centralized FlextTestsDocker with docker-compose."""
     # Use centralized docker-compose file for OpenLDAP
     compose_file = Path("~/flext/docker/docker-compose.openldap.yml").expanduser()
 
@@ -26,7 +26,7 @@ def shared_ldap_container(flext_docker: "FlextTestDocker") -> Generator[str]:
 
     return "flext-openldap-test"
 
-    # Cleanup handled by FlextTestDocker automatically
+    # Cleanup handled by FlextTestsDocker automatically
 
 
 def pytest_configure(config: pytest.Config) -> None:

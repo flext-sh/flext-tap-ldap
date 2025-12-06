@@ -159,7 +159,8 @@ class FlextTapLdapStreams:
             self.client: LDAPClient | None = None
             try:
                 connection_config: dict[str, object] = self.tap.config.get(
-                    "connection", {}
+                    "connection",
+                    {},
                 )
                 self.client = LDAPClient(
                     host=str(connection_config.get("host", "localhost")),
@@ -175,7 +176,7 @@ class FlextTapLdapStreams:
                     page_size=int(self.tap.config.get("page_size", 1000)),
                 )
             except Exception as e:
-                logger.warning(f"Failed to create LDAP client: {e}")
+                logger.warning("Failed to create LDAP client: %s", e)
                 self.client = None
 
         def get_records(
@@ -203,7 +204,8 @@ class FlextTapLdapStreams:
                 # Use base DN from config if not specified
                 if base_dn is None:
                     connection_config: dict[str, object] = self.tap.config.get(
-                        "connection", {}
+                        "connection",
+                        {},
                     )
                     base_dn = connection_config.get("base_dn", "")
 
@@ -215,13 +217,13 @@ class FlextTapLdapStreams:
                 )
 
                 if not results:
-                    logger.info(f"No results found for filter: {search_filter}")
+                    logger.info("No results found for filter: %s", search_filter)
                     return self._get_fallback_data()
 
                 return results
 
             except Exception as e:
-                logger.warning(f"LDAP search failed: {e}, using fallback data")
+                logger.warning("LDAP search failed: %s, using fallback data", e)
                 return self._get_fallback_data()
 
         def _get_fallback_data(
@@ -250,14 +252,14 @@ class FlextTapLdapStreams:
                 FlextMeltanoTypes.Singer.Typing.Property(
                     "objectClass",
                     FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType
+                        FlextMeltanoTypes.Singer.Typing.StringType,
                     ),
                     description="Object Classes",
                 ),
                 FlextMeltanoTypes.Singer.Typing.Property(
                     "memberOf",
                     FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType
+                        FlextMeltanoTypes.Singer.Typing.StringType,
                     ),
                     description="Group Memberships",
                 ),
@@ -281,7 +283,8 @@ class FlextTapLdapStreams:
             logger.info("Extracting LDAP users")
 
             user_filter = self.tap.config.get(
-                "user_filter", "(objectClass=inetOrgPerson)"
+                "user_filter",
+                "(objectClass=inetOrgPerson)",
             )
             user_attributes = [
                 "uid",
@@ -307,7 +310,8 @@ class FlextTapLdapStreams:
             ]
 
             results: list[FlextMeltanoTapLdapTypes.Core.Dict] = self._search_ldap(
-                user_filter, attributes=user_attributes
+                user_filter,
+                attributes=user_attributes,
             )
 
             yield from results
@@ -338,21 +342,21 @@ class FlextTapLdapStreams:
                 FlextMeltanoTypes.Singer.Typing.Property(
                     "member",
                     FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType
+                        FlextMeltanoTypes.Singer.Typing.StringType,
                     ),
                     description="Group Members",
                 ),
                 FlextMeltanoTypes.Singer.Typing.Property(
                     "uniqueMember",
                     FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType
+                        FlextMeltanoTypes.Singer.Typing.StringType,
                     ),
                     description="Unique Members",
                 ),
                 FlextMeltanoTypes.Singer.Typing.Property(
                     "objectClass",
                     FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType
+                        FlextMeltanoTypes.Singer.Typing.StringType,
                     ),
                     description="Object Classes",
                 ),
@@ -376,7 +380,8 @@ class FlextTapLdapStreams:
             logger.info("Extracting LDAP groups")
 
             group_filter = self.tap.config.get(
-                "group_filter", "(objectClass=groupOfNames)"
+                "group_filter",
+                "(objectClass=groupOfNames)",
             )
             group_attributes = [
                 "cn",
@@ -391,7 +396,8 @@ class FlextTapLdapStreams:
             ]
 
             results: FlextResult[object] = self._search_ldap(
-                group_filter, attributes=group_attributes
+                group_filter,
+                attributes=group_attributes,
             )
 
             yield from results
@@ -418,7 +424,7 @@ class FlextTapLdapStreams:
                 FlextMeltanoTypes.Singer.Typing.Property(
                     "objectClass",
                     FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType
+                        FlextMeltanoTypes.Singer.Typing.StringType,
                     ),
                     description="Object Classes",
                 ),
@@ -451,7 +457,8 @@ class FlextTapLdapStreams:
             ]
 
             results: FlextResult[object] = self._search_ldap(
-                ou_filter, attributes=ou_attributes
+                ou_filter,
+                attributes=ou_attributes,
             )
 
             yield from results
@@ -473,28 +480,28 @@ class FlextTapLdapStreams:
                 FlextMeltanoTypes.Singer.Typing.Property(
                     "objectClass",
                     FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType
+                        FlextMeltanoTypes.Singer.Typing.StringType,
                     ),
                     description="Object Classes",
                 ),
                 FlextMeltanoTypes.Singer.Typing.Property(
                     "objectClasses",
                     FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType
+                        FlextMeltanoTypes.Singer.Typing.StringType,
                     ),
                     description="Available Object Classes",
                 ),
                 FlextMeltanoTypes.Singer.Typing.Property(
                     "attributeTypes",
                     FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType
+                        FlextMeltanoTypes.Singer.Typing.StringType,
                     ),
                     description="Available Attribute Types",
                 ),
                 FlextMeltanoTypes.Singer.Typing.Property(
                     "ldapSyntaxes",
                     FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType
+                        FlextMeltanoTypes.Singer.Typing.StringType,
                     ),
                     description="LDAP Syntaxes",
                 ),
@@ -542,7 +549,9 @@ class FlextTapLdapStreams:
                             yield record
                         return  # Found schema, no need to try other base DNs
                 except Exception as e:
-                    logger.debug(f"Schema search failed for base DN '{base_dn}': {e}")
+                    logger.debug(
+                        "Schema search failed for base DN '%s': %s", base_dn, e
+                    )
                     continue
 
             # If no schema found, yield fallback
@@ -593,7 +602,7 @@ class FlextTapLdapStreams:
                         return FlextMeltanoTypes.Singer.Typing.Property(
                             name,
                             FlextMeltanoTypes.Singer.Typing.ArrayType(
-                                FlextMeltanoTypes.Singer.Typing.StringType
+                                FlextMeltanoTypes.Singer.Typing.StringType,
                             ),
                             description=prop_desc,
                         )
@@ -612,7 +621,7 @@ class FlextTapLdapStreams:
             # Build schema from parameters
             if params.schema_properties:
                 schema_props = list(
-                    starmap(_map_prop, params.schema_properties.items())
+                    starmap(_map_prop, params.schema_properties.items()),
                 )
                 # Ensure all are FlextMeltanoTypes.Singer.Typing.Property
                 typed_props = [
@@ -627,7 +636,8 @@ class FlextTapLdapStreams:
                     description="Distinguished Name",
                 )
                 schema = FlextMeltanoTypes.Singer.Typing.PropertiesList(
-                    dn_prop, *typed_props
+                    dn_prop,
+                    *typed_props,
                 ).to_dict()
             else:
                 schema = FlextMeltanoTypes.Singer.Typing.PropertiesList(
@@ -639,7 +649,7 @@ class FlextTapLdapStreams:
                     FlextMeltanoTypes.Singer.Typing.Property(
                         "objectClass",
                         FlextMeltanoTypes.Singer.Typing.ArrayType(
-                            FlextMeltanoTypes.Singer.Typing.StringType
+                            FlextMeltanoTypes.Singer.Typing.StringType,
                         ),
                         description="Object Classes",
                     ),
@@ -662,11 +672,11 @@ class FlextTapLdapStreams:
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
             logger.info(
-                f"Extracting LDAP records for custom stream: {self.params.name}"
+                f"Extracting LDAP records for custom stream: {self.params.name}",
             )
 
             results: list[FlextMeltanoTapLdapTypes.Core.Dict] = self._search_ldap(
-                self.params.search_filter
+                self.params.search_filter,
             )
 
             yield from results

@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 from flext_core import FlextLogger
-from flext_tests import FlextTestDocker
+from flext_tests import FlextTestsDocker
 from ldap3 import ALL, Connection, Server
 
 logger = FlextLogger(__name__)
@@ -49,14 +49,14 @@ def sample_catalog() -> dict[str, object]:
 
 @pytest.fixture(scope="session")
 def ldap_container(project_root: Path) -> Iterator[None]:
-    """Start and manage LDAP test container using FlextTestDocker."""
+    """Start and manage LDAP test container using FlextTestsDocker."""
     compose_file = project_root / "docker-compose.yml"
     logger.info("Starting OpenLDAP container...")
 
-    # Use FlextTestDocker for unified Docker management
-    docker_manager = FlextTestDocker(workspace_root=project_root)
+    # Use FlextTestsDocker for unified Docker management
+    docker_manager = FlextTestsDocker(workspace_root=project_root)
 
-    # Start containers using FlextTestDocker
+    # Start containers using FlextTestsDocker
     start_result = docker_manager.compose_up(compose_file=str(compose_file))
 
     if start_result.is_failure:
