@@ -12,11 +12,11 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from flext_core import FlextModels
+from flext_core import m as m_core
 from pydantic import BaseModel, Field
 
 
-class FlextTapLdapModels(FlextModels):
+class FlextTapLdapModels(m_core):
     """Tap-specific event models for LDAP extraction.
 
     Only contains Singer tap execution events.
@@ -24,7 +24,7 @@ class FlextTapLdapModels(FlextModels):
     LDIF processing models are inherited from flext-ldif.
     """
 
-    class TapExecutionStartedEvent(FlextModels.DomainEvent):
+    class TapExecutionStartedEvent(m_core.DomainEvent):
         """Event raised when tap execution starts."""
 
         timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
@@ -57,7 +57,7 @@ class FlextTapLdapModels(FlextModels):
             config_data = self.data.get("config")
             return config_data if isinstance(config_data, dict) else None
 
-    class TapExecutionCompletedEvent(FlextModels.DomainEvent):
+    class TapExecutionCompletedEvent(m_core.DomainEvent):
         """Event raised when tap execution completes."""
 
         timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
