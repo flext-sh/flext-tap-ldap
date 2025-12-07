@@ -19,7 +19,6 @@ from flext_core import FlextLogger, FlextResult
 from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTypes
 
 from flext_tap_ldap.client import LDAPClient
-from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 # Forward declaration to avoid circular import with tap.py
 if TYPE_CHECKING:
@@ -50,7 +49,7 @@ class FlextTapLdapStreams:
         """
 
         @staticmethod
-        def create_test_user_record() -> FlextMeltanoTapLdapTypes.Core.Dict:
+        def create_test_user_record() -> dict[str, object]:
             """Create standardized test user record for fallback scenarios."""
             return {
                 "dn": "uid=jdoe,ou=users,dc=test,dc=com",
@@ -71,7 +70,7 @@ class FlextTapLdapStreams:
             }
 
         @staticmethod
-        def create_test_group_record() -> FlextMeltanoTapLdapTypes.Core.Dict:
+        def create_test_group_record() -> dict[str, object]:
             """Create standardized test group record for fallback scenarios."""
             return {
                 "dn": "cn=developers,ou=groups,dc=test,dc=com",
@@ -86,7 +85,7 @@ class FlextTapLdapStreams:
             }
 
         @staticmethod
-        def create_test_ou_record() -> FlextMeltanoTapLdapTypes.Core.Dict:
+        def create_test_ou_record() -> dict[str, object]:
             """Create standardized test organizational unit record."""
             return {
                 "dn": "ou=users,dc=test,dc=com",
@@ -97,7 +96,7 @@ class FlextTapLdapStreams:
             }
 
         @staticmethod
-        def create_test_schema_record() -> FlextMeltanoTapLdapTypes.Core.Dict:
+        def create_test_schema_record() -> dict[str, object]:
             """Create standardized test schema record."""
             return {
                 "dn": "cn=schema",
@@ -118,8 +117,8 @@ class FlextTapLdapStreams:
 
         name: str
         search_filter: str
-        schema_properties: FlextMeltanoTapLdapTypes.Core.Dict | None = None
-        primary_keys: FlextMeltanoTapLdapTypes.Core.StringList | None = None
+        schema_properties: dict[str, object] | None = None
+        primary_keys: list[str] | None = None
         replication_key: str | None = None
 
         def __post_init__(self) -> None:
@@ -145,7 +144,7 @@ class FlextTapLdapStreams:
             self,
             tap: FlextMeltanoTapLDAP,
             name: str | None = None,
-            schema: FlextMeltanoTapLdapTypes.Core.Dict | None = None,
+            schema: dict[str, object] | None = None,
         ) -> None:
             """Initialize the LDAP stream."""
             super().__init__(tap, name=name, schema=schema)
@@ -182,7 +181,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> Iterable[dict[str, object]]:
             """Get records from LDAP - base implementation."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -193,8 +192,8 @@ class FlextTapLdapStreams:
             self,
             search_filter: str,
             base_dn: str | None = None,
-            attributes: FlextMeltanoTapLdapTypes.Core.StringList | None = None,
-        ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
+            attributes: list[str] | None = None,
+        ) -> list[dict[str, object]]:
             """Search LDAP directory with error handling."""
             if not self.client:
                 logger.warning("LDAP client not available, using fallback data")
@@ -228,7 +227,7 @@ class FlextTapLdapStreams:
 
         def _get_fallback_data(
             self,
-        ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> list[dict[str, object]]:
             """Get fallback data for testing/demo purposes."""
             return []
 
@@ -276,7 +275,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> Iterable[dict[str, object]]:
             """Get user records from LDAP."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -309,7 +308,7 @@ class FlextTapLdapStreams:
                 "modifyTimestamp",
             ]
 
-            results: list[FlextMeltanoTapLdapTypes.Core.Dict] = self._search_ldap(
+            results: list[dict[str, object]] = self._search_ldap(
                 user_filter,
                 attributes=user_attributes,
             )
@@ -318,7 +317,7 @@ class FlextTapLdapStreams:
 
         def _get_fallback_data(
             self,
-        ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> list[dict[str, object]]:
             """Get fallback user data."""
             return [FlextTapLdapStreams.FallbackDataFactory.create_test_user_record()]
 
@@ -373,7 +372,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> Iterable[dict[str, object]]:
             """Get group records from LDAP."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -404,7 +403,7 @@ class FlextTapLdapStreams:
 
         def _get_fallback_data(
             self,
-        ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> list[dict[str, object]]:
             """Get fallback group data."""
             return [FlextTapLdapStreams.FallbackDataFactory.create_test_group_record()]
 
@@ -441,7 +440,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> Iterable[dict[str, object]]:
             """Get organizational unit records from LDAP."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -465,7 +464,7 @@ class FlextTapLdapStreams:
 
         def _get_fallback_data(
             self,
-        ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> list[dict[str, object]]:
             """Get fallback organizational unit data."""
             return [FlextTapLdapStreams.FallbackDataFactory.create_test_ou_record()]
 
@@ -518,7 +517,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> Iterable[dict[str, object]]:
             """Get schema records from LDAP."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -560,7 +559,7 @@ class FlextTapLdapStreams:
 
         def _get_fallback_data(
             self,
-        ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> list[dict[str, object]]:
             """Get fallback schema data."""
             return [FlextTapLdapStreams.FallbackDataFactory.create_test_schema_record()]
 
@@ -667,7 +666,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> Iterable[dict[str, object]]:
             """Get records using custom filter."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -675,7 +674,7 @@ class FlextTapLdapStreams:
                 f"Extracting LDAP records for custom stream: {self.params.name}",
             )
 
-            results: list[FlextMeltanoTapLdapTypes.Core.Dict] = self._search_ldap(
+            results: list[dict[str, object]] = self._search_ldap(
                 self.params.search_filter,
             )
 
@@ -683,7 +682,7 @@ class FlextTapLdapStreams:
 
         def _get_fallback_data(
             self,
-        ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> list[dict[str, object]]:
             """Get fallback data for custom stream."""
             return [
                 {

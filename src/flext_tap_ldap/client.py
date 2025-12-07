@@ -22,8 +22,6 @@ from flext_ldap import (
     FlextLdapModels,
 )
 
-from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
-
 logger = FlextLogger(__name__)
 
 
@@ -170,7 +168,7 @@ class FlextTapLdapClient:
 
             Single Responsibility: Handle only scope conversion logic.
             """
-            scope_map: FlextMeltanoTapLdapTypes.Core.Headers = {
+            scope_map: dict[str, str] = {
                 "SUBTREE": "SUBTREE",
                 "ONELEVEL": "ONELEVEL",
                 "BASE": "BASE",
@@ -225,12 +223,12 @@ class FlextTapLdapClient:
             self,
             result: FlextResult[FlextLdapModels.SearchResponse],
             size_limit: int,
-        ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> list[dict[str, object]]:
             """Process LDAP search results with size limiting.
 
             Single Responsibility: Handle only result processing logic.
             """
-            entries: list[FlextMeltanoTapLdapTypes.Core.Dict] = []
+            entries: list[dict[str, object]] = []
             if not (result.is_success and result.data):
                 return entries
 
@@ -252,10 +250,10 @@ class FlextTapLdapClient:
             self,
             base_dn: str,
             search_filter: str,
-            attributes: FlextMeltanoTapLdapTypes.Core.StringList | None,
+            attributes: list[str] | None,
             ldap_scope: str,
             size_limit: int,
-        ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> list[dict[str, object]]:
             """Perform actual LDAP search.
 
             Single Responsibility: Handle only search execution.
@@ -285,8 +283,8 @@ class FlextTapLdapClient:
 
         def _run_in_new_loop(
             self,
-            coro: Awaitable[list[FlextMeltanoTapLdapTypes.Core.Dict]],
-        ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
+            coro: Awaitable[list[dict[str, object]]],
+        ) -> list[dict[str, object]]:
             """Run coroutine in new event loop.
 
             Single Responsibility: Handle only event loop management.
@@ -303,10 +301,10 @@ class FlextTapLdapClient:
             self,
             base_dn: str,
             search_filter: str = "(objectClass=*)",
-            attributes: FlextMeltanoTapLdapTypes.Core.StringList | None = None,
+            attributes: list[str] | None = None,
             scope: str = "SUBTREE",
             size_limit: int = 0,
-        ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> list[dict[str, object]]:
             """Search for entries using flext-ldap infrastructure (synchronous wrapper).
 
             Returns a list of entries for testing convenience with Singer streams.
@@ -434,7 +432,7 @@ class FlextTapLdapClient:
                 # Required for Singer protocol compliance - NOT security-sensitive data generation
                 return True
 
-        def health_check(self: object) -> FlextMeltanoTapLdapTypes.Core.Dict:
+        def health_check(self: object) -> dict[str, object]:
             """Perform health check for testing convenience."""
             start_time = time.time()
             connection_result: FlextResult[object] = self.test_connection()
@@ -486,10 +484,10 @@ class FlextTapLdapClient:
 
         def _extend_attributes_with_oracle_support(
             self,
-            attributes: FlextMeltanoTapLdapTypes.Core.StringList | None,
+            attributes: list[str] | None,
             *,
             oracle_oid_mode: bool,
-        ) -> FlextMeltanoTapLdapTypes.Core.StringList | None:
+        ) -> list[str] | None:
             """Extend attributes list with Oracle-specific attributes.
 
             Single Responsibility: Handle only Oracle attribute extension logic.
@@ -516,7 +514,7 @@ class FlextTapLdapClient:
 
             Single Responsibility: Handle only result processing logic.
             """
-            results: list[FlextMeltanoTapLdapTypes.Core.Dict] = []
+            results: list[dict[str, object]] = []
             for entry in search_result:
                 if isinstance(entry, dict):
                     entry_dict = entry
@@ -533,10 +531,10 @@ class FlextTapLdapClient:
             self,
             base_dn: str,
             search_filter: str,
-            attributes: FlextMeltanoTapLdapTypes.Core.StringList | None,
+            attributes: list[str] | None,
             *,
             oracle_oid_mode: bool,
-        ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> list[dict[str, object]]:
             """Execute Oracle search in new event loop.
 
             Single Responsibility: Handle only event loop management for Oracle search.
@@ -562,10 +560,10 @@ class FlextTapLdapClient:
             self,
             base_dn: str,
             search_filter: str = "(objectClass=*)",
-            attributes: FlextMeltanoTapLdapTypes.Core.StringList | None = None,
+            attributes: list[str] | None = None,
             *,
             oracle_oid_mode: bool = False,
-        ) -> list[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> list[dict[str, object]]:
             """Search with Oracle OID support for testing convenience.
 
             Refactored using Single Responsibility Principle to reduce complexity.
@@ -615,7 +613,7 @@ class LDAPClientConfig(FlextTapLdapClient.LDAPClientConfig):
     """LDAPClientConfig - real inheritance from FlextTapLdapClient.LDAPClientConfig."""
 
 
-__all__: FlextMeltanoTapLdapTypes.Core.StringList = [
+__all__: list[str] = [
     "FlextTapLdapClient",
     "LDAPClient",
     "LDAPClientConfig",

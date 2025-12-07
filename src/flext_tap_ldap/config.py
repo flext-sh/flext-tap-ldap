@@ -16,8 +16,6 @@ from flext_core import FlextConfig, FlextConstants, FlextResult
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
 
-from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
-
 
 class ConfigDefaults(TypedDict, total=False):
     """Type-safe configuration defaults."""
@@ -48,7 +46,7 @@ class FlextTapLdapConfig(FlextConfig):
 
         name: str = Field(..., description="Stream name")
         search_filter: str = Field(..., description="LDAP search filter")
-        primary_keys: FlextMeltanoTapLdapTypes.Core.StringList | None = Field(
+        primary_keys: list[str] | None = Field(
             default=None,
             description="Primary key fields",
         )
@@ -56,7 +54,7 @@ class FlextTapLdapConfig(FlextConfig):
             default=None,
             description="Replication key field",
         )
-        json_schema: FlextMeltanoTapLdapTypes.Core.Dict | None = Field(
+        json_schema: dict[str, object] | None = Field(
             default=None,
             description="JSON schema for the stream",
         )
@@ -73,7 +71,7 @@ class FlextTapLdapConfig(FlextConfig):
     class LDIFProcessingConfig(FlextConfig):
         """Nested configuration for LDIF file processing."""
 
-        ldif_files: FlextMeltanoTapLdapTypes.Core.StringList | None = Field(
+        ldif_files: list[str] | None = Field(
             default=None,
             description="List of LDIF files to process",
         )
@@ -106,7 +104,7 @@ class FlextTapLdapConfig(FlextConfig):
             default=False,
             description="Apply transformation rules to LDIF entries",
         )
-        ldif_transformation_rules: FlextMeltanoTapLdapTypes.Core.Dict | None = Field(
+        ldif_transformation_rules: dict[str, object] | None = Field(
             default=None,
             description="Transformation rules for LDIF processing",
         )
