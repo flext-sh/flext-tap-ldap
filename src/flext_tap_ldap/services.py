@@ -24,7 +24,6 @@ from flext_tap_ldap.config import (
     FlextTapLdapConfig,
     LDIFProcessingConfig,
 )
-from flext_tap_ldap.typings import FlextMeltanoTapLdapTypes
 
 logger = FlextLogger(__name__)
 
@@ -198,9 +197,9 @@ class FlextTapLdapServices:
         connection_id: str
         stream_type: str
         search_filter: str
-        attributes: FlextMeltanoTapLdapTypes.Core.StringList | None = None
+        attributes: list[str] | None = None
         tap_stream_id: str | None = None
-        key_properties: FlextMeltanoTapLdapTypes.Core.StringList | None = None
+        key_properties: list[str] | None = None
         replication_method: str = "FULL_TABLE"
         replication_key: str | None = None
 
@@ -224,7 +223,7 @@ class FlextTapLdapServices:
         following Interface Segregation Principle.
         """
 
-        ldif_files: FlextMeltanoTapLdapTypes.Core.StringList = field(
+        ldif_files: list[str] = field(
             default_factory=list,
         )
         ldif_directory: str | None = None
@@ -234,7 +233,7 @@ class FlextTapLdapServices:
         ldif_ignore_file_errors: bool = True
         ldif_ignore_entry_errors: bool = True
         ldif_apply_transformations: bool = False
-        ldif_transformation_rules: FlextMeltanoTapLdapTypes.Core.Dict = field(
+        ldif_transformation_rules: dict[str, object] = field(
             default_factory=dict,
         )
         migration_batch: str | None = None
@@ -274,12 +273,12 @@ class FlextTapLdapServices:
         def test_connection(
             self,
             connection_id: str,
-        ) -> FlextResult[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> FlextResult[dict[str, object]]:
             """Test LDAP connection."""
             try:
                 connection = self._connections.get(connection_id)
                 if not connection:
-                    return FlextResult[FlextMeltanoTapLdapTypes.Core.Dict].fail(
+                    return FlextResult[dict[str, object]].fail(
                         "Connection not found",
                     )
 
@@ -288,7 +287,7 @@ class FlextTapLdapServices:
                 connection.last_error = None
                 self._connections[connection_id] = connection
 
-                return FlextResult[FlextMeltanoTapLdapTypes.Core.Dict].ok({
+                return FlextResult[dict[str, object]].ok({
                     "success": "True",
                     "connection": "connection",
                 })
@@ -298,7 +297,7 @@ class FlextTapLdapServices:
                     connection.last_tested = datetime.now(UTC)
                     connection.last_error = str(e)
                     self._connections[connection_id] = connection
-                return FlextResult[FlextMeltanoTapLdapTypes.Core.Dict].fail(
+                return FlextResult[dict[str, object]].fail(
                     f"Failed to test connection: {e}",
                 )
 
@@ -368,12 +367,12 @@ class FlextTapLdapServices:
         def discover_schema(
             self,
             stream_id: str,
-        ) -> FlextResult[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> FlextResult[dict[str, object]]:
             """Discover schema for LDAP stream."""
             try:
                 stream = self._streams.get(stream_id)
                 if not stream:
-                    return FlextResult[FlextMeltanoTapLdapTypes.Core.Dict].fail(
+                    return FlextResult[dict[str, object]].fail(
                         "Stream not found",
                     )
 
@@ -391,9 +390,9 @@ class FlextTapLdapServices:
                 stream.update_schema(schema)
                 self._streams[stream_id] = stream
 
-                return FlextResult[FlextMeltanoTapLdapTypes.Core.Dict].ok(schema)
+                return FlextResult[dict[str, object]].ok(schema)
             except (RuntimeError, ValueError, TypeError) as e:
-                return FlextResult[FlextMeltanoTapLdapTypes.Core.Dict].fail(
+                return FlextResult[dict[str, object]].fail(
                     f"Failed to discover schema: {e}",
                 )
 
@@ -436,9 +435,9 @@ class FlextTapLdapServices:
             self,
             connection_id: str,
             command: str,
-            config: FlextMeltanoTapLdapTypes.Core.Dict | None = None,
-            catalog: FlextMeltanoTapLdapTypes.Core.Dict | None = None,
-            state: FlextMeltanoTapLdapTypes.Core.Dict | None = None,
+            config: dict[str, object] | None = None,
+            catalog: dict[str, object] | None = None,
+            state: dict[str, object] | None = None,
         ) -> FlextResult[TapExecution]:
             """Create tap execution."""
             try:
@@ -586,7 +585,7 @@ class FlextTapLdapServices:
         def process_ldif_file(
             self,
             file_path: str,
-        ) -> FlextResult[list[FlextMeltanoTapLdapTypes.Core.Dict]]:
+        ) -> FlextResult[list[dict[str, object]]]:
             """Process LDIF file using flext-ldif library."""
             try:
                 logger.info("Processing LDIF file: %s", file_path)
@@ -595,7 +594,7 @@ class FlextTapLdapServices:
                 result: FlextResult[object] = self._ldif_api.parse_file(file_path)
 
                 if not result.success:
-                    return FlextResult[list[FlextMeltanoTapLdapTypes.Core.Dict]].fail(
+                    return FlextResult[list[dict[str, object]]].fail(
                         f"Failed to parse LDIF file: {result.error}",
                     )
 
@@ -604,8 +603,8 @@ class FlextTapLdapServices:
                     f"Successfully processed {len(entries)} entries from {file_path}",
                 )
 
-                # Normalize to list[FlextMeltanoTapLdapTypes.Core.Dict]
-                normalized: list[FlextMeltanoTapLdapTypes.Core.Dict] = []
+                # Normalize to list[dict[str, object]]
+                normalized: list[dict[str, object]] = []
                 for entry in entries:
                     # FlextLdifEntry: expose minimal dict
                     getattr(getattr(entry, "dn", None), "value", None) or getattr(
@@ -617,38 +616,38 @@ class FlextTapLdapServices:
                     getattr(attributes_obj, "attributes", attributes_obj)
                     normalized.append({"dn": "dn", "attributes": "attributes"})
 
-                return FlextResult[list[FlextMeltanoTapLdapTypes.Core.Dict]].ok(
+                return FlextResult[list[dict[str, object]]].ok(
                     normalized,
                 )
 
             except Exception as e:
                 logger.exception("Error processing LDIF file %s", file_path)
-                return FlextResult[list[FlextMeltanoTapLdapTypes.Core.Dict]].fail(
+                return FlextResult[list[dict[str, object]]].fail(
                     f"LDIF processing failed: {e}",
                 )
 
         def validate_ldif_file(
             self,
             file_path: str,
-        ) -> FlextResult[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> FlextResult[dict[str, object]]:
             """Validate LDIF file using flext-ldif library."""
             try:
                 logger.info("Validating LDIF file: %s", file_path)
 
                 # Basic validation via parsing using flext-ldif
-                result: FlextResult[list[FlextMeltanoTapLdapTypes.Core.Dict]] = (
+                result: FlextResult[list[dict[str, object]]] = (
                     self._ldif_api.parse_file(file_path)
                 )
 
                 if not result.success:
-                    return FlextResult[list[FlextMeltanoTapLdapTypes.Core.Dict]].fail(
+                    return FlextResult[list[dict[str, object]]].fail(
                         f"Validation failed: {result.error}",
                     )
 
                 entries = result.data or []
                 len(entries)
                 # Consider parse success as valid
-                validation_data: FlextMeltanoTapLdapTypes.Core.Dict = {
+                validation_data: dict[str, object] = {
                     "total_entries": "total_entries",
                     "valid_entries": "total_entries",
                     "invalid_entries": 0,
@@ -656,26 +655,26 @@ class FlextTapLdapServices:
                 }
                 logger.info("LDIF file validation completed: %s", file_path)
 
-                return FlextResult[list[FlextMeltanoTapLdapTypes.Core.Dict]].ok(
+                return FlextResult[list[dict[str, object]]].ok(
                     validation_data,
                 )
 
             except Exception as e:
                 logger.exception("Error validating LDIF file %s", file_path)
-                return FlextResult[list[FlextMeltanoTapLdapTypes.Core.Dict]].fail(
+                return FlextResult[list[dict[str, object]]].fail(
                     f"LDIF validation failed: {e}",
                 )
 
         def get_ldif_statistics(
             self,
             file_path: str,
-        ) -> FlextResult[FlextMeltanoTapLdapTypes.Core.Dict]:
+        ) -> FlextResult[dict[str, object]]:
             """Get LDIF file statistics using flext-ldif library."""
             try:
                 # First validate to get statistics
-                validation_result: FlextResult[
-                    list[FlextMeltanoTapLdapTypes.Core.Dict]
-                ] = self.validate_ldif_file(file_path)
+                validation_result: FlextResult[list[dict[str, object]]] = (
+                    self.validate_ldif_file(file_path)
+                )
 
                 if not validation_result.success:
                     return validation_result
@@ -691,13 +690,13 @@ class FlextTapLdapServices:
                     **validation_data,
                 }
 
-                return FlextResult[list[FlextMeltanoTapLdapTypes.Core.Dict]].ok(
+                return FlextResult[list[dict[str, object]]].ok(
                     file_stats,
                 )
 
             except Exception as e:
                 logger.exception("Error getting LDIF statistics for %s", file_path)
-                return FlextResult[list[FlextMeltanoTapLdapTypes.Core.Dict]].fail(
+                return FlextResult[list[dict[str, object]]].fail(
                     f"LDIF statistics failed: {e}",
                 )
 
@@ -740,7 +739,7 @@ class FlextTapLdapServices:
     @staticmethod
     def create_ldap_connection_config(
         params: FlextTapLdapServices.LDAPConnectionParams,
-    ) -> FlextResult[FlextMeltanoTapLdapTypes.Core.Dict]:
+    ) -> FlextResult[dict[str, object]]:
         """Create LDAP connection configuration using Parameter Object Pattern.
 
         Args:
@@ -776,7 +775,7 @@ class FlextTapLdapServices:
         base_dn: str,
         port: int = 389,
         **kwargs: object,
-    ) -> FlextResult[FlextMeltanoTapLdapTypes.Core.Dict]:
+    ) -> FlextResult[dict[str, object]]:
         """Create LDAP connection configuration (testing convenience interface).
 
         Testing convenience wrapper for the Parameter Object Pattern implementation.

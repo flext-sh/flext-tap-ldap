@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from flext_core import FlextTypes, t
+from flext_core import FlextTypes
 
 # =============================================================================
 # TAP-LDAP-SPECIFIC TYPE VARIABLES - Domain-specific TypeVars for LDAP tap operations
@@ -24,7 +24,7 @@ from flext_core import FlextTypes, t
 
 
 # LDAP tap domain TypeVars
-class FlextMeltanoTapLdapTypes(t):
+class FlextMeltanoTapLdapTypes(FlextTypes):
     """LDAP tap-specific type definitions extending t.
 
     Domain-specific type system for LDAP data extraction operations.
