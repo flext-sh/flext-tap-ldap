@@ -287,12 +287,10 @@ class FlextTapLdapServices:
                 connection.last_error = None
                 self._connections[connection_id] = connection
 
-                return FlextResult[dict[str, object]].ok(
-                    {
-                        "success": "True",
-                        "connection": "connection",
-                    }
-                )
+                return FlextResult[dict[str, object]].ok({
+                    "success": "True",
+                    "connection": "connection",
+                })
             except (RuntimeError, ValueError, TypeError) as e:
                 connection = self._connections.get(connection_id)
                 if connection:
