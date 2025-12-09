@@ -13,6 +13,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 
 from flext_core import m as m_core
+from flext_core.utilities import u as flext_u
 from pydantic import BaseModel, Field
 
 
@@ -23,6 +24,14 @@ class FlextTapLdapModels(m_core):
     LDAP directory models are inherited from flext-ldap.
     LDIF processing models are inherited from flext-ldif.
     """
+
+    def __init_subclass__(cls, **kwargs: object) -> None:
+        """Warn when FlextTapLdapModels is subclassed directly."""
+        super().__init_subclass__(**kwargs)
+        flext_u.Deprecation.warn_once(
+            f"subclass:{cls.__name__}",
+            "Subclassing FlextTapLdapModels is deprecated. Use FlextModels directly with composition instead.",
+        )
 
     class TapExecutionStartedEvent(m_core.DomainEvent):
         """Event raised when tap execution starts."""
@@ -128,6 +137,11 @@ class FlextTapLdapModels(m_core):
         error_message: str | None = None
 
 
+m = FlextTapLdapModels
+m_tap_ldap = FlextTapLdapModels
+
 __all__: list[str] = [
     "FlextTapLdapModels",
+    "m",
+    "m_tap_ldap",
 ]

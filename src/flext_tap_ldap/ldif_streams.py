@@ -4,25 +4,20 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from pathlib import Path
-from typing import TYPE_CHECKING, override
+from typing import override
 
 from flext_core import FlextLogger, FlextResult
 from flext_ldap import FlextLdapClients
 from flext_ldif import FlextLdif, FlextLdifModels
-from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTypes
+from flext_meltano import FlextMeltanoStream as Stream
+from flext_meltano.typings import t as t_meltano
 
-# Forward declaration to avoid circular import with tap.py
-if TYPE_CHECKING:
-    from flext_tap_ldap.tap import FlextTapLdapTap
-
-    FlextMeltanoTapLDAP = FlextTapLdapTap
-else:
-    FlextMeltanoTapLDAP = object
+from flext_tap_ldap.protocols import TapProtocol
 
 logger = FlextLogger(__name__)
 
 # Access Singer SDK typing through FLEXT domain namespace
-typing_utils = FlextMeltanoTypes.Singer.Typing
+typing_utils = t_meltano.Singer.Typing
 
 
 class FlextTapLdapLdifStreams:
@@ -35,7 +30,7 @@ class FlextTapLdapLdifStreams:
         """LDIF stream using flext-ldif for ALL processing."""
 
         @override
-        def __init__(self, tap: FlextMeltanoTapLDAP) -> None:
+        def __init__(self, tap: TapProtocol) -> None:
             """Initialize LDIF stream with library delegation."""
             # Set required attributes BEFORE calling super().__init__()
             self.name = "ldif_entries"
@@ -143,7 +138,7 @@ class FlextTapLdapLdifStreams:
         """LDIF analysis stream using flext-ldif for ALL analysis."""
 
         @override
-        def __init__(self, tap: FlextMeltanoTapLDAP) -> None:
+        def __init__(self, tap: TapProtocol) -> None:
             """Initialize LDIF analysis stream with library delegation."""
             # Set required attributes BEFORE calling super().__init__()
             self.name = "ldif_analysis"
