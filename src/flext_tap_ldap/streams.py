@@ -13,20 +13,14 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from itertools import starmap
-from typing import TYPE_CHECKING, override
+from typing import override
 
 from flext_core import FlextLogger, FlextResult
-from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTypes
+from flext_meltano import FlextMeltanoStream as Stream
+from flext_meltano.typings import t as t_meltano
 
 from flext_tap_ldap.client import LDAPClient
-
-# Forward declaration to avoid circular import with tap.py
-if TYPE_CHECKING:
-    from flext_tap_ldap.tap import FlextTapLdapTap
-
-    FlextMeltanoTapLDAP = FlextTapLdapTap
-else:
-    FlextMeltanoTapLDAP = object
+from flext_tap_ldap.protocols import TapProtocol
 
 logger = FlextLogger(__name__)
 
@@ -142,7 +136,7 @@ class FlextTapLdapStreams:
         @override
         def __init__(
             self,
-            tap: FlextMeltanoTapLDAP,
+            tap: TapProtocol,
             name: str | None = None,
             schema: dict[str, object] | None = None,
         ) -> None:
@@ -239,32 +233,32 @@ class FlextTapLdapStreams:
         replication_key = "modifyTimestamp"
 
         @override
-        def __init__(self, tap: FlextMeltanoTapLDAP) -> None:
+        def __init__(self, tap: TapProtocol) -> None:
             """Initialize users stream."""
             name = "users"
-            schema: dict[str, object] = FlextMeltanoTypes.Singer.Typing.PropertiesList(
-                FlextMeltanoTypes.Singer.Typing.Property(
+            schema: dict[str, object] = t_meltano.Singer.Typing.PropertiesList(
+                t_meltano.Singer.Typing.Property(
                     "dn",
-                    FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.StringType,
                     description="Distinguished Name",
                 ),
-                FlextMeltanoTypes.Singer.Typing.Property(
+                t_meltano.Singer.Typing.Property(
                     "objectClass",
-                    FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.ArrayType(
+                        t_meltano.Singer.Typing.StringType,
                     ),
                     description="Object Classes",
                 ),
-                FlextMeltanoTypes.Singer.Typing.Property(
+                t_meltano.Singer.Typing.Property(
                     "memberOf",
-                    FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.ArrayType(
+                        t_meltano.Singer.Typing.StringType,
                     ),
                     description="Group Memberships",
                 ),
-                FlextMeltanoTypes.Singer.Typing.Property(
+                t_meltano.Singer.Typing.Property(
                     "modifyTimestamp",
-                    FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.StringType,
                     description="Modification Time",
                 ),
             ).to_dict()
@@ -329,39 +323,39 @@ class FlextTapLdapStreams:
         replication_key = "modifyTimestamp"
 
         @override
-        def __init__(self, tap: FlextMeltanoTapLDAP) -> None:
+        def __init__(self, tap: TapProtocol) -> None:
             """Initialize groups stream."""
             name = "groups"
-            schema: dict[str, object] = FlextMeltanoTypes.Singer.Typing.PropertiesList(
-                FlextMeltanoTypes.Singer.Typing.Property(
+            schema: dict[str, object] = t_meltano.Singer.Typing.PropertiesList(
+                t_meltano.Singer.Typing.Property(
                     "dn",
-                    FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.StringType,
                     description="Distinguished Name",
                 ),
-                FlextMeltanoTypes.Singer.Typing.Property(
+                t_meltano.Singer.Typing.Property(
                     "member",
-                    FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.ArrayType(
+                        t_meltano.Singer.Typing.StringType,
                     ),
                     description="Group Members",
                 ),
-                FlextMeltanoTypes.Singer.Typing.Property(
+                t_meltano.Singer.Typing.Property(
                     "uniqueMember",
-                    FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.ArrayType(
+                        t_meltano.Singer.Typing.StringType,
                     ),
                     description="Unique Members",
                 ),
-                FlextMeltanoTypes.Singer.Typing.Property(
+                t_meltano.Singer.Typing.Property(
                     "objectClass",
-                    FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.ArrayType(
+                        t_meltano.Singer.Typing.StringType,
                     ),
                     description="Object Classes",
                 ),
-                FlextMeltanoTypes.Singer.Typing.Property(
+                t_meltano.Singer.Typing.Property(
                     "modifyTimestamp",
-                    FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.StringType,
                     description="Modification Time",
                 ),
             ).to_dict()
@@ -411,25 +405,25 @@ class FlextTapLdapStreams:
         """Stream for LDAP organizational unit entries."""
 
         @override
-        def __init__(self, tap: FlextMeltanoTapLDAP) -> None:
+        def __init__(self, tap: TapProtocol) -> None:
             """Initialize organizational units stream."""
             name = "organizational_units"
-            schema: dict[str, object] = FlextMeltanoTypes.Singer.Typing.PropertiesList(
-                FlextMeltanoTypes.Singer.Typing.Property(
+            schema: dict[str, object] = t_meltano.Singer.Typing.PropertiesList(
+                t_meltano.Singer.Typing.Property(
                     "dn",
-                    FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.StringType,
                     description="Distinguished Name",
                 ),
-                FlextMeltanoTypes.Singer.Typing.Property(
+                t_meltano.Singer.Typing.Property(
                     "objectClass",
-                    FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.ArrayType(
+                        t_meltano.Singer.Typing.StringType,
                     ),
                     description="Object Classes",
                 ),
-                FlextMeltanoTypes.Singer.Typing.Property(
+                t_meltano.Singer.Typing.Property(
                     "modifyTimestamp",
-                    FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.StringType,
                     description="Modification Time",
                 ),
             ).to_dict()
@@ -472,41 +466,41 @@ class FlextTapLdapStreams:
         """Stream for LDAP schema information."""
 
         @override
-        def __init__(self, tap: FlextMeltanoTapLDAP) -> None:
+        def __init__(self, tap: TapProtocol) -> None:
             """Initialize schema stream."""
             name = "schema"
-            schema: dict[str, object] = FlextMeltanoTypes.Singer.Typing.PropertiesList(
-                FlextMeltanoTypes.Singer.Typing.Property(
+            schema: dict[str, object] = t_meltano.Singer.Typing.PropertiesList(
+                t_meltano.Singer.Typing.Property(
                     "objectClass",
-                    FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.ArrayType(
+                        t_meltano.Singer.Typing.StringType,
                     ),
                     description="Object Classes",
                 ),
-                FlextMeltanoTypes.Singer.Typing.Property(
+                t_meltano.Singer.Typing.Property(
                     "objectClasses",
-                    FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.ArrayType(
+                        t_meltano.Singer.Typing.StringType,
                     ),
                     description="Available Object Classes",
                 ),
-                FlextMeltanoTypes.Singer.Typing.Property(
+                t_meltano.Singer.Typing.Property(
                     "attributeTypes",
-                    FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.ArrayType(
+                        t_meltano.Singer.Typing.StringType,
                     ),
                     description="Available Attribute Types",
                 ),
-                FlextMeltanoTypes.Singer.Typing.Property(
+                t_meltano.Singer.Typing.Property(
                     "ldapSyntaxes",
-                    FlextMeltanoTypes.Singer.Typing.ArrayType(
-                        FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.ArrayType(
+                        t_meltano.Singer.Typing.StringType,
                     ),
                     description="LDAP Syntaxes",
                 ),
-                FlextMeltanoTypes.Singer.Typing.Property(
+                t_meltano.Singer.Typing.Property(
                     "modifyTimestamp",
-                    FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.StringType,
                     description="Modification Time",
                 ),
             ).to_dict()
@@ -569,7 +563,7 @@ class FlextTapLdapStreams:
         @override
         def __init__(
             self,
-            tap: FlextMeltanoTapLDAP,
+            tap: TapProtocol,
             params: FlextTapLdapStreams.CustomStreamParams,
         ) -> None:
             """Initialize custom stream with parameters."""
@@ -580,40 +574,40 @@ class FlextTapLdapStreams:
                     prop_type = str(definition.get("type", "string"))
                     prop_desc = str(definition.get("description", f"{name} field"))
                     if prop_type == "integer":
-                        return FlextMeltanoTypes.Singer.Typing.Property(
+                        return t_meltano.Singer.Typing.Property(
                             name,
-                            FlextMeltanoTypes.Singer.Typing.IntegerType,
+                            t_meltano.Singer.Typing.IntegerType,
                             description=prop_desc,
                         )
                     if prop_type == "number":
-                        return FlextMeltanoTypes.Singer.Typing.Property(
+                        return t_meltano.Singer.Typing.Property(
                             name,
-                            FlextMeltanoTypes.Singer.Typing.NumberType,
+                            t_meltano.Singer.Typing.NumberType,
                             description=prop_desc,
                         )
                     if prop_type == "boolean":
-                        return FlextMeltanoTypes.Singer.Typing.Property(
+                        return t_meltano.Singer.Typing.Property(
                             name,
-                            FlextMeltanoTypes.Singer.Typing.BooleanType,
+                            t_meltano.Singer.Typing.BooleanType,
                             description=prop_desc,
                         )
                     if prop_type == "array":
-                        return FlextMeltanoTypes.Singer.Typing.Property(
+                        return t_meltano.Singer.Typing.Property(
                             name,
-                            FlextMeltanoTypes.Singer.Typing.ArrayType(
-                                FlextMeltanoTypes.Singer.Typing.StringType,
+                            t_meltano.Singer.Typing.ArrayType(
+                                t_meltano.Singer.Typing.StringType,
                             ),
                             description=prop_desc,
                         )
-                    return FlextMeltanoTypes.Singer.Typing.Property(
+                    return t_meltano.Singer.Typing.Property(
                         name,
-                        FlextMeltanoTypes.Singer.Typing.StringType,
+                        t_meltano.Singer.Typing.StringType,
                         description=prop_desc,
                     )
                 # Fallback simple type
-                return FlextMeltanoTypes.Singer.Typing.Property(
+                return t_meltano.Singer.Typing.Property(
                     name,
-                    FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.StringType,
                     description=f"{name} field",
                 )
 
@@ -622,39 +616,39 @@ class FlextTapLdapStreams:
                 schema_props = list(
                     starmap(_map_prop, params.schema_properties.items()),
                 )
-                # Ensure all are FlextMeltanoTypes.Singer.Typing.Property
+                # Ensure all are t_meltano.Singer.Typing.Property
                 typed_props = [
                     p
                     for p in schema_props
-                    if isinstance(p, FlextMeltanoTypes.Singer.Typing.Property)
+                    if isinstance(p, t_meltano.Singer.Typing.Property)
                 ]
                 # Always include DN property even for custom streams
-                dn_prop = FlextMeltanoTypes.Singer.Typing.Property(
+                dn_prop = t_meltano.Singer.Typing.Property(
                     "dn",
-                    FlextMeltanoTypes.Singer.Typing.StringType,
+                    t_meltano.Singer.Typing.StringType,
                     description="Distinguished Name",
                 )
-                schema = FlextMeltanoTypes.Singer.Typing.PropertiesList(
+                schema = t_meltano.Singer.Typing.PropertiesList(
                     dn_prop,
                     *typed_props,
                 ).to_dict()
             else:
-                schema = FlextMeltanoTypes.Singer.Typing.PropertiesList(
-                    FlextMeltanoTypes.Singer.Typing.Property(
+                schema = t_meltano.Singer.Typing.PropertiesList(
+                    t_meltano.Singer.Typing.Property(
                         "dn",
-                        FlextMeltanoTypes.Singer.Typing.StringType,
+                        t_meltano.Singer.Typing.StringType,
                         description="Distinguished Name",
                     ),
-                    FlextMeltanoTypes.Singer.Typing.Property(
+                    t_meltano.Singer.Typing.Property(
                         "objectClass",
-                        FlextMeltanoTypes.Singer.Typing.ArrayType(
-                            FlextMeltanoTypes.Singer.Typing.StringType,
+                        t_meltano.Singer.Typing.ArrayType(
+                            t_meltano.Singer.Typing.StringType,
                         ),
                         description="Object Classes",
                     ),
-                    FlextMeltanoTypes.Singer.Typing.Property(
+                    t_meltano.Singer.Typing.Property(
                         "modifyTimestamp",
-                        FlextMeltanoTypes.Singer.Typing.StringType,
+                        t_meltano.Singer.Typing.StringType,
                         description="Modification Time",
                     ),
                 ).to_dict()
