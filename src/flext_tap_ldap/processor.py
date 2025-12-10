@@ -21,12 +21,12 @@ from flext_ldif.models import FlextLdifModels
 
 
 # Type classes with real inheritance for cleaner code
-class FlextLdifAttributes(FlextLdifModels.LdifAttributes):
-    """FlextLdifAttributes - real inheritance from FlextLdifModels.LdifAttributes."""
+class FlextLdifAttributes(FlextLdifModels.Attributes):
+    """FlextLdifAttributes - real inheritance from FlextLdifModels.Attributes."""
 
 
-class FlextLdifDistinguishedName(FlextLdifModels.DistinguishedName):
-    """FlextLdifDistinguishedName - real inheritance from FlextLdifModels.DistinguishedName."""
+class FlextLdifDistinguishedName(FlextLdifModels.DN):
+    """FlextLdifDistinguishedName - real inheritance from FlextLdifModels.DN."""
 
 
 class FlextLdifEntry(FlextLdifModels.Entry):
