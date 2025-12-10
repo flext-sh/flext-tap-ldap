@@ -15,9 +15,10 @@ from collections.abc import Awaitable
 from dataclasses import dataclass
 from typing import override
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, r
 from flext_ldap import (
     FlextLdap,
+    c,
     m,
 )
 
@@ -184,7 +185,7 @@ class FlextTapLdapClient:
 
         def _convert_entry_to_dict(
             self,
-            entry_data: m.Ldap.Entry | dict[str, object] | None,
+            entry_data: m.Ldif.Entry | dict[str, object] | None,
         ) -> dict[str, object]:
             """Convert FlextLdapModels.Entry to dict[str, object] format for testing convenience.
 
@@ -192,7 +193,7 @@ class FlextTapLdapClient:
             """
             # Check if it's an Entry object using hasattr for attributes
             if hasattr(entry_data, "dn") and hasattr(entry_data, "attributes"):
-                # It's a m.Ldap.Entry model object - flatten attributes
+                # It's a m.Ldif.Entry model object - flatten attributes
                 # Use getattr to safely access attributes for type checker
                 dn_value: str = str(getattr(entry_data, "dn", ""))
                 attributes: dict[str, object] = getattr(entry_data, "attributes", {})
@@ -220,7 +221,7 @@ class FlextTapLdapClient:
 
         def _process_search_results(
             self,
-            result: FlextResult[m.Ldap.SearchResponse],
+            result: r[m.Ldap.SearchResponse],
             size_limit: int,
         ) -> list[dict[str, object]]:
             """Process LDAP search results with size limiting.
@@ -270,8 +271,8 @@ class FlextTapLdapClient:
                     size_limit=size_limit,
                     time_limit=30,
                 )
-                result: FlextResult[m.Ldap.SearchResponse] = (
-                    self._flext_api.search_with_request(search_request)
+                result: r[m.Ldap.SearchResponse] = self._flext_api.search_with_request(
+                    search_request
                 )
 
                 return self._process_search_results(result, size_limit)
@@ -361,12 +362,12 @@ class FlextTapLdapClient:
                             test_search_request = m.Ldap.SearchRequest(
                                 base_dn="",
                                 filter_str="(objectClass=*)",
-                                scope=FlextLdapConstants.Scope.BASE,
+                                scope=c.Scope.BASE,
                                 attributes=None,
                                 size_limit=1,
                                 time_limit=5,
                             )
-                            result: FlextResult[object] = self._flext_api.search(
+                            result: r[object] = self._flext_api.search(
                                 test_search_request,
                             )
                             return result.is_success
@@ -434,7 +435,7 @@ class FlextTapLdapClient:
         def health_check(self: object) -> dict[str, object]:
             """Perform health check for testing convenience."""
             start_time = time.time()
-            connection_result: FlextResult[object] = self.test_connection()
+            connection_result: r[object] = self.test_connection()
             end_time = time.time()
 
             response_time_ms: float = round((end_time - start_time) * 1000, 2)
@@ -452,9 +453,6 @@ class FlextTapLdapClient:
         ) -> dict[str, object]:
             """Process Oracle-specific LDAP entries for testing convenience."""
             attributes: dict[str, object] = entry.get("attributes", {})
-            if not isinstance(attributes, dict):
-                return entry
-
             # Handle Oracle password attributes
             if "orclPassword" in attributes:
                 # Oracle OID stores passwords differently
@@ -505,7 +503,7 @@ class FlextTapLdapClient:
 
         def _process_search_results_with_oracle_support(
             self,
-            search_result: list[m.Ldap.Entry] | list[dict[str, object]],
+            search_result: list[m.Ldif.Entry] | list[dict[str, object]],
             *,
             oracle_oid_mode: bool,
         ) -> list[dict[str, object]]:
@@ -542,7 +540,7 @@ class FlextTapLdapClient:
             set_event_loop(loop)
             try:
                 # Perform synchronous search using existing method
-                search_result: FlextResult[object] = self.search(
+                search_result: r[object] = self.search(
                     base_dn,
                     search_filter,
                     attributes,
@@ -599,7 +597,7 @@ class LDAPConnectionConfig(m.Ldap.ConnectionConfig):
     """LDAPConnectionConfig - real inheritance from FlextLdapModels.ConnectionConfig."""
 
 
-class LDAPEntry(m.Ldap.Entry):
+class LDAPEntry(m.Ldif.Entry):
     """LDAPEntry - real inheritance from FlextLdapModels.Entry."""
 
 
