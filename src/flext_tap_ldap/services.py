@@ -21,7 +21,7 @@ from flext_ldap import FlextLdapModels
 from flext_ldif import FlextLdif
 
 from flext_tap_ldap.config import (
-    FlextTapLdapConfig,
+    FlextTapLdapSettings,
     LDIFProcessingConfig,
 )
 
@@ -704,35 +704,35 @@ class FlextTapLdapServices:
 
     @staticmethod
     def setup_ldap_tap(
-        config: FlextTapLdapConfig | None = None,
-    ) -> FlextResult[FlextTapLdapConfig]:
+        config: FlextTapLdapSettings | None = None,
+    ) -> FlextResult[FlextTapLdapSettings]:
         """Set up the LDAP tap with configuration.
 
         Args:
         config: Optional configuration. If None, creates defaults.
 
         Returns:
-        FlextResult with FlextTapLdapConfig or error message.
+        FlextResult with FlextTapLdapSettings or error message.
 
         """
         try:
             if config is None:
                 # Create with intelligent defaults
-                config = FlextTapLdapConfig.create_with_defaults()
+                config = FlextTapLdapSettings.create_with_defaults()
 
             # Validate configuration
-            validation_result: FlextResult[FlextTapLdapConfig] = (
+            validation_result: FlextResult[FlextTapLdapSettings] = (
                 config.validate_complete_config()
             )
             if not validation_result.success:
-                return FlextResult[FlextTapLdapConfig].fail(
+                return FlextResult[FlextTapLdapSettings].fail(
                     validation_result.error or "Configuration validation failed",
                 )
 
-            return FlextResult[FlextTapLdapConfig].ok(config)
+            return FlextResult[FlextTapLdapSettings].ok(config)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[FlextTapLdapConfig].fail(
+            return FlextResult[FlextTapLdapSettings].fail(
                 f"Failed to setup LDAP tap: {e}",
             )
 
@@ -799,7 +799,7 @@ class FlextTapLdapServices:
 
     @staticmethod
     def validate_ldap_config(
-        config: FlextTapLdapConfig,
+        config: FlextTapLdapSettings,
     ) -> FlextResult[bool]:
         """Validate LDAP tap configuration.
 
@@ -820,14 +820,14 @@ class FlextTapLdapServices:
     @staticmethod
     def create_development_ldap_config(
         **overrides: object,
-    ) -> FlextResult[FlextTapLdapConfig]:
+    ) -> FlextResult[FlextTapLdapSettings]:
         """Create development LDAP configuration with defaults.
 
         Args:
         **overrides: Configuration overrides
 
         Returns:
-        FlextResult with FlextTapLdapConfig for development use.
+        FlextResult with FlextTapLdapSettings for development use.
 
         """
         try:
@@ -835,7 +835,7 @@ class FlextTapLdapServices:
                 {"server": "localhost", "port": 389, "use_ssl": "False", "timeout": 30},
             )
 
-            config = FlextTapLdapConfig(
+            config = FlextTapLdapSettings(
                 connection=connection_config,
                 ldif_processing=LDIFProcessingConfig(enable_ldif_streams=False),
                 project_name="flext-data.taps.flext-tap-ldap",
@@ -846,26 +846,26 @@ class FlextTapLdapServices:
             if overrides:
                 config_dict: dict[str, object] = config.model_dump()
                 config_dict.update(overrides)
-                config = FlextTapLdapConfig(**config_dict)
+                config = FlextTapLdapSettings(**config_dict)
 
-            return FlextResult[FlextTapLdapConfig].ok(config)
+            return FlextResult[FlextTapLdapSettings].ok(config)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[FlextTapLdapConfig].fail(
+            return FlextResult[FlextTapLdapSettings].fail(
                 f"Failed to create development config: {e}",
             )
 
     @staticmethod
     def create_production_ldap_config(
         **overrides: object,
-    ) -> FlextResult[FlextTapLdapConfig]:
+    ) -> FlextResult[FlextTapLdapSettings]:
         """Create production LDAP configuration with security defaults.
 
         Args:
         **overrides: Configuration overrides
 
         Returns:
-        FlextResult with FlextTapLdapConfig for production use.
+        FlextResult with FlextTapLdapSettings for production use.
 
         """
         try:
@@ -878,7 +878,7 @@ class FlextTapLdapServices:
                 },
             )
 
-            config = FlextTapLdapConfig(
+            config = FlextTapLdapSettings(
                 connection=connection_config,
                 ldif_processing=LDIFProcessingConfig(
                     enable_ldif_streams=False,
@@ -893,12 +893,12 @@ class FlextTapLdapServices:
             if overrides:
                 config_dict: dict[str, object] = config.model_dump()
                 config_dict.update(overrides)
-                config = FlextTapLdapConfig(**config_dict)
+                config = FlextTapLdapSettings(**config_dict)
 
-            return FlextResult[FlextTapLdapConfig].ok(config)
+            return FlextResult[FlextTapLdapSettings].ok(config)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[FlextTapLdapConfig].fail(
+            return FlextResult[FlextTapLdapSettings].fail(
                 f"Failed to create production config: {e}",
             )
 

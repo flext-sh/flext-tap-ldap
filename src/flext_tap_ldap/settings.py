@@ -1,6 +1,6 @@
 """FLEXT Tap LDAP Configuration - Settings using flext-core patterns.
 
-Provides LDAP tap configuration management extending FlextConfig
+Provides LDAP tap configuration management extending FlextSettings
 with Pydantic Settings for environment variable support and validation.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import Self, TypedDict
 
-from flext_core import FlextConfig, FlextConstants, FlextResult
+from flext_core import FlextConstants, FlextResult, FlextSettings
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
 
@@ -31,17 +31,17 @@ class ConfigDefaults(TypedDict, total=False):
     ldif_max_errors: int
 
 
-class FlextTapLdapConfig(FlextConfig):
-    """FLEXT Tap LDAP Configuration extending FlextConfig.
+class FlextTapLdapSettings(FlextSettings):
+    """FLEXT Tap LDAP Configuration extending FlextSettings.
 
     Single flat configuration class for FLEXT LDAP tap with enterprise features:
-    - Extends FlextConfig from flext-core
+    - Extends FlextSettings from flext-core
     - Uses Pydantic 2 Settings with SecretStr for sensitive data
     - Enhanced singleton pattern with thread-safe access
     - Consolidates custom stream and LDIF processing configurations
     """
 
-    class CustomStreamConfig(FlextConfig):
+    class CustomStreamConfig(FlextSettings):
         """Nested configuration for custom LDAP streams."""
 
         name: str = Field(..., description="Stream name")
@@ -68,7 +68,7 @@ class FlextTapLdapConfig(FlextConfig):
 
             return FlextResult[None].ok(None)
 
-    class LDIFProcessingConfig(FlextConfig):
+    class LDIFProcessingConfig(FlextSettings):
         """Nested configuration for LDIF file processing."""
 
         ldif_files: list[str] | None = Field(
@@ -259,7 +259,7 @@ class FlextTapLdapConfig(FlextConfig):
     # Enhanced singleton pattern methods
     @classmethod
     def get_global_instance(cls) -> Self:
-        """Get the global singleton instance using enhanced FlextConfig pattern."""
+        """Get the global singleton instance using enhanced FlextSettings pattern."""
         return cls()
 
     @classmethod
@@ -338,17 +338,17 @@ class FlextTapLdapConfig(FlextConfig):
 
 
 # Re-export nested classes at module level with real inheritance for backwards compatibility
-class CustomStreamConfig(FlextTapLdapConfig.CustomStreamConfig):
-    """CustomStreamConfig - real inheritance from FlextTapLdapConfig.CustomStreamConfig."""
+class CustomStreamConfig(FlextTapLdapSettings.CustomStreamConfig):
+    """CustomStreamConfig - real inheritance from FlextTapLdapSettings.CustomStreamConfig."""
 
 
-class LDIFProcessingConfig(FlextTapLdapConfig.LDIFProcessingConfig):
-    """LDIFProcessingConfig - real inheritance from FlextTapLdapConfig.LDIFProcessingConfig."""
+class LDIFProcessingConfig(FlextTapLdapSettings.LDIFProcessingConfig):
+    """LDIFProcessingConfig - real inheritance from FlextTapLdapSettings.LDIFProcessingConfig."""
 
 
 # Export all configuration classes
 __all__ = [
     "CustomStreamConfig",
-    "FlextTapLdapConfig",
+    "FlextTapLdapSettings",
     "LDIFProcessingConfig",
 ]
