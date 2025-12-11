@@ -14,7 +14,7 @@ from typing import ClassVar
 from flext_core import FlextLogger
 from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
 
-from flext_tap_ldap.config import FlextTapLdapConfig
+from flext_tap_ldap.config import FlextTapLdapSettings
 from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
 from flext_tap_ldap.streams import FlextTapLdapStreams
 
@@ -29,7 +29,7 @@ class FlextTapLdapTap(Tap):
     """
 
     name: str = "tap-ldap"
-    config_class = FlextTapLdapConfig
+    config_class = FlextTapLdapSettings
 
     # NOTE(@flext-team): Use centralized LDAP schema when flext-meltano common_schemas is available
     # Issue: https://github.com/flext-team/flext-meltano/issues/1

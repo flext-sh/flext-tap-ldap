@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_tap_ldap.client import FlextTapLdapClient
-from flext_tap_ldap.config import FlextTapLdapConfig
+from flext_tap_ldap.config import FlextTapLdapSettings
 from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
 from flext_tap_ldap.models import FlextTapLdapModels, m, m_tap_ldap
 from flext_tap_ldap.processor import FlextTapLdapProcessor
@@ -22,10 +22,10 @@ __version_info__: tuple[int | str, ...] = (1, 0, 0)
 
 __all__ = [
     "FlextTapLdapClient",
-    "FlextTapLdapConfig",
     "FlextTapLdapLdifStreams",
     "FlextTapLdapModels",
     "FlextTapLdapProcessor",
+    "FlextTapLdapSettings",
     "FlextTapLdapStreams",
     # Main container classes
     "FlextTapLdapTap",
