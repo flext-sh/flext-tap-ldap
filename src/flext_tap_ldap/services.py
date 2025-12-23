@@ -20,7 +20,7 @@ from flext_core import FlextLogger, FlextResult
 from flext_ldap import FlextLdapModels
 from flext_ldif import FlextLdif
 
-from flext_tap_ldap.settings import (
+from flext_tap_ldap.config import (
     FlextTapLdapSettings,
     LDIFProcessingConfig,
 )
