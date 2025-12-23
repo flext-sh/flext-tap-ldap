@@ -14,8 +14,8 @@ from typing import ClassVar
 from flext_core import FlextLogger
 from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
 
+from flext_tap_ldap.config import FlextTapLdapSettings
 from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
-from flext_tap_ldap.settings import FlextTapLdapSettings
 from flext_tap_ldap.streams import FlextTapLdapStreams
 
 logger = FlextLogger(__name__)
