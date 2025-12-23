@@ -92,8 +92,7 @@ class FlextTapLdapLdifStreams:
             logger.info("Processing LDIF file: %s", ldif_file)
             try:
                 # Read file and delegate to flext-ldif
-                with Path(ldif_file).open(encoding="utf-8") as f:
-                    content = f.read()
+                content = Path(ldif_file).read_text(encoding="utf-8")
                 result: FlextResult[object] = self._ldif_api.parse(content)
                 if result.success and result.data:
                     for entry in result.data:
@@ -244,8 +243,7 @@ class FlextTapLdapLdifStreams:
             logger.info("Analyzing LDIF file: %s", ldif_file)
             try:
                 # Read file and delegate analysis to flext-ldif
-                with Path(ldif_file).open(encoding="utf-8") as f:
-                    content = f.read()
+                content = Path(ldif_file).read_text(encoding="utf-8")
                 result: FlextResult[object] = self._ldif_api.parse(content)
                 if result.success and result.data:
                     # Generate statistics from parsed entries
