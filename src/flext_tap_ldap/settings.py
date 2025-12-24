@@ -12,9 +12,10 @@ from __future__ import annotations
 
 from typing import Self, TypedDict
 
-from flext_core import FlextConstants, FlextResult, FlextSettings
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
+
+from flext import FlextConstants, FlextResult, FlextSettings
 
 
 class ConfigDefaults(TypedDict, total=False):
