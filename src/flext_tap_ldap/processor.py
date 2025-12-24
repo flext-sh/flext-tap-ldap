@@ -15,9 +15,10 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import override
 
-from flext_core import FlextLogger, FlextResult
 from flext_ldif import FlextLdif
 from flext_ldif.models import FlextLdifModels
+
+from flext import FlextLogger, FlextResult
 
 
 # Type classes with real inheritance for cleaner code

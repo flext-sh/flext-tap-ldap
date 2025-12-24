@@ -15,6 +15,7 @@
 **Python**: 3.13+
 
 **CRITICAL INTEGRATION DEPENDENCIES**:
+
 - **flext-meltano**: MANDATORY for ALL Singer operations (ZERO TOLERANCE for direct singer-sdk without flext-meltano)
 - **flext-ldap**: MANDATORY for ALL LDAP operations (ZERO TOLERANCE for direct ldap3 imports)
 - **flext-core**: Foundation patterns (FlextResult, FlextService, FlextContainer)
@@ -62,6 +63,7 @@ if result.is_success:
 ### ZERO TOLERANCE Policies
 
 **ABSOLUTELY FORBIDDEN**:
+
 - ❌ Direct singer-sdk imports (use flext-meltano)
 - ❌ Direct ldap3 imports (use flext-ldap)
 - ❌ Direct click/rich imports (use flext-cli)
@@ -69,6 +71,7 @@ if result.is_success:
 - ❌ Type ignores or `Any` types
 
 **MANDATORY**:
+
 - ✅ Use `FlextResult[T]` for all operations
 - ✅ Use flext-meltano for Singer operations
 - ✅ Use flext-ldap for LDAP operations
@@ -79,6 +82,7 @@ if result.is_success:
 ---
 
 **See Also**:
+
 - [Workspace Standards](../CLAUDE.md)
 - [flext-core Patterns](../flext-core/CLAUDE.md)
 - [flext-ldap Patterns](../flext-ldap/CLAUDE.md)

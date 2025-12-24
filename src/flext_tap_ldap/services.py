@@ -16,10 +16,10 @@ from pathlib import Path
 from typing import override
 from uuid import uuid4
 
-from flext_core import FlextLogger, FlextResult
 from flext_ldap import FlextLdapModels
 from flext_ldif import FlextLdif
 
+from flext import FlextLogger, FlextResult
 from flext_tap_ldap.config import (
     FlextTapLdapSettings,
     LDIFProcessingConfig,
