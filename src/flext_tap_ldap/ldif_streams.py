@@ -6,12 +6,12 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import override
 
+from flext_core import FlextLogger, FlextResult
 from flext_ldap import FlextLdapClients
 from flext_ldif import FlextLdif, FlextLdifModels
 from flext_meltano import FlextMeltanoStream as Stream
 from flext_meltano.typings import t as t_meltano
 
-from flext import FlextLogger, FlextResult
 from flext_tap_ldap.protocols import TapProtocol
 
 logger = FlextLogger(__name__)
