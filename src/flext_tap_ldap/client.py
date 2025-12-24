@@ -15,13 +15,12 @@ from collections.abc import Awaitable
 from dataclasses import dataclass
 from typing import override
 
+from flext_core import FlextLogger, r
 from flext_ldap import (
     FlextLdap,
     c,
     m,
 )
-
-from flext import FlextLogger, r
 
 logger = FlextLogger(__name__)
 

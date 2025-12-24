@@ -15,10 +15,10 @@ from dataclasses import dataclass
 from itertools import starmap
 from typing import override
 
+from flext_core import FlextLogger, FlextResult
 from flext_meltano import FlextMeltanoStream as Stream
 from flext_meltano.typings import t as t_meltano
 
-from flext import FlextLogger, FlextResult
 from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.protocols import TapProtocol
 
@@ -543,7 +543,9 @@ class FlextTapLdapStreams:
                         return  # Found schema, no need to try other base DNs
                 except Exception as e:
                     logger.debug(
-                        "Schema search failed for base DN '%s': %s", base_dn, e,
+                        "Schema search failed for base DN '%s': %s",
+                        base_dn,
+                        e,
                     )
                     continue
 

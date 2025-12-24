@@ -11,9 +11,9 @@ from __future__ import annotations
 
 from typing import ClassVar
 
+from flext_core import FlextLogger
 from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
 
-from flext import FlextLogger
 from flext_tap_ldap.config import FlextTapLdapSettings
 from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
 from flext_tap_ldap.streams import FlextTapLdapStreams
@@ -121,7 +121,8 @@ class FlextTapLdapTap(Tap):
 
         # Add custom streams if configured
         custom_streams_config: list[dict[str, object]] = self.config.get(
-            "custom_streams", [],
+            "custom_streams",
+            [],
         )
         for custom_config in custom_streams_config:
             params = FlextTapLdapStreams.CustomStreamParams(
