@@ -16,28 +16,18 @@ from pathlib import Path
 from typing import override
 
 from flext_core import FlextLogger, FlextResult
-from flext_ldif import FlextLdif
-from flext_ldif.models import FlextLdifModels
+from flext_ldif import FlextLdif, FlextLdifModels
 
 
-# Type classes with real inheritance for cleaner code
-class FlextLdifAttributes(FlextLdifModels.Attributes):
-    """FlextLdifAttributes - real inheritance from FlextLdifModels.Attributes."""
-
-
-class FlextLdifDistinguishedName(FlextLdifModels.DN):
-    """FlextLdifDistinguishedName - real inheritance from FlextLdifModels.DN."""
-
-
-class FlextLdifEntry(FlextLdifModels.Entry):
-    """FlextLdifEntry - real inheritance from FlextLdifModels.Entry."""
+class FlextLdifDistinguishedName(FlextLdifModels.Ldif.DN):
+    """FlextLdifDistinguishedName - real inheritance from FlextLdifModels.Ldif.DN."""
 
 
 logger = FlextLogger(__name__)
 
 
 class Entry:
-    """Testing convenience wrapper for FlextLdifEntry.
+    """Testing convenience wrapper for FlextLdifModels.Entry.
 
     This class maintains the existing interface while delegating
     all operations to the flext-ldif library implementation.
@@ -58,8 +48,8 @@ class Entry:
         # Create internal flext-ldif entry for actual processing
         self._flext_entry = self._create_flext_entry()
 
-    def _create_flext_entry(self) -> FlextLdifEntry:
-        """Create FlextLdifEntry from current data."""
+    def _create_flext_entry(self) -> FlextLdifModels.Entry:
+        """Create FlextLdifModels.Entry from current data."""
         try:
             # Use flext-ldif to create proper entry
             api = FlextLdif()
@@ -70,18 +60,18 @@ class Entry:
                     ldif_content += f"{attr_name}: {value}\n"
             ldif_content += "\n"
 
-            result: FlextResult[list[FlextLdifEntry]] = api.parse(ldif_content)
+            result: FlextResult[list[FlextLdifModels.Entry]] = api.parse(ldif_content)
             if result.is_success and result.value and len(result.value) > 0:
                 return result.value[0]
 
             # Fallback: create minimal entry
-            return FlextLdifEntry(
+            return FlextLdifModels.Entry(
                 dn=FlextLdifDistinguishedName(value=self.dn),
                 attributes=FlextLdifAttributes(attributes=self.attributes),
             )
         except Exception:
             # Fallback: create minimal entry for testing convenience
-            return FlextLdifEntry(
+            return FlextLdifModels.Entry(
                 dn=FlextLdifDistinguishedName(value=self.dn),
                 attributes=FlextLdifAttributes(attributes=self.attributes),
             )
@@ -222,9 +212,9 @@ class FlextTapLdapProcessor:
         self,
         content: str,
         file_path: Path,
-    ) -> FlextResult[list[FlextLdifEntry]]:
+    ) -> FlextResult[list[FlextLdifModels.Entry]]:
         """Parse LDIF content using flext-ldif API."""
-        result: FlextResult[list[FlextLdifEntry]] = self._api.parse(content)
+        result: FlextResult[list[FlextLdifModels.Entry]] = self._api.parse(content)
         if not result.is_success:
             error_msg = f"Failed to parse LDIF file {file_path}: {result.error}"
             if self.ignore_errors:
@@ -236,7 +226,7 @@ class FlextTapLdapProcessor:
 
     def _yield_entries_from_result(
         self,
-        result: FlextResult[list[FlextLdifEntry]],
+        result: FlextResult[list[FlextLdifModels.Entry]],
     ) -> Iterator[Entry]:
         """Yield testing convenience entries from parse result."""
         if result.value:
@@ -289,7 +279,7 @@ class FlextTapLdapProcessor:
         logger.info("Parsing LDIF content with flext-ldif from %s", source_name)
 
         try:
-            result: FlextResult[list[FlextLdifEntry]] = self._api.parse(content)
+            result: FlextResult[list[FlextLdifModels.Entry]] = self._api.parse(content)
             if not result.is_success:
                 error_msg = (
                     f"Failed to parse LDIF content from {source_name}: {result.error}"
@@ -315,8 +305,8 @@ class FlextTapLdapProcessor:
             else:
                 raise ValueError(error_msg) from e
 
-    def _convert_from_flext_entry(self, flext_entry: FlextLdifEntry) -> Entry:
-        """Convert FlextLdifEntry to testing convenience Entry."""
+    def _convert_from_flext_entry(self, flext_entry: FlextLdifModels.Entry) -> Entry:
+        """Convert FlextLdifModels.Entry to testing convenience Entry."""
         # Extract DN
         dn = flext_entry.dn.value if flext_entry.dn else ""
 
@@ -457,7 +447,7 @@ class Validator:
         errors: list[str] = []
 
         try:
-            # Convert to FlextLdifEntry objects
+            # Convert to FlextLdifModels.Entry objects
             # flext_entries = [entry._flext_entry for entry in entries]
 
             # Use flext-ldif batch validation

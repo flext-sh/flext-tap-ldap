@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import override
 
 from flext_core import FlextLogger, FlextResult
-from flext_ldap import FlextLdapClients
+from flext_ldap import FlextLdapConnection
 from flext_ldif import FlextLdif, FlextLdifModels
 from flext_meltano import FlextMeltanoStream as Stream
 from flext_meltano.typings import t as t_meltano
@@ -40,7 +40,7 @@ class FlextTapLdapLdifStreams:
             self.tap = tap
             # Initialize flext-ldif API for processing
             self._ldif_api = FlextLdif()
-            self._ldap_api = FlextLdapClients()
+            self._ldap_api = FlextLdapConnection()
             # Define schema
             schema = typing_utils.PropertiesList(
                 typing_utils.Property(
@@ -147,7 +147,7 @@ class FlextTapLdapLdifStreams:
             self.tap = tap
             # Initialize flext-ldif API for analysis
             self._ldif_api = FlextLdif()
-            self._ldap_api = FlextLdapClients()
+            self._ldap_api = FlextLdapConnection()
             # Define schema
             schema = typing_utils.PropertiesList(
                 typing_utils.Property(

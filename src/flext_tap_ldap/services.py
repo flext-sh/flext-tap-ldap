@@ -20,10 +20,13 @@ from flext_core import FlextLogger, FlextResult
 from flext_ldap import FlextLdapModels
 from flext_ldif import FlextLdif
 
-from flext_tap_ldap.config import (
+from flext_tap_ldap.settings import (
     FlextTapLdapSettings,
-    LDIFProcessingConfig,
+    FlextTapLdapSettings as Settings,
 )
+
+# Import LDIFProcessingConfig from within the settings class
+LDIFProcessingConfig = Settings.LDIFProcessingConfig
 
 logger = FlextLogger(__name__)
 

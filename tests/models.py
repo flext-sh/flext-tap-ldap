@@ -1,45 +1,27 @@
-"""Test models for flext-tap-ldap tests.
+"""Test models for flext-tap-ldap - uses m.TapLdap.Tests.* namespace pattern.
 
-Provides TestsFlextTapLdapModels, extending FlextTestsModels with
-flext-tap-ldap-specific models using COMPOSITION INHERITANCE.
+This module provides test-specific models that extend the main flext-tap-ldap models.
+Uses the unified namespace pattern m.TapLdap.Tests.* for test-only objects.
+Combines FlextTestsModels functionality with project-specific test models.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
+
 """
 
 from __future__ import annotations
 
-from flext_tests.models import FlextTestsModels
+from flext_tests import FlextTestsModels
 
-from flext_tap_ldap.models import FlextTapLdapModels
-
-
-class TestsFlextTapLdapModels(FlextTestsModels, FlextTapLdapModels):
-    """Models for flext-tap-ldap tests using COMPOSITION INHERITANCE.
-
-    MANDATORY: Inherits from BOTH:
-    1. FlextTestsModels - for test infrastructure (.Tests.*)
-    2. FlextTapLdapModels - for domain models
-
-    Access patterns:
-    - tm.Tests.* (generic test models from FlextTestsModels)
-    - tm.* (Tap LDAP domain models)
-    - m.* (production models via alternative alias)
-    """
-
-    class Tests:
-        """Project-specific test fixtures namespace."""
-
-        class TapLdap:
-            """Tap LDAP-specific test fixtures."""
+from flext_tap_ldap import m as FlextMeltanoTapLdapModels
 
 
-# Short aliases per FLEXT convention
-tm = TestsFlextTapLdapModels
-m = TestsFlextTapLdapModels
+class TestsFlextMeltanoTapLdapModels(FlextTestsModels, FlextMeltanoTapLdapModels):
+    class TapLdap(FlextMeltanoTapLdapModels.TapLdap):
+        class Tests:
+            """Internal tests declarations."""
 
-__all__ = [
-    "TestsFlextTapLdapModels",
-    "m",
-    "tm",
-]
+
+m = TestsFlextMeltanoTapLdapModels
+
+__all__ = ["TestsFlextMeltanoTapLdapModels", "m"]
