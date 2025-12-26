@@ -1,43 +1,29 @@
-"""Test protocol definitions for flext-tap-ldap.
+"""Test protocols for flext-tap-ldap - uses p.TapLdap.* namespace pattern.
 
-Provides TestsFlextTapLdapProtocols, combining FlextTestsProtocols with
-the tap's protocol definitions for test-specific protocol definitions.
-
-Note: flext-tap-ldap defines individual protocols (TapProtocol, TapConfigProtocol)
-without a wrapper class. Tests can access FlextTestsProtocols functionality.
+This module provides test-specific protocols that extend the main flext-tap-ldap protocols.
+Uses the unified namespace pattern p.TapLdap.* for test-only protocols.
+Combines FlextTestsProtocols functionality with project-specific test protocols.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
+
 """
 
 from __future__ import annotations
 
-from flext_tests.protocols import FlextTestsProtocols
+from flext_tests import FlextTestsProtocols
+
+from flext_tap_ldap import p as FlextMeltanoTapLdapProtocols
 
 
-class TestsFlextTapLdapProtocols(FlextTestsProtocols):
-    """Test protocols for flext-tap-ldap.
-
-    Extends FlextTestsProtocols with tap-specific test protocols.
-
-    Provides access to:
-    - tp.Tests.Docker.* (from FlextTestsProtocols)
-    - tp.Tests.Factory.* (from FlextTestsProtocols)
-    - tp.Tests.TapLdap.* (tap-specific test protocols)
-    """
-
-    class Tests:
-        """Project-specific test protocols.
-
-        Extends FlextTestsProtocols.Tests with TapLdap-specific protocols.
-        """
-
-        class TapLdap:
-            """TapLdap-specific test protocols."""
+class TestsFlextMeltanoTapLdapProtocols(
+    FlextTestsProtocols, FlextMeltanoTapLdapProtocols
+):
+    class TapLdap(FlextMeltanoTapLdapProtocols.TapLdap):
+        class Tests:
+            """Internal tests declarations."""
 
 
-# Runtime aliases
-p = TestsFlextTapLdapProtocols
-tp = TestsFlextTapLdapProtocols
+p = TestsFlextMeltanoTapLdapProtocols
 
-__all__ = ["TestsFlextTapLdapProtocols", "p", "tp"]
+__all__ = ["TestsFlextMeltanoTapLdapProtocols", "p"]
