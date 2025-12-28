@@ -17,7 +17,11 @@ from flext_tap_ldap import t as FlextMeltanoTapLdapTypes
 
 
 class TestsFlextMeltanoTapLdapTypes(FlextTestsTypes, FlextMeltanoTapLdapTypes):
+    """Test types combining FlextTestsTypes with flext-tap-ldap types."""
+
     class TapLdap(FlextMeltanoTapLdapTypes.TapLdap):
+        """TapLdap test types namespace."""
+
         class Tests:
             """Internal tests declarations."""
 

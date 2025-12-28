@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
+from flext_core import FlextTypes as t
 
 import contextlib
 import time
@@ -84,7 +85,7 @@ class TestLDAPClientQuick:
         assert result["cn"] == ["Test", "T. User"]  # Multi value preserved
         assert result["empty"] == []  # Empty preserved
 
-        # Test with dict[str, object] (mock scenario)
+        # Test with dict[str, t.GeneralValueType] (mock scenario)
         dict_entry = {
             "dn": "uid=dict,dc=example,dc=com",
             "attributes": {"mail": ["test@example.com"]},
@@ -160,7 +161,7 @@ class TestLDAPClientQuick:
     def test_run_in_new_loop(self, client: LDAPClient) -> None:
         """Test running coroutine in new loop."""
 
-        def dummy_coro() -> list[dict[str, object]]:
+        def dummy_coro() -> list[dict[str, t.GeneralValueType]]:
             time.sleep(0)
             return [{"test": "data"}]
 

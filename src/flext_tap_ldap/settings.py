@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import Self, TypedDict
 
-from flext_core import FlextConstants, FlextResult, FlextSettings
+from flext_core import FlextConstants, FlextResult, FlextSettings, FlextTypes as t
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
 
@@ -54,7 +54,7 @@ class FlextTapLdapSettings(FlextSettings):
             default=None,
             description="Replication key field",
         )
-        json_schema: dict[str, object] | None = Field(
+        json_schema: dict[str, t.GeneralValueType] | None = Field(
             default=None,
             description="JSON schema for the stream",
         )
@@ -104,7 +104,7 @@ class FlextTapLdapSettings(FlextSettings):
             default=False,
             description="Apply transformation rules to LDIF entries",
         )
-        ldif_transformation_rules: dict[str, object] | None = Field(
+        ldif_transformation_rules: dict[str, t.GeneralValueType] | None = Field(
             default=None,
             description="Transformation rules for LDIF processing",
         )

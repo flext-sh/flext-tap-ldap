@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
+from flext_core import FlextTypes as t
 
 from typing import ClassVar
 from unittest.mock import Mock, patch
@@ -509,7 +510,7 @@ class TestStreamIntegration:
     """Integration tests for stream functionality."""
 
     @pytest.fixture
-    def tap_config(self) -> dict[str, object]:
+    def tap_config(self) -> dict[str, t.GeneralValueType]:
         """Standard tap configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -524,7 +525,7 @@ class TestStreamIntegration:
 
     def test_all_default_streams_creation(
         self,
-        tap_config: dict[str, object],
+        tap_config: dict[str, t.GeneralValueType],
     ) -> None:
         """Test that all default streams can be created."""
         tap = FlextTapLdapTap(config=tap_config)
@@ -540,7 +541,7 @@ class TestStreamIntegration:
 
     def test_streams_with_custom_configuration(
         self,
-        tap_config: dict[str, object],
+        tap_config: dict[str, t.GeneralValueType],
     ) -> None:
         """Test streams with custom configuration."""
         tap_config["custom_streams"] = [
@@ -563,7 +564,7 @@ class TestStreamIntegration:
         custom_stream = next(s for s in streams if s.name == "custom_test_stream")
         assert isinstance(custom_stream, FlextTapLdapStreams.CustomStream)
 
-    def test_self(self, tap_config: dict[str, object]) -> None:
+    def test_self(self, tap_config: dict[str, t.GeneralValueType]) -> None:
         """Test method."""
         """Test LDIF streams are included when enabled."""
         tap_config["enable_ldif_streams"] = True
@@ -600,7 +601,7 @@ class TestLDAPBaseStreamDirectUsage:
         # Create a subclass to test the base functionality
         class TestBaseStream(FlextTapLdapStreams.LDAPBaseStream):
             name = "test_base"
-            schema: ClassVar[dict[str, object]] = {
+            schema: ClassVar[dict[str, t.GeneralValueType]] = {
                 "properties": {"dn": {"type": "string"}},
             }
 

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from pathlib import Path
-from typing import override
+from typing import cast, override
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, FlextTypes as t
 from flext_ldap import FlextLdapConnection
 from flext_ldif import FlextLdif, FlextLdifModels
 from flext_meltano import FlextMeltanoStream as Stream
@@ -64,20 +64,22 @@ class FlextTapLdapLdifStreams:
                     description="Entry attributes",
                 ),
             ).to_dict()
-            super().__init__(tap, name=self.name, schema=schema)
+            super().__init__(cast("object", tap), name=self.name, schema=schema)
 
         def get_records(
             self,
             _context: Mapping[str, object] | None = None,
-        ) -> Iterable[dict[str, object]]:
+        ) -> Iterable[dict[str, t.GeneralValueType]]:
             """Get LDIF records using flext-ldif processing."""
             logger.info("Processing LDIF files using flext-ldif library")
             # Get LDIF files from config
-            ldif_files: list[object] = self.tap.config.get("ldif_files", [])
-            ldif_directory = self.tap.config.get("ldif_directory")
+            ldif_files: list[t.GeneralValueType] = cast(
+                "list[t.GeneralValueType]", self.tap.config.get_config("ldif_files", [])
+            )
+            ldif_directory = self.tap.config.get_config("ldif_directory")
             if ldif_files:
                 for ldif_file in ldif_files:
-                    yield from self._process_ldif_file(ldif_file)
+                    yield from self._process_ldif_file(cast("str", ldif_file))
             elif ldif_directory:
                 # Directory processing should be implemented in flext-ldif library
                 logger.warning(
@@ -87,15 +89,15 @@ class FlextTapLdapLdifStreams:
         def _process_ldif_file(
             self,
             ldif_file: str,
-        ) -> Iterable[dict[str, object]]:
+        ) -> Iterable[dict[str, t.GeneralValueType]]:
             """Process single LDIF file using flext-ldif."""
             logger.info("Processing LDIF file: %s", ldif_file)
             try:
                 # Read file and delegate to flext-ldif
                 content = Path(ldif_file).read_text(encoding="utf-8")
-                result: FlextResult[object] = self._ldif_api.parse(content)
-                if result.success and result.data:
-                    for entry in result.data:
+                result = self._ldif_api.parse(content)
+                if result.is_success and result.value:
+                    for entry in result.value:
                         yield self._convert_entry_to_record(entry)
                 else:
                     logger.error(
@@ -107,7 +109,7 @@ class FlextTapLdapLdifStreams:
         def _convert_entry_to_record(
             self,
             flext_entry: FlextLdifModels.Entry,
-        ) -> dict[str, object]:
+        ) -> dict[str, t.GeneralValueType]:
             """Convert flext-ldif entry to Singer record."""
             # Delegate entry type classification to flext-ldap
             object_classes = flext_entry.attributes.get_values("objectClass")
@@ -171,17 +173,19 @@ class FlextTapLdapLdifStreams:
                     description="Count by object class",
                 ),
             ).to_dict()
-            super().__init__(tap, name=self.name, schema=schema)
+            super().__init__(cast("object", tap), name=self.name, schema=schema)
 
         def get_records(
             self,
             _context: Mapping[str, object] | None = None,
-        ) -> Iterable[dict[str, object]]:
+        ) -> Iterable[dict[str, t.GeneralValueType]]:
             """Get analysis records using flext-ldif analysis capabilities."""
             logger.info("Generating LDIF analysis using flext-ldif library")
             # Get LDIF files from config
-            ldif_files: list[object] = self.tap.config.get("ldif_files", [])
-            ldif_directory = self.tap.config.get("ldif_directory")
+            ldif_files: list[t.GeneralValueType] = cast(
+                "list[t.GeneralValueType]", self.tap.config.get_config("ldif_files", [])
+            )
+            ldif_directory = self.tap.config.get_config("ldif_directory")
             # Delegate ALL analysis to flext-ldif library
             try:
                 total_entries = 0
@@ -194,7 +198,7 @@ class FlextTapLdapLdifStreams:
                         if isinstance(total_count, int):
                             total_entries += total_count
                         # Merge counts
-                        stats_entry_types: dict[str, object] = stats.get(
+                        stats_entry_types: dict[str, t.GeneralValueType] = stats.get(
                             "entry_types",
                             {},
                         )
@@ -204,7 +208,7 @@ class FlextTapLdapLdifStreams:
                                     entry_type,
                                     0,
                                 ) + int(count)
-                        stats_object_classes: dict[str, object] = stats.get(
+                        stats_object_classes: dict[str, t.GeneralValueType] = stats.get(
                             "object_classes",
                             {},
                         )
@@ -238,21 +242,21 @@ class FlextTapLdapLdifStreams:
         def _analyze_ldif_file(
             self,
             ldif_file: str,
-        ) -> dict[str, object]:
+        ) -> dict[str, t.GeneralValueType]:
             """Analyze single LDIF file using flext-ldif."""
             logger.info("Analyzing LDIF file: %s", ldif_file)
             try:
                 # Read file and delegate analysis to flext-ldif
                 content = Path(ldif_file).read_text(encoding="utf-8")
-                result: FlextResult[object] = self._ldif_api.parse(content)
-                if result.success and result.data:
+                result = self._ldif_api.parse(content)
+                if result.is_success and result.value:
                     # Generate statistics from parsed entries
-                    len(result.data)
+                    len(result.value)
                     entry_types: dict[str, int] = {}
                     object_classes: dict[str, int] = {}
-                    for entry in result.data:
+                    for entry in result.value:
                         # Use library delegation for classification
-                        oc_list: list[object] = entry.attributes.get_values(
+                        oc_list: list[t.GeneralValueType] = entry.attributes.get_values(
                             "objectClass",
                         )
                         entry_type = self._classify_entry_type(oc_list)
