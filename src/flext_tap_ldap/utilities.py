@@ -13,10 +13,16 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from flext_core import FlextContainer, FlextExceptions, FlextLogger, FlextResult
+from flext_core import (
+    FlextContainer,
+    FlextExceptions,
+    FlextLogger,
+    FlextResult,
+    FlextTypes as t,
+)
 from flext_core.utilities import u_core
 
-from flext_tap_ldap.constants import MAX_PORT_NUMBER
+from flext_tap_ldap.constants import c
 
 
 class FlextMeltanoTapLdapUtilities(u_core):
@@ -42,14 +48,14 @@ class FlextMeltanoTapLdapUtilities(u_core):
             self._container = FlextContainer.get_global()
             self.logger = FlextLogger(__name__)
 
-        def execute(self) -> FlextResult[dict[str, object]]:
+        def execute(self) -> FlextResult[dict[str, t.GeneralValueType]]:
             """Execute the main domain service operation.
 
             Returns:
-            FlextResult[dict[str, object]]: Service status and capabilities.
+            FlextResult[dict[str, t.GeneralValueType]]: Service status and capabilities.
 
             """
-            return FlextResult[dict[str, object]].ok({
+            return FlextResult[dict[str, t.GeneralValueType]].ok({
                 "status": "operational",
                 "service": "flext-tap-ldap-utilities",
                 "capabilities": [
@@ -158,7 +164,7 @@ class FlextMeltanoTapLdapUtilities(u_core):
             @staticmethod
             def create_stream_info_from_ldap_entry(
                 dn: str,
-                attributes: dict[str, list[object]],
+                attributes: dict[str, list[t.GeneralValueType]],
                 stream_prefix: str = "ldap",
                 replication_method: str = "FULL_TABLE",
             ) -> FlextResult[object]:
@@ -195,7 +201,7 @@ class FlextMeltanoTapLdapUtilities(u_core):
             @staticmethod
             def validate_ldap_config(
                 config: dict,
-            ) -> FlextResult[dict[str, object]]:
+            ) -> FlextResult[dict[str, t.GeneralValueType]]:
                 """Validate LDAP configuration parameters."""
                 try:
                     required_fields = [
@@ -204,11 +210,11 @@ class FlextMeltanoTapLdapUtilities(u_core):
                     ]
                     for field in required_fields:
                         if field not in config:
-                            return FlextResult[dict[str, object]].fail(
+                            return FlextResult[dict[str, t.GeneralValueType]].fail(
                                 f"Missing required LDAP field: {field}",
                             )
                         if not config[field]:
-                            return FlextResult[dict[str, object]].fail(
+                            return FlextResult[dict[str, t.GeneralValueType]].fail(
                                 f"Empty LDAP field: {field}",
                             )
 
@@ -216,20 +222,20 @@ class FlextMeltanoTapLdapUtilities(u_core):
                     if "port" in config:
                         try:
                             port = int(config["port"])
-                            if port <= 0 or port > MAX_PORT_NUMBER:
-                                return FlextResult[dict[str, object]].fail(
+                            if port <= 0 or port > 65535:
+                                return FlextResult[dict[str, t.GeneralValueType]].fail(
                                     "LDAP port must be between 1 and 65535",
                                 )
                             config["port"] = port
                         except ValueError:
-                            return FlextResult[dict[str, object]].fail(
+                            return FlextResult[dict[str, t.GeneralValueType]].fail(
                                 "LDAP port must be numeric",
                             )
 
-                    return FlextResult[dict[str, object]].ok(config)
+                    return FlextResult[dict[str, t.GeneralValueType]].ok(config)
 
                 except (ValueError, TypeError, KeyError, AttributeError, OSError) as e:
-                    return FlextResult[dict[str, object]].fail(
+                    return FlextResult[dict[str, t.GeneralValueType]].fail(
                         f"LDAP config validation failed: {e}",
                     )
 
@@ -242,7 +248,7 @@ class FlextMeltanoTapLdapUtilities(u_core):
             MEMORY_THRESHOLD_MB: ClassVar[int] = 256
 
     # Constants for backward compatibility
-    MAX_PORT_NUMBER = 65535
+    65535 = 65535
     DEFAULT_LDAP_PORT = 389
     DEFAULT_LDAPS_PORT = 636
 

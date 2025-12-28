@@ -19,7 +19,11 @@ from flext_tap_ldap import p as FlextMeltanoTapLdapProtocols
 class TestsFlextMeltanoTapLdapProtocols(
     FlextTestsProtocols, FlextMeltanoTapLdapProtocols
 ):
+    """Test protocols combining FlextTestsProtocols with flext-tap-ldap protocols."""
+
     class TapLdap(FlextMeltanoTapLdapProtocols.TapLdap):
+        """TapLdap test protocols namespace."""
+
         class Tests:
             """Internal tests declarations."""
 

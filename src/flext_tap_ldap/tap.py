@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from flext_core import FlextLogger
+from flext_core import FlextLogger, FlextTypes as t
 from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
 
 from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
@@ -33,7 +33,7 @@ class FlextTapLdapTap(Tap):
 
     # NOTE(@flext-team): Use centralized LDAP schema when flext-meltano common_schemas is available
     # Issue: https://github.com/flext-team/flext-meltano/issues/1
-    config_jsonschema: ClassVar[dict[str, object]] = {
+    config_jsonschema: ClassVar[dict[str, t.GeneralValueType]] = {
         "type": "object",
         "properties": {
             # Basic LDAP connection properties
@@ -120,7 +120,7 @@ class FlextTapLdapTap(Tap):
             )
 
         # Add custom streams if configured
-        custom_streams_config: list[dict[str, object]] = self.config.get(
+        custom_streams_config: list[dict[str, t.GeneralValueType]] = self.config.get(
             "custom_streams",
             [],
         )
