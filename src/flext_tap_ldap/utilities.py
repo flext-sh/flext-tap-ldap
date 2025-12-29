@@ -22,8 +22,6 @@ from flext_core import (
 )
 from flext_core.utilities import u_core
 
-from flext_tap_ldap.constants import c
-
 
 class FlextMeltanoTapLdapUtilities(u_core):
     """Unified LDAP tap utilities class extending u classes.
@@ -247,10 +245,8 @@ class FlextMeltanoTapLdapUtilities(u_core):
             MAX_PARALLEL_SEARCHES: ClassVar[int] = 5
             MEMORY_THRESHOLD_MB: ClassVar[int] = 256
 
-    # Constants for backward compatibility
-    65535 = 65535
-    DEFAULT_LDAP_PORT = 389
-    DEFAULT_LDAPS_PORT = 636
+    # Constants for backward compatibility (imported from c.Ldap)
+    # Use c.Ldap.DEFAULT_LDAP_PORT, c.Ldap.DEFAULT_LDAPS_PORT, c.Network.Port.MAX_PORT
 
 
 # Runtime alias for simplified usage
