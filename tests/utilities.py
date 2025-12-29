@@ -13,15 +13,15 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsUtilities
 
-from flext_tap_ldap import u as FlextMeltanoTapLdapUtilities
+from flext_tap_ldap import u
 
 
 class TestsFlextMeltanoTapLdapUtilities(
-    FlextTestsUtilities, FlextMeltanoTapLdapUtilities
+    FlextTestsUtilities, u
 ):
     """Test utilities combining FlextTestsUtilities with flext-tap-ldap utilities."""
 
-    class TapLdap(FlextMeltanoTapLdapUtilities.TapLdap):
+    class TapLdap(u.TapLdap):
         """TapLdap test utilities namespace."""
 
         class Tests:

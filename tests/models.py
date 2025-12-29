@@ -13,13 +13,13 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsModels
 
-from flext_tap_ldap import m as FlextMeltanoTapLdapModels
+from flext_tap_ldap import m
 
 
-class TestsFlextMeltanoTapLdapModels(FlextTestsModels, FlextMeltanoTapLdapModels):
+class TestsFlextMeltanoTapLdapModels(FlextTestsModels, m):
     """Test models combining FlextTestsModels with flext-tap-ldap models."""
 
-    class TapLdap(FlextMeltanoTapLdapModels.TapLdap):
+    class TapLdap(m.TapLdap):
         """TapLdap test models namespace."""
 
         class Tests:
