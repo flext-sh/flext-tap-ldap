@@ -39,17 +39,14 @@ class FlextMeltanoTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             """LDAP connection constants."""
 
             # Use FlextLdapConstants for LDAP-specific configuration
-            DEFAULT_PORT: Final[int] = FlextLdapConstants.Ldap.Connection.DEFAULT_PORT
-            DEFAULT_SSL_PORT: Final[int] = (
-                FlextLdapConstants.Ldap.Connection.DEFAULT_SSL_PORT
-            )
+            DEFAULT_PORT: Final[int] = FlextLdapConstants.Ldap.ConnectionDefaults.PORT
+            DEFAULT_SSL_PORT: Final[int] = 636  # CONFIG: Standard LDAPS port
 
             # LDAP-specific search configuration
             DEFAULT_PAGE_SIZE: Final[int] = 1000
             MAX_FILTER_LENGTH: Final[int] = 2048
-            DEFAULT_TIMEOUT: Final[int] = (
-                FlextLdapConstants.Ldap.Connection.DEFAULT_TIMEOUT
-            )
+            DEFAULT_TIMEOUT: Final[int] = FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
+            MAX_PORT: Final[int] = 65535
 
         class Singer:
             """Singer tap configuration constants."""
