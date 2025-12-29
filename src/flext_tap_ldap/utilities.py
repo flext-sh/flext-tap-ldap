@@ -22,6 +22,8 @@ from flext_core import (
 )
 from flext_core.utilities import u_core
 
+from flext_tap_ldap.constants import FlextMeltanoTapLdapConstants as c
+
 
 class FlextMeltanoTapLdapUtilities(u_core):
     """Unified LDAP tap utilities class extending u classes.
@@ -220,9 +222,9 @@ class FlextMeltanoTapLdapUtilities(u_core):
                     if "port" in config:
                         try:
                             port = int(config["port"])
-                            if port <= 0 or port > 65535:
+                            if port <= 0 or port > c.TapLdap.Ldap.MAX_PORT:
                                 return FlextResult[dict[str, t.GeneralValueType]].fail(
-                                    "LDAP port must be between 1 and 65535",
+                                    f"LDAP port must be between 1 and {c.TapLdap.Ldap.MAX_PORT}",
                                 )
                             config["port"] = port
                         except ValueError:
