@@ -10,7 +10,10 @@ SPDX-License-Identifier: MIT
 """
 
 # Import test module aliases for unified test access
-from flext_tap_ldap.tests import m, p, t, u
+from .models import m
+from .protocols import p
+from .typings import t
+from .utilities import u
 
 __all__ = [
     "m",
