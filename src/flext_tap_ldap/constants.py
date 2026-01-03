@@ -45,7 +45,9 @@ class FlextMeltanoTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             # LDAP-specific search configuration
             DEFAULT_PAGE_SIZE: Final[int] = 1000
             MAX_FILTER_LENGTH: Final[int] = 2048
-            DEFAULT_TIMEOUT: Final[int] = FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
+            DEFAULT_TIMEOUT: Final[int] = (
+                FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
+            )
             MAX_PORT: Final[int] = 65535
 
         class Singer:

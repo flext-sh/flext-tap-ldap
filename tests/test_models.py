@@ -126,7 +126,7 @@ class TestConnectionTestedEvent:
             server_uri="ldap://localhost:389",
         )
 
-        assert event.success is True
+        assert event.is_success is True
         assert event.server_uri == "ldap://localhost:389"
         assert event.error_message is None
 
@@ -138,5 +138,5 @@ class TestConnectionTestedEvent:
             error_message="Connection refused",
         )
 
-        assert event.success is False
+        assert event.is_success is False
         assert event.error_message == "Connection refused"

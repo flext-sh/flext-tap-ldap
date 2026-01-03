@@ -246,7 +246,7 @@ class FlextTapLdapServices:
         """Service for managing LDAP connections with flext-core patterns."""
 
         @override
-        def __init__(self: object) -> None:
+        def __init__(self) -> None:
             """Initialize the connection service."""
             self._connections: dict[str, LDAPConnection] = {}
 
@@ -333,7 +333,7 @@ class FlextTapLdapServices:
         """Service for managing LDAP streams with flext-core patterns."""
 
         @override
-        def __init__(self: object) -> None:
+        def __init__(self) -> None:
             """Initialize the stream service."""
             self._streams: dict[str, LDAPStream] = {}
 
@@ -430,7 +430,7 @@ class FlextTapLdapServices:
         """Service for managing tap executions with flext-core patterns."""
 
         @override
-        def __init__(self: object) -> None:
+        def __init__(self) -> None:
             """Initialize the execution service."""
             self._executions: dict[str, TapExecution] = {}
 
@@ -581,7 +581,7 @@ class FlextTapLdapServices:
         """Service for LDIF file processing using flext-ldif library."""
 
         @override
-        def __init__(self: object) -> None:
+        def __init__(self) -> None:
             """Initialize LDIF processing service."""
             self._ldif_api = FlextLdif()
 
