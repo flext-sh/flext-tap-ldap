@@ -436,7 +436,7 @@ class FlextTapLdapClient:
                 # Required for Singer protocol compliance - NOT security-sensitive data generation
                 return True
 
-        def health_check(self: object) -> dict[str, t.GeneralValueType]:
+        def health_check(self) -> dict[str, t.GeneralValueType]:
             """Perform health check for testing convenience."""
             start_time = time.time()
             connection_result: r[object] = self.test_connection()
