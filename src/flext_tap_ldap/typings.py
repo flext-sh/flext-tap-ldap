@@ -36,7 +36,7 @@ class FlextMeltanoTapLdapTypes(FlextTypes):
     # LDAP CONNECTION TYPES - LDAP server connection configuration
     # =========================================================================
 
-    class LdapConnection:
+    class TapLdap:
         """LDAP connection complex types."""
 
         type ConnectionConfig = dict[
@@ -332,23 +332,6 @@ class FlextMeltanoTapLdapTypes(FlextTypes):
             str,
             FlextTypes.GeneralValueType | FlextTypes.JsonValue,
         ]
-
-    class TapLdap:
-        """Tap LDAP types namespace for cross-project access.
-
-        Provides organized access to all Tap LDAP types for other FLEXT projects.
-        Usage: Other projects can reference `t.TapLdap.LdapData.*`, `t.TapLdap.Project.*`, etc.
-        This enables consistent namespace patterns for cross-project type access.
-
-        Examples:
-            from flext_tap_ldap.typings import t
-            config: t.TapLdap.Project.TapLdapProjectConfig = ...
-            entry: t.TapLdap.LdapData.LdapEntry = ...
-
-        Note: Namespace composition via inheritance - no aliases needed.
-        Access parent namespaces directly through inheritance.
-
-        """
 
 
 # Alias for simplified usage
