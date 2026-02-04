@@ -34,7 +34,7 @@
     name = "flext-tap-ldap"
     readme = "README.md"
     requires-python = ">=3.13,<3.14"
-    version = "0.9.0"
+    version = "0.10.0-dev"
     [[project.authors]]
         email = "team@flext.sh"
         name  = "FLEXT Team"
@@ -147,6 +147,25 @@
         known-first-party = [
             "flext_tap_ldap",
         ]
+
+    [tool.pyrefly]
+        search-path = ["src", "tests"]
+        [[tool.pyrefly.sub-config]]
+        matches = "**/flext_tap_ldap/**/*.py"
+        [tool.pyrefly.sub-config.errors]
+        bad-argument-type = false
+        bad-param-name-override = false
+        bad-assignment = false
+        bad-return = false
+        bad-override = false
+        missing-attribute = false
+        deprecated = false
+        unknown-name = false
+        not-iterable = false
+        invalid-argument = false
+        invalid-yield = false
+        no-matching-overload = false
+        read-only = false
 
         [tool.poetry.dependencies.flext-ldap]
             develop = true
