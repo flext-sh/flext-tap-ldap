@@ -61,14 +61,14 @@ class FlextTapLdapSettings(FlextSettings):
             description="JSON schema for the stream",
         )
 
-        def validate_business_rules(self) -> FlextResult[None]:
+        def validate_business_rules(self) -> FlextResult[bool]:
             """Validate business rules for custom streams."""
             if not self.name or not self.search_filter:
-                return FlextResult[None].fail(
+                return FlextResult[bool].fail(
                     "Custom stream requires name and search_filter",
                 )
 
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(value=True)
 
     class LDIFProcessingConfig(FlextSettings):
         """Nested configuration for LDIF file processing."""
@@ -119,21 +119,21 @@ class FlextTapLdapSettings(FlextSettings):
             description="Enable LDIF processing streams",
         )
 
-        def validate_business_rules(self) -> FlextResult[None]:
+        def validate_business_rules(self) -> FlextResult[bool]:
             """Validate business rules for LDIF processing."""
             if self.ldif_files and self.ldif_directory:
-                return FlextResult[None].fail(
+                return FlextResult[bool].fail(
                     "Cannot specify both ldif_files and ldif_directory",
                 )
 
             if self.enable_ldif_streams and not (
                 self.ldif_files or self.ldif_directory
             ):
-                return FlextResult[None].fail(
+                return FlextResult[bool].fail(
                     "LDIF streams enabled but no files or directory specified",
                 )
 
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(value=True)
 
     model_config = SettingsConfigDict(
         env_prefix="FLEXT_TAP_LDAP_",
@@ -334,7 +334,7 @@ class FlextTapLdapSettings(FlextSettings):
             if self.ldif_max_errors <= 0:
                 return FlextResult[bool].fail("LDIF max errors must be positive")
 
-            return FlextResult[bool].ok(True)
+            return FlextResult[bool].ok(value=True)
         except Exception as e:
             return FlextResult[bool].fail(f"Configuration validation error: {e}")
 
