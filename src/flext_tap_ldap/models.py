@@ -59,7 +59,7 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 event_type: str,
                 aggregate_id: str,
                 execution_id: str,
-                config: t.JsonDict | None = None,
+                config: dict[str, t.JsonValue] | None = None,
                 config_hash: str | None = None,
                 **kwargs: t.GeneralValueType,
             ) -> None:
@@ -74,7 +74,7 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 self.config_hash = config_hash
 
             @property
-            def config(self) -> t.JsonDict | None:
+            def config(self) -> dict[str, t.JsonValue] | None:
                 """Get config from data field."""
                 config_data = self.data.get("config")
                 return config_data if isinstance(config_data, dict) else None

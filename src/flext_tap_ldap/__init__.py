@@ -24,7 +24,6 @@ __all__ = [
     "FlextMeltanoTapLdapModels",
     "FlextTapLdapClient",
     "FlextTapLdapLdifStreams",
-    "FlextTapLdapModels",
     "FlextTapLdapProcessor",
     "FlextTapLdapSettings",
     "FlextTapLdapStreams",

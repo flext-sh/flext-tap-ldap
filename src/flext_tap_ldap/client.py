@@ -18,6 +18,9 @@ from typing import override
 from flext_core import FlextLogger, FlextTypes as t, r
 from flext_ldap import (
     FlextLdap,
+    FlextLdapConnection,
+    FlextLdapOperations,
+    FlextLdapSettings,
     c,
     m,
 )
@@ -110,15 +113,28 @@ class FlextTapLdapClient:
             client_config: FlextTapLdapClient.LDAPClientConfig,
         ) -> None:
             """Initialize the FlextLdap API with the given configuration."""
-            flext_config = m.Ldap.ConnectionConfig(
-                server=client_config.host,
+            flext_connection_config = m.Ldap.ConnectionConfig(
+                host=client_config.host,
                 port=int(client_config.port),
                 use_ssl=bool(client_config.use_ssl),
+                bind_dn=client_config.bind_dn,
+                bind_password=client_config.password,
                 timeout=int(client_config.timeout),
             )
 
-            self._flext_api = FlextLdap()
-            self._config = flext_config
+            settings = FlextLdapSettings(
+                host=flext_connection_config.host,
+                port=flext_connection_config.port,
+                use_ssl=flext_connection_config.use_ssl,
+                bind_dn=flext_connection_config.bind_dn,
+                bind_password=flext_connection_config.bind_password,
+                timeout=flext_connection_config.timeout,
+            )
+
+            connection = FlextLdapConnection(config=settings)
+            operations = FlextLdapOperations(connection=connection)
+            self._flext_api = FlextLdap(connection=connection, operations=operations)
+            self._config = flext_connection_config
 
             # Store for testing convenience - these are what tests expect
             self.host = client_config.host
