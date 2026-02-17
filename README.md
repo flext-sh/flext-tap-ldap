@@ -6,6 +6,8 @@
 
 **FLEXT-Tap-LDAP** extracts data directly from enterprise LDAP directories (Active Directory, OpenLDAP, etc.). It enables real-time synchronization of organizational data into analytical backends.
 
+Part of the [FLEXT](https://github.com/flext/flext) ecosystem.
+
 ## 🚀 Key Features
 
 - **Multi-Attribute Search**: Configurable search filters (`ldap_filter`) and base DNs.
