@@ -1,14 +1,15 @@
 <!-- Generated from docs/guides/security.md for flext-tap-ldap. -->
+
 <!-- Source of truth: workspace docs/guides/. -->
 
 # flext-tap-ldap - Security Guide
 
 > Project profile: `flext-tap-ldap`
 
-
-
 <!-- TOC START -->
+
 - No sections found
+
 <!-- TOC END -->
 
 Security practices are governed by project-specific policies and central architecture ADRs.

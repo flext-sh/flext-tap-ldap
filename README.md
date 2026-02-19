@@ -1,7 +1,7 @@
 # FLEXT-Tap-LDAP
 
-
 <!-- TOC START -->
+
 - [🚀 Key Features](#-key-features)
 - [📦 Installation](#-installation)
 - [🛠️ Usage](#-usage)
@@ -10,6 +10,7 @@
 - [🏗️ Architecture](#-architecture)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
+
 <!-- TOC END -->
 
 [![Singer SDK](https://img.shields.io/badge/singer--sdk-compliant-brightgreen.svg)](https://sdk.meltano.com/)
