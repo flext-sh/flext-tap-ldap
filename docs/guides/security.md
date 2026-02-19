@@ -6,9 +6,9 @@
 > Project profile: `flext-tap-ldap`
 
 
-
-
-
+<!-- TOC START -->
+- No sections found
+<!-- TOC END -->
 
 Security practices are governed by project-specific policies and central architecture ADRs.
 
