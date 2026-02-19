@@ -2,8 +2,6 @@
 # Migrated to use base.mk - 2026-01-03
 
 PROJECT_NAME := flext-tap-ldap
-MIN_COVERAGE := 100
-
 # Include shared base.mk for standard targets
 include ../base.mk
 
