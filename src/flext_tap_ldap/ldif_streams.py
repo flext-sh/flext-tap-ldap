@@ -259,10 +259,10 @@ class FlextTapLdapLdifStreams:
                         oc_list: list[t.GeneralValueType] = entry.attributes.get_values(
                             "objectClass",
                         )
-                        entry_type = self._classify_entry_type(oc_list)
+                        oc_strs = [str(x) for x in oc_list if x is not None]
+                        entry_type = self._classify_entry_type(oc_strs)
                         entry_types[entry_type] = entry_types.get(entry_type, 0) + 1
-                        # Count object classes
-                        for oc in oc_list:
+                        for oc in oc_strs:
                             object_classes[oc] = object_classes.get(oc, 0) + 1
                     return {
                         "total_entries": "total_entries",
