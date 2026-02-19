@@ -215,14 +215,11 @@ class FlextTapLdapClient:
                 attributes: dict[str, t.GeneralValueType] = getattr(
                     entry_data, "attributes", {}
                 )
-                entry_dict = {"dn": dn_value}
-                # Add flattened attributes to the entry dict
+                entry_dict: dict[str, t.GeneralValueType] = {"dn": dn_value}
                 for attr_name, attr_values in attributes.items():
-                    # Convert single values and lists appropriately
                     if isinstance(attr_values, list) and len(attr_values) == 1:
                         entry_dict[attr_name] = attr_values[0]
                     else:
-                        # Keep as list or whatever type it is
                         entry_dict[attr_name] = attr_values
                 return entry_dict
             # It's already a dict[str, t.GeneralValueType] (from mock) - ensure proper type conversion

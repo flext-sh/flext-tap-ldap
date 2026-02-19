@@ -9,6 +9,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from flext_tap_ldap.__version__ import __version__, __version_info__
 from flext_tap_ldap.client import FlextTapLdapClient
 from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
 from flext_tap_ldap.models import FlextMeltanoTapLdapModels, m, m_tap_ldap
@@ -16,9 +17,6 @@ from flext_tap_ldap.processor import FlextTapLdapProcessor
 from flext_tap_ldap.settings import FlextTapLdapSettings
 from flext_tap_ldap.streams import FlextTapLdapStreams
 from flext_tap_ldap.tap import FlextTapLdapTap
-
-__version__: str = "1.0.0"
-__version_info__: tuple[int | str, ...] = (1, 0, 0)
 
 __all__ = [
     "FlextMeltanoTapLdapModels",
