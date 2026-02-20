@@ -4,7 +4,7 @@ requires = [ "poetry-core>=2.0", "poetry-core>=2" ]
 
 [project]
 name = "flext-tap-ldap"
-version = "0.10.0"
+version = "0.11.0"
 description = "FLEXT Tap LDAP - Singer Tap for LDAP Directory Services"
 readme = "README.md"
 keywords = [
