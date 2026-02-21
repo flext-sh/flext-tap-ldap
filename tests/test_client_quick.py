@@ -148,8 +148,8 @@ class TestLDAPClientQuick:
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_with_event_loop(
         self,
-        client: LDAPClient,
         mock_get_loop: Mock,
+        client: LDAPClient,
     ) -> None:
         """Test search when event loop is already running."""
         # Mock existing event loop
@@ -356,8 +356,8 @@ class TestLDAPClientQuick:
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_with_oracle_support_scenarios(
         self,
-        client: LDAPClient,
         mock_get_loop: Mock,
+        client: LDAPClient,
     ) -> None:
         """Test Oracle support search with different scenarios."""
         # Test with existing event loop

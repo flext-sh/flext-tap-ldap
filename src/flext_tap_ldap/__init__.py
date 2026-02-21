@@ -14,13 +14,17 @@ from flext_tap_ldap.client import FlextTapLdapClient
 from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
 from flext_tap_ldap.models import FlextMeltanoTapLdapModels, m
 from flext_tap_ldap.processor import FlextTapLdapProcessor
+from flext_tap_ldap.protocols import FlextMeltanoTapLdapProtocols, p
 from flext_tap_ldap.settings import FlextTapLdapSettings
 from flext_tap_ldap.streams import FlextTapLdapStreams
 from flext_tap_ldap.tap import FlextTapLdapTap
 from flext_tap_ldap.typings import t
+from flext_tap_ldap.utilities import FlextMeltanoTapLdapUtilities, u
 
 __all__ = [
     "FlextMeltanoTapLdapModels",
+    "FlextMeltanoTapLdapProtocols",
+    "FlextMeltanoTapLdapUtilities",
     "FlextTapLdapClient",
     "FlextTapLdapLdifStreams",
     "FlextTapLdapProcessor",
@@ -30,5 +34,7 @@ __all__ = [
     "__version__",
     "__version_info__",
     "m",
+    "p",
     "t",
+    "u",
 ]
