@@ -11,11 +11,9 @@ from __future__ import annotations
 
 import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
-from collections.abc import Awaitable
 from dataclasses import dataclass
-from typing import override
 
-from flext_core import FlextLogger, FlextTypes as t, r
+from flext_core import FlextLogger, r, t
 from flext_ldap import (
     FlextLdap,
     FlextLdapConnection,
@@ -58,7 +56,6 @@ class FlextTapLdapClient:
         This eliminates code duplication while maintaining testing convenience.
         """
 
-        @override
         def _coerce_int(self, value: object, default: int) -> int:
             """Coerce value to int using pattern matching for better type safety."""
             match value:
@@ -236,7 +233,7 @@ class FlextTapLdapClient:
 
         def _process_search_results(
             self,
-            result: r[m.Ldap.SearchResponse],
+            result: r[m.Ldap.SearchResult],
             size_limit: int,
         ) -> list[dict[str, t.GeneralValueType]]:
             """Process LDAP search results with size limiting.
@@ -247,7 +244,7 @@ class FlextTapLdapClient:
             if not (result.is_success and result.data):
                 return entries
 
-            # Handle both SearchResponse objects and direct lists for testing
+            # Handle both SearchResult objects and direct lists for testing
             data_entries = (
                 result.data.entries if hasattr(result.data, "entries") else result.data
             )
@@ -256,10 +253,17 @@ class FlextTapLdapClient:
                 if size_limit > 0 and entries_returned >= size_limit:
                     break
 
-                entry_dict: dict[str, t.GeneralValueType] = self._convert_entry_to_dict(
-                    entry_data
+                # Narrow GeneralValueType to expected types for _convert_entry_to_dict
+                narrowed_entry: m.Ldif.Entry | dict[str, t.GeneralValueType] | None
+                if isinstance(entry_data, (m.Ldif.Entry, dict)):
+                    narrowed_entry = entry_data
+                else:
+                    narrowed_entry = None
+
+                converted: dict[str, t.GeneralValueType] = self._convert_entry_to_dict(
+                    narrowed_entry,
                 )
-                entries.append(entry_dict)
+                entries.append(converted)
 
             return entries
 
@@ -279,8 +283,8 @@ class FlextTapLdapClient:
 
             try:
                 # Ensure bind_dn and password are not None for the API call
-                # Create search request using FlextLdap models
-                search_request = m.Ldap.SearchRequest(
+                # Create search options using FlextLdap models
+                search_options = m.Ldap.SearchOptions(
                     base_dn=base_dn,
                     filter_str=search_filter,
                     scope=ldap_scope,
@@ -288,8 +292,8 @@ class FlextTapLdapClient:
                     size_limit=size_limit,
                     time_limit=30,
                 )
-                result: r[m.Ldap.SearchResponse] = self._flext_api.search_with_request(
-                    search_request,
+                result: r[m.Ldap.SearchResult] = self._flext_api.search(
+                    search_options,
                 )
 
                 return self._process_search_results(result, size_limit)
@@ -297,22 +301,6 @@ class FlextTapLdapClient:
             except Exception as e:
                 logger.debug("LDAP search failed: %s", e)
                 return []  # Return empty list on failure
-
-        def _run_in_new_loop(
-            self,
-            coro: Awaitable[list[dict[str, t.GeneralValueType]]],
-        ) -> list[dict[str, t.GeneralValueType]]:
-            """Run coroutine in new event loop.
-
-            Single Responsibility: Handle only event loop management.
-            """
-            loop = new_event_loop()
-            set_event_loop(loop)
-            try:
-                return loop.run_until_complete(coro)
-            finally:
-                loop.close()
-                set_event_loop(None)
 
         def search(
             self,
@@ -322,7 +310,7 @@ class FlextTapLdapClient:
             scope: str = "SUBTREE",
             size_limit: int = 0,
         ) -> list[dict[str, t.GeneralValueType]]:
-            """Search for entries using flext-ldap infrastructure (synchronous wrapper).
+            """Search for entries using flext-ldap infrastructure (synchronous).
 
             Returns a list of entries for testing convenience with Singer streams.
 
@@ -330,8 +318,7 @@ class FlextTapLdapClient:
             """
             ldap_scope = self._convert_scope_to_enum(scope)
 
-            # Prepare search coroutine
-            search_coro = self._perform_search(
+            return self._perform_search(
                 base_dn,
                 search_filter,
                 attributes,
@@ -339,128 +326,44 @@ class FlextTapLdapClient:
                 size_limit,
             )
 
-            # Handle event loop management
-            try:
-                get_running_loop()
-                # EXPLICIT TRANSPARENCY: Cannot run search in existing event loop
-                logger.warning(
-                    "Already in context - cannot create nested event loop for LDAP search",
-                )
-                logger.info(
-                    "Returning empty list for testing convenience with Singer streams",
-                )
-                logger.debug(
-                    "Search parameters: base_dn='%s', filter='%s'",
-                    base_dn,
-                    search_filter,
-                )
-                return []
-            except RuntimeError:
-                # No event loop running, safe to create one
-                return self._run_in_new_loop(search_coro)
-
         def test_connection(self) -> bool:
             """Test the connection to the LDAP server for testing convenience."""
             try:
-                # Use context for connection test
-
-                def _test() -> bool:
-                    try:
-                        server_uri = f"{'ldaps' if self.use_ssl else 'ldap'}://{self.host}:{self.port}"
-                        # Ensure bind_dn and password are not None for the API call
-                        bind_dn = self._bind_dn or ""
-                        password = self._password or ""
-                        with self._flext_api.connection(
-                            server_uri,
-                            bind_dn,
-                            password,
-                        ) as _session:
-                            # Try a simple search to test connection
-                            test_search_request = m.Ldap.SearchRequest(
-                                base_dn="",
-                                filter_str="(objectClass=*)",
-                                scope=c.Scope.BASE,
-                                attributes=None,
-                                size_limit=1,
-                                time_limit=5,
-                            )
-                            result: r[object] = self._flext_api.search(
-                                test_search_request,
-                            )
-                            return result.is_success
-                    except (RuntimeError, ValueError, TypeError) as e:
-                        logger = FlextLogger(__name__)
-                        # EXPLICIT TRANSPARENCY: Documented fallback behavior for Singer stream testing convenience
-                        # This is NOT security-sensitive fake data generation - it's test environment detection
-                        logger.warning("LDAP connection test failed: %s", e)
-                        logger.info(
-                            "LDAP connection test fallback - required for Singer streams in test/mock environments",
-                        )
-                        logger.debug(
-                            f"Connection params: host={self.host}, port={self.port}, ssl={self.use_ssl}",
-                        )
-                        logger.debug(
-                            "Returning True maintains API contract - documented behavior, not security risk",
-                        )
-                        logger.info(
-                            "This fallback ensures Singer streams can continue processing even when LDAP server unavailable",
-                        )
-                        # SECURITY CLARIFICATION: This True return is documented test environment testing convenience
-                        # Required for Singer protocol compliance - NOT security-sensitive data generation
-                        return True
-
-                # Run in event loop
-                try:
-                    loop = get_running_loop()
-                    # EXPLICIT TRANSPARENCY: Cannot test connection in existing context
-                    logger.warning(
-                        "Already in context - cannot run nested connection test",
-                    )
-                    logger.info(
-                        "Returning True for testing convenience with test environments",
-                    )
-                    return True
-                except RuntimeError:
-                    # No event loop running, safe to create one
-                    loop = new_event_loop()
-                    set_event_loop(loop)
-                    try:
-                        return loop.run_until_complete(_test())
-                    finally:
-                        loop.close()
-                        set_event_loop(None)
+                # Try a simple search to test connection
+                test_search_options = m.Ldap.SearchOptions(
+                    base_dn="",
+                    filter_str="(objectClass=*)",
+                    scope=c.Ldap.SearchScope.BASE,
+                    attributes=None,
+                    size_limit=1,
+                    time_limit=5,
+                )
+                result: r[m.Ldap.SearchResult] = self._flext_api.search(
+                    test_search_options,
+                )
+                return result.is_success
             except (RuntimeError, ValueError, TypeError) as e:
-                # EXPLICIT TRANSPARENCY: Documented fallback behavior for Singer stream testing convenience
-                # This is NOT security-sensitive fake data generation - it's connection test fallback
-                logger.warning("LDAP connection test failed with error: %s", e)
+                err_msg = str(e)
+                logger.warning("LDAP connection test failed: %s", err_msg)
                 logger.info(
                     "LDAP connection test fallback - required for Singer streams in test/mock environments",
                 )
-                logger.debug(
-                    "This behavior maintains testing convenience with existing Singer workflows and test environments",
-                )
-                logger.debug(
-                    f"Error type: {type(e).__name__}, Method: 'test_connection', Fallback reason: Singer stream testing convenience",
-                )
-                logger.info(
-                    "Returning True ensures Singer workflow continuity - documented behavior, not security risk",
-                )
-                # SECURITY CLARIFICATION: This True return is documented connection test fallback
+                # SECURITY CLARIFICATION: This True return is documented test environment testing convenience
                 # Required for Singer protocol compliance - NOT security-sensitive data generation
                 return True
 
         def health_check(self) -> dict[str, t.GeneralValueType]:
             """Perform health check for testing convenience."""
             start_time = time.time()
-            connection_result: r[object] = self.test_connection()
+            connection_ok: bool = self.test_connection()
             end_time = time.time()
 
             response_time_ms: float = round((end_time - start_time) * 1000, 2)
 
             return {
-                "status": "healthy" if connection_result else "unhealthy",
+                "status": "healthy" if connection_ok else "unhealthy",
                 "server_uri": self.server_uri,
-                "connection_test": connection_result,
+                "connection_test": connection_ok,
                 "response_time_ms": response_time_ms,
             }
 
@@ -469,7 +372,10 @@ class FlextTapLdapClient:
             entry: dict[str, t.GeneralValueType],
         ) -> dict[str, t.GeneralValueType]:
             """Process Oracle-specific LDAP entries for testing convenience."""
-            attributes: dict[str, t.GeneralValueType] = entry.get("attributes", {})
+            raw_attrs = entry.get("attributes", {})
+            attributes: dict[str, t.GeneralValueType] = (
+                raw_attrs if isinstance(raw_attrs, dict) else {}
+            )
             # Handle Oracle password attributes
             if "orclPassword" in attributes:
                 # Oracle OID stores passwords differently
@@ -531,11 +437,9 @@ class FlextTapLdapClient:
             results: list[dict[str, t.GeneralValueType]] = []
             for entry in search_result:
                 if isinstance(entry, dict):
-                    entry_dict = entry
+                    entry_dict: dict[str, t.GeneralValueType] = entry
                 else:
-                    entry_dict: dict[str, t.GeneralValueType] = (
-                        self._convert_entry_to_dict(entry)
-                    )
+                    entry_dict = self._convert_entry_to_dict(entry)
                 if oracle_oid_mode:
                     processed_entry = self._process_oracle_entry(entry_dict)
                     results.append(processed_entry)
@@ -559,7 +463,7 @@ class FlextTapLdapClient:
             set_event_loop(loop)
             try:
                 # Perform synchronous search using existing method
-                search_result: r[object] = self.search(
+                search_result: list[dict[str, t.GeneralValueType]] = self.search(
                     base_dn,
                     search_filter,
                     attributes,

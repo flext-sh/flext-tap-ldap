@@ -15,7 +15,7 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import cast, override
 
-from flext_core import FlextLogger, FlextResult, FlextTypes as t
+from flext_core import FlextLogger, FlextResult, t
 from flext_ldif import FlextLdif, FlextLdifModels
 
 

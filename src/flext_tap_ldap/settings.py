@@ -12,9 +12,11 @@ from __future__ import annotations
 
 from typing import Self
 
-from flext_core import FlextConstants, FlextResult, FlextSettings, FlextTypes as t
+from flext_core import FlextConstants, FlextResult, FlextSettings
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
+
+from flext_tap_ldap.typings import t
 
 
 class ConfigDefaults(BaseModel):

@@ -11,12 +11,13 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from flext_core import FlextLogger, FlextTypes as t
+from flext_core import FlextLogger
 from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
 
 from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
 from flext_tap_ldap.settings import FlextTapLdapSettings
 from flext_tap_ldap.streams import FlextTapLdapStreams
+from flext_tap_ldap.typings import t
 
 logger = FlextLogger(__name__)
 
@@ -103,10 +104,10 @@ class FlextTapLdapTap(Tap):
         # Standard LDAP streams (always available)
         streams.extend(
             [
-                FlextTapLdapStreams.UsersStream(self),
-                FlextTapLdapStreams.GroupsStream(self),
-                FlextTapLdapStreams.OrganizationalUnitsStream(self),
-                FlextTapLdapStreams.SchemaStream(self),
+                FlextTapLdapStreams.UsersStream(self),  # type: ignore[arg-type]
+                FlextTapLdapStreams.GroupsStream(self),  # type: ignore[arg-type]
+                FlextTapLdapStreams.OrganizationalUnitsStream(self),  # type: ignore[arg-type]
+                FlextTapLdapStreams.SchemaStream(self),  # type: ignore[arg-type]
             ],
         )
 
@@ -114,25 +115,37 @@ class FlextTapLdapTap(Tap):
         if self.config.get("enable_ldif_streams", False):
             streams.extend(
                 [
-                    FlextTapLdapLdifStreams.LdifStream(self),
-                    FlextTapLdapLdifStreams.LdifAnalysisStream(self),
+                    FlextTapLdapLdifStreams.LdifStream(self),  # type: ignore[arg-type]
+                    FlextTapLdapLdifStreams.LdifAnalysisStream(self),  # type: ignore[arg-type]
                 ],
             )
 
         # Add custom streams if configured
-        custom_streams_config: list[dict[str, t.GeneralValueType]] = self.config.get(
-            "custom_streams",
-            [],
+        raw_custom = self.config.get("custom_streams", [])
+        custom_streams_config: list[dict[str, t.GeneralValueType]] = (
+            list(raw_custom) if isinstance(raw_custom, list) else []
         )
         for custom_config in custom_streams_config:
+            if not isinstance(custom_config, dict):
+                continue
+            raw_name = custom_config.get("name", "")
+            raw_filter = custom_config.get("search_filter", "")
+            raw_schema = custom_config.get("schema", {})
+            schema_dict = raw_schema if isinstance(raw_schema, dict) else {}
+            raw_props = schema_dict.get("properties", {})
+            schema_props = raw_props if isinstance(raw_props, dict) else {}
+            raw_pk = custom_config.get("primary_keys")
+            raw_rk = custom_config.get("replication_key")
             params = FlextTapLdapStreams.CustomStreamParams(
-                name=custom_config.get("name", ""),
-                search_filter=custom_config.get("search_filter", ""),
-                schema_properties=custom_config.get("schema", {}).get("properties", {}),
-                primary_keys=custom_config.get("primary_keys"),
-                replication_key=custom_config.get("replication_key"),
+                name=str(raw_name) if isinstance(raw_name, str) else "",
+                search_filter=str(raw_filter) if isinstance(raw_filter, str) else "",
+                schema_properties=schema_props,
+                primary_keys=[str(k) for k in raw_pk]
+                if isinstance(raw_pk, list)
+                else None,
+                replication_key=str(raw_rk) if isinstance(raw_rk, str) else None,
             )
-            stream = FlextTapLdapStreams.CustomStream(tap=self, params=params)
+            stream = FlextTapLdapStreams.CustomStream(tap=self, params=params)  # type: ignore[arg-type]
             streams.append(stream)
 
         return streams

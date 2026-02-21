@@ -12,14 +12,10 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from flext_core import FlextModels, FlextTypes as t
-from flext_core.utilities import u
+from flext_core import FlextModels
 from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
 from pydantic import BaseModel, Field
-
-# Aliases for convenience
-m_core = FlextModels
 
 
 class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
@@ -38,82 +34,23 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
     class TapLdap:
         """Tap LDAP namespace for cross-project access."""
 
-        def __init_subclass__(cls, **kwargs: t.GeneralValueType) -> None:
-            """Warn when FlextMeltanoTapLdapModels is subclassed directly."""
-            super().__init_subclass__(**kwargs)
-            u.Deprecation.warn_once(
-                f"subclass:{cls.__name__}",
-                "Subclassing FlextMeltanoTapLdapModels is deprecated. Use FlextModels directly with composition instead.",
-            )
-
-        class TapExecutionStartedEvent(m_core.DomainEvent):
+        class TapExecutionStartedEvent(FlextModels.DomainEvent):
             """Event raised when tap execution starts."""
 
             timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
             tap_name: str = "tap-ldap"
-            execution_id: str
+            execution_id: str = ""
             config_hash: str | None = None
 
-            def __init__(
-                self,
-                event_type: str,
-                aggregate_id: str,
-                execution_id: str,
-                config: dict[str, t.JsonValue] | None = None,
-                config_hash: str | None = None,
-                **kwargs: t.GeneralValueType,
-            ) -> None:
-                """Initialize with config data."""
-                super().__init__(
-                    event_type=event_type,
-                    aggregate_id=aggregate_id,
-                    data={"config": config} if config else {},
-                    **kwargs,
-                )
-                self.execution_id = execution_id
-                self.config_hash = config_hash
-
-            @property
-            def config(self) -> dict[str, t.JsonValue] | None:
-                """Get config from data field."""
-                config_data = self.data.get("config")
-                return config_data if isinstance(config_data, dict) else None
-
-        class TapExecutionCompletedEvent(m_core.DomainEvent):
+        class TapExecutionCompletedEvent(FlextModels.DomainEvent):
             """Event raised when tap execution completes."""
 
             timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
             tap_name: str = "tap-ldap"
-            execution_id: str
+            execution_id: str = ""
             records_processed: int = 0
             streams_discovered: int = 0
             duration_seconds: float = 0.0
-
-            def __init__(
-                self,
-                event_type: str,
-                aggregate_id: str,
-                execution_id: str,
-                records_processed: int = 0,
-                streams_discovered: int = 0,
-                duration_seconds: float = 0.0,
-                **kwargs: t.GeneralValueType,
-            ) -> None:
-                """Initialize with execution data."""
-                super().__init__(
-                    event_type=event_type,
-                    aggregate_id=aggregate_id,
-                    data={
-                        "records_processed": records_processed,
-                        "streams_discovered": streams_discovered,
-                        "duration_seconds": duration_seconds,
-                    },
-                    **kwargs,
-                )
-                self.execution_id = execution_id
-                self.records_processed = records_processed
-                self.streams_discovered = streams_discovered
-                self.duration_seconds = duration_seconds
 
             @property
             def records_extracted(self) -> int:
@@ -205,11 +142,9 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
 
 # Runtime alias for simplified usage
-m = FlextMeltanoTapLdapModels
-m_tap_ldap = FlextMeltanoTapLdapModels
+m: type[FlextMeltanoTapLdapModels] = FlextMeltanoTapLdapModels
 
 __all__ = [
     "FlextMeltanoTapLdapModels",
     "m",
-    "m_tap_ldap",
 ]

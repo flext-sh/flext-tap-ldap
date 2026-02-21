@@ -15,9 +15,10 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from flext_core import FlextTypes as t
 from flext_ldap import FlextLdapProtocols
 from flext_meltano import FlextMeltanoModels as m, FlextMeltanoProtocols
+
+from flext_tap_ldap.typings import t
 
 
 class FlextMeltanoTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):

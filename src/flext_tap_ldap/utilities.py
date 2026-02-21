@@ -18,14 +18,14 @@ from flext_core import (
     FlextExceptions,
     FlextLogger,
     FlextResult,
-    FlextTypes as t,
+    t,
 )
-from flext_core.utilities import u_core
+from flext_core.utilities import FlextUtilities
 
 from flext_tap_ldap.constants import FlextMeltanoTapLdapConstants as c
 
 
-class FlextMeltanoTapLdapUtilities(u_core):
+class FlextMeltanoTapLdapUtilities(FlextUtilities):
     """Unified LDAP tap utilities class extending u classes.
 
     Provides complete LDAP tap utilities with nested classes for:
@@ -46,7 +46,7 @@ class FlextMeltanoTapLdapUtilities(u_core):
             """Initialize FlextMeltanoTapLdapUtilities service."""
             super().__init__()
             self._container = FlextContainer.get_global()
-            self.logger = FlextLogger(__name__)
+            self._logger = FlextLogger(__name__)
 
         def execute(self) -> FlextResult[dict[str, t.GeneralValueType]]:
             """Execute the main domain service operation.
@@ -71,7 +71,7 @@ class FlextMeltanoTapLdapUtilities(u_core):
         @property
         def logger(self) -> FlextLogger:
             """Get logger instance."""
-            return self.logger
+            return self._logger
 
         @property
         def container(self) -> FlextContainer:
@@ -87,10 +87,10 @@ class FlextMeltanoTapLdapUtilities(u_core):
                 host: str | None = None,
                 port: int | None = None,
                 base_dn: str | None = None,
-                **kwargs: object,
+                **kwargs: t.MetadataAttributeValue,
             ) -> FlextExceptions.ConnectionError:
                 """Create LDAP connection errors with context."""
-                context = kwargs.copy()
+                context: dict[str, t.MetadataAttributeValue] = dict(kwargs)
                 if host is not None:
                     context["host"] = host
                 if port is not None:
@@ -104,10 +104,10 @@ class FlextMeltanoTapLdapUtilities(u_core):
             def create_bind_error(
                 message: str = "LDAP bind failed",
                 bind_dn: str | None = None,
-                **kwargs: object,
+                **kwargs: t.MetadataAttributeValue,
             ) -> FlextExceptions.AuthenticationError:
                 """Create LDAP bind/authentication errors with context."""
-                context = kwargs.copy()
+                context: dict[str, t.MetadataAttributeValue] = dict(kwargs)
                 if bind_dn is not None:
                     context["bind_dn"] = bind_dn
 
@@ -118,10 +118,10 @@ class FlextMeltanoTapLdapUtilities(u_core):
                 message: str = "LDAP search failed",
                 base_dn: str | None = None,
                 filter_str: str | None = None,
-                **kwargs: object,
+                **kwargs: t.MetadataAttributeValue,
             ) -> FlextExceptions.OperationError:
                 """Create LDAP search errors with context."""
-                context = kwargs.copy()
+                context: dict[str, t.MetadataAttributeValue] = dict(kwargs)
                 if base_dn is not None:
                     context["base_dn"] = base_dn
                 if filter_str is not None:
@@ -134,10 +134,10 @@ class FlextMeltanoTapLdapUtilities(u_core):
                 message: str = "Stream processing failed",
                 stream_name: str | None = None,
                 dn: str | None = None,
-                **kwargs: object,
+                **kwargs: t.MetadataAttributeValue,
             ) -> FlextExceptions.OperationError:
                 """Create stream processing errors with stream context."""
-                context = kwargs.copy()
+                context: dict[str, t.MetadataAttributeValue] = dict(kwargs)
                 if stream_name is not None:
                     context["stream_name"] = stream_name
                 if dn is not None:
@@ -149,10 +149,10 @@ class FlextMeltanoTapLdapUtilities(u_core):
             def create_configuration_error(
                 message: str = "Configuration validation failed",
                 config_section: str | None = None,
-                **kwargs: object,
+                **kwargs: t.MetadataAttributeValue,
             ) -> FlextExceptions.ConfigurationError:
                 """Create configuration errors with section context."""
-                context = kwargs.copy()
+                context: dict[str, t.MetadataAttributeValue] = dict(kwargs)
                 if config_section is not None:
                     context["config_section"] = config_section
 
@@ -252,7 +252,7 @@ class FlextMeltanoTapLdapUtilities(u_core):
 
 
 # Runtime alias for simplified usage
-u = FlextMeltanoTapLdapUtilities
+u: type[FlextMeltanoTapLdapUtilities] = FlextMeltanoTapLdapUtilities
 
 __all__ = [
     "FlextMeltanoTapLdapUtilities",

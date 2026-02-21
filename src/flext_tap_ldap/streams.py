@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from itertools import starmap
 from typing import override
 
-from flext_core import FlextLogger, FlextResult, FlextTypes as t
+from flext_core import FlextLogger, t
 from flext_meltano import FlextMeltanoStream as Stream
 from flext_meltano.typings import t as t_meltano
 
@@ -141,7 +141,7 @@ class FlextTapLdapStreams:
             schema: dict[str, t.GeneralValueType] | None = None,
         ) -> None:
             """Initialize the LDAP stream."""
-            super().__init__(tap, name=name, schema=schema)
+            super().__init__(tap, name=name, schema=schema)  # type: ignore[arg-type]
             self.tap = tap
 
             # Create LDAP client for directory operations
@@ -151,25 +151,32 @@ class FlextTapLdapStreams:
             """Create LDAP client from tap configuration."""
             self.client: LDAPClient | None = None
             try:
-                connection_config: dict[str, t.GeneralValueType] = self.tap.config.get(
-                    "connection",
-                    {},
+                raw_connection = self.tap.config.get_config("connection", {})
+                connection_config: dict[str, t.GeneralValueType] = (
+                    raw_connection if isinstance(raw_connection, dict) else {}
                 )
+                host_val = connection_config.get("host", "localhost")
+                port_val = connection_config.get("port", 389)
+                bind_dn_val = connection_config.get("bind_dn")
+                bind_pw_val = connection_config.get("bind_password")
+                timeout_val = connection_config.get("timeout_seconds", 30)
+                page_size_raw = self.tap.config.get_config("page_size", 1000)
                 self.client = LDAPClient(
-                    host=str(connection_config.get("host", "localhost")),
-                    port=int(connection_config.get("port", 389)),
-                    bind_dn=connection_config.get("bind_dn")
-                    if isinstance(connection_config.get("bind_dn"), str)
-                    else None,
-                    password=connection_config.get("bind_password")
-                    if isinstance(connection_config.get("bind_password"), str)
-                    else None,
+                    host=str(host_val),
+                    port=int(port_val) if isinstance(port_val, (int, str)) else 389,
+                    bind_dn=str(bind_dn_val) if isinstance(bind_dn_val, str) else None,
+                    password=str(bind_pw_val) if isinstance(bind_pw_val, str) else None,
                     use_ssl=bool(connection_config.get("use_ssl")),
-                    timeout=int(connection_config.get("timeout_seconds", 30)),
-                    page_size=int(self.tap.config.get("page_size", 1000)),
+                    timeout=int(timeout_val)
+                    if isinstance(timeout_val, (int, str))
+                    else 30,
+                    page_size=int(page_size_raw)
+                    if isinstance(page_size_raw, (int, str))
+                    else 1000,
                 )
             except Exception as e:
-                logger.warning("Failed to create LDAP client: %s", e)
+                err_msg = str(e)
+                logger.warning("Failed to create LDAP client: %s", err_msg)
                 self.client = None
 
         def get_records(
@@ -196,13 +203,12 @@ class FlextTapLdapStreams:
             try:
                 # Use base DN from config if not specified
                 if base_dn is None:
+                    raw_conn = self.tap.config.get_config("connection", {})
                     connection_config: dict[str, t.GeneralValueType] = (
-                        self.tap.config.get(
-                            "connection",
-                            {},
-                        )
+                        raw_conn if isinstance(raw_conn, dict) else {}
                     )
-                    base_dn = connection_config.get("base_dn", "")
+                    raw_base_dn = connection_config.get("base_dn", "")
+                    base_dn = str(raw_base_dn) if isinstance(raw_base_dn, str) else ""
 
                 results = self.client.search(
                     base_dn=base_dn or "",
@@ -218,7 +224,8 @@ class FlextTapLdapStreams:
                 return results
 
             except Exception as e:
-                logger.warning("LDAP search failed: %s, using fallback data", e)
+                err_msg = str(e)
+                logger.warning("LDAP search failed: %s, using fallback data", err_msg)
                 return self._get_fallback_data()
 
         def _get_fallback_data(
@@ -230,9 +237,23 @@ class FlextTapLdapStreams:
     class UsersStream(LDAPBaseStream):
         """Stream for LDAP user entries."""
 
-        # Class-level attributes for Singer protocol
-        replication_method = "INCREMENTAL"
-        replication_key = "modifyTimestamp"
+        @property
+        def replication_method(self) -> str:  # type: ignore[override, misc]
+            """Get replication method."""
+            return "INCREMENTAL"
+
+        @replication_method.setter
+        def replication_method(self, value: str) -> None:  # type: ignore[override]
+            """Set replication method (no-op, always INCREMENTAL)."""
+
+        @property
+        def replication_key(self) -> str:  # type: ignore[override, misc]
+            """Get replication key."""
+            return "modifyTimestamp"
+
+        @replication_key.setter
+        def replication_key(self, value: str | None) -> None:  # type: ignore[override]
+            """Set replication key (no-op, always modifyTimestamp)."""
 
         @override
         def __init__(self, tap: TapProtocol) -> None:
@@ -279,9 +300,14 @@ class FlextTapLdapStreams:
             _context = context  # Acknowledge the parameter
             logger.info("Extracting LDAP users")
 
-            user_filter = self.tap.config.get(
+            raw_filter = self.tap.config.get_config(
                 "user_filter",
                 "(objectClass=inetOrgPerson)",
+            )
+            user_filter = (
+                str(raw_filter)
+                if isinstance(raw_filter, str)
+                else "(objectClass=inetOrgPerson)"
             )
             user_attributes = [
                 "uid",
@@ -322,9 +348,23 @@ class FlextTapLdapStreams:
     class GroupsStream(LDAPBaseStream):
         """Stream for LDAP group entries."""
 
-        # Class-level attributes for Singer protocol
-        replication_method = "INCREMENTAL"
-        replication_key = "modifyTimestamp"
+        @property
+        def replication_method(self) -> str:  # type: ignore[override, misc]
+            """Get replication method."""
+            return "INCREMENTAL"
+
+        @replication_method.setter
+        def replication_method(self, value: str) -> None:  # type: ignore[override]
+            """Set replication method (no-op, always INCREMENTAL)."""
+
+        @property
+        def replication_key(self) -> str:  # type: ignore[override, misc]
+            """Get replication key."""
+            return "modifyTimestamp"
+
+        @replication_key.setter
+        def replication_key(self, value: str | None) -> None:  # type: ignore[override]
+            """Set replication key (no-op, always modifyTimestamp)."""
 
         @override
         def __init__(self, tap: TapProtocol) -> None:
@@ -378,9 +418,14 @@ class FlextTapLdapStreams:
             _context = context  # Acknowledge the parameter
             logger.info("Extracting LDAP groups")
 
-            group_filter = self.tap.config.get(
+            raw_group_filter = self.tap.config.get_config(
                 "group_filter",
                 "(objectClass=groupOfNames)",
+            )
+            group_filter = (
+                str(raw_group_filter)
+                if isinstance(raw_group_filter, str)
+                else "(objectClass=groupOfNames)"
             )
             group_attributes = [
                 "cn",
@@ -394,7 +439,7 @@ class FlextTapLdapStreams:
                 "modifyTimestamp",
             ]
 
-            results: FlextResult[object] = self._search_ldap(
+            results: list[dict[str, t.GeneralValueType]] = self._search_ldap(
                 group_filter,
                 attributes=group_attributes,
             )
@@ -457,7 +502,7 @@ class FlextTapLdapStreams:
                 "modifyTimestamp",
             ]
 
-            results: FlextResult[object] = self._search_ldap(
+            results: list[dict[str, t.GeneralValueType]] = self._search_ldap(
                 ou_filter,
                 attributes=ou_attributes,
             )
