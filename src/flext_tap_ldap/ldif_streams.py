@@ -9,7 +9,7 @@ from typing import override
 from flext_core import FlextLogger
 from flext_ldap import FlextLdapConnection
 from flext_ldif import FlextLdif
-from flext_ldif.models import m as m_ldif
+from flext_ldif.models import m
 from flext_meltano import FlextMeltanoStream as Stream
 from flext_meltano.typings import t as t_meltano
 
@@ -101,7 +101,7 @@ class FlextTapLdapLdifStreams:
                 result = self._ldif_api.parse(content)
                 if result.is_success and result.data:
                     for entry in result.data:
-                        if isinstance(entry, m_ldif.Ldif.Entry):
+                        if isinstance(entry, m.Ldif.Entry):
                             yield self._convert_entry_to_record(entry)
                 else:
                     logger.error(
@@ -112,7 +112,7 @@ class FlextTapLdapLdifStreams:
 
         def _convert_entry_to_record(
             self,
-            flext_entry: m_ldif.Ldif.Entry,
+            flext_entry: m.Ldif.Entry,
         ) -> dict[str, t.GeneralValueType]:
             """Convert flext-ldif entry to Singer record."""
             # Guard against None dn/attributes (RFC violation entries)
@@ -263,7 +263,7 @@ class FlextTapLdapLdifStreams:
                     entry_types: dict[str, int] = {}
                     object_classes: dict[str, int] = {}
                     for entry in result.data:
-                        if not isinstance(entry, m_ldif.Ldif.Entry):
+                        if not isinstance(entry, m.Ldif.Entry):
                             continue
                         if entry.attributes is None:
                             continue
