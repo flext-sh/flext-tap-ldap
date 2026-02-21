@@ -175,7 +175,8 @@ run.source = [ "src/flext_tap_ldap" ]
 
 [tool.pyrefly]
 project-excludes = [ "**/*_pb2*.py", "**/*_pb2_grpc*.py" ]
-search-path = [ "../typings", "../typings/generated", "src", "tests", "examples", "scripts" ]
+# Project root first so "tests" package and relative imports in tests/ resolve
+search-path = [ ".", "../typings", "../typings/generated", "src", "tests", "examples", "scripts" ]
 
 [[tool.pyrefly.sub-config]]
 errors.bad-argument-type = false
