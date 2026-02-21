@@ -10,10 +10,9 @@ from flext_core import FlextLogger
 from flext_ldap import FlextLdapConnection
 from flext_ldif import FlextLdif
 from flext_ldif.models import m
-from flext_meltano import FlextMeltanoStream as Stream
+from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
 from flext_meltano.typings import t as t_meltano
 
-from flext_tap_ldap.protocols import TapProtocol
 from flext_tap_ldap.typings import t
 
 logger = FlextLogger(__name__)
@@ -32,7 +31,7 @@ class FlextTapLdapLdifStreams:
         """LDIF stream using flext-ldif for ALL processing."""
 
         @override
-        def __init__(self, tap: TapProtocol) -> None:
+        def __init__(self, tap: Tap) -> None:
             """Initialize LDIF stream with library delegation."""
             # Set required attributes BEFORE calling super().__init__()
             self.name = "ldif_entries"
@@ -66,7 +65,7 @@ class FlextTapLdapLdifStreams:
                     description="Entry attributes",
                 ),
             ).to_dict()
-            super().__init__(tap, name=self.name, schema=schema)  # type: ignore[arg-type]
+            super().__init__(tap, name=self.name, schema=schema)
 
         def get_records(
             self,
@@ -75,11 +74,11 @@ class FlextTapLdapLdifStreams:
             """Get LDIF records using flext-ldif processing."""
             logger.info("Processing LDIF files using flext-ldif library")
             # Get LDIF files from config
-            raw_files = self.tap.config.get_config("ldif_files", [])
+            raw_files = self.config.get("ldif_files", [])
             ldif_files: list[t.GeneralValueType] = (
                 list(raw_files) if isinstance(raw_files, list) else []
             )
-            ldif_directory = self.tap.config.get_config("ldif_directory")
+            ldif_directory = self.config.get("ldif_directory")
             if ldif_files:
                 for ldif_file in ldif_files:
                     yield from self._process_ldif_file(str(ldif_file))
@@ -149,7 +148,7 @@ class FlextTapLdapLdifStreams:
         """LDIF analysis stream using flext-ldif for ALL analysis."""
 
         @override
-        def __init__(self, tap: TapProtocol) -> None:
+        def __init__(self, tap: Tap) -> None:
             """Initialize LDIF analysis stream with library delegation."""
             # Set required attributes BEFORE calling super().__init__()
             self.name = "ldif_analysis"
@@ -183,7 +182,7 @@ class FlextTapLdapLdifStreams:
                     description="Count by object class",
                 ),
             ).to_dict()
-            super().__init__(tap, name=self.name, schema=schema)  # type: ignore[arg-type]
+            super().__init__(tap, name=self.name, schema=schema)
 
         def get_records(
             self,
@@ -192,11 +191,11 @@ class FlextTapLdapLdifStreams:
             """Get analysis records using flext-ldif analysis capabilities."""
             logger.info("Generating LDIF analysis using flext-ldif library")
             # Get LDIF files from config
-            raw_files = self.tap.config.get_config("ldif_files", [])
+            raw_files = self.config.get("ldif_files", [])
             ldif_files: list[t.GeneralValueType] = (
                 list(raw_files) if isinstance(raw_files, list) else []
             )
-            ldif_directory = self.tap.config.get_config("ldif_directory")
+            ldif_directory = self.config.get("ldif_directory")
             # Delegate ALL analysis to flext-ldif library
             try:
                 total_entries = 0

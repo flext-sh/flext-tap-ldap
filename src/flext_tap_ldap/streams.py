@@ -16,11 +16,10 @@ from itertools import starmap
 from typing import override
 
 from flext_core import FlextLogger, t
-from flext_meltano import FlextMeltanoStream as Stream
+from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
 from flext_meltano.typings import t as t_meltano
 
 from flext_tap_ldap.client import LDAPClient
-from flext_tap_ldap.protocols import TapProtocol
 
 logger = FlextLogger(__name__)
 
@@ -136,12 +135,12 @@ class FlextTapLdapStreams:
         @override
         def __init__(
             self,
-            tap: TapProtocol,
+            tap: Tap,
             name: str | None = None,
             schema: dict[str, t.GeneralValueType] | None = None,
         ) -> None:
             """Initialize the LDAP stream."""
-            super().__init__(tap, name=name, schema=schema)  # type: ignore[arg-type]
+            super().__init__(tap, name=name, schema=schema)
             self.tap = tap
 
             # Create LDAP client for directory operations
@@ -151,7 +150,7 @@ class FlextTapLdapStreams:
             """Create LDAP client from tap configuration."""
             self.client: LDAPClient | None = None
             try:
-                raw_connection = self.tap.config.get_config("connection", {})
+                raw_connection = self.config.get("connection", {})
                 connection_config: dict[str, t.GeneralValueType] = (
                     raw_connection if isinstance(raw_connection, dict) else {}
                 )
@@ -160,7 +159,7 @@ class FlextTapLdapStreams:
                 bind_dn_val = connection_config.get("bind_dn")
                 bind_pw_val = connection_config.get("bind_password")
                 timeout_val = connection_config.get("timeout_seconds", 30)
-                page_size_raw = self.tap.config.get_config("page_size", 1000)
+                page_size_raw = self.config.get("page_size", 1000)
                 self.client = LDAPClient(
                     host=str(host_val),
                     port=int(port_val) if isinstance(port_val, (int, str)) else 389,
@@ -203,7 +202,7 @@ class FlextTapLdapStreams:
             try:
                 # Use base DN from config if not specified
                 if base_dn is None:
-                    raw_conn = self.tap.config.get_config("connection", {})
+                    raw_conn = self.config.get("connection", {})
                     connection_config: dict[str, t.GeneralValueType] = (
                         raw_conn if isinstance(raw_conn, dict) else {}
                     )
@@ -237,26 +236,8 @@ class FlextTapLdapStreams:
     class UsersStream(LDAPBaseStream):
         """Stream for LDAP user entries."""
 
-        @property
-        def replication_method(self) -> str:  # type: ignore[override, misc]
-            """Get replication method."""
-            return "INCREMENTAL"
-
-        @replication_method.setter
-        def replication_method(self, value: str) -> None:  # type: ignore[override]
-            """Set replication method (no-op, always INCREMENTAL)."""
-
-        @property
-        def replication_key(self) -> str:  # type: ignore[override, misc]
-            """Get replication key."""
-            return "modifyTimestamp"
-
-        @replication_key.setter
-        def replication_key(self, value: str | None) -> None:  # type: ignore[override]
-            """Set replication key (no-op, always modifyTimestamp)."""
-
         @override
-        def __init__(self, tap: TapProtocol) -> None:
+        def __init__(self, tap: Tap) -> None:
             """Initialize users stream."""
             name = "users"
             schema: dict[str, t.GeneralValueType] = (
@@ -290,6 +271,9 @@ class FlextTapLdapStreams:
 
             super().__init__(tap, name=name, schema=schema)
             self.primary_keys = ["dn"]
+            # Set replication via Singer SDK's built-in mechanism
+            self.forced_replication_method = "INCREMENTAL"
+            self.replication_key = "modifyTimestamp"
 
         def get_records(
             self,
@@ -300,7 +284,7 @@ class FlextTapLdapStreams:
             _context = context  # Acknowledge the parameter
             logger.info("Extracting LDAP users")
 
-            raw_filter = self.tap.config.get_config(
+            raw_filter = self.config.get(
                 "user_filter",
                 "(objectClass=inetOrgPerson)",
             )
@@ -348,26 +332,8 @@ class FlextTapLdapStreams:
     class GroupsStream(LDAPBaseStream):
         """Stream for LDAP group entries."""
 
-        @property
-        def replication_method(self) -> str:  # type: ignore[override, misc]
-            """Get replication method."""
-            return "INCREMENTAL"
-
-        @replication_method.setter
-        def replication_method(self, value: str) -> None:  # type: ignore[override]
-            """Set replication method (no-op, always INCREMENTAL)."""
-
-        @property
-        def replication_key(self) -> str:  # type: ignore[override, misc]
-            """Get replication key."""
-            return "modifyTimestamp"
-
-        @replication_key.setter
-        def replication_key(self, value: str | None) -> None:  # type: ignore[override]
-            """Set replication key (no-op, always modifyTimestamp)."""
-
         @override
-        def __init__(self, tap: TapProtocol) -> None:
+        def __init__(self, tap: Tap) -> None:
             """Initialize groups stream."""
             name = "groups"
             schema: dict[str, t.GeneralValueType] = (
@@ -408,6 +374,9 @@ class FlextTapLdapStreams:
 
             super().__init__(tap, name=name, schema=schema)
             self.primary_keys = ["dn"]
+            # Set replication via Singer SDK's built-in mechanism
+            self.forced_replication_method = "INCREMENTAL"
+            self.replication_key = "modifyTimestamp"
 
         def get_records(
             self,
@@ -418,7 +387,7 @@ class FlextTapLdapStreams:
             _context = context  # Acknowledge the parameter
             logger.info("Extracting LDAP groups")
 
-            raw_group_filter = self.tap.config.get_config(
+            raw_group_filter = self.config.get(
                 "group_filter",
                 "(objectClass=groupOfNames)",
             )
@@ -456,7 +425,7 @@ class FlextTapLdapStreams:
         """Stream for LDAP organizational unit entries."""
 
         @override
-        def __init__(self, tap: TapProtocol) -> None:
+        def __init__(self, tap: Tap) -> None:
             """Initialize organizational units stream."""
             name = "organizational_units"
             schema: dict[str, t.GeneralValueType] = (
@@ -519,7 +488,7 @@ class FlextTapLdapStreams:
         """Stream for LDAP schema information."""
 
         @override
-        def __init__(self, tap: TapProtocol) -> None:
+        def __init__(self, tap: Tap) -> None:
             """Initialize schema stream."""
             name = "schema"
             schema: dict[str, t.GeneralValueType] = (
@@ -620,7 +589,7 @@ class FlextTapLdapStreams:
         @override
         def __init__(
             self,
-            tap: TapProtocol,
+            tap: Tap,
             params: FlextTapLdapStreams.CustomStreamParams,
         ) -> None:
             """Initialize custom stream with parameters."""

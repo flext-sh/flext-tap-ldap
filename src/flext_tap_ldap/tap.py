@@ -104,10 +104,10 @@ class FlextTapLdapTap(Tap):
         # Standard LDAP streams (always available)
         streams.extend(
             [
-                FlextTapLdapStreams.UsersStream(self),  # type: ignore[arg-type]
-                FlextTapLdapStreams.GroupsStream(self),  # type: ignore[arg-type]
-                FlextTapLdapStreams.OrganizationalUnitsStream(self),  # type: ignore[arg-type]
-                FlextTapLdapStreams.SchemaStream(self),  # type: ignore[arg-type]
+                FlextTapLdapStreams.UsersStream(self),
+                FlextTapLdapStreams.GroupsStream(self),
+                FlextTapLdapStreams.OrganizationalUnitsStream(self),
+                FlextTapLdapStreams.SchemaStream(self),
             ],
         )
 
@@ -115,8 +115,8 @@ class FlextTapLdapTap(Tap):
         if self.config.get("enable_ldif_streams", False):
             streams.extend(
                 [
-                    FlextTapLdapLdifStreams.LdifStream(self),  # type: ignore[arg-type]
-                    FlextTapLdapLdifStreams.LdifAnalysisStream(self),  # type: ignore[arg-type]
+                    FlextTapLdapLdifStreams.LdifStream(self),
+                    FlextTapLdapLdifStreams.LdifAnalysisStream(self),
                 ],
             )
 
@@ -145,7 +145,7 @@ class FlextTapLdapTap(Tap):
                 else None,
                 replication_key=str(raw_rk) if isinstance(raw_rk, str) else None,
             )
-            stream = FlextTapLdapStreams.CustomStream(tap=self, params=params)  # type: ignore[arg-type]
+            stream = FlextTapLdapStreams.CustomStream(tap=self, params=params)
             streams.append(stream)
 
         return streams
