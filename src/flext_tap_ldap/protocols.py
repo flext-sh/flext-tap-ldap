@@ -17,7 +17,7 @@ from typing import Protocol, runtime_checkable
 
 from flext_core import FlextTypes as t
 from flext_ldap import FlextLdapProtocols
-from flext_meltano import FlextMeltanoProtocols
+from flext_meltano import FlextMeltanoModels as m, FlextMeltanoProtocols
 
 
 class FlextMeltanoTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
@@ -144,7 +144,7 @@ class FlextMeltanoTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 self,
                 base_dn: str,
                 config: dict[str, t.JsonValue],
-            ) -> FlextMeltanoProtocols.Result[list[dict[str, t.JsonValue]]]:
+            ) -> FlextMeltanoProtocols.Result[m.Meltano.SingerCatalog]:
                 """Generate Singer streams from LDAP directory structure."""
                 ...
 
@@ -153,7 +153,7 @@ class FlextMeltanoTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 stream_name: str,
                 base_dn: str,
                 state: dict[str, t.JsonValue],
-            ) -> FlextMeltanoProtocols.Result[dict[str, t.JsonValue]]:
+            ) -> FlextMeltanoProtocols.Result[m.Meltano.SingerStateMessage]:
                 """Sync Singer stream from LDAP entries."""
                 ...
 
