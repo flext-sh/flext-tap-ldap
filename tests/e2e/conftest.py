@@ -13,8 +13,8 @@ from collections.abc import Generator, Iterator
 from pathlib import Path
 
 import pytest
-from flext_tap_ldap import t
 from flext_core import FlextLogger
+from flext_tap_ldap import t
 from flext_tests import FlextTestsDocker
 from ldap3 import ALL, Connection, Server
 
