@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from flext_tap_ldap import FlextTapLdapModels
+from flext_tap_ldap import m
 
 
 class TestTapExecutionStartedEvent:
@@ -17,7 +17,9 @@ class TestTapExecutionStartedEvent:
 
     def test_event_creation(self) -> None:
         """Test creating tap execution started event."""
-        event = FlextTapLdapModels.TapExecutionStartedEvent(
+        event = m.TapLdap.TapExecutionStartedEvent(
+            event_type="tap_started",
+            aggregate_id="tap-ldap-001",
             execution_id="exec-123",
             config_hash="hash-abc",
         )
@@ -29,7 +31,9 @@ class TestTapExecutionStartedEvent:
 
     def test_event_defaults(self) -> None:
         """Test event default values."""
-        event = FlextTapLdapModels.TapExecutionStartedEvent(
+        event = m.TapLdap.TapExecutionStartedEvent(
+            event_type="tap_started",
+            aggregate_id="tap-ldap-002",
             execution_id="exec-456",
         )
 
@@ -43,7 +47,9 @@ class TestTapExecutionCompletedEvent:
 
     def test_event_creation(self) -> None:
         """Test creating tap execution completed event."""
-        event = FlextTapLdapModels.TapExecutionCompletedEvent(
+        event = m.TapLdap.TapExecutionCompletedEvent(
+            event_type="tap_completed",
+            aggregate_id="tap-ldap-003",
             execution_id="exec-789",
             records_processed=100,
             streams_discovered=4,
@@ -57,7 +63,9 @@ class TestTapExecutionCompletedEvent:
 
     def test_event_defaults(self) -> None:
         """Test event default values."""
-        event = FlextTapLdapModels.TapExecutionCompletedEvent(
+        event = m.TapLdap.TapExecutionCompletedEvent(
+            event_type="tap_completed",
+            aggregate_id="tap-ldap-004",
             execution_id="exec-000",
         )
 
@@ -71,7 +79,9 @@ class TestStreamDiscoveredEvent:
 
     def test_event_creation(self) -> None:
         """Test creating stream discovered event."""
-        event = FlextTapLdapModels.StreamDiscoveredEvent(
+        event = m.TapLdap.StreamDiscoveredEvent(
+            event_type="stream_discovered",
+            aggregate_id="tap-ldap-005",
             stream_name="users",
             stream_key_properties=["dn"],
             bookmark_key="modifyTimestamp",
@@ -83,7 +93,9 @@ class TestStreamDiscoveredEvent:
 
     def test_event_defaults(self) -> None:
         """Test event default values."""
-        event = FlextTapLdapModels.StreamDiscoveredEvent(
+        event = m.TapLdap.StreamDiscoveredEvent(
+            event_type="stream_discovered",
+            aggregate_id="tap-ldap-006",
             stream_name="groups",
         )
 
@@ -96,7 +108,9 @@ class TestRecordExtractedEvent:
 
     def test_event_creation(self) -> None:
         """Test creating record extracted event."""
-        event = FlextTapLdapModels.RecordExtractedEvent(
+        event = m.TapLdap.RecordExtractedEvent(
+            event_type="record_extracted",
+            aggregate_id="tap-ldap-007",
             stream_name="users",
             record_id="uid=jdoe,ou=users,dc=example,dc=com",
             record_size_bytes=256,
@@ -108,7 +122,9 @@ class TestRecordExtractedEvent:
 
     def test_event_defaults(self) -> None:
         """Test event default values."""
-        event = FlextTapLdapModels.RecordExtractedEvent(
+        event = m.TapLdap.RecordExtractedEvent(
+            event_type="record_extracted",
+            aggregate_id="tap-ldap-008",
             stream_name="groups",
         )
 
@@ -121,22 +137,22 @@ class TestConnectionTestedEvent:
 
     def test_event_creation_success(self) -> None:
         """Test creating successful connection tested event."""
-        event = FlextTapLdapModels.ConnectionTestedEvent(
+        event = m.TapLdap.ConnectionTestedEvent(
             success=True,
             server_uri="ldap://localhost:389",
         )
 
-        assert event.is_success is True
+        assert event.success is True
         assert event.server_uri == "ldap://localhost:389"
         assert event.error_message is None
 
     def test_event_creation_failure(self) -> None:
         """Test creating failed connection tested event."""
-        event = FlextTapLdapModels.ConnectionTestedEvent(
+        event = m.TapLdap.ConnectionTestedEvent(
             success=False,
             server_uri="ldap://invalid:389",
             error_message="Connection refused",
         )
 
-        assert event.is_success is False
+        assert event.success is False
         assert event.error_message == "Connection refused"
