@@ -14,7 +14,7 @@ from asyncio import get_running_loop, new_event_loop, set_event_loop
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
-from flext_core import FlextLogger, FlextRuntime, r, t
+from flext_core import FlextLogger, r, t, u, x
 from flext_ldap import (
     FlextLdap,
     FlextLdapConnection,
@@ -89,12 +89,16 @@ class FlextTapLdapClient:
         ) -> FlextTapLdapClient.LDAPClientConfig:
             """Create config from convenience keyword arguments."""
             raw_host = convenience_kwargs.get("host")
-            if not u.Guards._is_str(raw_host) or not raw_host:
-                msg = "Either 'config' or valid string 'host' must be provided"
-                raise ValueError(msg)
+            host: str
+            match raw_host:
+                case str() as host_value if host_value:
+                    host = host_value
+                case _:
+                    msg = "Either 'config' or valid string 'host' must be provided"
+                    raise ValueError(msg)
 
             return FlextTapLdapClient.LDAPClientConfig(
-                host=raw_host,
+                host=host,
                 port=self._coerce_int(convenience_kwargs.get("port", 389), 389),
                 bind_dn=self._coerce_str_opt(convenience_kwargs.get("bind_dn")),
                 password=self._coerce_str_opt(convenience_kwargs.get("password")),
@@ -221,7 +225,7 @@ class FlextTapLdapClient:
                 return entry_dict
             # It's already a dict[str, t.GeneralValueType] (from mock) - ensure proper type conversion
             if entry_data:
-                if u.Guards._is_dict(entry_data):
+                if u.is_dict_like(entry_data):
                     return entry_data
                 # Convert to dict[str, t.GeneralValueType] if it's not already
                 return (
@@ -256,7 +260,7 @@ class FlextTapLdapClient:
                     break
 
                 narrowed_entry: m.Ldif.Entry | Mapping[str, t.GeneralValueType] | None
-                if x.is_base_model(entry_data) or u.Guards._is_dict(entry_data):
+                if x.is_base_model(entry_data) or u.is_dict_like(entry_data):
                     narrowed_entry = entry_data
                 else:
                     narrowed_entry = None
@@ -375,7 +379,7 @@ class FlextTapLdapClient:
             """Process Oracle-specific LDAP entries for testing convenience."""
             raw_attrs = entry.get("attributes", {})
             attributes: dict[str, t.GeneralValueType] = (
-                raw_attrs if u.Guards._is_dict(raw_attrs) else {}
+                raw_attrs if u.is_dict_like(raw_attrs) else {}
             )
             # Handle Oracle password attributes
             if "orclPassword" in attributes:
@@ -438,7 +442,7 @@ class FlextTapLdapClient:
             """
             results: list[Mapping[str, t.GeneralValueType]] = []
             for entry in search_result:
-                if u.Guards._is_dict(entry):
+                if u.is_dict_like(entry):
                     entry_dict: Mapping[str, t.GeneralValueType] = entry
                 else:
                     entry_dict = self._convert_entry_to_dict(entry)

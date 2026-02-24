@@ -24,11 +24,13 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
         """Tap LDAP namespace for cross-project access."""
 
         def __init__(self) -> None:
+            """Initialize TapLdap with global container and logger."""
             super().__init__()
             self._container = FlextContainer.get_global()
             self._logger = FlextLogger(__name__)
 
         def execute(self) -> FlextResult[ServiceStatus]:
+            """Execute tap LDAP utilities and return operational status."""
             return FlextResult[ServiceStatus].ok({
                 "status": "operational",
                 "service": "flext-tap-ldap-utilities",
@@ -44,10 +46,12 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
 
         @property
         def logger(self) -> FlextLogger:
+            """Return the logger instance."""
             return self._logger
 
         @property
         def container(self) -> FlextContainer:
+            """Return the global container instance."""
             return self._container
 
         class ErrorHandling:
@@ -61,6 +65,7 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
                 base_dn: str | None = None,
                 **kwargs: MetadataValue,
             ) -> FlextExceptions.ConnectionError:
+                """Create connection error with context."""
                 context: MetadataContext = dict(kwargs)
                 if host is not None:
                     context["host"] = host
@@ -76,6 +81,7 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
                 bind_dn: str | None = None,
                 **kwargs: MetadataValue,
             ) -> FlextExceptions.AuthenticationError:
+                """Create bind error with context."""
                 context: MetadataContext = dict(kwargs)
                 if bind_dn is not None:
                     context["bind_dn"] = bind_dn
@@ -88,6 +94,7 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
                 filter_str: str | None = None,
                 **kwargs: MetadataValue,
             ) -> FlextExceptions.OperationError:
+                """Create search error with context."""
                 context: MetadataContext = dict(kwargs)
                 if base_dn is not None:
                     context["base_dn"] = base_dn
@@ -105,6 +112,7 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
                 stream_prefix: str = "ldap",
                 replication_method: str = "FULL_TABLE",
             ) -> FlextResult[StreamInfo]:
+                """Create stream info from LDAP entry."""
                 object_classes = attributes.get("objectClass", [])
                 if not object_classes:
                     return FlextResult[StreamInfo].fail("Entry has no objectClass")
@@ -126,6 +134,7 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
 
             @staticmethod
             def validate_ldap_config(config: LdapConfig) -> FlextResult[LdapConfig]:
+                """Validate LDAP configuration."""
                 config_map = dict(config)
                 required_fields = ["host", "base_dn"]
                 for field in required_fields:

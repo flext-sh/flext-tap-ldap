@@ -6,7 +6,7 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import override
 
-from flext_core import FlextLogger, FlextRuntime
+from flext_core import FlextLogger, u, x
 from flext_ldap import FlextLdapConnection
 from flext_ldif import FlextLdif
 from flext_ldif.models import m
@@ -203,15 +203,21 @@ class FlextTapLdapLdifStreams:
                 object_classes: dict[str, int] = {}
                 if ldif_files:
                     for ldif_file in ldif_files:
-                        if not u.Guards._is_str(ldif_file):
-                            continue
-                        stats = self._analyze_ldif_file(ldif_file)
+                        match ldif_file:
+                            case str() as ldif_file_value:
+                                pass
+                            case _:
+                                continue
+                        stats = self._analyze_ldif_file(ldif_file_value)
                         total_count = stats.get("total_entries", 0)
-                        if u.Guards._is_int(total_count):
-                            total_entries += total_count
+                        match total_count:
+                            case int() as total_count_value:
+                                total_entries += total_count_value
+                            case _:
+                                pass
                         # Merge counts
                         raw_entry_types = stats.get("entry_types", {})
-                        if u.Guards._is_dict(raw_entry_types):
+                        if u.is_dict_like(raw_entry_types):
                             for entry_type, count in raw_entry_types.items():
                                 if count.__class__ in {int, str}:
                                     entry_types[entry_type] = entry_types.get(
@@ -219,7 +225,7 @@ class FlextTapLdapLdifStreams:
                                         0,
                                     ) + int(count)
                         raw_object_classes = stats.get("object_classes", {})
-                        if u.Guards._is_dict(raw_object_classes):
+                        if u.is_dict_like(raw_object_classes):
                             for obj_class, count in raw_object_classes.items():
                                 if count.__class__ in {int, str}:
                                     object_classes[obj_class] = object_classes.get(
