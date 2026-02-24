@@ -58,7 +58,7 @@ class FlextTapLdapSettings(FlextSettings):
             default=None,
             description="Replication key field",
         )
-        json_schema: dict[str, t.GeneralValueType] | None = Field(
+        json_schema: dict[str, t.JsonValue] | None = Field(
             default=None,
             description="JSON schema for the stream",
         )
@@ -108,7 +108,7 @@ class FlextTapLdapSettings(FlextSettings):
             default=False,
             description="Apply transformation rules to LDIF entries",
         )
-        ldif_transformation_rules: dict[str, t.GeneralValueType] | None = Field(
+        ldif_transformation_rules: dict[str, t.JsonValue] | None = Field(
             default=None,
             description="Transformation rules for LDIF processing",
         )
@@ -267,9 +267,9 @@ class FlextTapLdapSettings(FlextSettings):
         return cls()
 
     @classmethod
-    def create_for_development(cls, **overrides: t.GeneralValueType) -> Self:
+    def create_for_development(cls, **overrides: t.JsonValue) -> Self:
         """Create development configuration instance."""
-        dev_defaults: dict[str, t.GeneralValueType] = {
+        dev_defaults: dict[str, t.JsonValue] = {
             "ldap_host": "localhost",
             "ldap_port": 10389,
             "ldap_use_ssl": False,
@@ -283,9 +283,9 @@ class FlextTapLdapSettings(FlextSettings):
         return cls(**dev_defaults)
 
     @classmethod
-    def create_for_production(cls, **overrides: t.GeneralValueType) -> Self:
+    def create_for_production(cls, **overrides: t.JsonValue) -> Self:
         """Create production configuration instance."""
-        prod_defaults: dict[str, t.GeneralValueType] = {
+        prod_defaults: dict[str, t.JsonValue] = {
             "ldap_use_ssl": True,
             "ldap_timeout": 30,
             "ldap_page_size": 1000,
@@ -297,9 +297,9 @@ class FlextTapLdapSettings(FlextSettings):
         return cls(**prod_defaults)
 
     @classmethod
-    def create_for_testing(cls, **overrides: t.GeneralValueType) -> Self:
+    def create_for_testing(cls, **overrides: t.JsonValue) -> Self:
         """Create testing configuration instance."""
-        test_defaults: dict[str, t.GeneralValueType] = {
+        test_defaults: dict[str, t.JsonValue] = {
             "ldap_host": "test-ldap",
             "ldap_port": 3389,
             "ldap_use_ssl": False,

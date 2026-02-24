@@ -13,6 +13,7 @@ from typing import ClassVar
 
 from flext_core import FlextLogger
 from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
+from pydantic import ConfigDict, TypeAdapter, ValidationError
 
 from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
 from flext_tap_ldap.settings import FlextTapLdapSettings
@@ -20,6 +21,34 @@ from flext_tap_ldap.streams import FlextTapLdapStreams
 from flext_tap_ldap.typings import t
 
 logger = FlextLogger(__name__)
+
+_LIST_ADAPTER = TypeAdapter(list[t.GeneralValueType], config=ConfigDict(strict=True))
+_MAP_ADAPTER = TypeAdapter(
+    dict[str, t.GeneralValueType],
+    config=ConfigDict(strict=True),
+)
+_STR_ADAPTER = TypeAdapter(str, config=ConfigDict(strict=True))
+
+
+def _as_list(value: object) -> list[t.GeneralValueType] | None:
+    try:
+        return _LIST_ADAPTER.validate_python(value)
+    except ValidationError:
+        return None
+
+
+def _as_map(value: object) -> dict[str, t.GeneralValueType] | None:
+    try:
+        return _MAP_ADAPTER.validate_python(value)
+    except ValidationError:
+        return None
+
+
+def _as_str(value: object) -> str | None:
+    try:
+        return _STR_ADAPTER.validate_python(value)
+    except ValidationError:
+        return None
 
 
 class FlextTapLdapTap(Tap):
@@ -122,28 +151,31 @@ class FlextTapLdapTap(Tap):
 
         # Add custom streams if configured
         raw_custom = self.config.get("custom_streams", [])
-        custom_streams_config: list[dict[str, t.GeneralValueType]] = (
-            list(raw_custom) if isinstance(raw_custom, list) else []
-        )
-        for custom_config in custom_streams_config:
-            if not isinstance(custom_config, dict):
+        custom_streams_list = _as_list(raw_custom) or []
+        for custom_config_raw in custom_streams_list:
+            custom_config = _as_map(custom_config_raw)
+            if custom_config is None:
                 continue
             raw_name = custom_config.get("name", "")
             raw_filter = custom_config.get("search_filter", "")
-            raw_schema = custom_config.get("schema", {})
-            schema_dict = raw_schema if isinstance(raw_schema, dict) else {}
-            raw_props = schema_dict.get("properties", {})
-            schema_props = raw_props if isinstance(raw_props, dict) else {}
+            schema_dict = _as_map(custom_config.get("schema", {})) or {}
+            schema_props = _as_map(schema_dict.get("properties", {})) or {}
             raw_pk = custom_config.get("primary_keys")
             raw_rk = custom_config.get("replication_key")
+
+            raw_pk_values = _as_list(raw_pk)
+            primary_keys = (
+                [_as_str(k) or "" for k in raw_pk_values]
+                if raw_pk_values is not None
+                else None
+            )
+
             params = FlextTapLdapStreams.CustomStreamParams(
-                name=str(raw_name) if isinstance(raw_name, str) else "",
-                search_filter=str(raw_filter) if isinstance(raw_filter, str) else "",
+                name=_as_str(raw_name) or "",
+                search_filter=_as_str(raw_filter) or "",
                 schema_properties=schema_props,
-                primary_keys=[str(k) for k in raw_pk]
-                if isinstance(raw_pk, list)
-                else None,
-                replication_key=str(raw_rk) if isinstance(raw_rk, str) else None,
+                primary_keys=primary_keys,
+                replication_key=_as_str(raw_rk),
             )
             stream = FlextTapLdapStreams.CustomStream(tap=self, params=params)
             streams.append(stream)

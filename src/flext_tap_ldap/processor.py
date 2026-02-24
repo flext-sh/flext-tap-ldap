@@ -13,10 +13,11 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from pathlib import Path
-from typing import cast, override
+from typing import override
 
 from flext_core import FlextLogger, FlextResult, t
 from flext_ldif import FlextLdif, FlextLdifModels
+from pydantic import ConfigDict, TypeAdapter, ValidationError
 
 
 class FlextLdifDistinguishedName(FlextLdifModels.Ldif.DN):
@@ -24,6 +25,19 @@ class FlextLdifDistinguishedName(FlextLdifModels.Ldif.DN):
 
 
 logger = FlextLogger(__name__)
+
+_LDIF_ENTRY_ADAPTER = TypeAdapter(
+    FlextLdifModels.Ldif.Entry,
+    config=ConfigDict(strict=True),
+)
+
+
+def _to_ldif_entry(raw_value: object) -> FlextLdifModels.Ldif.Entry | None:
+    """Validate and coerce value to LDIF entry model."""
+    try:
+        return _LDIF_ENTRY_ADAPTER.validate_python(raw_value)
+    except ValidationError:
+        return None
 
 
 class Entry:
@@ -62,7 +76,9 @@ class Entry:
 
             result: FlextResult[list[t.GeneralValueType]] = api.parse(ldif_content)
             if result.is_success and result.value and len(result.value) > 0:
-                return cast("FlextLdifModels.Ldif.Entry", result.value[0])
+                parsed_entry = _to_ldif_entry(result.value[0])
+                if parsed_entry is not None:
+                    return parsed_entry
 
             # Fallback: create minimal entry
             return FlextLdifModels.Ldif.Entry(
@@ -231,9 +247,10 @@ class FlextTapLdapProcessor:
         """Yield testing convenience entries from parse result."""
         if result.value:
             for flext_entry in result.value:
-                convenience_entry = self._convert_from_flext_entry(
-                    cast("FlextLdifModels.Ldif.Entry", flext_entry)
-                )
+                parsed_entry = _to_ldif_entry(flext_entry)
+                if parsed_entry is None:
+                    continue
+                convenience_entry = self._convert_from_flext_entry(parsed_entry)
                 yield convenience_entry
                 self.processed_entries += 1
 
@@ -295,9 +312,10 @@ class FlextTapLdapProcessor:
 
             if result.value:
                 for flext_entry in result.value:
-                    convenience_entry = self._convert_from_flext_entry(
-                        cast("FlextLdifModels.Ldif.Entry", flext_entry)
-                    )
+                    parsed_entry = _to_ldif_entry(flext_entry)
+                    if parsed_entry is None:
+                        continue
+                    convenience_entry = self._convert_from_flext_entry(parsed_entry)
                     yield convenience_entry
                     self.processed_entries += 1
 

@@ -18,10 +18,83 @@ from typing import override
 from flext_core import FlextLogger, t
 from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
 from flext_meltano.typings import t as t_meltano
+from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError
 
 from flext_tap_ldap.client import LDAPClient
 
 logger = FlextLogger(__name__)
+
+
+class _LdapConnectionConfig(BaseModel):
+    """Validated LDAP connection configuration payload."""
+
+    model_config = ConfigDict(extra="allow")
+
+    host: str = "localhost"
+    port: int = 389
+    bind_dn: str | None = None
+    bind_password: str | None = None
+    use_ssl: bool = False
+    timeout_seconds: int = 30
+    base_dn: str = ""
+
+
+class _CustomPropertyDefinition(BaseModel):
+    """Validated custom stream property definition."""
+
+    model_config = ConfigDict(extra="allow")
+
+    type: str = "string"
+    description: str = ""
+
+
+_STRICT_STR_ADAPTER = TypeAdapter(str, config=ConfigDict(strict=True))
+
+
+def _coerce_positive_int(raw_value: object, default: int) -> int:
+    """Coerce value to positive integer with safe fallback."""
+    try:
+        parsed = int(str(raw_value))
+    except (TypeError, ValueError):
+        return default
+    return parsed if parsed > 0 else default
+
+
+def _coerce_optional_string(raw_value: object) -> str | None:
+    """Coerce value to string only when source is already string-like."""
+    if raw_value is None:
+        return None
+    try:
+        validated = _STRICT_STR_ADAPTER.validate_python(raw_value)
+    except ValidationError:
+        return None
+    return validated or None
+
+
+def _parse_connection_config(raw_value: object) -> _LdapConnectionConfig:
+    """Validate LDAP connection payload through Pydantic."""
+    try:
+        parsed = _LdapConnectionConfig.model_validate(raw_value, strict=True)
+    except ValidationError:
+        parsed = _LdapConnectionConfig()
+
+    return _LdapConnectionConfig(
+        host=str(parsed.host),
+        port=_coerce_positive_int(parsed.port, 389),
+        bind_dn=_coerce_optional_string(parsed.bind_dn),
+        bind_password=_coerce_optional_string(parsed.bind_password),
+        use_ssl=bool(parsed.use_ssl),
+        timeout_seconds=_coerce_positive_int(parsed.timeout_seconds, 30),
+        base_dn=str(parsed.base_dn),
+    )
+
+
+def _parse_property_definition(raw_value: object) -> _CustomPropertyDefinition:
+    """Validate custom stream property definition through Pydantic."""
+    try:
+        return _CustomPropertyDefinition.model_validate(raw_value, strict=True)
+    except ValidationError:
+        return _CustomPropertyDefinition()
 
 
 class FlextTapLdapStreams:
@@ -151,27 +224,16 @@ class FlextTapLdapStreams:
             self.client: LDAPClient | None = None
             try:
                 raw_connection = self.config.get("connection", {})
-                connection_config: dict[str, t.GeneralValueType] = (
-                    raw_connection if isinstance(raw_connection, dict) else {}
-                )
-                host_val = connection_config.get("host", "localhost")
-                port_val = connection_config.get("port", 389)
-                bind_dn_val = connection_config.get("bind_dn")
-                bind_pw_val = connection_config.get("bind_password")
-                timeout_val = connection_config.get("timeout_seconds", 30)
+                connection_config = _parse_connection_config(raw_connection)
                 page_size_raw = self.config.get("page_size", 1000)
                 self.client = LDAPClient(
-                    host=str(host_val),
-                    port=int(port_val) if isinstance(port_val, (int, str)) else 389,
-                    bind_dn=str(bind_dn_val) if isinstance(bind_dn_val, str) else None,
-                    password=str(bind_pw_val) if isinstance(bind_pw_val, str) else None,
-                    use_ssl=bool(connection_config.get("use_ssl")),
-                    timeout=int(timeout_val)
-                    if isinstance(timeout_val, (int, str))
-                    else 30,
-                    page_size=int(page_size_raw)
-                    if isinstance(page_size_raw, (int, str))
-                    else 1000,
+                    host=connection_config.host,
+                    port=connection_config.port,
+                    bind_dn=connection_config.bind_dn,
+                    password=connection_config.bind_password,
+                    use_ssl=connection_config.use_ssl,
+                    timeout=connection_config.timeout_seconds,
+                    page_size=_coerce_positive_int(page_size_raw, 1000),
                 )
             except Exception as e:
                 err_msg = str(e)
@@ -203,11 +265,8 @@ class FlextTapLdapStreams:
                 # Use base DN from config if not specified
                 if base_dn is None:
                     raw_conn = self.config.get("connection", {})
-                    connection_config: dict[str, t.GeneralValueType] = (
-                        raw_conn if isinstance(raw_conn, dict) else {}
-                    )
-                    raw_base_dn = connection_config.get("base_dn", "")
-                    base_dn = str(raw_base_dn) if isinstance(raw_base_dn, str) else ""
+                    connection_config = _parse_connection_config(raw_conn)
+                    base_dn = connection_config.base_dn
 
                 results = self.client.search(
                     base_dn=base_dn or "",
@@ -289,9 +348,7 @@ class FlextTapLdapStreams:
                 "(objectClass=inetOrgPerson)",
             )
             user_filter = (
-                str(raw_filter)
-                if isinstance(raw_filter, str)
-                else "(objectClass=inetOrgPerson)"
+                _coerce_optional_string(raw_filter) or "(objectClass=inetOrgPerson)"
             )
             user_attributes = [
                 "uid",
@@ -392,9 +449,8 @@ class FlextTapLdapStreams:
                 "(objectClass=groupOfNames)",
             )
             group_filter = (
-                str(raw_group_filter)
-                if isinstance(raw_group_filter, str)
-                else "(objectClass=groupOfNames)"
+                _coerce_optional_string(raw_group_filter)
+                or "(objectClass=groupOfNames)"
             )
             group_attributes = [
                 "cn",
@@ -595,59 +651,52 @@ class FlextTapLdapStreams:
             """Initialize custom stream with parameters."""
             self.params = params
 
-            def _map_prop(name: str, definition: object) -> object:
-                if isinstance(definition, dict):
-                    prop_type = str(definition.get("type", "string"))
-                    prop_desc = str(definition.get("description", f"{name} field"))
-                    if prop_type == "integer":
-                        return t_meltano.Singer.Typing.Property(
-                            name,
-                            t_meltano.Singer.Typing.IntegerType,
-                            description=prop_desc,
-                        )
-                    if prop_type == "number":
-                        return t_meltano.Singer.Typing.Property(
-                            name,
-                            t_meltano.Singer.Typing.NumberType,
-                            description=prop_desc,
-                        )
-                    if prop_type == "boolean":
-                        return t_meltano.Singer.Typing.Property(
-                            name,
-                            t_meltano.Singer.Typing.BooleanType,
-                            description=prop_desc,
-                        )
-                    if prop_type == "array":
-                        return t_meltano.Singer.Typing.Property(
-                            name,
-                            t_meltano.Singer.Typing.ArrayType(
-                                t_meltano.Singer.Typing.StringType,
-                            ),
-                            description=prop_desc,
-                        )
+            def _map_prop(
+                name: str,
+                definition: object,
+            ) -> t_meltano.Singer.Typing.Property:
+                parsed_definition = _parse_property_definition(definition)
+                prop_type = parsed_definition.type
+                prop_desc = parsed_definition.description or f"{name} field"
+
+                if prop_type == "integer":
                     return t_meltano.Singer.Typing.Property(
                         name,
-                        t_meltano.Singer.Typing.StringType,
+                        t_meltano.Singer.Typing.IntegerType,
                         description=prop_desc,
                     )
-                # Fallback simple type
+                if prop_type == "number":
+                    return t_meltano.Singer.Typing.Property(
+                        name,
+                        t_meltano.Singer.Typing.NumberType,
+                        description=prop_desc,
+                    )
+                if prop_type == "boolean":
+                    return t_meltano.Singer.Typing.Property(
+                        name,
+                        t_meltano.Singer.Typing.BooleanType,
+                        description=prop_desc,
+                    )
+                if prop_type == "array":
+                    return t_meltano.Singer.Typing.Property(
+                        name,
+                        t_meltano.Singer.Typing.ArrayType(
+                            t_meltano.Singer.Typing.StringType,
+                        ),
+                        description=prop_desc,
+                    )
+
                 return t_meltano.Singer.Typing.Property(
                     name,
                     t_meltano.Singer.Typing.StringType,
-                    description=f"{name} field",
+                    description=prop_desc,
                 )
 
             # Build schema from parameters
             if params.schema_properties:
-                schema_props = list(
+                schema_props: list[t_meltano.Singer.Typing.Property] = list(
                     starmap(_map_prop, params.schema_properties.items()),
                 )
-                # Ensure all are t_meltano.Singer.Typing.Property
-                typed_props = [
-                    p
-                    for p in schema_props
-                    if isinstance(p, t_meltano.Singer.Typing.Property)
-                ]
                 # Always include DN property even for custom streams
                 dn_prop = t_meltano.Singer.Typing.Property(
                     "dn",
@@ -656,7 +705,7 @@ class FlextTapLdapStreams:
                 )
                 schema = t_meltano.Singer.Typing.PropertiesList(
                     dn_prop,
-                    *typed_props,
+                    *schema_props,
                 ).to_dict()
             else:
                 schema = t_meltano.Singer.Typing.PropertiesList(

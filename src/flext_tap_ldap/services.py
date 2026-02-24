@@ -17,10 +17,39 @@ from uuid import uuid4
 
 from flext_core import FlextLogger, FlextResult, t
 from flext_ldif import FlextLdif
+from pydantic import ConfigDict, TypeAdapter, ValidationError
 
 from flext_tap_ldap.settings import FlextTapLdapSettings
 
 logger = FlextLogger(__name__)
+
+_LIST_ADAPTER = TypeAdapter(list[t.GeneralValueType], config=ConfigDict(strict=True))
+_MAP_ADAPTER = TypeAdapter(
+    dict[str, t.GeneralValueType],
+    config=ConfigDict(strict=True),
+)
+_STR_ADAPTER = TypeAdapter(str, config=ConfigDict(strict=True))
+
+
+def _as_list(value: object) -> list[t.GeneralValueType] | None:
+    try:
+        return _LIST_ADAPTER.validate_python(value)
+    except ValidationError:
+        return None
+
+
+def _as_map(value: object) -> dict[str, t.GeneralValueType] | None:
+    try:
+        return _MAP_ADAPTER.validate_python(value)
+    except ValidationError:
+        return None
+
+
+def _as_str(value: object) -> str | None:
+    try:
+        return _STR_ADAPTER.validate_python(value)
+    except ValidationError:
+        return None
 
 
 @dataclass
@@ -592,7 +621,8 @@ class FlextTapLdapServices:
                     )
 
                 entries = result.data or []
-                entry_count = len(entries) if isinstance(entries, list) else 0
+                entry_list = _as_list(entries)
+                entry_count = len(entry_list) if entry_list is not None else 0
                 logger.info(
                     "Successfully processed %s entries from %s",
                     entry_count,
@@ -601,12 +631,10 @@ class FlextTapLdapServices:
 
                 # Normalize to list[dict[str, t.GeneralValueType]]
                 normalized: list[dict[str, t.GeneralValueType]] = []
-                for entry in entries:
+                for entry in entry_list or []:
                     dn_value = str(getattr(entry, "dn", ""))
                     attributes_raw = getattr(entry, "attributes", {})
-                    attrs: dict[str, t.GeneralValueType] = (
-                        dict(attributes_raw) if isinstance(attributes_raw, dict) else {}
-                    )
+                    attrs = _as_map(attributes_raw) or {}
                     normalized.append({"dn": dn_value, "attributes": attrs})
 
                 return FlextResult[list[dict[str, t.GeneralValueType]]].ok(
@@ -638,7 +666,8 @@ class FlextTapLdapServices:
                     )
 
                 entries = result.data or []
-                total_entries = len(entries) if isinstance(entries, list) else 0
+                entry_list = _as_list(entries)
+                total_entries = len(entry_list) if entry_list is not None else 0
                 # Consider parse success as valid
                 validation_data: dict[str, t.GeneralValueType] = {
                     "total_entries": total_entries,
@@ -673,9 +702,7 @@ class FlextTapLdapServices:
                     return validation_result
 
                 validation_data: dict[str, t.GeneralValueType] = (
-                    validation_result.data
-                    if isinstance(validation_result.data, dict)
-                    else {}
+                    _as_map(validation_result.data) or {}
                 )
 
                 # Add file-level statistics
@@ -781,12 +808,8 @@ class FlextTapLdapServices:
             base_dn=base_dn,
             port=port,
             use_ssl=bool(kwargs.get("use_ssl")),
-            bind_dn=str(kwargs.get("bind_dn"))
-            if isinstance(kwargs.get("bind_dn"), str)
-            else None,
-            bind_password=str(kwargs.get("bind_password"))
-            if isinstance(kwargs.get("bind_password"), str)
-            else None,
+            bind_dn=_as_str(kwargs.get("bind_dn")),
+            bind_password=_as_str(kwargs.get("bind_password")),
         )
         return FlextTapLdapServices.create_ldap_connection_config(
             params,

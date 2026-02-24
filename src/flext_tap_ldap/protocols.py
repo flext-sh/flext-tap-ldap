@@ -114,7 +114,7 @@ class FlextMeltanoTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
         @runtime_checkable
         class AttributeMappingProtocol(
-            FlextLdapProtocols.Service[t.GeneralValueType],
+            FlextLdapProtocols.Service[t.JsonValue],
             Protocol,
         ):
             """Protocol for LDAP to Singer attribute mapping."""
@@ -128,9 +128,9 @@ class FlextMeltanoTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
             def convert_attribute_value(
                 self,
-                value: t.GeneralValueType,
+                value: t.JsonValue,
                 ldap_attr: str,
-            ) -> FlextMeltanoProtocols.Result[t.GeneralValueType]:
+            ) -> FlextMeltanoProtocols.Result[t.JsonValue]:
                 """Convert LDAP attribute value to Singer-compatible format."""
                 ...
 
@@ -177,8 +177,8 @@ class TapConfigProtocol(Protocol):
     def get_config(
         self,
         key: str,
-        default: t.GeneralValueType | None = None,
-    ) -> t.GeneralValueType:
+        default: t.JsonValue | None = None,
+    ) -> t.JsonValue:
         """Get configuration value by key.
 
         Args:
@@ -196,7 +196,7 @@ class TapProtocol(Protocol):
     """Protocol for tap interface used by streams.
 
     Defines the minimal interface that streams need from tap instances,
-    avoiding circular dependencies without using TYPE_CHECKING.
+    avoiding circular dependencies through protocol-based typing.
     """
 
     @property
