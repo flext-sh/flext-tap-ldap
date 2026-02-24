@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from pathlib import Path
 from typing import override
 
@@ -51,11 +51,11 @@ class Entry:
     def __init__(
         self,
         dn: str,
-        attributes: dict[str, list[str]] | None = None,
+        attributes: Mapping[str, list[str]] | None = None,
     ) -> None:
         """Initialize LDIF entry with testing convenience."""
         self.dn = dn
-        self.attributes = attributes or {}
+        self.attributes = dict(attributes or {})
         self.change_type: str | None = None
         self.controls: list[str] = []
 
@@ -104,7 +104,7 @@ class Entry:
         object_classes: list[str] = self.get_attribute("objectClass") or []
         return any(oc.lower() == object_class.lower() for oc in object_classes)
 
-    def to_dict(self) -> dict[str, t.GeneralValueType]:
+    def to_dict(self) -> Mapping[str, t.GeneralValueType]:
         """Convert entry to dictionary format."""
         entry_dict: dict[str, t.GeneralValueType] = {
             "dn": "self.dn",
@@ -148,16 +148,16 @@ class Entry:
             return bool(self.dn and self.dn.strip())
 
     @property
-    def validation_errors(self) -> list[dict[str, str]]:
+    def validation_errors(self) -> list[Mapping[str, str]]:
         """Get validation errors for this entry."""
-        errors: list[dict[str, str]] = []
+        errors: list[Mapping[str, str]] = []
         if not self.is_valid():
             errors.append(
                 {"code": "invalid_entry", "message": "Entry failed validation"},
             )
         return errors
 
-    def parse_dn(self) -> dict[str, t.GeneralValueType]:
+    def parse_dn(self) -> Mapping[str, t.GeneralValueType]:
         """Parse DN into components using flext-ldif DN parsing."""
         try:
             # Use flext-ldif DN parsing capabilities
@@ -342,7 +342,7 @@ class FlextTapLdapProcessor:
 
         return Entry(dn=dn, attributes=attributes)
 
-    def get_statistics(self) -> dict[str, t.GeneralValueType]:
+    def get_statistics(self) -> Mapping[str, t.GeneralValueType]:
         """Get parsing statistics."""
         return {
             "processed_entries": self.processed_entries,
@@ -414,9 +414,9 @@ class FlextTapLdapProcessor:
     def to_singer_format(
         self,
         _stream_name: str,
-    ) -> list[dict[str, t.GeneralValueType]]:
+    ) -> list[Mapping[str, t.GeneralValueType]]:
         """Convert LDIF entries to Singer record format."""
-        records: list[dict[str, t.GeneralValueType]] = []
+        records: list[Mapping[str, t.GeneralValueType]] = []
 
         for entry in self.entries:
             record_attributes: dict[str, t.GeneralValueType] = {"dn": entry.dn}
@@ -453,7 +453,7 @@ class Validator:
             self.validation_errors.append(f"Validation error for {entry.dn}: {e}")
             return False
 
-    def get_validation_results(self) -> dict[str, t.GeneralValueType]:
+    def get_validation_results(self) -> Mapping[str, t.GeneralValueType]:
         """Get validation results."""
         return {
             "errors": self.validation_errors.copy(),
@@ -464,7 +464,7 @@ class Validator:
     def validate_entries(
         self,
         entries: list[Entry],
-    ) -> dict[str, t.GeneralValueType]:
+    ) -> Mapping[str, t.GeneralValueType]:
         """Validate a list of LDIF entries using flext-ldif."""
         valid_count = 0
         invalid_count = 0
@@ -513,10 +513,10 @@ class Transformer:
     @override
     def __init__(
         self,
-        transformation_rules: dict[str, t.GeneralValueType] | None = None,
+        transformation_rules: Mapping[str, t.GeneralValueType] | None = None,
     ) -> None:
         """Initialize transformer with optional transformation rules."""
-        self.transformation_rules = transformation_rules or {}
+        self.transformation_rules = dict(transformation_rules or {})
         self._api = FlextLdif()
 
     def transform_entry(self, entry: Entry) -> Entry:
@@ -528,7 +528,7 @@ class Transformer:
     def apply_attribute_mappings(
         self,
         entry: Entry,
-        mappings: dict[str, str],
+        mappings: Mapping[str, str],
     ) -> Entry:
         """Apply attribute name mappings to entry."""
         new_attributes: dict[str, list[str]] = {}

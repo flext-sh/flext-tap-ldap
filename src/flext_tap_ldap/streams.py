@@ -115,7 +115,7 @@ class FlextTapLdapStreams:
         """
 
         @staticmethod
-        def create_test_user_record() -> dict[str, t.GeneralValueType]:
+        def create_test_user_record() -> Mapping[str, t.GeneralValueType]:
             """Create standardized test user record for fallback scenarios."""
             return {
                 "dn": "uid=jdoe,ou=users,dc=test,dc=com",
@@ -136,7 +136,7 @@ class FlextTapLdapStreams:
             }
 
         @staticmethod
-        def create_test_group_record() -> dict[str, t.GeneralValueType]:
+        def create_test_group_record() -> Mapping[str, t.GeneralValueType]:
             """Create standardized test group record for fallback scenarios."""
             return {
                 "dn": "cn=developers,ou=groups,dc=test,dc=com",
@@ -151,7 +151,7 @@ class FlextTapLdapStreams:
             }
 
         @staticmethod
-        def create_test_ou_record() -> dict[str, t.GeneralValueType]:
+        def create_test_ou_record() -> Mapping[str, t.GeneralValueType]:
             """Create standardized test organizational unit record."""
             return {
                 "dn": "ou=users,dc=test,dc=com",
@@ -162,7 +162,7 @@ class FlextTapLdapStreams:
             }
 
         @staticmethod
-        def create_test_schema_record() -> dict[str, t.GeneralValueType]:
+        def create_test_schema_record() -> Mapping[str, t.GeneralValueType]:
             """Create standardized test schema record."""
             return {
                 "dn": "cn=schema",
@@ -210,7 +210,7 @@ class FlextTapLdapStreams:
             self,
             tap: Tap,
             name: str | None = None,
-            schema: dict[str, t.GeneralValueType] | None = None,
+            schema: Mapping[str, t.GeneralValueType] | None = None,
         ) -> None:
             """Initialize the LDAP stream."""
             super().__init__(tap, name=name, schema=schema)
@@ -243,7 +243,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[dict[str, t.GeneralValueType]]:
+        ) -> Iterable[Mapping[str, t.GeneralValueType]]:
             """Get records from LDAP - base implementation."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -255,7 +255,7 @@ class FlextTapLdapStreams:
             search_filter: str,
             base_dn: str | None = None,
             attributes: list[str] | None = None,
-        ) -> list[dict[str, t.GeneralValueType]]:
+        ) -> list[Mapping[str, t.GeneralValueType]]:
             """Search LDAP directory with error handling."""
             if not self.client:
                 logger.warning("LDAP client not available, using fallback data")
@@ -268,12 +268,15 @@ class FlextTapLdapStreams:
                     connection_config = _parse_connection_config(raw_conn)
                     base_dn = connection_config.base_dn
 
-                results = self.client.search(
-                    base_dn=base_dn or "",
-                    search_filter=search_filter,
-                    attributes=attributes,
-                    scope="SUBTREE",
-                )
+                results: list[Mapping[str, t.GeneralValueType]] = [
+                    dict(entry)
+                    for entry in self.client.search(
+                        base_dn=base_dn or "",
+                        search_filter=search_filter,
+                        attributes=attributes,
+                        scope="SUBTREE",
+                    )
+                ]
 
                 if not results:
                     logger.info("No results found for filter: %s", search_filter)
@@ -288,7 +291,7 @@ class FlextTapLdapStreams:
 
         def _get_fallback_data(
             self,
-        ) -> list[dict[str, t.GeneralValueType]]:
+        ) -> list[Mapping[str, t.GeneralValueType]]:
             """Get fallback data for testing/demo purposes."""
             return []
 
@@ -337,7 +340,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[dict[str, t.GeneralValueType]]:
+        ) -> Iterable[Mapping[str, t.GeneralValueType]]:
             """Get user records from LDAP."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -373,7 +376,7 @@ class FlextTapLdapStreams:
                 "modifyTimestamp",
             ]
 
-            results: list[dict[str, t.GeneralValueType]] = self._search_ldap(
+            results: list[Mapping[str, t.GeneralValueType]] = self._search_ldap(
                 user_filter,
                 attributes=user_attributes,
             )
@@ -382,9 +385,11 @@ class FlextTapLdapStreams:
 
         def _get_fallback_data(
             self,
-        ) -> list[dict[str, t.GeneralValueType]]:
+        ) -> list[Mapping[str, t.GeneralValueType]]:
             """Get fallback user data."""
-            return [FlextTapLdapStreams.FallbackDataFactory.create_test_user_record()]
+            return [
+                dict(FlextTapLdapStreams.FallbackDataFactory.create_test_user_record()),
+            ]
 
     class GroupsStream(LDAPBaseStream):
         """Stream for LDAP group entries."""
@@ -438,7 +443,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[dict[str, t.GeneralValueType]]:
+        ) -> Iterable[Mapping[str, t.GeneralValueType]]:
             """Get group records from LDAP."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -464,7 +469,7 @@ class FlextTapLdapStreams:
                 "modifyTimestamp",
             ]
 
-            results: list[dict[str, t.GeneralValueType]] = self._search_ldap(
+            results: list[Mapping[str, t.GeneralValueType]] = self._search_ldap(
                 group_filter,
                 attributes=group_attributes,
             )
@@ -473,9 +478,13 @@ class FlextTapLdapStreams:
 
         def _get_fallback_data(
             self,
-        ) -> list[dict[str, t.GeneralValueType]]:
+        ) -> list[Mapping[str, t.GeneralValueType]]:
             """Get fallback group data."""
-            return [FlextTapLdapStreams.FallbackDataFactory.create_test_group_record()]
+            return [
+                dict(
+                    FlextTapLdapStreams.FallbackDataFactory.create_test_group_record()
+                ),
+            ]
 
     class OrganizationalUnitsStream(LDAPBaseStream):
         """Stream for LDAP organizational unit entries."""
@@ -512,7 +521,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[dict[str, t.GeneralValueType]]:
+        ) -> Iterable[Mapping[str, t.GeneralValueType]]:
             """Get organizational unit records from LDAP."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -527,7 +536,7 @@ class FlextTapLdapStreams:
                 "modifyTimestamp",
             ]
 
-            results: list[dict[str, t.GeneralValueType]] = self._search_ldap(
+            results: list[Mapping[str, t.GeneralValueType]] = self._search_ldap(
                 ou_filter,
                 attributes=ou_attributes,
             )
@@ -536,9 +545,11 @@ class FlextTapLdapStreams:
 
         def _get_fallback_data(
             self,
-        ) -> list[dict[str, t.GeneralValueType]]:
+        ) -> list[Mapping[str, t.GeneralValueType]]:
             """Get fallback organizational unit data."""
-            return [FlextTapLdapStreams.FallbackDataFactory.create_test_ou_record()]
+            return [
+                dict(FlextTapLdapStreams.FallbackDataFactory.create_test_ou_record()),
+            ]
 
     class SchemaStream(LDAPBaseStream):
         """Stream for LDAP schema information."""
@@ -591,7 +602,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[dict[str, t.GeneralValueType]]:
+        ) -> Iterable[Mapping[str, t.GeneralValueType]]:
             """Get schema records from LDAP."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -635,9 +646,13 @@ class FlextTapLdapStreams:
 
         def _get_fallback_data(
             self,
-        ) -> list[dict[str, t.GeneralValueType]]:
+        ) -> list[Mapping[str, t.GeneralValueType]]:
             """Get fallback schema data."""
-            return [FlextTapLdapStreams.FallbackDataFactory.create_test_schema_record()]
+            return [
+                dict(
+                    FlextTapLdapStreams.FallbackDataFactory.create_test_schema_record()
+                ),
+            ]
 
     class CustomStream(LDAPBaseStream):
         """Custom LDAP stream with configurable filter and schema."""
@@ -735,7 +750,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[dict[str, t.GeneralValueType]]:
+        ) -> Iterable[Mapping[str, t.GeneralValueType]]:
             """Get records using custom filter."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -743,7 +758,7 @@ class FlextTapLdapStreams:
                 f"Extracting LDAP records for custom stream: {self.params.name}",
             )
 
-            results: list[dict[str, t.GeneralValueType]] = self._search_ldap(
+            results: list[Mapping[str, t.GeneralValueType]] = self._search_ldap(
                 self.params.search_filter,
             )
 
@@ -751,7 +766,7 @@ class FlextTapLdapStreams:
 
         def _get_fallback_data(
             self,
-        ) -> list[dict[str, t.GeneralValueType]]:
+        ) -> list[Mapping[str, t.GeneralValueType]]:
             """Get fallback data for custom stream."""
             return [
                 {

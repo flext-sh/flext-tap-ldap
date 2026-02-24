@@ -6,7 +6,7 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import override
 
-from flext_core import FlextLogger
+from flext_core import FlextLogger, FlextRuntime
 from flext_ldap import FlextLdapConnection
 from flext_ldif import FlextLdif
 from flext_ldif.models import m
@@ -70,13 +70,13 @@ class FlextTapLdapLdifStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,  # noqa: ARG002
-        ) -> Iterable[dict[str, t.GeneralValueType]]:
+        ) -> Iterable[Mapping[str, t.GeneralValueType]]:
             """Get LDIF records using flext-ldif processing."""
             logger.info("Processing LDIF files using flext-ldif library")
             # Get LDIF files from config
             raw_files = self.config.get("ldif_files", [])
             ldif_files: list[t.GeneralValueType] = (
-                list(raw_files) if isinstance(raw_files, list) else []
+                list(raw_files) if u.Guards.is_list(raw_files) else []
             )
             ldif_directory = self.config.get("ldif_directory")
             if ldif_files:
@@ -91,7 +91,7 @@ class FlextTapLdapLdifStreams:
         def _process_ldif_file(
             self,
             ldif_file: str,
-        ) -> Iterable[dict[str, t.GeneralValueType]]:
+        ) -> Iterable[Mapping[str, t.GeneralValueType]]:
             """Process single LDIF file using flext-ldif."""
             logger.info("Processing LDIF file: %s", ldif_file)
             try:
@@ -100,7 +100,7 @@ class FlextTapLdapLdifStreams:
                 result = self._ldif_api.parse(content)
                 if result.is_success and result.data:
                     for entry in result.data:
-                        if isinstance(entry, m.Ldif.Entry):
+                        if x.is_base_model(entry):
                             yield self._convert_entry_to_record(entry)
                 else:
                     logger.error(
@@ -112,7 +112,7 @@ class FlextTapLdapLdifStreams:
         def _convert_entry_to_record(
             self,
             flext_entry: m.Ldif.Entry,
-        ) -> dict[str, t.GeneralValueType]:
+        ) -> Mapping[str, t.GeneralValueType]:
             """Convert flext-ldif entry to Singer record."""
             # Guard against None dn/attributes (RFC violation entries)
             dn_value = flext_entry.dn.value if flext_entry.dn is not None else ""
@@ -187,13 +187,13 @@ class FlextTapLdapLdifStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,  # noqa: ARG002
-        ) -> Iterable[dict[str, t.GeneralValueType]]:
+        ) -> Iterable[Mapping[str, t.GeneralValueType]]:
             """Get analysis records using flext-ldif analysis capabilities."""
             logger.info("Generating LDIF analysis using flext-ldif library")
             # Get LDIF files from config
             raw_files = self.config.get("ldif_files", [])
             ldif_files: list[t.GeneralValueType] = (
-                list(raw_files) if isinstance(raw_files, list) else []
+                list(raw_files) if u.Guards.is_list(raw_files) else []
             )
             ldif_directory = self.config.get("ldif_directory")
             # Delegate ALL analysis to flext-ldif library
@@ -203,25 +203,25 @@ class FlextTapLdapLdifStreams:
                 object_classes: dict[str, int] = {}
                 if ldif_files:
                     for ldif_file in ldif_files:
-                        if not isinstance(ldif_file, str):
+                        if not u.Guards._is_str(ldif_file):
                             continue
                         stats = self._analyze_ldif_file(ldif_file)
                         total_count = stats.get("total_entries", 0)
-                        if isinstance(total_count, int):
+                        if u.Guards._is_int(total_count):
                             total_entries += total_count
                         # Merge counts
                         raw_entry_types = stats.get("entry_types", {})
-                        if isinstance(raw_entry_types, dict):
+                        if u.Guards._is_dict(raw_entry_types):
                             for entry_type, count in raw_entry_types.items():
-                                if isinstance(count, (int, str)):
+                                if count.__class__ in {int, str}:
                                     entry_types[entry_type] = entry_types.get(
                                         entry_type,
                                         0,
                                     ) + int(count)
                         raw_object_classes = stats.get("object_classes", {})
-                        if isinstance(raw_object_classes, dict):
+                        if u.Guards._is_dict(raw_object_classes):
                             for obj_class, count in raw_object_classes.items():
-                                if isinstance(count, (int, str)):
+                                if count.__class__ in {int, str}:
                                     object_classes[obj_class] = object_classes.get(
                                         obj_class,
                                         0,
@@ -250,7 +250,7 @@ class FlextTapLdapLdifStreams:
         def _analyze_ldif_file(
             self,
             ldif_file: str,
-        ) -> dict[str, t.GeneralValueType]:
+        ) -> Mapping[str, t.GeneralValueType]:
             """Analyze single LDIF file using flext-ldif."""
             logger.info("Analyzing LDIF file: %s", ldif_file)
             try:
@@ -262,7 +262,7 @@ class FlextTapLdapLdifStreams:
                     entry_types: dict[str, int] = {}
                     object_classes: dict[str, int] = {}
                     for entry in result.data:
-                        if not isinstance(entry, m.Ldif.Entry):
+                        if not x.is_base_model(entry):
                             continue
                         if entry.attributes is None:
                             continue

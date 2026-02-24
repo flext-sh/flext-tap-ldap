@@ -11,9 +11,10 @@ from __future__ import annotations
 
 import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
-from flext_core import FlextLogger, r, t
+from flext_core import FlextLogger, FlextRuntime, r, t
 from flext_ldap import (
     FlextLdap,
     FlextLdapConnection,
@@ -88,7 +89,7 @@ class FlextTapLdapClient:
         ) -> FlextTapLdapClient.LDAPClientConfig:
             """Create config from convenience keyword arguments."""
             raw_host = convenience_kwargs.get("host")
-            if not isinstance(raw_host, str) or not raw_host:
+            if not u.Guards._is_str(raw_host) or not raw_host:
                 msg = "Either 'config' or valid string 'host' must be provided"
                 raise ValueError(msg)
 
@@ -198,14 +199,13 @@ class FlextTapLdapClient:
 
         def _convert_entry_to_dict(
             self,
-            entry_data: m.Ldif.Entry | dict[str, t.GeneralValueType] | None,
-        ) -> dict[str, t.GeneralValueType]:
+            entry_data: m.Ldif.Entry | Mapping[str, t.GeneralValueType] | None,
+        ) -> Mapping[str, t.GeneralValueType]:
             """Convert FlextLdapModels.Entry to dict[str, t.GeneralValueType] format for testing convenience.
 
             Single Responsibility: Handle only entry format conversion.
             """
-            # Check if it's an Entry object using hasattr for attributes
-            if hasattr(entry_data, "dn") and hasattr(entry_data, "attributes"):
+            if x.is_base_model(entry_data):
                 # It's a m.Ldif.Entry model object - flatten attributes
                 # Use getattr to safely access attributes for type checker
                 dn_value: str = str(getattr(entry_data, "dn", ""))
@@ -214,19 +214,19 @@ class FlextTapLdapClient:
                 )
                 entry_dict: dict[str, t.GeneralValueType] = {"dn": dn_value}
                 for attr_name, attr_values in attributes.items():
-                    if isinstance(attr_values, list) and len(attr_values) == 1:
+                    if u.Guards.is_list(attr_values) and len(attr_values) == 1:
                         entry_dict[attr_name] = attr_values[0]
                     else:
                         entry_dict[attr_name] = attr_values
                 return entry_dict
             # It's already a dict[str, t.GeneralValueType] (from mock) - ensure proper type conversion
             if entry_data:
-                if isinstance(entry_data, dict):
+                if u.Guards._is_dict(entry_data):
                     return entry_data
                 # Convert to dict[str, t.GeneralValueType] if it's not already
                 return (
                     dict[str, t.GeneralValueType](entry_data)
-                    if hasattr(entry_data, "__iter__")
+                    if getattr(entry_data, "__iter__", None) is not None
                     else {}
                 )
             return {}
@@ -235,27 +235,28 @@ class FlextTapLdapClient:
             self,
             result: r[m.Ldap.SearchResult],
             size_limit: int,
-        ) -> list[dict[str, t.GeneralValueType]]:
+        ) -> Sequence[Mapping[str, t.GeneralValueType]]:
             """Process LDAP search results with size limiting.
 
             Single Responsibility: Handle only result processing logic.
             """
-            entries: list[dict[str, t.GeneralValueType]] = []
+            entries: list[Mapping[str, t.GeneralValueType]] = []
             if not (result.is_success and result.data):
                 return entries
 
             # Handle both SearchResult objects and direct lists for testing
             data_entries = (
-                result.data.entries if hasattr(result.data, "entries") else result.data
+                result.data.entries
+                if getattr(result.data, "entries", None) is not None
+                else result.data
             )
 
             for entries_returned, entry_data in enumerate(data_entries):
                 if size_limit > 0 and entries_returned >= size_limit:
                     break
 
-                # Narrow GeneralValueType to expected types for _convert_entry_to_dict
-                narrowed_entry: m.Ldif.Entry | dict[str, t.GeneralValueType] | None
-                if isinstance(entry_data, (m.Ldif.Entry, dict)):
+                narrowed_entry: m.Ldif.Entry | Mapping[str, t.GeneralValueType] | None
+                if x.is_base_model(entry_data) or u.Guards._is_dict(entry_data):
                     narrowed_entry = entry_data
                 else:
                     narrowed_entry = None
@@ -274,7 +275,7 @@ class FlextTapLdapClient:
             attributes: list[str] | None,
             ldap_scope: str,
             size_limit: int,
-        ) -> list[dict[str, t.GeneralValueType]]:
+        ) -> Sequence[Mapping[str, t.GeneralValueType]]:
             """Perform actual LDAP search.
 
             Single Responsibility: Handle only search execution.
@@ -309,7 +310,7 @@ class FlextTapLdapClient:
             attributes: list[str] | None = None,
             scope: str = "SUBTREE",
             size_limit: int = 0,
-        ) -> list[dict[str, t.GeneralValueType]]:
+        ) -> Sequence[Mapping[str, t.GeneralValueType]]:
             """Search for entries using flext-ldap infrastructure (synchronous).
 
             Returns a list of entries for testing convenience with Singer streams.
@@ -352,7 +353,7 @@ class FlextTapLdapClient:
                 # Required for Singer protocol compliance - NOT security-sensitive data generation
                 return True
 
-        def health_check(self) -> dict[str, t.GeneralValueType]:
+        def health_check(self) -> Mapping[str, t.GeneralValueType]:
             """Perform health check for testing convenience."""
             start_time = time.time()
             connection_ok: bool = self.test_connection()
@@ -369,12 +370,12 @@ class FlextTapLdapClient:
 
         def _process_oracle_entry(
             self,
-            entry: dict[str, t.GeneralValueType],
-        ) -> dict[str, t.GeneralValueType]:
+            entry: Mapping[str, t.GeneralValueType],
+        ) -> Mapping[str, t.GeneralValueType]:
             """Process Oracle-specific LDAP entries for testing convenience."""
             raw_attrs = entry.get("attributes", {})
             attributes: dict[str, t.GeneralValueType] = (
-                raw_attrs if isinstance(raw_attrs, dict) else {}
+                raw_attrs if u.Guards._is_dict(raw_attrs) else {}
             )
             # Handle Oracle password attributes
             if "orclPassword" in attributes:
@@ -426,18 +427,19 @@ class FlextTapLdapClient:
 
         def _process_search_results_with_oracle_support(
             self,
-            search_result: list[m.Ldif.Entry] | list[dict[str, t.GeneralValueType]],
+            search_result: Sequence[m.Ldif.Entry]
+            | Sequence[Mapping[str, t.GeneralValueType]],
             *,
             oracle_oid_mode: bool,
-        ) -> list[dict[str, t.GeneralValueType]]:
+        ) -> Sequence[Mapping[str, t.GeneralValueType]]:
             """Process search results with Oracle OID support.
 
             Single Responsibility: Handle only result processing logic.
             """
-            results: list[dict[str, t.GeneralValueType]] = []
+            results: list[Mapping[str, t.GeneralValueType]] = []
             for entry in search_result:
-                if isinstance(entry, dict):
-                    entry_dict: dict[str, t.GeneralValueType] = entry
+                if u.Guards._is_dict(entry):
+                    entry_dict: Mapping[str, t.GeneralValueType] = entry
                 else:
                     entry_dict = self._convert_entry_to_dict(entry)
                 if oracle_oid_mode:
@@ -454,7 +456,7 @@ class FlextTapLdapClient:
             attributes: list[str] | None,
             *,
             oracle_oid_mode: bool,
-        ) -> list[dict[str, t.GeneralValueType]]:
+        ) -> Sequence[Mapping[str, t.GeneralValueType]]:
             """Execute Oracle search in new event loop.
 
             Single Responsibility: Handle only event loop management for Oracle search.
@@ -463,7 +465,7 @@ class FlextTapLdapClient:
             set_event_loop(loop)
             try:
                 # Perform synchronous search using existing method
-                search_result: list[dict[str, t.GeneralValueType]] = self.search(
+                search_result: Sequence[Mapping[str, t.GeneralValueType]] = self.search(
                     base_dn,
                     search_filter,
                     attributes,
@@ -483,7 +485,7 @@ class FlextTapLdapClient:
             attributes: list[str] | None = None,
             *,
             oracle_oid_mode: bool = False,
-        ) -> list[dict[str, t.GeneralValueType]]:
+        ) -> Sequence[Mapping[str, t.GeneralValueType]]:
             """Search with Oracle OID support for testing convenience.
 
             Refactored using Single Responsibility Principle to reduce complexity.

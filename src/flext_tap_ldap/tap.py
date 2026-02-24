@@ -9,6 +9,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import ClassVar
 
 from flext_core import FlextLogger
@@ -37,7 +38,7 @@ def _as_list(value: object) -> list[t.GeneralValueType] | None:
         return None
 
 
-def _as_map(value: object) -> dict[str, t.GeneralValueType] | None:
+def _as_map(value: object) -> Mapping[str, t.GeneralValueType] | None:
     try:
         return _MAP_ADAPTER.validate_python(value)
     except ValidationError:
@@ -173,7 +174,7 @@ class FlextTapLdapTap(Tap):
             params = FlextTapLdapStreams.CustomStreamParams(
                 name=_as_str(raw_name) or "",
                 search_filter=_as_str(raw_filter) or "",
-                schema_properties=schema_props,
+                schema_properties=dict(schema_props),
                 primary_keys=primary_keys,
                 replication_key=_as_str(raw_rk),
             )
