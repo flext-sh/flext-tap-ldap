@@ -69,7 +69,7 @@ class FlextTapLdapLdifStreams:
 
         def get_records(
             self,
-            context: Mapping[str, object] | None = None,  # noqa: ARG002
+            context: Mapping[str, object] | None = None,
         ) -> Iterable[Mapping[str, t.GeneralValueType]]:
             """Get LDIF records using flext-ldif processing."""
             logger.info("Processing LDIF files using flext-ldif library")
@@ -186,7 +186,7 @@ class FlextTapLdapLdifStreams:
 
         def get_records(
             self,
-            context: Mapping[str, object] | None = None,  # noqa: ARG002
+            context: Mapping[str, object] | None = None,
         ) -> Iterable[Mapping[str, t.GeneralValueType]]:
             """Get analysis records using flext-ldif analysis capabilities."""
             logger.info("Generating LDIF analysis using flext-ldif library")
