@@ -2,23 +2,53 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import override
 
-from flext_core import FlextLogger, u, x
 from flext_ldap import FlextLdapConnection
 from flext_ldif import FlextLdif
 from flext_ldif.models import m
 from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
 from flext_meltano.typings import t as t_meltano
+from ldap3 import SUBTREE, Connection, Server
+from pydantic import BaseModel
 
 from flext_tap_ldap.typings import t
 
-logger = FlextLogger(__name__)
+logger = logging.getLogger(__name__)
 
 # Access Singer SDK typing through FLEXT domain namespace
 typing_utils = t_meltano.Singer.Typing
+
+
+class _Guards:
+    @staticmethod
+    def is_list(value: object) -> bool:
+        return isinstance(value, list)
+
+    @staticmethod
+    def is_type(value: object, expected: type[object]) -> bool:
+        return isinstance(value, expected)
+
+
+class _Utilities:
+    Guards = _Guards
+
+    @staticmethod
+    def is_dict_like(value: object) -> bool:
+        return isinstance(value, Mapping)
+
+
+class _Mixins:
+    @staticmethod
+    def is_base_model(value: object) -> bool:
+        return isinstance(value, BaseModel)
+
+
+u = _Utilities
+x = _Mixins
 
 
 class FlextTapLdapLdifStreams:
@@ -70,7 +100,7 @@ class FlextTapLdapLdifStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[Mapping[str, t.GeneralValueType]]:
+        ):
             """Get LDIF records using flext-ldif processing."""
             logger.info("Processing LDIF files using flext-ldif library")
             # Get LDIF files from config
@@ -83,15 +113,119 @@ class FlextTapLdapLdifStreams:
                 for ldif_file in ldif_files:
                     yield from self._process_ldif_file(str(ldif_file))
             elif ldif_directory:
-                # Directory processing should be implemented in flext-ldif library
-                logger.warning(
-                    "Directory processing not yet implemented in flext-ldif library",
-                )
+                for discovered_file in self._discover_ldif_files(str(ldif_directory)):
+                    yield from self._process_ldif_file(str(discovered_file))
+            else:
+                yield from self._process_ldap_directory()
+
+        def _process_ldap_directory(self) -> Iterable[dict[str, t.GeneralValueType]]:
+            host_raw = self.config.get("ldap_host")
+            base_dn_raw = self.config.get("ldap_base_dn")
+            if not isinstance(host_raw, str) or not host_raw:
+                return
+            if not isinstance(base_dn_raw, str) or not base_dn_raw:
+                return
+
+            port_raw = self.config.get("ldap_port", 389)
+            port = int(port_raw) if isinstance(port_raw, int | str) else 389
+            use_ssl_raw = self.config.get("ldap_use_ssl", False)
+            use_ssl = bool(use_ssl_raw)
+            bind_dn_raw = self.config.get("ldap_bind_dn")
+            bind_password_raw = self.config.get("ldap_bind_password")
+            bind_dn = bind_dn_raw if isinstance(bind_dn_raw, str) else None
+            bind_password = (
+                bind_password_raw if isinstance(bind_password_raw, str) else None
+            )
+            search_filter_raw = self.config.get("ldap_search_filter", "(objectClass=*)")
+            search_filter = (
+                search_filter_raw
+                if isinstance(search_filter_raw, str)
+                else "(objectClass=*)"
+            )
+            attributes_raw = self.config.get("ldap_attributes")
+            attributes = ["*"]
+            if isinstance(attributes_raw, list):
+                parsed_attributes = [
+                    str(item) for item in attributes_raw if item is not None
+                ]
+                if parsed_attributes:
+                    attributes = parsed_attributes
+            page_size_raw = self.config.get("ldap_page_size", 1000)
+            page_size = (
+                int(page_size_raw) if isinstance(page_size_raw, int | str) else 1000
+            )
+
+            try:
+                server = Server(host_raw, port=port, use_ssl=use_ssl, get_info=None)
+                with Connection(
+                    server=server,
+                    user=bind_dn,
+                    password=bind_password,
+                    auto_bind=True,
+                ) as connection:
+                    search_result = connection.extend.standard.paged_search(
+                        search_base=base_dn_raw,
+                        search_filter=search_filter,
+                        search_scope=SUBTREE,
+                        attributes=attributes,
+                        paged_size=page_size,
+                        generator=True,
+                    )
+                    for entry in search_result:
+                        if not u.is_dict_like(entry):
+                            continue
+                        entry_type_raw = entry.get("type")
+                        if entry_type_raw != "searchResEntry":
+                            continue
+                        dn_raw = entry.get("dn")
+                        attrs_raw = entry.get("attributes")
+                        if not isinstance(dn_raw, str) or not u.is_dict_like(attrs_raw):
+                            continue
+                        object_classes_raw = attrs_raw.get("objectClass")
+                        object_classes = self._normalize_object_classes(
+                            object_classes_raw
+                        )
+                        yield {
+                            "dn": dn_raw,
+                            "entry_type": self._classify_entry_type(object_classes),
+                            "object_classes": object_classes,
+                            "attributes": dict(attrs_raw),
+                        }
+            except (
+                ValueError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                OSError,
+                RuntimeError,
+                ImportError,
+            ):
+                logger.exception("Error traversing LDAP directory")
+
+        def _normalize_object_classes(self, object_classes: object) -> list[str]:
+            if isinstance(object_classes, str):
+                return [object_classes]
+            if isinstance(object_classes, list):
+                return [str(value) for value in object_classes if value is not None]
+            return []
+
+        def _discover_ldif_files(self, ldif_directory: str) -> list[Path]:
+            directory = Path(ldif_directory)
+            if not directory.exists() or not directory.is_dir():
+                logger.warning("LDIF directory not found: %s", ldif_directory)
+                return []
+            pattern_raw = self.config.get("ldif_file_pattern", "*.ldif")
+            pattern = (
+                str(pattern_raw) if u.Guards.is_type(pattern_raw, str) else "*.ldif"
+            )
+            files = [path for path in directory.rglob(pattern) if path.is_file()]
+            files.sort()
+            return files
 
         def _process_ldif_file(
             self,
             ldif_file: str,
-        ) -> Iterable[Mapping[str, t.GeneralValueType]]:
+        ) -> Iterable[dict[str, t.GeneralValueType]]:
             """Process single LDIF file using flext-ldif."""
             logger.info("Processing LDIF file: %s", ldif_file)
             try:
@@ -106,13 +240,21 @@ class FlextTapLdapLdifStreams:
                     logger.error(
                         f"Failed to parse LDIF file {ldif_file}: {result.error}",
                     )
-            except Exception:
+            except (
+                ValueError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                OSError,
+                RuntimeError,
+                ImportError,
+            ):
                 logger.exception("Error processing LDIF file %s", ldif_file)
 
         def _convert_entry_to_record(
             self,
             flext_entry: m.Ldif.Entry,
-        ) -> Mapping[str, t.GeneralValueType]:
+        ) -> dict[str, t.GeneralValueType]:
             """Convert flext-ldif entry to Singer record."""
             # Guard against None dn/attributes (RFC violation entries)
             dn_value = flext_entry.dn.value if flext_entry.dn is not None else ""
@@ -187,7 +329,7 @@ class FlextTapLdapLdifStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[Mapping[str, t.GeneralValueType]]:
+        ):
             """Get analysis records using flext-ldif analysis capabilities."""
             logger.info("Generating LDIF analysis using flext-ldif library")
             # Get LDIF files from config
@@ -233,17 +375,47 @@ class FlextTapLdapLdifStreams:
                                         0,
                                     ) + int(count)
                 elif ldif_directory:
-                    # This should be implemented in flext-ldif library
-                    logger.warning(
-                        "Directory analysis should be implemented in flext-ldif library",
-                    )
+                    for discovered_file in self._discover_ldif_files(
+                        str(ldif_directory)
+                    ):
+                        stats = self._analyze_ldif_file(str(discovered_file))
+                        total_count = stats.get("total_entries", 0)
+                        match total_count:
+                            case int() as total_count_value:
+                                total_entries += total_count_value
+                            case _:
+                                pass
+                        raw_entry_types = stats.get("entry_types", {})
+                        if u.is_dict_like(raw_entry_types):
+                            for entry_type, count in raw_entry_types.items():
+                                if count.__class__ in {int, str}:
+                                    entry_types[entry_type] = entry_types.get(
+                                        entry_type,
+                                        0,
+                                    ) + int(count)
+                        raw_object_classes = stats.get("object_classes", {})
+                        if u.is_dict_like(raw_object_classes):
+                            for obj_class, count in raw_object_classes.items():
+                                if count.__class__ in {int, str}:
+                                    object_classes[obj_class] = object_classes.get(
+                                        obj_class,
+                                        0,
+                                    ) + int(count)
                 yield {
                     "analysis_id": "ldif_summary",
                     "total_entries": "total_entries",
                     "entry_types": "entry_types",
                     "object_classes": "object_classes",
                 }
-            except Exception:
+            except (
+                ValueError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                OSError,
+                RuntimeError,
+                ImportError,
+            ):
                 logger.exception("LDIF analysis error")
                 # Return empty stats on error
                 yield {
@@ -256,7 +428,7 @@ class FlextTapLdapLdifStreams:
         def _analyze_ldif_file(
             self,
             ldif_file: str,
-        ) -> Mapping[str, t.GeneralValueType]:
+        ) -> dict[str, t.GeneralValueType]:
             """Analyze single LDIF file using flext-ldif."""
             logger.info("Analyzing LDIF file: %s", ldif_file)
             try:
@@ -288,9 +460,30 @@ class FlextTapLdapLdifStreams:
                     }
                 logger.error(f"Failed to analyze LDIF file {ldif_file}: {result.error}")
                 return {"total_entries": 0, "entry_types": {}, "object_classes": {}}
-            except Exception:
+            except (
+                ValueError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                OSError,
+                RuntimeError,
+                ImportError,
+            ):
                 logger.exception("Error analyzing LDIF file %s", ldif_file)
                 return {"total_entries": 0, "entry_types": {}, "object_classes": {}}
+
+        def _discover_ldif_files(self, ldif_directory: str) -> list[Path]:
+            directory = Path(ldif_directory)
+            if not directory.exists() or not directory.is_dir():
+                logger.warning("LDIF directory not found: %s", ldif_directory)
+                return []
+            pattern_raw = self.config.get("ldif_file_pattern", "*.ldif")
+            pattern = (
+                str(pattern_raw) if u.Guards.is_type(pattern_raw, str) else "*.ldif"
+            )
+            files = [path for path in directory.rglob(pattern) if path.is_file()]
+            files.sort()
+            return files
 
         def _classify_entry_type(
             self,

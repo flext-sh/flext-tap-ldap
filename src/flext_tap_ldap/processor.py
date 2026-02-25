@@ -85,7 +85,15 @@ class Entry:
                 dn=FlextLdifDistinguishedName(value=self.dn),
                 attributes=FlextLdifModels.Ldif.Attributes(attributes=self.attributes),
             )
-        except Exception:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ):
             # Fallback: create minimal entry for testing convenience
             return FlextLdifModels.Ldif.Entry(
                 dn=FlextLdifDistinguishedName(value=self.dn),
@@ -143,7 +151,15 @@ class Entry:
             return result.is_success and bool(
                 result.value and result.value.valid_entries > 0,
             )
-        except Exception:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ):
             # Fallback to basic validation for testing convenience
             return bool(self.dn and self.dn.strip())
 
@@ -163,7 +179,15 @@ class Entry:
             # Use flext-ldif DN parsing capabilities
             dn_obj = FlextLdifDistinguishedName(value=self.dn)
             return {"dn": "self.dn", "components": dn_obj.value}
-        except Exception:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ):
             return {"dn": self.dn}
 
     def remove_attribute(self, name: str) -> None:
@@ -286,7 +310,15 @@ class FlextTapLdapProcessor:
                 content = self._read_file_content(file_path, "latin-1")
                 result = self._parse_ldif_content(content, file_path)
                 yield from self._yield_entries_from_result(result)
-            except Exception as e:
+            except (
+                ValueError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                OSError,
+                RuntimeError,
+                ImportError,
+            ) as e:
                 self._handle_parsing_error(file_path, e, "latin-1")
 
     def parse_content(
@@ -319,7 +351,15 @@ class FlextTapLdapProcessor:
                     yield convenience_entry
                     self.processed_entries += 1
 
-        except Exception as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             error_msg = f"Failed to parse LDIF content from {source_name}: {e}"
             if self.ignore_errors:
                 logger.exception(error_msg)
@@ -449,7 +489,15 @@ class Validator:
             # result: FlextResult[object] = self._api.validate([entry._flext_entry])
             # return result.is_success and bool(result.value)
             return True  # Placeholder - always return True for now
-        except Exception as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             self.validation_errors.append(f"Validation error for {entry.dn}: {e}")
             return False
 
@@ -489,7 +537,15 @@ class Validator:
             valid_count = len(entries)
             invalid_count = 0
 
-        except Exception:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ):
             # Fallback to individual validation
             for entry in entries:
                 if self.validate_entry(entry):
@@ -520,10 +576,104 @@ class Transformer:
         self._api = FlextLdif()
 
     def transform_entry(self, entry: Entry) -> Entry:
-        """Transform LDIF entry - placeholder for future enhancements."""
-        # For now, return entry as-is
-        # Future: integrate with flext-ldif transformation capabilities
-        return entry
+        """Transform LDIF entry using configured transformation rules."""
+        transformed = Entry(entry.dn, {k: list(v) for k, v in entry.attributes.items()})
+        transformed.change_type = entry.change_type
+        transformed.controls = entry.controls.copy()
+
+        raw_schema_mappings = self.transformation_rules.get("schema_mappings")
+        if isinstance(raw_schema_mappings, Mapping):
+            transformed = self.apply_schema_mappings(transformed, raw_schema_mappings)
+
+        raw_mappings = self.transformation_rules.get("attribute_mappings")
+        mappings: dict[str, str] = {}
+        if isinstance(raw_mappings, Mapping):
+            for source_attr, target_attr in raw_mappings.items():
+                if isinstance(source_attr, str) and isinstance(target_attr, str):
+                    mappings[source_attr] = target_attr
+        if mappings:
+            transformed = self.apply_attribute_mappings(transformed, mappings)
+
+        raw_value_mappings = self.transformation_rules.get("attribute_value_mappings")
+        if isinstance(raw_value_mappings, Mapping):
+            for attr_name, attr_value_map in raw_value_mappings.items():
+                if not isinstance(attr_name, str) or not isinstance(
+                    attr_value_map, Mapping
+                ):
+                    continue
+                existing_values = transformed.attributes.get(attr_name)
+                if existing_values is None:
+                    continue
+                mapped_values: list[str] = []
+                for value in existing_values:
+                    mapped = attr_value_map.get(value, value)
+                    mapped_values.append(str(mapped))
+                transformed.attributes[attr_name] = mapped_values
+
+        raw_remove_attributes = self.transformation_rules.get("remove_attributes")
+        if isinstance(raw_remove_attributes, list):
+            for attr_name in raw_remove_attributes:
+                if isinstance(attr_name, str):
+                    transformed.attributes.pop(attr_name, None)
+
+        raw_add_attributes = self.transformation_rules.get("add_attributes")
+        if isinstance(raw_add_attributes, Mapping):
+            for attr_name, value in raw_add_attributes.items():
+                if not isinstance(attr_name, str):
+                    continue
+                if isinstance(value, list):
+                    transformed.add_attribute(attr_name, [str(item) for item in value])
+                else:
+                    transformed.add_attribute(attr_name, str(value))
+
+        return transformed
+
+    def apply_schema_mappings(
+        self,
+        entry: Entry,
+        schema_mappings: Mapping[str, t.GeneralValueType],
+    ) -> Entry:
+        """Apply schema mappings to normalize output attributes."""
+        transformed_entry = Entry(
+            entry.dn, {k: list(v) for k, v in entry.attributes.items()}
+        )
+        transformed_entry.change_type = entry.change_type
+        transformed_entry.controls = entry.controls.copy()
+
+        for target_attr, mapping in schema_mappings.items():
+            if not isinstance(target_attr, str):
+                continue
+
+            source_attr: str | None = None
+            default_values: list[str] | None = None
+
+            if isinstance(mapping, str):
+                source_attr = mapping
+            elif isinstance(mapping, Mapping):
+                source_raw = mapping.get("source")
+                if isinstance(source_raw, str):
+                    source_attr = source_raw
+
+                default_raw = mapping.get("default")
+                if isinstance(default_raw, list):
+                    default_values = [str(value) for value in default_raw]
+                elif default_raw is not None:
+                    default_values = [str(default_raw)]
+
+            if source_attr is None:
+                continue
+
+            source_values = transformed_entry.attributes.get(source_attr)
+            if source_values:
+                transformed_entry.attributes[target_attr] = [
+                    str(value) for value in source_values
+                ]
+                continue
+
+            if default_values is not None:
+                transformed_entry.attributes[target_attr] = default_values
+
+        return transformed_entry
 
     def apply_attribute_mappings(
         self,
