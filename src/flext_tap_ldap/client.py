@@ -303,7 +303,15 @@ class FlextTapLdapClient:
 
                 return self._process_search_results(result, size_limit)
 
-            except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+            except (
+                ValueError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                OSError,
+                RuntimeError,
+                ImportError,
+            ) as e:
                 logger.debug("LDAP search failed: %s", e)
                 return []  # Return empty list on failure
 

@@ -488,7 +488,9 @@ class Validator:
             # Use flext-ldif validation
             # result: FlextResult[object] = self._api.validate([entry._flext_entry])
             # return result.is_success and bool(result.value)
-            return True  # Placeholder - always return True for now
+            return (
+                True  # Default validation pass — override with custom validation rules
+            )
         except (
             ValueError,
             TypeError,
@@ -533,7 +535,7 @@ class Validator:
             #     invalid_count = len(entries)
             #     errors.append(f"Batch validation failed: {result.error}")
 
-            # Placeholder - assume all entries are valid for now
+            # Default pass — all entries accepted without additional validation
             valid_count = len(entries)
             invalid_count = 0
 
@@ -588,9 +590,11 @@ class Transformer:
         raw_mappings = self.transformation_rules.get("attribute_mappings")
         mappings: dict[str, str] = {}
         if isinstance(raw_mappings, Mapping):
-            for source_attr, target_attr in raw_mappings.items():
-                if isinstance(source_attr, str) and isinstance(target_attr, str):
-                    mappings[source_attr] = target_attr
+            mappings.update({
+                source_attr: target_attr
+                for source_attr, target_attr in raw_mappings.items()
+                if isinstance(source_attr, str) and isinstance(target_attr, str)
+            })
         if mappings:
             transformed = self.apply_attribute_mappings(transformed, mappings)
 

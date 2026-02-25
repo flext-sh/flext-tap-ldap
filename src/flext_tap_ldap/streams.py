@@ -235,7 +235,15 @@ class FlextTapLdapStreams:
                     timeout=connection_config.timeout_seconds,
                     page_size=_coerce_positive_int(page_size_raw, 1000),
                 )
-            except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+            except (
+                ValueError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                OSError,
+                RuntimeError,
+                ImportError,
+            ) as e:
                 err_msg = str(e)
                 logger.warning("Failed to create LDAP client: %s", err_msg)
                 self.client = None
@@ -284,7 +292,15 @@ class FlextTapLdapStreams:
 
                 return results
 
-            except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+            except (
+                ValueError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                OSError,
+                RuntimeError,
+                ImportError,
+            ) as e:
                 err_msg = str(e)
                 logger.warning("LDAP search failed: %s, using fallback data", err_msg)
                 return self._get_fallback_data()
@@ -632,7 +648,15 @@ class FlextTapLdapStreams:
                         for record in results:
                             yield record
                         return  # Found schema, no need to try other base DNs
-                except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+                except (
+                    ValueError,
+                    TypeError,
+                    KeyError,
+                    AttributeError,
+                    OSError,
+                    RuntimeError,
+                    ImportError,
+                ) as e:
                     logger.debug(
                         "Schema search failed for base DN '%s': %s",
                         base_dn,

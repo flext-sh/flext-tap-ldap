@@ -642,7 +642,15 @@ class FlextTapLdapServices:
                     normalized,
                 )
 
-            except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+            except (
+                ValueError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                OSError,
+                RuntimeError,
+                ImportError,
+            ) as e:
                 logger.exception("Error processing LDIF file %s", file_path)
                 return FlextResult[list[Mapping[str, t.GeneralValueType]]].fail(
                     f"LDIF processing failed: {e}",
@@ -682,7 +690,15 @@ class FlextTapLdapServices:
                     validation_data,
                 )
 
-            except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+            except (
+                ValueError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                OSError,
+                RuntimeError,
+                ImportError,
+            ) as e:
                 logger.exception("Error validating LDIF file %s", file_path)
                 return FlextResult[Mapping[str, t.GeneralValueType]].fail(
                     f"LDIF validation failed: {e}",
@@ -719,7 +735,15 @@ class FlextTapLdapServices:
                     file_stats,
                 )
 
-            except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+            except (
+                ValueError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                OSError,
+                RuntimeError,
+                ImportError,
+            ) as e:
                 logger.exception("Error getting LDIF statistics for %s", file_path)
                 return FlextResult[Mapping[str, t.GeneralValueType]].fail(
                     f"LDIF statistics failed: {e}",
