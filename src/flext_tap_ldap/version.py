@@ -9,24 +9,26 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from importlib.metadata import metadata
+
+from pydantic import BaseModel, ConfigDict, Field
 
 _metadata = metadata("flext_tap_ldap")
 
 
-@dataclass(frozen=True)
-class FlextMeltanoTapLdapVersion:
+class FlextMeltanoTapLdapVersion(BaseModel):
     """Version information container."""
 
-    version: str
-    version_info: tuple[int | str, ...]
-    title: str
-    description: str
-    author: str
-    author_email: str
-    license_: str
-    url: str
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    version: str = Field(description="Version string")
+    version_info: tuple[int | str, ...] = Field(description="Version tuple")
+    title: str = Field(description="Project title")
+    description: str = Field(description="Project description")
+    author: str = Field(description="Author name")
+    author_email: str = Field(description="Author email")
+    license_: str = Field(description="License identifier")
+    url: str = Field(description="Project URL")
 
 
 VERSION = FlextMeltanoTapLdapVersion(

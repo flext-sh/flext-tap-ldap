@@ -11,7 +11,6 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
@@ -19,7 +18,7 @@ from uuid import uuid4
 from flext_core import FlextLogger, FlextResult
 from flext_core.typings import t
 from flext_ldif import FlextLdif, FlextLdifModels
-from pydantic import ConfigDict, TypeAdapter, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
 
 from flext_tap_ldap.settings import FlextTapLdapSettings
 
@@ -54,48 +53,44 @@ def _as_str(value: object) -> str | None:
         return None
 
 
-@dataclass
-class LDAPConnection:
+class LDAPConnection(BaseModel):
     """LDAP connection model."""
 
-    id: str = field(default_factory=lambda: str(uuid4()))
-    host: str = ""
-    port: int = 389
-    bind_dn: str | None = None
-    password: str | None = None
-    use_ssl: bool = False
-    timeout: int = 30
-    last_tested: datetime | None = None
-    last_error: str | None = None
+    model_config = ConfigDict(extra="forbid")
 
-    def __post_init__(self) -> None:
-        """Initialize connection after creation."""
-        if not self.id:
-            self.id = str(uuid4())
+    id: str = Field(default_factory=lambda: str(uuid4()), description="Connection ID")
+    host: str = Field(default="", description="LDAP host")
+    port: int = Field(default=389, description="LDAP port")
+    bind_dn: str | None = Field(default=None, description="Bind DN")
+    password: str | None = Field(default=None, description="Bind password")
+    use_ssl: bool = Field(default=False, description="Use SSL")
+    timeout: int = Field(default=30, description="Connection timeout")
+    last_tested: datetime | None = Field(default=None, description="Last test time")
+    last_error: str | None = Field(default=None, description="Last error message")
 
 
-@dataclass
-class LDAPStream:
+class LDAPStream(BaseModel):
     """LDAP stream model."""
 
-    id: str = field(default_factory=lambda: str(uuid4()))
-    name: str = ""
-    connection_id: str = ""
-    stream_type: str = ""
-    search_filter: str = ""
-    attributes: list[str] = field(default_factory=list)
-    tap_stream_id: str = ""
-    key_properties: list[str] = field(default_factory=lambda: ["dn"])
-    replication_method: str = "FULL_TABLE"
-    replication_key: str | None = None
-    stream_schema: dict[str, t.GeneralValueType] = field(default_factory=dict)
+    model_config = ConfigDict(extra="forbid")
 
-    def __post_init__(self) -> None:
-        """Initialize stream after creation."""
-        if not self.id:
-            self.id = str(uuid4())
-        if not self.tap_stream_id:
-            self.tap_stream_id = f"{self.name}_stream"
+    id: str = Field(default_factory=lambda: str(uuid4()), description="Stream ID")
+    name: str = Field(default="", description="Stream name")
+    connection_id: str = Field(default="", description="Connection ID")
+    stream_type: str = Field(default="", description="Stream type")
+    search_filter: str = Field(default="", description="LDAP search filter")
+    attributes: list[str] = Field(default_factory=list, description="LDAP attributes")
+    tap_stream_id: str = Field(default="", description="Tap stream ID")
+    key_properties: list[str] = Field(
+        default_factory=lambda: ["dn"], description="Key properties"
+    )
+    replication_method: str = Field(
+        default="FULL_TABLE", description="Replication method"
+    )
+    replication_key: str | None = Field(default=None, description="Replication key")
+    stream_schema: dict[str, t.GeneralValueType] = Field(
+        default_factory=dict, description="Stream schema"
+    )
 
     def update_schema(self, schema: Mapping[str, t.GeneralValueType]) -> None:
         """Update stream schema."""
