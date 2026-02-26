@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Iterator, Mapping
 from pathlib import Path
 from typing import override
 
@@ -99,9 +99,10 @@ class FlextTapLdapLdifStreams:
 
         def get_records(
             self,
-            _context: Mapping[str, object] | None = None,
-        ) -> t.Iterator[dict[str, object]]:
+            context: Mapping[str, object] | None = None,
+        ) -> Iterator[dict[str, t.GeneralValueType]]:
             """Get LDIF records using flext-ldif processing."""
+            _ = context
             logger.info("Processing LDIF files using flext-ldif library")
             # Get LDIF files from config
             raw_files = self.config.get("ldif_files", [])
@@ -156,7 +157,9 @@ class FlextTapLdapLdifStreams:
             )
 
             try:
-                server = Server(host_raw, port=port, use_ssl=use_ssl, get_info=None)
+                server = Server(
+                    host_raw, port=port, use_ssl=use_ssl, get_info="NO_INFO"
+                )
                 with Connection(
                     server=server,
                     user=bind_dn,
@@ -259,16 +262,18 @@ class FlextTapLdapLdifStreams:
             # Guard against None dn/attributes (RFC violation entries)
             dn_value = flext_entry.dn.value if flext_entry.dn is not None else ""
             attrs = flext_entry.attributes
+            object_classes: list[str] = []
+            entry_type = "other"
             if attrs is not None:
                 object_classes = attrs.get_values("objectClass")
-                self._classify_entry_type(object_classes)
+                entry_type = self._classify_entry_type(object_classes)
                 entry_attrs = attrs.attributes
             else:
                 entry_attrs = {}
             return {
                 "dn": dn_value,
-                "entry_type": "entry_type",
-                "object_classes": "object_classes",
+                "entry_type": entry_type,
+                "object_classes": object_classes,
                 "attributes": entry_attrs,
             }
 
@@ -328,9 +333,10 @@ class FlextTapLdapLdifStreams:
 
         def get_records(
             self,
-            _context: Mapping[str, object] | None = None,
-        ) -> t.Iterator[dict[str, object]]:
+            context: Mapping[str, object] | None = None,
+        ) -> Iterator[dict[str, t.GeneralValueType]]:
             """Get analysis records using flext-ldif analysis capabilities."""
+            _ = context
             logger.info("Generating LDIF analysis using flext-ldif library")
             # Get LDIF files from config
             raw_files = self.config.get("ldif_files", [])
@@ -359,17 +365,21 @@ class FlextTapLdapLdifStreams:
                                 pass
                         # Merge counts
                         raw_entry_types = stats.get("entry_types", {})
-                        if u.is_dict_like(raw_entry_types):
+                        if isinstance(raw_entry_types, Mapping):
                             for entry_type, count in raw_entry_types.items():
-                                if count.__class__ in {int, str}:
+                                if isinstance(entry_type, str) and isinstance(
+                                    count, int | str
+                                ):
                                     entry_types[entry_type] = entry_types.get(
                                         entry_type,
                                         0,
                                     ) + int(count)
                         raw_object_classes = stats.get("object_classes", {})
-                        if u.is_dict_like(raw_object_classes):
+                        if isinstance(raw_object_classes, Mapping):
                             for obj_class, count in raw_object_classes.items():
-                                if count.__class__ in {int, str}:
+                                if isinstance(obj_class, str) and isinstance(
+                                    count, int | str
+                                ):
                                     object_classes[obj_class] = object_classes.get(
                                         obj_class,
                                         0,
@@ -386,26 +396,30 @@ class FlextTapLdapLdifStreams:
                             case _:
                                 pass
                         raw_entry_types = stats.get("entry_types", {})
-                        if u.is_dict_like(raw_entry_types):
+                        if isinstance(raw_entry_types, Mapping):
                             for entry_type, count in raw_entry_types.items():
-                                if count.__class__ in {int, str}:
+                                if isinstance(entry_type, str) and isinstance(
+                                    count, int | str
+                                ):
                                     entry_types[entry_type] = entry_types.get(
                                         entry_type,
                                         0,
                                     ) + int(count)
                         raw_object_classes = stats.get("object_classes", {})
-                        if u.is_dict_like(raw_object_classes):
+                        if isinstance(raw_object_classes, Mapping):
                             for obj_class, count in raw_object_classes.items():
-                                if count.__class__ in {int, str}:
+                                if isinstance(obj_class, str) and isinstance(
+                                    count, int | str
+                                ):
                                     object_classes[obj_class] = object_classes.get(
                                         obj_class,
                                         0,
                                     ) + int(count)
                 yield {
                     "analysis_id": "ldif_summary",
-                    "total_entries": "total_entries",
-                    "entry_types": "entry_types",
-                    "object_classes": "object_classes",
+                    "total_entries": total_entries,
+                    "entry_types": entry_types,
+                    "object_classes": object_classes,
                 }
             except (
                 ValueError,
@@ -454,9 +468,9 @@ class FlextTapLdapLdifStreams:
                         for oc in oc_strs:
                             object_classes[oc] = object_classes.get(oc, 0) + 1
                     return {
-                        "total_entries": "total_entries",
-                        "entry_types": "entry_types",
-                        "object_classes": "object_classes",
+                        "total_entries": len(result.data),
+                        "entry_types": entry_types,
+                        "object_classes": object_classes,
                     }
                 logger.error(f"Failed to analyze LDIF file {ldif_file}: {result.error}")
                 return {"total_entries": 0, "entry_types": {}, "object_classes": {}}

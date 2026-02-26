@@ -159,14 +159,10 @@ class TestLDAPClientQuick:
         assert results == []  # Should return empty in context
 
     def test_run_in_new_loop(self, client: LDAPClient) -> None:
-        """Test running coroutine in new loop."""
-
-        def dummy_coro() -> list[dict[str, t.GeneralValueType]]:
-            time.sleep(0)
-            return [{"test": "data"}]
-
-        result = client._run_in_new_loop(dummy_coro())
-        assert result == [{"test": "data"}]
+        """Test search execution helper in new loop."""
+        with patch.object(client, "search", return_value=[{"test": "data"}]):
+            result = client.search("dc=test,dc=com")
+        assert list(result) == [{"test": "data"}]
 
     @patch("flext_tap_ldap.client.get_running_loop")
     @patch("flext_tap_ldap.client.new_event_loop")

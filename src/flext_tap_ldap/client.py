@@ -14,7 +14,8 @@ from asyncio import get_running_loop, new_event_loop, set_event_loop
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
-from flext_core import FlextLogger, r, t, u, x
+from flext_core import FlextLogger, r, u, x
+from flext_core.typings import t
 from flext_ldap import (
     FlextLdap,
     FlextLdapConnection,
@@ -23,6 +24,7 @@ from flext_ldap import (
     c,
     m,
 )
+from pydantic import BaseModel
 
 logger = FlextLogger(__name__)
 
@@ -203,8 +205,8 @@ class FlextTapLdapClient:
 
         def _convert_entry_to_dict(
             self,
-            entry_data: m.Ldif.Entry | Mapping[str, t.GeneralValueType] | None,
-        ) -> Mapping[str, t.GeneralValueType]:
+            entry_data: BaseModel | Mapping[str, t.GeneralValueType] | None,
+        ) -> dict[str, t.GeneralValueType]:
             """Convert FlextLdapModels.Entry to dict[str, t.GeneralValueType] format for testing convenience.
 
             Single Responsibility: Handle only entry format conversion.
@@ -226,10 +228,10 @@ class FlextTapLdapClient:
             # It's already a dict[str, t.GeneralValueType] (from mock) - ensure proper type conversion
             if entry_data:
                 if u.is_dict_like(entry_data):
-                    return entry_data
+                    return dict(entry_data)
                 # Convert to dict[str, t.GeneralValueType] if it's not already
                 return (
-                    dict[str, t.GeneralValueType](entry_data)
+                    dict(entry_data)
                     if getattr(entry_data, "__iter__", None) is not None
                     else {}
                 )
@@ -249,23 +251,28 @@ class FlextTapLdapClient:
                 return entries
 
             # Handle both SearchResult objects and direct lists for testing
-            data_entries = (
-                result.data.entries
-                if getattr(result.data, "entries", None) is not None
-                else result.data
-            )
+            raw_entries: object = result.data
+            if (
+                hasattr(raw_entries, "entries")
+                and getattr(raw_entries, "entries", None) is not None
+            ):
+                data_entries = list(getattr(raw_entries, "entries"))
+            elif isinstance(raw_entries, Sequence):
+                data_entries = list(raw_entries)
+            else:
+                data_entries = []
 
             for entries_returned, entry_data in enumerate(data_entries):
                 if size_limit > 0 and entries_returned >= size_limit:
                     break
 
-                narrowed_entry: m.Ldif.Entry | Mapping[str, t.GeneralValueType] | None
+                narrowed_entry: BaseModel | Mapping[str, t.GeneralValueType] | None
                 if x.is_base_model(entry_data) or u.is_dict_like(entry_data):
                     narrowed_entry = entry_data
                 else:
                     narrowed_entry = None
 
-                converted: dict[str, t.GeneralValueType] = self._convert_entry_to_dict(
+                converted = self._convert_entry_to_dict(
                     narrowed_entry,
                 )
                 entries.append(converted)
@@ -386,9 +393,12 @@ class FlextTapLdapClient:
         ) -> Mapping[str, t.GeneralValueType]:
             """Process Oracle-specific LDAP entries for testing convenience."""
             raw_attrs = entry.get("attributes", {})
-            attributes: dict[str, t.GeneralValueType] = (
-                raw_attrs if u.is_dict_like(raw_attrs) else {}
-            )
+            attributes: dict[str, t.GeneralValueType] = {}
+            if isinstance(raw_attrs, Mapping):
+                attributes = {
+                    str(attr_name): attr_value
+                    for attr_name, attr_value in raw_attrs.items()
+                }
             # Handle Oracle password attributes
             if "orclPassword" in attributes:
                 # Oracle OID stores passwords differently
@@ -451,7 +461,7 @@ class FlextTapLdapClient:
             results: list[Mapping[str, t.GeneralValueType]] = []
             for entry in search_result:
                 if u.is_dict_like(entry):
-                    entry_dict: Mapping[str, t.GeneralValueType] = entry
+                    entry_dict: Mapping[str, t.GeneralValueType] = dict(entry)
                 else:
                     entry_dict = self._convert_entry_to_dict(entry)
                 if oracle_oid_mode:

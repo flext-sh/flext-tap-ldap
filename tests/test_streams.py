@@ -8,7 +8,6 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 from flext_tap_ldap import t
 
-from typing import ClassVar
 from unittest.mock import Mock, patch
 
 import pytest
@@ -128,12 +127,14 @@ class TestUsersStream:
         ]
 
         stream = FlextTapLdapStreams.UsersStream(mock_tap)
-        records = list(stream.get_records(_context=None))
+        records = list(stream.get_records(context=None))
 
         # Stream now returns fallback test data (1 record) instead of mock LDAP data
         assert len(records) == 1  # Should get fallback test record
-        assert records[0]["dn"] == "uid=jdoe,ou=users,dc=test,dc=com"
-        assert records[0]["uid"] == "jdoe"
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert first_record["dn"] == "uid=jdoe,ou=users,dc=test,dc=com"
+        assert first_record["uid"] == "jdoe"
         # LDAP client is still called even though fallback is used
         mock_client_class.assert_called_once()
 
@@ -150,12 +151,14 @@ class TestUsersStream:
         mock_client.search.return_value = []
 
         stream = FlextTapLdapStreams.GroupsStream(mock_tap)
-        records = list(stream.get_records(_context=None))
+        records = list(stream.get_records(context=None))
 
         # Should get fallback test data when no LDAP data
         assert len(records) == 1
-        assert records[0]["dn"] == "cn=developers,ou=groups,dc=test,dc=com"
-        assert records[0]["cn"] == "developers"
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert first_record["dn"] == "cn=developers,ou=groups,dc=test,dc=com"
+        assert first_record["cn"] == "developers"
         mock_client_class.assert_called_once()
 
     @patch("flext_tap_ldap.client.LDAPClient")
@@ -175,8 +178,10 @@ class TestUsersStream:
 
         # Should get fallback test data when no LDAP data
         assert len(records) == 1
-        assert records[0]["dn"] == "ou=users,dc=test,dc=com"
-        assert records[0]["ou"] == "users"
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert first_record["dn"] == "ou=users,dc=test,dc=com"
+        assert first_record["ou"] == "users"
         mock_client_class.assert_called_once()
 
     @patch("flext_tap_ldap.client.LDAPClient")
@@ -192,12 +197,14 @@ class TestUsersStream:
         mock_client.search.return_value = []
 
         stream = FlextTapLdapStreams.SchemaStream(mock_tap)
-        records = list(stream.get_records(_context=None))
+        records = list(stream.get_records(context=None))
 
         # Should get fallback test data when no LDAP data
         assert len(records) == 1
-        assert records[0]["name"] == "cn"
-        assert records[0]["type"] == "attributeType"
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert first_record["dn"] == "cn=schema"
+        assert first_record["cn"] == "schema"
         mock_client_class.assert_called_once()
 
 
@@ -475,7 +482,9 @@ class TestCustomStream:
 
         # Should get fallback test data when no LDAP data
         assert len(records) == 1
-        assert "cn=custom_entry,dc=test,dc=com" in records[0]["dn"]
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert "cn=test-custom_test,dc=test,dc=com" in str(first_record["dn"])
         mock_client_class.assert_called_once()
 
     def test_custom_stream_schema_type_mappings(self, mock_tap: Mock) -> None:
@@ -600,16 +609,17 @@ class TestLDAPBaseStreamDirectUsage:
 
         # Create a subclass to test the base functionality
         class TestBaseStream(FlextTapLdapStreams.LDAPBaseStream):
-            name = "test_base"
-            schema: ClassVar[dict[str, t.GeneralValueType]] = {
-                "properties": {"dn": {"type": "string"}},
-            }
+            pass
 
         # Create instance of test subclass
-        base_stream = TestBaseStream(mock_tap)
+        base_stream = TestBaseStream(
+            mock_tap,
+            name="test_base",
+            schema={"properties": {"dn": {"type": "string"}}},
+        )
 
         # Should yield empty (base implementation)
-        records = list(base_stream.get_records(_context=None))
+        records = list(base_stream.get_records(context=None))
         assert len(records) == 0
 
 
@@ -642,11 +652,13 @@ class TestStreamExceptionHandling:
         mock_client.search.side_effect = Exception("Connection failed")
 
         stream = FlextTapLdapStreams.UsersStream(mock_tap_failing)
-        records = list(stream.get_records(_context=None))
+        records = list(stream.get_records(context=None))
 
         # Should fall back to test data when exception occurs
         assert len(records) == 1
-        assert records[0]["dn"] == "uid=jdoe,ou=users,dc=test,dc=com"
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert first_record["dn"] == "uid=jdoe,ou=users,dc=test,dc=com"
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_groups_stream_exception_fallback(
@@ -661,11 +673,13 @@ class TestStreamExceptionHandling:
         mock_client.search.side_effect = Exception("Connection failed")
 
         stream = FlextTapLdapStreams.GroupsStream(mock_tap_failing)
-        records = list(stream.get_records(_context=None))
+        records = list(stream.get_records(context=None))
 
         # Should fall back to test data when exception occurs
         assert len(records) == 1
-        assert records[0]["dn"] == "cn=developers,ou=groups,dc=test,dc=com"
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert first_record["dn"] == "cn=developers,ou=groups,dc=test,dc=com"
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_organizational_units_stream_exception_fallback(
@@ -680,11 +694,13 @@ class TestStreamExceptionHandling:
         mock_client.search.side_effect = Exception("Connection failed")
 
         stream = FlextTapLdapStreams.OrganizationalUnitsStream(mock_tap_failing)
-        records = list(stream.get_records(_context=None))
+        records = list(stream.get_records(context=None))
 
         # Should fall back to test data when exception occurs
         assert len(records) == 1
-        assert records[0]["dn"] == "ou=users,dc=test,dc=com"
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert first_record["dn"] == "ou=users,dc=test,dc=com"
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_schema_stream_exception_fallback(
@@ -699,11 +715,13 @@ class TestStreamExceptionHandling:
         mock_client.search.side_effect = Exception("Connection failed")
 
         stream = FlextTapLdapStreams.SchemaStream(mock_tap_failing)
-        records = list(stream.get_records(_context=None))
+        records = list(stream.get_records(context=None))
 
         # Should fall back to test data when exception occurs
         assert len(records) == 1
-        assert records[0]["name"] == "cn"
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert first_record["dn"] == "cn=schema"
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_custom_stream_exception_fallback(
@@ -722,8 +740,10 @@ class TestStreamExceptionHandling:
             search_filter="(objectClass=*)",
         )
         stream = FlextTapLdapStreams.CustomStream(tap=mock_tap_failing, params=params)
-        records = list(stream.get_records(_context=None))
+        records = list(stream.get_records(context=None))
 
         # Should fall back to test data when exception occurs
         assert len(records) == 1
-        assert "cn=custom_entry,dc=test,dc=com" in records[0]["dn"]
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert "cn=test-failing_custom,dc=test,dc=com" in str(first_record["dn"])

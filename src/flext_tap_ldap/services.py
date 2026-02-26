@@ -16,8 +16,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
-from flext_core import FlextLogger, FlextResult, t
-from flext_ldif import FlextLdif
+from flext_core import FlextLogger, FlextResult
+from flext_core.typings import t
+from flext_ldif import FlextLdif, FlextLdifModels
 from pydantic import ConfigDict, TypeAdapter, ValidationError
 
 from flext_tap_ldap.settings import FlextTapLdapSettings
@@ -312,8 +313,8 @@ class FlextTapLdapServices:
                 self._connections[connection_id] = connection
 
                 return FlextResult[Mapping[str, t.GeneralValueType]].ok({
-                    "success": "True",
-                    "connection": "connection",
+                    "success": True,
+                    "connection": connection.id,
                 })
             except (RuntimeError, ValueError, TypeError) as e:
                 connection = self._connections.get(connection_id)
@@ -406,7 +407,7 @@ class FlextTapLdapServices:
                         "dn": {"type": "string"},
                         "objectClass": {"type": "array", "items": {"type": "string"}},
                     },
-                    "additionalProperties": "True",
+                    "additionalProperties": True,
                 }
 
                 # Update stream with schema
@@ -612,8 +613,10 @@ class FlextTapLdapServices:
                 logger.info("Processing LDIF file: %s", file_path)
 
                 # Use flext-ldif to parse the file
-                result: FlextResult[list[t.GeneralValueType]] = self._ldif_api.parse(
-                    Path(file_path),
+                result: FlextResult[list[FlextLdifModels.Ldif.Entry]] = (
+                    self._ldif_api.parse(
+                        Path(file_path),
+                    )
                 )
 
                 if not result.is_success:
@@ -621,9 +624,8 @@ class FlextTapLdapServices:
                         f"Failed to parse LDIF file: {result.error}",
                     )
 
-                entries = result.data or []
-                entry_list = _as_list(entries)
-                entry_count = len(entry_list) if entry_list is not None else 0
+                entries: list[FlextLdifModels.Ldif.Entry] = result.data or []
+                entry_count = len(entries)
                 logger.info(
                     "Successfully processed %s entries from %s",
                     entry_count,
@@ -632,9 +634,13 @@ class FlextTapLdapServices:
 
                 # Normalize to list[dict[str, t.GeneralValueType]]
                 normalized: list[Mapping[str, t.GeneralValueType]] = []
-                for entry in entry_list or []:
-                    dn_value = str(getattr(entry, "dn", ""))
-                    attributes_raw = getattr(entry, "attributes", {})
+                for entry in entries:
+                    dn_value = entry.dn.value if entry.dn is not None else ""
+                    attributes_raw = (
+                        entry.attributes.attributes
+                        if entry.attributes is not None
+                        else {}
+                    )
                     attrs = _as_map(attributes_raw) or {}
                     normalized.append({"dn": dn_value, "attributes": attrs})
 
@@ -665,8 +671,10 @@ class FlextTapLdapServices:
                 logger.info("Validating LDIF file: %s", file_path)
 
                 # Basic validation via parsing using flext-ldif
-                result: FlextResult[list[t.GeneralValueType]] = self._ldif_api.parse(
-                    Path(file_path),
+                result: FlextResult[list[FlextLdifModels.Ldif.Entry]] = (
+                    self._ldif_api.parse(
+                        Path(file_path),
+                    )
                 )
 
                 if not result.is_success:
@@ -674,9 +682,8 @@ class FlextTapLdapServices:
                         f"Validation failed: {result.error}",
                     )
 
-                entries = result.data or []
-                entry_list = _as_list(entries)
-                total_entries = len(entry_list) if entry_list is not None else 0
+                entries: list[FlextLdifModels.Ldif.Entry] = result.data or []
+                total_entries = len(entries)
                 # Consider parse success as valid
                 validation_data: dict[str, t.GeneralValueType] = {
                     "total_entries": total_entries,

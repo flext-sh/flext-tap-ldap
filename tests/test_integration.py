@@ -18,6 +18,7 @@ import pytest
 from click.testing import CliRunner
 
 from flext_tap_ldap import FlextTapLdapTap
+from flext_tap_ldap.tap import CLI_COMMAND
 
 
 class TestFlextTapLdapIntegration:
@@ -82,7 +83,9 @@ class TestFlextTapLdapIntegration:
         return catalog_path
 
     @pytest.fixture
-    def state_file(self, tmp_path: Path, sample_state: dict[str, t.GeneralValueType]) -> Path:
+    def state_file(
+        self, tmp_path: Path, sample_state: dict[str, t.GeneralValueType]
+    ) -> Path:
         """Create a state file fixture for testing."""
         state_path = tmp_path / "state.json"
         with Path(state_path).open("w", encoding="utf-8") as f:
@@ -101,7 +104,7 @@ class TestFlextTapLdapIntegration:
         mock_client_instance = mock_ldap_client.return_value
         mock_client_instance.search.return_value.__aenter__.return_value = []
         result = runner.invoke(
-            FlextTapLdapTap.cli,
+            CLI_COMMAND,
             ["--config", str(config_file), "--discover"],
             catch_exceptions=False,
         )
@@ -142,7 +145,7 @@ class TestFlextTapLdapIntegration:
             },
         ]
         result = runner.invoke(
-            FlextTapLdapTap.cli,
+            CLI_COMMAND,
             ["--config", str(config_file), "--catalog", str(catalog_file)],
             catch_exceptions=False,
         )
@@ -172,7 +175,7 @@ class TestFlextTapLdapIntegration:
         mock_client_instance = mock_ldap_client.return_value
         mock_client_instance.search.return_value.__aenter__.return_value = []
         result = runner.invoke(
-            FlextTapLdapTap.cli,
+            CLI_COMMAND,
             [
                 "--config",
                 str(config_file),
@@ -228,7 +231,7 @@ class TestFlextTapLdapIntegration:
             mock_client_instance = mock_ldap_client.return_value
             mock_client_instance.search.return_value.__aenter__.return_value = []
             result = runner.invoke(
-                FlextTapLdapTap.cli,
+                CLI_COMMAND,
                 ["--config", str(config_file), "--discover"],
                 catch_exceptions=False,
             )
@@ -255,7 +258,7 @@ class TestFlextTapLdapIntegration:
         with Path(config_file).open("w", encoding="utf-8") as f:
             json.dump({"invalid": "config"}, f)  # Missing required fields
         result = runner.invoke(
-            FlextTapLdapTap.cli,
+            CLI_COMMAND,
             ["--config", str(config_file), "--discover"],
         )
         # Check if validation warning occurred in captured logs or result indicates failure
@@ -303,7 +306,7 @@ class TestFlextTapLdapIntegration:
 
         mock_client_instance.search = mock_search
         result = runner.invoke(
-            FlextTapLdapTap.cli,
+            CLI_COMMAND,
             ["--config", str(config_file), "--catalog", str(catalog_file)],
             catch_exceptions=False,
         )

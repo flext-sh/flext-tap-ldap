@@ -13,10 +13,9 @@ from __future__ import annotations
 from typing import Self
 
 from flext_core import FlextConstants, FlextResult, FlextSettings
+from flext_core.typings import t
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
-
-from flext_tap_ldap.typings import t
 
 
 class ConfigDefaults(BaseModel):
@@ -267,9 +266,9 @@ class FlextTapLdapSettings(FlextSettings):
         return cls()
 
     @classmethod
-    def create_for_development(cls, **overrides: t.JsonValue) -> Self:
+    def create_for_development(cls, **overrides: t.GeneralValueType) -> Self:
         """Create development configuration instance."""
-        dev_defaults: dict[str, t.JsonValue] = {
+        dev_defaults: dict[str, t.GeneralValueType] = {
             "ldap_host": "localhost",
             "ldap_port": 10389,
             "ldap_use_ssl": False,
@@ -280,12 +279,12 @@ class FlextTapLdapSettings(FlextSettings):
             "ldif_max_errors": 10,
         }
         dev_defaults.update(overrides)
-        return cls(**dev_defaults)
+        return cls.model_validate(dev_defaults)
 
     @classmethod
-    def create_for_production(cls, **overrides: t.JsonValue) -> Self:
+    def create_for_production(cls, **overrides: t.GeneralValueType) -> Self:
         """Create production configuration instance."""
-        prod_defaults: dict[str, t.JsonValue] = {
+        prod_defaults: dict[str, t.GeneralValueType] = {
             "ldap_use_ssl": True,
             "ldap_timeout": 30,
             "ldap_page_size": 1000,
@@ -294,12 +293,12 @@ class FlextTapLdapSettings(FlextSettings):
             "ldif_max_errors": 0,
         }
         prod_defaults.update(overrides)
-        return cls(**prod_defaults)
+        return cls.model_validate(prod_defaults)
 
     @classmethod
-    def create_for_testing(cls, **overrides: t.JsonValue) -> Self:
+    def create_for_testing(cls, **overrides: t.GeneralValueType) -> Self:
         """Create testing configuration instance."""
-        test_defaults: dict[str, t.JsonValue] = {
+        test_defaults: dict[str, t.GeneralValueType] = {
             "ldap_host": "test-ldap",
             "ldap_port": 3389,
             "ldap_use_ssl": False,
@@ -309,7 +308,7 @@ class FlextTapLdapSettings(FlextSettings):
             "ldif_max_errors": 1,
         }
         test_defaults.update(overrides)
-        return cls(**test_defaults)
+        return cls.model_validate(test_defaults)
 
     def validate_tap_configuration(self) -> FlextResult[bool]:
         """Validate the complete LDAP tap configuration."""

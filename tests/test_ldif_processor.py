@@ -10,6 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import Mock
 
+from flext_core.typings import t
 from flext_tap_ldap import FlextTapLdapLdifStreams, FlextTapLdapProcessor
 from flext_tap_ldap.processor import Entry, Transformer
 
@@ -45,7 +46,7 @@ def test_ldif_directory_processing_traverses_ldif_files(tmp_path: Path) -> None:
 
     seen: list[str] = []
 
-    def _process(ldif_file: str) -> list[dict[str, str]]:
+    def _process(ldif_file: str) -> list[dict[str, t.GeneralValueType]]:
         seen.append(ldif_file)
         return [{"dn": ldif_file}]
 

@@ -18,12 +18,6 @@ from flext_tests import FlextTestsModels
 class TestsFlextMeltanoTapLdapModels(FlextTestsModels, m):
     """Test models combining FlextTestsModels with flext-tap-ldap models."""
 
-    class TapLdap(m.TapLdap):
-        """TapLdap test models namespace."""
-
-        class Tests:
-            """Internal tests declarations."""
-
 
 m = TestsFlextMeltanoTapLdapModels
 

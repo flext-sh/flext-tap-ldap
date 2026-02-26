@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from flext_core import FlextLogger
 from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
@@ -184,9 +184,13 @@ class FlextTapLdapTap(Tap):
         return streams
 
 
+CLI_COMMAND: Any = getattr(FlextTapLdapTap, "cli")
+
+
 def main() -> None:
     """Run the main entry point for the tap."""
-    FlextTapLdapTap.cli()
+    if callable(CLI_COMMAND):
+        CLI_COMMAND()
 
 
 if __name__ == "__main__":

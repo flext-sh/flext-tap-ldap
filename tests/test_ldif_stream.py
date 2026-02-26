@@ -33,12 +33,7 @@ class TestLDIFStreamBasic:
                     "bind_password": "test_password",
                 },
             )
-            stream = FlextTapLdapLdifStreams.LdifStream(
-                tap=tap,
-                name="test_stream",
-                schema={},
-                path=[],
-            )
+            stream = FlextTapLdapLdifStreams.LdifStream(tap=tap)
             assert stream is not None
         except (TypeError, AttributeError, ImportError):
             # If constructor signature is different, just test the class exists

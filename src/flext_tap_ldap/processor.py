@@ -15,7 +15,8 @@ from collections.abc import Iterator, Mapping
 from pathlib import Path
 from typing import override
 
-from flext_core import FlextLogger, FlextResult, t
+from flext_core import FlextLogger, FlextResult
+from flext_core.typings import t
 from flext_ldif import FlextLdif, FlextLdifModels
 from pydantic import ConfigDict, TypeAdapter, ValidationError
 
@@ -74,7 +75,9 @@ class Entry:
                     ldif_content += f"{attr_name}: {value}\n"
             ldif_content += "\n"
 
-            result: FlextResult[list[t.GeneralValueType]] = api.parse(ldif_content)
+            result: FlextResult[list[FlextLdifModels.Ldif.Entry]] = api.parse(
+                ldif_content
+            )
             if result.is_success and result.value and len(result.value) > 0:
                 parsed_entry = _to_ldif_entry(result.value[0])
                 if parsed_entry is not None:
@@ -115,8 +118,8 @@ class Entry:
     def to_dict(self) -> Mapping[str, t.GeneralValueType]:
         """Convert entry to dictionary format."""
         entry_dict: dict[str, t.GeneralValueType] = {
-            "dn": "self.dn",
-            "attributes": dict[str, t.GeneralValueType](self.attributes),
+            "dn": self.dn,
+            "attributes": dict(self.attributes),
         }
 
         if self.change_type:
@@ -178,7 +181,7 @@ class Entry:
         try:
             # Use flext-ldif DN parsing capabilities
             dn_obj = FlextLdifDistinguishedName(value=self.dn)
-            return {"dn": "self.dn", "components": dn_obj.value}
+            return {"dn": self.dn, "components": dn_obj.value}
         except (
             ValueError,
             TypeError,
@@ -252,9 +255,9 @@ class FlextTapLdapProcessor:
         self,
         content: str,
         file_path: Path,
-    ) -> FlextResult[list[t.GeneralValueType]]:
+    ) -> FlextResult[list[FlextLdifModels.Ldif.Entry]]:
         """Parse LDIF content using flext-ldif API."""
-        result: FlextResult[list[t.GeneralValueType]] = self._api.parse(content)
+        result: FlextResult[list[FlextLdifModels.Ldif.Entry]] = self._api.parse(content)
         if not result.is_success:
             error_msg = f"Failed to parse LDIF file {file_path}: {result.error}"
             if self.ignore_errors:
@@ -266,7 +269,7 @@ class FlextTapLdapProcessor:
 
     def _yield_entries_from_result(
         self,
-        result: FlextResult[list[t.GeneralValueType]],
+        result: FlextResult[list[FlextLdifModels.Ldif.Entry]],
     ) -> Iterator[Entry]:
         """Yield testing convenience entries from parse result."""
         if result.value:
@@ -330,7 +333,9 @@ class FlextTapLdapProcessor:
         logger.info("Parsing LDIF content with flext-ldif from %s", source_name)
 
         try:
-            result: FlextResult[list[t.GeneralValueType]] = self._api.parse(content)
+            result: FlextResult[list[FlextLdifModels.Ldif.Entry]] = self._api.parse(
+                content
+            )
             if not result.is_success:
                 error_msg = (
                     f"Failed to parse LDIF content from {source_name}: {result.error}"
@@ -464,8 +469,8 @@ class FlextTapLdapProcessor:
 
             record: dict[str, t.GeneralValueType] = {
                 "type": "RECORD",
-                "stream": "stream_name",
-                "record": "record_attributes",
+                "stream": _stream_name,
+                "record": record_attributes,
             }
             records.append(record)
 
@@ -559,9 +564,9 @@ class Validator:
 
         return {
             "total_entries": len(entries),
-            "valid_entries": "valid_count",
-            "invalid_entries": "invalid_count",
-            "errors": "errors",
+            "valid_entries": valid_count,
+            "invalid_entries": invalid_count,
+            "errors": errors,
         }
 
 
