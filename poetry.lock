@@ -1194,7 +1194,7 @@ name = "flext-core"
 version = "0.12.0.dev0"
 description = "Enterprise Foundation Framework - Modern Python 3.13 + Clean Architecture"
 optional = false
-python-versions = ">=3.13,<3.14"
+python-versions = ">=3.13"
 groups = ["main"]
 files = []
 develop = false
@@ -4367,4 +4367,4 @@ dev = ["autoflake", "bandit", "black", "codespell", "deptry", "django-stubs", "f
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "40a297362b079fcfe14450910c728a8e94269011914dc6c71ac06b6b7d0b3b39"
+content-hash = "f1acbadafaa0c60970f23cd4c92ccb0afe9286f95d28ef41e756b5434e6314a5"
