@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
+import pytest
 from flext_tap_ldap import m
 
 
@@ -59,7 +60,7 @@ class TestTapExecutionCompletedEvent:
         assert event.execution_id == "exec-789"
         assert event.records_processed == 100
         assert event.streams_discovered == 4
-        assert event.duration_seconds == 15.5
+        assert event.duration_seconds == pytest.approx(15.5)
 
     def test_event_defaults(self) -> None:
         """Test event default values."""
@@ -71,7 +72,7 @@ class TestTapExecutionCompletedEvent:
 
         assert event.records_processed == 0
         assert event.streams_discovered == 0
-        assert event.duration_seconds == 0.0
+        assert event.duration_seconds == pytest.approx(0.0)
 
 
 class TestStreamDiscoveredEvent:

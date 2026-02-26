@@ -6,14 +6,11 @@ SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
-from flext_tap_ldap import t
 
 import contextlib
-import time
 from unittest.mock import Mock, patch
 
 import pytest
-
 from flext_tap_ldap import FlextTapLdapClient
 
 LDAPClient = FlextTapLdapClient.LDAPClient

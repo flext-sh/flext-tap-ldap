@@ -6,13 +6,11 @@ SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
-from flext_tap_ldap import t
 
 from unittest.mock import Mock, patch
 
 import pytest
-
-from flext_tap_ldap import FlextTapLdapStreams, FlextTapLdapTap
+from flext_tap_ldap import FlextTapLdapStreams, FlextTapLdapTap, t
 
 
 class TestLDAPBaseStream:

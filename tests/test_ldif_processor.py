@@ -7,9 +7,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import types
 from pathlib import Path
+from typing import Self
 from unittest.mock import Mock
 
+import pytest
 from flext_core.typings import t
 from flext_tap_ldap import FlextTapLdapLdifStreams, FlextTapLdapProcessor
 from flext_tap_ldap.processor import Entry, Transformer
@@ -94,10 +97,10 @@ def test_transform_entry_applies_rules() -> None:
 
 
 def test_directory_processing_traverses_ldap_dit_with_mock_connection(
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     class _FakeConnection:
-        def __init__(self, *args, **kwargs) -> None:
+        def __init__(self, *args: object, **kwargs: object) -> None:
             self.extend = Mock()
             self.extend.standard = Mock()
             self.extend.standard.paged_search.return_value = [
@@ -111,10 +114,15 @@ def test_directory_processing_traverses_ldap_dit_with_mock_connection(
                 },
             ]
 
-        def __enter__(self):
+        def __enter__(self) -> Self:
             return self
 
-        def __exit__(self, exc_type, exc, tb) -> None:
+        def __exit__(
+            self,
+            exc_type: type[BaseException] | None,
+            exc: BaseException | None,
+            tb: types.TracebackType | None,
+        ) -> None:
             _ = exc_type
             _ = exc
             _ = tb

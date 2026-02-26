@@ -6,7 +6,6 @@ SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
-from flext_tap_ldap import t
 
 import json
 import time
@@ -16,8 +15,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from click.testing import CliRunner
-
-from flext_tap_ldap import FlextTapLdapTap
+from flext_tap_ldap import t
 from flext_tap_ldap.tap import CLI_COMMAND
 
 

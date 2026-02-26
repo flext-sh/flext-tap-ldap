@@ -6,13 +6,11 @@ SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
-from flext_tap_ldap import t
 
 from unittest.mock import MagicMock, patch
 
 import pytest
-
-from flext_tap_ldap import FlextTapLdapTap
+from flext_tap_ldap import FlextTapLdapTap, t
 
 
 class TestFlextTapLdapTapUnit:
@@ -58,7 +56,9 @@ class TestFlextTapLdapTapUnit:
             count_error: str = f"Expected {4}, got {len(streams)}"
             raise AssertionError(count_error)
 
-    def test_custom_streams_configuration(self, config: dict[str, t.GeneralValueType]) -> None:
+    def test_custom_streams_configuration(
+        self, config: dict[str, t.GeneralValueType]
+    ) -> None:
         """Test custom streams configuration."""
         config["custom_streams"] = [
             {

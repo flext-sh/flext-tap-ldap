@@ -277,8 +277,7 @@ class FlextTapLdapProcessor:
                 parsed_entry = _to_ldif_entry(flext_entry)
                 if parsed_entry is None:
                     continue
-                convenience_entry = self._convert_from_flext_entry(parsed_entry)
-                yield convenience_entry
+                yield self._convert_from_flext_entry(parsed_entry)
                 self.processed_entries += 1
 
     def _handle_parsing_error(
@@ -352,8 +351,7 @@ class FlextTapLdapProcessor:
                     parsed_entry = _to_ldif_entry(flext_entry)
                     if parsed_entry is None:
                         continue
-                    convenience_entry = self._convert_from_flext_entry(parsed_entry)
-                    yield convenience_entry
+                    yield self._convert_from_flext_entry(parsed_entry)
                     self.processed_entries += 1
 
         except (
