@@ -5,7 +5,7 @@
 # [MANAGED] build system
 [build-system]
 build-backend = "poetry.core.masonry.api"
-requires = [ "poetry-core>=2" ]
+requires = ["poetry-core>=2"]
 
 # [CUSTOM] project metadata
 [project]
@@ -13,18 +13,10 @@ name = "flext-tap-ldap"
 version = "0.12.0-dev"
 description = "FLEXT Tap LDAP - Singer Tap for LDAP Directory Services"
 readme = "README.md"
-keywords = [
-  "data-extraction",
-  "enterprise",
-  "etl",
-  "flext",
-  "singer",
-  "tap",
-  "typed",
-]
+keywords = ["data-extraction", "enterprise", "etl", "flext", "singer", "tap", "typed"]
 license = "MIT"
-maintainers = [ { email = "team@flext.sh", name = "FLEXT Team" } ]
-authors = [ { email = "team@flext.sh", name = "FLEXT Team" } ]
+maintainers = [{ email = "team@flext.sh", name = "FLEXT Team" }]
+authors = [{ email = "team@flext.sh", name = "FLEXT Team" }]
 requires-python = ">=3.13,<3.14"
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -38,7 +30,7 @@ classifiers = [
   "Topic :: System :: Archiving",
   "Typing :: Typed",
 ]
-dependencies = [ "flext-core @ ../flext-core", "pydantic>=2.12.3", "pydantic-core>=2.41.4" ]
+dependencies = ["flext-core @ ../flext-core", "pydantic>=2.12.3", "pydantic-core>=2.41.4"]
 # [MANAGED] consolidated development dependencies
 # [AUTO] merged from dev/docs/security/test/typings
 optional-dependencies.dev = [
@@ -106,33 +98,23 @@ scripts = { "flext-tap-ldap" = "flext_tap_ldap.tap:main", "tap-ldap" = "flext_ta
 
 # [MANAGED] deptry
 [tool.deptry]
-pep621_dev_dependency_groups = [
-  "dev",
-]
+pep621_dev_dependency_groups = ["dev"]
 
 [tool.pytest.ini_options]
 minversion = "8.0"
-python_classes = [
-    "Test*",
-]
-python_files = [
-    "*_test.py",
-    "*_tests.py",
-    "test_*.py",
-]
-addopts = [
-    "--strict-markers",
-]
+python_classes = ["Test*"]
+python_files = ["*_test.py", "*_tests.py", "test_*.py"]
+addopts = ["--strict-markers"]
 markers = [
-    "unit: unit tests",
-    "integration: integration tests",
-    "performance: performance and benchmark tests",
-    "slow: slow-running tests",
-    "docker: tests requiring Docker",
-    "e2e: end-to-end integration tests",
-    "edge_cases: edge case tests",
-    "stress: stress tests",
-    "resilience: resilience tests",
+  "unit: unit tests",
+  "integration: integration tests",
+  "performance: performance and benchmark tests",
+  "slow: slow-running tests",
+  "docker: tests requiring Docker",
+  "e2e: end-to-end integration tests",
+  "edge_cases: edge case tests",
+  "stress: stress tests",
+  "resilience: resilience tests",
 ]
 
 # [MANAGED] ruff
