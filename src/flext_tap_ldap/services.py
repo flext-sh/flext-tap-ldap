@@ -97,32 +97,32 @@ class LDAPStream(BaseModel):
         self.stream_schema = dict(schema)
 
 
-@dataclass
-class TapExecution:
+class TapExecution(BaseModel):
     """Tap execution model."""
 
-    id: str = field(default_factory=lambda: str(uuid4()))
-    execution_id: str = ""
-    connection_id: str = ""
-    command: str = ""
-    tap_status: str = "created"
-    config: dict[str, t.GeneralValueType] = field(default_factory=dict)
-    catalog: dict[str, t.GeneralValueType] = field(default_factory=dict)
-    state: dict[str, t.GeneralValueType] = field(default_factory=dict)
-    started_at: datetime | None = None
-    completed_at: datetime | None = None
-    exit_code: int | None = None
-    stdout: str | None = None
-    stderr: str | None = None
-    records_extracted: int = 0
-    streams_processed: int = 0
+    model_config = ConfigDict(extra="forbid")
 
-    def __post_init__(self) -> None:
-        """Initialize execution after creation."""
-        if not self.id:
-            self.id = str(uuid4())
-        if not self.execution_id:
-            self.execution_id = f"exec_{self.id[:8]}"
+    id: str = Field(default_factory=lambda: str(uuid4()), description="Execution ID")
+    execution_id: str = Field(default="", description="Execution identifier")
+    connection_id: str = Field(default="", description="Connection ID")
+    command: str = Field(default="", description="Command executed")
+    tap_status: str = Field(default="created", description="Tap status")
+    config: dict[str, t.GeneralValueType] = Field(
+        default_factory=dict, description="Configuration"
+    )
+    catalog: dict[str, t.GeneralValueType] = Field(
+        default_factory=dict, description="Catalog"
+    )
+    state: dict[str, t.GeneralValueType] = Field(
+        default_factory=dict, description="State"
+    )
+    started_at: datetime | None = Field(default=None, description="Start time")
+    completed_at: datetime | None = Field(default=None, description="Completion time")
+    exit_code: int | None = Field(default=None, description="Exit code")
+    stdout: str | None = Field(default=None, description="Standard output")
+    stderr: str | None = Field(default=None, description="Standard error")
+    records_extracted: int = Field(default=0, description="Records extracted")
+    streams_processed: int = Field(default=0, description="Streams processed")
 
     def start_execution(self) -> None:
         """Mark execution as started."""
@@ -168,97 +168,79 @@ class FlextTapLdapServices:
     # Constants
     EXPECTED_DATA_COUNT = 3
 
-    @dataclass
-    class LDAPConnectionParams:
+    class LDAPConnectionParams(BaseModel):
         """Parameter object for LDAP connection configuration.
 
         Implements Parameter Object Pattern to reduce parameter count
         and improve maintainability
         """
 
-        host: str
-        base_dn: str
-        port: int = 389
-        use_ssl: bool = False
-        bind_dn: str | None = None
-        bind_password: str | None = None
-        timeout_seconds: int = 30
-        page_size: int = 1000
-        max_retries: int = 3
+        model_config = ConfigDict(extra="forbid")
 
-        def __post_init__(self) -> None:
-            """Validate connection parameters after initialization."""
-            # Constants for port validation
-            max_port_number = 65535
+        host: str = Field(description="LDAP host")
+        base_dn: str = Field(description="Base DN")
+        port: int = Field(default=389, ge=1, le=65535, description="LDAP port")
+        use_ssl: bool = Field(default=False, description="Use SSL")
+        bind_dn: str | None = Field(default=None, description="Bind DN")
+        bind_password: str | None = Field(default=None, description="Bind password")
+        timeout_seconds: int = Field(default=30, gt=0, description="Timeout in seconds")
+        page_size: int = Field(default=1000, gt=0, description="Page size")
+        max_retries: int = Field(default=3, ge=0, description="Max retries")
 
-            if not self.host:
-                msg = "Host is required"
-                raise ValueError(msg)
-            if self.port <= 0 or self.port > max_port_number:
-                msg = f"Port must be between 1 and {max_port_number}"
-                raise ValueError(msg)
-            if self.timeout_seconds <= 0:
-                msg = "Timeout must be positive"
-                raise ValueError(msg)
-            if self.page_size <= 0:
-                msg = "Page size must be positive"
-                raise ValueError(msg)
-            if self.max_retries < 0:
-                msg = "Max retries cannot be negative"
-                raise ValueError(msg)
-
-    @dataclass
-    class StreamCreationParams:
+    class StreamCreationParams(BaseModel):
         """Parameter object for LDAP stream creation.
 
         Implements Parameter Object Pattern to reduce parameter count in create_stream method
         following SOLID principles for better maintainability.
         """
 
-        connection_id: str
-        stream_type: str
-        search_filter: str
-        attributes: list[str] | None = None
-        tap_stream_id: str | None = None
-        key_properties: list[str] | None = None
-        replication_method: str = "FULL_TABLE"
-        replication_key: str | None = None
+        model_config = ConfigDict(extra="forbid")
 
-        def __post_init__(self) -> None:
-            """Validate stream creation parameters after initialization."""
-            if not self.stream_type:
-                msg = "Stream type is required"
-                raise ValueError(msg)
-            if not self.search_filter:
-                msg = "Search filter is required"
-                raise ValueError(msg)
-            if self.replication_method not in {"FULL_TABLE", "INCREMENTAL"}:
-                msg = "Replication method must be FULL_TABLE or INCREMENTAL"
-                raise ValueError(msg)
+        connection_id: str = Field(description="Connection ID")
+        stream_type: str = Field(description="Stream type")
+        search_filter: str = Field(description="Search filter")
+        attributes: list[str] | None = Field(
+            default=None, description="LDAP attributes"
+        )
+        tap_stream_id: str | None = Field(default=None, description="Tap stream ID")
+        key_properties: list[str] | None = Field(
+            default=None, description="Key properties"
+        )
+        replication_method: str = Field(
+            default="FULL_TABLE", description="Replication method"
+        )
+        replication_key: str | None = Field(default=None, description="Replication key")
 
-    @dataclass
-    class LDIFConfigBuilder:
+    class LDIFConfigBuilder(BaseModel):
         """Builder for LDIF processing configuration.
 
         Implements Builder Pattern to eliminate parameter proliferation
         following Interface Segregation Principle.
         """
 
-        ldif_files: list[str] = field(
-            default_factory=list,
+        model_config = ConfigDict(extra="forbid")
+
+        ldif_files: list[str] = Field(default_factory=list, description="LDIF files")
+        ldif_directory: str | None = Field(default=None, description="LDIF directory")
+        ldif_file_pattern: str = Field(default="*.ldif", description="File pattern")
+        ldif_ignore_errors: bool = Field(default=True, description="Ignore errors")
+        ldif_max_errors: int = Field(default=100, description="Max errors")
+        ldif_ignore_file_errors: bool = Field(
+            default=True, description="Ignore file errors"
         )
-        ldif_directory: str | None = None
-        ldif_file_pattern: str = "*.ldif"
-        ldif_ignore_errors: bool = True
-        ldif_max_errors: int = 100
-        ldif_ignore_file_errors: bool = True
-        ldif_ignore_entry_errors: bool = True
-        ldif_apply_transformations: bool = False
-        ldif_transformation_rules: dict[str, t.GeneralValueType] = field(
-            default_factory=dict,
+        ldif_ignore_entry_errors: bool = Field(
+            default=True, description="Ignore entry errors"
         )
-        migration_batch: str | None = None
-        enable_ldif_streams: bool = False
+        ldif_apply_transformations: bool = Field(
+            default=False, description="Apply transformations"
+        )
+        ldif_transformation_rules: dict[str, t.GeneralValueType] = Field(
+            default_factory=dict, description="Transformation rules"
+        )
+        migration_batch: str | None = Field(default=None, description="Migration batch")
+        enable_ldif_streams: bool = Field(
+            default=False, description="Enable LDIF streams"
+        )
 
     class LDAPConnectionService:
         """Service for managing LDAP connections with flext-core patterns."""

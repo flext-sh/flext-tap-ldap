@@ -11,14 +11,13 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
-from dataclasses import dataclass
 from itertools import starmap
 from typing import override
 
 from flext_core import FlextLogger, t
 from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
 from flext_meltano.typings import t as t_meltano
-from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
 
 from flext_tap_ldap.client import LDAPClient
 
@@ -177,34 +176,22 @@ class FlextTapLdapStreams:
                 "modifyTimestamp": "2024-01-01T12:00:00Z",
             }
 
-    @dataclass
-    class CustomStreamParams:
+    class CustomStreamParams(BaseModel):
         """Parameter object for CustomStream initialization.
 
         Implements Parameter Object Pattern to reduce parameter count
         and improve maintainability
         """
 
-        name: str
-        search_filter: str
-        schema_properties: Mapping[str, t.GeneralValueType] | None = None
-        primary_keys: list[str] | None = None
-        replication_key: str | None = None
+        model_config = ConfigDict(extra="forbid")
 
-        def __post_init__(self) -> None:
-            """Validate custom stream parameters after initialization."""
-            if not self.name:
-                msg = "Stream name is required"
-                raise ValueError(msg)
-            if not self.search_filter:
-                msg = "Search filter is required"
-                raise ValueError(msg)
-            # Ensure valid primary keys
-            if self.primary_keys is None:
-                self.primary_keys = ["dn"]
-            elif not self.primary_keys:
-                msg = "Primary keys cannot be empty list"
-                raise ValueError(msg)
+        name: str = Field(description="Stream name")
+        search_filter: str = Field(description="LDAP search filter")
+        schema_properties: Mapping[str, t.GeneralValueType] | None = Field(
+            default=None, description="Schema properties"
+        )
+        primary_keys: list[str] | None = Field(default=None, description="Primary keys")
+        replication_key: str | None = Field(default=None, description="Replication key")
 
     class LDAPBaseStream(Stream):
         """Base class for LDAP streams with flext-ldap integration."""

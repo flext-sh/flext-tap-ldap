@@ -12,7 +12,6 @@ from __future__ import annotations
 import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
 
 from flext_core import FlextLogger, r, u, x
 from flext_core.typings import t
@@ -24,7 +23,7 @@ from flext_ldap import (
     c,
     m,
 )
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 logger = FlextLogger(__name__)
 
@@ -36,21 +35,22 @@ class FlextTapLdapClient:
     with nested LDAPClient and LDAPClientConfig classes.
     """
 
-    @dataclass
-    class LDAPClientConfig:
+    class LDAPClientConfig(BaseModel):
         """Parameter object for LDAP client configuration.
 
         Implements Parameter Object Pattern to reduce parameter count
         and improve maintainability
         """
 
-        host: str
-        port: int = 389
-        bind_dn: str | None = None
-        password: str | None = None
-        use_ssl: bool = False
-        timeout: int = 30
-        page_size: int = 1000
+        model_config = ConfigDict(extra="forbid")
+
+        host: str = Field(description="LDAP host")
+        port: int = Field(default=389, description="LDAP port")
+        bind_dn: str | None = Field(default=None, description="Bind DN")
+        password: str | None = Field(default=None, description="Bind password")
+        use_ssl: bool = Field(default=False, description="Use SSL")
+        timeout: int = Field(default=30, description="Timeout")
+        page_size: int = Field(default=1000, description="Page size")
 
     class LDAPClient:
         """Testing convenience LDAP client wrapper.
