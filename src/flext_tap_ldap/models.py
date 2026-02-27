@@ -11,11 +11,12 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Any
 
 from flext_core import FlextModels
 from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 
 class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
@@ -66,12 +67,15 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             """Event raised when a stream is discovered."""
 
             event_type: str = Field(default="stream_discovered", frozen=True)
-            aggregate_id: str = Field(default="", description="Stream name as aggregate identifier")
+            aggregate_id: str = Field(
+                default="", description="Stream name as aggregate identifier"
+            )
             stream_name: str
             stream_key_properties: list[str] = Field(default_factory=list)
             bookmark_key: str | None = None
-            
-            def __init__(self, **data):
+
+            def __init__(self, **data: Any) -> None:
+                """Initialize StreamDiscoveredEvent and set aggregate_id."""
                 # Set aggregate_id from stream_name if not provided
                 if "aggregate_id" not in data and "stream_name" in data:
                     data["aggregate_id"] = data["stream_name"]
@@ -81,12 +85,15 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             """Event raised when a record is extracted."""
 
             event_type: str = Field(default="record_extracted", frozen=True)
-            aggregate_id: str = Field(default="", description="Stream name as aggregate identifier")
+            aggregate_id: str = Field(
+                default="", description="Stream name as aggregate identifier"
+            )
             stream_name: str
             record_id: str | None = None
             record_size_bytes: int = 0
-            
-            def __init__(self, **data):
+
+            def __init__(self, **data: Any) -> None:
+                """Initialize RecordExtractedEvent and set aggregate_id."""
                 # Set aggregate_id from stream_name if not provided
                 if "aggregate_id" not in data and "stream_name" in data:
                     data["aggregate_id"] = data["stream_name"]
@@ -96,12 +103,15 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             """Event raised after connection test."""
 
             event_type: str = Field(default="connection_tested", frozen=True)
-            aggregate_id: str = Field(default="", description="Server URI as aggregate identifier")
+            aggregate_id: str = Field(
+                default="", description="Server URI as aggregate identifier"
+            )
             success: bool
             server_uri: str
             error_message: str | None = None
-            
-            def __init__(self, **data):
+
+            def __init__(self, **data: Any) -> None:
+                """Initialize ConnectionTestedEvent and set aggregate_id."""
                 # Set aggregate_id from server_uri if not provided
                 if "aggregate_id" not in data and "server_uri" in data:
                     data["aggregate_id"] = data["server_uri"]
