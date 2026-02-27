@@ -167,6 +167,20 @@ class FlextTapLdapClient:
             Testing convenience Usage (for testing convenience):
                 client = FlextTapLdapClient.LDAPClient(host="ldap.example.com", port=389)
             """
+            # Declare attributes with type annotations
+            self._flext_api: FlextLdap
+            self._config: m.Ldap.ConnectionConfig
+            self.host: str
+            self.port: int
+            self.bind_dn: str | None
+            self.password: str | None
+            self.use_ssl: bool
+            self.timeout: int
+            self.page_size: int
+            self.client: object
+            self._bind_dn: str | None
+            self._password: str | None
+
             # Support both new Parameter Object Pattern and testing convenience
             client_config = (
                 config

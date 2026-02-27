@@ -18,7 +18,7 @@ from typing import override
 from flext_core import FlextLogger, FlextResult
 from flext_core.typings import t
 from flext_ldif import FlextLdif, FlextLdifModels
-from pydantic import ConfigDict, TypeAdapter, ValidationError
+from pydantic import TypeAdapter, ValidationError
 
 
 class FlextLdifDistinguishedName(FlextLdifModels.Ldif.DN):
@@ -29,7 +29,6 @@ logger = FlextLogger(__name__)
 
 _LDIF_ENTRY_ADAPTER = TypeAdapter(
     FlextLdifModels.Ldif.Entry,
-    config=ConfigDict(strict=True),
 )
 
 

@@ -97,6 +97,7 @@ class FlextTapLdapLdifStreams:
             ).to_dict()
             super().__init__(tap, name=self.name, schema=schema)
 
+        @override
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
@@ -331,6 +332,7 @@ class FlextTapLdapLdifStreams:
             ).to_dict()
             super().__init__(tap, name=self.name, schema=schema)
 
+        @override
         def get_records(
             self,
             context: Mapping[str, object] | None = None,

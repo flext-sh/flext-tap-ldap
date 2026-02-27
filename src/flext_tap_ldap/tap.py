@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, ClassVar
+from typing import Any, ClassVar, override
 
 from flext_core import FlextLogger
 from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
@@ -123,6 +123,7 @@ class FlextTapLdapTap(Tap):
         },
     }
 
+    @override
     def discover_streams(self) -> list[Stream]:
         """Discover available streams.
 

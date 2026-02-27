@@ -239,6 +239,7 @@ class FlextTapLdapStreams:
                 logger.warning("Failed to create LDAP client: %s", err_msg)
                 self.client = None
 
+        @override
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
@@ -296,6 +297,7 @@ class FlextTapLdapStreams:
                 logger.warning("LDAP search failed: %s, using fallback data", err_msg)
                 return self._get_fallback_data()
 
+        @override
         def _get_fallback_data(
             self,
         ) -> list[dict[str, object]]:
@@ -344,6 +346,7 @@ class FlextTapLdapStreams:
             self.forced_replication_method = "INCREMENTAL"
             self.replication_key = "modifyTimestamp"
 
+        @override
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
@@ -390,6 +393,7 @@ class FlextTapLdapStreams:
 
             yield from results
 
+        @override
         def _get_fallback_data(
             self,
         ) -> list[dict[str, object]]:
@@ -447,6 +451,7 @@ class FlextTapLdapStreams:
             self.forced_replication_method = "INCREMENTAL"
             self.replication_key = "modifyTimestamp"
 
+        @override
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
@@ -483,6 +488,7 @@ class FlextTapLdapStreams:
 
             yield from results
 
+        @override
         def _get_fallback_data(
             self,
         ) -> list[dict[str, object]]:
@@ -525,6 +531,7 @@ class FlextTapLdapStreams:
             super().__init__(tap, name=name, schema=schema)
             self.primary_keys = ["dn"]
 
+        @override
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
@@ -550,6 +557,7 @@ class FlextTapLdapStreams:
 
             yield from results
 
+        @override
         def _get_fallback_data(
             self,
         ) -> list[dict[str, object]]:
@@ -606,6 +614,7 @@ class FlextTapLdapStreams:
             super().__init__(tap, name=name, schema=schema)
             self.primary_keys = ["dn"]
 
+        @override
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
@@ -659,6 +668,7 @@ class FlextTapLdapStreams:
             for record in self._get_fallback_data():
                 yield record
 
+        @override
         def _get_fallback_data(
             self,
         ) -> list[dict[str, object]]:
@@ -762,6 +772,7 @@ class FlextTapLdapStreams:
             self.primary_keys = params.primary_keys or ["dn"]
             self.replication_key = params.replication_key
 
+        @override
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
@@ -779,6 +790,7 @@ class FlextTapLdapStreams:
 
             yield from results
 
+        @override
         def _get_fallback_data(
             self,
         ) -> list[dict[str, object]]:
