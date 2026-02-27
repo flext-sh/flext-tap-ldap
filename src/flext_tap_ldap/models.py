@@ -62,29 +62,50 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 """Alias for duration_seconds for backward compatibility."""
                 return self.duration_seconds
 
-        class StreamDiscoveredEvent(BaseModel):
+        class StreamDiscoveredEvent(FlextModels.DomainEvent):
             """Event raised when a stream is discovered."""
 
-            timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+            event_type: str = Field(default="stream_discovered", frozen=True)
+            aggregate_id: str = Field(default="", description="Stream name as aggregate identifier")
             stream_name: str
             stream_key_properties: list[str] = Field(default_factory=list)
             bookmark_key: str | None = None
+            
+            def __init__(self, **data):
+                # Set aggregate_id from stream_name if not provided
+                if "aggregate_id" not in data and "stream_name" in data:
+                    data["aggregate_id"] = data["stream_name"]
+                super().__init__(**data)
 
-        class RecordExtractedEvent(BaseModel):
+        class RecordExtractedEvent(FlextModels.DomainEvent):
             """Event raised when a record is extracted."""
 
-            timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+            event_type: str = Field(default="record_extracted", frozen=True)
+            aggregate_id: str = Field(default="", description="Stream name as aggregate identifier")
             stream_name: str
             record_id: str | None = None
             record_size_bytes: int = 0
+            
+            def __init__(self, **data):
+                # Set aggregate_id from stream_name if not provided
+                if "aggregate_id" not in data and "stream_name" in data:
+                    data["aggregate_id"] = data["stream_name"]
+                super().__init__(**data)
 
-        class ConnectionTestedEvent(BaseModel):
+        class ConnectionTestedEvent(FlextModels.DomainEvent):
             """Event raised after connection test."""
 
-            timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+            event_type: str = Field(default="connection_tested", frozen=True)
+            aggregate_id: str = Field(default="", description="Server URI as aggregate identifier")
             success: bool
             server_uri: str
             error_message: str | None = None
+            
+            def __init__(self, **data):
+                # Set aggregate_id from server_uri if not provided
+                if "aggregate_id" not in data and "server_uri" in data:
+                    data["aggregate_id"] = data["server_uri"]
+                super().__init__(**data)
 
         class Tests:
             """Test models namespace for flext-tap-ldap tests.
