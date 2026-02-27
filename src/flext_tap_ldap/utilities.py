@@ -8,7 +8,7 @@ from typing import ClassVar
 from flext_core import FlextContainer, FlextExceptions, FlextLogger, FlextResult
 from flext_core.utilities import FlextUtilities
 
-from .constants import FlextMeltanoTapLdapConstants as c
+from .constants import c
 
 type MetadataValue = str | int | float | bool | None
 type MetadataContext = dict[str, MetadataValue]

@@ -17,7 +17,7 @@ from collections.abc import Mapping
 from typing import Protocol, runtime_checkable
 
 from flext_ldap import FlextLdapProtocols
-from flext_meltano import FlextMeltanoModels as m, FlextMeltanoProtocols
+from flext_meltano import m, FlextMeltanoProtocols
 
 from flext_tap_ldap.typings import t
 
