@@ -12,8 +12,7 @@ from __future__ import annotations
 
 from typing import Self
 
-from flext_core import FlextConstants, FlextResult, FlextSettings
-from flext_core.typings import t
+from flext_core import FlextConstants, FlextResult, FlextSettings, t
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
 

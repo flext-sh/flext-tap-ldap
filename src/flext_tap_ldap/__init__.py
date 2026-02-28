@@ -13,7 +13,6 @@ from flext_tap_ldap.__version__ import __version__, __version_info__
 from flext_tap_ldap.client import FlextTapLdapClient
 from flext_tap_ldap.constants import FlextMeltanoTapLdapConstants, c
 from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
-from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
 from flext_tap_ldap.models import FlextMeltanoTapLdapModels, m
 from flext_tap_ldap.processor import FlextTapLdapProcessor
 from flext_tap_ldap.protocols import FlextMeltanoTapLdapProtocols, p

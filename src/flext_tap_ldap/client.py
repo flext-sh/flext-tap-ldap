@@ -13,8 +13,7 @@ import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
 from collections.abc import Mapping, Sequence
 
-from flext_core import FlextLogger, r, u, x
-from flext_core.typings import t
+from flext_core import FlextLogger, r, t, u, x
 from flext_ldap import (
     FlextLdap,
     FlextLdapConnection,

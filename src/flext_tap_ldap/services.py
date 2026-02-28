@@ -15,8 +15,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
-from flext_core import FlextLogger, FlextResult
-from flext_core.typings import t
+from flext_core import FlextLogger, FlextResult, t
 from flext_ldif import FlextLdif, FlextLdifModels
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
 

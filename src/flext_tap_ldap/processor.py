@@ -15,8 +15,7 @@ from collections.abc import Iterator, Mapping
 from pathlib import Path
 from typing import override
 
-from flext_core import FlextLogger, FlextResult
-from flext_core.typings import t
+from flext_core import FlextLogger, FlextResult, t
 from flext_ldif import FlextLdif, FlextLdifModels
 from pydantic import TypeAdapter, ValidationError
 

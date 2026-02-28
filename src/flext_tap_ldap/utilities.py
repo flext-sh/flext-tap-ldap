@@ -5,8 +5,13 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import ClassVar
 
-from flext_core import FlextContainer, FlextExceptions, FlextLogger, FlextResult
-from flext_core.utilities import FlextUtilities
+from flext_core import (
+    FlextContainer,
+    FlextExceptions,
+    FlextLogger,
+    FlextResult,
+    FlextUtilities,
+)
 
 from .constants import c
 
