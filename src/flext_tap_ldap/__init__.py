@@ -16,10 +16,7 @@ from flext_core import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_tap_ldap.__version__ import __version__, __version_info__
     from flext_tap_ldap.client import FlextTapLdapClient
-    from flext_tap_ldap.constants import (
-        FlextMeltanoTapLdapConstants,
-        FlextMeltanoTapLdapConstants as c,
-    )
+    from flext_tap_ldap.constants import FlextMeltanoTapLdapConstants as c
     from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
     from flext_tap_ldap.models import (
         FlextMeltanoTapLdapModels,
@@ -41,21 +38,15 @@ if TYPE_CHECKING:
 
 # Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    "FlextTapLdapUtilities": ("flext_tap_ldap.utilities", "FlextTapLdapUtilities"),
     "FlextMeltanoTapLdapModels": ("flext_tap_ldap.models", "FlextMeltanoTapLdapModels"),
-    "FlextMeltanoTapLdapProtocols": (
-        "flext_tap_ldap.protocols",
-        "FlextMeltanoTapLdapProtocols",
-    ),
+    "FlextMeltanoTapLdapProtocols": ("flext_tap_ldap.protocols", "FlextMeltanoTapLdapProtocols"),
     "FlextTapLdapClient": ("flext_tap_ldap.client", "FlextTapLdapClient"),
-    "FlextTapLdapLdifStreams": (
-        "flext_tap_ldap.ldif_streams",
-        "FlextTapLdapLdifStreams",
-    ),
+    "FlextTapLdapLdifStreams": ("flext_tap_ldap.ldif_streams", "FlextTapLdapLdifStreams"),
     "FlextTapLdapProcessor": ("flext_tap_ldap.processor", "FlextTapLdapProcessor"),
     "FlextTapLdapSettings": ("flext_tap_ldap.settings", "FlextTapLdapSettings"),
     "FlextTapLdapStreams": ("flext_tap_ldap.streams", "FlextTapLdapStreams"),
     "FlextTapLdapTap": ("flext_tap_ldap.tap", "FlextTapLdapTap"),
+    "FlextTapLdapUtilities": ("flext_tap_ldap.utilities", "FlextTapLdapUtilities"),
     "__version__": ("flext_tap_ldap.__version__", "__version__"),
     "__version_info__": ("flext_tap_ldap.__version__", "__version_info__"),
     "c": ("flext_tap_ldap.constants", "FlextMeltanoTapLdapConstants"),
