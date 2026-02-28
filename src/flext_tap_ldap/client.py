@@ -59,7 +59,7 @@ class FlextTapLdapClient:
         This eliminates code duplication while maintaining testing convenience.
         """
 
-        def _coerce_int(self, value: object, default: int) -> int:
+        def _coerce_int(self, value: t.GeneralValueType, default: int) -> int:
             """Coerce value to int using pattern matching for better type safety."""
             match value:
                 case int() as int_val:
@@ -77,7 +77,7 @@ class FlextTapLdapClient:
                 case _:
                     return default
 
-        def _coerce_str_opt(self, value: object) -> str | None:
+        def _coerce_str_opt(self, value: t.GeneralValueType) -> str | None:
             """Coerce value to optional string using pattern matching."""
             match value:
                 case str() as str_val if str_val:
@@ -87,7 +87,7 @@ class FlextTapLdapClient:
 
         def _create_config_from_kwargs(
             self,
-            **convenience_kwargs: object,
+            **convenience_kwargs: t.GeneralValueType,
         ) -> FlextTapLdapClient.LDAPClientConfig:
             """Create config from convenience keyword arguments."""
             raw_host = convenience_kwargs.get("host")
@@ -156,7 +156,7 @@ class FlextTapLdapClient:
         def __init__(
             self,
             config: FlextTapLdapClient.LDAPClientConfig | None = None,
-            **convenience_kwargs: object,
+            **convenience_kwargs: t.GeneralValueType,
         ) -> None:
             """Initialize with Parameter Object Pattern (preferred) or testing convenience interface.
 
@@ -177,7 +177,7 @@ class FlextTapLdapClient:
             self.use_ssl: bool
             self.timeout: int
             self.page_size: int
-            self.client: object
+            self.client: t.GeneralValueType
             self._bind_dn: str | None
             self._password: str | None
 
@@ -265,7 +265,7 @@ class FlextTapLdapClient:
                 return entries
 
             # Handle both SearchResult objects and direct lists for testing
-            raw_entries: object = result.data
+            raw_entries: t.GeneralValueType = result.data
             if (
                 hasattr(raw_entries, "entries")
                 and getattr(raw_entries, "entries", None) is not None

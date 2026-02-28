@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, ClassVar, override
+from typing import ClassVar, override
 
 from flext_core import FlextLogger
 from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
@@ -32,21 +32,21 @@ _MAP_ADAPTER = TypeAdapter(
 _STR_ADAPTER = TypeAdapter(str, config=ConfigDict(strict=True))
 
 
-def _as_list(value: object) -> list[t.GeneralValueType] | None:
+def _as_list(value: t.GeneralValueType) -> list[t.GeneralValueType] | None:
     try:
         return _LIST_ADAPTER.validate_python(value)
     except ValidationError:
         return None
 
 
-def _as_map(value: object) -> Mapping[str, t.GeneralValueType] | None:
+def _as_map(value: t.GeneralValueType) -> Mapping[str, t.GeneralValueType] | None:
     try:
         return _MAP_ADAPTER.validate_python(value)
     except ValidationError:
         return None
 
 
-def _as_str(value: object) -> str | None:
+def _as_str(value: t.GeneralValueType) -> str | None:
     try:
         return _STR_ADAPTER.validate_python(value)
     except ValidationError:
@@ -186,7 +186,7 @@ class FlextTapLdapTap(Tap):
         return streams
 
 
-CLI_COMMAND: Any = getattr(FlextTapLdapTap, "cli")
+CLI_COMMAND: t.GeneralValueType = getattr(FlextTapLdapTap, "cli")
 
 
 def main() -> None:

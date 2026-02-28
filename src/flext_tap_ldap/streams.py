@@ -55,7 +55,7 @@ class _CustomPropertyDefinition(BaseModel):
 _STRICT_STR_ADAPTER = TypeAdapter(str, config=ConfigDict(strict=True))
 
 
-def _coerce_positive_int(raw_value: object, default: int) -> int:
+def _coerce_positive_int(raw_value: t.GeneralValueType, default: int) -> int:
     """Coerce value to positive integer with safe fallback."""
     try:
         parsed = int(str(raw_value))
@@ -64,7 +64,7 @@ def _coerce_positive_int(raw_value: object, default: int) -> int:
     return parsed if parsed > 0 else default
 
 
-def _coerce_optional_string(raw_value: object) -> str | None:
+def _coerce_optional_string(raw_value: t.GeneralValueType) -> str | None:
     """Coerce value to string only when source is already string-like."""
     if raw_value is None:
         return None
@@ -75,7 +75,7 @@ def _coerce_optional_string(raw_value: object) -> str | None:
     return validated or None
 
 
-def _parse_connection_config(raw_value: object) -> _LdapConnectionConfig:
+def _parse_connection_config(raw_value: t.GeneralValueType) -> _LdapConnectionConfig:
     """Validate LDAP connection payload through Pydantic."""
     try:
         parsed = _LdapConnectionConfig.model_validate(raw_value, strict=True)
@@ -93,7 +93,7 @@ def _parse_connection_config(raw_value: object) -> _LdapConnectionConfig:
     )
 
 
-def _parse_property_definition(raw_value: object) -> _CustomPropertyDefinition:
+def _parse_property_definition(raw_value: t.GeneralValueType) -> _CustomPropertyDefinition:
     """Validate custom stream property definition through Pydantic."""
     try:
         return _CustomPropertyDefinition.model_validate(raw_value, strict=True)
@@ -694,7 +694,7 @@ class FlextTapLdapStreams:
 
             def _map_prop(
                 name: str,
-                definition: object,
+                definition: t.GeneralValueType,
             ) -> t_meltano.Singer.Typing.Property:
                 parsed_definition = _parse_property_definition(definition)
                 prop_type = parsed_definition.type

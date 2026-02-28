@@ -26,11 +26,11 @@ typing_utils = t_meltano.Singer.Typing
 
 class _Guards:
     @staticmethod
-    def is_list(value: object) -> bool:
+    def is_list(value: t.GeneralValueType) -> bool:
         return isinstance(value, list)
 
     @staticmethod
-    def is_type(value: object, expected: type[object]) -> bool:
+    def is_type(value: t.GeneralValueType, expected: type[t.GeneralValueType]) -> bool:
         return isinstance(value, expected)
 
 
@@ -38,13 +38,13 @@ class _Utilities:
     Guards = _Guards
 
     @staticmethod
-    def is_dict_like(value: object) -> bool:
+    def is_dict_like(value: t.GeneralValueType) -> bool:
         return isinstance(value, Mapping)
 
 
 class _Mixins:
     @staticmethod
-    def is_base_model(value: object) -> bool:
+    def is_base_model(value: t.GeneralValueType) -> bool:
         return isinstance(value, BaseModel)
 
 
@@ -207,7 +207,7 @@ class FlextTapLdapLdifStreams:
             ):
                 logger.exception("Error traversing LDAP directory")
 
-        def _normalize_object_classes(self, object_classes: object) -> list[str]:
+        def _normalize_object_classes(self, object_classes: t.GeneralValueType) -> list[str]:
             if isinstance(object_classes, str):
                 return [object_classes]
             if isinstance(object_classes, list):

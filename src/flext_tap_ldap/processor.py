@@ -31,7 +31,7 @@ _LDIF_ENTRY_ADAPTER = TypeAdapter(
 )
 
 
-def _to_ldif_entry(raw_value: object) -> FlextLdifModels.Ldif.Entry | None:
+def _to_ldif_entry(raw_value: t.GeneralValueType) -> FlextLdifModels.Ldif.Entry | None:
     """Validate and coerce value to LDIF entry model."""
     try:
         return _LDIF_ENTRY_ADAPTER.validate_python(raw_value)

@@ -17,6 +17,8 @@ from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
 from pydantic import Field, model_validator
 
+from flext_tap_ldap.typings import t
+
 
 class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
     """Complete models for LDAP tap operations extending FlextModels.
@@ -65,7 +67,7 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             @model_validator(mode="before")
             @classmethod
-            def set_aggregate_id(cls, data: object) -> object:
+            def set_aggregate_id(cls, data: t.GeneralValueType) -> t.GeneralValueType:
                 """Set aggregate_id from stream_name if not provided."""
                 if isinstance(data, dict) and "aggregate_id" not in data and "stream_name" in data:
                     data["aggregate_id"] = data["stream_name"]
@@ -84,7 +86,7 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             @model_validator(mode="before")
             @classmethod
-            def set_aggregate_id(cls, data: object) -> object:
+            def set_aggregate_id(cls, data: t.GeneralValueType) -> t.GeneralValueType:
                 """Set aggregate_id from stream_name if not provided."""
                 if isinstance(data, dict) and "aggregate_id" not in data and "stream_name" in data:
                     data["aggregate_id"] = data["stream_name"]
@@ -103,7 +105,7 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             @model_validator(mode="before")
             @classmethod
-            def set_aggregate_id(cls, data: object) -> object:
+            def set_aggregate_id(cls, data: t.GeneralValueType) -> t.GeneralValueType:
                 """Set aggregate_id from server_uri if not provided."""
                 if isinstance(data, dict) and "aggregate_id" not in data and "server_uri" in data:
                     data["aggregate_id"] = data["server_uri"]
