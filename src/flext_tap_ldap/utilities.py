@@ -10,8 +10,9 @@ from flext_core import (
     FlextExceptions,
     FlextLogger,
     FlextResult,
-    FlextUtilities,
 )
+from flext_ldap.utilities import FlextLdapUtilities
+from flext_meltano.utilities import FlextMeltanoUtilities
 
 from .constants import c
 
@@ -22,7 +23,7 @@ type StreamInfo = Mapping[str, str | int]
 type LdapConfig = Mapping[str, str | int | bool]
 
 
-class FlextMeltanoTapLdapUtilities(FlextUtilities):
+class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
     """Unified LDAP tap utilities class."""
 
     class TapLdap:
@@ -173,6 +174,6 @@ class FlextMeltanoTapLdapUtilities(FlextUtilities):
             MEMORY_THRESHOLD_MB: ClassVar[int] = 256
 
 
-u: type[FlextMeltanoTapLdapUtilities] = FlextMeltanoTapLdapUtilities
+u = FlextTapLdapUtilities
 
-__all__ = ["FlextMeltanoTapLdapUtilities", "u"]
+__all__ = ["FlextTapLdapUtilities", "u"]

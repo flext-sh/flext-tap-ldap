@@ -35,18 +35,23 @@ if TYPE_CHECKING:
     from flext_tap_ldap.tap import FlextTapLdapTap
     from flext_tap_ldap.typings import t
     from flext_tap_ldap.utilities import (
-        FlextMeltanoTapLdapUtilities,
-        FlextMeltanoTapLdapUtilities as u,
+        FlextTapLdapUtilities,
+        FlextTapLdapUtilities as u,
     )
 
 # Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    "FlextMeltanoTapLdapConstants": ("flext_tap_ldap.constants", "FlextMeltanoTapLdapConstants"),
+    "FlextTapLdapUtilities": ("flext_tap_ldap.utilities", "FlextTapLdapUtilities"),
     "FlextMeltanoTapLdapModels": ("flext_tap_ldap.models", "FlextMeltanoTapLdapModels"),
-    "FlextMeltanoTapLdapProtocols": ("flext_tap_ldap.protocols", "FlextMeltanoTapLdapProtocols"),
-    "FlextMeltanoTapLdapUtilities": ("flext_tap_ldap.utilities", "FlextMeltanoTapLdapUtilities"),
+    "FlextMeltanoTapLdapProtocols": (
+        "flext_tap_ldap.protocols",
+        "FlextMeltanoTapLdapProtocols",
+    ),
     "FlextTapLdapClient": ("flext_tap_ldap.client", "FlextTapLdapClient"),
-    "FlextTapLdapLdifStreams": ("flext_tap_ldap.ldif_streams", "FlextTapLdapLdifStreams"),
+    "FlextTapLdapLdifStreams": (
+        "flext_tap_ldap.ldif_streams",
+        "FlextTapLdapLdifStreams",
+    ),
     "FlextTapLdapProcessor": ("flext_tap_ldap.processor", "FlextTapLdapProcessor"),
     "FlextTapLdapSettings": ("flext_tap_ldap.settings", "FlextTapLdapSettings"),
     "FlextTapLdapStreams": ("flext_tap_ldap.streams", "FlextTapLdapStreams"),
@@ -57,20 +62,20 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "m": ("flext_tap_ldap.models", "FlextMeltanoTapLdapModels"),
     "p": ("flext_tap_ldap.protocols", "FlextMeltanoTapLdapProtocols"),
     "t": ("flext_tap_ldap.typings", "t"),
-    "u": ("flext_tap_ldap.utilities", "FlextMeltanoTapLdapUtilities"),
+    "u": ("flext_tap_ldap.utilities", "FlextTapLdapUtilities"),
 }
 
 __all__ = [
     "FlextMeltanoTapLdapConstants",
     "FlextMeltanoTapLdapModels",
     "FlextMeltanoTapLdapProtocols",
-    "FlextMeltanoTapLdapUtilities",
     "FlextTapLdapClient",
     "FlextTapLdapLdifStreams",
     "FlextTapLdapProcessor",
     "FlextTapLdapSettings",
     "FlextTapLdapStreams",
     "FlextTapLdapTap",
+    "FlextTapLdapUtilities",
     "__version__",
     "__version_info__",
     "c",
