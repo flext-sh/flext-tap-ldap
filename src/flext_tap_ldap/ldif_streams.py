@@ -15,6 +15,7 @@ from flext_meltano.typings import t as t_meltano
 from ldap3 import SUBTREE, Connection, Server
 from pydantic import BaseModel
 
+from flext_tap_ldap.constants import c
 from flext_tap_ldap.typings import t
 
 logger = logging.getLogger(__name__)
@@ -128,8 +129,8 @@ class FlextTapLdapLdifStreams:
             if not isinstance(base_dn_raw, str) or not base_dn_raw:
                 return
 
-            port_raw = self.config.get("ldap_port", 389)
-            port = int(port_raw) if isinstance(port_raw, int | str) else 389
+            port_raw = self.config.get("ldap_port", c.TapLdap.DEFAULT_PORT)
+            port = int(port_raw) if isinstance(port_raw, int | str) else c.TapLdap.DEFAULT_PORT
             use_ssl_raw = self.config.get("ldap_use_ssl", False)
             use_ssl = bool(use_ssl_raw)
             bind_dn_raw = self.config.get("ldap_bind_dn")
@@ -152,9 +153,9 @@ class FlextTapLdapLdifStreams:
                 ]
                 if parsed_attributes:
                     attributes = parsed_attributes
-            page_size_raw = self.config.get("ldap_page_size", 1000)
+            page_size_raw = self.config.get("ldap_page_size", c.TapLdap.DEFAULT_PAGE_SIZE)
             page_size = (
-                int(page_size_raw) if isinstance(page_size_raw, int | str) else 1000
+                int(page_size_raw) if isinstance(page_size_raw, int | str) else c.TapLdap.DEFAULT_PAGE_SIZE
             )
 
             try:

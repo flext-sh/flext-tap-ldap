@@ -16,6 +16,8 @@ from flext_core import FlextConstants, FlextResult, FlextSettings, t
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
 
+from flext_tap_ldap.constants import c
+
 
 class ConfigDefaults(BaseModel):
     """Type-safe configuration defaults."""
@@ -152,7 +154,7 @@ class FlextTapLdapSettings(FlextSettings):
     # LDAP Connection Configuration - flat structure
     ldap_host: str = Field(min_length=1, description="LDAP server host")
     ldap_port: int = Field(
-        default=389,
+        default=c.TapLdap.DEFAULT_PORT,
         description="LDAP server port",
     )
     ldap_use_ssl: bool = Field(default=False, description="Use SSL connection")
@@ -285,8 +287,8 @@ class FlextTapLdapSettings(FlextSettings):
         """Create production configuration instance."""
         prod_defaults: dict[str, t.GeneralValueType] = {
             "ldap_use_ssl": True,
-            "ldap_timeout": 30,
-            "ldap_page_size": 1000,
+            "ldap_timeout": c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
+            "ldap_page_size": c.TapLdap.DEFAULT_PAGE_SIZE,
             "ldap_max_retries": 5,
             "ldif_ignore_errors": False,
             "ldif_max_errors": 0,

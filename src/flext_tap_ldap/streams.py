@@ -20,6 +20,7 @@ from flext_meltano.typings import t as t_meltano
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
 
 from flext_tap_ldap.client import LDAPClient
+from flext_tap_ldap.constants import c
 
 logger = FlextLogger(__name__)
 
@@ -34,11 +35,11 @@ class _LdapConnectionConfig(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     host: str = "localhost"
-    port: int = 389
+    port: int = c.TapLdap.DEFAULT_PORT
     bind_dn: str | None = None
     bind_password: str | None = None
     use_ssl: bool = False
-    timeout_seconds: int = 30
+    timeout_seconds: int = c.TapLdap.DEFAULT_SEARCH_TIMEOUT
     base_dn: str = ""
 
 
@@ -83,11 +84,11 @@ def _parse_connection_config(raw_value: object) -> _LdapConnectionConfig:
 
     return _LdapConnectionConfig(
         host=str(parsed.host),
-        port=_coerce_positive_int(parsed.port, 389),
+        port=_coerce_positive_int(parsed.port, c.TapLdap.DEFAULT_PORT),
         bind_dn=_coerce_optional_string(parsed.bind_dn),
         bind_password=_coerce_optional_string(parsed.bind_password),
         use_ssl=bool(parsed.use_ssl),
-        timeout_seconds=_coerce_positive_int(parsed.timeout_seconds, 30),
+        timeout_seconds=_coerce_positive_int(parsed.timeout_seconds, c.TapLdap.DEFAULT_SEARCH_TIMEOUT),
         base_dn=str(parsed.base_dn),
     )
 
@@ -224,7 +225,7 @@ class FlextTapLdapStreams:
                     password=connection_config.bind_password,
                     use_ssl=connection_config.use_ssl,
                     timeout=connection_config.timeout_seconds,
-                    page_size=_coerce_positive_int(page_size_raw, 1000),
+                    page_size=_coerce_positive_int(page_size_raw, c.TapLdap.DEFAULT_PAGE_SIZE),
                 )
             except (
                 ValueError,

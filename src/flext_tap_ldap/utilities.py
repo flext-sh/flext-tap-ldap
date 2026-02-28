@@ -169,7 +169,7 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         class PerformanceOptimization:
             """LDAP tap performance optimization utilities."""
 
-            DEFAULT_PAGE_SIZE: ClassVar[int] = 1000
+            DEFAULT_PAGE_SIZE: ClassVar[int] = c.TapLdap.DEFAULT_PAGE_SIZE
             MAX_PARALLEL_SEARCHES: ClassVar[int] = 5
             MEMORY_THRESHOLD_MB: ClassVar[int] = 256
 

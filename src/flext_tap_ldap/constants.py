@@ -13,10 +13,6 @@ from typing import Final, Literal
 from flext_ldap import FlextLdapConstants
 from flext_meltano import FlextMeltanoConstants
 
-# LDAP port constants (moved outside class for accessibility)
-DEFAULT_LDAP_PORT: Final[int] = 389
-DEFAULT_LDAPS_PORT: Final[int] = 636
-
 
 class FlextMeltanoTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
     """LDAP tap extraction-specific constants following FLEXT unified pattern.
@@ -30,10 +26,14 @@ class FlextMeltanoTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
     class TapLdap:
         """Tap LDAP namespace for cross-project access."""
 
+        # Port constants
+        DEFAULT_PORT: Final[int] = 389
+        DEFAULT_SSL_PORT: Final[int] = 636
+
         # Constants
-        DEFAULT_PAGE_SIZE = 1000
-        MAX_LDAP_FILTER_LENGTH = 2048
-        DEFAULT_SEARCH_TIMEOUT = 30
+        DEFAULT_PAGE_SIZE: Final[int] = 1000
+        MAX_LDAP_FILTER_LENGTH: Final[int] = 2048
+        DEFAULT_SEARCH_TIMEOUT: Final[int] = 30
 
         class Ldap:
             """LDAP connection constants."""
@@ -103,8 +103,8 @@ class FlextMeltanoTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             """LDAP tap connection configuration."""
 
             DEFAULT_HOST: Final[str] = "localhost"
-            DEFAULT_PORT: Final[int] = DEFAULT_LDAP_PORT
-            DEFAULT_SSL_PORT: Final[int] = DEFAULT_LDAPS_PORT
+            DEFAULT_PORT: Final[int] = 389
+            DEFAULT_SSL_PORT: Final[int] = 636
             DEFAULT_BASE_DN: Final[str] = ""
             DEFAULT_BIND_DN: Final[str] = ""
             DEFAULT_BIND_PASSWORD: Final[str] = ""

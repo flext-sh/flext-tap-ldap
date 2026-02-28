@@ -16,6 +16,7 @@ from flext_core import FlextLogger
 from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
 from pydantic import ConfigDict, TypeAdapter, ValidationError
 
+from flext_tap_ldap.constants import c
 from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
 from flext_tap_ldap.settings import FlextTapLdapSettings
 from flext_tap_ldap.streams import FlextTapLdapStreams
@@ -71,7 +72,7 @@ class FlextTapLdapTap(Tap):
             "host": {"type": "string", "description": "LDAP server host"},
             "port": {
                 "type": "integer",
-                "default": 389,
+                "default": c.TapLdap.DEFAULT_PORT,
                 "description": "LDAP server port",
             },
             "bind_dn": {"type": "string", "description": "Bind DN for authentication"},
@@ -88,7 +89,7 @@ class FlextTapLdapTap(Tap):
             # Tap-specific properties
             "page_size": {
                 "type": "integer",
-                "default": 1000,
+                "default": c.TapLdap.DEFAULT_PAGE_SIZE,
                 "description": "Page size for paged results",
             },
             "user_filter": {

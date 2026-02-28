@@ -19,10 +19,11 @@ from flext_ldap import (
     FlextLdapConnection,
     FlextLdapOperations,
     FlextLdapSettings,
-    c,
     m,
 )
 from pydantic import BaseModel, ConfigDict, Field
+
+from flext_tap_ldap.constants import c
 
 logger = FlextLogger(__name__)
 
@@ -44,12 +45,12 @@ class FlextTapLdapClient:
         model_config = ConfigDict(extra="forbid")
 
         host: str = Field(description="LDAP host")
-        port: int = Field(default=389, description="LDAP port")
+        port: int = Field(default=c.TapLdap.DEFAULT_PORT, description="LDAP port")
         bind_dn: str | None = Field(default=None, description="Bind DN")
         password: str | None = Field(default=None, description="Bind password")
         use_ssl: bool = Field(default=False, description="Use SSL")
-        timeout: int = Field(default=30, description="Timeout")
-        page_size: int = Field(default=1000, description="Page size")
+        timeout: int = Field(default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT, description="Timeout")
+        page_size: int = Field(default=c.TapLdap.DEFAULT_PAGE_SIZE, description="Page size")
 
     class LDAPClient:
         """Testing convenience LDAP client wrapper.
@@ -100,14 +101,14 @@ class FlextTapLdapClient:
 
             return FlextTapLdapClient.LDAPClientConfig(
                 host=host,
-                port=self._coerce_int(convenience_kwargs.get("port", 389), 389),
+                port=self._coerce_int(convenience_kwargs.get("port", c.TapLdap.DEFAULT_PORT), c.TapLdap.DEFAULT_PORT),
                 bind_dn=self._coerce_str_opt(convenience_kwargs.get("bind_dn")),
                 password=self._coerce_str_opt(convenience_kwargs.get("password")),
                 use_ssl=bool(convenience_kwargs.get("use_ssl")),
-                timeout=self._coerce_int(convenience_kwargs.get("timeout", 30), 30),
+                timeout=self._coerce_int(convenience_kwargs.get("timeout", c.TapLdap.DEFAULT_SEARCH_TIMEOUT), c.TapLdap.DEFAULT_SEARCH_TIMEOUT),
                 page_size=self._coerce_int(
-                    convenience_kwargs.get("page_size", 1000),
-                    1000,
+                    convenience_kwargs.get("page_size", c.TapLdap.DEFAULT_PAGE_SIZE),
+                    c.TapLdap.DEFAULT_PAGE_SIZE,
                 ),
             )
 
@@ -315,7 +316,7 @@ class FlextTapLdapClient:
                     scope=ldap_scope,
                     attributes=attributes,
                     size_limit=size_limit,
-                    time_limit=30,
+                    time_limit=c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
                 )
                 result: r[m.Ldap.SearchResult] = self._flext_api.search(
                     search_options,

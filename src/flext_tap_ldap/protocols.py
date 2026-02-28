@@ -165,7 +165,6 @@ class FlextMeltanoTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 p = FlextMeltanoTapLdapProtocols
 
 
-
 class TapConfigProtocol(Protocol):
     """Protocol for tap configuration interface."""
 
