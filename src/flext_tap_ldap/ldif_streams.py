@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Iterable, Iterator, Mapping
 from pathlib import Path
-from typing import override
+from typing import ClassVar, override
 
 from flext_ldap import FlextLdapConnection
 from flext_ldif import FlextLdif
@@ -61,7 +61,7 @@ class FlextTapLdapLdifStreams:
     class LdifStream(Stream):
         """LDIF stream using flext-ldif for ALL processing."""
 
-        primary_keys: list[str] = ["dn"]
+        primary_keys: ClassVar[list[str]] = ["dn"]
 
         @override
         def __init__(self, tap: Tap) -> None:
@@ -298,7 +298,7 @@ class FlextTapLdapLdifStreams:
     class LdifAnalysisStream(Stream):
         """LDIF analysis stream using flext-ldif for ALL analysis."""
 
-        primary_keys: list[str] = ["analysis_id"]
+        primary_keys: ClassVar[list[str]] = ["analysis_id"]
 
         @override
         def __init__(self, tap: Tap) -> None:

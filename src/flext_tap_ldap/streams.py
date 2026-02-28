@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from itertools import starmap
-from typing import override
+from typing import ClassVar, override
 
 from flext_core import FlextLogger, t
 from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
@@ -308,7 +308,7 @@ class FlextTapLdapStreams:
     class UsersStream(LDAPBaseStream):
         """Stream for LDAP user entries."""
 
-        primary_keys: list[str] = ["dn"]
+        primary_keys: ClassVar[list[str]] = ["dn"]
         replication_key: str = "modifyTimestamp"
 
         @override
@@ -409,7 +409,7 @@ class FlextTapLdapStreams:
     class GroupsStream(LDAPBaseStream):
         """Stream for LDAP group entries."""
 
-        primary_keys: list[str] = ["dn"]
+        primary_keys: ClassVar[list[str]] = ["dn"]
         replication_key: str = "modifyTimestamp"
 
         @override
@@ -509,7 +509,7 @@ class FlextTapLdapStreams:
     class OrganizationalUnitsStream(LDAPBaseStream):
         """Stream for LDAP organizational unit entries."""
 
-        primary_keys: list[str] = ["dn"]
+        primary_keys: ClassVar[list[str]] = ["dn"]
 
         @override
         def __init__(self, tap: Tap) -> None:
@@ -578,7 +578,7 @@ class FlextTapLdapStreams:
     class SchemaStream(LDAPBaseStream):
         """Stream for LDAP schema information."""
 
-        primary_keys: list[str] = ["dn"]
+        primary_keys: ClassVar[list[str]] = ["dn"]
 
         @override
         def __init__(self, tap: Tap) -> None:
@@ -693,7 +693,7 @@ class FlextTapLdapStreams:
     class CustomStream(LDAPBaseStream):
         """Custom LDAP stream with configurable filter and schema."""
 
-        primary_keys: list[str] = ["dn"]
+        primary_keys: ClassVar[list[str]] = ["dn"]
         replication_key: str | None = None
 
         @override
