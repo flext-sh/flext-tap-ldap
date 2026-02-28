@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Package version."""
 
 __version__: str = "1.0.0"

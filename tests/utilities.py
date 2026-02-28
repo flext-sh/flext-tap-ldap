@@ -15,7 +15,7 @@ from flext_tap_ldap import u
 from flext_tests import FlextTestsUtilities
 
 
-class TestsFlextMeltanoTapLdapUtilities(FlextTestsUtilities, u):
+class TestsFlextTapLdapUtilities(FlextTestsUtilities, u):
     """Test utilities combining FlextTestsUtilities with flext-tap-ldap utilities."""
 
     class TapLdap(u.TapLdap):
@@ -25,6 +25,6 @@ class TestsFlextMeltanoTapLdapUtilities(FlextTestsUtilities, u):
             """Internal tests declarations."""
 
 
-u = TestsFlextMeltanoTapLdapUtilities
+u = TestsFlextTapLdapUtilities
 
-__all__ = ["TestsFlextMeltanoTapLdapUtilities", "u"]
+__all__ = ["TestsFlextTapLdapUtilities", "u"]
