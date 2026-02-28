@@ -308,6 +308,9 @@ class FlextTapLdapStreams:
     class UsersStream(LDAPBaseStream):
         """Stream for LDAP user entries."""
 
+        primary_keys: list[str] = ["dn"]
+        replication_key: str = "modifyTimestamp"
+
         @override
         def __init__(self, tap: Tap) -> None:
             """Initialize users stream."""
@@ -406,6 +409,9 @@ class FlextTapLdapStreams:
     class GroupsStream(LDAPBaseStream):
         """Stream for LDAP group entries."""
 
+        primary_keys: list[str] = ["dn"]
+        replication_key: str = "modifyTimestamp"
+
         @override
         def __init__(self, tap: Tap) -> None:
             """Initialize groups stream."""
@@ -503,6 +509,8 @@ class FlextTapLdapStreams:
     class OrganizationalUnitsStream(LDAPBaseStream):
         """Stream for LDAP organizational unit entries."""
 
+        primary_keys: list[str] = ["dn"]
+
         @override
         def __init__(self, tap: Tap) -> None:
             """Initialize organizational units stream."""
@@ -569,6 +577,8 @@ class FlextTapLdapStreams:
 
     class SchemaStream(LDAPBaseStream):
         """Stream for LDAP schema information."""
+
+        primary_keys: list[str] = ["dn"]
 
         @override
         def __init__(self, tap: Tap) -> None:
@@ -682,6 +692,9 @@ class FlextTapLdapStreams:
 
     class CustomStream(LDAPBaseStream):
         """Custom LDAP stream with configurable filter and schema."""
+
+        primary_keys: list[str] = ["dn"]
+        replication_key: str | None = None
 
         @override
         def __init__(

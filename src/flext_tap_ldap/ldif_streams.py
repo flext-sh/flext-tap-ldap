@@ -61,6 +61,8 @@ class FlextTapLdapLdifStreams:
     class LdifStream(Stream):
         """LDIF stream using flext-ldif for ALL processing."""
 
+        primary_keys: list[str] = ["dn"]
+
         @override
         def __init__(self, tap: Tap) -> None:
             """Initialize LDIF stream with library delegation."""
@@ -295,6 +297,8 @@ class FlextTapLdapLdifStreams:
 
     class LdifAnalysisStream(Stream):
         """LDIF analysis stream using flext-ldif for ALL analysis."""
+
+        primary_keys: list[str] = ["analysis_id"]
 
         @override
         def __init__(self, tap: Tap) -> None:

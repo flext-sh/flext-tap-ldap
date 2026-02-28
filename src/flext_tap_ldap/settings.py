@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Self
+from typing import Self, override
 
 from flext_core import FlextConstants, FlextResult, FlextSettings, t
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
@@ -262,6 +262,7 @@ class FlextTapLdapSettings(FlextSettings):
 
     # Enhanced singleton pattern methods
     @classmethod
+    @override
     def get_global_instance(cls) -> Self:
         """Get the global singleton instance using enhanced FlextSettings pattern."""
         return cls()
