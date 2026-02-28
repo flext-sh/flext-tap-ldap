@@ -16,8 +16,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Protocol, runtime_checkable
 
-from flext_ldap import FlextLdapProtocols
-from flext_meltano import FlextMeltanoProtocols, m
+from flext_ldap.protocols import FlextLdapProtocols
+from flext_meltano.models import FlextMeltanoModels as m
+from flext_meltano.protocols import FlextMeltanoProtocols
 
 from flext_tap_ldap.typings import t
 
@@ -163,13 +164,6 @@ class FlextMeltanoTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 # Runtime alias for simplified usage
 p = FlextMeltanoTapLdapProtocols
 
-
-__all__ = [
-    "FlextMeltanoTapLdapProtocols",
-    "TapConfigProtocol",
-    "TapProtocol",
-    "p",
-]
 
 
 class TapConfigProtocol(Protocol):
