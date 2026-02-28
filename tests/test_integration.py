@@ -82,7 +82,9 @@ class TestFlextTapLdapIntegration:
 
     @pytest.fixture
     def state_file(
-        self, tmp_path: Path, sample_state: dict[str, t.GeneralValueType]
+        self,
+        tmp_path: Path,
+        sample_state: dict[str, t.GeneralValueType],
     ) -> Path:
         """Create a state file fixture for testing."""
         state_path = tmp_path / "state.json"

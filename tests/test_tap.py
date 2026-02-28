@@ -57,7 +57,8 @@ class TestFlextTapLdapTapUnit:
             raise AssertionError(count_error)
 
     def test_custom_streams_configuration(
-        self, config: dict[str, t.GeneralValueType]
+        self,
+        config: dict[str, t.GeneralValueType],
     ) -> None:
         """Test custom streams configuration."""
         config["custom_streams"] = [

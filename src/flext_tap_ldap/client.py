@@ -50,10 +50,12 @@ class FlextTapLdapClient:
         password: str | None = Field(default=None, description="Bind password")
         use_ssl: bool = Field(default=False, description="Use SSL")
         timeout: int = Field(
-            default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT, description="Timeout"
+            default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
+            description="Timeout",
         )
         page_size: int = Field(
-            default=c.TapLdap.DEFAULT_PAGE_SIZE, description="Page size"
+            default=c.TapLdap.DEFAULT_PAGE_SIZE,
+            description="Page size",
         )
 
     class LDAPClient:
@@ -240,7 +242,9 @@ class FlextTapLdapClient:
                 # Use getattr to safely access attributes for type checker
                 dn_value: str = str(getattr(entry_data, "dn", ""))
                 attributes: dict[str, t.GeneralValueType] = getattr(
-                    entry_data, "attributes", {}
+                    entry_data,
+                    "attributes",
+                    {},
                 )
                 entry_dict: dict[str, t.GeneralValueType] = {"dn": dn_value}
                 for attr_name, attr_values in attributes.items():
@@ -280,7 +284,7 @@ class FlextTapLdapClient:
                 hasattr(raw_entries, "entries")
                 and getattr(raw_entries, "entries", None) is not None
             ):
-                data_entries = list(getattr(raw_entries, "entries"))
+                data_entries = list(raw_entries.entries)
             elif isinstance(raw_entries, Sequence):
                 data_entries = list(raw_entries)
             else:

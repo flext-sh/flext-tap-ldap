@@ -96,7 +96,8 @@ def _parse_connection_config(raw_value: t.GeneralValueType) -> _LdapConnectionCo
         bind_password=_coerce_optional_string(parsed.bind_password),
         use_ssl=bool(parsed.use_ssl),
         timeout_seconds=_coerce_positive_int(
-            parsed.timeout_seconds, c.TapLdap.DEFAULT_SEARCH_TIMEOUT
+            parsed.timeout_seconds,
+            c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
         ),
         base_dn=str(parsed.base_dn),
     )
@@ -200,7 +201,8 @@ class FlextTapLdapStreams:
         name: str = Field(description="Stream name")
         search_filter: str = Field(description="LDAP search filter")
         schema_properties: Mapping[str, t.GeneralValueType] | None = Field(
-            default=None, description="Schema properties"
+            default=None,
+            description="Schema properties",
         )
         primary_keys: list[str] | None = Field(default=None, description="Primary keys")
         replication_key: str | None = Field(default=None, description="Replication key")
@@ -237,7 +239,8 @@ class FlextTapLdapStreams:
                     use_ssl=connection_config.use_ssl,
                     timeout=connection_config.timeout_seconds,
                     page_size=_coerce_positive_int(
-                        page_size_raw, c.TapLdap.DEFAULT_PAGE_SIZE
+                        page_size_raw,
+                        c.TapLdap.DEFAULT_PAGE_SIZE,
                     ),
                 )
             except (
@@ -514,7 +517,7 @@ class FlextTapLdapStreams:
             """Get fallback group data."""
             return [
                 dict(
-                    FlextTapLdapStreams.FallbackDataFactory.create_test_group_record()
+                    FlextTapLdapStreams.FallbackDataFactory.create_test_group_record(),
                 ),
             ]
 
@@ -698,7 +701,7 @@ class FlextTapLdapStreams:
             """Get fallback schema data."""
             return [
                 dict(
-                    FlextTapLdapStreams.FallbackDataFactory.create_test_schema_record()
+                    FlextTapLdapStreams.FallbackDataFactory.create_test_schema_record(),
                 ),
             ]
 

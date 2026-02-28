@@ -59,7 +59,8 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             event_type: str = Field(default="stream_discovered", frozen=True)
             aggregate_id: str = Field(
-                default="", description="Stream name as aggregate identifier"
+                default="",
+                description="Stream name as aggregate identifier",
             )
             stream_name: str
             stream_key_properties: list[str] = Field(default_factory=list)
@@ -82,7 +83,8 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             event_type: str = Field(default="record_extracted", frozen=True)
             aggregate_id: str = Field(
-                default="", description="Stream name as aggregate identifier"
+                default="",
+                description="Stream name as aggregate identifier",
             )
             stream_name: str
             record_id: str | None = None
@@ -105,7 +107,8 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             event_type: str = Field(default="connection_tested", frozen=True)
             aggregate_id: str = Field(
-                default="", description="Server URI as aggregate identifier"
+                default="",
+                description="Server URI as aggregate identifier",
             )
             success: bool
             server_uri: str

@@ -162,7 +162,8 @@ class FlextTapLdapLdifStreams:
                 if parsed_attributes:
                     attributes = parsed_attributes
             page_size_raw = self.config.get(
-                "ldap_page_size", c.TapLdap.DEFAULT_PAGE_SIZE
+                "ldap_page_size",
+                c.TapLdap.DEFAULT_PAGE_SIZE,
             )
             page_size = (
                 int(page_size_raw)
@@ -172,7 +173,10 @@ class FlextTapLdapLdifStreams:
 
             try:
                 server = Server(
-                    host_raw, port=port, use_ssl=use_ssl, get_info="NO_INFO"
+                    host_raw,
+                    port=port,
+                    use_ssl=use_ssl,
+                    get_info="NO_INFO",
                 )
                 with Connection(
                     server=server,
@@ -200,7 +204,7 @@ class FlextTapLdapLdifStreams:
                             continue
                         object_classes_raw = attrs_raw.get("objectClass")
                         object_classes = self._normalize_object_classes(
-                            object_classes_raw
+                            object_classes_raw,
                         )
                         yield {
                             "dn": dn_raw,
@@ -220,7 +224,8 @@ class FlextTapLdapLdifStreams:
                 logger.exception("Error traversing LDAP directory")
 
         def _normalize_object_classes(
-            self, object_classes: t.GeneralValueType
+            self,
+            object_classes: t.GeneralValueType,
         ) -> list[str]:
             if isinstance(object_classes, str):
                 return [object_classes]
@@ -387,7 +392,8 @@ class FlextTapLdapLdifStreams:
                         if isinstance(raw_entry_types, Mapping):
                             for entry_type, count in raw_entry_types.items():
                                 if isinstance(entry_type, str) and isinstance(
-                                    count, int | str
+                                    count,
+                                    int | str,
                                 ):
                                     entry_types[entry_type] = entry_types.get(
                                         entry_type,
@@ -397,7 +403,8 @@ class FlextTapLdapLdifStreams:
                         if isinstance(raw_object_classes, Mapping):
                             for obj_class, count in raw_object_classes.items():
                                 if isinstance(obj_class, str) and isinstance(
-                                    count, int | str
+                                    count,
+                                    int | str,
                                 ):
                                     object_classes[obj_class] = object_classes.get(
                                         obj_class,
@@ -405,7 +412,7 @@ class FlextTapLdapLdifStreams:
                                     ) + int(count)
                 elif ldif_directory:
                     for discovered_file in self._discover_ldif_files(
-                        str(ldif_directory)
+                        str(ldif_directory),
                     ):
                         stats = self._analyze_ldif_file(str(discovered_file))
                         total_count = stats.get("total_entries", 0)
@@ -418,7 +425,8 @@ class FlextTapLdapLdifStreams:
                         if isinstance(raw_entry_types, Mapping):
                             for entry_type, count in raw_entry_types.items():
                                 if isinstance(entry_type, str) and isinstance(
-                                    count, int | str
+                                    count,
+                                    int | str,
                                 ):
                                     entry_types[entry_type] = entry_types.get(
                                         entry_type,
@@ -428,7 +436,8 @@ class FlextTapLdapLdifStreams:
                         if isinstance(raw_object_classes, Mapping):
                             for obj_class, count in raw_object_classes.items():
                                 if isinstance(obj_class, str) and isinstance(
-                                    count, int | str
+                                    count,
+                                    int | str,
                                 ):
                                     object_classes[obj_class] = object_classes.get(
                                         obj_class,

@@ -65,7 +65,8 @@ class LDAPConnection(BaseModel):
     password: str | None = Field(default=None, description="Bind password")
     use_ssl: bool = Field(default=False, description="Use SSL")
     timeout: int = Field(
-        default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT, description="Connection timeout"
+        default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
+        description="Connection timeout",
     )
     last_tested: datetime | None = Field(default=None, description="Last test time")
     last_error: str | None = Field(default=None, description="Last error message")
@@ -84,14 +85,17 @@ class LDAPStream(BaseModel):
     attributes: list[str] = Field(default_factory=list, description="LDAP attributes")
     tap_stream_id: str = Field(default="", description="Tap stream ID")
     key_properties: list[str] = Field(
-        default_factory=lambda: ["dn"], description="Key properties"
+        default_factory=lambda: ["dn"],
+        description="Key properties",
     )
     replication_method: str = Field(
-        default="FULL_TABLE", description="Replication method"
+        default="FULL_TABLE",
+        description="Replication method",
     )
     replication_key: str | None = Field(default=None, description="Replication key")
     stream_schema: dict[str, t.GeneralValueType] = Field(
-        default_factory=dict, description="Stream schema"
+        default_factory=dict,
+        description="Stream schema",
     )
 
     def update_schema(self, schema: Mapping[str, t.GeneralValueType]) -> None:
@@ -110,13 +114,16 @@ class TapExecution(BaseModel):
     command: str = Field(default="", description="Command executed")
     tap_status: str = Field(default="created", description="Tap status")
     config: dict[str, t.GeneralValueType] = Field(
-        default_factory=dict, description="Configuration"
+        default_factory=dict,
+        description="Configuration",
     )
     catalog: dict[str, t.GeneralValueType] = Field(
-        default_factory=dict, description="Catalog"
+        default_factory=dict,
+        description="Catalog",
     )
     state: dict[str, t.GeneralValueType] = Field(
-        default_factory=dict, description="State"
+        default_factory=dict,
+        description="State",
     )
     started_at: datetime | None = Field(default=None, description="Start time")
     completed_at: datetime | None = Field(default=None, description="Completion time")
@@ -196,7 +203,9 @@ class FlextTapLdapServices:
             description="Timeout in seconds",
         )
         page_size: int = Field(
-            default=c.TapLdap.DEFAULT_PAGE_SIZE, gt=0, description="Page size"
+            default=c.TapLdap.DEFAULT_PAGE_SIZE,
+            gt=0,
+            description="Page size",
         )
         max_retries: int = Field(default=3, ge=0, description="Max retries")
 
@@ -213,14 +222,17 @@ class FlextTapLdapServices:
         stream_type: str = Field(description="Stream type")
         search_filter: str = Field(description="Search filter")
         attributes: list[str] | None = Field(
-            default=None, description="LDAP attributes"
+            default=None,
+            description="LDAP attributes",
         )
         tap_stream_id: str | None = Field(default=None, description="Tap stream ID")
         key_properties: list[str] | None = Field(
-            default=None, description="Key properties"
+            default=None,
+            description="Key properties",
         )
         replication_method: str = Field(
-            default="FULL_TABLE", description="Replication method"
+            default="FULL_TABLE",
+            description="Replication method",
         )
         replication_key: str | None = Field(default=None, description="Replication key")
 
@@ -239,20 +251,25 @@ class FlextTapLdapServices:
         ldif_ignore_errors: bool = Field(default=True, description="Ignore errors")
         ldif_max_errors: int = Field(default=100, description="Max errors")
         ldif_ignore_file_errors: bool = Field(
-            default=True, description="Ignore file errors"
+            default=True,
+            description="Ignore file errors",
         )
         ldif_ignore_entry_errors: bool = Field(
-            default=True, description="Ignore entry errors"
+            default=True,
+            description="Ignore entry errors",
         )
         ldif_apply_transformations: bool = Field(
-            default=False, description="Apply transformations"
+            default=False,
+            description="Apply transformations",
         )
         ldif_transformation_rules: dict[str, t.GeneralValueType] = Field(
-            default_factory=dict, description="Transformation rules"
+            default_factory=dict,
+            description="Transformation rules",
         )
         migration_batch: str | None = Field(default=None, description="Migration batch")
         enable_ldif_streams: bool = Field(
-            default=False, description="Enable LDIF streams"
+            default=False,
+            description="Enable LDIF streams",
         )
 
     class LDAPConnectionService:

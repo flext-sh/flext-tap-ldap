@@ -16,7 +16,8 @@ from flext_tests import FlextTestsProtocols
 
 
 class TestsFlextMeltanoTapLdapProtocols(
-    FlextTestsProtocols, FlextMeltanoTapLdapProtocols
+    FlextTestsProtocols,
+    FlextMeltanoTapLdapProtocols,
 ):
     """Test protocols combining FlextTestsProtocols with flext-tap-ldap protocols."""
 

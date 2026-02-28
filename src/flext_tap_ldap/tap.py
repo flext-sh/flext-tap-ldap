@@ -186,7 +186,7 @@ class FlextTapLdapTap(Tap):
         return streams
 
 
-CLI_COMMAND: t.GeneralValueType = getattr(FlextTapLdapTap, "cli")
+CLI_COMMAND: t.GeneralValueType = FlextTapLdapTap.cli
 
 
 def main() -> None:

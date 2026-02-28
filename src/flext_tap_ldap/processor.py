@@ -74,7 +74,7 @@ class Entry:
             ldif_content += "\n"
 
             result: FlextResult[list[FlextLdifModels.Ldif.Entry]] = api.parse(
-                ldif_content
+                ldif_content,
             )
             if result.is_success and result.value and len(result.value) > 0:
                 parsed_entry = _to_ldif_entry(result.value[0])
@@ -331,7 +331,7 @@ class FlextTapLdapProcessor:
 
         try:
             result: FlextResult[list[FlextLdifModels.Ldif.Entry]] = self._api.parse(
-                content
+                content,
             )
             if not result.is_success:
                 error_msg = (
@@ -369,7 +369,8 @@ class FlextTapLdapProcessor:
                 raise ValueError(error_msg) from e
 
     def _convert_from_flext_entry(
-        self, flext_entry: FlextLdifModels.Ldif.Entry
+        self,
+        flext_entry: FlextLdifModels.Ldif.Entry,
     ) -> Entry:
         """Convert FlextLdifModels.Ldif.Entry to testing convenience Entry."""
         # Extract DN
@@ -603,7 +604,8 @@ class Transformer:
         if isinstance(raw_value_mappings, Mapping):
             for attr_name, attr_value_map in raw_value_mappings.items():
                 if not isinstance(attr_name, str) or not isinstance(
-                    attr_value_map, Mapping
+                    attr_value_map,
+                    Mapping,
                 ):
                     continue
                 existing_values = transformed.attributes.get(attr_name)
@@ -640,7 +642,8 @@ class Transformer:
     ) -> Entry:
         """Apply schema mappings to normalize output attributes."""
         transformed_entry = Entry(
-            entry.dn, {k: list(v) for k, v in entry.attributes.items()}
+            entry.dn,
+            {k: list(v) for k, v in entry.attributes.items()},
         )
         transformed_entry.change_type = entry.change_type
         transformed_entry.controls = entry.controls.copy()
