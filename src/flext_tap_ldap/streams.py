@@ -15,8 +15,11 @@ from itertools import starmap
 from typing import ClassVar, override
 
 from flext_core import FlextLogger, t
-from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
-from flext_meltano.typings import t as t_meltano
+from flext_meltano import (
+    FlextMeltanoStream as Stream,
+    FlextMeltanoTap as Tap,
+    t as t_meltano,
+)
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
 
 from flext_tap_ldap.client import LDAPClient
@@ -24,7 +27,9 @@ from flext_tap_ldap.constants import c
 
 logger = FlextLogger(__name__)
 
-type SingerValue = str | int | float | bool | None | list[SingerValue] | dict[str, SingerValue]
+type SingerValue = (
+    str | int | float | bool | list[SingerValue] | dict[str, SingerValue] | None
+)
 
 type StreamRecord = (
     dict[str, object] | tuple[dict[object, object], dict[object, object] | None]
@@ -90,12 +95,16 @@ def _parse_connection_config(raw_value: t.GeneralValueType) -> _LdapConnectionCo
         bind_dn=_coerce_optional_string(parsed.bind_dn),
         bind_password=_coerce_optional_string(parsed.bind_password),
         use_ssl=bool(parsed.use_ssl),
-        timeout_seconds=_coerce_positive_int(parsed.timeout_seconds, c.TapLdap.DEFAULT_SEARCH_TIMEOUT),
+        timeout_seconds=_coerce_positive_int(
+            parsed.timeout_seconds, c.TapLdap.DEFAULT_SEARCH_TIMEOUT
+        ),
         base_dn=str(parsed.base_dn),
     )
 
 
-def _parse_property_definition(raw_value: t.GeneralValueType) -> _CustomPropertyDefinition:
+def _parse_property_definition(
+    raw_value: t.GeneralValueType,
+) -> _CustomPropertyDefinition:
     """Validate custom stream property definition through Pydantic."""
     try:
         return _CustomPropertyDefinition.model_validate(raw_value, strict=True)
@@ -227,7 +236,9 @@ class FlextTapLdapStreams:
                     password=connection_config.bind_password,
                     use_ssl=connection_config.use_ssl,
                     timeout=connection_config.timeout_seconds,
-                    page_size=_coerce_positive_int(page_size_raw, c.TapLdap.DEFAULT_PAGE_SIZE),
+                    page_size=_coerce_positive_int(
+                        page_size_raw, c.TapLdap.DEFAULT_PAGE_SIZE
+                    ),
                 )
             except (
                 ValueError,
@@ -309,8 +320,8 @@ class FlextTapLdapStreams:
     class UsersStream(LDAPBaseStream):
         """Stream for LDAP user entries."""
 
-        primary_keys: list[str] = ["dn"]
-        replication_key: str = "modifyTimestamp"
+        primary_keys: ClassVar[list[str]] = ["dn"]
+        replication_key: ClassVar[str] = "modifyTimestamp"
 
         @override
         def __init__(self, tap: Tap) -> None:
@@ -410,8 +421,8 @@ class FlextTapLdapStreams:
     class GroupsStream(LDAPBaseStream):
         """Stream for LDAP group entries."""
 
-        primary_keys: list[str] = ["dn"]
-        replication_key: str = "modifyTimestamp"
+        primary_keys: ClassVar[list[str]] = ["dn"]
+        replication_key: ClassVar[str] = "modifyTimestamp"
 
         @override
         def __init__(self, tap: Tap) -> None:
@@ -510,7 +521,7 @@ class FlextTapLdapStreams:
     class OrganizationalUnitsStream(LDAPBaseStream):
         """Stream for LDAP organizational unit entries."""
 
-        primary_keys: list[str] = ["dn"]
+        primary_keys: ClassVar[list[str]] = ["dn"]
 
         @override
         def __init__(self, tap: Tap) -> None:
@@ -579,7 +590,7 @@ class FlextTapLdapStreams:
     class SchemaStream(LDAPBaseStream):
         """Stream for LDAP schema information."""
 
-        primary_keys: list[str] = ["dn"]
+        primary_keys: ClassVar[list[str]] = ["dn"]
 
         @override
         def __init__(self, tap: Tap) -> None:
@@ -694,8 +705,8 @@ class FlextTapLdapStreams:
     class CustomStream(LDAPBaseStream):
         """Custom LDAP stream with configurable filter and schema."""
 
-        primary_keys: list[str] = ["dn"]
-        replication_key: str | None = None
+        primary_keys: ClassVar[list[str]] = ["dn"]
+        replication_key: ClassVar[str | None] = None
 
         @override
         def __init__(
@@ -749,8 +760,10 @@ class FlextTapLdapStreams:
 
             # Build schema from parameters
             if params.schema_properties:
-                schema_props: list[t_meltano.Singer.Typing.Property[SingerValue]] = list(
-                    starmap(_map_prop, params.schema_properties.items()),
+                schema_props: list[t_meltano.Singer.Typing.Property[SingerValue]] = (
+                    list(
+                        starmap(_map_prop, params.schema_properties.items()),
+                    )
                 )
                 # Always include DN property even for custom streams
                 dn_prop = t_meltano.Singer.Typing.Property(

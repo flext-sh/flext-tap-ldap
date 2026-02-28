@@ -11,8 +11,8 @@ from flext_core import (
     FlextLogger,
     FlextResult,
 )
-from flext_ldap.utilities import FlextLdapUtilities
-from flext_meltano.utilities import FlextMeltanoUtilities
+from flext_ldap import FlextLdapUtilities
+from flext_meltano import FlextMeltanoUtilities
 
 from .constants import c
 

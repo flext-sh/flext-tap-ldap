@@ -69,7 +69,11 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             @classmethod
             def set_aggregate_id(cls, data: t.GeneralValueType) -> t.GeneralValueType:
                 """Set aggregate_id from stream_name if not provided."""
-                if isinstance(data, dict) and "aggregate_id" not in data and "stream_name" in data:
+                if (
+                    isinstance(data, dict)
+                    and "aggregate_id" not in data
+                    and "stream_name" in data
+                ):
                     data["aggregate_id"] = data["stream_name"]
                 return data
 
@@ -88,7 +92,11 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             @classmethod
             def set_aggregate_id(cls, data: t.GeneralValueType) -> t.GeneralValueType:
                 """Set aggregate_id from stream_name if not provided."""
-                if isinstance(data, dict) and "aggregate_id" not in data and "stream_name" in data:
+                if (
+                    isinstance(data, dict)
+                    and "aggregate_id" not in data
+                    and "stream_name" in data
+                ):
                     data["aggregate_id"] = data["stream_name"]
                 return data
 
@@ -107,7 +115,11 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             @classmethod
             def set_aggregate_id(cls, data: t.GeneralValueType) -> t.GeneralValueType:
                 """Set aggregate_id from server_uri if not provided."""
-                if isinstance(data, dict) and "aggregate_id" not in data and "server_uri" in data:
+                if (
+                    isinstance(data, dict)
+                    and "aggregate_id" not in data
+                    and "server_uri" in data
+                ):
                     data["aggregate_id"] = data["server_uri"]
                 return data
 

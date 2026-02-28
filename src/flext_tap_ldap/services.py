@@ -64,7 +64,9 @@ class LDAPConnection(BaseModel):
     bind_dn: str | None = Field(default=None, description="Bind DN")
     password: str | None = Field(default=None, description="Bind password")
     use_ssl: bool = Field(default=False, description="Use SSL")
-    timeout: int = Field(default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT, description="Connection timeout")
+    timeout: int = Field(
+        default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT, description="Connection timeout"
+    )
     last_tested: datetime | None = Field(default=None, description="Last test time")
     last_error: str | None = Field(default=None, description="Last error message")
 
@@ -179,12 +181,23 @@ class FlextTapLdapServices:
 
         host: str = Field(description="LDAP host")
         base_dn: str = Field(description="Base DN")
-        port: int = Field(default=c.TapLdap.DEFAULT_PORT, ge=1, le=c.TapLdap.Ldap.MAX_PORT, description="LDAP port")
+        port: int = Field(
+            default=c.TapLdap.DEFAULT_PORT,
+            ge=1,
+            le=c.TapLdap.Ldap.MAX_PORT,
+            description="LDAP port",
+        )
         use_ssl: bool = Field(default=False, description="Use SSL")
         bind_dn: str | None = Field(default=None, description="Bind DN")
         bind_password: str | None = Field(default=None, description="Bind password")
-        timeout_seconds: int = Field(default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT, gt=0, description="Timeout in seconds")
-        page_size: int = Field(default=c.TapLdap.DEFAULT_PAGE_SIZE, gt=0, description="Page size")
+        timeout_seconds: int = Field(
+            default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
+            gt=0,
+            description="Timeout in seconds",
+        )
+        page_size: int = Field(
+            default=c.TapLdap.DEFAULT_PAGE_SIZE, gt=0, description="Page size"
+        )
         max_retries: int = Field(default=3, ge=0, description="Max retries")
 
     class StreamCreationParams(BaseModel):

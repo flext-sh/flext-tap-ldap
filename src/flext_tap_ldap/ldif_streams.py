@@ -8,10 +8,12 @@ from pathlib import Path
 from typing import ClassVar, override
 
 from flext_ldap import FlextLdapConnection
-from flext_ldif import FlextLdif
-from flext_ldif.models import m
-from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
-from flext_meltano.typings import t as t_meltano
+from flext_ldif import FlextLdif, m
+from flext_meltano import (
+    FlextMeltanoStream as Stream,
+    FlextMeltanoTap as Tap,
+    t as t_meltano,
+)
 from ldap3 import SUBTREE, Connection, Server
 from pydantic import BaseModel
 
@@ -61,7 +63,7 @@ class FlextTapLdapLdifStreams:
     class LdifStream(Stream):
         """LDIF stream using flext-ldif for ALL processing."""
 
-        primary_keys: list[str] = ["dn"]
+        primary_keys: ClassVar[list[str]] = ["dn"]
 
         @override
         def __init__(self, tap: Tap) -> None:
@@ -132,7 +134,11 @@ class FlextTapLdapLdifStreams:
                 return
 
             port_raw = self.config.get("ldap_port", c.TapLdap.DEFAULT_PORT)
-            port = int(port_raw) if isinstance(port_raw, int | str) else c.TapLdap.DEFAULT_PORT
+            port = (
+                int(port_raw)
+                if isinstance(port_raw, int | str)
+                else c.TapLdap.DEFAULT_PORT
+            )
             use_ssl_raw = self.config.get("ldap_use_ssl", False)
             use_ssl = bool(use_ssl_raw)
             bind_dn_raw = self.config.get("ldap_bind_dn")
@@ -155,9 +161,13 @@ class FlextTapLdapLdifStreams:
                 ]
                 if parsed_attributes:
                     attributes = parsed_attributes
-            page_size_raw = self.config.get("ldap_page_size", c.TapLdap.DEFAULT_PAGE_SIZE)
+            page_size_raw = self.config.get(
+                "ldap_page_size", c.TapLdap.DEFAULT_PAGE_SIZE
+            )
             page_size = (
-                int(page_size_raw) if isinstance(page_size_raw, int | str) else c.TapLdap.DEFAULT_PAGE_SIZE
+                int(page_size_raw)
+                if isinstance(page_size_raw, int | str)
+                else c.TapLdap.DEFAULT_PAGE_SIZE
             )
 
             try:
@@ -209,7 +219,9 @@ class FlextTapLdapLdifStreams:
             ):
                 logger.exception("Error traversing LDAP directory")
 
-        def _normalize_object_classes(self, object_classes: t.GeneralValueType) -> list[str]:
+        def _normalize_object_classes(
+            self, object_classes: t.GeneralValueType
+        ) -> list[str]:
             if isinstance(object_classes, str):
                 return [object_classes]
             if isinstance(object_classes, list):
@@ -298,7 +310,7 @@ class FlextTapLdapLdifStreams:
     class LdifAnalysisStream(Stream):
         """LDIF analysis stream using flext-ldif for ALL analysis."""
 
-        primary_keys: list[str] = ["analysis_id"]
+        primary_keys: ClassVar[list[str]] = ["analysis_id"]
 
         @override
         def __init__(self, tap: Tap) -> None:

@@ -49,8 +49,12 @@ class FlextTapLdapClient:
         bind_dn: str | None = Field(default=None, description="Bind DN")
         password: str | None = Field(default=None, description="Bind password")
         use_ssl: bool = Field(default=False, description="Use SSL")
-        timeout: int = Field(default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT, description="Timeout")
-        page_size: int = Field(default=c.TapLdap.DEFAULT_PAGE_SIZE, description="Page size")
+        timeout: int = Field(
+            default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT, description="Timeout"
+        )
+        page_size: int = Field(
+            default=c.TapLdap.DEFAULT_PAGE_SIZE, description="Page size"
+        )
 
     class LDAPClient:
         """Testing convenience LDAP client wrapper.
@@ -101,11 +105,17 @@ class FlextTapLdapClient:
 
             return FlextTapLdapClient.LDAPClientConfig(
                 host=host,
-                port=self._coerce_int(convenience_kwargs.get("port", c.TapLdap.DEFAULT_PORT), c.TapLdap.DEFAULT_PORT),
+                port=self._coerce_int(
+                    convenience_kwargs.get("port", c.TapLdap.DEFAULT_PORT),
+                    c.TapLdap.DEFAULT_PORT,
+                ),
                 bind_dn=self._coerce_str_opt(convenience_kwargs.get("bind_dn")),
                 password=self._coerce_str_opt(convenience_kwargs.get("password")),
                 use_ssl=bool(convenience_kwargs.get("use_ssl")),
-                timeout=self._coerce_int(convenience_kwargs.get("timeout", c.TapLdap.DEFAULT_SEARCH_TIMEOUT), c.TapLdap.DEFAULT_SEARCH_TIMEOUT),
+                timeout=self._coerce_int(
+                    convenience_kwargs.get("timeout", c.TapLdap.DEFAULT_SEARCH_TIMEOUT),
+                    c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
+                ),
                 page_size=self._coerce_int(
                     convenience_kwargs.get("page_size", c.TapLdap.DEFAULT_PAGE_SIZE),
                     c.TapLdap.DEFAULT_PAGE_SIZE,
@@ -280,10 +290,10 @@ class FlextTapLdapClient:
                 if size_limit > 0 and entries_returned >= size_limit:
                     break
 
-                narrowed_entry: BaseModel | Mapping[str, t.GeneralValueType] | None = None
-                if isinstance(entry_data, BaseModel):
-                    narrowed_entry = entry_data
-                elif u.is_dict_like(entry_data):
+                narrowed_entry: BaseModel | Mapping[str, t.GeneralValueType] | None = (
+                    None
+                )
+                if isinstance(entry_data, BaseModel) or u.is_dict_like(entry_data):
                     narrowed_entry = entry_data
 
                 converted = self._convert_entry_to_dict(
