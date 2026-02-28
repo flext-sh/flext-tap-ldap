@@ -274,17 +274,17 @@ class FlextTapLdapClient:
             elif isinstance(raw_entries, Sequence):
                 data_entries = list(raw_entries)
             else:
-                data_entries = []
+                data_entries: list[t.GeneralValueType] = []
 
             for entries_returned, entry_data in enumerate(data_entries):
                 if size_limit > 0 and entries_returned >= size_limit:
                     break
 
-                narrowed_entry: BaseModel | Mapping[str, t.GeneralValueType] | None
-                if x.is_base_model(entry_data) or u.is_dict_like(entry_data):
+                narrowed_entry: BaseModel | Mapping[str, t.GeneralValueType] | None = None
+                if isinstance(entry_data, BaseModel):
                     narrowed_entry = entry_data
-                else:
-                    narrowed_entry = None
+                elif u.is_dict_like(entry_data):
+                    narrowed_entry = entry_data
 
                 converted = self._convert_entry_to_dict(
                     narrowed_entry,
@@ -420,12 +420,13 @@ class FlextTapLdapClient:
 
             # Handle Oracle container objects
             if "objectClass" in attributes:
-                obj_classes = attributes["objectClass"]
-                match obj_classes:
+                raw_obj_classes = attributes["objectClass"]
+                obj_classes: list[str]
+                match raw_obj_classes:
                     case str() as single_class:
                         obj_classes = [single_class]
                     case list() as class_list:
-                        obj_classes = class_list
+                        obj_classes = [str(c) for c in class_list]
                     case _:
                         obj_classes = []
 

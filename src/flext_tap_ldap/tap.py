@@ -176,7 +176,7 @@ class FlextTapLdapTap(Tap):
             params = FlextTapLdapStreams.CustomStreamParams(
                 name=_as_str(raw_name) or "",
                 search_filter=_as_str(raw_filter) or "",
-                schema_properties=dict(schema_props),
+                schema_properties={str(k): v for k, v in schema_props.items()},
                 primary_keys=primary_keys,
                 replication_key=_as_str(raw_rk),
             )

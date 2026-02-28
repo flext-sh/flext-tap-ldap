@@ -613,7 +613,7 @@ class FlextTapLdapServices:
                 normalized: list[Mapping[str, t.GeneralValueType]] = []
                 for entry in entries:
                     dn_value = entry.dn.value if entry.dn is not None else ""
-                    attributes_raw = (
+                    attributes_raw: Mapping[str, t.GeneralValueType] = (
                         entry.attributes.attributes
                         if entry.attributes is not None
                         else {}

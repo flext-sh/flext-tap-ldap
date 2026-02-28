@@ -24,6 +24,8 @@ from flext_tap_ldap.constants import c
 
 logger = FlextLogger(__name__)
 
+type SingerValue = str | int | float | bool | None | list[SingerValue] | dict[str, SingerValue]
+
 type StreamRecord = (
     dict[str, object] | tuple[dict[object, object], dict[object, object] | None]
 )
@@ -205,6 +207,7 @@ class FlextTapLdapStreams:
             schema: dict[str, t.GeneralValueType] | None = None,
         ) -> None:
             """Initialize the LDAP stream."""
+            self.client: LDAPClient | None = None
             super().__init__(tap, name=name, schema=schema)
             self.tap = tap
 
@@ -213,7 +216,6 @@ class FlextTapLdapStreams:
 
         def _create_ldap_client(self) -> None:
             """Create LDAP client from tap configuration."""
-            self.client: LDAPClient | None = None
             try:
                 raw_connection = self.config.get("connection", {})
                 connection_config = _parse_connection_config(raw_connection)
@@ -298,7 +300,6 @@ class FlextTapLdapStreams:
                 logger.warning("LDAP search failed: %s, using fallback data", err_msg)
                 return self._get_fallback_data()
 
-        @override
         def _get_fallback_data(
             self,
         ) -> list[dict[str, object]]:
@@ -308,7 +309,7 @@ class FlextTapLdapStreams:
     class UsersStream(LDAPBaseStream):
         """Stream for LDAP user entries."""
 
-        primary_keys: ClassVar[list[str]] = ["dn"]
+        primary_keys: list[str] = ["dn"]
         replication_key: str = "modifyTimestamp"
 
         @override
@@ -409,7 +410,7 @@ class FlextTapLdapStreams:
     class GroupsStream(LDAPBaseStream):
         """Stream for LDAP group entries."""
 
-        primary_keys: ClassVar[list[str]] = ["dn"]
+        primary_keys: list[str] = ["dn"]
         replication_key: str = "modifyTimestamp"
 
         @override
@@ -509,7 +510,7 @@ class FlextTapLdapStreams:
     class OrganizationalUnitsStream(LDAPBaseStream):
         """Stream for LDAP organizational unit entries."""
 
-        primary_keys: ClassVar[list[str]] = ["dn"]
+        primary_keys: list[str] = ["dn"]
 
         @override
         def __init__(self, tap: Tap) -> None:
@@ -578,7 +579,7 @@ class FlextTapLdapStreams:
     class SchemaStream(LDAPBaseStream):
         """Stream for LDAP schema information."""
 
-        primary_keys: ClassVar[list[str]] = ["dn"]
+        primary_keys: list[str] = ["dn"]
 
         @override
         def __init__(self, tap: Tap) -> None:
@@ -693,7 +694,7 @@ class FlextTapLdapStreams:
     class CustomStream(LDAPBaseStream):
         """Custom LDAP stream with configurable filter and schema."""
 
-        primary_keys: ClassVar[list[str]] = ["dn"]
+        primary_keys: list[str] = ["dn"]
         replication_key: str | None = None
 
         @override
@@ -708,7 +709,7 @@ class FlextTapLdapStreams:
             def _map_prop(
                 name: str,
                 definition: t.GeneralValueType,
-            ) -> t_meltano.Singer.Typing.Property:
+            ) -> t_meltano.Singer.Typing.Property[SingerValue]:
                 parsed_definition = _parse_property_definition(definition)
                 prop_type = parsed_definition.type
                 prop_desc = parsed_definition.description or f"{name} field"
@@ -748,7 +749,7 @@ class FlextTapLdapStreams:
 
             # Build schema from parameters
             if params.schema_properties:
-                schema_props: list[t_meltano.Singer.Typing.Property] = list(
+                schema_props: list[t_meltano.Singer.Typing.Property[SingerValue]] = list(
                     starmap(_map_prop, params.schema_properties.items()),
                 )
                 # Always include DN property even for custom streams

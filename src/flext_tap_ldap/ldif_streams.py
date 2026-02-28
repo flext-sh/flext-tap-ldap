@@ -30,7 +30,7 @@ class _Guards:
         return isinstance(value, list)
 
     @staticmethod
-    def is_type(value: t.GeneralValueType, expected: type[t.GeneralValueType]) -> bool:
+    def is_type(value: t.GeneralValueType, expected: type | tuple[type, ...]) -> bool:
         return isinstance(value, expected)
 
 
@@ -61,7 +61,7 @@ class FlextTapLdapLdifStreams:
     class LdifStream(Stream):
         """LDIF stream using flext-ldif for ALL processing."""
 
-        primary_keys: ClassVar[list[str]] = ["dn"]
+        primary_keys: list[str] = ["dn"]
 
         @override
         def __init__(self, tap: Tap) -> None:
@@ -271,9 +271,9 @@ class FlextTapLdapLdifStreams:
             if attrs is not None:
                 object_classes = attrs.get_values("objectClass")
                 entry_type = self._classify_entry_type(object_classes)
-                entry_attrs = attrs.attributes
+                entry_attrs: Mapping[str, t.GeneralValueType] = attrs.attributes
             else:
-                entry_attrs = {}
+                entry_attrs: Mapping[str, t.GeneralValueType] = {}
             return {
                 "dn": dn_value,
                 "entry_type": entry_type,
@@ -298,7 +298,7 @@ class FlextTapLdapLdifStreams:
     class LdifAnalysisStream(Stream):
         """LDIF analysis stream using flext-ldif for ALL analysis."""
 
-        primary_keys: ClassVar[list[str]] = ["analysis_id"]
+        primary_keys: list[str] = ["analysis_id"]
 
         @override
         def __init__(self, tap: Tap) -> None:
