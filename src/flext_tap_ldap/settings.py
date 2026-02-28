@@ -350,7 +350,6 @@ class FlextTapLdapSettings(FlextSettings):
             return FlextResult[bool].fail(f"Configuration validation error: {e}")
 
 
-# Re-export nested classes at module level with real inheritance for backwards compatibility
 class CustomStreamConfig(FlextTapLdapSettings.CustomStreamConfig):
     """CustomStreamConfig - real inheritance from FlextTapLdapSettings.CustomStreamConfig."""
 

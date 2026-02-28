@@ -549,7 +549,7 @@ class FlextTapLdapClient:
                     oracle_oid_mode=oracle_oid_mode,
                 )
 
-        def __getattr__(self, name: str) -> object:
+        def __getattr__(self, name: str) -> t.GeneralValueType:
             """Delegate unknown attributes to the real API."""
             return getattr(self._flext_api, name)
 
@@ -563,7 +563,6 @@ class LDAPEntry(m.Ldif.Entry):
     """LDAPEntry - real inheritance from FlextLdapModels.Entry."""
 
 
-# Re-export at module level with real inheritance for backwards compatibility
 class LDAPClient(FlextTapLdapClient.LDAPClient):
     """LDAPClient - real inheritance from FlextTapLdapClient.LDAPClient."""
 
