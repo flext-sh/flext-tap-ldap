@@ -21,7 +21,7 @@ from flext_meltano import FlextMeltanoModels as m, FlextMeltanoProtocols
 from flext_tap_ldap.typings import t
 
 
-class FlextMeltanoTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
+class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
     """LDAP tap-specific protocol definitions extending p.
 
     Domain-specific protocol system for LDAP data extraction operations.
@@ -160,7 +160,7 @@ class FlextMeltanoTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
 
 # Runtime alias for simplified usage
-p = FlextMeltanoTapLdapProtocols
+p = FlextTapLdapProtocols
 
 
 class TapConfigProtocol(Protocol):
@@ -184,7 +184,7 @@ class TapConfigProtocol(Protocol):
         ...
 
 
-class TapProtocol(Protocol):
+class Tap(Protocol):
     """Protocol for tap interface used by streams.
 
     Defines the minimal interface that streams need from tap instances,
@@ -203,8 +203,8 @@ class TapProtocol(Protocol):
 
 
 __all__ = [
-    "FlextMeltanoTapLdapProtocols",
+    "FlextTapLdapProtocols",
+    "Tap",
     "TapConfigProtocol",
-    "TapProtocol",
     "p",
 ]

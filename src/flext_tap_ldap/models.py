@@ -20,7 +20,7 @@ from pydantic import Field, model_validator
 from flext_tap_ldap.typings import t
 
 
-class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
+class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
     """Complete models for LDAP tap operations extending FlextModels.
 
     Provides standardized models for all LDAP tap domain entities including:
@@ -182,9 +182,9 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
 
 # Runtime alias for simplified usage
-m: type[FlextMeltanoTapLdapModels] = FlextMeltanoTapLdapModels
+m: type[FlextTapLdapModels] = FlextTapLdapModels
 
 __all__ = [
-    "FlextMeltanoTapLdapModels",
+    "FlextTapLdapModels",
     "m",
 ]

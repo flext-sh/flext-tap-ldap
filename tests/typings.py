@@ -15,7 +15,7 @@ from flext_tap_ldap import t
 from flext_tests import FlextTestsTypes
 
 
-class TestsFlextMeltanoTapLdapTypes(FlextTestsTypes, t):
+class TestsFlextTapLdapTypes(FlextTestsTypes, t):
     """Test types combining FlextTestsTypes with flext-tap-ldap types."""
 
     class TapLdap(t.TapLdap):
@@ -25,6 +25,6 @@ class TestsFlextMeltanoTapLdapTypes(FlextTestsTypes, t):
             """Internal tests declarations."""
 
 
-t = TestsFlextMeltanoTapLdapTypes
+t = TestsFlextTapLdapTypes
 
-__all__ = ["TestsFlextMeltanoTapLdapTypes", "t"]
+__all__ = ["TestsFlextTapLdapTypes", "t"]

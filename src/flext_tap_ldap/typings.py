@@ -17,6 +17,8 @@ from __future__ import annotations
 from typing import Literal
 
 from flext_core import FlextTypes
+from flext_ldap import FlextLdapTypes
+from flext_meltano import FlextMeltanoTypes
 
 # =============================================================================
 # TAP-LDAP-SPECIFIC TYPE VARIABLES - Domain-specific TypeVars for LDAP tap operations
@@ -24,7 +26,7 @@ from flext_core import FlextTypes
 
 
 # LDAP tap domain TypeVars
-class FlextMeltanoTapLdapTypes(FlextTypes):
+class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
     """LDAP tap-specific type definitions extending t.
 
     Domain-specific type system for LDAP data extraction operations.
@@ -210,7 +212,7 @@ class FlextMeltanoTapLdapTypes(FlextTypes):
         ]
 
     # =========================================================================
-    # CORE TYPES - Essential LDAP tap types extending FlextMeltanoTapLdapTypes.Core
+    # CORE TYPES - Essential LDAP tap types extending FlextTapLdapTypes.Core
     # =========================================================================
 
     class TapLdapCore:
@@ -335,7 +337,7 @@ class FlextMeltanoTapLdapTypes(FlextTypes):
 
 
 # Alias for simplified usage
-t = FlextMeltanoTapLdapTypes
+t = FlextTapLdapTypes
 
 # Namespace composition via class inheritance
 # TapLdap namespace provides access to nested classes through inheritance
@@ -349,6 +351,6 @@ t = FlextMeltanoTapLdapTypes
 # =============================================================================
 
 __all__ = [
-    "FlextMeltanoTapLdapTypes",
+    "FlextTapLdapTypes",
     "t",
 ]

@@ -11,23 +11,23 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tap_ldap.protocols import FlextMeltanoTapLdapProtocols
+from flext_tap_ldap.protocols import FlextTapLdapProtocols
 from flext_tests import FlextTestsProtocols
 
 
-class TestsFlextMeltanoTapLdapProtocols(
+class TestsFlextTapLdapProtocols(
     FlextTestsProtocols,
-    FlextMeltanoTapLdapProtocols,
+    FlextTapLdapProtocols,
 ):
     """Test protocols combining FlextTestsProtocols with flext-tap-ldap protocols."""
 
-    class TapLdap(FlextMeltanoTapLdapProtocols.TapLdap):
+    class TapLdap(FlextTapLdapProtocols.TapLdap):
         """TapLdap test protocols namespace."""
 
         class Tests:
             """Internal tests declarations."""
 
 
-p = TestsFlextMeltanoTapLdapProtocols
+p = TestsFlextTapLdapProtocols
 
-__all__ = ["TestsFlextMeltanoTapLdapProtocols", "p"]
+__all__ = ["TestsFlextTapLdapProtocols", "p"]

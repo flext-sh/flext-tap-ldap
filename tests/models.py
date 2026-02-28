@@ -15,10 +15,10 @@ from flext_tap_ldap import m
 from flext_tests import FlextTestsModels
 
 
-class TestsFlextMeltanoTapLdapModels(FlextTestsModels, m):
+class TestsFlextTapLdapModels(FlextTestsModels, m):
     """Test models combining FlextTestsModels with flext-tap-ldap models."""
 
 
-m = TestsFlextMeltanoTapLdapModels
+m = TestsFlextTapLdapModels
 
-__all__ = ["TestsFlextMeltanoTapLdapModels", "m"]
+__all__ = ["TestsFlextTapLdapModels", "m"]

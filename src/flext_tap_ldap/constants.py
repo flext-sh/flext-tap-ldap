@@ -14,7 +14,7 @@ from flext_ldap import FlextLdapConstants
 from flext_meltano import FlextMeltanoConstants
 
 
-class FlextMeltanoTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
+class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
     """LDAP tap extraction-specific constants following FLEXT unified pattern.
 
     Inherits from FlextMeltanoConstants for universal constants, defines only
@@ -132,6 +132,6 @@ class FlextMeltanoTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
         TapExecutionMode = Literal["discovery", "extraction", "test", "validate"]
 
 
-c = FlextMeltanoTapLdapConstants
+c = FlextTapLdapConstants
 
-__all__ = ["FlextMeltanoTapLdapConstants", "c"]
+__all__ = ["FlextTapLdapConstants", "c"]

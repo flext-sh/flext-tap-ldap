@@ -16,7 +16,7 @@ from pydantic import BaseModel, ConfigDict, Field
 _metadata = metadata("flext_tap_ldap")
 
 
-class FlextMeltanoTapLdapVersion(BaseModel):
+class FlextTapLdapVersion(BaseModel):
     """Version information container."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -31,7 +31,7 @@ class FlextMeltanoTapLdapVersion(BaseModel):
     url: str = Field(description="Project URL")
 
 
-VERSION = FlextMeltanoTapLdapVersion(
+VERSION = FlextTapLdapVersion(
     version=_metadata["Version"],
     version_info=tuple(
         int(part) if part.isdigit() else part
@@ -47,5 +47,5 @@ VERSION = FlextMeltanoTapLdapVersion(
 
 __all__ = [
     "VERSION",
-    "FlextMeltanoTapLdapVersion",
+    "FlextTapLdapVersion",
 ]
