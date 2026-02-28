@@ -11,12 +11,11 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any
 
 from flext_core import FlextModels
 from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
-from pydantic import Field
+from pydantic import Field, model_validator
 
 
 class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
@@ -53,16 +52,6 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             streams_discovered: int = 0
             duration_seconds: float = 0.0
 
-            @property
-            def records_extracted(self) -> int:
-                """Alias for records_processed for backward compatibility."""
-                return self.records_processed
-
-            @property
-            def duration(self) -> float:
-                """Alias for duration_seconds for backward compatibility."""
-                return self.duration_seconds
-
         class StreamDiscoveredEvent(FlextModels.DomainEvent):
             """Event raised when a stream is discovered."""
 
@@ -74,12 +63,13 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             stream_key_properties: list[str] = Field(default_factory=list)
             bookmark_key: str | None = None
 
-            def __init__(self, **data: Any) -> None:
-                """Initialize StreamDiscoveredEvent and set aggregate_id."""
-                # Set aggregate_id from stream_name if not provided
-                if "aggregate_id" not in data and "stream_name" in data:
+            @model_validator(mode="before")
+            @classmethod
+            def set_aggregate_id(cls, data: object) -> object:
+                """Set aggregate_id from stream_name if not provided."""
+                if isinstance(data, dict) and "aggregate_id" not in data and "stream_name" in data:
                     data["aggregate_id"] = data["stream_name"]
-                super().__init__(**data)
+                return data
 
         class RecordExtractedEvent(FlextModels.DomainEvent):
             """Event raised when a record is extracted."""
@@ -92,12 +82,13 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             record_id: str | None = None
             record_size_bytes: int = 0
 
-            def __init__(self, **data: Any) -> None:
-                """Initialize RecordExtractedEvent and set aggregate_id."""
-                # Set aggregate_id from stream_name if not provided
-                if "aggregate_id" not in data and "stream_name" in data:
+            @model_validator(mode="before")
+            @classmethod
+            def set_aggregate_id(cls, data: object) -> object:
+                """Set aggregate_id from stream_name if not provided."""
+                if isinstance(data, dict) and "aggregate_id" not in data and "stream_name" in data:
                     data["aggregate_id"] = data["stream_name"]
-                super().__init__(**data)
+                return data
 
         class ConnectionTestedEvent(FlextModels.DomainEvent):
             """Event raised after connection test."""
@@ -110,12 +101,13 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             server_uri: str
             error_message: str | None = None
 
-            def __init__(self, **data: Any) -> None:
-                """Initialize ConnectionTestedEvent and set aggregate_id."""
-                # Set aggregate_id from server_uri if not provided
-                if "aggregate_id" not in data and "server_uri" in data:
+            @model_validator(mode="before")
+            @classmethod
+            def set_aggregate_id(cls, data: object) -> object:
+                """Set aggregate_id from server_uri if not provided."""
+                if isinstance(data, dict) and "aggregate_id" not in data and "server_uri" in data:
                     data["aggregate_id"] = data["server_uri"]
-                super().__init__(**data)
+                return data
 
         class Tests:
             """Test models namespace for flext-tap-ldap tests.
