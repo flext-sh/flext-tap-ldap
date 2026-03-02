@@ -69,7 +69,6 @@ class FlextTapLdapLdifStreams:
             # Set required attributes BEFORE calling super().__init__()
             self.name = "ldif_entries"
             self.path = "/ldif_entries"
-            self.primary_keys = ["dn"]
             # Store tap reference
             self.tap = tap
             # Initialize flext-ldif API for processing
@@ -108,7 +107,6 @@ class FlextTapLdapLdifStreams:
                 self._logger_instance = FlextLogger.create_module_logger(__name__)
             return self._logger_instance
 
-        @override
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
@@ -184,12 +182,13 @@ class FlextTapLdapLdifStreams:
                     use_ssl=use_ssl,
                     get_info="NO_INFO",
                 )
-                with Connection(
+                connection = Connection(
                     server=server,
                     user=bind_dn,
                     password=bind_password,
                     auto_bind=True,
-                ) as connection:
+                )
+                try:
                     search_result = connection.extend.standard.paged_search(
                         search_base=base_dn_raw,
                         search_filter=search_filter,
@@ -218,6 +217,8 @@ class FlextTapLdapLdifStreams:
                             "object_classes": object_classes,
                             "attributes": dict(attrs_raw),
                         }
+                finally:
+                    connection.unbind()
             except (
                 ValueError,
                 TypeError,
@@ -329,7 +330,6 @@ class FlextTapLdapLdifStreams:
             # Set required attributes BEFORE calling super().__init__()
             self.name = "ldif_analysis"
             self.path = "/ldif_analysis"
-            self.primary_keys = ["analysis_id"]
             # Store tap reference
             self.tap = tap
             # Initialize flext-ldif API for analysis
@@ -368,7 +368,6 @@ class FlextTapLdapLdifStreams:
                 self._logger_instance = FlextLogger.create_module_logger(__name__)
             return self._logger_instance
 
-        @override
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
