@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Iterable, Iterator, Mapping
 from pathlib import Path
 from typing import ClassVar, override
 
+from flext_core.loggings import FlextLogger
 from flext_ldap import FlextLdapConnection
 from flext_ldif import FlextLdif, m
 from flext_meltano import (
@@ -19,8 +19,6 @@ from pydantic import BaseModel
 
 from flext_tap_ldap.constants import c
 from flext_tap_ldap.typings import t
-
-logger = logging.getLogger(__name__)
 
 # Access Singer SDK typing through FLEXT domain namespace
 typing_utils = t_meltano.Singer.Typing
@@ -77,6 +75,7 @@ class FlextTapLdapLdifStreams:
             # Initialize flext-ldif API for processing
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
+            self._logger_instance: FlextLogger | None = None
             # Define schema
             schema = typing_utils.PropertiesList(
                 typing_utils.Property(
@@ -102,6 +101,13 @@ class FlextTapLdapLdifStreams:
             ).to_dict()
             super().__init__(tap, name=self.name, schema=schema)
 
+        @property
+        def logger(self) -> FlextLogger:
+            """Lazy logger."""
+            if self._logger_instance is None:
+                self._logger_instance = FlextLogger.create_module_logger(__name__)
+            return self._logger_instance
+
         @override
         def get_records(
             self,
@@ -109,7 +115,7 @@ class FlextTapLdapLdifStreams:
         ) -> Iterator[dict[str, t.GeneralValueType]]:
             """Get LDIF records using flext-ldif processing."""
             _ = context
-            logger.info("Processing LDIF files using flext-ldif library")
+            self.logger.info("Processing LDIF files using flext-ldif library")
             # Get LDIF files from config
             raw_files = self.config.get("ldif_files", [])
             ldif_files: list[t.GeneralValueType] = (
@@ -221,7 +227,7 @@ class FlextTapLdapLdifStreams:
                 RuntimeError,
                 ImportError,
             ):
-                logger.exception("Error traversing LDAP directory")
+                self.logger.exception("Error traversing LDAP directory")
 
         def _normalize_object_classes(
             self,
@@ -236,7 +242,7 @@ class FlextTapLdapLdifStreams:
         def _discover_ldif_files(self, ldif_directory: str) -> list[Path]:
             directory = Path(ldif_directory)
             if not directory.exists() or not directory.is_dir():
-                logger.warning("LDIF directory not found: %s", ldif_directory)
+                self.logger.warning("LDIF directory not found: %s", ldif_directory)
                 return []
             pattern_raw = self.config.get("ldif_file_pattern", "*.ldif")
             pattern = (
@@ -251,7 +257,7 @@ class FlextTapLdapLdifStreams:
             ldif_file: str,
         ) -> Iterable[dict[str, t.GeneralValueType]]:
             """Process single LDIF file using flext-ldif."""
-            logger.info("Processing LDIF file: %s", ldif_file)
+            self.logger.info("Processing LDIF file: %s", ldif_file)
             try:
                 # Read file and delegate to flext-ldif
                 content = Path(ldif_file).read_text(encoding="utf-8")
@@ -261,7 +267,7 @@ class FlextTapLdapLdifStreams:
                         if x.is_base_model(entry):
                             yield self._convert_entry_to_record(entry)
                 else:
-                    logger.error(
+                    self.logger.error(
                         f"Failed to parse LDIF file {ldif_file}: {result.error}",
                     )
             except (
@@ -273,7 +279,7 @@ class FlextTapLdapLdifStreams:
                 RuntimeError,
                 ImportError,
             ):
-                logger.exception("Error processing LDIF file %s", ldif_file)
+                self.logger.exception("Error processing LDIF file %s", ldif_file)
 
         def _convert_entry_to_record(
             self,
@@ -329,6 +335,7 @@ class FlextTapLdapLdifStreams:
             # Initialize flext-ldif API for analysis
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
+            self._logger_instance: FlextLogger | None = None
             # Define schema
             schema = typing_utils.PropertiesList(
                 typing_utils.Property(
@@ -354,6 +361,13 @@ class FlextTapLdapLdifStreams:
             ).to_dict()
             super().__init__(tap, name=self.name, schema=schema)
 
+        @property
+        def logger(self) -> FlextLogger:
+            """Lazy logger."""
+            if self._logger_instance is None:
+                self._logger_instance = FlextLogger.create_module_logger(__name__)
+            return self._logger_instance
+
         @override
         def get_records(
             self,
@@ -361,7 +375,7 @@ class FlextTapLdapLdifStreams:
         ) -> Iterator[dict[str, t.GeneralValueType]]:
             """Get analysis records using flext-ldif analysis capabilities."""
             _ = context
-            logger.info("Generating LDIF analysis using flext-ldif library")
+            self.logger.info("Generating LDIF analysis using flext-ldif library")
             # Get LDIF files from config
             raw_files = self.config.get("ldif_files", [])
             ldif_files: list[t.GeneralValueType] = (
@@ -458,7 +472,7 @@ class FlextTapLdapLdifStreams:
                 RuntimeError,
                 ImportError,
             ):
-                logger.exception("LDIF analysis error")
+                self.logger.exception("LDIF analysis error")
                 # Return empty stats on error
                 yield {
                     "analysis_id": "ldif_summary_error",
@@ -472,7 +486,7 @@ class FlextTapLdapLdifStreams:
             ldif_file: str,
         ) -> dict[str, t.GeneralValueType]:
             """Analyze single LDIF file using flext-ldif."""
-            logger.info("Analyzing LDIF file: %s", ldif_file)
+            self.logger.info("Analyzing LDIF file: %s", ldif_file)
             try:
                 # Read file and delegate analysis to flext-ldif
                 content = Path(ldif_file).read_text(encoding="utf-8")
@@ -500,7 +514,9 @@ class FlextTapLdapLdifStreams:
                         "entry_types": entry_types,
                         "object_classes": object_classes,
                     }
-                logger.error(f"Failed to analyze LDIF file {ldif_file}: {result.error}")
+                self.logger.error(
+                    f"Failed to analyze LDIF file {ldif_file}: {result.error}"
+                )
                 return {"total_entries": 0, "entry_types": {}, "object_classes": {}}
             except (
                 ValueError,
@@ -511,13 +527,13 @@ class FlextTapLdapLdifStreams:
                 RuntimeError,
                 ImportError,
             ):
-                logger.exception("Error analyzing LDIF file %s", ldif_file)
+                self.logger.exception("Error analyzing LDIF file %s", ldif_file)
                 return {"total_entries": 0, "entry_types": {}, "object_classes": {}}
 
         def _discover_ldif_files(self, ldif_directory: str) -> list[Path]:
             directory = Path(ldif_directory)
             if not directory.exists() or not directory.is_dir():
-                logger.warning("LDIF directory not found: %s", ldif_directory)
+                self.logger.warning("LDIF directory not found: %s", ldif_directory)
                 return []
             pattern_raw = self.config.get("ldif_file_pattern", "*.ldif")
             pattern = (
