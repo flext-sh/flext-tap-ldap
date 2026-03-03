@@ -26,7 +26,7 @@ logger = FlextLogger(__name__)
 
 _LIST_ADAPTER = TypeAdapter(list[t.ContainerValue], config=ConfigDict(strict=True))
 _MAP_ADAPTER = TypeAdapter(
-    dict[str, t.ContainerValue],
+    t.ConfigurationMapping,
     config=ConfigDict(strict=True),
 )
 _STR_ADAPTER = TypeAdapter(str, config=ConfigDict(strict=True))
