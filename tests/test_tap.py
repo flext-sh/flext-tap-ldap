@@ -18,7 +18,7 @@ class TestFlextTapLdapTapUnit:
     """Unit tests for FlextTapLdapTap."""
 
     @pytest.fixture
-    def config(self) -> dict[str, t.GeneralValueType]:
+    def config(self) -> dict[str, t.ContainerValue]:
         """Create a test configuration fixture."""
         return {
             "ldap_host": "test.ldap.com",
@@ -30,7 +30,7 @@ class TestFlextTapLdapTapUnit:
             "page_size": 1000,
         }
 
-    def test_tap_initialization(self, config: dict[str, t.GeneralValueType]) -> None:
+    def test_tap_initialization(self, config: dict[str, t.ContainerValue]) -> None:
         """Test tap initialization."""
         tap = FlextTapLdapTap(config=config)
         if tap.name != "tap-ldap":
@@ -38,7 +38,7 @@ class TestFlextTapLdapTapUnit:
             raise AssertionError(msg)
         assert tap.config == config
 
-    def test_stream_discovery(self, config: dict[str, t.GeneralValueType]) -> None:
+    def test_stream_discovery(self, config: dict[str, t.ContainerValue]) -> None:
         """Test stream discovery."""
         tap = FlextTapLdapTap(config=config)
         streams = tap.discover_streams()
@@ -59,7 +59,7 @@ class TestFlextTapLdapTapUnit:
 
     def test_custom_streams_configuration(
         self,
-        config: dict[str, t.GeneralValueType],
+        config: dict[str, t.ContainerValue],
     ) -> None:
         """Test custom streams configuration."""
         config["custom_streams"] = [
@@ -88,7 +88,7 @@ class TestFlextTapLdapTapUnit:
             count_error: str = f"Expected {5}, got {len(streams)}"
             raise AssertionError(count_error)
 
-    def test_catalog_generation(self, config: dict[str, t.GeneralValueType]) -> None:
+    def test_catalog_generation(self, config: dict[str, t.ContainerValue]) -> None:
         """Test catalog generation and metadata."""
         tap = FlextTapLdapTap(config=config)
         catalog = tap.catalog_dict
@@ -120,7 +120,7 @@ class TestFlextTapLdapTapUnit:
     def test_stream_records(
         self,
         mock_client_class: MagicMock,
-        config: dict[str, t.GeneralValueType],
+        config: dict[str, t.ContainerValue],
     ) -> None:
         """Test streaming records from LDAP."""
         # Mock LDAP client
@@ -147,7 +147,7 @@ class TestFlextTapLdapTapUnit:
         # Singer SDK get_records returns tuples (record, context) or just records
         # We need to handle both cases
         raw_records = list(users_stream.get_records(None))
-        records: list[dict[str, t.GeneralValueType]] = []
+        records: list[dict[str, t.ContainerValue]] = []
         for item in raw_records:
             if isinstance(item, tuple):
                 record, _context = item

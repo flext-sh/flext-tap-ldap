@@ -159,7 +159,7 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
 
         type TapConfig = dict[
             str,
-            FlextTypes.GeneralValueType | dict[str, FlextTypes.JsonValue],
+            FlextTypes.ContainerValue | dict[str, FlextTypes.JsonValue],
         ]
         type ExtractionConfig = dict[str, str | int | bool | list[str]]
         type FilteringConfig = dict[
@@ -323,7 +323,7 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
         # LDAP tap-specific project configurations
         type TapLdapProjectConfig = dict[
             str,
-            FlextTypes.GeneralValueType | FlextTypes.JsonValue,
+            FlextTypes.ContainerValue | FlextTypes.JsonValue,
         ]
         type LdapExtractionConfig = dict[str, str | int | bool | list[str]]
         type LdapIntegrationConfig = dict[
@@ -332,7 +332,7 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
         ]
         type TapLdapPipelineConfig = dict[
             str,
-            FlextTypes.GeneralValueType | FlextTypes.JsonValue,
+            FlextTypes.ContainerValue | FlextTypes.JsonValue,
         ]
 
 

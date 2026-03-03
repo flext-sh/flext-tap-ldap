@@ -83,7 +83,7 @@ class TestLDAPClientQuick:
         assert result["cn"] == ["Test", "T. User"]  # Multi value preserved
         assert result["empty"] == []  # Empty preserved
 
-        # Test with dict[str, t.GeneralValueType] (mock scenario)
+        # Test with dict[str, t.ContainerValue] (mock scenario)
         dict_entry = {
             "dn": "uid=dict,dc=example,dc=com",
             "attributes": {"mail": ["test@example.com"]},

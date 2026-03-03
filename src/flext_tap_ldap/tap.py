@@ -24,29 +24,29 @@ from flext_tap_ldap.typings import t
 
 logger = FlextLogger(__name__)
 
-_LIST_ADAPTER = TypeAdapter(list[t.GeneralValueType], config=ConfigDict(strict=True))
+_LIST_ADAPTER = TypeAdapter(list[t.ContainerValue], config=ConfigDict(strict=True))
 _MAP_ADAPTER = TypeAdapter(
-    dict[str, t.GeneralValueType],
+    dict[str, t.ContainerValue],
     config=ConfigDict(strict=True),
 )
 _STR_ADAPTER = TypeAdapter(str, config=ConfigDict(strict=True))
 
 
-def _as_list(value: t.GeneralValueType) -> list[t.GeneralValueType] | None:
+def _as_list(value: t.ContainerValue) -> list[t.ContainerValue] | None:
     try:
         return _LIST_ADAPTER.validate_python(value)
     except ValidationError:
         return None
 
 
-def _as_map(value: t.GeneralValueType) -> Mapping[str, t.GeneralValueType] | None:
+def _as_map(value: t.ContainerValue) -> Mapping[str, t.ContainerValue] | None:
     try:
         return _MAP_ADAPTER.validate_python(value)
     except ValidationError:
         return None
 
 
-def _as_str(value: t.GeneralValueType) -> str | None:
+def _as_str(value: t.ContainerValue) -> str | None:
     try:
         return _STR_ADAPTER.validate_python(value)
     except ValidationError:
@@ -65,7 +65,7 @@ class FlextTapLdapTap(Tap):
 
     # NOTE(@flext-team): Use centralized LDAP schema when flext-meltano common_schemas is available
     # Issue: https://github.com/flext-team/flext-meltano/issues/1
-    config_jsonschema: ClassVar[dict[str, t.GeneralValueType]] = {
+    config_jsonschema: ClassVar[dict[str, t.ContainerValue]] = {
         "type": "object",
         "properties": {
             # Basic LDAP connection properties
@@ -186,7 +186,7 @@ class FlextTapLdapTap(Tap):
         return streams
 
 
-CLI_COMMAND: t.GeneralValueType = FlextTapLdapTap.cli
+CLI_COMMAND: t.ContainerValue = FlextTapLdapTap.cli
 
 
 def main() -> None:

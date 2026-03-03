@@ -28,7 +28,7 @@ from flext_tap_ldap.constants import c
 logger = FlextLogger(__name__)
 
 type SingerValue = (
-    str | int | float | bool | list[SingerValue] | dict[str, SingerValue] | None
+    t.JsonPrimitive | list[SingerValue] | dict[str, SingerValue] | None
 )
 
 type StreamRecord = (
@@ -62,7 +62,7 @@ class _CustomPropertyDefinition(BaseModel):
 _STRICT_STR_ADAPTER = TypeAdapter(str, config=ConfigDict(strict=True))
 
 
-def _coerce_positive_int(raw_value: t.GeneralValueType, default: int) -> int:
+def _coerce_positive_int(raw_value: t.ContainerValue, default: int) -> int:
     """Coerce value to positive integer with safe fallback."""
     try:
         parsed = int(str(raw_value))
@@ -71,7 +71,7 @@ def _coerce_positive_int(raw_value: t.GeneralValueType, default: int) -> int:
     return parsed if parsed > 0 else default
 
 
-def _coerce_optional_string(raw_value: t.GeneralValueType) -> str | None:
+def _coerce_optional_string(raw_value: t.ContainerValue) -> str | None:
     """Coerce value to string only when source is already string-like."""
     if raw_value is None:
         return None
@@ -82,7 +82,7 @@ def _coerce_optional_string(raw_value: t.GeneralValueType) -> str | None:
     return validated or None
 
 
-def _parse_connection_config(raw_value: t.GeneralValueType) -> _LdapConnectionConfig:
+def _parse_connection_config(raw_value: t.ContainerValue) -> _LdapConnectionConfig:
     """Validate LDAP connection payload through Pydantic."""
     try:
         parsed = _LdapConnectionConfig.model_validate(raw_value, strict=True)
@@ -104,7 +104,7 @@ def _parse_connection_config(raw_value: t.GeneralValueType) -> _LdapConnectionCo
 
 
 def _parse_property_definition(
-    raw_value: t.GeneralValueType,
+    raw_value: t.ContainerValue,
 ) -> _CustomPropertyDefinition:
     """Validate custom stream property definition through Pydantic."""
     try:
@@ -131,7 +131,7 @@ class FlextTapLdapStreams:
         """
 
         @staticmethod
-        def create_test_user_record() -> Mapping[str, t.GeneralValueType]:
+        def create_test_user_record() -> Mapping[str, t.ContainerValue]:
             """Create standardized test user record for fallback scenarios."""
             return {
                 "dn": "uid=jdoe,ou=users,dc=test,dc=com",
@@ -152,7 +152,7 @@ class FlextTapLdapStreams:
             }
 
         @staticmethod
-        def create_test_group_record() -> Mapping[str, t.GeneralValueType]:
+        def create_test_group_record() -> Mapping[str, t.ContainerValue]:
             """Create standardized test group record for fallback scenarios."""
             return {
                 "dn": "cn=developers,ou=groups,dc=test,dc=com",
@@ -167,7 +167,7 @@ class FlextTapLdapStreams:
             }
 
         @staticmethod
-        def create_test_ou_record() -> Mapping[str, t.GeneralValueType]:
+        def create_test_ou_record() -> Mapping[str, t.ContainerValue]:
             """Create standardized test organizational unit record."""
             return {
                 "dn": "ou=users,dc=test,dc=com",
@@ -178,7 +178,7 @@ class FlextTapLdapStreams:
             }
 
         @staticmethod
-        def create_test_schema_record() -> Mapping[str, t.GeneralValueType]:
+        def create_test_schema_record() -> Mapping[str, t.ContainerValue]:
             """Create standardized test schema record."""
             return {
                 "dn": "cn=schema",
@@ -200,7 +200,7 @@ class FlextTapLdapStreams:
 
         name: str = Field(description="Stream name")
         search_filter: str = Field(description="LDAP search filter")
-        schema_properties: Mapping[str, t.GeneralValueType] | None = Field(
+        schema_properties: Mapping[str, t.ContainerValue] | None = Field(
             default=None,
             description="Schema properties",
         )
@@ -215,7 +215,7 @@ class FlextTapLdapStreams:
             self,
             tap: Tap,
             name: str | None = None,
-            schema: dict[str, t.GeneralValueType] | None = None,
+            schema: dict[str, t.ContainerValue] | None = None,
         ) -> None:
             """Initialize the LDAP stream."""
             self.client: LDAPClient | None = None
@@ -330,7 +330,7 @@ class FlextTapLdapStreams:
         def __init__(self, tap: Tap) -> None:
             """Initialize users stream."""
             name = "users"
-            schema: dict[str, t.GeneralValueType] = (
+            schema: dict[str, t.ContainerValue] = (
                 t_meltano.Singer.Typing.PropertiesList(
                     t_meltano.Singer.Typing.Property(
                         "dn",
@@ -431,7 +431,7 @@ class FlextTapLdapStreams:
         def __init__(self, tap: Tap) -> None:
             """Initialize groups stream."""
             name = "groups"
-            schema: dict[str, t.GeneralValueType] = (
+            schema: dict[str, t.ContainerValue] = (
                 t_meltano.Singer.Typing.PropertiesList(
                     t_meltano.Singer.Typing.Property(
                         "dn",
@@ -530,7 +530,7 @@ class FlextTapLdapStreams:
         def __init__(self, tap: Tap) -> None:
             """Initialize organizational units stream."""
             name = "organizational_units"
-            schema: dict[str, t.GeneralValueType] = (
+            schema: dict[str, t.ContainerValue] = (
                 t_meltano.Singer.Typing.PropertiesList(
                     t_meltano.Singer.Typing.Property(
                         "dn",
@@ -599,7 +599,7 @@ class FlextTapLdapStreams:
         def __init__(self, tap: Tap) -> None:
             """Initialize schema stream."""
             name = "schema"
-            schema: dict[str, t.GeneralValueType] = (
+            schema: dict[str, t.ContainerValue] = (
                 t_meltano.Singer.Typing.PropertiesList(
                     t_meltano.Singer.Typing.Property(
                         "objectClass",
@@ -722,7 +722,7 @@ class FlextTapLdapStreams:
 
             def _map_prop(
                 name: str,
-                definition: t.GeneralValueType,
+                definition: t.ContainerValue,
             ) -> t_meltano.Singer.Typing.Property[SingerValue]:
                 parsed_definition = _parse_property_definition(definition)
                 prop_type = parsed_definition.type

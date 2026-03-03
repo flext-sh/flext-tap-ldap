@@ -29,7 +29,7 @@ def project_root() -> Path:
 
 
 @pytest.fixture(scope="session")
-def sample_catalog() -> dict[str, t.GeneralValueType]:
+def sample_catalog() -> dict[str, t.ContainerValue]:
     """Create a sample Singer catalog for testing."""
     return {
         "streams": [
@@ -124,7 +124,7 @@ def tap_config_file(tmp_path: Path, _ldap_container: None) -> Path:
 
 
 @pytest.fixture
-def catalog_file(tmp_path: Path, sample_catalog: dict[str, t.GeneralValueType]) -> Path:
+def catalog_file(tmp_path: Path, sample_catalog: dict[str, t.ContainerValue]) -> Path:
     """Create catalog file for testing."""
     catalog_file = tmp_path / "catalog.json"
     catalog_file.write_text(json.dumps(sample_catalog, indent=2))

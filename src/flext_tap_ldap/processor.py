@@ -31,7 +31,7 @@ _LDIF_ENTRY_ADAPTER = TypeAdapter(
 )
 
 
-def _to_ldif_entry(raw_value: t.GeneralValueType) -> FlextLdifModels.Ldif.Entry | None:
+def _to_ldif_entry(raw_value: t.ContainerValue) -> FlextLdifModels.Ldif.Entry | None:
     """Validate and coerce value to LDIF entry model."""
     try:
         return _LDIF_ENTRY_ADAPTER.validate_python(raw_value)
@@ -113,9 +113,9 @@ class Entry:
         object_classes: list[str] = self.get_attribute("objectClass") or []
         return any(oc.lower() == object_class.lower() for oc in object_classes)
 
-    def to_dict(self) -> Mapping[str, t.GeneralValueType]:
+    def to_dict(self) -> Mapping[str, t.ContainerValue]:
         """Convert entry to dictionary format."""
-        entry_dict: dict[str, t.GeneralValueType] = {
+        entry_dict: dict[str, t.ContainerValue] = {
             "dn": self.dn,
             "attributes": dict(self.attributes),
         }
@@ -174,7 +174,7 @@ class Entry:
             )
         return errors
 
-    def parse_dn(self) -> Mapping[str, t.GeneralValueType]:
+    def parse_dn(self) -> Mapping[str, t.ContainerValue]:
         """Parse DN into components using flext-ldif DN parsing."""
         try:
             # Use flext-ldif DN parsing capabilities
@@ -384,7 +384,7 @@ class FlextTapLdapProcessor:
 
         return Entry(dn=dn, attributes=attributes)
 
-    def get_statistics(self) -> Mapping[str, t.GeneralValueType]:
+    def get_statistics(self) -> Mapping[str, t.ContainerValue]:
         """Get parsing statistics."""
         return {
             "processed_entries": self.processed_entries,
@@ -456,15 +456,15 @@ class FlextTapLdapProcessor:
     def to_singer_format(
         self,
         _stream_name: str,
-    ) -> list[Mapping[str, t.GeneralValueType]]:
+    ) -> list[Mapping[str, t.ContainerValue]]:
         """Convert LDIF entries to Singer record format."""
-        records: list[Mapping[str, t.GeneralValueType]] = []
+        records: list[Mapping[str, t.ContainerValue]] = []
 
         for entry in self.entries:
-            record_attributes: dict[str, t.GeneralValueType] = {"dn": entry.dn}
+            record_attributes: dict[str, t.ContainerValue] = {"dn": entry.dn}
             record_attributes.update(dict(entry.attributes))
 
-            record: dict[str, t.GeneralValueType] = {
+            record: dict[str, t.ContainerValue] = {
                 "type": "RECORD",
                 "stream": _stream_name,
                 "record": record_attributes,
@@ -505,7 +505,7 @@ class Validator:
             self.validation_errors.append(f"Validation error for {entry.dn}: {e}")
             return False
 
-    def get_validation_results(self) -> Mapping[str, t.GeneralValueType]:
+    def get_validation_results(self) -> Mapping[str, t.ContainerValue]:
         """Get validation results."""
         return {
             "errors": self.validation_errors.copy(),
@@ -516,7 +516,7 @@ class Validator:
     def validate_entries(
         self,
         entries: list[Entry],
-    ) -> Mapping[str, t.GeneralValueType]:
+    ) -> Mapping[str, t.ContainerValue]:
         """Validate a list of LDIF entries using flext-ldif."""
         valid_count = 0
         invalid_count = 0
@@ -573,7 +573,7 @@ class Transformer:
     @override
     def __init__(
         self,
-        transformation_rules: Mapping[str, t.GeneralValueType] | None = None,
+        transformation_rules: Mapping[str, t.ContainerValue] | None = None,
     ) -> None:
         """Initialize transformer with optional transformation rules."""
         self.transformation_rules = dict(transformation_rules or {})
@@ -638,7 +638,7 @@ class Transformer:
     def apply_schema_mappings(
         self,
         entry: Entry,
-        schema_mappings: Mapping[str, t.GeneralValueType],
+        schema_mappings: Mapping[str, t.ContainerValue],
     ) -> Entry:
         """Apply schema mappings to normalize output attributes."""
         transformed_entry = Entry(

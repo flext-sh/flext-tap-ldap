@@ -50,7 +50,7 @@ def test_ldif_directory_processing_traverses_ldif_files(tmp_path: Path) -> None:
 
     seen: list[str] = []
 
-    def _process(ldif_file: str) -> list[dict[str, t.GeneralValueType]]:
+    def _process(ldif_file: str) -> list[dict[str, t.ContainerValue]]:
         seen.append(ldif_file)
         return [{"dn": ldif_file}]
 

@@ -29,7 +29,7 @@ class TestFlextTapLdapIntegration:
         return CliRunner()
 
     @pytest.fixture
-    def mock_ldap_config(self) -> dict[str, t.GeneralValueType]:
+    def mock_ldap_config(self) -> dict[str, t.ContainerValue]:
         """Mock LDAP configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -40,7 +40,7 @@ class TestFlextTapLdapIntegration:
         }
 
     @pytest.fixture
-    def sample_catalog(self) -> dict[str, t.GeneralValueType]:
+    def sample_catalog(self) -> dict[str, t.ContainerValue]:
         """Sample catalog for testing."""
         return {
             "streams": [
@@ -53,7 +53,7 @@ class TestFlextTapLdapIntegration:
         }
 
     @pytest.fixture
-    def sample_state(self) -> dict[str, t.GeneralValueType]:
+    def sample_state(self) -> dict[str, t.ContainerValue]:
         """Sample state for testing."""
         return {"bookmarks": {}}
 
@@ -61,7 +61,7 @@ class TestFlextTapLdapIntegration:
     def config_file(
         self,
         tmp_path: Path,
-        mock_ldap_config: dict[str, t.GeneralValueType],
+        mock_ldap_config: dict[str, t.ContainerValue],
     ) -> Path:
         """Create temporary config file."""
         config_path = tmp_path / "config.json"
@@ -73,7 +73,7 @@ class TestFlextTapLdapIntegration:
     def catalog_file(
         self,
         tmp_path: Path,
-        sample_catalog: dict[str, t.GeneralValueType],
+        sample_catalog: dict[str, t.ContainerValue],
     ) -> Path:
         """Create temporary catalog file."""
         catalog_path = tmp_path / "catalog.json"
@@ -85,7 +85,7 @@ class TestFlextTapLdapIntegration:
     def state_file(
         self,
         tmp_path: Path,
-        sample_state: dict[str, t.GeneralValueType],
+        sample_state: dict[str, t.ContainerValue],
     ) -> Path:
         """Create a state file fixture for testing."""
         state_path = tmp_path / "state.json"
@@ -294,7 +294,7 @@ class TestFlextTapLdapIntegration:
         def mock_search(
             *_args: object,
             **_kwargs: object,
-        ) -> Generator[dict[str, t.GeneralValueType]]:
+        ) -> Generator[dict[str, t.ContainerValue]]:
             time.sleep(0)
             yield {
                 "dn": "uid=user1,ou=users,dc=test,dc=com",

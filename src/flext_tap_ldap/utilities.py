@@ -16,7 +16,7 @@ from flext_meltano import FlextMeltanoUtilities
 
 from .constants import c
 
-type MetadataValue = str | int | float | bool | None
+type MetadataValue = t.JsonPrimitive | None
 type MetadataContext = dict[str, MetadataValue]
 type ServiceStatus = Mapping[str, str | list[str]]
 type StreamInfo = Mapping[str, str | int]

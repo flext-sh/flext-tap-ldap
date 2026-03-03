@@ -268,9 +268,9 @@ class FlextTapLdapSettings(FlextSettings):
         return cls()
 
     @classmethod
-    def create_for_development(cls, **overrides: t.GeneralValueType) -> Self:
+    def create_for_development(cls, **overrides: t.ContainerValue) -> Self:
         """Create development configuration instance."""
-        dev_defaults: dict[str, t.GeneralValueType] = {
+        dev_defaults: dict[str, t.ContainerValue] = {
             "ldap_host": "localhost",
             "ldap_port": 10389,
             "ldap_use_ssl": False,
@@ -284,9 +284,9 @@ class FlextTapLdapSettings(FlextSettings):
         return cls.model_validate(dev_defaults)
 
     @classmethod
-    def create_for_production(cls, **overrides: t.GeneralValueType) -> Self:
+    def create_for_production(cls, **overrides: t.ContainerValue) -> Self:
         """Create production configuration instance."""
-        prod_defaults: dict[str, t.GeneralValueType] = {
+        prod_defaults: dict[str, t.ContainerValue] = {
             "ldap_use_ssl": True,
             "ldap_timeout": c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
             "ldap_page_size": c.TapLdap.DEFAULT_PAGE_SIZE,
@@ -298,9 +298,9 @@ class FlextTapLdapSettings(FlextSettings):
         return cls.model_validate(prod_defaults)
 
     @classmethod
-    def create_for_testing(cls, **overrides: t.GeneralValueType) -> Self:
+    def create_for_testing(cls, **overrides: t.ContainerValue) -> Self:
         """Create testing configuration instance."""
-        test_defaults: dict[str, t.GeneralValueType] = {
+        test_defaults: dict[str, t.ContainerValue] = {
             "ldap_host": "test-ldap",
             "ldap_port": 3389,
             "ldap_use_ssl": False,
