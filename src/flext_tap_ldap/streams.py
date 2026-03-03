@@ -27,13 +27,9 @@ from flext_tap_ldap.constants import c
 
 logger = FlextLogger(__name__)
 
-type SingerValue = (
-    t.JsonPrimitive | list[SingerValue] | dict[str, SingerValue] | None
-)
 
-type StreamRecord = (
-    dict[str, object] | tuple[dict[object, object], dict[object, object] | None]
-)
+
+
 
 
 class _LdapConnectionConfig(BaseModel):
@@ -260,7 +256,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[StreamRecord]:
+        ) -> Iterable[t.ContainerValue]:
             """Get records from LDAP - base implementation."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -369,7 +365,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[StreamRecord]:
+        ) -> Iterable[t.ContainerValue]:
             """Get user records from LDAP."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -477,7 +473,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[StreamRecord]:
+        ) -> Iterable[t.ContainerValue]:
             """Get group records from LDAP."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -559,7 +555,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[StreamRecord]:
+        ) -> Iterable[t.ContainerValue]:
             """Get organizational unit records from LDAP."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -644,7 +640,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[StreamRecord]:
+        ) -> Iterable[t.ContainerValue]:
             """Get schema records from LDAP."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter
@@ -723,7 +719,7 @@ class FlextTapLdapStreams:
             def _map_prop(
                 name: str,
                 definition: t.ContainerValue,
-            ) -> t_meltano.Singer.Typing.Property[SingerValue]:
+            ) -> t_meltano.Singer.Typing.Property[t.JsonValue]:
                 parsed_definition = _parse_property_definition(definition)
                 prop_type = parsed_definition.type
                 prop_desc = parsed_definition.description or f"{name} field"
@@ -763,7 +759,7 @@ class FlextTapLdapStreams:
 
             # Build schema from parameters
             if params.schema_properties:
-                schema_props: list[t_meltano.Singer.Typing.Property[SingerValue]] = (
+                schema_props: list[t_meltano.Singer.Typing.Property[t.JsonValue]] = (
                     list(
                         starmap(_map_prop, params.schema_properties.items()),
                     )
@@ -807,7 +803,7 @@ class FlextTapLdapStreams:
         def get_records(
             self,
             context: Mapping[str, object] | None = None,
-        ) -> Iterable[StreamRecord]:
+        ) -> Iterable[t.ContainerValue]:
             """Get records using custom filter."""
             # Use context parameter to avoid unused argument warning
             _context = context  # Acknowledge the parameter

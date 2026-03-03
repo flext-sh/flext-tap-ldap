@@ -16,10 +16,10 @@ from flext_meltano import FlextMeltanoUtilities
 
 from .constants import c
 
-type MetadataValue = t.JsonPrimitive | None
-type MetadataContext = dict[str, MetadataValue]
-type ServiceStatus = Mapping[str, str | list[str]]
-type StreamInfo = Mapping[str, str | int]
+
+type dict[str, t.JsonPrimitive] = dict[str, t.JsonPrimitive]
+
+
 type LdapConfig = Mapping[str, str | int | bool]
 
 
@@ -35,9 +35,9 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             self._container = FlextContainer.get_global()
             self._logger = FlextLogger(__name__)
 
-        def execute(self) -> FlextResult[ServiceStatus]:
+        def execute(self) -> FlextResult[Mapping[str, str | list[str]]]:
             """Execute tap LDAP utilities and return operational status."""
-            return FlextResult[ServiceStatus].ok({
+            return FlextResult[Mapping[str, str | list[str]]].ok({
                 "status": "operational",
                 "service": "flext-tap-ldap-utilities",
                 "capabilities": [
@@ -69,10 +69,10 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 host: str | None = None,
                 port: int | None = None,
                 base_dn: str | None = None,
-                **kwargs: MetadataValue,
+                **kwargs: t.JsonPrimitive,
             ) -> FlextExceptions.ConnectionError:
                 """Create connection error with context."""
-                context: MetadataContext = dict(kwargs)
+                context: dict[str, t.JsonPrimitive] = dict(kwargs)
                 if host is not None:
                     context["host"] = host
                 if port is not None:
@@ -85,10 +85,10 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             def create_bind_error(
                 message: str = "LDAP bind failed",
                 bind_dn: str | None = None,
-                **kwargs: MetadataValue,
+                **kwargs: t.JsonPrimitive,
             ) -> FlextExceptions.AuthenticationError:
                 """Create bind error with context."""
-                context: MetadataContext = dict(kwargs)
+                context: dict[str, t.JsonPrimitive] = dict(kwargs)
                 if bind_dn is not None:
                     context["bind_dn"] = bind_dn
                 return FlextExceptions.AuthenticationError(message, context=context)
@@ -98,10 +98,10 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 message: str = "LDAP search failed",
                 base_dn: str | None = None,
                 filter_str: str | None = None,
-                **kwargs: MetadataValue,
+                **kwargs: t.JsonPrimitive,
             ) -> FlextExceptions.OperationError:
                 """Create search error with context."""
-                context: MetadataContext = dict(kwargs)
+                context: dict[str, t.JsonPrimitive] = dict(kwargs)
                 if base_dn is not None:
                     context["base_dn"] = base_dn
                 if filter_str is not None:
@@ -117,15 +117,15 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 attributes: Mapping[str, list[str]],
                 stream_prefix: str = "ldap",
                 replication_method: str = "FULL_TABLE",
-            ) -> FlextResult[StreamInfo]:
+            ) -> FlextResult[Mapping[str, str | int]]:
                 """Create stream info from LDAP entry."""
                 object_classes = attributes.get("objectClass", [])
                 if not object_classes:
-                    return FlextResult[StreamInfo].fail("Entry has no objectClass")
+                    return FlextResult[Mapping[str, str | int]].fail("Entry has no objectClass")
 
                 primary_class = object_classes[0].lower()
                 stream_name = f"{stream_prefix}_{primary_class}"
-                stream_info: StreamInfo = {
+                stream_info: Mapping[str, str | int] = {
                     "stream_name": stream_name,
                     "table_name": primary_class,
                     "dn": dn,
@@ -133,7 +133,7 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     "attribute_count": len(attributes),
                     "object_class": primary_class,
                 }
-                return FlextResult[StreamInfo].ok(stream_info)
+                return FlextResult[Mapping[str, str | int]].ok(stream_info)
 
         class ConfigurationValidation:
             """LDAP tap configuration validation utilities."""
