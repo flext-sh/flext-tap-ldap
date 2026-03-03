@@ -14,7 +14,7 @@ from flext_core import (
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 
-from .constants import c
+from flext_tap_ldap import c, t
 
 
 class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
@@ -63,10 +63,10 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 host: str | None = None,
                 port: int | None = None,
                 base_dn: str | None = None,
-                **kwargs: t.JsonPrimitive,
+                **kwargs: t.Scalar,
             ) -> FlextExceptions.ConnectionError:
                 """Create connection error with context."""
-                context: dict[str, t.JsonPrimitive] = dict(kwargs)
+                context: dict[str, t.Scalar] = dict(kwargs)
                 if host is not None:
                     context["host"] = host
                 if port is not None:
@@ -79,10 +79,10 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             def create_bind_error(
                 message: str = "LDAP bind failed",
                 bind_dn: str | None = None,
-                **kwargs: t.JsonPrimitive,
+                **kwargs: t.Scalar,
             ) -> FlextExceptions.AuthenticationError:
                 """Create bind error with context."""
-                context: dict[str, t.JsonPrimitive] = dict(kwargs)
+                context: dict[str, t.Scalar] = dict(kwargs)
                 if bind_dn is not None:
                     context["bind_dn"] = bind_dn
                 return FlextExceptions.AuthenticationError(message, context=context)
@@ -92,10 +92,10 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 message: str = "LDAP search failed",
                 base_dn: str | None = None,
                 filter_str: str | None = None,
-                **kwargs: t.JsonPrimitive,
+                **kwargs: t.Scalar,
             ) -> FlextExceptions.OperationError:
                 """Create search error with context."""
-                context: dict[str, t.JsonPrimitive] = dict(kwargs)
+                context: dict[str, t.Scalar] = dict(kwargs)
                 if base_dn is not None:
                     context["base_dn"] = base_dn
                 if filter_str is not None:
@@ -135,17 +135,19 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """LDAP tap configuration validation utilities."""
 
             @staticmethod
-            def validate_ldap_config(config: LdapConfig) -> FlextResult[LdapConfig]:
+            def validate_ldap_config(
+                config: t.ConfigurationMapping,
+            ) -> FlextResult[t.ConfigurationMapping]:
                 """Validate LDAP configuration."""
                 config_map = dict(config)
                 required_fields = ["host", "base_dn"]
                 for field in required_fields:
                     if field not in config_map:
-                        return FlextResult[LdapConfig].fail(
+                        return FlextResult[t.ConfigurationMapping].fail(
                             f"Missing required LDAP field: {field}",
                         )
                     if not str(config_map[field]).strip():
-                        return FlextResult[LdapConfig].fail(
+                        return FlextResult[t.ConfigurationMapping].fail(
                             f"Empty LDAP field: {field}",
                         )
 
@@ -153,14 +155,16 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     try:
                         port = int(str(config_map["port"]))
                     except ValueError:
-                        return FlextResult[LdapConfig].fail("LDAP port must be numeric")
+                        return FlextResult[t.ConfigurationMapping].fail(
+                            "LDAP port must be numeric"
+                        )
                     if port <= 0 or port > c.TapLdap.Ldap.MAX_PORT:
-                        return FlextResult[LdapConfig].fail(
+                        return FlextResult[t.ConfigurationMapping].fail(
                             f"LDAP port must be between 1 and {c.TapLdap.Ldap.MAX_PORT}",
                         )
                     config_map["port"] = port
 
-                return FlextResult[LdapConfig].ok(config_map)
+                return FlextResult[t.ConfigurationMapping].ok(config_map)
 
         class PerformanceOptimization:
             """LDAP tap performance optimization utilities."""
