@@ -17,12 +17,6 @@ from flext_meltano import FlextMeltanoUtilities
 from .constants import c
 
 
-type dict[str, t.JsonPrimitive] = dict[str, t.JsonPrimitive]
-
-
-type LdapConfig = Mapping[str, str | int | bool]
-
-
 class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
     """Unified LDAP tap utilities class."""
 
@@ -121,7 +115,9 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 """Create stream info from LDAP entry."""
                 object_classes = attributes.get("objectClass", [])
                 if not object_classes:
-                    return FlextResult[Mapping[str, str | int]].fail("Entry has no objectClass")
+                    return FlextResult[Mapping[str, str | int]].fail(
+                        "Entry has no objectClass"
+                    )
 
                 primary_class = object_classes[0].lower()
                 stream_name = f"{stream_prefix}_{primary_class}"

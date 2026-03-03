@@ -294,9 +294,7 @@ class FlextTapLdapClient:
                 if size_limit > 0 and entries_returned >= size_limit:
                     break
 
-                narrowed_entry: BaseModel | t.ConfigurationMapping | None = (
-                    None
-                )
+                narrowed_entry: BaseModel | t.ConfigurationMapping | None = None
                 if isinstance(entry_data, BaseModel) or u.is_dict_like(entry_data):
                     narrowed_entry = entry_data
 

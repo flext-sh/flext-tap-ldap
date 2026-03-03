@@ -28,10 +28,6 @@ from flext_tap_ldap.constants import c
 logger = FlextLogger(__name__)
 
 
-
-
-
-
 class _LdapConnectionConfig(BaseModel):
     """Validated LDAP connection configuration payload."""
 
