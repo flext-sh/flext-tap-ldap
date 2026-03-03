@@ -10,6 +10,7 @@ from __future__ import annotations
 from unittest.mock import Mock, patch
 
 import pytest
+
 from flext_tap_ldap import FlextTapLdapStreams, FlextTapLdapTap, t
 
 

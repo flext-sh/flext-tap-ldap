@@ -11,8 +11,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tap_ldap.protocols import FlextTapLdapProtocols
 from flext_tests import FlextTestsProtocols
+
+from flext_tap_ldap.protocols import FlextTapLdapProtocols
 
 
 class TestsFlextTapLdapProtocols(

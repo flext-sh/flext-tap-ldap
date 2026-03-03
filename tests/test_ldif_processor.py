@@ -14,6 +14,7 @@ from unittest.mock import Mock
 
 import pytest
 from flext_core import t
+
 from flext_tap_ldap import FlextTapLdapLdifStreams, FlextTapLdapProcessor
 from flext_tap_ldap.processor import Entry, Transformer
 
