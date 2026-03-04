@@ -189,7 +189,7 @@ class FlextTapLdapLdifStreams:
                     auto_bind=True,
                 )
                 try:
-                    search_result = connection.extend.standard.paged_search(
+                    search_result = connection.extend.standard.paged_search(  # type: ignore[attr-defined]
                         search_base=base_dn_raw,
                         search_filter=search_filter,
                         search_scope=SUBTREE,
@@ -263,8 +263,8 @@ class FlextTapLdapLdifStreams:
                 # Read file and delegate to flext-ldif
                 content = Path(ldif_file).read_text(encoding="utf-8")
                 result = self._ldif_api.parse(content)
-                if result.is_success and result.data:
-                    for entry in result.data:
+                if result.is_success and result.value:
+                    for entry in result.value:
                         if x.is_base_model(entry):
                             yield self._convert_entry_to_record(entry)
                 else:
@@ -490,11 +490,11 @@ class FlextTapLdapLdifStreams:
                 # Read file and delegate analysis to flext-ldif
                 content = Path(ldif_file).read_text(encoding="utf-8")
                 result = self._ldif_api.parse(content)
-                if result.is_success and result.data:
+                if result.is_success and result.value:
                     # Generate statistics from parsed entries
                     entry_types: dict[str, int] = {}
                     object_classes: dict[str, int] = {}
-                    for entry in result.data:
+                    for entry in result.value:
                         if not x.is_base_model(entry):
                             continue
                         if entry.attributes is None:
@@ -503,13 +503,15 @@ class FlextTapLdapLdifStreams:
                         oc_list: list[str] = entry.attributes.get_values(
                             "objectClass",
                         )
-                        oc_strs = [str(x) for x in oc_list if x is not None]
+                        oc_strs = [
+                            str(oc_val) for oc_val in oc_list if oc_val is not None
+                        ]
                         entry_type = self._classify_entry_type(oc_strs)
                         entry_types[entry_type] = entry_types.get(entry_type, 0) + 1
                         for oc in oc_strs:
                             object_classes[oc] = object_classes.get(oc, 0) + 1
                     return {
-                        "total_entries": len(result.data),
+                        "total_entries": len(result.value),
                         "entry_types": entry_types,
                         "object_classes": object_classes,
                     }
