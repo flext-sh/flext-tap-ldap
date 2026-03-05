@@ -35,6 +35,7 @@ class ConfigDefaults(BaseModel):
     ldif_max_errors: int | None = Field(default=None)
 
 
+@FlextSettings.auto_register("tap_ldap")
 class FlextTapLdapSettings(FlextSettings):
     """FLEXT Tap LDAP Configuration extending FlextSettings.
 
