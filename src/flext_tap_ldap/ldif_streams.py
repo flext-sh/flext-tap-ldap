@@ -129,6 +129,66 @@ class FlextTapLdapLdifStreams:
             else:
                 yield from self._process_ldap_directory()
 
+        def _classify_entry_type(
+            self,
+            object_classes: list[str],
+        ) -> str:
+            """Classify entry type by simple objectClass heuristics."""
+            lowered = {oc.lower() for oc in object_classes}
+            if "inetorgperson" in lowered or "person" in lowered:
+                return "user"
+            if "groupofnames" in lowered or "group" in lowered:
+                return "group"
+            if "organizationalunit" in lowered or "ou" in lowered:
+                return "ou"
+            return "other"
+
+        def _convert_entry_to_record(
+            self,
+            flext_entry: m.Ldif.Entry,
+        ) -> dict[str, t.ContainerValue]:
+            """Convert flext-ldif entry to Singer record."""
+            # Guard against None dn/attributes (RFC violation entries)
+            dn_value = flext_entry.dn.value if flext_entry.dn is not None else ""
+            attrs = flext_entry.attributes
+            object_classes: list[str] = []
+            entry_type = "other"
+            if attrs is not None:
+                object_classes = attrs.get_values("objectClass")
+                entry_type = self._classify_entry_type(object_classes)
+                entry_attrs: Mapping[str, t.ContainerValue] = attrs.attributes
+            else:
+                entry_attrs: Mapping[str, t.ContainerValue] = {}
+            return {
+                "dn": dn_value,
+                "entry_type": entry_type,
+                "object_classes": object_classes,
+                "attributes": entry_attrs,
+            }
+
+        def _discover_ldif_files(self, ldif_directory: str) -> list[Path]:
+            directory = Path(ldif_directory)
+            if not directory.exists() or not directory.is_dir():
+                self.logger.warning("LDIF directory not found: %s", ldif_directory)
+                return []
+            pattern_raw = self.config.get("ldif_file_pattern", "*.ldif")
+            pattern = (
+                str(pattern_raw) if u.Guards.is_type(pattern_raw, str) else "*.ldif"
+            )
+            files = [path for path in directory.rglob(pattern) if path.is_file()]
+            files.sort()
+            return files
+
+        def _normalize_object_classes(
+            self,
+            object_classes: t.ContainerValue,
+        ) -> list[str]:
+            if isinstance(object_classes, str):
+                return [object_classes]
+            if isinstance(object_classes, list):
+                return [str(value) for value in object_classes if value is not None]
+            return []
+
         def _process_ldap_directory(self) -> Iterable[dict[str, t.ContainerValue]]:
             host_raw = self.config.get("ldap_host")
             base_dn_raw = self.config.get("ldap_base_dn")
@@ -230,29 +290,6 @@ class FlextTapLdapLdifStreams:
             ):
                 self.logger.exception("Error traversing LDAP directory")
 
-        def _normalize_object_classes(
-            self,
-            object_classes: t.ContainerValue,
-        ) -> list[str]:
-            if isinstance(object_classes, str):
-                return [object_classes]
-            if isinstance(object_classes, list):
-                return [str(value) for value in object_classes if value is not None]
-            return []
-
-        def _discover_ldif_files(self, ldif_directory: str) -> list[Path]:
-            directory = Path(ldif_directory)
-            if not directory.exists() or not directory.is_dir():
-                self.logger.warning("LDIF directory not found: %s", ldif_directory)
-                return []
-            pattern_raw = self.config.get("ldif_file_pattern", "*.ldif")
-            pattern = (
-                str(pattern_raw) if u.Guards.is_type(pattern_raw, str) else "*.ldif"
-            )
-            files = [path for path in directory.rglob(pattern) if path.is_file()]
-            files.sort()
-            return files
-
         def _process_ldif_file(
             self,
             ldif_file: str,
@@ -281,43 +318,6 @@ class FlextTapLdapLdifStreams:
                 ImportError,
             ):
                 self.logger.exception("Error processing LDIF file %s", ldif_file)
-
-        def _convert_entry_to_record(
-            self,
-            flext_entry: m.Ldif.Entry,
-        ) -> dict[str, t.ContainerValue]:
-            """Convert flext-ldif entry to Singer record."""
-            # Guard against None dn/attributes (RFC violation entries)
-            dn_value = flext_entry.dn.value if flext_entry.dn is not None else ""
-            attrs = flext_entry.attributes
-            object_classes: list[str] = []
-            entry_type = "other"
-            if attrs is not None:
-                object_classes = attrs.get_values("objectClass")
-                entry_type = self._classify_entry_type(object_classes)
-                entry_attrs: Mapping[str, t.ContainerValue] = attrs.attributes
-            else:
-                entry_attrs: Mapping[str, t.ContainerValue] = {}
-            return {
-                "dn": dn_value,
-                "entry_type": entry_type,
-                "object_classes": object_classes,
-                "attributes": entry_attrs,
-            }
-
-        def _classify_entry_type(
-            self,
-            object_classes: list[str],
-        ) -> str:
-            """Classify entry type by simple objectClass heuristics."""
-            lowered = {oc.lower() for oc in object_classes}
-            if "inetorgperson" in lowered or "person" in lowered:
-                return "user"
-            if "groupofnames" in lowered or "group" in lowered:
-                return "group"
-            if "organizationalunit" in lowered or "ou" in lowered:
-                return "ou"
-            return "other"
 
     class LdifAnalysisStream(Stream):
         """LDIF analysis stream using flext-ldif for ALL analysis."""
@@ -531,19 +531,6 @@ class FlextTapLdapLdifStreams:
                 self.logger.exception("Error analyzing LDIF file %s", ldif_file)
                 return {"total_entries": 0, "entry_types": {}, "object_classes": {}}
 
-        def _discover_ldif_files(self, ldif_directory: str) -> list[Path]:
-            directory = Path(ldif_directory)
-            if not directory.exists() or not directory.is_dir():
-                self.logger.warning("LDIF directory not found: %s", ldif_directory)
-                return []
-            pattern_raw = self.config.get("ldif_file_pattern", "*.ldif")
-            pattern = (
-                str(pattern_raw) if u.Guards.is_type(pattern_raw, str) else "*.ldif"
-            )
-            files = [path for path in directory.rglob(pattern) if path.is_file()]
-            files.sort()
-            return files
-
         def _classify_entry_type(
             self,
             object_classes: list[str],
@@ -557,6 +544,19 @@ class FlextTapLdapLdifStreams:
             if "organizationalunit" in lowered or "ou" in lowered:
                 return "ou"
             return "other"
+
+        def _discover_ldif_files(self, ldif_directory: str) -> list[Path]:
+            directory = Path(ldif_directory)
+            if not directory.exists() or not directory.is_dir():
+                self.logger.warning("LDIF directory not found: %s", ldif_directory)
+                return []
+            pattern_raw = self.config.get("ldif_file_pattern", "*.ldif")
+            pattern = (
+                str(pattern_raw) if u.Guards.is_type(pattern_raw, str) else "*.ldif"
+            )
+            files = [path for path in directory.rglob(pattern) if path.is_file()]
+            files.sort()
+            return files
 
 
 __all__ = [

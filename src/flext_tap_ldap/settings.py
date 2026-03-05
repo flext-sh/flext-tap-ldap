@@ -235,39 +235,6 @@ class FlextTapLdapSettings(FlextSettings):
         description="Custom stream definitions",
     )
 
-    # Validation methods
-    @field_validator("custom_streams")
-    @classmethod
-    def validate_custom_streams(
-        cls,
-        v: list[dict[str, str]] | None,
-    ) -> list[dict[str, str]] | None:
-        """Validate custom stream configurations."""
-        if v is not None:
-            for stream_config in v:
-                name = stream_config.get("name", "")
-                search_filter = stream_config.get("search_filter", "")
-                if not name or not search_filter:
-                    msg = "Custom stream must have 'name' and 'search_filter'"
-                    raise ValueError(msg)
-        return v
-
-    @field_validator("ldap_port")
-    @classmethod
-    def validate_ldap_port(cls, v: int) -> int:
-        """Validate LDAP port is in valid range."""
-        if v <= 0 or v > FlextConstants.Network.MAX_PORT:
-            msg = f"LDAP port must be between 1 and {FlextConstants.Network.MAX_PORT}"
-            raise ValueError(msg)
-        return v
-
-    # Enhanced singleton pattern methods
-    @classmethod
-    @override
-    def get_global_instance(cls) -> Self:
-        """Get the global singleton instance using enhanced FlextSettings pattern."""
-        return cls()
-
     @classmethod
     def create_for_development(cls, **overrides: t.ContainerValue) -> Self:
         """Create development configuration instance."""
@@ -312,6 +279,39 @@ class FlextTapLdapSettings(FlextSettings):
         }
         test_defaults.update(overrides)
         return cls.model_validate(test_defaults)
+
+    # Enhanced singleton pattern methods
+    @classmethod
+    @override
+    def get_global_instance(cls) -> Self:
+        """Get the global singleton instance using enhanced FlextSettings pattern."""
+        return cls()
+
+    # Validation methods
+    @field_validator("custom_streams")
+    @classmethod
+    def validate_custom_streams(
+        cls,
+        v: list[dict[str, str]] | None,
+    ) -> list[dict[str, str]] | None:
+        """Validate custom stream configurations."""
+        if v is not None:
+            for stream_config in v:
+                name = stream_config.get("name", "")
+                search_filter = stream_config.get("search_filter", "")
+                if not name or not search_filter:
+                    msg = "Custom stream must have 'name' and 'search_filter'"
+                    raise ValueError(msg)
+        return v
+
+    @field_validator("ldap_port")
+    @classmethod
+    def validate_ldap_port(cls, v: int) -> int:
+        """Validate LDAP port is in valid range."""
+        if v <= 0 or v > FlextConstants.Network.MAX_PORT:
+            msg = f"LDAP port must be between 1 and {FlextConstants.Network.MAX_PORT}"
+            raise ValueError(msg)
+        return v
 
     def validate_tap_configuration(self) -> FlextResult[bool]:
         """Validate the complete LDAP tap configuration."""

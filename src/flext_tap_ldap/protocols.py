@@ -119,19 +119,19 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
         ):
             """Protocol for LDAP to Singer attribute mapping."""
 
-            def map_ldap_attribute(
-                self,
-                ldap_attr: str,
-            ) -> FlextMeltanoProtocols.Result[str]:
-                """Map LDAP attribute to Singer field name."""
-                ...
-
             def convert_attribute_value(
                 self,
                 value: t.JsonValue,
                 ldap_attr: str,
             ) -> FlextMeltanoProtocols.Result[t.JsonValue]:
                 """Convert LDAP attribute value to Singer-compatible format."""
+                ...
+
+            def map_ldap_attribute(
+                self,
+                ldap_attr: str,
+            ) -> FlextMeltanoProtocols.Result[str]:
+                """Map LDAP attribute to Singer field name."""
                 ...
 
         @runtime_checkable

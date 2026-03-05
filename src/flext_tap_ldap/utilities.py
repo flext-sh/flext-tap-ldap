@@ -29,6 +29,16 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             self._container = FlextContainer.get_global()
             self._logger = FlextLogger(__name__)
 
+        @property
+        def container(self) -> FlextContainer:
+            """Return the global container instance."""
+            return self._container
+
+        @property
+        def logger(self) -> FlextLogger:
+            """Return the logger instance."""
+            return self._logger
+
         def execute(self) -> FlextResult[Mapping[str, str | list[str]]]:
             """Execute tap LDAP utilities and return operational status."""
             return FlextResult[Mapping[str, str | list[str]]].ok({
@@ -44,18 +54,20 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 ],
             })
 
-        @property
-        def logger(self) -> FlextLogger:
-            """Return the logger instance."""
-            return self._logger
-
-        @property
-        def container(self) -> FlextContainer:
-            """Return the global container instance."""
-            return self._container
-
         class ErrorHandling:
             """LDAP tap error handling utilities with enhanced context."""
+
+            @staticmethod
+            def create_bind_error(
+                message: str = "LDAP bind failed",
+                bind_dn: str | None = None,
+                **kwargs: t.Scalar,
+            ) -> FlextExceptions.AuthenticationError:
+                """Create bind error with context."""
+                context: dict[str, t.Scalar] = dict(kwargs)
+                if bind_dn is not None:
+                    context["bind_dn"] = bind_dn
+                return FlextExceptions.AuthenticationError(message, context=context)
 
             @staticmethod
             def create_connection_error(
@@ -74,18 +86,6 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 if base_dn is not None:
                     context["base_dn"] = base_dn
                 return FlextExceptions.ConnectionError(message, context=context)
-
-            @staticmethod
-            def create_bind_error(
-                message: str = "LDAP bind failed",
-                bind_dn: str | None = None,
-                **kwargs: t.Scalar,
-            ) -> FlextExceptions.AuthenticationError:
-                """Create bind error with context."""
-                context: dict[str, t.Scalar] = dict(kwargs)
-                if bind_dn is not None:
-                    context["bind_dn"] = bind_dn
-                return FlextExceptions.AuthenticationError(message, context=context)
 
             @staticmethod
             def create_search_error(

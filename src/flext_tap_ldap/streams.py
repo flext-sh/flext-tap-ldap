@@ -123,27 +123,6 @@ class FlextTapLdapStreams:
         """
 
         @staticmethod
-        def create_test_user_record() -> Mapping[str, t.ContainerValue]:
-            """Create standardized test user record for fallback scenarios."""
-            return {
-                "dn": "uid=jdoe,ou=users,dc=test,dc=com",
-                "uid": "jdoe",
-                "cn": "John Doe",
-                "mail": "jdoe@test.com",
-                "sn": "Doe",
-                "givenName": "John",
-                "userPrincipalName": "jdoe@test.com",
-                "memberOf": ["cn=developers,ou=groups,dc=test,dc=com"],
-                "objectClass": [
-                    "inetOrgPerson",
-                    "organizationalPerson",
-                    "person",
-                    "top",
-                ],
-                "modifyTimestamp": "2024-01-01T12:00:00Z",
-            }
-
-        @staticmethod
         def create_test_group_record() -> Mapping[str, t.ContainerValue]:
             """Create standardized test group record for fallback scenarios."""
             return {
@@ -178,6 +157,27 @@ class FlextTapLdapStreams:
                 "cn": "schema",
                 "objectClasses": ["inetOrgPerson", "organizationalPerson", "person"],
                 "attributeTypes": ["uid", "cn", "sn", "mail"],
+                "modifyTimestamp": "2024-01-01T12:00:00Z",
+            }
+
+        @staticmethod
+        def create_test_user_record() -> Mapping[str, t.ContainerValue]:
+            """Create standardized test user record for fallback scenarios."""
+            return {
+                "dn": "uid=jdoe,ou=users,dc=test,dc=com",
+                "uid": "jdoe",
+                "cn": "John Doe",
+                "mail": "jdoe@test.com",
+                "sn": "Doe",
+                "givenName": "John",
+                "userPrincipalName": "jdoe@test.com",
+                "memberOf": ["cn=developers,ou=groups,dc=test,dc=com"],
+                "objectClass": [
+                    "inetOrgPerson",
+                    "organizationalPerson",
+                    "person",
+                    "top",
+                ],
                 "modifyTimestamp": "2024-01-01T12:00:00Z",
             }
 
@@ -217,6 +217,17 @@ class FlextTapLdapStreams:
             # Create LDAP client for directory operations
             self._create_ldap_client()
 
+        @override
+        def get_records(
+            self,
+            context: Mapping[str, object] | None = None,
+        ) -> Iterable[t.ContainerValue]:
+            """Get records from LDAP - base implementation."""
+            # Use context parameter to avoid unused argument warning
+            _context = context  # Acknowledge the parameter
+            # This is a base implementation that yields empty records
+            return []
+
         def _create_ldap_client(self) -> None:
             """Create LDAP client from tap configuration."""
             try:
@@ -248,15 +259,10 @@ class FlextTapLdapStreams:
                 logger.warning("Failed to create LDAP client: %s", err_msg)
                 self.client = None
 
-        @override
-        def get_records(
+        def _get_fallback_data(
             self,
-            context: Mapping[str, object] | None = None,
-        ) -> Iterable[t.ContainerValue]:
-            """Get records from LDAP - base implementation."""
-            # Use context parameter to avoid unused argument warning
-            _context = context  # Acknowledge the parameter
-            # This is a base implementation that yields empty records
+        ) -> list[dict[str, object]]:
+            """Get fallback data for testing/demo purposes."""
             return []
 
         def _search_ldap(
@@ -305,12 +311,6 @@ class FlextTapLdapStreams:
                 err_msg = str(e)
                 logger.warning("LDAP search failed: %s, using fallback data", err_msg)
                 return self._get_fallback_data()
-
-        def _get_fallback_data(
-            self,
-        ) -> list[dict[str, object]]:
-            """Get fallback data for testing/demo purposes."""
-            return []
 
     class UsersStream(LDAPBaseStream):
         """Stream for LDAP user entries."""
