@@ -56,7 +56,6 @@ class FlextTapLdapClient:
             Testing convenience Usage (for testing convenience):
                 client = FlextTapLdapClient.LDAPClient(host="ldap.example.com", port=389)
             """
-            # Declare attributes with type annotations
             self._flext_api: FlextLdap
             self._config: m.Ldap.ConnectionConfig
             self.host: str
@@ -69,15 +68,11 @@ class FlextTapLdapClient:
             self.client: t.ContainerValue
             self._bind_dn: str | None
             self._password: str | None
-
-            # Support both new Parameter Object Pattern and testing convenience
             client_config = (
                 config
                 if config is not None
                 else self._create_config_from_kwargs(**convenience_kwargs)
             )
-
-            # Initialize the FlextLdap API
             self._initialize_flext_api(client_config)
 
         def __getattr__(self, name: str) -> t.ContainerValue:
@@ -95,9 +90,7 @@ class FlextTapLdapClient:
             start_time = time.time()
             connection_ok: bool = self.test_connection()
             end_time = time.time()
-
             response_time_ms: float = round((end_time - start_time) * 1000, 2)
-
             return {
                 "status": "healthy" if connection_ok else "unhealthy",
                 "server_uri": self.server_uri,
@@ -120,13 +113,8 @@ class FlextTapLdapClient:
             Refactored for lower complexity using Single Responsibility Principle.
             """
             ldap_scope = self._convert_scope_to_enum(scope)
-
             return self._perform_search(
-                base_dn,
-                search_filter,
-                attributes,
-                ldap_scope,
-                size_limit,
+                base_dn, search_filter, attributes, ldap_scope, size_limit
             )
 
         def search_with_oracle_support(
@@ -142,20 +130,13 @@ class FlextTapLdapClient:
             Refactored using Single Responsibility Principle to reduce complexity.
             Each step now has its own dedicated method.
             """
-            # Step 1: Extend attributes with Oracle-specific ones if needed
             extended_attributes = self._extend_attributes_with_oracle_support(
-                attributes,
-                oracle_oid_mode=oracle_oid_mode,
+                attributes, oracle_oid_mode=oracle_oid_mode
             )
-
-            # Step 2: Handle event loop management
             try:
                 get_running_loop()
-                # We're in an context, can't use run_until_complete
-                # Return empty list as fallback
                 return []
             except RuntimeError:
-                # Step 3: No event loop running, execute search in new loop
                 return self._execute_oracle_search_in_new_loop(
                     base_dn=base_dn,
                     search_filter=search_filter,
@@ -166,7 +147,6 @@ class FlextTapLdapClient:
         def test_connection(self) -> bool:
             """Test the connection to the LDAP server for testing convenience."""
             try:
-                # Try a simple search to test connection
                 test_search_options = m.Ldap.SearchOptions(
                     base_dn="",
                     filter_str="(objectClass=*)",
@@ -176,17 +156,15 @@ class FlextTapLdapClient:
                     time_limit=5,
                 )
                 result: r[m.Ldap.SearchResult] = self._flext_api.search(
-                    test_search_options,
+                    test_search_options
                 )
                 return result.is_success
             except (RuntimeError, ValueError, TypeError) as e:
                 err_msg = str(e)
                 logger.warning("LDAP connection test failed: %s", err_msg)
                 logger.info(
-                    "LDAP connection test fallback - required for Singer streams in test/mock environments",
+                    "LDAP connection test fallback - required for Singer streams in test/mock environments"
                 )
-                # SECURITY CLARIFICATION: This True return is documented test environment testing convenience
-                # Required for Singer protocol compliance - NOT security-sensitive data generation
                 return True
 
         def _build_server_uri(self) -> str:
@@ -224,21 +202,16 @@ class FlextTapLdapClient:
                     return None
 
         def _convert_entry_to_dict(
-            self,
-            entry_data: BaseModel | t.ConfigurationMapping | None,
+            self, entry_data: BaseModel | t.ConfigurationMapping | None
         ) -> dict[str, t.ContainerValue]:
             """Convert FlextLdapModels.Entry to dict[str, t.ContainerValue] format for testing convenience.
 
             Single Responsibility: Handle only entry format conversion.
             """
             if x.is_base_model(entry_data):
-                # It's a m.Ldif.Entry model object - flatten attributes
-                # Use getattr to safely access attributes for type checker
                 dn_value: str = str(getattr(entry_data, "dn", ""))
                 attributes: dict[str, t.ContainerValue] = getattr(
-                    entry_data,
-                    "attributes",
-                    {},
+                    entry_data, "attributes", {}
                 )
                 entry_dict: dict[str, t.ContainerValue] = {"dn": dn_value}
                 for attr_name, attr_values in attributes.items():
@@ -247,11 +220,9 @@ class FlextTapLdapClient:
                     else:
                         entry_dict[attr_name] = attr_values
                 return entry_dict
-            # It's already a dict[str, t.ContainerValue] (from mock) - ensure proper type conversion
             if entry_data:
                 if u.is_dict_like(entry_data):
                     return dict(entry_data)
-                # Convert to dict[str, t.ContainerValue] if it's not already
                 return (
                     dict(entry_data)
                     if getattr(entry_data, "__iter__", None) is not None
@@ -272,8 +243,7 @@ class FlextTapLdapClient:
             return scope_map.get(scope.upper(), "SUBTREE")
 
         def _create_config_from_kwargs(
-            self,
-            **convenience_kwargs: t.ContainerValue,
+            self, **convenience_kwargs: t.ContainerValue
         ) -> FlextTapLdapClient.LDAPClientConfig:
             """Create config from convenience keyword arguments."""
             raw_host = convenience_kwargs.get("host")
@@ -284,7 +254,6 @@ class FlextTapLdapClient:
                 case _:
                     msg = "Either 'config' or valid string 'host' must be provided"
                     raise ValueError(msg)
-
             return FlextTapLdapClient.LDAPClientConfig(
                 host=host,
                 port=self._coerce_int(
@@ -319,25 +288,18 @@ class FlextTapLdapClient:
             loop = new_event_loop()
             set_event_loop(loop)
             try:
-                # Perform synchronous search using existing method
                 search_result: Sequence[Mapping[str, t.ContainerValue]] = self.search(
-                    base_dn,
-                    search_filter,
-                    attributes,
+                    base_dn, search_filter, attributes
                 )
                 return self._process_search_results_with_oracle_support(
-                    search_result,
-                    oracle_oid_mode=oracle_oid_mode,
+                    search_result, oracle_oid_mode=oracle_oid_mode
                 )
             finally:
                 loop.close()
                 set_event_loop(None)
 
         def _extend_attributes_with_oracle_support(
-            self,
-            attributes: list[str] | None,
-            *,
-            oracle_oid_mode: bool,
+            self, attributes: list[str] | None, *, oracle_oid_mode: bool
         ) -> list[str] | None:
             """Extend attributes list with Oracle-specific attributes.
 
@@ -345,19 +307,15 @@ class FlextTapLdapClient:
             """
             if not oracle_oid_mode or not attributes:
                 return attributes
-
             oracle_attrs = ["orclPassword", "orclPasswordAttribute", "userPassword"]
             extended_attributes = attributes.copy()
-
             for oracle_attr in oracle_attrs:
                 if oracle_attr not in extended_attributes:
                     extended_attributes.append(oracle_attr)
-
             return extended_attributes
 
         def _initialize_flext_api(
-            self,
-            client_config: FlextTapLdapClient.LDAPClientConfig,
+            self, client_config: FlextTapLdapClient.LDAPClientConfig
         ) -> None:
             """Initialize the FlextLdap API with the given configuration."""
             flext_connection_config = m.Ldap.ConnectionConfig(
@@ -368,7 +326,6 @@ class FlextTapLdapClient:
                 bind_password=client_config.password,
                 timeout=int(client_config.timeout),
             )
-
             settings = FlextLdapSettings(
                 host=flext_connection_config.host,
                 port=flext_connection_config.port,
@@ -377,13 +334,10 @@ class FlextTapLdapClient:
                 bind_password=flext_connection_config.bind_password,
                 timeout=flext_connection_config.timeout,
             )
-
             connection = FlextLdapConnection(config=settings)
             operations = FlextLdapOperations(connection=connection)
             self._flext_api = FlextLdap(connection=connection, operations=operations)
             self._config = flext_connection_config
-
-            # Store for testing convenience - these are what tests expect
             self.host = client_config.host
             self.port = client_config.port
             self.bind_dn = client_config.bind_dn
@@ -391,10 +345,8 @@ class FlextTapLdapClient:
             self.use_ssl = client_config.use_ssl
             self.timeout = client_config.timeout
             self.page_size = client_config.page_size
-
-            # Add testing convenience attributes that tests expect
-            self._bind_dn = client_config.bind_dn  # Tests expect _bind_dn attribute
-            self._password = client_config.password  # Tests expect _password attribute
+            self._bind_dn = client_config.bind_dn
+            self._password = client_config.password
 
         def _perform_search(
             self,
@@ -409,10 +361,7 @@ class FlextTapLdapClient:
             Single Responsibility: Handle only search execution.
             """
             self._build_server_uri()
-
             try:
-                # Ensure bind_dn and password are not None for the API call
-                # Create search options using FlextLdap models
                 search_options = m.Ldap.SearchOptions(
                     base_dn=base_dn,
                     filter_str=search_filter,
@@ -421,12 +370,8 @@ class FlextTapLdapClient:
                     size_limit=size_limit,
                     time_limit=c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
                 )
-                result: r[m.Ldap.SearchResult] = self._flext_api.search(
-                    search_options,
-                )
-
+                result: r[m.Ldap.SearchResult] = self._flext_api.search(search_options)
                 return self._process_search_results(result, size_limit)
-
             except (
                 ValueError,
                 TypeError,
@@ -437,11 +382,10 @@ class FlextTapLdapClient:
                 ImportError,
             ) as e:
                 logger.debug("LDAP search failed: %s", e)
-                return []  # Return empty list on failure
+                return []
 
         def _process_oracle_entry(
-            self,
-            entry: Mapping[str, t.ContainerValue],
+            self, entry: Mapping[str, t.ContainerValue]
         ) -> Mapping[str, t.ContainerValue]:
             """Process Oracle-specific LDAP entries for testing convenience."""
             raw_attrs = entry.get("attributes", {})
@@ -451,12 +395,8 @@ class FlextTapLdapClient:
                     str(attr_name): attr_value
                     for attr_name, attr_value in raw_attrs.items()
                 }
-            # Handle Oracle password attributes
             if "orclPassword" in attributes:
-                # Oracle OID stores passwords differently
                 attributes["userPassword"] = attributes.get("orclPassword")
-
-            # Handle Oracle container objects
             if "objectClass" in attributes:
                 raw_obj_classes = attributes["objectClass"]
                 obj_classes: list[str]
@@ -467,21 +407,16 @@ class FlextTapLdapClient:
                         obj_classes = [str(c) for c in class_list]
                     case _:
                         obj_classes = []
-
-                # Convert Oracle-specific object classes
                 if (
                     "orclContainer" in obj_classes
                     and "organizationalUnit" not in obj_classes
                 ):
                     obj_classes.append("organizationalUnit")
                     attributes["objectClass"] = obj_classes
-
             return entry
 
         def _process_search_results(
-            self,
-            result: r[m.Ldap.SearchResult],
-            size_limit: int,
+            self, result: r[m.Ldap.SearchResult], size_limit: int
         ) -> Sequence[Mapping[str, t.ContainerValue]]:
             """Process LDAP search results with size limiting.
 
@@ -490,8 +425,6 @@ class FlextTapLdapClient:
             entries: list[Mapping[str, t.ContainerValue]] = []
             if not (result.is_success and result.data):
                 return entries
-
-            # Handle both SearchResult objects and direct lists for testing
             raw_entries: t.ContainerValue = result.data
             if (
                 hasattr(raw_entries, "entries")
@@ -502,20 +435,14 @@ class FlextTapLdapClient:
                 data_entries = list(raw_entries)
             else:
                 data_entries: list[t.ContainerValue] = []
-
             for entries_returned, entry_data in enumerate(data_entries):
                 if size_limit > 0 and entries_returned >= size_limit:
                     break
-
                 narrowed_entry: BaseModel | t.ConfigurationMapping | None = None
                 if isinstance(entry_data, BaseModel) or u.is_dict_like(entry_data):
                     narrowed_entry = entry_data
-
-                converted = self._convert_entry_to_dict(
-                    narrowed_entry,
-                )
+                converted = self._convert_entry_to_dict(narrowed_entry)
                 entries.append(converted)
-
             return entries
 
         def _process_search_results_with_oracle_support(
@@ -543,7 +470,6 @@ class FlextTapLdapClient:
             return results
 
 
-# Type classes with real inheritance for testing convenience
 class LDAPConnectionConfig(m.Ldap.ConnectionConfig):
     """LDAPConnectionConfig - real inheritance from FlextLdapModels.ConnectionConfig."""
 

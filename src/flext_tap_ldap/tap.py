@@ -23,12 +23,8 @@ from flext_tap_ldap.streams import FlextTapLdapStreams
 from flext_tap_ldap.typings import t
 
 logger = FlextLogger(__name__)
-
 _LIST_ADAPTER = TypeAdapter(list[t.ContainerValue], config=ConfigDict(strict=True))
-_MAP_ADAPTER = TypeAdapter(
-    t.ConfigurationMapping,
-    config=ConfigDict(strict=True),
-)
+_MAP_ADAPTER = TypeAdapter(t.ConfigurationMapping, config=ConfigDict(strict=True))
 _STR_ADAPTER = TypeAdapter(str, config=ConfigDict(strict=True))
 
 
@@ -62,13 +58,9 @@ class FlextTapLdapTap(Tap):
 
     name: str = "tap-ldap"
     config_class = FlextTapLdapSettings
-
-    # NOTE(@flext-team): Use centralized LDAP schema when flext-meltano common_schemas is available
-    # Issue: https://github.com/flext-team/flext-meltano/issues/1
     config_jsonschema: ClassVar[dict[str, t.ContainerValue]] = {
         "type": "object",
         "properties": {
-            # Basic LDAP connection properties
             "host": {"type": "string", "description": "LDAP server host"},
             "port": {
                 "type": "integer",
@@ -86,7 +78,6 @@ class FlextTapLdapTap(Tap):
                 "default": False,
                 "description": "Use SSL connection",
             },
-            # Tap-specific properties
             "page_size": {
                 "type": "integer",
                 "default": c.TapLdap.DEFAULT_PAGE_SIZE,
@@ -102,7 +93,6 @@ class FlextTapLdapTap(Tap):
                 "default": "(objectClass=groupOfNames)",
                 "description": "LDAP filter for group entries",
             },
-            # LDIF processing properties
             "ldif_files": {
                 "type": "array",
                 "items": {"type": "string"},
@@ -132,27 +122,17 @@ class FlextTapLdapTap(Tap):
         and optionally LDIF processing streams and custom streams based on configuration.
         """
         streams: list[Stream] = []
-
-        # Standard LDAP streams (always available)
-        streams.extend(
-            [
-                FlextTapLdapStreams.UsersStream(self),
-                FlextTapLdapStreams.GroupsStream(self),
-                FlextTapLdapStreams.OrganizationalUnitsStream(self),
-                FlextTapLdapStreams.SchemaStream(self),
-            ],
-        )
-
-        # Add LDIF streams if enabled
+        streams.extend([
+            FlextTapLdapStreams.UsersStream(self),
+            FlextTapLdapStreams.GroupsStream(self),
+            FlextTapLdapStreams.OrganizationalUnitsStream(self),
+            FlextTapLdapStreams.SchemaStream(self),
+        ])
         if self.config.get("enable_ldif_streams", False):
-            streams.extend(
-                [
-                    FlextTapLdapLdifStreams.LdifStream(self),
-                    FlextTapLdapLdifStreams.LdifAnalysisStream(self),
-                ],
-            )
-
-        # Add custom streams if configured
+            streams.extend([
+                FlextTapLdapLdifStreams.LdifStream(self),
+                FlextTapLdapLdifStreams.LdifAnalysisStream(self),
+            ])
         raw_custom = self.config.get("custom_streams", [])
         custom_streams_list = _as_list(raw_custom) or []
         for custom_config_raw in custom_streams_list:
@@ -165,14 +145,12 @@ class FlextTapLdapTap(Tap):
             schema_props = _as_map(schema_dict.get("properties", {})) or {}
             raw_pk = custom_config.get("primary_keys")
             raw_rk = custom_config.get("replication_key")
-
             raw_pk_values = _as_list(raw_pk)
             primary_keys = (
                 [_as_str(k) or "" for k in raw_pk_values]
                 if raw_pk_values is not None
                 else None
             )
-
             params = FlextTapLdapStreams.CustomStreamParams(
                 name=_as_str(raw_name) or "",
                 search_filter=_as_str(raw_filter) or "",
@@ -182,7 +160,6 @@ class FlextTapLdapTap(Tap):
             )
             stream = FlextTapLdapStreams.CustomStream(tap=self, params=params)
             streams.append(stream)
-
         return streams
 
 

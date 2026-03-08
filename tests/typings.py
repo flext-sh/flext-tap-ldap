@@ -27,5 +27,4 @@ class TestsFlextTapLdapTypes(FlextTestsTypes, t):
 
 
 t = TestsFlextTapLdapTypes
-
 __all__ = ["TestsFlextTapLdapTypes", "t"]

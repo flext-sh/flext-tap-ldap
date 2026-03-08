@@ -25,7 +25,6 @@ class TestTapExecutionStartedEvent:
             execution_id="exec-123",
             config_hash="hash-abc",
         )
-
         assert event.execution_id == "exec-123"
         assert event.config_hash == "hash-abc"
         assert event.tap_name == "tap-ldap"
@@ -38,7 +37,6 @@ class TestTapExecutionStartedEvent:
             aggregate_id="tap-ldap-002",
             execution_id="exec-456",
         )
-
         assert event.execution_id == "exec-456"
         assert event.config_hash is None
         assert event.tap_name == "tap-ldap"
@@ -57,7 +55,6 @@ class TestTapExecutionCompletedEvent:
             streams_discovered=4,
             duration_seconds=15.5,
         )
-
         assert event.execution_id == "exec-789"
         assert event.records_processed == 100
         assert event.streams_discovered == 4
@@ -70,7 +67,6 @@ class TestTapExecutionCompletedEvent:
             aggregate_id="tap-ldap-004",
             execution_id="exec-000",
         )
-
         assert event.records_processed == 0
         assert event.streams_discovered == 0
         assert event.duration_seconds == pytest.approx(0.0)
@@ -88,7 +84,6 @@ class TestStreamDiscoveredEvent:
             stream_key_properties=["dn"],
             bookmark_key="modifyTimestamp",
         )
-
         assert event.stream_name == "users"
         assert event.stream_key_properties == ["dn"]
         assert event.bookmark_key == "modifyTimestamp"
@@ -100,7 +95,6 @@ class TestStreamDiscoveredEvent:
             aggregate_id="tap-ldap-006",
             stream_name="groups",
         )
-
         assert event.stream_key_properties == []
         assert event.bookmark_key is None
 
@@ -117,7 +111,6 @@ class TestRecordExtractedEvent:
             record_id="uid=jdoe,ou=users,dc=example,dc=com",
             record_size_bytes=256,
         )
-
         assert event.stream_name == "users"
         assert event.record_id == "uid=jdoe,ou=users,dc=example,dc=com"
         assert event.record_size_bytes == 256
@@ -129,7 +122,6 @@ class TestRecordExtractedEvent:
             aggregate_id="tap-ldap-008",
             stream_name="groups",
         )
-
         assert event.record_id is None
         assert event.record_size_bytes == 0
 
@@ -140,10 +132,8 @@ class TestConnectionTestedEvent:
     def test_event_creation_success(self) -> None:
         """Test creating successful connection tested event."""
         event = m.TapLdap.ConnectionTestedEvent(
-            success=True,
-            server_uri="ldap://localhost:389",
+            success=True, server_uri="ldap://localhost:389"
         )
-
         assert event.success is True
         assert event.server_uri == "ldap://localhost:389"
         assert event.error_message is None
@@ -155,6 +145,5 @@ class TestConnectionTestedEvent:
             server_uri="ldap://invalid:389",
             error_message="Connection refused",
         )
-
         assert event.success is False
         assert event.error_message == "Connection refused"

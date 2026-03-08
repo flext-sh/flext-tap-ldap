@@ -18,10 +18,6 @@ from flext_core import t
 from flext_tap_ldap import FlextTapLdapLdifStreams, FlextTapLdapProcessor
 from flext_tap_ldap.processor import Entry, Transformer
 
-# NOTE: LDIF test classes have been refactored as part of consolidation
-# These internal classes are no longer part of the public API
-# Tests using FlextTapLdapProcessor should be implemented in future iterations
-
 
 class TestPlaceholder:
     """Placeholder tests pending refactoring with proper FlextTapLdapProcessor API."""
@@ -40,14 +36,9 @@ def test_ldif_directory_processing_traverses_ldif_files(tmp_path: Path) -> None:
     file_a.write_text("dn: cn=a,dc=example,dc=com\n", encoding="utf-8")
     file_b.write_text("dn: cn=b,dc=example,dc=com\n", encoding="utf-8")
     ignored.write_text("not-ldif", encoding="utf-8")
-
     stream = object.__new__(FlextTapLdapLdifStreams.LdifStream)
     stream.tap = Mock()
-    stream.tap.config = {
-        "ldif_directory": str(tmp_path),
-        "ldif_file_pattern": "*.ldif",
-    }
-
+    stream.tap.config = {"ldif_directory": str(tmp_path), "ldif_file_pattern": "*.ldif"}
     seen: list[str] = []
 
     def _process(ldif_file: str) -> list[dict[str, t.ContainerValue]]:
@@ -55,9 +46,7 @@ def test_ldif_directory_processing_traverses_ldif_files(tmp_path: Path) -> None:
         return [{"dn": ldif_file}]
 
     stream._process_ldif_file = _process
-
     records = list(stream.get_records())
-
     assert len(records) == 2
     assert set(seen) == {str(file_a), str(file_b)}
 
@@ -67,26 +56,19 @@ def test_transform_entry_applies_rules() -> None:
         transformation_rules={
             "attribute_mappings": {"CN": "cn", "sn": "surname"},
             "attribute_value_mappings": {
-                "department": {"IT": "Information Technology"},
+                "department": {"IT": "Information Technology"}
             },
             "remove_attributes": ["obsolete"],
             "add_attributes": {"status": "active"},
-        },
+        }
     )
     entry = Entry(
         "cn=alice,dc=example,dc=com",
-        {
-            "CN": ["Alice"],
-            "sn": ["Smith"],
-            "department": ["IT"],
-            "obsolete": ["x"],
-        },
+        {"CN": ["Alice"], "sn": ["Smith"], "department": ["IT"], "obsolete": ["x"]},
     )
     entry.change_type = "modify"
     entry.controls = ["control-a"]
-
     transformed = transformer.transform_entry(entry)
-
     assert transformed is not entry
     assert transformed.attributes["cn"] == ["Alice"]
     assert transformed.attributes["surname"] == ["Smith"]
@@ -100,6 +82,7 @@ def test_transform_entry_applies_rules() -> None:
 def test_directory_processing_traverses_ldap_dit_with_mock_connection(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+
     class _FakeConnection:
         def __init__(self, *args: object, **kwargs: object) -> None:
             self.extend = Mock()
@@ -112,7 +95,7 @@ def test_directory_processing_traverses_ldap_dit_with_mock_connection(
                         "cn": ["alice"],
                         "objectClass": ["person", "inetOrgPerson"],
                     },
-                },
+                }
             ]
 
         def __enter__(self) -> Self:
@@ -130,7 +113,6 @@ def test_directory_processing_traverses_ldap_dit_with_mock_connection(
 
     monkeypatch.setattr("flext_tap_ldap.ldif_streams.Server", Mock())
     monkeypatch.setattr("flext_tap_ldap.ldif_streams.Connection", _FakeConnection)
-
     stream = object.__new__(FlextTapLdapLdifStreams.LdifStream)
     stream.tap = Mock()
     stream.tap.config = {
@@ -142,9 +124,7 @@ def test_directory_processing_traverses_ldap_dit_with_mock_connection(
         "ldap_search_filter": "(objectClass=*)",
         "ldap_page_size": 100,
     }
-
     records = list(stream.get_records())
-
     assert len(records) == 1
     assert records[0]["dn"] == "cn=alice,dc=example,dc=com"
     assert records[0]["entry_type"] == "user"
@@ -156,17 +136,10 @@ def test_transform_entry_applies_schema_mappings() -> None:
             "schema_mappings": {
                 "uid": "employeeId",
                 "status": {"source": "employmentStatus", "default": "active"},
-            },
-        },
+            }
+        }
     )
-    entry = Entry(
-        "cn=alice,dc=example,dc=com",
-        {
-            "employeeId": ["1001"],
-        },
-    )
-
+    entry = Entry("cn=alice,dc=example,dc=com", {"employeeId": ["1001"]})
     transformed = transformer.transform_entry(entry)
-
     assert transformed.attributes["uid"] == ["1001"]
     assert transformed.attributes["status"] == ["active"]

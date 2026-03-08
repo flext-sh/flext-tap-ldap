@@ -20,7 +20,6 @@ from pydantic import BaseModel
 from flext_tap_ldap.constants import c
 from flext_tap_ldap.typings import t
 
-# Access Singer SDK typing through FLEXT domain namespace
 typing_utils = t_meltano.Singer.Typing
 
 
@@ -66,21 +65,15 @@ class FlextTapLdapLdifStreams:
         @override
         def __init__(self, tap: Tap) -> None:
             """Initialize LDIF stream with library delegation."""
-            # Set required attributes BEFORE calling super().__init__()
             self.name = "ldif_entries"
             self.path = "/ldif_entries"
-            # Store tap reference
             self.tap = tap
-            # Initialize flext-ldif API for processing
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
             self._logger_instance: FlextLogger | None = None
-            # Define schema
             schema = typing_utils.PropertiesList(
                 typing_utils.Property(
-                    "dn",
-                    typing_utils.StringType,
-                    description="Distinguished Name",
+                    "dn", typing_utils.StringType, description="Distinguished Name"
                 ),
                 typing_utils.Property(
                     "entry_type",
@@ -108,13 +101,11 @@ class FlextTapLdapLdifStreams:
             return self._logger_instance
 
         def get_records(
-            self,
-            context: Mapping[str, object] | None = None,
+            self, context: Mapping[str, object] | None = None
         ) -> Iterator[dict[str, t.ContainerValue]]:
             """Get LDIF records using flext-ldif processing."""
             _ = context
             self.logger.info("Processing LDIF files using flext-ldif library")
-            # Get LDIF files from config
             raw_files = self.config.get("ldif_files", [])
             ldif_files: list[t.ContainerValue] = (
                 list(raw_files) if u.Guards.is_list(raw_files) else []
@@ -129,10 +120,7 @@ class FlextTapLdapLdifStreams:
             else:
                 yield from self._process_ldap_directory()
 
-        def _classify_entry_type(
-            self,
-            object_classes: list[str],
-        ) -> str:
+        def _classify_entry_type(self, object_classes: list[str]) -> str:
             """Classify entry type by simple objectClass heuristics."""
             lowered = {oc.lower() for oc in object_classes}
             if "inetorgperson" in lowered or "person" in lowered:
@@ -144,11 +132,9 @@ class FlextTapLdapLdifStreams:
             return "other"
 
         def _convert_entry_to_record(
-            self,
-            flext_entry: m.Ldif.Entry,
+            self, flext_entry: m.Ldif.Entry
         ) -> dict[str, t.ContainerValue]:
             """Convert flext-ldif entry to Singer record."""
-            # Guard against None dn/attributes (RFC violation entries)
             dn_value = flext_entry.dn.value if flext_entry.dn is not None else ""
             attrs = flext_entry.attributes
             object_classes: list[str] = []
@@ -180,8 +166,7 @@ class FlextTapLdapLdifStreams:
             return files
 
         def _normalize_object_classes(
-            self,
-            object_classes: t.ContainerValue,
+            self, object_classes: t.ContainerValue
         ) -> list[str]:
             if isinstance(object_classes, str):
                 return [object_classes]
@@ -196,7 +181,6 @@ class FlextTapLdapLdifStreams:
                 return
             if not isinstance(base_dn_raw, str) or not base_dn_raw:
                 return
-
             port_raw = self.config.get("ldap_port", c.TapLdap.DEFAULT_PORT)
             port = (
                 int(port_raw)
@@ -226,30 +210,22 @@ class FlextTapLdapLdifStreams:
                 if parsed_attributes:
                     attributes = parsed_attributes
             page_size_raw = self.config.get(
-                "ldap_page_size",
-                c.TapLdap.DEFAULT_PAGE_SIZE,
+                "ldap_page_size", c.TapLdap.DEFAULT_PAGE_SIZE
             )
             page_size = (
                 int(page_size_raw)
                 if isinstance(page_size_raw, int | str)
                 else c.TapLdap.DEFAULT_PAGE_SIZE
             )
-
             try:
                 server = Server(
-                    host_raw,
-                    port=port,
-                    use_ssl=use_ssl,
-                    get_info="NO_INFO",
+                    host_raw, port=port, use_ssl=use_ssl, get_info="NO_INFO"
                 )
                 connection = Connection(
-                    server=server,
-                    user=bind_dn,
-                    password=bind_password,
-                    auto_bind=True,
+                    server=server, user=bind_dn, password=bind_password, auto_bind=True
                 )
                 try:
-                    search_result = connection.extend.standard.paged_search(  # type: ignore[attr-defined]
+                    search_result = connection.extend.standard.paged_search(
                         search_base=base_dn_raw,
                         search_filter=search_filter,
                         search_scope=SUBTREE,
@@ -269,7 +245,7 @@ class FlextTapLdapLdifStreams:
                             continue
                         object_classes_raw = attrs_raw.get("objectClass")
                         object_classes = self._normalize_object_classes(
-                            object_classes_raw,
+                            object_classes_raw
                         )
                         yield {
                             "dn": dn_raw,
@@ -291,13 +267,11 @@ class FlextTapLdapLdifStreams:
                 self.logger.exception("Error traversing LDAP directory")
 
         def _process_ldif_file(
-            self,
-            ldif_file: str,
+            self, ldif_file: str
         ) -> Iterable[dict[str, t.ContainerValue]]:
             """Process single LDIF file using flext-ldif."""
             self.logger.info("Processing LDIF file: %s", ldif_file)
             try:
-                # Read file and delegate to flext-ldif
                 content = Path(ldif_file).read_text(encoding="utf-8")
                 result = self._ldif_api.parse(content)
                 if result.is_success and result.value:
@@ -306,7 +280,7 @@ class FlextTapLdapLdifStreams:
                             yield self._convert_entry_to_record(entry)
                 else:
                     self.logger.error(
-                        f"Failed to parse LDIF file {ldif_file}: {result.error}",
+                        f"Failed to parse LDIF file {ldif_file}: {result.error}"
                     )
             except (
                 ValueError,
@@ -327,16 +301,12 @@ class FlextTapLdapLdifStreams:
         @override
         def __init__(self, tap: Tap) -> None:
             """Initialize LDIF analysis stream with library delegation."""
-            # Set required attributes BEFORE calling super().__init__()
             self.name = "ldif_analysis"
             self.path = "/ldif_analysis"
-            # Store tap reference
             self.tap = tap
-            # Initialize flext-ldif API for analysis
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
             self._logger_instance: FlextLogger | None = None
-            # Define schema
             schema = typing_utils.PropertiesList(
                 typing_utils.Property(
                     "analysis_id",
@@ -369,19 +339,16 @@ class FlextTapLdapLdifStreams:
             return self._logger_instance
 
         def get_records(
-            self,
-            context: Mapping[str, object] | None = None,
+            self, context: Mapping[str, object] | None = None
         ) -> Iterator[dict[str, t.ContainerValue]]:
             """Get analysis records using flext-ldif analysis capabilities."""
             _ = context
             self.logger.info("Generating LDIF analysis using flext-ldif library")
-            # Get LDIF files from config
             raw_files = self.config.get("ldif_files", [])
             ldif_files: list[t.ContainerValue] = (
                 list(raw_files) if u.Guards.is_list(raw_files) else []
             )
             ldif_directory = self.config.get("ldif_directory")
-            # Delegate ALL analysis to flext-ldif library
             try:
                 total_entries = 0
                 entry_types: dict[str, int] = {}
@@ -400,32 +367,27 @@ class FlextTapLdapLdifStreams:
                                 total_entries += total_count_value
                             case _:
                                 pass
-                        # Merge counts
                         raw_entry_types = stats.get("entry_types", {})
                         if isinstance(raw_entry_types, Mapping):
                             for entry_type, count in raw_entry_types.items():
                                 if isinstance(entry_type, str) and isinstance(
-                                    count,
-                                    int | str,
+                                    count, int | str
                                 ):
                                     entry_types[entry_type] = entry_types.get(
-                                        entry_type,
-                                        0,
+                                        entry_type, 0
                                     ) + int(count)
                         raw_object_classes = stats.get("object_classes", {})
                         if isinstance(raw_object_classes, Mapping):
                             for obj_class, count in raw_object_classes.items():
                                 if isinstance(obj_class, str) and isinstance(
-                                    count,
-                                    int | str,
+                                    count, int | str
                                 ):
                                     object_classes[obj_class] = object_classes.get(
-                                        obj_class,
-                                        0,
+                                        obj_class, 0
                                     ) + int(count)
                 elif ldif_directory:
                     for discovered_file in self._discover_ldif_files(
-                        str(ldif_directory),
+                        str(ldif_directory)
                     ):
                         stats = self._analyze_ldif_file(str(discovered_file))
                         total_count = stats.get("total_entries", 0)
@@ -438,23 +400,19 @@ class FlextTapLdapLdifStreams:
                         if isinstance(raw_entry_types, Mapping):
                             for entry_type, count in raw_entry_types.items():
                                 if isinstance(entry_type, str) and isinstance(
-                                    count,
-                                    int | str,
+                                    count, int | str
                                 ):
                                     entry_types[entry_type] = entry_types.get(
-                                        entry_type,
-                                        0,
+                                        entry_type, 0
                                     ) + int(count)
                         raw_object_classes = stats.get("object_classes", {})
                         if isinstance(raw_object_classes, Mapping):
                             for obj_class, count in raw_object_classes.items():
                                 if isinstance(obj_class, str) and isinstance(
-                                    count,
-                                    int | str,
+                                    count, int | str
                                 ):
                                     object_classes[obj_class] = object_classes.get(
-                                        obj_class,
-                                        0,
+                                        obj_class, 0
                                     ) + int(count)
                 yield {
                     "analysis_id": "ldif_summary",
@@ -472,7 +430,6 @@ class FlextTapLdapLdifStreams:
                 ImportError,
             ):
                 self.logger.exception("LDIF analysis error")
-                # Return empty stats on error
                 yield {
                     "analysis_id": "ldif_summary_error",
                     "total_entries": 0,
@@ -480,18 +437,13 @@ class FlextTapLdapLdifStreams:
                     "object_classes": {},
                 }
 
-        def _analyze_ldif_file(
-            self,
-            ldif_file: str,
-        ) -> dict[str, t.ContainerValue]:
+        def _analyze_ldif_file(self, ldif_file: str) -> dict[str, t.ContainerValue]:
             """Analyze single LDIF file using flext-ldif."""
             self.logger.info("Analyzing LDIF file: %s", ldif_file)
             try:
-                # Read file and delegate analysis to flext-ldif
                 content = Path(ldif_file).read_text(encoding="utf-8")
                 result = self._ldif_api.parse(content)
                 if result.is_success and result.value:
-                    # Generate statistics from parsed entries
                     entry_types: dict[str, int] = {}
                     object_classes: dict[str, int] = {}
                     for entry in result.value:
@@ -499,10 +451,7 @@ class FlextTapLdapLdifStreams:
                             continue
                         if entry.attributes is None:
                             continue
-                        # Use library delegation for classification
-                        oc_list: list[str] = entry.attributes.get_values(
-                            "objectClass",
-                        )
+                        oc_list: list[str] = entry.attributes.get_values("objectClass")
                         oc_strs = [
                             str(oc_val) for oc_val in oc_list if oc_val is not None
                         ]
@@ -531,10 +480,7 @@ class FlextTapLdapLdifStreams:
                 self.logger.exception("Error analyzing LDIF file %s", ldif_file)
                 return {"total_entries": 0, "entry_types": {}, "object_classes": {}}
 
-        def _classify_entry_type(
-            self,
-            object_classes: list[str],
-        ) -> str:
+        def _classify_entry_type(self, object_classes: list[str]) -> str:
             """Classify entry type by simple objectClass heuristics."""
             lowered = {oc.lower() for oc in object_classes}
             if "inetorgperson" in lowered or "person" in lowered:
@@ -559,6 +505,4 @@ class FlextTapLdapLdifStreams:
             return files
 
 
-__all__ = [
-    "FlextTapLdapLdifStreams",
-]
+__all__ = ["FlextTapLdapLdifStreams"]

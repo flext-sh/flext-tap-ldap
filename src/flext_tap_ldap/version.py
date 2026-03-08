@@ -12,8 +12,6 @@ from __future__ import annotations
 from importlib.metadata import metadata
 
 _metadata = metadata("flext_tap_ldap")
-
-
 VERSION = FlextTapLdapVersion(
     version=_metadata["Version"],
     version_info=tuple(
@@ -27,8 +25,4 @@ VERSION = FlextTapLdapVersion(
     license_=_metadata["License"],
     url=_metadata.get("Home-Page", ""),
 )
-
-__all__ = [
-    "VERSION",
-    "FlextTapLdapVersion",
-]
+__all__ = ["VERSION", "FlextTapLdapVersion"]

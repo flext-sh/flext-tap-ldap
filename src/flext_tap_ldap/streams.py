@@ -26,8 +26,6 @@ from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.constants import c
 
 logger = FlextLogger(__name__)
-
-
 _STRICT_STR_ADAPTER = TypeAdapter(str, config=ConfigDict(strict=True))
 
 
@@ -57,7 +55,6 @@ def _parse_connection_config(raw_value: t.ContainerValue) -> _LdapConnectionConf
         parsed = _LdapConnectionConfig.model_validate(raw_value, strict=True)
     except ValidationError:
         parsed = _LdapConnectionConfig()
-
     return _LdapConnectionConfig(
         host=str(parsed.host),
         port=_coerce_positive_int(parsed.port, c.TapLdap.DEFAULT_PORT),
@@ -65,8 +62,7 @@ def _parse_connection_config(raw_value: t.ContainerValue) -> _LdapConnectionConf
         bind_password=_coerce_optional_string(parsed.bind_password),
         use_ssl=bool(parsed.use_ssl),
         timeout_seconds=_coerce_positive_int(
-            parsed.timeout_seconds,
-            c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
+            parsed.timeout_seconds, c.TapLdap.DEFAULT_SEARCH_TIMEOUT
         ),
         base_dn=str(parsed.base_dn),
     )
@@ -172,19 +168,14 @@ class FlextTapLdapStreams:
             self.client: LDAPClient | None = None
             super().__init__(tap, name=name, schema=schema)
             self.tap = tap
-
-            # Create LDAP client for directory operations
             self._create_ldap_client()
 
         @override
         def get_records(
-            self,
-            context: Mapping[str, object] | None = None,
+            self, context: Mapping[str, object] | None = None
         ) -> Iterable[t.ContainerValue]:
             """Get records from LDAP - base implementation."""
-            # Use context parameter to avoid unused argument warning
-            _context = context  # Acknowledge the parameter
-            # This is a base implementation that yields empty records
+            _context = context
             return []
 
         def _create_ldap_client(self) -> None:
@@ -201,8 +192,7 @@ class FlextTapLdapStreams:
                     use_ssl=connection_config.use_ssl,
                     timeout=connection_config.timeout_seconds,
                     page_size=_coerce_positive_int(
-                        page_size_raw,
-                        c.TapLdap.DEFAULT_PAGE_SIZE,
+                        page_size_raw, c.TapLdap.DEFAULT_PAGE_SIZE
                     ),
                 )
             except (
@@ -218,9 +208,7 @@ class FlextTapLdapStreams:
                 logger.warning("Failed to create LDAP client: %s", err_msg)
                 self.client = None
 
-        def _get_fallback_data(
-            self,
-        ) -> list[dict[str, object]]:
+        def _get_fallback_data(self) -> list[dict[str, object]]:
             """Get fallback data for testing/demo purposes."""
             return []
 
@@ -234,14 +222,11 @@ class FlextTapLdapStreams:
             if not self.client:
                 logger.warning("LDAP client not available, using fallback data")
                 return self._get_fallback_data()
-
             try:
-                # Use base DN from config if not specified
                 if base_dn is None:
                     raw_conn = self.config.get("connection", {})
                     connection_config = _parse_connection_config(raw_conn)
                     base_dn = connection_config.base_dn
-
                 results: list[dict[str, object]] = [
                     dict(entry)
                     for entry in self.client.search(
@@ -251,13 +236,10 @@ class FlextTapLdapStreams:
                         scope="SUBTREE",
                     )
                 ]
-
                 if not results:
                     logger.info("No results found for filter: %s", search_filter)
                     return self._get_fallback_data()
-
                 return results
-
             except (
                 ValueError,
                 TypeError,
@@ -291,14 +273,14 @@ class FlextTapLdapStreams:
                     t_meltano.Singer.Typing.Property(
                         "objectClass",
                         t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType,
+                            t_meltano.Singer.Typing.StringType
                         ),
                         description="Object Classes",
                     ),
                     t_meltano.Singer.Typing.Property(
                         "memberOf",
                         t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType,
+                            t_meltano.Singer.Typing.StringType
                         ),
                         description="Group Memberships",
                     ),
@@ -309,27 +291,19 @@ class FlextTapLdapStreams:
                     ),
                 ).to_dict()
             )
-
             super().__init__(tap, name=name, schema=schema)
             self.primary_keys = ["dn"]
-            # Set replication via Singer SDK's built-in mechanism
             self.forced_replication_method = "INCREMENTAL"
             self.replication_key = "modifyTimestamp"
 
         @override
         def get_records(
-            self,
-            context: Mapping[str, object] | None = None,
+            self, context: Mapping[str, object] | None = None
         ) -> Iterable[t.ContainerValue]:
             """Get user records from LDAP."""
-            # Use context parameter to avoid unused argument warning
-            _context = context  # Acknowledge the parameter
+            _context = context
             logger.info("Extracting LDAP users")
-
-            raw_filter = self.config.get(
-                "user_filter",
-                "(objectClass=inetOrgPerson)",
-            )
+            raw_filter = self.config.get("user_filter", "(objectClass=inetOrgPerson)")
             user_filter = (
                 _coerce_optional_string(raw_filter) or "(objectClass=inetOrgPerson)"
             )
@@ -355,21 +329,16 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-
             results: list[dict[str, object]] = self._search_ldap(
-                user_filter,
-                attributes=user_attributes,
+                user_filter, attributes=user_attributes
             )
-
             yield from results
 
         @override
-        def _get_fallback_data(
-            self,
-        ) -> list[dict[str, object]]:
+        def _get_fallback_data(self) -> list[dict[str, object]]:
             """Get fallback user data."""
             return [
-                dict(FlextTapLdapStreams.FallbackDataFactory.create_test_user_record()),
+                dict(FlextTapLdapStreams.FallbackDataFactory.create_test_user_record())
             ]
 
     class GroupsStream(LDAPBaseStream):
@@ -392,21 +361,21 @@ class FlextTapLdapStreams:
                     t_meltano.Singer.Typing.Property(
                         "member",
                         t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType,
+                            t_meltano.Singer.Typing.StringType
                         ),
                         description="Group Members",
                     ),
                     t_meltano.Singer.Typing.Property(
                         "uniqueMember",
                         t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType,
+                            t_meltano.Singer.Typing.StringType
                         ),
                         description="Unique Members",
                     ),
                     t_meltano.Singer.Typing.Property(
                         "objectClass",
                         t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType,
+                            t_meltano.Singer.Typing.StringType
                         ),
                         description="Object Classes",
                     ),
@@ -417,26 +386,20 @@ class FlextTapLdapStreams:
                     ),
                 ).to_dict()
             )
-
             super().__init__(tap, name=name, schema=schema)
             self.primary_keys = ["dn"]
-            # Set replication via Singer SDK's built-in mechanism
             self.forced_replication_method = "INCREMENTAL"
             self.replication_key = "modifyTimestamp"
 
         @override
         def get_records(
-            self,
-            context: Mapping[str, object] | None = None,
+            self, context: Mapping[str, object] | None = None
         ) -> Iterable[t.ContainerValue]:
             """Get group records from LDAP."""
-            # Use context parameter to avoid unused argument warning
-            _context = context  # Acknowledge the parameter
+            _context = context
             logger.info("Extracting LDAP groups")
-
             raw_group_filter = self.config.get(
-                "group_filter",
-                "(objectClass=groupOfNames)",
+                "group_filter", "(objectClass=groupOfNames)"
             )
             group_filter = (
                 _coerce_optional_string(raw_group_filter)
@@ -453,23 +416,16 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-
             results: list[dict[str, object]] = self._search_ldap(
-                group_filter,
-                attributes=group_attributes,
+                group_filter, attributes=group_attributes
             )
-
             yield from results
 
         @override
-        def _get_fallback_data(
-            self,
-        ) -> list[dict[str, object]]:
+        def _get_fallback_data(self) -> list[dict[str, object]]:
             """Get fallback group data."""
             return [
-                dict(
-                    FlextTapLdapStreams.FallbackDataFactory.create_test_group_record(),
-                ),
+                dict(FlextTapLdapStreams.FallbackDataFactory.create_test_group_record())
             ]
 
     class OrganizationalUnitsStream(LDAPBaseStream):
@@ -491,7 +447,7 @@ class FlextTapLdapStreams:
                     t_meltano.Singer.Typing.Property(
                         "objectClass",
                         t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType,
+                            t_meltano.Singer.Typing.StringType
                         ),
                         description="Object Classes",
                     ),
@@ -502,20 +458,16 @@ class FlextTapLdapStreams:
                     ),
                 ).to_dict()
             )
-
             super().__init__(tap, name=name, schema=schema)
             self.primary_keys = ["dn"]
 
         @override
         def get_records(
-            self,
-            context: Mapping[str, object] | None = None,
+            self, context: Mapping[str, object] | None = None
         ) -> Iterable[t.ContainerValue]:
             """Get organizational unit records from LDAP."""
-            # Use context parameter to avoid unused argument warning
-            _context = context  # Acknowledge the parameter
+            _context = context
             logger.info("Extracting LDAP organizational units")
-
             ou_filter = "(objectClass=organizationalUnit)"
             ou_attributes = [
                 "ou",
@@ -524,21 +476,16 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-
             results: list[dict[str, object]] = self._search_ldap(
-                ou_filter,
-                attributes=ou_attributes,
+                ou_filter, attributes=ou_attributes
             )
-
             yield from results
 
         @override
-        def _get_fallback_data(
-            self,
-        ) -> list[dict[str, object]]:
+        def _get_fallback_data(self) -> list[dict[str, object]]:
             """Get fallback organizational unit data."""
             return [
-                dict(FlextTapLdapStreams.FallbackDataFactory.create_test_ou_record()),
+                dict(FlextTapLdapStreams.FallbackDataFactory.create_test_ou_record())
             ]
 
     class SchemaStream(LDAPBaseStream):
@@ -555,28 +502,28 @@ class FlextTapLdapStreams:
                     t_meltano.Singer.Typing.Property(
                         "objectClass",
                         t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType,
+                            t_meltano.Singer.Typing.StringType
                         ),
                         description="Object Classes",
                     ),
                     t_meltano.Singer.Typing.Property(
                         "objectClasses",
                         t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType,
+                            t_meltano.Singer.Typing.StringType
                         ),
                         description="Available Object Classes",
                     ),
                     t_meltano.Singer.Typing.Property(
                         "attributeTypes",
                         t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType,
+                            t_meltano.Singer.Typing.StringType
                         ),
                         description="Available Attribute Types",
                     ),
                     t_meltano.Singer.Typing.Property(
                         "ldapSyntaxes",
                         t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType,
+                            t_meltano.Singer.Typing.StringType
                         ),
                         description="LDAP Syntaxes",
                     ),
@@ -587,20 +534,16 @@ class FlextTapLdapStreams:
                     ),
                 ).to_dict()
             )
-
             super().__init__(tap, name=name, schema=schema)
             self.primary_keys = ["dn"]
 
         @override
         def get_records(
-            self,
-            context: Mapping[str, object] | None = None,
+            self, context: Mapping[str, object] | None = None
         ) -> Iterable[t.ContainerValue]:
             """Get schema records from LDAP."""
-            # Use context parameter to avoid unused argument warning
-            _context = context  # Acknowledge the parameter
+            _context = context
             logger.info("Extracting LDAP schema")
-
             schema_filter = "(objectClass=schema)"
             schema_attributes = [
                 "cn",
@@ -610,21 +553,16 @@ class FlextTapLdapStreams:
                 "ldapSyntaxes",
                 "modifyTimestamp",
             ]
-
-            # Schema is usually at root DSE or cn=schema
             base_dns = ["", "cn=schema"]
-
             for base_dn in base_dns:
                 try:
                     results = self._search_ldap(
-                        schema_filter,
-                        base_dn=base_dn,
-                        attributes=schema_attributes,
+                        schema_filter, base_dn=base_dn, attributes=schema_attributes
                     )
                     if results:
                         for record in results:
                             yield record
-                        return  # Found schema, no need to try other base DNs
+                        return
                 except (
                     ValueError,
                     TypeError,
@@ -635,25 +573,19 @@ class FlextTapLdapStreams:
                     ImportError,
                 ) as e:
                     logger.debug(
-                        "Schema search failed for base DN '%s': %s",
-                        base_dn,
-                        e,
+                        "Schema search failed for base DN '%s': %s", base_dn, e
                     )
                     continue
-
-            # If no schema found, yield fallback
             for record in self._get_fallback_data():
                 yield record
 
         @override
-        def _get_fallback_data(
-            self,
-        ) -> list[dict[str, object]]:
+        def _get_fallback_data(self) -> list[dict[str, object]]:
             """Get fallback schema data."""
             return [
                 dict(
-                    FlextTapLdapStreams.FallbackDataFactory.create_test_schema_record(),
-                ),
+                    FlextTapLdapStreams.FallbackDataFactory.create_test_schema_record()
+                )
             ]
 
     class CustomStream(LDAPBaseStream):
@@ -664,70 +596,52 @@ class FlextTapLdapStreams:
 
         @override
         def __init__(
-            self,
-            tap: Tap,
-            params: FlextTapLdapStreams.CustomStreamParams,
+            self, tap: Tap, params: FlextTapLdapStreams.CustomStreamParams
         ) -> None:
             """Initialize custom stream with parameters."""
             self.params = params
 
             def _map_prop(
-                name: str,
-                definition: t.ContainerValue,
+                name: str, definition: t.ContainerValue
             ) -> t_meltano.Singer.Typing.Property[t.JsonValue]:
                 parsed_definition = _parse_property_definition(definition)
                 prop_type = parsed_definition.type
                 prop_desc = parsed_definition.description or f"{name} field"
-
                 if prop_type == "integer":
                     return t_meltano.Singer.Typing.Property(
-                        name,
-                        t_meltano.Singer.Typing.IntegerType,
-                        description=prop_desc,
+                        name, t_meltano.Singer.Typing.IntegerType, description=prop_desc
                     )
                 if prop_type == "number":
                     return t_meltano.Singer.Typing.Property(
-                        name,
-                        t_meltano.Singer.Typing.NumberType,
-                        description=prop_desc,
+                        name, t_meltano.Singer.Typing.NumberType, description=prop_desc
                     )
                 if prop_type == "boolean":
                     return t_meltano.Singer.Typing.Property(
-                        name,
-                        t_meltano.Singer.Typing.BooleanType,
-                        description=prop_desc,
+                        name, t_meltano.Singer.Typing.BooleanType, description=prop_desc
                     )
                 if prop_type == "array":
                     return t_meltano.Singer.Typing.Property(
                         name,
                         t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType,
+                            t_meltano.Singer.Typing.StringType
                         ),
                         description=prop_desc,
                     )
-
                 return t_meltano.Singer.Typing.Property(
-                    name,
-                    t_meltano.Singer.Typing.StringType,
-                    description=prop_desc,
+                    name, t_meltano.Singer.Typing.StringType, description=prop_desc
                 )
 
-            # Build schema from parameters
             if params.schema_properties:
                 schema_props: list[t_meltano.Singer.Typing.Property[t.JsonValue]] = (
-                    list(
-                        starmap(_map_prop, params.schema_properties.items()),
-                    )
+                    list(starmap(_map_prop, params.schema_properties.items()))
                 )
-                # Always include DN property even for custom streams
                 dn_prop = t_meltano.Singer.Typing.Property(
                     "dn",
                     t_meltano.Singer.Typing.StringType,
                     description="Distinguished Name",
                 )
                 schema = t_meltano.Singer.Typing.PropertiesList(
-                    dn_prop,
-                    *schema_props,
+                    dn_prop, *schema_props
                 ).to_dict()
             else:
                 schema = t_meltano.Singer.Typing.PropertiesList(
@@ -739,7 +653,7 @@ class FlextTapLdapStreams:
                     t_meltano.Singer.Typing.Property(
                         "objectClass",
                         t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType,
+                            t_meltano.Singer.Typing.StringType
                         ),
                         description="Object Classes",
                     ),
@@ -749,43 +663,34 @@ class FlextTapLdapStreams:
                         description="Modification Time",
                     ),
                 ).to_dict()
-
             super().__init__(tap, name=params.name, schema=schema)
             self.primary_keys = params.primary_keys or ["dn"]
             self.replication_key = params.replication_key
 
         @override
         def get_records(
-            self,
-            context: Mapping[str, object] | None = None,
+            self, context: Mapping[str, object] | None = None
         ) -> Iterable[t.ContainerValue]:
             """Get records using custom filter."""
-            # Use context parameter to avoid unused argument warning
-            _context = context  # Acknowledge the parameter
+            _context = context
             logger.info(
-                f"Extracting LDAP records for custom stream: {self.params.name}",
+                f"Extracting LDAP records for custom stream: {self.params.name}"
             )
-
             results: list[dict[str, object]] = self._search_ldap(
-                self.params.search_filter,
+                self.params.search_filter
             )
-
             yield from results
 
         @override
-        def _get_fallback_data(
-            self,
-        ) -> list[dict[str, object]]:
+        def _get_fallback_data(self) -> list[dict[str, object]]:
             """Get fallback data for custom stream."""
             return [
                 {
                     "dn": f"cn=test-{self.params.name},dc=test,dc=com",
                     "objectClass": ["top", "testObject"],
                     "modifyTimestamp": "2024-01-01T12:00:00Z",
-                },
+                }
             ]
 
 
-__all__ = [
-    "FlextTapLdapStreams",
-]
+__all__ = ["FlextTapLdapStreams"]

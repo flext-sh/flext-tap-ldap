@@ -44,8 +44,8 @@ def sample_catalog() -> dict[str, t.ContainerValue]:
                     },
                 },
                 "metadata": [],
-            },
-        ],
+            }
+        ]
     }
 
 
@@ -54,18 +54,11 @@ def ldap_container(project_root: Path) -> Iterator[None]:
     """Start and manage LDAP test container using FlextTestsDocker."""
     compose_file = project_root / "docker-compose.yml"
     logger.info("Starting OpenLDAP container...")
-
-    # Use FlextTestsDocker for unified Docker management
     docker_manager = FlextTestsDocker(workspace_root=project_root)
-
-    # Start containers using FlextTestsDocker
     start_result = docker_manager.compose_up(compose_file=str(compose_file))
-
     if start_result.is_failure:
         logger.error(f"Failed to start OpenLDAP container: {start_result.error}")
         raise RuntimeError(f"Container startup failed: {start_result.error}")
-
-    # Wait for LDAP to be ready
     max_retries = 30
     for i in range(max_retries):
         try:
@@ -86,7 +79,6 @@ def ldap_container(project_root: Path) -> Iterator[None]:
             logger.info("Waiting for LDAP container to be ready...")
             time.sleep(2)
     yield
-    # Cleanup
     logger.info("Stopping OpenLDAP container...")
     stop_result = docker_manager.compose_down(compose_file=str(compose_file))
     if stop_result.is_failure:

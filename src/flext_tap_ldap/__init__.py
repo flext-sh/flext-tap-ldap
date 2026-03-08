@@ -35,8 +35,6 @@ if TYPE_CHECKING:
         FlextTapLdapUtilities,
         FlextTapLdapUtilities as u,
     )
-
-# Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "FlextTapLdapClient": ("flext_tap_ldap.client", "FlextTapLdapClient"),
     "FlextTapLdapConstants": ("flext_tap_ldap.constants", "FlextTapLdapConstants"),
@@ -60,7 +58,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "t": ("flext_tap_ldap.typings", "FlextTapLdapTypes"),
     "u": ("flext_tap_ldap.utilities", "FlextTapLdapUtilities"),
 }
-
 __all__ = [
     "FlextTapLdapClient",
     "FlextTapLdapConstants",
@@ -83,7 +80,7 @@ __all__ = [
 ]
 
 
-def __getattr__(name: str) -> Any:  # noqa: ANN401
+def __getattr__(name: str) -> Any:
     """Lazy-load module attributes on first access (PEP 562)."""
     return lazy_getattr(name, _LAZY_IMPORTS, globals(), __name__)
 
