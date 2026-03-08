@@ -21,7 +21,7 @@ from flext_ldap import (
     FlextLdapSettings,
     m,
 )
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel
 
 from flext_tap_ldap.constants import c
 
@@ -34,29 +34,6 @@ class FlextTapLdapClient:
     Consolidates LDAP client functionality following FlextTapLdap[Module] pattern
     with nested LDAPClient and LDAPClientConfig classes.
     """
-
-    class LDAPClientConfig(BaseModel):
-        """Parameter object for LDAP client configuration.
-
-        Implements Parameter Object Pattern to reduce parameter count
-        and improve maintainability
-        """
-
-        model_config = ConfigDict(extra="forbid")
-
-        host: str = Field(description="LDAP host")
-        port: int = Field(default=c.TapLdap.DEFAULT_PORT, description="LDAP port")
-        bind_dn: str | None = Field(default=None, description="Bind DN")
-        password: str | None = Field(default=None, description="Bind password")
-        use_ssl: bool = Field(default=False, description="Use SSL")
-        timeout: int = Field(
-            default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
-            description="Timeout",
-        )
-        page_size: int = Field(
-            default=c.TapLdap.DEFAULT_PAGE_SIZE,
-            description="Page size",
-        )
 
     class LDAPClient:
         """Testing convenience LDAP client wrapper.

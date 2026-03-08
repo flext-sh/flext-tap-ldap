@@ -20,35 +20,12 @@ from flext_meltano import (
     FlextMeltanoTap as Tap,
     t as t_meltano,
 )
-from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
+from pydantic import ConfigDict, TypeAdapter, ValidationError
 
 from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.constants import c
 
 logger = FlextLogger(__name__)
-
-
-class _LdapConnectionConfig(BaseModel):
-    """Validated LDAP connection configuration payload."""
-
-    model_config = ConfigDict(extra="allow")
-
-    host: str = "localhost"
-    port: int = c.TapLdap.DEFAULT_PORT
-    bind_dn: str | None = None
-    bind_password: str | None = None
-    use_ssl: bool = False
-    timeout_seconds: int = c.TapLdap.DEFAULT_SEARCH_TIMEOUT
-    base_dn: str = ""
-
-
-class _CustomPropertyDefinition(BaseModel):
-    """Validated custom stream property definition."""
-
-    model_config = ConfigDict(extra="allow")
-
-    type: str = "string"
-    description: str = ""
 
 
 _STRICT_STR_ADAPTER = TypeAdapter(str, config=ConfigDict(strict=True))
@@ -180,24 +157,6 @@ class FlextTapLdapStreams:
                 ],
                 "modifyTimestamp": "2024-01-01T12:00:00Z",
             }
-
-    class CustomStreamParams(BaseModel):
-        """Parameter object for CustomStream initialization.
-
-        Implements Parameter Object Pattern to reduce parameter count
-        and improve maintainability
-        """
-
-        model_config = ConfigDict(extra="forbid")
-
-        name: str = Field(description="Stream name")
-        search_filter: str = Field(description="LDAP search filter")
-        schema_properties: Mapping[str, t.ContainerValue] | None = Field(
-            default=None,
-            description="Schema properties",
-        )
-        primary_keys: list[str] | None = Field(default=None, description="Primary keys")
-        replication_key: str | None = Field(default=None, description="Replication key")
 
     class LDAPBaseStream(Stream):
         """Base class for LDAP streams with flext-ldap integration."""

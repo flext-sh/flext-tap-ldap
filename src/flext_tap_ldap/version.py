@@ -11,24 +11,7 @@ from __future__ import annotations
 
 from importlib.metadata import metadata
 
-from pydantic import BaseModel, ConfigDict, Field
-
 _metadata = metadata("flext_tap_ldap")
-
-
-class FlextTapLdapVersion(BaseModel):
-    """Version information container."""
-
-    model_config = ConfigDict(frozen=True, extra="forbid")
-
-    version: str = Field(description="Version string")
-    version_info: tuple[int | str, ...] = Field(description="Version tuple")
-    title: str = Field(description="Project title")
-    description: str = Field(description="Project description")
-    author: str = Field(description="Author name")
-    author_email: str = Field(description="Author email")
-    license_: str = Field(description="License identifier")
-    url: str = Field(description="Project URL")
 
 
 VERSION = FlextTapLdapVersion(
