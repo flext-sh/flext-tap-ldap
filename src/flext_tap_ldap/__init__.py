@@ -35,13 +35,12 @@ if TYPE_CHECKING:
         FlextTapLdapUtilities,
         FlextTapLdapUtilities as u,
     )
+
+# Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "FlextTapLdapClient": ("flext_tap_ldap.client", "FlextTapLdapClient"),
     "FlextTapLdapConstants": ("flext_tap_ldap.constants", "FlextTapLdapConstants"),
-    "FlextTapLdapLdifStreams": (
-        "flext_tap_ldap.ldif_streams",
-        "FlextTapLdapLdifStreams",
-    ),
+    "FlextTapLdapLdifStreams": ("flext_tap_ldap.ldif_streams", "FlextTapLdapLdifStreams"),
     "FlextTapLdapModels": ("flext_tap_ldap.models", "FlextTapLdapModels"),
     "FlextTapLdapProcessor": ("flext_tap_ldap.processor", "FlextTapLdapProcessor"),
     "FlextTapLdapProtocols": ("flext_tap_ldap.protocols", "FlextTapLdapProtocols"),
@@ -58,6 +57,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "t": ("flext_tap_ldap.typings", "FlextTapLdapTypes"),
     "u": ("flext_tap_ldap.utilities", "FlextTapLdapUtilities"),
 }
+
 __all__ = [
     "FlextTapLdapClient",
     "FlextTapLdapConstants",
@@ -80,7 +80,7 @@ __all__ = [
 ]
 
 
-def __getattr__(name: str) -> Any:
+def __getattr__(name: str) -> Any:  # noqa: ANN401  # JUSTIFIED: Ruff (any-type) with PEP 562 dynamic module exports — https://docs.astral.sh/ruff/rules/any-type/
     """Lazy-load module attributes on first access (PEP 562)."""
     return lazy_getattr(name, _LAZY_IMPORTS, globals(), __name__)
 
