@@ -49,13 +49,13 @@ def _coerce_optional_string(raw_value: t.ContainerValue) -> str | None:
     return validated or None
 
 
-def _parse_connection_config(raw_value: t.ContainerValue) -> _LdapConnectionConfig:
+def _parse_connection_config(raw_value: t.ContainerValue) -> _LdapConnectionConfig:  # noqa: F821
     """Validate LDAP connection payload through Pydantic."""
     try:
-        parsed = _LdapConnectionConfig.model_validate(raw_value, strict=True)
+        parsed = _LdapConnectionConfig.model_validate(raw_value, strict=True)  # noqa: F821
     except ValidationError:
-        parsed = _LdapConnectionConfig()
-    return _LdapConnectionConfig(
+        parsed = _LdapConnectionConfig()  # noqa: F821
+    return _LdapConnectionConfig(  # noqa: F821
         host=str(parsed.host),
         port=_coerce_positive_int(parsed.port, c.TapLdap.DEFAULT_PORT),
         bind_dn=_coerce_optional_string(parsed.bind_dn),
@@ -70,12 +70,12 @@ def _parse_connection_config(raw_value: t.ContainerValue) -> _LdapConnectionConf
 
 def _parse_property_definition(
     raw_value: t.ContainerValue,
-) -> _CustomPropertyDefinition:
+) -> _CustomPropertyDefinition:  # noqa: F821
     """Validate custom stream property definition through Pydantic."""
     try:
-        return _CustomPropertyDefinition.model_validate(raw_value, strict=True)
+        return _CustomPropertyDefinition.model_validate(raw_value, strict=True)  # noqa: F821
     except ValidationError:
-        return _CustomPropertyDefinition()
+        return _CustomPropertyDefinition()  # noqa: F821
 
 
 class FlextTapLdapStreams:

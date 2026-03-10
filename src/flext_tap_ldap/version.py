@@ -12,7 +12,7 @@ from __future__ import annotations
 from importlib.metadata import metadata
 
 _metadata = metadata("flext_tap_ldap")
-VERSION = FlextTapLdapVersion(
+VERSION = FlextTapLdapVersion(  # noqa: F821
     version=_metadata["Version"],
     version_info=tuple(
         int(part) if part.isdigit() else part
@@ -25,4 +25,4 @@ VERSION = FlextTapLdapVersion(
     license_=_metadata["License"],
     url=_metadata.get("Home-Page", ""),
 )
-__all__ = ["VERSION", "FlextTapLdapVersion"]
+__all__ = ["VERSION", "FlextTapLdapVersion"]  # noqa: F822

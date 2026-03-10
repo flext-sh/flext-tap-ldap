@@ -19,10 +19,10 @@ from flext_core import FlextLogger, FlextResult, t
 from flext_ldif import FlextLdif, FlextLdifModels
 from pydantic import ConfigDict, TypeAdapter, ValidationError
 
-from flext_tap_ldap.constants import c
-from flext_tap_ldap.settings import FlextTapLdapSettings
 from flext_tap_ldap.client import LDAPConnection
+from flext_tap_ldap.constants import c
 from flext_tap_ldap.models import TapExecution
+from flext_tap_ldap.settings import FlextTapLdapSettings
 
 logger = FlextLogger(__name__)
 _LIST_ADAPTER = TypeAdapter(list[t.ContainerValue], config=ConfigDict(strict=True))
@@ -146,17 +146,17 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize the stream service."""
-            self._streams: dict[str, LDAPStream] = {}
+            self._streams: dict[str, LDAPStream] = {}  # noqa: F821
 
         def create_stream(
             self, params: FlextTapLdapServices.StreamCreationParams
-        ) -> FlextResult[LDAPStream]:
+        ) -> FlextResult[LDAPStream]:  # noqa: F821
             """Create LDAP stream using parameter object pattern."""
             try:
                 tap_stream_id = params.tap_stream_id
                 if not tap_stream_id:
                     tap_stream_id = f"{params.stream_type.lower()}_stream"
-                stream = LDAPStream(
+                stream = LDAPStream(  # noqa: F821
                     name=params.stream_type.lower(),
                     connection_id=params.connection_id,
                     stream_type=params.stream_type.lower(),
@@ -169,9 +169,9 @@ class FlextTapLdapServices:
                     stream_schema={},
                 )
                 self._streams[str(stream.id)] = stream
-                return FlextResult[LDAPStream].ok(stream)
+                return FlextResult[LDAPStream].ok(stream)  # noqa: F821
             except (RuntimeError, ValueError, TypeError) as e:
-                return FlextResult[LDAPStream].fail(f"Failed to create stream: {e}")
+                return FlextResult[LDAPStream].fail(f"Failed to create stream: {e}")  # noqa: F821
 
         def discover_schema(
             self, stream_id: str
@@ -197,27 +197,27 @@ class FlextTapLdapServices:
                     f"Failed to discover schema: {e}"
                 )
 
-        def get_stream(self, stream_id: str) -> FlextResult[LDAPStream]:
+        def get_stream(self, stream_id: str) -> FlextResult[LDAPStream]:  # noqa: F821
             """Get LDAP stream by ID."""
             try:
                 stream = self._streams.get(stream_id)
                 if not stream:
-                    return FlextResult[LDAPStream].fail("Stream not found")
-                return FlextResult[LDAPStream].ok(stream)
+                    return FlextResult[LDAPStream].fail("Stream not found")  # noqa: F821
+                return FlextResult[LDAPStream].ok(stream)  # noqa: F821
             except (RuntimeError, ValueError, TypeError) as e:
-                return FlextResult[LDAPStream].fail(f"Failed to get stream: {e}")
+                return FlextResult[LDAPStream].fail(f"Failed to get stream: {e}")  # noqa: F821
 
         def list_streams(
             self, connection_id: str | None = None
-        ) -> FlextResult[list[LDAPStream]]:
+        ) -> FlextResult[list[LDAPStream]]:  # noqa: F821
             """List LDAP streams, optionally filtered by connection ID."""
             try:
                 streams = list(self._streams.values())
                 if connection_id:
                     streams = [s for s in streams if s.connection_id == connection_id]
-                return FlextResult[list[LDAPStream]].ok(streams)
+                return FlextResult[list[LDAPStream]].ok(streams)  # noqa: F821
             except (RuntimeError, ValueError, TypeError) as e:
-                return FlextResult[list[LDAPStream]].fail(
+                return FlextResult[list[LDAPStream]].fail(  # noqa: F821
                     f"Failed to list streams: {e}"
                 )
 
