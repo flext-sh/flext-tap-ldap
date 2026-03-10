@@ -21,6 +21,8 @@ from pydantic import ConfigDict, TypeAdapter, ValidationError
 
 from flext_tap_ldap.constants import c
 from flext_tap_ldap.settings import FlextTapLdapSettings
+from flext_tap_ldap.client import LDAPConnection
+from flext_tap_ldap.models import TapExecution
 
 logger = FlextLogger(__name__)
 _LIST_ADAPTER = TypeAdapter(list[t.ContainerValue], config=ConfigDict(strict=True))
