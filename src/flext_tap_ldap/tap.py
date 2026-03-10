@@ -10,10 +10,10 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import ClassVar, override
+from typing import ClassVar
 
 from flext_core import FlextLogger
-from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
+from flext_meltano import FlextMeltanoTap as Tap
 from pydantic import ConfigDict, TypeAdapter, ValidationError
 
 from flext_tap_ldap.constants import c
@@ -24,8 +24,14 @@ from flext_tap_ldap.typings import t
 
 logger = FlextLogger(__name__)
 _LIST_ADAPTER = TypeAdapter(list[t.ContainerValue], config=ConfigDict(strict=True))
-_MAP_ADAPTER = TypeAdapter(t.ConfigurationMapping, config=ConfigDict(strict=True))
+_MAP_ADAPTER = TypeAdapter(dict[str, t.ContainerValue], config=ConfigDict(strict=True))
 _STR_ADAPTER = TypeAdapter(str, config=ConfigDict(strict=True))
+
+type TapLdapStream = (
+    FlextTapLdapStreams.LDAPBaseStream
+    | FlextTapLdapLdifStreams.LdifStream
+    | FlextTapLdapLdifStreams.LdifAnalysisStream
+)
 
 
 def _as_list(value: t.ContainerValue) -> list[t.ContainerValue] | None:
@@ -114,14 +120,13 @@ class FlextTapLdapTap(Tap):
         },
     }
 
-    @override
-    def discover_streams(self) -> list[Stream]:
+    def discover_streams(self) -> list[TapLdapStream]:
         """Discover available streams.
 
         Discovers standard LDAP streams (users, groups, organizational units, schema)
         and optionally LDIF processing streams and custom streams based on configuration.
         """
-        streams: list[Stream] = []
+        streams: list[TapLdapStream] = []
         streams.extend([
             FlextTapLdapStreams.UsersStream(self),
             FlextTapLdapStreams.GroupsStream(self),
@@ -155,7 +160,7 @@ class FlextTapLdapTap(Tap):
                 name=_as_str(raw_name) or "",
                 search_filter=_as_str(raw_filter) or "",
                 schema_properties={str(k): v for k, v in schema_props.items()},
-                primary_keys=primary_keys,
+                primary_keys=primary_keys or ["dn"],
                 replication_key=_as_str(raw_rk),
             )
             stream = FlextTapLdapStreams.CustomStream(tap=self, params=params)

@@ -4,23 +4,18 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Iterator, Mapping
 from pathlib import Path
-from typing import ClassVar, override
+from typing import TYPE_CHECKING, ClassVar, override
 
 from flext_core.loggings import FlextLogger
 from flext_ldap import FlextLdapConnection
 from flext_ldif import FlextLdif, m
-from flext_meltano import (
-    FlextMeltanoStream as Stream,
-    FlextMeltanoTap as Tap,
-    t as t_meltano,
-)
-from ldap3 import SUBTREE, Connection, Server
+from flext_meltano import FlextMeltanoStream as Stream
 from pydantic import BaseModel
 
-from flext_tap_ldap.constants import c
 from flext_tap_ldap.typings import t
 
-typing_utils = t_meltano.Singer.Typing
+if TYPE_CHECKING:
+    from flext_tap_ldap.tap import FlextTapLdapTap
 
 
 class _Guards:
@@ -63,7 +58,7 @@ class FlextTapLdapLdifStreams:
         primary_keys: ClassVar[list[str]] = ["dn"]
 
         @override
-        def __init__(self, tap: Tap) -> None:
+        def __init__(self, tap: FlextTapLdapTap) -> None:
             """Initialize LDIF stream with library delegation."""
             self.name = "ldif_entries"
             self.path = "/ldif_entries"
@@ -71,27 +66,26 @@ class FlextTapLdapLdifStreams:
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
             self._logger_instance: FlextLogger | None = None
-            schema = typing_utils.PropertiesList(
-                typing_utils.Property(
-                    "dn", typing_utils.StringType, description="Distinguished Name"
-                ),
-                typing_utils.Property(
-                    "entry_type",
-                    typing_utils.StringType,
-                    description="Entry type classification",
-                ),
-                typing_utils.Property(
-                    "object_classes",
-                    typing_utils.ArrayType(typing_utils.StringType),
-                    description="Object classes",
-                ),
-                typing_utils.Property(
-                    "attributes",
-                    typing_utils.ObjectType(),
-                    description="Entry attributes",
-                ),
-            ).to_dict()
-            super().__init__(tap, name=self.name, schema=schema)
+            schema: dict[str, t.ContainerValue] = {
+                "type": "object",
+                "properties": {
+                    "dn": {"type": "string", "description": "Distinguished Name"},
+                    "entry_type": {
+                        "type": "string",
+                        "description": "Entry type classification",
+                    },
+                    "object_classes": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Object classes",
+                    },
+                    "attributes": {
+                        "type": "object",
+                        "description": "Entry attributes",
+                    },
+                },
+            }
+            Stream.__init__(self, tap, name=self.name, schema=schema)
 
         @property
         def logger(self) -> FlextLogger:
@@ -139,12 +133,11 @@ class FlextTapLdapLdifStreams:
             attrs = flext_entry.attributes
             object_classes: list[str] = []
             entry_type = "other"
+            entry_attrs: Mapping[str, t.ContainerValue] = {}
             if attrs is not None:
                 object_classes = attrs.get_values("objectClass")
                 entry_type = self._classify_entry_type(object_classes)
-                entry_attrs: Mapping[str, t.ContainerValue] = attrs.attributes
-            else:
-                entry_attrs: Mapping[str, t.ContainerValue] = {}
+                entry_attrs = attrs.attributes
             return {
                 "dn": dn_value,
                 "entry_type": entry_type,
@@ -174,97 +167,17 @@ class FlextTapLdapLdifStreams:
                 return [str(value) for value in object_classes if value is not None]
             return []
 
-        def _process_ldap_directory(self) -> Iterable[dict[str, t.ContainerValue]]:
+        def _process_ldap_directory(self) -> Iterator[dict[str, t.ContainerValue]]:
             host_raw = self.config.get("ldap_host")
             base_dn_raw = self.config.get("ldap_base_dn")
             if not isinstance(host_raw, str) or not host_raw:
-                return
+                return iter(())
             if not isinstance(base_dn_raw, str) or not base_dn_raw:
-                return
-            port_raw = self.config.get("ldap_port", c.TapLdap.DEFAULT_PORT)
-            port = (
-                int(port_raw)
-                if isinstance(port_raw, int | str)
-                else c.TapLdap.DEFAULT_PORT
+                return iter(())
+            self.logger.warning(
+                "LDAP directory traversal is disabled; provide LDIF files or ldif_directory"
             )
-            use_ssl_raw = self.config.get("ldap_use_ssl", False)
-            use_ssl = bool(use_ssl_raw)
-            bind_dn_raw = self.config.get("ldap_bind_dn")
-            bind_password_raw = self.config.get("ldap_bind_password")
-            bind_dn = bind_dn_raw if isinstance(bind_dn_raw, str) else None
-            bind_password = (
-                bind_password_raw if isinstance(bind_password_raw, str) else None
-            )
-            search_filter_raw = self.config.get("ldap_search_filter", "(objectClass=*)")
-            search_filter = (
-                search_filter_raw
-                if isinstance(search_filter_raw, str)
-                else "(objectClass=*)"
-            )
-            attributes_raw = self.config.get("ldap_attributes")
-            attributes = ["*"]
-            if isinstance(attributes_raw, list):
-                parsed_attributes = [
-                    str(item) for item in attributes_raw if item is not None
-                ]
-                if parsed_attributes:
-                    attributes = parsed_attributes
-            page_size_raw = self.config.get(
-                "ldap_page_size", c.TapLdap.DEFAULT_PAGE_SIZE
-            )
-            page_size = (
-                int(page_size_raw)
-                if isinstance(page_size_raw, int | str)
-                else c.TapLdap.DEFAULT_PAGE_SIZE
-            )
-            try:
-                server = Server(
-                    host_raw, port=port, use_ssl=use_ssl, get_info="NO_INFO"
-                )
-                connection = Connection(
-                    server=server, user=bind_dn, password=bind_password, auto_bind=True
-                )
-                try:
-                    search_result = connection.extend.standard.paged_search(
-                        search_base=base_dn_raw,
-                        search_filter=search_filter,
-                        search_scope=SUBTREE,
-                        attributes=attributes,
-                        paged_size=page_size,
-                        generator=True,
-                    )
-                    for entry in search_result:
-                        if not u.is_dict_like(entry):
-                            continue
-                        entry_type_raw = entry.get("type")
-                        if entry_type_raw != "searchResEntry":
-                            continue
-                        dn_raw = entry.get("dn")
-                        attrs_raw = entry.get("attributes")
-                        if not isinstance(dn_raw, str) or not u.is_dict_like(attrs_raw):
-                            continue
-                        object_classes_raw = attrs_raw.get("objectClass")
-                        object_classes = self._normalize_object_classes(
-                            object_classes_raw
-                        )
-                        yield {
-                            "dn": dn_raw,
-                            "entry_type": self._classify_entry_type(object_classes),
-                            "object_classes": object_classes,
-                            "attributes": dict(attrs_raw),
-                        }
-                finally:
-                    connection.unbind()
-            except (
-                ValueError,
-                TypeError,
-                KeyError,
-                AttributeError,
-                OSError,
-                RuntimeError,
-                ImportError,
-            ):
-                self.logger.exception("Error traversing LDAP directory")
+            return iter(())
 
         def _process_ldif_file(
             self, ldif_file: str
@@ -299,7 +212,7 @@ class FlextTapLdapLdifStreams:
         primary_keys: ClassVar[list[str]] = ["analysis_id"]
 
         @override
-        def __init__(self, tap: Tap) -> None:
+        def __init__(self, tap: FlextTapLdapTap) -> None:
             """Initialize LDIF analysis stream with library delegation."""
             self.name = "ldif_analysis"
             self.path = "/ldif_analysis"
@@ -307,29 +220,28 @@ class FlextTapLdapLdifStreams:
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
             self._logger_instance: FlextLogger | None = None
-            schema = typing_utils.PropertiesList(
-                typing_utils.Property(
-                    "analysis_id",
-                    typing_utils.StringType,
-                    description="Analysis identifier",
-                ),
-                typing_utils.Property(
-                    "total_entries",
-                    typing_utils.IntegerType,
-                    description="Total number of entries",
-                ),
-                typing_utils.Property(
-                    "entry_types",
-                    typing_utils.ObjectType(),
-                    description="Count by entry type",
-                ),
-                typing_utils.Property(
-                    "object_classes",
-                    typing_utils.ObjectType(),
-                    description="Count by object class",
-                ),
-            ).to_dict()
-            super().__init__(tap, name=self.name, schema=schema)
+            schema: dict[str, t.ContainerValue] = {
+                "type": "object",
+                "properties": {
+                    "analysis_id": {
+                        "type": "string",
+                        "description": "Analysis identifier",
+                    },
+                    "total_entries": {
+                        "type": "integer",
+                        "description": "Total number of entries",
+                    },
+                    "entry_types": {
+                        "type": "object",
+                        "description": "Count by entry type",
+                    },
+                    "object_classes": {
+                        "type": "object",
+                        "description": "Count by object class",
+                    },
+                },
+            }
+            Stream.__init__(self, tap, name=self.name, schema=schema)
 
         @property
         def logger(self) -> FlextLogger:
@@ -370,18 +282,14 @@ class FlextTapLdapLdifStreams:
                         raw_entry_types = stats.get("entry_types", {})
                         if isinstance(raw_entry_types, Mapping):
                             for entry_type, count in raw_entry_types.items():
-                                if isinstance(entry_type, str) and isinstance(
-                                    count, int | str
-                                ):
+                                if isinstance(count, int | str):
                                     entry_types[entry_type] = entry_types.get(
                                         entry_type, 0
                                     ) + int(count)
                         raw_object_classes = stats.get("object_classes", {})
                         if isinstance(raw_object_classes, Mapping):
                             for obj_class, count in raw_object_classes.items():
-                                if isinstance(obj_class, str) and isinstance(
-                                    count, int | str
-                                ):
+                                if isinstance(count, int | str):
                                     object_classes[obj_class] = object_classes.get(
                                         obj_class, 0
                                     ) + int(count)
@@ -399,18 +307,14 @@ class FlextTapLdapLdifStreams:
                         raw_entry_types = stats.get("entry_types", {})
                         if isinstance(raw_entry_types, Mapping):
                             for entry_type, count in raw_entry_types.items():
-                                if isinstance(entry_type, str) and isinstance(
-                                    count, int | str
-                                ):
+                                if isinstance(count, int | str):
                                     entry_types[entry_type] = entry_types.get(
                                         entry_type, 0
                                     ) + int(count)
                         raw_object_classes = stats.get("object_classes", {})
                         if isinstance(raw_object_classes, Mapping):
                             for obj_class, count in raw_object_classes.items():
-                                if isinstance(obj_class, str) and isinstance(
-                                    count, int | str
-                                ):
+                                if isinstance(count, int | str):
                                     object_classes[obj_class] = object_classes.get(
                                         obj_class, 0
                                     ) + int(count)
@@ -452,9 +356,7 @@ class FlextTapLdapLdifStreams:
                         if entry.attributes is None:
                             continue
                         oc_list: list[str] = entry.attributes.get_values("objectClass")
-                        oc_strs = [
-                            str(oc_val) for oc_val in oc_list if oc_val is not None
-                        ]
+                        oc_strs = [str(oc_val) for oc_val in oc_list]
                         entry_type = self._classify_entry_type(oc_strs)
                         entry_types[entry_type] = entry_types.get(entry_type, 0) + 1
                         for oc in oc_strs:

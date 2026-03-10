@@ -11,8 +11,22 @@ from __future__ import annotations
 
 from importlib.metadata import metadata
 
+from pydantic import BaseModel, Field
+
+
+class FlextTapLdapVersion(BaseModel):
+    version: str = Field(min_length=1)
+    version_info: tuple[int | str, ...]
+    title: str = ""
+    description: str = ""
+    author: str = ""
+    author_email: str = ""
+    license_: str = ""
+    url: str = ""
+
+
 _metadata = metadata("flext_tap_ldap")
-VERSION = FlextTapLdapVersion(  # noqa: F821
+VERSION = FlextTapLdapVersion(
     version=_metadata["Version"],
     version_info=tuple(
         int(part) if part.isdigit() else part
@@ -25,4 +39,4 @@ VERSION = FlextTapLdapVersion(  # noqa: F821
     license_=_metadata["License"],
     url=_metadata.get("Home-Page", ""),
 )
-__all__ = ["VERSION", "FlextTapLdapVersion"]  # noqa: F822
+__all__ = ["VERSION", "FlextTapLdapVersion"]

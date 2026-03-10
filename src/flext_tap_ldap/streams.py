@@ -11,19 +11,26 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
-from itertools import starmap
-from typing import ClassVar, override
+from typing import TYPE_CHECKING, ClassVar, override
 
 from flext_core import FlextLogger, t
 from flext_meltano import (
     FlextMeltanoStream as Stream,
-    FlextMeltanoTap as Tap,
-    t as t_meltano,
 )
-from pydantic import ConfigDict, TypeAdapter, ValidationError
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    TypeAdapter,
+    ValidationError,
+    model_validator,
+)
 
 from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.constants import c
+
+if TYPE_CHECKING:
+    from flext_tap_ldap.tap import FlextTapLdapTap
 
 logger = FlextLogger(__name__)
 _STRICT_STR_ADAPTER = TypeAdapter(str, config=ConfigDict(strict=True))
@@ -49,13 +56,49 @@ def _coerce_optional_string(raw_value: t.ContainerValue) -> str | None:
     return validated or None
 
 
-def _parse_connection_config(raw_value: t.ContainerValue) -> _LdapConnectionConfig:  # noqa: F821
+class _LdapConnectionConfig(BaseModel):
+    host: str = ""
+    port: int = c.TapLdap.DEFAULT_PORT
+    bind_dn: str | None = None
+    bind_password: str | None = None
+    use_ssl: bool = False
+    timeout_seconds: int = c.TapLdap.DEFAULT_SEARCH_TIMEOUT
+    base_dn: str = ""
+
+
+class _CustomPropertyDefinition(BaseModel):
+    type: str = "string"
+    description: str | None = None
+
+
+class _CustomStreamParams(BaseModel):
+    name: str
+    search_filter: str
+    schema_properties: dict[str, t.ContainerValue] = Field(default_factory=dict)
+    primary_keys: list[str] = Field(default_factory=lambda: ["dn"])
+    replication_key: str | None = None
+
+    @model_validator(mode="after")
+    def validate_required_fields(self) -> _CustomStreamParams:
+        if not self.name:
+            msg = "Stream name is required"
+            raise ValueError(msg)
+        if not self.search_filter:
+            msg = "Search filter is required"
+            raise ValueError(msg)
+        if self.primary_keys == []:
+            msg = "Primary keys cannot be empty list"
+            raise ValueError(msg)
+        return self
+
+
+def _parse_connection_config(raw_value: t.ContainerValue) -> _LdapConnectionConfig:
     """Validate LDAP connection payload through Pydantic."""
     try:
-        parsed = _LdapConnectionConfig.model_validate(raw_value, strict=True)  # noqa: F821
+        parsed = _LdapConnectionConfig.model_validate(raw_value, strict=True)
     except ValidationError:
-        parsed = _LdapConnectionConfig()  # noqa: F821
-    return _LdapConnectionConfig(  # noqa: F821
+        parsed = _LdapConnectionConfig()
+    return _LdapConnectionConfig(
         host=str(parsed.host),
         port=_coerce_positive_int(parsed.port, c.TapLdap.DEFAULT_PORT),
         bind_dn=_coerce_optional_string(parsed.bind_dn),
@@ -70,12 +113,12 @@ def _parse_connection_config(raw_value: t.ContainerValue) -> _LdapConnectionConf
 
 def _parse_property_definition(
     raw_value: t.ContainerValue,
-) -> _CustomPropertyDefinition:  # noqa: F821
+) -> _CustomPropertyDefinition:
     """Validate custom stream property definition through Pydantic."""
     try:
-        return _CustomPropertyDefinition.model_validate(raw_value, strict=True)  # noqa: F821
+        return _CustomPropertyDefinition.model_validate(raw_value, strict=True)
     except ValidationError:
-        return _CustomPropertyDefinition()  # noqa: F821
+        return _CustomPropertyDefinition()
 
 
 class FlextTapLdapStreams:
@@ -154,23 +197,24 @@ class FlextTapLdapStreams:
                 "modifyTimestamp": "2024-01-01T12:00:00Z",
             }
 
+    CustomStreamParams = _CustomStreamParams
+
     class LDAPBaseStream(Stream):
         """Base class for LDAP streams with flext-ldap integration."""
 
         @override
         def __init__(
             self,
-            tap: Tap,
+            tap: FlextTapLdapTap,
             name: str | None = None,
             schema: dict[str, t.ContainerValue] | None = None,
         ) -> None:
             """Initialize the LDAP stream."""
             self.client: LDAPClient | None = None
-            super().__init__(tap, name=name, schema=schema)
+            Stream.__init__(self, tap, name=name, schema=schema)
             self.tap = tap
             self._create_ldap_client()
 
-        @override
         def get_records(
             self, context: Mapping[str, object] | None = None
         ) -> Iterable[t.ContainerValue]:
@@ -208,7 +252,7 @@ class FlextTapLdapStreams:
                 logger.warning("Failed to create LDAP client: %s", err_msg)
                 self.client = None
 
-        def _get_fallback_data(self) -> list[dict[str, object]]:
+        def _get_fallback_data(self) -> list[dict[str, t.ContainerValue]]:
             """Get fallback data for testing/demo purposes."""
             return []
 
@@ -217,7 +261,7 @@ class FlextTapLdapStreams:
             search_filter: str,
             base_dn: str | None = None,
             attributes: list[str] | None = None,
-        ) -> list[dict[str, object]]:
+        ) -> list[dict[str, t.ContainerValue]]:
             """Search LDAP directory with error handling."""
             if not self.client:
                 logger.warning("LDAP client not available, using fallback data")
@@ -227,7 +271,7 @@ class FlextTapLdapStreams:
                     raw_conn = self.config.get("connection", {})
                     connection_config = _parse_connection_config(raw_conn)
                     base_dn = connection_config.base_dn
-                results: list[dict[str, object]] = [
+                results: list[dict[str, t.ContainerValue]] = [
                     dict(entry)
                     for entry in self.client.search(
                         base_dn=base_dn or "",
@@ -260,41 +304,31 @@ class FlextTapLdapStreams:
         replication_key: ClassVar[str] = "modifyTimestamp"
 
         @override
-        def __init__(self, tap: Tap) -> None:
+        def __init__(self, tap: FlextTapLdapTap) -> None:
             """Initialize users stream."""
             name = "users"
-            schema: dict[str, t.ContainerValue] = (
-                t_meltano.Singer.Typing.PropertiesList(
-                    t_meltano.Singer.Typing.Property(
-                        "dn",
-                        t_meltano.Singer.Typing.StringType,
-                        description="Distinguished Name",
-                    ),
-                    t_meltano.Singer.Typing.Property(
-                        "objectClass",
-                        t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType
-                        ),
-                        description="Object Classes",
-                    ),
-                    t_meltano.Singer.Typing.Property(
-                        "memberOf",
-                        t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType
-                        ),
-                        description="Group Memberships",
-                    ),
-                    t_meltano.Singer.Typing.Property(
-                        "modifyTimestamp",
-                        t_meltano.Singer.Typing.StringType,
-                        description="Modification Time",
-                    ),
-                ).to_dict()
-            )
+            schema: dict[str, t.ContainerValue] = {
+                "type": "object",
+                "properties": {
+                    "dn": {"type": "string", "description": "Distinguished Name"},
+                    "objectClass": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Object Classes",
+                    },
+                    "memberOf": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Group Memberships",
+                    },
+                    "modifyTimestamp": {
+                        "type": "string",
+                        "description": "Modification Time",
+                    },
+                },
+            }
             super().__init__(tap, name=name, schema=schema)
-            self.primary_keys = ["dn"]
             self.forced_replication_method = "INCREMENTAL"
-            self.replication_key = "modifyTimestamp"
 
         @override
         def get_records(
@@ -329,13 +363,13 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-            results: list[dict[str, object]] = self._search_ldap(
+            results: list[dict[str, t.ContainerValue]] = self._search_ldap(
                 user_filter, attributes=user_attributes
             )
             yield from results
 
         @override
-        def _get_fallback_data(self) -> list[dict[str, object]]:
+        def _get_fallback_data(self) -> list[dict[str, t.ContainerValue]]:
             """Get fallback user data."""
             return [
                 dict(FlextTapLdapStreams.FallbackDataFactory.create_test_user_record())
@@ -348,48 +382,36 @@ class FlextTapLdapStreams:
         replication_key: ClassVar[str] = "modifyTimestamp"
 
         @override
-        def __init__(self, tap: Tap) -> None:
+        def __init__(self, tap: FlextTapLdapTap) -> None:
             """Initialize groups stream."""
             name = "groups"
-            schema: dict[str, t.ContainerValue] = (
-                t_meltano.Singer.Typing.PropertiesList(
-                    t_meltano.Singer.Typing.Property(
-                        "dn",
-                        t_meltano.Singer.Typing.StringType,
-                        description="Distinguished Name",
-                    ),
-                    t_meltano.Singer.Typing.Property(
-                        "member",
-                        t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType
-                        ),
-                        description="Group Members",
-                    ),
-                    t_meltano.Singer.Typing.Property(
-                        "uniqueMember",
-                        t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType
-                        ),
-                        description="Unique Members",
-                    ),
-                    t_meltano.Singer.Typing.Property(
-                        "objectClass",
-                        t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType
-                        ),
-                        description="Object Classes",
-                    ),
-                    t_meltano.Singer.Typing.Property(
-                        "modifyTimestamp",
-                        t_meltano.Singer.Typing.StringType,
-                        description="Modification Time",
-                    ),
-                ).to_dict()
-            )
+            schema: dict[str, t.ContainerValue] = {
+                "type": "object",
+                "properties": {
+                    "dn": {"type": "string", "description": "Distinguished Name"},
+                    "member": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Group Members",
+                    },
+                    "uniqueMember": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Unique Members",
+                    },
+                    "objectClass": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Object Classes",
+                    },
+                    "modifyTimestamp": {
+                        "type": "string",
+                        "description": "Modification Time",
+                    },
+                },
+            }
             super().__init__(tap, name=name, schema=schema)
-            self.primary_keys = ["dn"]
             self.forced_replication_method = "INCREMENTAL"
-            self.replication_key = "modifyTimestamp"
 
         @override
         def get_records(
@@ -416,13 +438,13 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-            results: list[dict[str, object]] = self._search_ldap(
+            results: list[dict[str, t.ContainerValue]] = self._search_ldap(
                 group_filter, attributes=group_attributes
             )
             yield from results
 
         @override
-        def _get_fallback_data(self) -> list[dict[str, object]]:
+        def _get_fallback_data(self) -> list[dict[str, t.ContainerValue]]:
             """Get fallback group data."""
             return [
                 dict(FlextTapLdapStreams.FallbackDataFactory.create_test_group_record())
@@ -434,32 +456,25 @@ class FlextTapLdapStreams:
         primary_keys: ClassVar[list[str]] = ["dn"]
 
         @override
-        def __init__(self, tap: Tap) -> None:
+        def __init__(self, tap: FlextTapLdapTap) -> None:
             """Initialize organizational units stream."""
             name = "organizational_units"
-            schema: dict[str, t.ContainerValue] = (
-                t_meltano.Singer.Typing.PropertiesList(
-                    t_meltano.Singer.Typing.Property(
-                        "dn",
-                        t_meltano.Singer.Typing.StringType,
-                        description="Distinguished Name",
-                    ),
-                    t_meltano.Singer.Typing.Property(
-                        "objectClass",
-                        t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType
-                        ),
-                        description="Object Classes",
-                    ),
-                    t_meltano.Singer.Typing.Property(
-                        "modifyTimestamp",
-                        t_meltano.Singer.Typing.StringType,
-                        description="Modification Time",
-                    ),
-                ).to_dict()
-            )
+            schema: dict[str, t.ContainerValue] = {
+                "type": "object",
+                "properties": {
+                    "dn": {"type": "string", "description": "Distinguished Name"},
+                    "objectClass": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Object Classes",
+                    },
+                    "modifyTimestamp": {
+                        "type": "string",
+                        "description": "Modification Time",
+                    },
+                },
+            }
             super().__init__(tap, name=name, schema=schema)
-            self.primary_keys = ["dn"]
 
         @override
         def get_records(
@@ -476,13 +491,13 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-            results: list[dict[str, object]] = self._search_ldap(
+            results: list[dict[str, t.ContainerValue]] = self._search_ldap(
                 ou_filter, attributes=ou_attributes
             )
             yield from results
 
         @override
-        def _get_fallback_data(self) -> list[dict[str, object]]:
+        def _get_fallback_data(self) -> list[dict[str, t.ContainerValue]]:
             """Get fallback organizational unit data."""
             return [
                 dict(FlextTapLdapStreams.FallbackDataFactory.create_test_ou_record())
@@ -494,48 +509,39 @@ class FlextTapLdapStreams:
         primary_keys: ClassVar[list[str]] = ["dn"]
 
         @override
-        def __init__(self, tap: Tap) -> None:
+        def __init__(self, tap: FlextTapLdapTap) -> None:
             """Initialize schema stream."""
             name = "schema"
-            schema: dict[str, t.ContainerValue] = (
-                t_meltano.Singer.Typing.PropertiesList(
-                    t_meltano.Singer.Typing.Property(
-                        "objectClass",
-                        t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType
-                        ),
-                        description="Object Classes",
-                    ),
-                    t_meltano.Singer.Typing.Property(
-                        "objectClasses",
-                        t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType
-                        ),
-                        description="Available Object Classes",
-                    ),
-                    t_meltano.Singer.Typing.Property(
-                        "attributeTypes",
-                        t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType
-                        ),
-                        description="Available Attribute Types",
-                    ),
-                    t_meltano.Singer.Typing.Property(
-                        "ldapSyntaxes",
-                        t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType
-                        ),
-                        description="LDAP Syntaxes",
-                    ),
-                    t_meltano.Singer.Typing.Property(
-                        "modifyTimestamp",
-                        t_meltano.Singer.Typing.StringType,
-                        description="Modification Time",
-                    ),
-                ).to_dict()
-            )
+            schema: dict[str, t.ContainerValue] = {
+                "type": "object",
+                "properties": {
+                    "objectClass": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Object Classes",
+                    },
+                    "objectClasses": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Available Object Classes",
+                    },
+                    "attributeTypes": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Available Attribute Types",
+                    },
+                    "ldapSyntaxes": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "LDAP Syntaxes",
+                    },
+                    "modifyTimestamp": {
+                        "type": "string",
+                        "description": "Modification Time",
+                    },
+                },
+            }
             super().__init__(tap, name=name, schema=schema)
-            self.primary_keys = ["dn"]
 
         @override
         def get_records(
@@ -580,7 +586,7 @@ class FlextTapLdapStreams:
                 yield record
 
         @override
-        def _get_fallback_data(self) -> list[dict[str, object]]:
+        def _get_fallback_data(self) -> list[dict[str, t.ContainerValue]]:
             """Get fallback schema data."""
             return [
                 dict(
@@ -591,81 +597,78 @@ class FlextTapLdapStreams:
     class CustomStream(LDAPBaseStream):
         """Custom LDAP stream with configurable filter and schema."""
 
-        primary_keys: ClassVar[list[str]] = ["dn"]
-        replication_key: ClassVar[str | None] = None
+        _default_primary_keys: ClassVar[list[str]] = ["dn"]
 
         @override
         def __init__(
-            self, tap: Tap, params: FlextTapLdapStreams.CustomStreamParams
+            self, tap: FlextTapLdapTap, params: FlextTapLdapStreams.CustomStreamParams
         ) -> None:
             """Initialize custom stream with parameters."""
             self.params = params
 
             def _map_prop(
                 name: str, definition: t.ContainerValue
-            ) -> t_meltano.Singer.Typing.Property[t.JsonValue]:
+            ) -> dict[str, t.ContainerValue]:
                 parsed_definition = _parse_property_definition(definition)
                 prop_type = parsed_definition.type
                 prop_desc = parsed_definition.description or f"{name} field"
                 if prop_type == "integer":
-                    return t_meltano.Singer.Typing.Property(
-                        name, t_meltano.Singer.Typing.IntegerType, description=prop_desc
-                    )
+                    return {"type": "integer", "description": prop_desc}
                 if prop_type == "number":
-                    return t_meltano.Singer.Typing.Property(
-                        name, t_meltano.Singer.Typing.NumberType, description=prop_desc
-                    )
+                    return {"type": "number", "description": prop_desc}
                 if prop_type == "boolean":
-                    return t_meltano.Singer.Typing.Property(
-                        name, t_meltano.Singer.Typing.BooleanType, description=prop_desc
-                    )
+                    return {"type": "boolean", "description": prop_desc}
                 if prop_type == "array":
-                    return t_meltano.Singer.Typing.Property(
-                        name,
-                        t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType
-                        ),
-                        description=prop_desc,
-                    )
-                return t_meltano.Singer.Typing.Property(
-                    name, t_meltano.Singer.Typing.StringType, description=prop_desc
-                )
+                    return {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": prop_desc,
+                    }
+                return {"type": "string", "description": prop_desc}
 
             if params.schema_properties:
-                schema_props: list[t_meltano.Singer.Typing.Property[t.JsonValue]] = (
-                    list(starmap(_map_prop, params.schema_properties.items()))
-                )
-                dn_prop = t_meltano.Singer.Typing.Property(
-                    "dn",
-                    t_meltano.Singer.Typing.StringType,
-                    description="Distinguished Name",
-                )
-                schema = t_meltano.Singer.Typing.PropertiesList(
-                    dn_prop, *schema_props
-                ).to_dict()
+                dynamic_properties: dict[str, dict[str, t.ContainerValue]] = {
+                    key: _map_prop(key, value)
+                    for key, value in params.schema_properties.items()
+                }
+                schema: dict[str, t.ContainerValue] = {
+                    "type": "object",
+                    "properties": {
+                        "dn": {
+                            "type": "string",
+                            "description": "Distinguished Name",
+                        },
+                        **dynamic_properties,
+                    },
+                }
             else:
-                schema = t_meltano.Singer.Typing.PropertiesList(
-                    t_meltano.Singer.Typing.Property(
-                        "dn",
-                        t_meltano.Singer.Typing.StringType,
-                        description="Distinguished Name",
-                    ),
-                    t_meltano.Singer.Typing.Property(
-                        "objectClass",
-                        t_meltano.Singer.Typing.ArrayType(
-                            t_meltano.Singer.Typing.StringType
-                        ),
-                        description="Object Classes",
-                    ),
-                    t_meltano.Singer.Typing.Property(
-                        "modifyTimestamp",
-                        t_meltano.Singer.Typing.StringType,
-                        description="Modification Time",
-                    ),
-                ).to_dict()
+                schema = {
+                    "type": "object",
+                    "properties": {
+                        "dn": {
+                            "type": "string",
+                            "description": "Distinguished Name",
+                        },
+                        "objectClass": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Object Classes",
+                        },
+                        "modifyTimestamp": {
+                            "type": "string",
+                            "description": "Modification Time",
+                        },
+                    },
+                }
             super().__init__(tap, name=params.name, schema=schema)
-            self.primary_keys = params.primary_keys or ["dn"]
-            self.replication_key = params.replication_key
+
+        @property
+        def primary_keys(self) -> list[str]:
+            return self.params.primary_keys or self._default_primary_keys
+
+        @property
+        def replication_key(self) -> str | None:
+            return self.params.replication_key
 
         @override
         def get_records(
@@ -676,13 +679,13 @@ class FlextTapLdapStreams:
             logger.info(
                 f"Extracting LDAP records for custom stream: {self.params.name}"
             )
-            results: list[dict[str, object]] = self._search_ldap(
+            results: list[dict[str, t.ContainerValue]] = self._search_ldap(
                 self.params.search_filter
             )
             yield from results
 
         @override
-        def _get_fallback_data(self) -> list[dict[str, object]]:
+        def _get_fallback_data(self) -> list[dict[str, t.ContainerValue]]:
             """Get fallback data for custom stream."""
             return [
                 {

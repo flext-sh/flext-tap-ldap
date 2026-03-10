@@ -11,6 +11,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from uuid import uuid4
 
 from flext_core import FlextModels
 from flext_ldap import FlextLdapModels
@@ -102,6 +103,49 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                     data["aggregate_id"] = data["stream_name"]
                 return data
 
+        class TapExecution(FlextModels.Entity):
+            id: str = Field(default_factory=lambda: uuid4().hex)
+            execution_id: str
+            connection_id: str
+            command: str
+            tap_status: str = "created"
+            config: t.ConfigurationMapping = Field(default_factory=dict)
+            catalog: t.ConfigurationMapping = Field(default_factory=dict)
+            state: t.ConfigurationMapping = Field(default_factory=dict)
+            started_at: datetime | None = None
+            completed_at: datetime | None = None
+            records_extracted: int = 0
+            streams_processed: int = 0
+            exit_code: int | None = None
+            stdout: str | None = None
+            stderr: str | None = None
+
+            def start_execution(self) -> None:
+                self.tap_status = "running"
+                self.started_at = datetime.now(UTC)
+
+            def complete_execution(
+                self,
+                exit_code: int,
+                stdout: str | None = None,
+                stderr: str | None = None,
+            ) -> None:
+                self.tap_status = "completed" if exit_code == 0 else "failed"
+                self.completed_at = datetime.now(UTC)
+                self.exit_code = exit_code
+                self.stdout = stdout
+                self.stderr = stderr
+
+            def cancel_execution(self) -> None:
+                self.tap_status = "cancelled"
+                self.completed_at = datetime.now(UTC)
+
+            def update_metrics(
+                self, records_extracted: int, streams_processed: int
+            ) -> None:
+                self.records_extracted = records_extracted
+                self.streams_processed = streams_processed
+
         class ConnectionTestedEvent(FlextModels.DomainEvent):
             """Event raised after connection test."""
 
@@ -183,8 +227,10 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
 # Runtime alias for simplified usage
 m: type[FlextTapLdapModels] = FlextTapLdapModels
+TapExecution = FlextTapLdapModels.TapLdap.TapExecution
 
 __all__ = [
     "FlextTapLdapModels",
+    "TapExecution",
     "m",
 ]

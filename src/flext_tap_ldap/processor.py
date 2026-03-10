@@ -511,8 +511,6 @@ class Transformer:
         transformed_entry.change_type = entry.change_type
         transformed_entry.controls = entry.controls.copy()
         for target_attr, mapping in schema_mappings.items():
-            if not isinstance(target_attr, str):
-                continue
             source_attr: str | None = None
             default_values: list[str] | None = None
             if isinstance(mapping, str):
@@ -552,16 +550,14 @@ class Transformer:
             mappings.update({
                 source_attr: target_attr
                 for source_attr, target_attr in raw_mappings.items()
-                if isinstance(source_attr, str) and isinstance(target_attr, str)
+                if isinstance(target_attr, str)
             })
         if mappings:
             transformed = self.apply_attribute_mappings(transformed, mappings)
         raw_value_mappings = self.transformation_rules.get("attribute_value_mappings")
         if isinstance(raw_value_mappings, Mapping):
             for attr_name, attr_value_map in raw_value_mappings.items():
-                if not isinstance(attr_name, str) or not isinstance(
-                    attr_value_map, Mapping
-                ):
+                if not isinstance(attr_value_map, Mapping):
                     continue
                 existing_values = transformed.attributes.get(attr_name)
                 if existing_values is None:
@@ -579,8 +575,6 @@ class Transformer:
         raw_add_attributes = self.transformation_rules.get("add_attributes")
         if isinstance(raw_add_attributes, Mapping):
             for attr_name, value in raw_add_attributes.items():
-                if not isinstance(attr_name, str):
-                    continue
                 if isinstance(value, list):
                     transformed.add_attribute(attr_name, [str(item) for item in value])
                 else:
