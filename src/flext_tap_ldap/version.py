@@ -15,6 +15,8 @@ from pydantic import BaseModel, Field
 
 
 class FlextTapLdapVersion(BaseModel):
+    """Version metadata for FLEXT Tap LDAP package."""
+
     version: str = Field(min_length=1)
     version_info: tuple[int | str, ...]
     title: str = ""

@@ -57,6 +57,8 @@ class FlextTapLdapServices:
     EXPECTED_DATA_COUNT = 3
 
     class LDAPConnectionParams(FlextModels.Value):
+        """Parameters for establishing LDAP connection."""
+
         host: str = Field(min_length=1)
         base_dn: str = Field(min_length=1)
         port: int = Field(default=c.TapLdap.DEFAULT_PORT, ge=1)
@@ -68,6 +70,8 @@ class FlextTapLdapServices:
         max_retries: int = Field(default=3, ge=0)
 
     class StreamCreationParams(FlextModels.Value):
+        """Parameters for creating LDAP data stream."""
+
         stream_type: str = Field(min_length=1)
         connection_id: str = Field(min_length=1)
         search_filter: str = Field(min_length=1)
@@ -78,6 +82,8 @@ class FlextTapLdapServices:
         replication_key: str | None = None
 
     class LDAPConnection(FlextModels.Entity):
+        """LDAP connection entity with test status and error tracking."""
+
         host: str = Field(min_length=1)
         port: int = Field(ge=1)
         bind_dn: str | None = None
@@ -89,6 +95,8 @@ class FlextTapLdapServices:
         last_error: str | None = None
 
     class LDAPStream(FlextModels.Entity):
+        """LDAP data stream with schema and replication configuration."""
+
         id: str = Field(default_factory=lambda: uuid4().hex)
         name: str = Field(min_length=1)
         connection_id: str = Field(min_length=1)
@@ -102,6 +110,7 @@ class FlextTapLdapServices:
         stream_schema: dict[str, t.ContainerValue] = Field(default_factory=dict)
 
         def update_schema(self, schema: Mapping[str, t.ContainerValue]) -> None:
+            """Update stream schema from mapping."""
             self.stream_schema = dict(schema)
 
     class LDAPConnectionService:
@@ -327,14 +336,17 @@ class FlextTapLdapServices:
         ) -> FlextResult[TapExecution]:
             """Create tap execution."""
             try:
+                config_adapter = TypeAdapter(t.ConfigurationMapping)
+                catalog_adapter = TypeAdapter(t.ConfigurationMapping)
+                state_adapter = TypeAdapter(t.ConfigurationMapping)
                 execution = TapExecution(
                     execution_id=f"exec_{uuid4().hex[:8]}",
                     connection_id=connection_id,
                     command=command,
                     tap_status="created",
-                    config=dict(config or {}),
-                    catalog=dict(catalog or {}),
-                    state=dict(state or {}),
+                    config=config_adapter.validate_python(config or {}),
+                    catalog=catalog_adapter.validate_python(catalog or {}),
+                    state=state_adapter.validate_python(state or {}),
                 )
                 self._executions[str(execution.id)] = execution
                 return FlextResult[TapExecution].ok(execution)

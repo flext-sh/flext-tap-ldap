@@ -664,10 +664,12 @@ class FlextTapLdapStreams:
 
         @property
         def primary_keys(self) -> list[str]:
+            """Get primary key columns for this stream."""
             return self.params.primary_keys or self._default_primary_keys
 
         @property
         def replication_key(self) -> str | None:
+            """Get replication key for incremental sync."""
             return self.params.replication_key
 
         @override

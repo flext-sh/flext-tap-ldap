@@ -104,6 +104,8 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 return data
 
         class TapExecution(FlextModels.Entity):
+            """Execution state and metrics for a tap run."""
+
             id: str = Field(default_factory=lambda: uuid4().hex)
             execution_id: str
             connection_id: str
@@ -121,6 +123,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             stderr: str | None = None
 
             def start_execution(self) -> None:
+                """Mark execution as running with current timestamp."""
                 self.tap_status = "running"
                 self.started_at = datetime.now(UTC)
 
@@ -130,6 +133,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 stdout: str | None = None,
                 stderr: str | None = None,
             ) -> None:
+                """Mark execution as completed with exit code and output."""
                 self.tap_status = "completed" if exit_code == 0 else "failed"
                 self.completed_at = datetime.now(UTC)
                 self.exit_code = exit_code
@@ -137,12 +141,14 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 self.stderr = stderr
 
             def cancel_execution(self) -> None:
+                """Mark execution as cancelled."""
                 self.tap_status = "cancelled"
                 self.completed_at = datetime.now(UTC)
 
             def update_metrics(
                 self, records_extracted: int, streams_processed: int
             ) -> None:
+                """Update extraction metrics with record and stream counts."""
                 self.records_extracted = records_extracted
                 self.streams_processed = streams_processed
 

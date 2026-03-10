@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 from flext_ldap import FlextLdapSettings
-from pydantic import ConfigDict, Field, SecretStr
+from pydantic import Field, SecretStr
+from pydantic_settings import SettingsConfigDict
 
 
 class FlextTapLdapSettings(FlextLdapSettings):
     """Tap LDAP runtime settings."""
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = SettingsConfigDict(extra="ignore")
 
     host: str = Field(default="localhost")
     port: int = Field(default=389, ge=1)
