@@ -1,11 +1,23 @@
-"""FLEXT Tap LDAP Configuration - Settings using flext-core patterns.
-
-Provides LDAP tap configuration management extending FlextSettings
-with Pydantic Settings for environment variable support and validation.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-"""
+"""Tap LDAP settings models."""
 
 from __future__ import annotations
+
+from flext_ldap import FlextLdapSettings
+from pydantic import ConfigDict, Field, SecretStr
+
+
+class FlextTapLdapSettings(FlextLdapSettings):
+    """Tap LDAP runtime settings."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    host: str = Field(default="localhost")
+    port: int = Field(default=389, ge=1)
+    bind_dn: str | None = Field(default=None)
+    bind_password: str | SecretStr | None = Field(default=None)
+    use_ssl: bool = Field(default=False)
+    timeout: int = Field(default=30, ge=1)
+    page_size: int = Field(default=1000, ge=1)
+
+
+__all__ = ["FlextTapLdapSettings"]

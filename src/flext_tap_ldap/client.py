@@ -35,6 +35,17 @@ class FlextTapLdapClient:
     with nested LDAPClient and LDAPClientConfig classes.
     """
 
+    class LDAPClientConfig(BaseModel):
+        """Parameter object for LDAP client initialization."""
+
+        host: str
+        port: int = c.TapLdap.DEFAULT_PORT
+        bind_dn: str | None = None
+        password: str | None = None
+        use_ssl: bool = False
+        timeout: int = c.TapLdap.DEFAULT_SEARCH_TIMEOUT
+        page_size: int = c.TapLdap.DEFAULT_PAGE_SIZE
+
     class LDAPClient:
         """Testing convenience LDAP client wrapper.
 
@@ -202,7 +213,7 @@ class FlextTapLdapClient:
                     return None
 
         def _convert_entry_to_dict(
-            self, entry_data: BaseModel | t.ConfigurationMapping | None
+            self, entry_data: t.ContainerValue | None
         ) -> dict[str, t.ContainerValue]:
             """Convert FlextLdapModels.Entry to dict[str, t.ContainerValue] format for testing convenience.
 
@@ -221,13 +232,9 @@ class FlextTapLdapClient:
                         entry_dict[attr_name] = attr_values
                 return entry_dict
             if entry_data:
-                if u.is_dict_like(entry_data):
-                    return dict(entry_data)
-                return (
-                    dict(entry_data)
-                    if getattr(entry_data, "__iter__", None) is not None
-                    else {}
-                )
+                if isinstance(entry_data, Mapping):
+                    return {str(key): value for key, value in entry_data.items()}
+                return {}
             return {}
 
         def _convert_scope_to_enum(self, scope: str) -> str:
@@ -438,8 +445,8 @@ class FlextTapLdapClient:
             for entries_returned, entry_data in enumerate(data_entries):
                 if size_limit > 0 and entries_returned >= size_limit:
                     break
-                narrowed_entry: BaseModel | t.ConfigurationMapping | None = None
-                if isinstance(entry_data, BaseModel) or u.is_dict_like(entry_data):
+                narrowed_entry: t.ContainerValue | None = None
+                if isinstance(entry_data, BaseModel):
                     narrowed_entry = entry_data
                 converted = self._convert_entry_to_dict(narrowed_entry)
                 entries.append(converted)
@@ -482,8 +489,7 @@ class LDAPClient(FlextTapLdapClient.LDAPClient):
     """LDAPClient - real inheritance from FlextTapLdapClient.LDAPClient."""
 
 
-class LDAPClientConfig(FlextTapLdapClient.LDAPClientConfig):
-    """LDAPClientConfig - real inheritance from FlextTapLdapClient.LDAPClientConfig."""
+LDAPClientConfig = FlextTapLdapClient.LDAPClientConfig
 
 
 __all__: list[str] = [
