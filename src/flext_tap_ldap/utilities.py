@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import ClassVar
 
-from flext_core import FlextContainer, FlextExceptions, FlextLogger, FlextResult
+from flext_core import FlextContainer, FlextExceptions, FlextLogger, r
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 
@@ -34,9 +34,9 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """Return the logger instance."""
             return self._logger
 
-        def execute(self) -> FlextResult[Mapping[str, str | list[str]]]:
+        def execute(self) -> r[Mapping[str, str | list[str]]]:
             """Execute tap LDAP utilities and return operational status."""
-            return FlextResult[Mapping[str, str | list[str]]].ok({
+            return r[Mapping[str, str | list[str]]].ok({
                 "status": "operational",
                 "service": "flext-tap-ldap-utilities",
                 "capabilities": [
@@ -106,13 +106,11 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 attributes: Mapping[str, list[str]],
                 stream_prefix: str = "ldap",
                 replication_method: str = "FULL_TABLE",
-            ) -> FlextResult[Mapping[str, str | int]]:
+            ) -> r[Mapping[str, str | int]]:
                 """Create stream info from LDAP entry."""
                 object_classes = attributes.get("objectClass", [])
                 if not object_classes:
-                    return FlextResult[Mapping[str, str | int]].fail(
-                        "Entry has no objectClass"
-                    )
+                    return r[Mapping[str, str | int]].fail("Entry has no objectClass")
                 primary_class = object_classes[0].lower()
                 stream_name = f"{stream_prefix}_{primary_class}"
                 stream_info: Mapping[str, str | int] = {
@@ -123,7 +121,7 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     "attribute_count": len(attributes),
                     "object_class": primary_class,
                 }
-                return FlextResult[Mapping[str, str | int]].ok(stream_info)
+                return r[Mapping[str, str | int]].ok(stream_info)
 
         class ConfigurationValidation:
             """LDAP tap configuration validation utilities."""
@@ -131,32 +129,32 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             @staticmethod
             def validate_ldap_config(
                 config: t.ConfigurationMapping,
-            ) -> FlextResult[t.ConfigurationMapping]:
+            ) -> r[t.ConfigurationMapping]:
                 """Validate LDAP configuration."""
                 config_map = dict(config)
                 required_fields = ["host", "base_dn"]
                 for field in required_fields:
                     if field not in config_map:
-                        return FlextResult[t.ConfigurationMapping].fail(
+                        return r[t.ConfigurationMapping].fail(
                             f"Missing required LDAP field: {field}"
                         )
                     if not str(config_map[field]).strip():
-                        return FlextResult[t.ConfigurationMapping].fail(
+                        return r[t.ConfigurationMapping].fail(
                             f"Empty LDAP field: {field}"
                         )
                 if "port" in config_map:
                     try:
                         port = int(str(config_map["port"]))
                     except ValueError:
-                        return FlextResult[t.ConfigurationMapping].fail(
+                        return r[t.ConfigurationMapping].fail(
                             "LDAP port must be numeric"
                         )
                     if port <= 0 or port > c.TapLdap.Ldap.MAX_PORT:
-                        return FlextResult[t.ConfigurationMapping].fail(
+                        return r[t.ConfigurationMapping].fail(
                             f"LDAP port must be between 1 and {c.TapLdap.Ldap.MAX_PORT}"
                         )
                     config_map["port"] = port
-                return FlextResult[t.ConfigurationMapping].ok(config_map)
+                return r[t.ConfigurationMapping].ok(config_map)
 
         class PerformanceOptimization:
             """LDAP tap performance optimization utilities."""

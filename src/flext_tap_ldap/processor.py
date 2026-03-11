@@ -15,7 +15,7 @@ from collections.abc import Iterator, Mapping
 from pathlib import Path
 from typing import override
 
-from flext_core import FlextLogger, FlextResult, t
+from flext_core import FlextLogger, r, t
 from flext_ldif import FlextLdif, FlextLdifModels
 from pydantic import TypeAdapter, ValidationError
 
@@ -156,9 +156,7 @@ class Entry:
                 for value in attr_values:
                     ldif_content += f"{attr_name}: {value}\n"
             ldif_content += "\n"
-            result: FlextResult[list[FlextLdifModels.Ldif.Entry]] = api.parse(
-                ldif_content
-            )
+            result: r[list[FlextLdifModels.Ldif.Entry]] = api.parse(ldif_content)
             if result.is_success and result.value and (len(result.value) > 0):
                 parsed_entry = _to_ldif_entry(result.value[0])
                 if parsed_entry is not None:
@@ -230,27 +228,23 @@ class FlextTapLdapProcessor:
             "error_messages": self.errors.copy(),
         }
 
-    def load_from_file(self, file_path: Path) -> FlextResult[str]:
-        """Load LDIF entries from file and return as FlextResult."""
+    def load_from_file(self, file_path: Path) -> r[str]:
+        """Load LDIF entries from file and return as r."""
         try:
             self.entries = list(self.parse_file(file_path))
             self._update_stats()
-            return FlextResult[str].ok("LDIF file loaded successfully using flext-ldif")
+            return r[str].ok("LDIF file loaded successfully using flext-ldif")
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[str].fail(f"Failed to load LDIF file: {e}")
+            return r[str].fail(f"Failed to load LDIF file: {e}")
 
-    def load_from_string(
-        self, content: str, source_name: str = "string"
-    ) -> FlextResult[str]:
-        """Load LDIF entries from string and return as FlextResult."""
+    def load_from_string(self, content: str, source_name: str = "string") -> r[str]:
+        """Load LDIF entries from string and return as r."""
         try:
             self.entries = list(self.parse_content(content, source_name))
             self._update_stats()
-            return FlextResult[str].ok(
-                "LDIF content loaded successfully using flext-ldif"
-            )
+            return r[str].ok("LDIF content loaded successfully using flext-ldif")
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[str].fail(f"Failed to load LDIF content: {e}")
+            return r[str].fail(f"Failed to load LDIF content: {e}")
 
     def parse_content(
         self, content: str, source_name: str = "content"
@@ -258,9 +252,7 @@ class FlextTapLdapProcessor:
         """Parse LDIF content using flext-ldif and yield testing convenience entries."""
         logger.info("Parsing LDIF content with flext-ldif from %s", source_name)
         try:
-            result: FlextResult[list[FlextLdifModels.Ldif.Entry]] = self._api.parse(
-                content
-            )
+            result: r[list[FlextLdifModels.Ldif.Entry]] = self._api.parse(content)
             if not result.is_success:
                 error_msg = (
                     f"Failed to parse LDIF content from {source_name}: {result.error}"
@@ -359,9 +351,9 @@ class FlextTapLdapProcessor:
 
     def _parse_ldif_content(
         self, content: str, file_path: Path
-    ) -> FlextResult[list[FlextLdifModels.Ldif.Entry]]:
+    ) -> r[list[FlextLdifModels.Ldif.Entry]]:
         """Parse LDIF content using flext-ldif API."""
-        result: FlextResult[list[FlextLdifModels.Ldif.Entry]] = self._api.parse(content)
+        result: r[list[FlextLdifModels.Ldif.Entry]] = self._api.parse(content)
         if not result.is_success:
             error_msg = f"Failed to parse LDIF file {file_path}: {result.error}"
             if self.ignore_errors:
@@ -400,7 +392,7 @@ class FlextTapLdapProcessor:
             raise ValueError(msg)
 
     def _yield_entries_from_result(
-        self, result: FlextResult[list[FlextLdifModels.Ldif.Entry]]
+        self, result: r[list[FlextLdifModels.Ldif.Entry]]
     ) -> Iterator[Entry]:
         """Yield testing convenience entries from parse result."""
         if result.value:
