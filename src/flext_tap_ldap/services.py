@@ -336,23 +336,20 @@ class FlextTapLdapServices:
         ) -> FlextResult[TapExecution]:
             """Create tap execution."""
             try:
-                config_adapter: TypeAdapter[t.ConfigurationMapping] = TypeAdapter(
+                cfg_adapter: TypeAdapter[t.ConfigurationMapping] = TypeAdapter(
                     t.ConfigurationMapping
                 )
-                catalog_adapter: TypeAdapter[t.ConfigurationMapping] = TypeAdapter(
-                    t.ConfigurationMapping
-                )
-                state_adapter: TypeAdapter[t.ConfigurationMapping] = TypeAdapter(
-                    t.ConfigurationMapping
-                )
+                validated_config = cfg_adapter.validate_python(config or {})
+                validated_catalog = cfg_adapter.validate_python(catalog or {})
+                validated_state = cfg_adapter.validate_python(state or {})
                 execution = TapExecution(
                     execution_id=f"exec_{uuid4().hex[:8]}",
                     connection_id=connection_id,
                     command=command,
                     tap_status="created",
-                    config=config_adapter.validate_python(config or {}),
-                    catalog=catalog_adapter.validate_python(catalog or {}),
-                    state=state_adapter.validate_python(state or {}),
+                    config={str(k): v for k, v in validated_config.items()},
+                    catalog={str(k): v for k, v in validated_catalog.items()},
+                    state={str(k): v for k, v in validated_state.items()},
                 )
                 self._executions[str(execution.id)] = execution
                 return FlextResult[TapExecution].ok(execution)
