@@ -12,8 +12,7 @@ from collections.abc import Generator, Iterator
 from pathlib import Path
 
 import pytest
-from flext_core import FlextDecorators as d
-from flext_core import FlextLogger
+from flext_core import FlextDecorators as d, FlextLogger
 from flext_tests import FlextTestsDocker
 from ldap3 import ALL, Connection, Server
 
