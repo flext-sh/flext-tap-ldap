@@ -13,7 +13,7 @@ from collections.abc import Mapping
 from typing import ClassVar
 
 from flext_core import FlextLogger
-from flext_meltano import FlextMeltanoTap as Tap
+from flext_meltano import FlextMeltanoTapAbstractions as Tap
 from pydantic import ConfigDict, TypeAdapter, ValidationError
 
 from flext_tap_ldap.constants import c
