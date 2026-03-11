@@ -337,8 +337,8 @@ class FlextTapLdapClient:
                 host=flext_connection_config.host,
                 port=flext_connection_config.port,
                 use_ssl=flext_connection_config.use_ssl,
-                bind_dn=flext_connection_config.bind_dn,
-                bind_password=flext_connection_config.bind_password,
+                bind_dn=flext_connection_config.bind_dn or "",
+                bind_password=flext_connection_config.bind_password or "",
                 timeout=flext_connection_config.timeout,
             )
             connection = FlextLdapConnection(config=settings)
@@ -432,23 +432,11 @@ class FlextTapLdapClient:
             entries: list[Mapping[str, t.ContainerValue]] = []
             if not (result.is_success and result.data):
                 return entries
-            raw_entries: t.ContainerValue = result.data
-            if (
-                hasattr(raw_entries, "entries")
-                and getattr(raw_entries, "entries", None) is not None
-            ):
-                data_entries = list(raw_entries.entries)
-            elif isinstance(raw_entries, Sequence):
-                data_entries = list(raw_entries)
-            else:
-                data_entries: list[t.ContainerValue] = []
+            data_entries: list[dict[str, list[str]]] = result.data.entries
             for entries_returned, entry_data in enumerate(data_entries):
                 if size_limit > 0 and entries_returned >= size_limit:
                     break
-                narrowed_entry: t.ContainerValue | None = None
-                if isinstance(entry_data, BaseModel):
-                    narrowed_entry = entry_data
-                converted = self._convert_entry_to_dict(narrowed_entry)
+                converted = self._convert_entry_to_dict(entry_data)
                 entries.append(converted)
             return entries
 

@@ -570,13 +570,14 @@ class Transformer:
         raw_remove_attributes = self.transformation_rules.get("remove_attributes")
         if isinstance(raw_remove_attributes, list):
             for attr_name in raw_remove_attributes:
-                if isinstance(attr_name, str):
-                    transformed.attributes.pop(attr_name, None)
+                transformed.attributes.pop(str(attr_name), None)
         raw_add_attributes = self.transformation_rules.get("add_attributes")
         if isinstance(raw_add_attributes, Mapping):
-            for attr_name, value in raw_add_attributes.items():
-                if isinstance(value, list):
-                    transformed.add_attribute(attr_name, [str(item) for item in value])
+            for attr_name, attr_value in raw_add_attributes.items():
+                if isinstance(attr_value, list):
+                    transformed.add_attribute(
+                        attr_name, [str(item) for item in attr_value]
+                    )
                 else:
-                    transformed.add_attribute(attr_name, str(value))
+                    transformed.add_attribute(attr_name, str(attr_value))
         return transformed

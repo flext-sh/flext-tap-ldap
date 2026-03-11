@@ -600,9 +600,7 @@ class FlextTapLdapStreams:
         _default_primary_keys: ClassVar[list[str]] = ["dn"]
 
         @override
-        def __init__(
-            self, tap: FlextTapLdapTap, params: FlextTapLdapStreams.CustomStreamParams
-        ) -> None:
+        def __init__(self, tap: FlextTapLdapTap, params: _CustomStreamParams) -> None:
             """Initialize custom stream with parameters."""
             self.params = params
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from flext_ldap import FlextLdapSettings
-from pydantic import Field, SecretStr
+from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 
 
@@ -14,8 +14,6 @@ class FlextTapLdapSettings(FlextLdapSettings):
 
     host: str = Field(default="localhost")
     port: int = Field(default=389, ge=1)
-    bind_dn: str | None = Field(default=None)
-    bind_password: str | SecretStr | None = Field(default=None)
     use_ssl: bool = Field(default=False)
     timeout: int = Field(default=30, ge=1)
     page_size: int = Field(default=1000, ge=1)

@@ -336,9 +336,15 @@ class FlextTapLdapServices:
         ) -> FlextResult[TapExecution]:
             """Create tap execution."""
             try:
-                config_adapter = TypeAdapter(t.ConfigurationMapping)
-                catalog_adapter = TypeAdapter(t.ConfigurationMapping)
-                state_adapter = TypeAdapter(t.ConfigurationMapping)
+                config_adapter: TypeAdapter[t.ConfigurationMapping] = TypeAdapter(
+                    t.ConfigurationMapping
+                )
+                catalog_adapter: TypeAdapter[t.ConfigurationMapping] = TypeAdapter(
+                    t.ConfigurationMapping
+                )
+                state_adapter: TypeAdapter[t.ConfigurationMapping] = TypeAdapter(
+                    t.ConfigurationMapping
+                )
                 execution = TapExecution(
                     execution_id=f"exec_{uuid4().hex[:8]}",
                     connection_id=connection_id,
