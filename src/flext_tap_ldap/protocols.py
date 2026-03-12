@@ -36,7 +36,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
         """
 
         @runtime_checkable
-        class LdapConnectionProtocol(FlextLdapProtocols.Service[t.JsonValue], Protocol):
+        class LdapConnectionProtocol(FlextLdapProtocols.Service[objectotocol):
             """Protocol for LDAP database connection management."""
 
             def connect(
@@ -80,7 +80,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 ...
 
         @runtime_checkable
-        class LdapExtractionProtocol(FlextLdapProtocols.Service[t.JsonValue], Protocol):
+        class LdapExtractionProtocol(FlextLdapProtocols.Service[objectotocol):
             """Protocol for LDAP data extraction."""
 
             def extract_entries(
@@ -97,13 +97,13 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
         @runtime_checkable
         class AttributeMappingProtocol(
-            FlextLdapProtocols.Service[t.JsonValue], Protocol
+            FlextLdapProtocols.Service[objectotocol
         ):
             """Protocol for LDAP to Singer attribute mapping."""
 
             def convert_attribute_value(
-                self, value: t.JsonValue, ldap_attr: str
-            ) -> FlextMeltanoProtocols.Result[t.JsonValue]:
+                self, value: objectp_attr: str
+            ) -> FlextMeltanoProtocols.Result[object
                 """Convert LDAP attribute value to Singer-compatible format."""
                 ...
 
@@ -138,7 +138,7 @@ p = FlextTapLdapProtocols
 class TapConfigProtocol(Protocol):
     """Protocol for tap configuration interface."""
 
-    def get_config(self, key: str, default: t.JsonValue | None = None) -> t.JsonValue:
+    def get_config(self, key: str, default: objectne = None) -> objecobject
         """Get configuration value by key.
 
         Args:

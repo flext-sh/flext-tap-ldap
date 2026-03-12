@@ -173,11 +173,11 @@ class FlextTapLdapServices:
             try:
                 connection = self._connections.get(connection_id)
                 if not connection:
-                    return r[t.ConfigurationMapping].fail("Connection not found")
+                    return r[object].fail("Connection not found")
                 connection.last_tested = datetime.now(UTC)
                 connection.last_error = None
                 self._connections[connection_id] = connection
-                return r[t.ConfigurationMapping].ok({
+                return r[object].ok({
                     "success": True,
                     "connection": connection.id,
                 })
@@ -187,7 +187,7 @@ class FlextTapLdapServices:
                     connection.last_tested = datetime.now(UTC)
                     connection.last_error = str(e)
                     self._connections[connection_id] = connection
-                return r[t.ConfigurationMapping].fail(f"Failed to test connection: {e}")
+                return r[object].fail(f"Failed to test connection: {e}")
 
     class LDAPStreamService:
         """Service for managing LDAP streams with flext-core patterns."""
@@ -228,7 +228,7 @@ class FlextTapLdapServices:
             try:
                 stream = self._streams.get(stream_id)
                 if not stream:
-                    return r[t.ConfigurationMapping].fail("Stream not found")
+                    return r[object].fail("Stream not found")
                 schema: dict[str, object] = {
                     "type": "object",
                     "properties": {
@@ -239,9 +239,9 @@ class FlextTapLdapServices:
                 }
                 stream.update_schema(schema)
                 self._streams[stream_id] = stream
-                return r[t.ConfigurationMapping].ok(schema)
+                return r[object].ok(schema)
             except (RuntimeError, ValueError, TypeError) as e:
-                return r[t.ConfigurationMapping].fail(f"Failed to discover schema: {e}")
+                return r[object].fail(f"Failed to discover schema: {e}")
 
         def get_stream(self, stream_id: str) -> r[FlextTapLdapServices.LDAPStream]:
             """Get LDAP stream by ID."""
@@ -316,8 +316,8 @@ class FlextTapLdapServices:
         ) -> r[TapExecution]:
             """Create tap execution."""
             try:
-                cfg_adapter: TypeAdapter[t.ConfigurationMapping] = TypeAdapter(
-                    t.ConfigurationMapping
+                cfg_adapter: TypeAdapter[object] = TypeAdapter(
+                    object
                 )
                 validated_config = cfg_adapter.validate_python(config or {})
                 validated_catalog = cfg_adapter.validate_python(catalog or {})
@@ -415,7 +415,7 @@ class FlextTapLdapServices:
                     else 0,
                     **validation_data,
                 }
-                return r[t.ConfigurationMapping].ok(file_stats)
+                return r[object].ok(file_stats)
             except (
                 ValueError,
                 TypeError,
@@ -426,7 +426,7 @@ class FlextTapLdapServices:
                 ImportError,
             ) as e:
                 logger.exception("Error getting LDIF statistics for %s", file_path)
-                return r[t.ConfigurationMapping].fail(f"LDIF statistics failed: {e}")
+                return r[object].fail(f"LDIF statistics failed: {e}")
 
         def process_ldif_file(self, file_path: str) -> r[list[Mapping[str, object]]]:
             """Process LDIF file using flext-ldif library."""
@@ -436,7 +436,7 @@ class FlextTapLdapServices:
                     Path(file_path)
                 )
                 if not result.is_success:
-                    return r[list[t.ConfigurationMapping]].fail(
+                    return r[list[object]].fail(
                         f"Failed to parse LDIF file: {result.error}"
                     )
                 entries: list[FlextLdifModels.Ldif.Entry] = result.data or []
@@ -454,7 +454,7 @@ class FlextTapLdapServices:
                     )
                     attrs = _as_map(attributes_raw) or {}
                     normalized.append({"dn": dn_value, "attributes": attrs})
-                return r[list[t.ConfigurationMapping]].ok(normalized)
+                return r[list[object]].ok(normalized)
             except (
                 ValueError,
                 TypeError,
@@ -465,7 +465,7 @@ class FlextTapLdapServices:
                 ImportError,
             ) as e:
                 logger.exception("Error processing LDIF file %s", file_path)
-                return r[list[t.ConfigurationMapping]].fail(
+                return r[list[object]].fail(
                     f"LDIF processing failed: {e}"
                 )
 
@@ -477,7 +477,7 @@ class FlextTapLdapServices:
                     Path(file_path)
                 )
                 if not result.is_success:
-                    return r[t.ConfigurationMapping].fail(
+                    return r[object].fail(
                         f"Validation failed: {result.error}"
                     )
                 entries: list[FlextLdifModels.Ldif.Entry] = result.data or []
@@ -489,7 +489,7 @@ class FlextTapLdapServices:
                     "errors": [],
                 }
                 logger.info("LDIF file validation completed: %s", file_path)
-                return r[t.ConfigurationMapping].ok(validation_data)
+                return r[object].ok(validation_data)
             except (
                 ValueError,
                 TypeError,
@@ -500,7 +500,7 @@ class FlextTapLdapServices:
                 ImportError,
             ) as e:
                 logger.exception("Error validating LDIF file %s", file_path)
-                return r[t.ConfigurationMapping].fail(f"LDIF validation failed: {e}")
+                return r[object].fail(f"LDIF validation failed: {e}")
 
     @staticmethod
     def create_development_ldap_config(
@@ -548,9 +548,9 @@ class FlextTapLdapServices:
                 "page_size": params.page_size,
                 "max_retries": params.max_retries,
             }
-            return r[t.ConfigurationMapping].ok(config)
+            return r[object].ok(config)
         except (RuntimeError, ValueError, TypeError) as e:
-            return r[t.ConfigurationMapping].fail(
+            return r[object].fail(
                 f"Failed to create LDAP connection config: {e}"
             )
 

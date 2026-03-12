@@ -111,9 +111,9 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             connection_id: str
             command: str
             tap_status: str = "created"
-            config: t.ConfigurationMapping = Field(default_factory=dict)
-            catalog: t.ConfigurationMapping = Field(default_factory=dict)
-            state: t.ConfigurationMapping = Field(default_factory=dict)
+            config: object = Field(default_factory=dict)
+            catalog: object = Field(default_factory=dict)
+            state: object = Field(default_factory=dict)
             started_at: datetime | None = None
             completed_at: datetime | None = None
             records_extracted: int = 0
