@@ -23,6 +23,7 @@ from flext_ldap import (
 )
 from pydantic import BaseModel
 
+from flext_tap_ldap import t
 from flext_tap_ldap.constants import c
 
 logger = FlextLogger(__name__)

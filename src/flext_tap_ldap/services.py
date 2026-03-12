@@ -19,6 +19,7 @@ from flext_core import FlextLogger, FlextModels, r
 from flext_ldif import FlextLdif, FlextLdifModels
 from pydantic import ConfigDict, Field, TypeAdapter, ValidationError
 
+from flext_tap_ldap import t
 from flext_tap_ldap.constants import c
 from flext_tap_ldap.models import TapExecution
 from flext_tap_ldap.settings import FlextTapLdapSettings
