@@ -225,7 +225,7 @@ class FlextTapLdapClient:
                 attributes: dict[str, object] = getattr(entry_data, "attributes", {})
                 entry_dict: dict[str, object] = {"dn": dn_value}
                 for attr_name, attr_values in attributes.items():
-                    if u.Guards.is_list(attr_values) and len(attr_values) == 1:
+                    if u.is_list(attr_values) and len(attr_values) == 1:
                         entry_dict[attr_name] = attr_values[0]
                     else:
                         entry_dict[attr_name] = attr_values

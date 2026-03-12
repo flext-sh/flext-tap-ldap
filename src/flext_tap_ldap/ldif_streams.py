@@ -99,9 +99,7 @@ class FlextTapLdapLdifStreams:
             _ = context
             self.logger.info("Processing LDIF files using flext-ldif library")
             raw_files = self.config.get("ldif_files", [])
-            ldif_files: list[object] = (
-                list(raw_files) if u.Guards.is_list(raw_files) else []
-            )
+            ldif_files: list[object] = list(raw_files) if u.is_list(raw_files) else []
             ldif_directory = self.config.get("ldif_directory")
             if ldif_files:
                 for ldif_file in ldif_files:
@@ -149,9 +147,7 @@ class FlextTapLdapLdifStreams:
                 self.logger.warning("LDIF directory not found: %s", ldif_directory)
                 return []
             pattern_raw = self.config.get("ldif_file_pattern", "*.ldif")
-            pattern = (
-                str(pattern_raw) if u.Guards.is_type(pattern_raw, str) else "*.ldif"
-            )
+            pattern = str(pattern_raw) if u.is_type(pattern_raw, str) else "*.ldif"
             files = [path for path in directory.rglob(pattern) if path.is_file()]
             files.sort()
             return files
@@ -251,9 +247,7 @@ class FlextTapLdapLdifStreams:
             _ = context
             self.logger.info("Generating LDIF analysis using flext-ldif library")
             raw_files = self.config.get("ldif_files", [])
-            ldif_files: list[object] = (
-                list(raw_files) if u.Guards.is_list(raw_files) else []
-            )
+            ldif_files: list[object] = list(raw_files) if u.is_list(raw_files) else []
             ldif_directory = self.config.get("ldif_directory")
             try:
                 total_entries = 0
@@ -393,9 +387,7 @@ class FlextTapLdapLdifStreams:
                 self.logger.warning("LDIF directory not found: %s", ldif_directory)
                 return []
             pattern_raw = self.config.get("ldif_file_pattern", "*.ldif")
-            pattern = (
-                str(pattern_raw) if u.Guards.is_type(pattern_raw, str) else "*.ldif"
-            )
+            pattern = str(pattern_raw) if u.is_type(pattern_raw, str) else "*.ldif"
             files = [path for path in directory.rglob(pattern) if path.is_file()]
             files.sort()
             return files
