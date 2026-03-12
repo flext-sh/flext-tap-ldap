@@ -15,7 +15,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
-from flext_core import FlextLogger, FlextModels, r, t
+from flext_core import FlextLogger, FlextModels, r
 from flext_ldif import FlextLdif, FlextLdifModels
 from pydantic import ConfigDict, Field, TypeAdapter, ValidationError
 
@@ -316,9 +316,7 @@ class FlextTapLdapServices:
         ) -> r[TapExecution]:
             """Create tap execution."""
             try:
-                cfg_adapter: TypeAdapter[object] = TypeAdapter(
-                    object
-                )
+                cfg_adapter: TypeAdapter[object] = TypeAdapter(object)
                 validated_config = cfg_adapter.validate_python(config or {})
                 validated_catalog = cfg_adapter.validate_python(catalog or {})
                 validated_state = cfg_adapter.validate_python(state or {})
@@ -465,9 +463,7 @@ class FlextTapLdapServices:
                 ImportError,
             ) as e:
                 logger.exception("Error processing LDIF file %s", file_path)
-                return r[list[object]].fail(
-                    f"LDIF processing failed: {e}"
-                )
+                return r[list[object]].fail(f"LDIF processing failed: {e}")
 
         def validate_ldif_file(self, file_path: str) -> r[Mapping[str, object]]:
             """Validate LDIF file using flext-ldif library."""
@@ -477,9 +473,7 @@ class FlextTapLdapServices:
                     Path(file_path)
                 )
                 if not result.is_success:
-                    return r[object].fail(
-                        f"Validation failed: {result.error}"
-                    )
+                    return r[object].fail(f"Validation failed: {result.error}")
                 entries: list[FlextLdifModels.Ldif.Entry] = result.data or []
                 total_entries = len(entries)
                 validation_data: dict[str, object] = {
@@ -550,9 +544,7 @@ class FlextTapLdapServices:
             }
             return r[object].ok(config)
         except (RuntimeError, ValueError, TypeError) as e:
-            return r[object].fail(
-                f"Failed to create LDAP connection config: {e}"
-            )
+            return r[object].fail(f"Failed to create LDAP connection config: {e}")
 
     @staticmethod
     def create_ldap_connection_config_convenience(

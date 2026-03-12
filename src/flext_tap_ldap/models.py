@@ -18,8 +18,6 @@ from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
 from pydantic import Field, model_validator
 
-from flext_tap_ldap.typings import t
-
 
 class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
     """Complete models for LDAP tap operations extending FlextModels.

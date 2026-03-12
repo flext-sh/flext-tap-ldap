@@ -135,20 +135,14 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 required_fields = ["host", "base_dn"]
                 for field in required_fields:
                     if field not in config_map:
-                        return r[object].fail(
-                            f"Missing required LDAP field: {field}"
-                        )
+                        return r[object].fail(f"Missing required LDAP field: {field}")
                     if not str(config_map[field]).strip():
-                        return r[object].fail(
-                            f"Empty LDAP field: {field}"
-                        )
+                        return r[object].fail(f"Empty LDAP field: {field}")
                 if "port" in config_map:
                     try:
                         port = int(str(config_map["port"]))
                     except ValueError:
-                        return r[object].fail(
-                            "LDAP port must be numeric"
-                        )
+                        return r[object].fail("LDAP port must be numeric")
                     if port <= 0 or port > c.TapLdap.Ldap.MAX_PORT:
                         return r[object].fail(
                             f"LDAP port must be between 1 and {c.TapLdap.Ldap.MAX_PORT}"
