@@ -83,7 +83,7 @@ def test_directory_processing_traverses_ldap_dit_with_mock_connection(
 ) -> None:
 
     class _FakeConnection:
-        def __init__(self, *args: object, **kwargs: object) -> None:
+        def __init__(self, *args: object, **kwargs: t.Scalar) -> None:
             self.extend = Mock()
             self.extend.standard = Mock()
             self.extend.standard.paged_search.return_value = [

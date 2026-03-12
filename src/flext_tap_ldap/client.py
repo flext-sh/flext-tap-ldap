@@ -56,7 +56,7 @@ class FlextTapLdapClient:
         def __init__(
             self,
             config: FlextTapLdapClient.LDAPClientConfig | None = None,
-            **convenience_kwargs: object,
+            **convenience_kwargs: t.Scalar,
         ) -> None:
             """Initialize with Parameter Object Pattern (preferred) or testing convenience interface.
 
@@ -248,7 +248,7 @@ class FlextTapLdapClient:
             return scope_map.get(scope.upper(), "SUBTREE")
 
         def _create_config_from_kwargs(
-            self, **convenience_kwargs: object
+            self, **convenience_kwargs: t.Scalar
         ) -> FlextTapLdapClient.LDAPClientConfig:
             """Create config from convenience keyword arguments."""
             raw_host = convenience_kwargs.get("host")

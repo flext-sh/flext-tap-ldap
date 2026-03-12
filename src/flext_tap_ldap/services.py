@@ -498,7 +498,7 @@ class FlextTapLdapServices:
 
     @staticmethod
     def create_development_ldap_config(
-        **overrides: object,
+        **overrides: t.Scalar,
     ) -> r[FlextTapLdapSettings]:
         """Create development LDAP configuration with defaults.
 
@@ -551,7 +551,7 @@ class FlextTapLdapServices:
         host: str,
         base_dn: str,
         port: int = c.TapLdap.DEFAULT_PORT,
-        **kwargs: object,
+        **kwargs: t.Scalar,
     ) -> r[Mapping[str, object]]:
         """Create LDAP connection configuration (testing convenience interface).
 
@@ -570,7 +570,7 @@ class FlextTapLdapServices:
 
     @staticmethod
     def create_production_ldap_config(
-        **overrides: object,
+        **overrides: t.Scalar,
     ) -> r[FlextTapLdapSettings]:
         """Create production LDAP configuration with security defaults.
 
