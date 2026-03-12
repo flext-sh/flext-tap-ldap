@@ -11,14 +11,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from flext_tap_ldap import FlextTapLdapTap, t
+from flext_tap_ldap import FlextTapLdapTap
 
 
 class TestFlextTapLdapTapUnit:
     """Unit tests for FlextTapLdapTap."""
 
     @pytest.fixture
-    def config(self) -> dict[str, t.ContainerValue]:
+    def config(self) -> dict[str, object]:
         """Create a test configuration fixture."""
         return {
             "ldap_host": "test.ldap.com",
@@ -30,7 +30,7 @@ class TestFlextTapLdapTapUnit:
             "page_size": 1000,
         }
 
-    def test_tap_initialization(self, config: dict[str, t.ContainerValue]) -> None:
+    def test_tap_initialization(self, config: dict[str, object]) -> None:
         """Test tap initialization."""
         tap = FlextTapLdapTap(config=config)
         if tap.name != "tap-ldap":
@@ -38,7 +38,7 @@ class TestFlextTapLdapTapUnit:
             raise AssertionError(msg)
         assert tap.config == config
 
-    def test_stream_discovery(self, config: dict[str, t.ContainerValue]) -> None:
+    def test_stream_discovery(self, config: dict[str, object]) -> None:
         """Test stream discovery."""
         tap = FlextTapLdapTap(config=config)
         streams = tap.discover_streams()
@@ -55,9 +55,7 @@ class TestFlextTapLdapTapUnit:
             count_error: str = f"Expected {4}, got {len(streams)}"
             raise AssertionError(count_error)
 
-    def test_custom_streams_configuration(
-        self, config: dict[str, t.ContainerValue]
-    ) -> None:
+    def test_custom_streams_configuration(self, config: dict[str, object]) -> None:
         """Test custom streams configuration."""
         config["custom_streams"] = [
             {
@@ -80,7 +78,7 @@ class TestFlextTapLdapTapUnit:
             count_error: str = f"Expected {5}, got {len(streams)}"
             raise AssertionError(count_error)
 
-    def test_catalog_generation(self, config: dict[str, t.ContainerValue]) -> None:
+    def test_catalog_generation(self, config: dict[str, object]) -> None:
         """Test catalog generation and metadata."""
         tap = FlextTapLdapTap(config=config)
         catalog = tap.catalog_dict
@@ -107,7 +105,7 @@ class TestFlextTapLdapTapUnit:
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_stream_records(
-        self, mock_client_class: MagicMock, config: dict[str, t.ContainerValue]
+        self, mock_client_class: MagicMock, config: dict[str, object]
     ) -> None:
         """Test streaming records from LDAP."""
         mock_client = MagicMock()
@@ -127,7 +125,7 @@ class TestFlextTapLdapTapUnit:
         streams = tap.discover_streams()
         users_stream = next(s for s in streams if s.name == "users")
         raw_records = list(users_stream.get_records(None))
-        records: list[dict[str, t.ContainerValue]] = []
+        records: list[dict[str, object]] = []
         for item in raw_records:
             if isinstance(item, tuple):
                 record, _context = item

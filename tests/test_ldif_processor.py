@@ -13,7 +13,6 @@ from typing import Self
 from unittest.mock import Mock
 
 import pytest
-from flext_core import t
 
 from flext_tap_ldap import FlextTapLdapLdifStreams, FlextTapLdapProcessor
 from flext_tap_ldap.processor import Entry, Transformer
@@ -41,7 +40,7 @@ def test_ldif_directory_processing_traverses_ldif_files(tmp_path: Path) -> None:
     stream.tap.config = {"ldif_directory": str(tmp_path), "ldif_file_pattern": "*.ldif"}
     seen: list[str] = []
 
-    def _process(ldif_file: str) -> list[dict[str, t.ContainerValue]]:
+    def _process(ldif_file: str) -> list[dict[str, object]]:
         seen.append(ldif_file)
         return [{"dn": ldif_file}]
 

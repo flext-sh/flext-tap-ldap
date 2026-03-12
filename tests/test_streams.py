@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from flext_tap_ldap import FlextTapLdapStreams, FlextTapLdapTap, t
+from flext_tap_ldap import FlextTapLdapStreams, FlextTapLdapTap
 
 
 class TestLDAPBaseStream:
@@ -437,7 +437,7 @@ class TestStreamIntegration:
     """Integration tests for stream functionality."""
 
     @pytest.fixture
-    def tap_config(self) -> dict[str, t.ContainerValue]:
+    def tap_config(self) -> dict[str, object]:
         """Standard tap configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -450,9 +450,7 @@ class TestStreamIntegration:
             "page_size": 1000,
         }
 
-    def test_all_default_streams_creation(
-        self, tap_config: dict[str, t.ContainerValue]
-    ) -> None:
+    def test_all_default_streams_creation(self, tap_config: dict[str, object]) -> None:
         """Test that all default streams can be created."""
         tap = FlextTapLdapTap(config=tap_config)
         streams = tap.discover_streams()
@@ -464,7 +462,7 @@ class TestStreamIntegration:
         assert "schema" in stream_names
 
     def test_streams_with_custom_configuration(
-        self, tap_config: dict[str, t.ContainerValue]
+        self, tap_config: dict[str, object]
     ) -> None:
         """Test streams with custom configuration."""
         tap_config["custom_streams"] = [
@@ -483,7 +481,7 @@ class TestStreamIntegration:
         custom_stream = next(s for s in streams if s.name == "custom_test_stream")
         assert isinstance(custom_stream, FlextTapLdapStreams.CustomStream)
 
-    def test_self(self, tap_config: dict[str, t.ContainerValue]) -> None:
+    def test_self(self, tap_config: dict[str, object]) -> None:
         """Test method."""
         "Test LDIF streams are included when enabled."
         tap_config["enable_ldif_streams"] = True

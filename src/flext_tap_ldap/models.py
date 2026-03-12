@@ -69,7 +69,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             @model_validator(mode="before")
             @classmethod
-            def set_aggregate_id(cls, data: t.ContainerValue) -> t.ContainerValue:
+            def set_aggregate_id(cls, data: object) -> object:
                 """Set aggregate_id from stream_name if not provided."""
                 if (
                     isinstance(data, dict)
@@ -93,7 +93,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             @model_validator(mode="before")
             @classmethod
-            def set_aggregate_id(cls, data: t.ContainerValue) -> t.ContainerValue:
+            def set_aggregate_id(cls, data: object) -> object:
                 """Set aggregate_id from stream_name if not provided."""
                 if (
                     isinstance(data, dict)
@@ -166,7 +166,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             @model_validator(mode="before")
             @classmethod
-            def set_aggregate_id(cls, data: t.ContainerValue) -> t.ContainerValue:
+            def set_aggregate_id(cls, data: object) -> object:
                 """Set aggregate_id from server_uri if not provided."""
                 if (
                     isinstance(data, dict)

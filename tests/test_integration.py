@@ -16,7 +16,6 @@ from unittest.mock import Mock, patch
 import pytest
 from click.testing import CliRunner
 
-from flext_tap_ldap import t
 from flext_tap_ldap.tap import CLI_COMMAND
 
 
@@ -29,7 +28,7 @@ class TestFlextTapLdapIntegration:
         return CliRunner()
 
     @pytest.fixture
-    def mock_ldap_config(self) -> dict[str, t.ContainerValue]:
+    def mock_ldap_config(self) -> dict[str, object]:
         """Mock LDAP configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -40,7 +39,7 @@ class TestFlextTapLdapIntegration:
         }
 
     @pytest.fixture
-    def sample_catalog(self) -> dict[str, t.ContainerValue]:
+    def sample_catalog(self) -> dict[str, object]:
         """Sample catalog for testing."""
         return {
             "streams": [
@@ -53,14 +52,12 @@ class TestFlextTapLdapIntegration:
         }
 
     @pytest.fixture
-    def sample_state(self) -> dict[str, t.ContainerValue]:
+    def sample_state(self) -> dict[str, object]:
         """Sample state for testing."""
         return {"bookmarks": {}}
 
     @pytest.fixture
-    def config_file(
-        self, tmp_path: Path, mock_ldap_config: dict[str, t.ContainerValue]
-    ) -> Path:
+    def config_file(self, tmp_path: Path, mock_ldap_config: dict[str, object]) -> Path:
         """Create temporary config file."""
         config_path = tmp_path / "config.json"
         with Path(config_path).open("w", encoding="utf-8") as f:
@@ -68,9 +65,7 @@ class TestFlextTapLdapIntegration:
         return config_path
 
     @pytest.fixture
-    def catalog_file(
-        self, tmp_path: Path, sample_catalog: dict[str, t.ContainerValue]
-    ) -> Path:
+    def catalog_file(self, tmp_path: Path, sample_catalog: dict[str, object]) -> Path:
         """Create temporary catalog file."""
         catalog_path = tmp_path / "catalog.json"
         with Path(catalog_path).open("w", encoding="utf-8") as f:
@@ -78,9 +73,7 @@ class TestFlextTapLdapIntegration:
         return catalog_path
 
     @pytest.fixture
-    def state_file(
-        self, tmp_path: Path, sample_state: dict[str, t.ContainerValue]
-    ) -> Path:
+    def state_file(self, tmp_path: Path, sample_state: dict[str, object]) -> Path:
         """Create a state file fixture for testing."""
         state_path = tmp_path / "state.json"
         with Path(state_path).open("w", encoding="utf-8") as f:
@@ -260,7 +253,7 @@ class TestFlextTapLdapIntegration:
 
         def mock_search(
             *_args: object, **_kwargs: object
-        ) -> Generator[dict[str, t.ContainerValue]]:
+        ) -> Generator[dict[str, object]]:
             time.sleep(0)
             yield {
                 "dn": "uid=user1,ou=users,dc=test,dc=com",
