@@ -520,7 +520,7 @@ class FlextTapLdapServices:
 
         """
         try:
-            config = FlextTapLdapSettings(overrides)
+            config = FlextTapLdapSettings.model_validate(overrides)
             return r[FlextTapLdapSettings].ok(config)
         except (RuntimeError, ValueError, TypeError) as e:
             return r[FlextTapLdapSettings].fail(
@@ -595,7 +595,7 @@ class FlextTapLdapServices:
         """
         try:
             production_overrides = {"use_ssl": True, **overrides}
-            config = FlextTapLdapSettings(production_overrides)
+            config = FlextTapLdapSettings.model_validate(production_overrides)
             return r[FlextTapLdapSettings].ok(config)
         except (RuntimeError, ValueError, TypeError) as e:
             return r[FlextTapLdapSettings].fail(
