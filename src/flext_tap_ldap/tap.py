@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import ClassVar, override
 
 from flext_core import FlextLogger, r
 from flext_meltano import FlextMeltanoTapAbstractions as Tap, m
@@ -96,6 +96,7 @@ class FlextTapLdapTap(Tap):
         },
     }
 
+    @override
     def discover_streams(
         self,
         source_config: m.Meltano.DataSourceConfig

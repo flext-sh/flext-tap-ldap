@@ -164,6 +164,7 @@ class Entry:
             return FlextLdifModels.Ldif.Entry(
                 dn=FlextLdifDistinguishedName(value=self.dn),
                 attributes=FlextLdifModels.Ldif.Attributes(attributes=self.attributes),
+                domain_events=[],
             )
         except (
             ValueError,
@@ -177,6 +178,7 @@ class Entry:
             return FlextLdifModels.Ldif.Entry(
                 dn=FlextLdifDistinguishedName(value=self.dn),
                 attributes=FlextLdifModels.Ldif.Attributes(attributes=self.attributes),
+                domain_events=[],
             )
 
 

@@ -11,11 +11,12 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
-from typing import TYPE_CHECKING, ClassVar, override
+from typing import ClassVar, override
 
 from flext_core import FlextLogger
 from flext_meltano import (
     FlextMeltanoStream as Stream,
+    FlextMeltanoTapAbstractions as Tap,
 )
 from pydantic import (
     BaseModel,
@@ -28,9 +29,6 @@ from pydantic import (
 
 from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.constants import c
-
-if TYPE_CHECKING:
-    from flext_tap_ldap.tap import FlextTapLdapTap
 
 logger = FlextLogger(__name__)
 _STRICT_STR_ADAPTER = TypeAdapter(str, config=ConfigDict(strict=True))
@@ -205,7 +203,7 @@ class FlextTapLdapStreams:
         @override
         def __init__(
             self,
-            tap: FlextTapLdapTap,
+            tap: Tap,
             name: str | None = None,
             schema: dict[str, object] | None = None,
         ) -> None:
@@ -228,17 +226,48 @@ class FlextTapLdapStreams:
                 raw_connection = self.config.get("connection", {})
                 connection_config = _parse_connection_config(raw_connection)
                 page_size_raw = self.config.get("page_size", 1000)
-                self.client = LDAPClient(
-                    host=connection_config.host,
-                    port=connection_config.port,
-                    bind_dn=connection_config.bind_dn,
-                    password=connection_config.bind_password,
-                    use_ssl=connection_config.use_ssl,
-                    timeout=connection_config.timeout_seconds,
-                    page_size=_coerce_positive_int(
-                        page_size_raw, c.TapLdap.DEFAULT_PAGE_SIZE
-                    ),
+                page_size = _coerce_positive_int(
+                    page_size_raw, c.TapLdap.DEFAULT_PAGE_SIZE
                 )
+                if (
+                    connection_config.bind_dn is not None
+                    and connection_config.bind_password is not None
+                ):
+                    self.client = LDAPClient(
+                        host=connection_config.host,
+                        port=connection_config.port,
+                        bind_dn=connection_config.bind_dn,
+                        password=connection_config.bind_password,
+                        use_ssl=connection_config.use_ssl,
+                        timeout=connection_config.timeout_seconds,
+                        page_size=page_size,
+                    )
+                elif connection_config.bind_dn is not None:
+                    self.client = LDAPClient(
+                        host=connection_config.host,
+                        port=connection_config.port,
+                        bind_dn=connection_config.bind_dn,
+                        use_ssl=connection_config.use_ssl,
+                        timeout=connection_config.timeout_seconds,
+                        page_size=page_size,
+                    )
+                elif connection_config.bind_password is not None:
+                    self.client = LDAPClient(
+                        host=connection_config.host,
+                        port=connection_config.port,
+                        password=connection_config.bind_password,
+                        use_ssl=connection_config.use_ssl,
+                        timeout=connection_config.timeout_seconds,
+                        page_size=page_size,
+                    )
+                else:
+                    self.client = LDAPClient(
+                        host=connection_config.host,
+                        port=connection_config.port,
+                        use_ssl=connection_config.use_ssl,
+                        timeout=connection_config.timeout_seconds,
+                        page_size=page_size,
+                    )
             except (
                 ValueError,
                 TypeError,
@@ -304,7 +333,7 @@ class FlextTapLdapStreams:
         replication_key: ClassVar[str] = "modifyTimestamp"
 
         @override
-        def __init__(self, tap: FlextTapLdapTap) -> None:
+        def __init__(self, tap: Tap) -> None:
             """Initialize users stream."""
             name = "users"
             schema: dict[str, object] = {
@@ -382,7 +411,7 @@ class FlextTapLdapStreams:
         replication_key: ClassVar[str] = "modifyTimestamp"
 
         @override
-        def __init__(self, tap: FlextTapLdapTap) -> None:
+        def __init__(self, tap: Tap) -> None:
             """Initialize groups stream."""
             name = "groups"
             schema: dict[str, object] = {
@@ -456,7 +485,7 @@ class FlextTapLdapStreams:
         primary_keys: ClassVar[list[str]] = ["dn"]
 
         @override
-        def __init__(self, tap: FlextTapLdapTap) -> None:
+        def __init__(self, tap: Tap) -> None:
             """Initialize organizational units stream."""
             name = "organizational_units"
             schema: dict[str, object] = {
@@ -509,7 +538,7 @@ class FlextTapLdapStreams:
         primary_keys: ClassVar[list[str]] = ["dn"]
 
         @override
-        def __init__(self, tap: FlextTapLdapTap) -> None:
+        def __init__(self, tap: Tap) -> None:
             """Initialize schema stream."""
             name = "schema"
             schema: dict[str, object] = {
@@ -578,8 +607,11 @@ class FlextTapLdapStreams:
                     RuntimeError,
                     ImportError,
                 ) as e:
+                    err_msg = str(e)
                     logger.debug(
-                        "Schema search failed for base DN '%s': %s", base_dn, e
+                        "Schema search failed for base DN '%s': %s",
+                        base_dn,
+                        err_msg,
                     )
                     continue
             for record in self._get_fallback_data():
@@ -600,7 +632,7 @@ class FlextTapLdapStreams:
         _default_primary_keys: ClassVar[list[str]] = ["dn"]
 
         @override
-        def __init__(self, tap: FlextTapLdapTap, params: _CustomStreamParams) -> None:
+        def __init__(self, tap: Tap, params: _CustomStreamParams) -> None:
             """Initialize custom stream with parameters."""
             self.params = params
 

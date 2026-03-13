@@ -133,6 +133,7 @@ class FlextTapLdapServices:
                     password=params.bind_password,
                     use_ssl=params.use_ssl,
                     timeout=params.timeout_seconds,
+                    domain_events=[],
                 )
                 self._connections[str(connection.id)] = connection
                 return r[FlextTapLdapServices.LDAPConnection].ok(connection)
@@ -174,11 +175,11 @@ class FlextTapLdapServices:
             try:
                 connection = self._connections.get(connection_id)
                 if not connection:
-                    return r[object].fail("Connection not found")
+                    return r[Mapping[str, object]].fail("Connection not found")
                 connection.last_tested = datetime.now(UTC)
                 connection.last_error = None
                 self._connections[connection_id] = connection
-                return r[object].ok({
+                return r[Mapping[str, object]].ok({
                     "success": True,
                     "connection": connection.id,
                 })
@@ -188,7 +189,7 @@ class FlextTapLdapServices:
                     connection.last_tested = datetime.now(UTC)
                     connection.last_error = str(e)
                     self._connections[connection_id] = connection
-                return r[object].fail(f"Failed to test connection: {e}")
+                return r[Mapping[str, object]].fail(f"Failed to test connection: {e}")
 
     class LDAPStreamService:
         """Service for managing LDAP streams with flext-core patterns."""
@@ -216,6 +217,7 @@ class FlextTapLdapServices:
                     replication_method=params.replication_method,
                     replication_key=params.replication_key,
                     stream_schema={},
+                    domain_events=[],
                 )
                 self._streams[str(stream.id)] = stream
                 return r[FlextTapLdapServices.LDAPStream].ok(stream)
@@ -229,7 +231,7 @@ class FlextTapLdapServices:
             try:
                 stream = self._streams.get(stream_id)
                 if not stream:
-                    return r[object].fail("Stream not found")
+                    return r[Mapping[str, object]].fail("Stream not found")
                 schema: dict[str, object] = {
                     "type": "object",
                     "properties": {
@@ -240,9 +242,9 @@ class FlextTapLdapServices:
                 }
                 stream.update_schema(schema)
                 self._streams[stream_id] = stream
-                return r[object].ok(schema)
+                return r[Mapping[str, object]].ok(schema)
             except (RuntimeError, ValueError, TypeError) as e:
-                return r[object].fail(f"Failed to discover schema: {e}")
+                return r[Mapping[str, object]].fail(f"Failed to discover schema: {e}")
 
         def get_stream(self, stream_id: str) -> r[FlextTapLdapServices.LDAPStream]:
             """Get LDAP stream by ID."""
@@ -317,10 +319,9 @@ class FlextTapLdapServices:
         ) -> r[TapExecution]:
             """Create tap execution."""
             try:
-                cfg_adapter: TypeAdapter[object] = TypeAdapter(object)
-                validated_config = cfg_adapter.validate_python(config or {})
-                validated_catalog = cfg_adapter.validate_python(catalog or {})
-                validated_state = cfg_adapter.validate_python(state or {})
+                validated_config = _as_map(config or {}) or {}
+                validated_catalog = _as_map(catalog or {}) or {}
+                validated_state = _as_map(state or {}) or {}
                 execution = TapExecution(
                     execution_id=f"exec_{uuid4().hex[:8]}",
                     connection_id=connection_id,
@@ -329,6 +330,7 @@ class FlextTapLdapServices:
                     config={str(k): v for k, v in validated_config.items()},
                     catalog={str(k): v for k, v in validated_catalog.items()},
                     state={str(k): v for k, v in validated_state.items()},
+                    domain_events=[],
                 )
                 self._executions[str(execution.id)] = execution
                 return r[TapExecution].ok(execution)
@@ -405,7 +407,7 @@ class FlextTapLdapServices:
                 if not validation_result.is_success:
                     return validation_result
                 validation_data: Mapping[str, object] = (
-                    _as_map(validation_result.data) or {}
+                    _as_map(validation_result.value) or {}
                 )
                 file_stats: dict[str, object] = {
                     "file_path": file_path,
@@ -414,7 +416,7 @@ class FlextTapLdapServices:
                     else 0,
                     **validation_data,
                 }
-                return r[object].ok(file_stats)
+                return r[Mapping[str, object]].ok(file_stats)
             except (
                 ValueError,
                 TypeError,
@@ -425,7 +427,7 @@ class FlextTapLdapServices:
                 ImportError,
             ) as e:
                 logger.exception("Error getting LDIF statistics for %s", file_path)
-                return r[object].fail(f"LDIF statistics failed: {e}")
+                return r[Mapping[str, object]].fail(f"LDIF statistics failed: {e}")
 
         def process_ldif_file(self, file_path: str) -> r[list[Mapping[str, object]]]:
             """Process LDIF file using flext-ldif library."""
@@ -435,10 +437,10 @@ class FlextTapLdapServices:
                     Path(file_path)
                 )
                 if not result.is_success:
-                    return r[list[object]].fail(
+                    return r[list[Mapping[str, object]]].fail(
                         f"Failed to parse LDIF file: {result.error}"
                     )
-                entries: list[FlextLdifModels.Ldif.Entry] = result.data or []
+                entries: list[FlextLdifModels.Ldif.Entry] = result.value or []
                 entry_count = len(entries)
                 logger.info(
                     "Successfully processed %s entries from %s", entry_count, file_path
@@ -453,7 +455,7 @@ class FlextTapLdapServices:
                     )
                     attrs = _as_map(attributes_raw) or {}
                     normalized.append({"dn": dn_value, "attributes": attrs})
-                return r[list[object]].ok(normalized)
+                return r[list[Mapping[str, object]]].ok(normalized)
             except (
                 ValueError,
                 TypeError,
@@ -464,7 +466,9 @@ class FlextTapLdapServices:
                 ImportError,
             ) as e:
                 logger.exception("Error processing LDIF file %s", file_path)
-                return r[list[object]].fail(f"LDIF processing failed: {e}")
+                return r[list[Mapping[str, object]]].fail(
+                    f"LDIF processing failed: {e}"
+                )
 
         def validate_ldif_file(self, file_path: str) -> r[Mapping[str, object]]:
             """Validate LDIF file using flext-ldif library."""
@@ -474,8 +478,10 @@ class FlextTapLdapServices:
                     Path(file_path)
                 )
                 if not result.is_success:
-                    return r[object].fail(f"Validation failed: {result.error}")
-                entries: list[FlextLdifModels.Ldif.Entry] = result.data or []
+                    return r[Mapping[str, object]].fail(
+                        f"Validation failed: {result.error}"
+                    )
+                entries: list[FlextLdifModels.Ldif.Entry] = result.value or []
                 total_entries = len(entries)
                 validation_data: dict[str, object] = {
                     "total_entries": total_entries,
@@ -484,7 +490,7 @@ class FlextTapLdapServices:
                     "errors": [],
                 }
                 logger.info("LDIF file validation completed: %s", file_path)
-                return r[object].ok(validation_data)
+                return r[Mapping[str, object]].ok(validation_data)
             except (
                 ValueError,
                 TypeError,
@@ -495,7 +501,7 @@ class FlextTapLdapServices:
                 ImportError,
             ) as e:
                 logger.exception("Error validating LDIF file %s", file_path)
-                return r[object].fail(f"LDIF validation failed: {e}")
+                return r[Mapping[str, object]].fail(f"LDIF validation failed: {e}")
 
     @staticmethod
     def create_development_ldap_config(
@@ -543,9 +549,11 @@ class FlextTapLdapServices:
                 "page_size": params.page_size,
                 "max_retries": params.max_retries,
             }
-            return r[object].ok(config)
+            return r[Mapping[str, object]].ok(config)
         except (RuntimeError, ValueError, TypeError) as e:
-            return r[object].fail(f"Failed to create LDAP connection config: {e}")
+            return r[Mapping[str, object]].fail(
+                f"Failed to create LDAP connection config: {e}"
+            )
 
     @staticmethod
     def create_ldap_connection_config_convenience(

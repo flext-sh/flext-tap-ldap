@@ -387,7 +387,8 @@ class FlextTapLdapClient:
                 RuntimeError,
                 ImportError,
             ) as e:
-                logger.debug("LDAP search failed: %s", e)
+                err_msg = str(e)
+                logger.debug("LDAP search failed: %s", err_msg)
                 return []
 
         def _process_oracle_entry(
@@ -429,9 +430,12 @@ class FlextTapLdapClient:
             Single Responsibility: Handle only result processing logic.
             """
             entries: list[Mapping[str, object]] = []
-            if not (result.is_success and result.data):
+            if not (result.is_success and result.value):
                 return entries
-            data_entries: list[dict[str, list[str]]] = result.data.entries
+            search_result = result.value
+            if not isinstance(search_result, m.Ldap.SearchResult):
+                return entries
+            data_entries: list[dict[str, list[str]]] = search_result.entries
             for entries_returned, entry_data in enumerate(data_entries):
                 if size_limit > 0 and entries_returned >= size_limit:
                     break
@@ -451,8 +455,8 @@ class FlextTapLdapClient:
             """
             results: list[Mapping[str, object]] = []
             for entry in search_result:
-                if u.is_dict_like(entry):
-                    entry_dict: Mapping[str, object] = dict(entry)
+                if isinstance(entry, Mapping):
+                    entry_dict = {str(key): value for key, value in entry.items()}
                 else:
                     entry_dict = self._convert_entry_to_dict(entry)
                 if oracle_oid_mode:

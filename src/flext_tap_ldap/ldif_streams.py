@@ -4,44 +4,35 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Iterator, Mapping
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar, override
+from typing import ClassVar, override
 
-from flext_core.loggings import FlextLogger
+from flext_core import FlextLogger
 from flext_ldap import FlextLdapConnection
 from flext_ldif import FlextLdif, m
-from flext_meltano import FlextMeltanoStream as Stream
-from pydantic import BaseModel
+from flext_meltano import (
+    FlextMeltanoStream as Stream,
+    FlextMeltanoTapAbstractions as Tap,
+)
+from pydantic import ConfigDict, TypeAdapter, ValidationError
 
-if TYPE_CHECKING:
-    from flext_tap_ldap.tap import FlextTapLdapTap
-
-
-class _Guards:
-    @staticmethod
-    def is_list(value: object) -> bool:
-        return isinstance(value, list)
-
-    @staticmethod
-    def is_type(value: object, expected: type | tuple[type, ...]) -> bool:
-        return isinstance(value, expected)
+_OBJECT_LIST_ADAPTER = TypeAdapter(list[object], config=ConfigDict(strict=False))
+_COUNTER_MAP_ADAPTER = TypeAdapter(
+    dict[str, int | str], config=ConfigDict(strict=False)
+)
 
 
-class _Utilities:
-    Guards = _Guards
-
-    @staticmethod
-    def is_dict_like(value: object) -> bool:
-        return isinstance(value, Mapping)
-
-
-class _Mixins:
-    @staticmethod
-    def is_base_model(value: object) -> bool:
-        return isinstance(value, BaseModel)
+def _as_object_list(value: object) -> list[object]:
+    try:
+        return _OBJECT_LIST_ADAPTER.validate_python(value)
+    except ValidationError:
+        return []
 
 
-u = _Utilities
-x = _Mixins
+def _as_counter_map(value: object) -> dict[str, int | str]:
+    try:
+        return _COUNTER_MAP_ADAPTER.validate_python(value)
+    except ValidationError:
+        return {}
 
 
 class FlextTapLdapLdifStreams:
@@ -56,7 +47,7 @@ class FlextTapLdapLdifStreams:
         primary_keys: ClassVar[list[str]] = ["dn"]
 
         @override
-        def __init__(self, tap: FlextTapLdapTap) -> None:
+        def __init__(self, tap: Tap) -> None:
             """Initialize LDIF stream with library delegation."""
             self.name = "ldif_entries"
             self.path = "/ldif_entries"
@@ -99,7 +90,7 @@ class FlextTapLdapLdifStreams:
             _ = context
             self.logger.info("Processing LDIF files using flext-ldif library")
             raw_files = self.config.get("ldif_files", [])
-            ldif_files: list[object] = list(raw_files) if u.is_list(raw_files) else []
+            ldif_files = _as_object_list(raw_files)
             ldif_directory = self.config.get("ldif_directory")
             if ldif_files:
                 for ldif_file in ldif_files:
@@ -147,7 +138,7 @@ class FlextTapLdapLdifStreams:
                 self.logger.warning("LDIF directory not found: %s", ldif_directory)
                 return []
             pattern_raw = self.config.get("ldif_file_pattern", "*.ldif")
-            pattern = str(pattern_raw) if u.is_type(pattern_raw, str) else "*.ldif"
+            pattern = str(pattern_raw) if isinstance(pattern_raw, str) else "*.ldif"
             files = [path for path in directory.rglob(pattern) if path.is_file()]
             files.sort()
             return files
@@ -155,8 +146,9 @@ class FlextTapLdapLdifStreams:
         def _normalize_object_classes(self, object_classes: object) -> list[str]:
             if isinstance(object_classes, str):
                 return [object_classes]
-            if isinstance(object_classes, list):
-                return [str(value) for value in object_classes if value is not None]
+            object_values = _as_object_list(object_classes)
+            if object_values:
+                return [str(value) for value in object_values if value is not None]
             return []
 
         def _process_ldap_directory(self) -> Iterator[dict[str, object]]:
@@ -179,7 +171,7 @@ class FlextTapLdapLdifStreams:
                 result = self._ldif_api.parse(content)
                 if result.is_success and result.value:
                     for entry in result.value:
-                        if x.is_base_model(entry):
+                        if isinstance(entry, m.Ldif.Entry):
                             yield self._convert_entry_to_record(entry)
                 else:
                     self.logger.error(
@@ -202,7 +194,7 @@ class FlextTapLdapLdifStreams:
         primary_keys: ClassVar[list[str]] = ["analysis_id"]
 
         @override
-        def __init__(self, tap: FlextTapLdapTap) -> None:
+        def __init__(self, tap: Tap) -> None:
             """Initialize LDIF analysis stream with library delegation."""
             self.name = "ldif_analysis"
             self.path = "/ldif_analysis"
@@ -247,7 +239,7 @@ class FlextTapLdapLdifStreams:
             _ = context
             self.logger.info("Generating LDIF analysis using flext-ldif library")
             raw_files = self.config.get("ldif_files", [])
-            ldif_files: list[object] = list(raw_files) if u.is_list(raw_files) else []
+            ldif_files = _as_object_list(raw_files)
             ldif_directory = self.config.get("ldif_directory")
             try:
                 total_entries = 0
@@ -267,20 +259,22 @@ class FlextTapLdapLdifStreams:
                                 total_entries += total_count_value
                             case _:
                                 pass
-                        raw_entry_types = stats.get("entry_types", {})
-                        if isinstance(raw_entry_types, Mapping):
-                            for entry_type, count in raw_entry_types.items():
-                                if isinstance(count, int | str):
-                                    entry_types[entry_type] = entry_types.get(
-                                        entry_type, 0
-                                    ) + int(count)
-                        raw_object_classes = stats.get("object_classes", {})
-                        if isinstance(raw_object_classes, Mapping):
-                            for obj_class, count in raw_object_classes.items():
-                                if isinstance(count, int | str):
-                                    object_classes[obj_class] = object_classes.get(
-                                        obj_class, 0
-                                    ) + int(count)
+                        validated_entry_types = _as_counter_map(
+                            stats.get("entry_types", {})
+                        )
+                        for entry_type, count in validated_entry_types.items():
+                            object_count = int(count)
+                            entry_types[entry_type] = (
+                                entry_types.get(entry_type, 0) + object_count
+                            )
+                        validated_object_classes = _as_counter_map(
+                            stats.get("object_classes", {})
+                        )
+                        for obj_class, count in validated_object_classes.items():
+                            object_count = int(count)
+                            object_classes[obj_class] = (
+                                object_classes.get(obj_class, 0) + object_count
+                            )
                 elif ldif_directory:
                     for discovered_file in self._discover_ldif_files(
                         str(ldif_directory)
@@ -292,20 +286,22 @@ class FlextTapLdapLdifStreams:
                                 total_entries += total_count_value
                             case _:
                                 pass
-                        raw_entry_types = stats.get("entry_types", {})
-                        if isinstance(raw_entry_types, Mapping):
-                            for entry_type, count in raw_entry_types.items():
-                                if isinstance(count, int | str):
-                                    entry_types[entry_type] = entry_types.get(
-                                        entry_type, 0
-                                    ) + int(count)
-                        raw_object_classes = stats.get("object_classes", {})
-                        if isinstance(raw_object_classes, Mapping):
-                            for obj_class, count in raw_object_classes.items():
-                                if isinstance(count, int | str):
-                                    object_classes[obj_class] = object_classes.get(
-                                        obj_class, 0
-                                    ) + int(count)
+                        validated_entry_types = _as_counter_map(
+                            stats.get("entry_types", {})
+                        )
+                        for entry_type, count in validated_entry_types.items():
+                            object_count = int(count)
+                            entry_types[entry_type] = (
+                                entry_types.get(entry_type, 0) + object_count
+                            )
+                        validated_object_classes = _as_counter_map(
+                            stats.get("object_classes", {})
+                        )
+                        for obj_class, count in validated_object_classes.items():
+                            object_count = int(count)
+                            object_classes[obj_class] = (
+                                object_classes.get(obj_class, 0) + object_count
+                            )
                 yield {
                     "analysis_id": "ldif_summary",
                     "total_entries": total_entries,
@@ -339,7 +335,7 @@ class FlextTapLdapLdifStreams:
                     entry_types: dict[str, int] = {}
                     object_classes: dict[str, int] = {}
                     for entry in result.value:
-                        if not x.is_base_model(entry):
+                        if not isinstance(entry, m.Ldif.Entry):
                             continue
                         if entry.attributes is None:
                             continue
@@ -387,7 +383,7 @@ class FlextTapLdapLdifStreams:
                 self.logger.warning("LDIF directory not found: %s", ldif_directory)
                 return []
             pattern_raw = self.config.get("ldif_file_pattern", "*.ldif")
-            pattern = str(pattern_raw) if u.is_type(pattern_raw, str) else "*.ldif"
+            pattern = str(pattern_raw) if isinstance(pattern_raw, str) else "*.ldif"
             files = [path for path in directory.rglob(pattern) if path.is_file()]
             files.sort()
             return files
