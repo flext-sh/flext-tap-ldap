@@ -13,6 +13,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Annotated
 from uuid import uuid4
 
 from flext_core import FlextLogger, FlextModels, r
@@ -60,22 +61,24 @@ class FlextTapLdapServices:
     class LDAPConnectionParams(FlextModels.Value):
         """Parameters for establishing LDAP connection."""
 
-        host: str = Field(min_length=1)
-        base_dn: str = Field(min_length=1)
-        port: int = Field(default=c.TapLdap.DEFAULT_PORT, ge=1)
+        host: Annotated[str, Field(min_length=1)]
+        base_dn: Annotated[str, Field(min_length=1)]
+        port: Annotated[int, Field(default=c.TapLdap.DEFAULT_PORT, ge=1)]
         bind_dn: str | None = None
         bind_password: str | None = None
         use_ssl: bool = False
-        timeout_seconds: int = Field(default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT, ge=1)
-        page_size: int = Field(default=c.TapLdap.DEFAULT_PAGE_SIZE, ge=1)
-        max_retries: int = Field(default=3, ge=0)
+        timeout_seconds: Annotated[
+            int, Field(default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT, ge=1)
+        ]
+        page_size: Annotated[int, Field(default=c.TapLdap.DEFAULT_PAGE_SIZE, ge=1)]
+        max_retries: Annotated[int, Field(default=3, ge=0)]
 
     class StreamCreationParams(FlextModels.Value):
         """Parameters for creating LDAP data stream."""
 
-        stream_type: str = Field(min_length=1)
-        connection_id: str = Field(min_length=1)
-        search_filter: str = Field(min_length=1)
+        stream_type: Annotated[str, Field(min_length=1)]
+        connection_id: Annotated[str, Field(min_length=1)]
+        search_filter: Annotated[str, Field(min_length=1)]
         attributes: list[str] | None = None
         tap_stream_id: str | None = None
         key_properties: list[str] | None = None
@@ -85,30 +88,30 @@ class FlextTapLdapServices:
     class LDAPConnection(FlextModels.Entity):
         """LDAP connection entity with test status and error tracking."""
 
-        host: str = Field(min_length=1)
-        port: int = Field(ge=1)
+        host: Annotated[str, Field(min_length=1)]
+        port: Annotated[int, Field(ge=1)]
         bind_dn: str | None = None
         password: str | None = None
         use_ssl: bool = False
-        timeout: int = Field(ge=1)
-        id: str = Field(default_factory=lambda: uuid4().hex)
+        timeout: Annotated[int, Field(ge=1)]
+        id: Annotated[str, Field(default_factory=lambda: uuid4().hex)]
         last_tested: datetime | None = None
         last_error: str | None = None
 
     class LDAPStream(FlextModels.Entity):
         """LDAP data stream with schema and replication configuration."""
 
-        id: str = Field(default_factory=lambda: uuid4().hex)
-        name: str = Field(min_length=1)
-        connection_id: str = Field(min_length=1)
-        stream_type: str = Field(min_length=1)
-        search_filter: str = Field(min_length=1)
-        attributes: list[str] = Field(default_factory=list)
-        tap_stream_id: str = Field(min_length=1)
-        key_properties: list[str] = Field(default_factory=lambda: ["dn"])
+        id: Annotated[str, Field(default_factory=lambda: uuid4().hex)]
+        name: Annotated[str, Field(min_length=1)]
+        connection_id: Annotated[str, Field(min_length=1)]
+        stream_type: Annotated[str, Field(min_length=1)]
+        search_filter: Annotated[str, Field(min_length=1)]
+        attributes: Annotated[list[str], Field(default_factory=list)]
+        tap_stream_id: Annotated[str, Field(min_length=1)]
+        key_properties: Annotated[list[str], Field(default_factory=lambda: ["dn"])]
         replication_method: str = "FULL_TABLE"
         replication_key: str | None = None
-        stream_schema: dict[str, object] = Field(default_factory=dict)
+        stream_schema: Annotated[dict[str, object], Field(default_factory=dict)]
 
         def update_schema(self, schema: Mapping[str, object]) -> None:
             """Update stream schema from mapping."""

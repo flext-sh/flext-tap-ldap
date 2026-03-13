@@ -10,6 +10,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from importlib.metadata import metadata
+from typing import Annotated
 
 from pydantic import BaseModel, Field
 
@@ -17,7 +18,7 @@ from pydantic import BaseModel, Field
 class FlextTapLdapVersion(BaseModel):
     """Version metadata for FLEXT Tap LDAP package."""
 
-    version: str = Field(min_length=1)
+    version: Annotated[str, Field(min_length=1)]
     version_info: tuple[int | str, ...]
     title: str = ""
     description: str = ""

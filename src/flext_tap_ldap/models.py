@@ -11,6 +11,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Annotated
 from uuid import uuid4
 
 from flext_core import FlextModels
@@ -38,7 +39,9 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
         class TapExecutionStartedEvent(FlextModels.DomainEvent):
             """Event raised when tap execution starts."""
 
-            timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+            timestamp: Annotated[
+                datetime, Field(default_factory=lambda: datetime.now(UTC))
+            ]
             tap_name: str = "tap-ldap"
             execution_id: str = ""
             config_hash: str | None = None
@@ -46,7 +49,9 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
         class TapExecutionCompletedEvent(FlextModels.DomainEvent):
             """Event raised when tap execution completes."""
 
-            timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+            timestamp: Annotated[
+                datetime, Field(default_factory=lambda: datetime.now(UTC))
+            ]
             tap_name: str = "tap-ldap"
             execution_id: str = ""
             records_processed: int = 0
@@ -56,13 +61,16 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
         class StreamDiscoveredEvent(FlextModels.DomainEvent):
             """Event raised when a stream is discovered."""
 
-            event_type: str = Field(default="stream_discovered", frozen=True)
-            aggregate_id: str = Field(
-                default="",
-                description="Stream name as aggregate identifier",
-            )
+            event_type: Annotated[str, Field(default="stream_discovered", frozen=True)]
+            aggregate_id: Annotated[
+                str,
+                Field(
+                    default="",
+                    description="Stream name as aggregate identifier",
+                ),
+            ]
             stream_name: str
-            stream_key_properties: list[str] = Field(default_factory=list)
+            stream_key_properties: Annotated[list[str], Field(default_factory=list)]
             bookmark_key: str | None = None
 
             @model_validator(mode="before")
@@ -80,11 +88,14 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
         class RecordExtractedEvent(FlextModels.DomainEvent):
             """Event raised when a record is extracted."""
 
-            event_type: str = Field(default="record_extracted", frozen=True)
-            aggregate_id: str = Field(
-                default="",
-                description="Stream name as aggregate identifier",
-            )
+            event_type: Annotated[str, Field(default="record_extracted", frozen=True)]
+            aggregate_id: Annotated[
+                str,
+                Field(
+                    default="",
+                    description="Stream name as aggregate identifier",
+                ),
+            ]
             stream_name: str
             record_id: str | None = None
             record_size_bytes: int = 0
@@ -104,14 +115,14 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
         class TapExecution(FlextModels.Entity):
             """Execution state and metrics for a tap run."""
 
-            id: str = Field(default_factory=lambda: uuid4().hex)
+            id: Annotated[str, Field(default_factory=lambda: uuid4().hex)]
             execution_id: str
             connection_id: str
             command: str
             tap_status: str = "created"
-            config: object = Field(default_factory=dict)
-            catalog: object = Field(default_factory=dict)
-            state: object = Field(default_factory=dict)
+            config: Annotated[object, Field(default_factory=dict)]
+            catalog: Annotated[object, Field(default_factory=dict)]
+            state: Annotated[object, Field(default_factory=dict)]
             started_at: datetime | None = None
             completed_at: datetime | None = None
             records_extracted: int = 0
@@ -153,11 +164,14 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
         class ConnectionTestedEvent(FlextModels.DomainEvent):
             """Event raised after connection test."""
 
-            event_type: str = Field(default="connection_tested", frozen=True)
-            aggregate_id: str = Field(
-                default="",
-                description="Server URI as aggregate identifier",
-            )
+            event_type: Annotated[str, Field(default="connection_tested", frozen=True)]
+            aggregate_id: Annotated[
+                str,
+                Field(
+                    default="",
+                    description="Server URI as aggregate identifier",
+                ),
+            ]
             success: bool
             server_uri: str
             error_message: str | None = None

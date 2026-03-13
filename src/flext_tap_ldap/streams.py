@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
-from typing import ClassVar, override
+from typing import Annotated, ClassVar, override
 
 from flext_core import FlextLogger
 from flext_meltano import (
@@ -72,8 +72,8 @@ class _CustomPropertyDefinition(BaseModel):
 class _CustomStreamParams(BaseModel):
     name: str
     search_filter: str
-    schema_properties: dict[str, object] = Field(default_factory=dict)
-    primary_keys: list[str] = Field(default_factory=lambda: ["dn"])
+    schema_properties: Annotated[dict[str, object], Field(default_factory=dict)]
+    primary_keys: Annotated[list[str], Field(default_factory=lambda: ["dn"])]
     replication_key: str | None = None
 
     @model_validator(mode="after")
