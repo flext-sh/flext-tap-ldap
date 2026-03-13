@@ -36,7 +36,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
         """
 
         @runtime_checkable
-        class LdapConnectionProtocol(FlextLdapProtocols.Service[m.ConfigMap], Protocol):
+        class LdapConnection(FlextLdapProtocols.Service[m.ConfigMap], Protocol):
             """Protocol for LDAP database connection management."""
 
             def connect(
@@ -56,9 +56,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 ...
 
         @runtime_checkable
-        class DirectoryDiscoveryProtocol(
-            FlextLdapProtocols.Service[m.ConfigMap], Protocol
-        ):
+        class DirectoryDiscovery(FlextLdapProtocols.Service[m.ConfigMap], Protocol):
             """Protocol for LDAP directory discovery."""
 
             def discover_base_dns(
@@ -80,7 +78,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 ...
 
         @runtime_checkable
-        class LdapExtractionProtocol(FlextLdapProtocols.Service[t.Container], Protocol):
+        class LdapExtraction(FlextLdapProtocols.Service[t.Container], Protocol):
             """Protocol for LDAP data extraction."""
 
             def extract_entries(
@@ -96,9 +94,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 ...
 
         @runtime_checkable
-        class AttributeMappingProtocol(
-            FlextLdapProtocols.Service[t.Container], Protocol
-        ):
+        class AttributeMapping(FlextLdapProtocols.Service[t.Container], Protocol):
             """Protocol for LDAP to Singer attribute mapping."""
 
             def convert_attribute_value(
@@ -114,9 +110,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 ...
 
         @runtime_checkable
-        class StreamGenerationProtocol(
-            FlextLdapProtocols.Service[m.ConfigMap], Protocol
-        ):
+        class StreamGeneration(FlextLdapProtocols.Service[m.ConfigMap], Protocol):
             """Protocol for Singer stream generation from LDAP."""
 
             def generate_streams_from_ldap(
@@ -135,7 +129,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 p = FlextTapLdapProtocols
 
 
-class TapConfigProtocol(Protocol):
+class TapConfig(Protocol):
     """Protocol for tap configuration interface."""
 
     def get_config(self, key: str, default: t.Scalar | None = None) -> t.Scalar | None:
@@ -160,7 +154,7 @@ class Tap(Protocol):
     """
 
     @property
-    def config(self) -> TapConfigProtocol:
+    def config(self) -> TapConfig:
         """Get tap configuration.
 
         Returns:
@@ -170,4 +164,4 @@ class Tap(Protocol):
         ...
 
 
-__all__ = ["FlextTapLdapProtocols", "Tap", "TapConfigProtocol", "p"]
+__all__ = ["FlextTapLdapProtocols", "Tap", "TapConfig", "p"]
