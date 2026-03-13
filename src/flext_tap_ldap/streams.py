@@ -93,7 +93,7 @@ class _CustomStreamParams(BaseModel):
 def _parse_connection_config(raw_value: object) -> _LdapConnectionConfig:
     """Validate LDAP connection payload through Pydantic."""
     try:
-        parsed = _LdapConnectionConfig.model_validate(raw_value, strict=True)
+        parsed = _LdapConnectionConfig(raw_value, strict=True)
     except ValidationError:
         parsed = _LdapConnectionConfig()
     return _LdapConnectionConfig(
@@ -114,7 +114,7 @@ def _parse_property_definition(
 ) -> _CustomPropertyDefinition:
     """Validate custom stream property definition through Pydantic."""
     try:
-        return _CustomPropertyDefinition.model_validate(raw_value, strict=True)
+        return _CustomPropertyDefinition(raw_value, strict=True)
     except ValidationError:
         return _CustomPropertyDefinition()
 
