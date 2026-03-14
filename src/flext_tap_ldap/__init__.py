@@ -45,13 +45,18 @@ if TYPE_CHECKING:
     from flext_tap_ldap.utilities import FlextTapLdapUtilities, u
     from flext_tap_ldap.version import VERSION, FlextTapLdapVersion
 
-# Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "Entry": ("flext_tap_ldap.processor", "Entry"),
-    "FlextLdifDistinguishedName": ("flext_tap_ldap.processor", "FlextLdifDistinguishedName"),
+    "FlextLdifDistinguishedName": (
+        "flext_tap_ldap.processor",
+        "FlextLdifDistinguishedName",
+    ),
     "FlextTapLdapClient": ("flext_tap_ldap.client", "FlextTapLdapClient"),
     "FlextTapLdapConstants": ("flext_tap_ldap.constants", "FlextTapLdapConstants"),
-    "FlextTapLdapLdifStreams": ("flext_tap_ldap.ldif_streams", "FlextTapLdapLdifStreams"),
+    "FlextTapLdapLdifStreams": (
+        "flext_tap_ldap.ldif_streams",
+        "FlextTapLdapLdifStreams",
+    ),
     "FlextTapLdapModels": ("flext_tap_ldap.models", "FlextTapLdapModels"),
     "FlextTapLdapProcessor": ("flext_tap_ldap.processor", "FlextTapLdapProcessor"),
     "FlextTapLdapProtocols": ("flext_tap_ldap.protocols", "FlextTapLdapProtocols"),

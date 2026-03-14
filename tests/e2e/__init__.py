@@ -22,7 +22,6 @@ if TYPE_CHECKING:
         tap_config_file,
     )
 
-# Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "catalog_file": ("tests.e2e.conftest", "catalog_file"),
     "ldap_connection": ("tests.e2e.conftest", "ldap_connection"),

@@ -75,29 +75,46 @@ if TYPE_CHECKING:
     from tests.typings import TestsFlextTapLdapTypes, t
     from tests.utilities import TestsFlextTapLdapUtilities, u
 
-# Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "LDAPClient": ("tests.test_client_quick", "LDAPClient"),
     "TestConnectionTestedEvent": ("tests.test_models", "TestConnectionTestedEvent"),
     "TestCustomStream": ("tests.test_streams", "TestCustomStream"),
     "TestCustomStreamParams": ("tests.test_streams", "TestCustomStreamParams"),
-    "TestFlextTapLdapIntegration": ("tests.test_integration", "TestFlextTapLdapIntegration"),
+    "TestFlextTapLdapIntegration": (
+        "tests.test_integration",
+        "TestFlextTapLdapIntegration",
+    ),
     "TestFlextTapLdapTapUnit": ("tests.test_tap", "TestFlextTapLdapTapUnit"),
     "TestGroupsStream": ("tests.test_streams", "TestGroupsStream"),
     "TestLDAPBaseStream": ("tests.test_streams", "TestLDAPBaseStream"),
-    "TestLDAPBaseStreamDirectUsage": ("tests.test_streams", "TestLDAPBaseStreamDirectUsage"),
+    "TestLDAPBaseStreamDirectUsage": (
+        "tests.test_streams",
+        "TestLDAPBaseStreamDirectUsage",
+    ),
     "TestLDAPClientCoverageBoost": ("tests.test_client", "TestLDAPClientCoverageBoost"),
     "TestLDAPClientQuick": ("tests.test_client_quick", "TestLDAPClientQuick"),
     "TestLDIFStreamBasic": ("tests.test_ldif_stream", "TestLDIFStreamBasic"),
-    "TestOrganizationalUnitsStream": ("tests.test_streams", "TestOrganizationalUnitsStream"),
+    "TestOrganizationalUnitsStream": (
+        "tests.test_streams",
+        "TestOrganizationalUnitsStream",
+    ),
     "TestPlaceholder": ("tests.test_ldif_processor", "TestPlaceholder"),
     "TestRecordExtractedEvent": ("tests.test_models", "TestRecordExtractedEvent"),
     "TestSchemaStream": ("tests.test_streams", "TestSchemaStream"),
     "TestStreamDiscoveredEvent": ("tests.test_models", "TestStreamDiscoveredEvent"),
-    "TestStreamExceptionHandling": ("tests.test_streams", "TestStreamExceptionHandling"),
+    "TestStreamExceptionHandling": (
+        "tests.test_streams",
+        "TestStreamExceptionHandling",
+    ),
     "TestStreamIntegration": ("tests.test_streams", "TestStreamIntegration"),
-    "TestTapExecutionCompletedEvent": ("tests.test_models", "TestTapExecutionCompletedEvent"),
-    "TestTapExecutionStartedEvent": ("tests.test_models", "TestTapExecutionStartedEvent"),
+    "TestTapExecutionCompletedEvent": (
+        "tests.test_models",
+        "TestTapExecutionCompletedEvent",
+    ),
+    "TestTapExecutionStartedEvent": (
+        "tests.test_models",
+        "TestTapExecutionStartedEvent",
+    ),
     "TestUsersStream": ("tests.test_streams", "TestUsersStream"),
     "TestsFlextTapLdapConstants": ("tests.constants", "TestsFlextTapLdapConstants"),
     "TestsFlextTapLdapModels": ("tests.models", "TestsFlextTapLdapModels"),
@@ -118,10 +135,22 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "t": ("tests.typings", "t"),
     "tap_config_file": ("tests.e2e.conftest", "tap_config_file"),
     "test_data_dir": ("tests.conftest", "test_data_dir"),
-    "test_directory_processing_traverses_ldap_dit_with_mock_connection": ("tests.test_ldif_processor", "test_directory_processing_traverses_ldap_dit_with_mock_connection"),
-    "test_ldif_directory_processing_traverses_ldif_files": ("tests.test_ldif_processor", "test_ldif_directory_processing_traverses_ldif_files"),
-    "test_transform_entry_applies_rules": ("tests.test_ldif_processor", "test_transform_entry_applies_rules"),
-    "test_transform_entry_applies_schema_mappings": ("tests.test_ldif_processor", "test_transform_entry_applies_schema_mappings"),
+    "test_directory_processing_traverses_ldap_dit_with_mock_connection": (
+        "tests.test_ldif_processor",
+        "test_directory_processing_traverses_ldap_dit_with_mock_connection",
+    ),
+    "test_ldif_directory_processing_traverses_ldif_files": (
+        "tests.test_ldif_processor",
+        "test_ldif_directory_processing_traverses_ldif_files",
+    ),
+    "test_transform_entry_applies_rules": (
+        "tests.test_ldif_processor",
+        "test_transform_entry_applies_rules",
+    ),
+    "test_transform_entry_applies_schema_mappings": (
+        "tests.test_ldif_processor",
+        "test_transform_entry_applies_schema_mappings",
+    ),
     "u": ("tests.utilities", "u"),
 }
 
