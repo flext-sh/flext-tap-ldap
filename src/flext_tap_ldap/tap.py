@@ -22,7 +22,9 @@ from flext_tap_ldap.streams import FlextTapLdapStreams
 from flext_tap_ldap.typings import t
 
 logger = FlextLogger(__name__)
-_CONFIG_MAP_ADAPTER = TypeAdapter(dict[str, object], config=ConfigDict(strict=False))
+_CONFIG_MAP_ADAPTER = TypeAdapter(
+    dict[str, t.ContainerValue], config=ConfigDict(strict=False)
+)
 
 type TapLdapStream = (
     FlextTapLdapStreams.LDAPBaseStream
@@ -40,7 +42,7 @@ class FlextTapLdapTap(Tap):
 
     name: ClassVar[str] = "tap-ldap"
     config_class: ClassVar[type[FlextTapLdapSettings]] = FlextTapLdapSettings
-    config_jsonschema: ClassVar[dict[str, object]] = {
+    config_jsonschema: ClassVar[dict[str, t.ContainerValue]] = {
         "type": "object",
         "properties": {
             "host": {"type": "string", "description": "LDAP server host"},
@@ -110,7 +112,7 @@ class FlextTapLdapTap(Tap):
         """
         source_payload = source_config.model_dump(mode="python")
         raw_connection_config = source_payload.get("connection_config", {})
-        config_map: dict[str, object]
+        config_map: dict[str, t.ContainerValue]
         try:
             config_map = _CONFIG_MAP_ADAPTER.validate_python(raw_connection_config)
         except ValidationError:

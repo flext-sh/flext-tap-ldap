@@ -6,7 +6,7 @@ from collections.abc import Iterable, Iterator, Mapping
 from pathlib import Path
 from typing import ClassVar, override
 
-from flext_core import FlextLogger
+from flext_core import FlextLogger, t
 from flext_ldap import FlextLdapConnection
 from flext_ldif import FlextLdif, m
 from flext_meltano import (
@@ -15,20 +15,22 @@ from flext_meltano import (
 )
 from pydantic import ConfigDict, TypeAdapter, ValidationError
 
-_OBJECT_LIST_ADAPTER = TypeAdapter(list[object], config=ConfigDict(strict=False))
+_OBJECT_LIST_ADAPTER = TypeAdapter(
+    list[t.ContainerValue], config=ConfigDict(strict=False)
+)
 _COUNTER_MAP_ADAPTER = TypeAdapter(
     dict[str, int | str], config=ConfigDict(strict=False)
 )
 
 
-def _as_object_list(value: object) -> list[object]:
+def _as_object_list(value: t.ContainerValue) -> list[t.ContainerValue]:
     try:
         return _OBJECT_LIST_ADAPTER.validate_python(value)
     except ValidationError:
         return []
 
 
-def _as_counter_map(value: object) -> dict[str, int | str]:
+def _as_counter_map(value: t.ContainerValue) -> dict[str, int | str]:
     try:
         return _COUNTER_MAP_ADAPTER.validate_python(value)
     except ValidationError:
@@ -55,7 +57,7 @@ class FlextTapLdapLdifStreams:
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
             self._logger_instance: FlextLogger | None = None
-            schema: dict[str, object] = {
+            schema: dict[str, t.ContainerValue] = {
                 "type": "object",
                 "properties": {
                     "dn": {"type": "string", "description": "Distinguished Name"},
@@ -84,8 +86,8 @@ class FlextTapLdapLdifStreams:
             return self._logger_instance
 
         def get_records(
-            self, context: Mapping[str, object] | None = None
-        ) -> Iterator[dict[str, object]]:
+            self, context: Mapping[str, t.ContainerValue] | None = None
+        ) -> Iterator[dict[str, t.ContainerValue]]:
             """Get LDIF records using flext-ldif processing."""
             _ = context
             self.logger.info("Processing LDIF files using flext-ldif library")
@@ -114,13 +116,13 @@ class FlextTapLdapLdifStreams:
 
         def _convert_entry_to_record(
             self, flext_entry: m.Ldif.Entry
-        ) -> dict[str, object]:
+        ) -> dict[str, t.ContainerValue]:
             """Convert flext-ldif entry to Singer record."""
             dn_value = flext_entry.dn.value if flext_entry.dn is not None else ""
             attrs = flext_entry.attributes
             object_classes: list[str] = []
             entry_type = "other"
-            entry_attrs: Mapping[str, object] = {}
+            entry_attrs: Mapping[str, t.ContainerValue] = {}
             if attrs is not None:
                 object_classes = attrs.get_values("objectClass")
                 entry_type = self._classify_entry_type(object_classes)
@@ -143,7 +145,9 @@ class FlextTapLdapLdifStreams:
             files.sort()
             return files
 
-        def _normalize_object_classes(self, object_classes: object) -> list[str]:
+        def _normalize_object_classes(
+            self, object_classes: t.ContainerValue
+        ) -> list[str]:
             if isinstance(object_classes, str):
                 return [object_classes]
             object_values = _as_object_list(object_classes)
@@ -151,7 +155,7 @@ class FlextTapLdapLdifStreams:
                 return [str(value) for value in object_values if value is not None]
             return []
 
-        def _process_ldap_directory(self) -> Iterator[dict[str, object]]:
+        def _process_ldap_directory(self) -> Iterator[dict[str, t.ContainerValue]]:
             host_raw = self.config.get("ldap_host")
             base_dn_raw = self.config.get("ldap_base_dn")
             if not isinstance(host_raw, str) or not host_raw:
@@ -163,7 +167,9 @@ class FlextTapLdapLdifStreams:
             )
             return iter(())
 
-        def _process_ldif_file(self, ldif_file: str) -> Iterable[dict[str, object]]:
+        def _process_ldif_file(
+            self, ldif_file: str
+        ) -> Iterable[dict[str, t.ContainerValue]]:
             """Process single LDIF file using flext-ldif."""
             self.logger.info("Processing LDIF file: %s", ldif_file)
             try:
@@ -202,7 +208,7 @@ class FlextTapLdapLdifStreams:
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
             self._logger_instance: FlextLogger | None = None
-            schema: dict[str, object] = {
+            schema: dict[str, t.ContainerValue] = {
                 "type": "object",
                 "properties": {
                     "analysis_id": {
@@ -233,8 +239,8 @@ class FlextTapLdapLdifStreams:
             return self._logger_instance
 
         def get_records(
-            self, context: Mapping[str, object] | None = None
-        ) -> Iterator[dict[str, object]]:
+            self, context: Mapping[str, t.ContainerValue] | None = None
+        ) -> Iterator[dict[str, t.ContainerValue]]:
             """Get analysis records using flext-ldif analysis capabilities."""
             _ = context
             self.logger.info("Generating LDIF analysis using flext-ldif library")
@@ -325,7 +331,7 @@ class FlextTapLdapLdifStreams:
                     "object_classes": {},
                 }
 
-        def _analyze_ldif_file(self, ldif_file: str) -> dict[str, object]:
+        def _analyze_ldif_file(self, ldif_file: str) -> dict[str, t.ContainerValue]:
             """Analyze single LDIF file using flext-ldif."""
             self.logger.info("Analyzing LDIF file: %s", ldif_file)
             try:

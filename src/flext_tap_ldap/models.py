@@ -14,7 +14,7 @@ from datetime import UTC, datetime
 from typing import Annotated
 from uuid import uuid4
 
-from flext_core import FlextModels
+from flext_core import FlextModels, t
 from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
 from pydantic import Field, model_validator
@@ -75,7 +75,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             @model_validator(mode="before")
             @classmethod
-            def set_aggregate_id(cls, data: object) -> object:
+            def set_aggregate_id(cls, data: t.ContainerValue) -> t.ContainerValue:
                 """Set aggregate_id from stream_name if not provided."""
                 if (
                     isinstance(data, dict)
@@ -102,7 +102,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             @model_validator(mode="before")
             @classmethod
-            def set_aggregate_id(cls, data: object) -> object:
+            def set_aggregate_id(cls, data: t.ContainerValue) -> t.ContainerValue:
                 """Set aggregate_id from stream_name if not provided."""
                 if (
                     isinstance(data, dict)
@@ -120,9 +120,9 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             connection_id: str
             command: str
             tap_status: str = "created"
-            config: Annotated[object, Field(default_factory=dict)]
-            catalog: Annotated[object, Field(default_factory=dict)]
-            state: Annotated[object, Field(default_factory=dict)]
+            config: Annotated[t.ContainerValue, Field(default_factory=dict)]
+            catalog: Annotated[t.ContainerValue, Field(default_factory=dict)]
+            state: Annotated[t.ContainerValue, Field(default_factory=dict)]
             started_at: datetime | None = None
             completed_at: datetime | None = None
             records_extracted: int = 0
@@ -178,7 +178,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             @model_validator(mode="before")
             @classmethod
-            def set_aggregate_id(cls, data: object) -> object:
+            def set_aggregate_id(cls, data: t.ContainerValue) -> t.ContainerValue:
                 """Set aggregate_id from server_uri if not provided."""
                 if (
                     isinstance(data, dict)
