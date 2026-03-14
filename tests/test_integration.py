@@ -252,9 +252,7 @@ class TestFlextTapLdapIntegration:
         """Test pagination handling functionality."""
         mock_client_instance = mock_ldap_client.return_value
 
-        def mock_search(
-            *_args, **_kwargs: t.Scalar
-        ) -> Generator[dict[str, object]]:
+        def mock_search(*_args, **_kwargs: t.Scalar) -> Generator[dict[str, object]]:
             time.sleep(0)
             yield {
                 "dn": "uid=user1,ou=users,dc=test,dc=com",
