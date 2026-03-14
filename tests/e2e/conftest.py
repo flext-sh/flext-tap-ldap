@@ -8,12 +8,11 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import json
-import time
 from collections.abc import Generator, Iterator
 from pathlib import Path
 
 import pytest
-from flext_core import FlextLogger, FlextTypes as t
+from flext_core import FlextDecorators as d, FlextLogger
 from flext_tests import FlextTestsDocker
 from ldap3 import ALL, Connection, Server
 
@@ -27,7 +26,7 @@ def project_root() -> Path:
 
 
 @pytest.fixture(scope="session")
-def sample_catalog() -> dict[str, t.GeneralValueType]:
+def sample_catalog() -> dict[str, object]:
     """Create a sample Singer catalog for testing."""
     return {
         "streams": [
@@ -42,8 +41,8 @@ def sample_catalog() -> dict[str, t.GeneralValueType]:
                     },
                 },
                 "metadata": [],
-            },
-        ],
+            }
+        ]
     }
 
 
@@ -52,39 +51,26 @@ def ldap_container(project_root: Path) -> Iterator[None]:
     """Start and manage LDAP test container using FlextTestsDocker."""
     compose_file = project_root / "docker-compose.yml"
     logger.info("Starting OpenLDAP container...")
-
-    # Use FlextTestsDocker for unified Docker management
     docker_manager = FlextTestsDocker(workspace_root=project_root)
-
-    # Start containers using FlextTestsDocker
     start_result = docker_manager.compose_up(compose_file=str(compose_file))
-
     if start_result.is_failure:
         logger.error(f"Failed to start OpenLDAP container: {start_result.error}")
         raise RuntimeError(f"Container startup failed: {start_result.error}")
 
-    # Wait for LDAP to be ready
-    max_retries = 30
-    for i in range(max_retries):
-        try:
-            server = Server("localhost", port=10389, get_info=ALL)
-            conn = Connection(
-                server,
-                user="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-                password="REDACTED_LDAP_BIND_PASSWORD_password",
-                auto_bind=True,
-            )
-            conn.unbind()
-            logger.info("LDAP container is ready")
-            break
-        except (RuntimeError, ValueError, TypeError):
-            if i == max_retries - 1:
-                logger.exception("LDAP container failed to start")
-                raise
-            logger.info("Waiting for LDAP container to be ready...")
-            time.sleep(2)
+    @d.retry(max_attempts=30, delay_seconds=2.0, backoff_strategy="linear")
+    def _check_ldap_ready() -> None:
+        server = Server("localhost", port=10389, get_info=ALL)
+        conn = Connection(
+            server,
+            user="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
+            password="REDACTED_LDAP_BIND_PASSWORD_password",
+            auto_bind=True,
+        )
+        conn.unbind()
+
+    _check_ldap_ready()
+    logger.info("LDAP container is ready")
     yield
-    # Cleanup
     logger.info("Stopping OpenLDAP container...")
     stop_result = docker_manager.compose_down(compose_file=str(compose_file))
     if stop_result.is_failure:
@@ -122,7 +108,7 @@ def tap_config_file(tmp_path: Path, _ldap_container: None) -> Path:
 
 
 @pytest.fixture
-def catalog_file(tmp_path: Path, sample_catalog: dict[str, t.GeneralValueType]) -> Path:
+def catalog_file(tmp_path: Path, sample_catalog: dict[str, object]) -> Path:
     """Create catalog file for testing."""
     catalog_file = tmp_path / "catalog.json"
     catalog_file.write_text(json.dumps(sample_catalog, indent=2))

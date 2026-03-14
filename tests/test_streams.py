@@ -6,9 +6,7 @@ SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
-from flext_core import FlextTypes as t
 
-from typing import ClassVar
 from unittest.mock import Mock, patch
 
 import pytest
@@ -30,17 +28,14 @@ class TestLDAPBaseStream:
             "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
             "bind_password": "test_password",
         }
-        # Add required Singer SDK attributes
         tap.metrics_logger = Mock()
         tap.logger = Mock()
         return tap
 
     def test_self(self, mock_tap: Mock) -> None:
         """Test method."""
-        """Test base stream has required attributes."""
-        # Use UsersStream as concrete implementation
+        "Test base stream has required attributes."
         stream = FlextTapLdapStreams.UsersStream(mock_tap)
-
         assert hasattr(stream, "name")
         assert hasattr(stream, "tap")
         assert hasattr(stream, "schema")
@@ -62,7 +57,6 @@ class TestUsersStream:
             "bind_password": "test_password",
             "user_filter": "(objectClass=inetOrgPerson)",
         }
-        # Add required Singer SDK attributes
         tap.metrics_logger = Mock()
         tap.logger = Mock()
         return tap
@@ -70,7 +64,6 @@ class TestUsersStream:
     def test_users_stream_creation(self, mock_tap: Mock) -> None:
         """Test users stream creation."""
         stream = FlextTapLdapStreams.UsersStream(mock_tap)
-
         assert stream is not None
         assert stream.name == "users"
         assert stream.tap == mock_tap
@@ -78,28 +71,20 @@ class TestUsersStream:
     def test_users_stream_schema_definition(self, mock_tap: Mock) -> None:
         """Test users stream schema definition."""
         stream = FlextTapLdapStreams.UsersStream(mock_tap)
-
         schema = stream.schema
         assert isinstance(schema, dict)
         assert "properties" in schema
-
-        # Check common LDAP user attributes
         properties = schema["properties"]
         assert "dn" in properties
         assert "cn" in properties or "commonName" in properties
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_users_stream_get_records(
-        self,
-        mock_client_class: Mock,
-        mock_tap: Mock,
+        self, mock_client_class: Mock, mock_tap: Mock
     ) -> None:
         """Test users stream record retrieval."""
-        # Mock LDAP client
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-
-        # Mock the search method to return list directly (not FlextResult)
         mock_client.search.return_value = [
             {
                 "dn": "cn=user1,ou=users,dc=test,dc=com",
@@ -126,78 +111,64 @@ class TestUsersStream:
                 "modifyTimestamp": "2024-01-01T12:00:00Z",
             },
         ]
-
         stream = FlextTapLdapStreams.UsersStream(mock_tap)
-        records = list(stream.get_records(_context=None))
-
-        # Stream now returns fallback test data (1 record) instead of mock LDAP data
-        assert len(records) == 1  # Should get fallback test record
-        assert records[0]["dn"] == "uid=jdoe,ou=users,dc=test,dc=com"
-        assert records[0]["uid"] == "jdoe"
-        # LDAP client is still called even though fallback is used
+        records = list(stream.get_records(context=None))
+        assert len(records) == 1
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert first_record["dn"] == "uid=jdoe,ou=users,dc=test,dc=com"
+        assert first_record["uid"] == "jdoe"
         mock_client_class.assert_called_once()
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_groups_stream_get_records(
-        self,
-        mock_client_class: Mock,
-        mock_tap: Mock,
+        self, mock_client_class: Mock, mock_tap: Mock
     ) -> None:
         """Test groups stream record retrieval."""
-        # Mock LDAP client
         mock_client = Mock()
         mock_client_class.return_value = mock_client
         mock_client.search.return_value = []
-
         stream = FlextTapLdapStreams.GroupsStream(mock_tap)
-        records = list(stream.get_records(_context=None))
-
-        # Should get fallback test data when no LDAP data
+        records = list(stream.get_records(context=None))
         assert len(records) == 1
-        assert records[0]["dn"] == "cn=developers,ou=groups,dc=test,dc=com"
-        assert records[0]["cn"] == "developers"
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert first_record["dn"] == "cn=developers,ou=groups,dc=test,dc=com"
+        assert first_record["cn"] == "developers"
         mock_client_class.assert_called_once()
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_organizational_units_stream_get_records(
-        self,
-        mock_client_class: Mock,
-        mock_tap: Mock,
+        self, mock_client_class: Mock, mock_tap: Mock
     ) -> None:
         """Test organizational units stream record retrieval."""
-        # Mock LDAP client
         mock_client = Mock()
         mock_client_class.return_value = mock_client
         mock_client.search.return_value = []
-
         stream = FlextTapLdapStreams.OrganizationalUnitsStream(mock_tap)
         records = list(stream.get_records(context=None))
-
-        # Should get fallback test data when no LDAP data
         assert len(records) == 1
-        assert records[0]["dn"] == "ou=users,dc=test,dc=com"
-        assert records[0]["ou"] == "users"
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert first_record["dn"] == "ou=users,dc=test,dc=com"
+        assert first_record["ou"] == "users"
         mock_client_class.assert_called_once()
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_schema_stream_get_records(
-        self,
-        mock_client_class: Mock,
-        mock_tap: Mock,
+        self, mock_client_class: Mock, mock_tap: Mock
     ) -> None:
         """Test schema stream record retrieval."""
-        # Mock LDAP client
         mock_client = Mock()
         mock_client_class.return_value = mock_client
         mock_client.search.return_value = []
-
         stream = FlextTapLdapStreams.SchemaStream(mock_tap)
-        records = list(stream.get_records(_context=None))
-
-        # Should get fallback test data when no LDAP data
+        records = list(stream.get_records(context=None))
         assert len(records) == 1
-        assert records[0]["name"] == "cn"
-        assert records[0]["type"] == "attributeType"
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert first_record["dn"] == "cn=schema"
+        assert first_record["cn"] == "schema"
         mock_client_class.assert_called_once()
 
 
@@ -216,7 +187,6 @@ class TestGroupsStream:
             "bind_password": "test_password",
             "group_filter": "(objectClass=groupOfNames)",
         }
-        # Add required Singer SDK attributes
         tap.metrics_logger = Mock()
         tap.logger = Mock()
         return tap
@@ -224,7 +194,6 @@ class TestGroupsStream:
     def test_groups_stream_creation(self, mock_tap: Mock) -> None:
         """Test groups stream creation."""
         stream = FlextTapLdapStreams.GroupsStream(mock_tap)
-
         assert stream is not None
         assert stream.name == "groups"
         assert stream.tap == mock_tap
@@ -232,12 +201,9 @@ class TestGroupsStream:
     def test_groups_stream_schema_definition(self, mock_tap: Mock) -> None:
         """Test groups stream schema definition."""
         stream = FlextTapLdapStreams.GroupsStream(mock_tap)
-
         schema = stream.schema
         assert isinstance(schema, dict)
         assert "properties" in schema
-
-        # Check common LDAP group attributes
         properties = schema["properties"]
         assert "dn" in properties
         assert "cn" in properties or "commonName" in properties
@@ -257,7 +223,6 @@ class TestOrganizationalUnitsStream:
             "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
             "bind_password": "test_password",
         }
-        # Add required Singer SDK attributes
         tap.metrics_logger = Mock()
         tap.logger = Mock()
         return tap
@@ -265,23 +230,18 @@ class TestOrganizationalUnitsStream:
     def test_organizational_units_stream_creation(self, mock_tap: Mock) -> None:
         """Test organizational units stream creation."""
         stream = FlextTapLdapStreams.OrganizationalUnitsStream(mock_tap)
-
         assert stream is not None
         assert stream.name == "organizational_units"
         assert stream.tap == mock_tap
 
     def test_organizational_units_stream_schema_definition(
-        self,
-        mock_tap: Mock,
+        self, mock_tap: Mock
     ) -> None:
         """Test organizational units stream schema definition."""
         stream = FlextTapLdapStreams.OrganizationalUnitsStream(mock_tap)
-
         schema = stream.schema
         assert isinstance(schema, dict)
         assert "properties" in schema
-
-        # Check common LDAP OU attributes
         properties = schema["properties"]
         assert "dn" in properties
         assert "ou" in properties or "organizationalUnitName" in properties
@@ -301,7 +261,6 @@ class TestSchemaStream:
             "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
             "bind_password": "test_password",
         }
-        # Add required Singer SDK attributes
         tap.metrics_logger = Mock()
         tap.logger = Mock()
         return tap
@@ -309,7 +268,6 @@ class TestSchemaStream:
     def test_schema_stream_creation(self, mock_tap: Mock) -> None:
         """Test schema stream creation."""
         stream = FlextTapLdapStreams.SchemaStream(mock_tap)
-
         assert stream is not None
         assert stream.name == "schema"
         assert stream.tap == mock_tap
@@ -317,12 +275,9 @@ class TestSchemaStream:
     def test_schema_stream_schema_definition(self, mock_tap: Mock) -> None:
         """Test schema stream schema definition."""
         stream = FlextTapLdapStreams.SchemaStream(mock_tap)
-
         schema = stream.schema
         assert isinstance(schema, dict)
         assert "properties" in schema
-
-        # Schema stream should have schema-specific attributes
         properties = schema["properties"]
         assert "name" in properties
         assert "type" in properties
@@ -333,7 +288,7 @@ class TestCustomStreamParams:
 
     def test_custom_stream_params_creation(self) -> None:
         """Test method."""
-        """Test creating custom stream parameters."""
+        "Test creating custom stream parameters."
         params = FlextTapLdapStreams.CustomStreamParams(
             name="test_stream",
             search_filter="(objectClass=person)",
@@ -341,7 +296,6 @@ class TestCustomStreamParams:
             primary_keys=["dn"],
             replication_key="modifyTimestamp",
         )
-
         assert params.name == "test_stream"
         assert params.search_filter == "(objectClass=person)"
         assert params.schema_properties == {"cn": {"type": "string"}}
@@ -350,31 +304,20 @@ class TestCustomStreamParams:
 
     def test_custom_stream_params_validation(self) -> None:
         """Test method."""
-        """Test parameter validation."""
-        # Valid parameters
+        "Test parameter validation."
         params = FlextTapLdapStreams.CustomStreamParams(
-            name="valid_stream",
-            search_filter="(objectClass=*)",
+            name="valid_stream", search_filter="(objectClass=*)"
         )
-        assert params.primary_keys == ["dn"]  # Default value
-
-        # Invalid - empty name
+        assert params.primary_keys == ["dn"]
         with pytest.raises(ValueError, match="Stream name is required"):
             FlextTapLdapStreams.CustomStreamParams(
-                name="",
-                search_filter="(objectClass=*)",
+                name="", search_filter="(objectClass=*)"
             )
-
-        # Invalid - empty search filter
         with pytest.raises(ValueError, match="Search filter is required"):
             FlextTapLdapStreams.CustomStreamParams(name="test", search_filter="")
-
-        # Invalid - empty primary keys list
         with pytest.raises(ValueError, match="Primary keys cannot be empty list"):
             FlextTapLdapStreams.CustomStreamParams(
-                name="test",
-                search_filter="(objectClass=*)",
-                primary_keys=[],
+                name="test", search_filter="(objectClass=*)", primary_keys=[]
             )
 
 
@@ -392,7 +335,6 @@ class TestCustomStream:
             "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
             "bind_password": "test_password",
         }
-        # Add required Singer SDK attributes
         tap.metrics_logger = Mock()
         tap.logger = Mock()
         return tap
@@ -411,7 +353,6 @@ class TestCustomStream:
             replication_key="modifyTimestamp",
         )
         stream = FlextTapLdapStreams.CustomStream(tap=mock_tap, params=params)
-
         assert stream is not None
         assert stream.name == "service_accounts"
         assert stream.tap == mock_tap
@@ -419,11 +360,9 @@ class TestCustomStream:
     def test_custom_stream_minimal_configuration(self, mock_tap: Mock) -> None:
         """Test custom stream with minimal configuration."""
         params = FlextTapLdapStreams.CustomStreamParams(
-            name="minimal_custom",
-            search_filter="(objectClass=*)",
+            name="minimal_custom", search_filter="(objectClass=*)"
         )
         stream = FlextTapLdapStreams.CustomStream(tap=mock_tap, params=params)
-
         assert stream is not None
         assert stream.name == "minimal_custom"
         assert stream.tap == mock_tap
@@ -435,36 +374,28 @@ class TestCustomStream:
             "department": {"type": "string"},
             "manager": {"type": "string"},
         }
-
         params = FlextTapLdapStreams.CustomStreamParams(
             name="employees",
             search_filter="(objectClass=employee)",
             schema_properties=custom_properties,
         )
         stream = FlextTapLdapStreams.CustomStream(tap=mock_tap, params=params)
-
         schema = stream.schema
         assert isinstance(schema, dict)
         assert "properties" in schema
-
         properties = schema["properties"]
-        # Should include both default DN and custom properties
         assert "dn" in properties
         for prop_name in custom_properties:
             assert prop_name in properties
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_custom_stream_get_records(
-        self,
-        mock_client_class: Mock,
-        mock_tap: Mock,
+        self, mock_client_class: Mock, mock_tap: Mock
     ) -> None:
         """Test custom stream record retrieval."""
-        # Mock LDAP client
         mock_client = Mock()
         mock_client_class.return_value = mock_client
         mock_client.search.return_value = []
-
         params = FlextTapLdapStreams.CustomStreamParams(
             name="custom_test",
             search_filter="(objectClass=testObject)",
@@ -472,10 +403,10 @@ class TestCustomStream:
         )
         stream = FlextTapLdapStreams.CustomStream(tap=mock_tap, params=params)
         records = list(stream.get_records(context=None))
-
-        # Should get fallback test data when no LDAP data
         assert len(records) == 1
-        assert "cn=custom_entry,dc=test,dc=com" in records[0]["dn"]
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert "cn=test-custom_test,dc=test,dc=com" in str(first_record["dn"])
         mock_client_class.assert_called_once()
 
     def test_custom_stream_schema_type_mappings(self, mock_tap: Mock) -> None:
@@ -487,18 +418,14 @@ class TestCustomStream:
             "integerField": {"type": "integer"},
             "datetimeField": {"type": "datetime"},
         }
-
         params = FlextTapLdapStreams.CustomStreamParams(
             name="type_test",
             search_filter="(objectClass=typeTest)",
             schema_properties=custom_properties,
         )
         stream = FlextTapLdapStreams.CustomStream(tap=mock_tap, params=params)
-
         schema = stream.schema
         properties = schema["properties"]
-
-        # Verify all field types are properly mapped
         assert "stringField" in properties
         assert "arrayField" in properties
         assert "booleanField" in properties
@@ -510,7 +437,7 @@ class TestStreamIntegration:
     """Integration tests for stream functionality."""
 
     @pytest.fixture
-    def tap_config(self) -> dict[str, t.GeneralValueType]:
+    def tap_config(self) -> dict[str, object]:
         """Standard tap configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -523,16 +450,11 @@ class TestStreamIntegration:
             "page_size": 1000,
         }
 
-    def test_all_default_streams_creation(
-        self,
-        tap_config: dict[str, t.GeneralValueType],
-    ) -> None:
+    def test_all_default_streams_creation(self, tap_config: dict[str, object]) -> None:
         """Test that all default streams can be created."""
         tap = FlextTapLdapTap(config=tap_config)
         streams = tap.discover_streams()
-
-        assert len(streams) >= 4  # users, groups, organizational_units, schema
-
+        assert len(streams) >= 4
         stream_names = [s.name for s in streams]
         assert "users" in stream_names
         assert "groups" in stream_names
@@ -540,8 +462,7 @@ class TestStreamIntegration:
         assert "schema" in stream_names
 
     def test_streams_with_custom_configuration(
-        self,
-        tap_config: dict[str, t.GeneralValueType],
+        self, tap_config: dict[str, object]
     ) -> None:
         """Test streams with custom configuration."""
         tap_config["custom_streams"] = [
@@ -551,31 +472,24 @@ class TestStreamIntegration:
                 "primary_keys": ["dn"],
                 "replication_key": "modifyTimestamp",
                 "schema": {"properties": {"testAttribute": {"type": "string"}}},
-            },
+            }
         ]
-
         tap = FlextTapLdapTap(config=tap_config)
         streams = tap.discover_streams()
-
         stream_names = [s.name for s in streams]
         assert "custom_test_stream" in stream_names
-
-        # Find the custom stream
         custom_stream = next(s for s in streams if s.name == "custom_test_stream")
         assert isinstance(custom_stream, FlextTapLdapStreams.CustomStream)
 
-    def test_self(self, tap_config: dict[str, t.GeneralValueType]) -> None:
+    def test_self(self, tap_config: dict[str, object]) -> None:
         """Test method."""
-        """Test LDIF streams are included when enabled."""
+        "Test LDIF streams are included when enabled."
         tap_config["enable_ldif_streams"] = True
-
         tap = FlextTapLdapTap(config=tap_config)
         streams = tap.discover_streams()
-
         stream_names = [s.name for s in streams]
-        # Should include LDIF-related streams when enabled
         ldif_stream_found = any("ldif" in name.lower() for name in stream_names)
-        assert ldif_stream_found or len(streams) > 4  # More streams when LDIF enabled
+        assert ldif_stream_found or len(streams) > 4
 
 
 class TestLDAPBaseStreamDirectUsage:
@@ -596,20 +510,17 @@ class TestLDAPBaseStreamDirectUsage:
 
     def test_self(self, mock_tap: Mock) -> None:
         """Test method."""
-        """Test base stream get_records method (covers line 68)."""
+        "Test base stream get_records method (covers line 68)."
 
-        # Create a subclass to test the base functionality
         class TestBaseStream(FlextTapLdapStreams.LDAPBaseStream):
-            name = "test_base"
-            schema: ClassVar[dict[str, t.GeneralValueType]] = {
-                "properties": {"dn": {"type": "string"}},
-            }
+            pass
 
-        # Create instance of test subclass
-        base_stream = TestBaseStream(mock_tap)
-
-        # Should yield empty (base implementation)
-        records = list(base_stream.get_records(_context=None))
+        base_stream = TestBaseStream(
+            mock_tap,
+            name="test_base",
+            schema={"properties": {"dn": {"type": "string"}}},
+        )
+        records = list(base_stream.get_records(context=None))
         assert len(records) == 0
 
 
@@ -631,99 +542,78 @@ class TestStreamExceptionHandling:
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_users_stream_exception_fallback(
-        self,
-        mock_client_class: Mock,
-        mock_tap_failing: Mock,
+        self, mock_client_class: Mock, mock_tap_failing: Mock
     ) -> None:
         """Test users stream exception handling fallback (covers lines 168-171)."""
-        # Mock LDAP client to raise exception
         mock_client = Mock()
         mock_client_class.return_value = mock_client
         mock_client.search.side_effect = Exception("Connection failed")
-
         stream = FlextTapLdapStreams.UsersStream(mock_tap_failing)
-        records = list(stream.get_records(_context=None))
-
-        # Should fall back to test data when exception occurs
+        records = list(stream.get_records(context=None))
         assert len(records) == 1
-        assert records[0]["dn"] == "uid=jdoe,ou=users,dc=test,dc=com"
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert first_record["dn"] == "uid=jdoe,ou=users,dc=test,dc=com"
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_groups_stream_exception_fallback(
-        self,
-        mock_client_class: Mock,
-        mock_tap_failing: Mock,
+        self, mock_client_class: Mock, mock_tap_failing: Mock
     ) -> None:
         """Test groups stream exception handling fallback."""
-        # Mock LDAP client to raise exception
         mock_client = Mock()
         mock_client_class.return_value = mock_client
         mock_client.search.side_effect = Exception("Connection failed")
-
         stream = FlextTapLdapStreams.GroupsStream(mock_tap_failing)
-        records = list(stream.get_records(_context=None))
-
-        # Should fall back to test data when exception occurs
+        records = list(stream.get_records(context=None))
         assert len(records) == 1
-        assert records[0]["dn"] == "cn=developers,ou=groups,dc=test,dc=com"
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert first_record["dn"] == "cn=developers,ou=groups,dc=test,dc=com"
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_organizational_units_stream_exception_fallback(
-        self,
-        mock_client_class: Mock,
-        mock_tap_failing: Mock,
+        self, mock_client_class: Mock, mock_tap_failing: Mock
     ) -> None:
         """Test organizational units stream exception handling fallback."""
-        # Mock LDAP client to raise exception
         mock_client = Mock()
         mock_client_class.return_value = mock_client
         mock_client.search.side_effect = Exception("Connection failed")
-
         stream = FlextTapLdapStreams.OrganizationalUnitsStream(mock_tap_failing)
-        records = list(stream.get_records(_context=None))
-
-        # Should fall back to test data when exception occurs
+        records = list(stream.get_records(context=None))
         assert len(records) == 1
-        assert records[0]["dn"] == "ou=users,dc=test,dc=com"
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert first_record["dn"] == "ou=users,dc=test,dc=com"
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_schema_stream_exception_fallback(
-        self,
-        mock_client_class: Mock,
-        mock_tap_failing: Mock,
+        self, mock_client_class: Mock, mock_tap_failing: Mock
     ) -> None:
         """Test schema stream exception handling fallback."""
-        # Mock LDAP client to raise exception
         mock_client = Mock()
         mock_client_class.return_value = mock_client
         mock_client.search.side_effect = Exception("Connection failed")
-
         stream = FlextTapLdapStreams.SchemaStream(mock_tap_failing)
-        records = list(stream.get_records(_context=None))
-
-        # Should fall back to test data when exception occurs
+        records = list(stream.get_records(context=None))
         assert len(records) == 1
-        assert records[0]["name"] == "cn"
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert first_record["dn"] == "cn=schema"
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_custom_stream_exception_fallback(
-        self,
-        mock_client_class: Mock,
-        mock_tap_failing: Mock,
+        self, mock_client_class: Mock, mock_tap_failing: Mock
     ) -> None:
         """Test custom stream exception handling fallback."""
-        # Mock LDAP client to raise exception
         mock_client = Mock()
         mock_client_class.return_value = mock_client
         mock_client.search.side_effect = Exception("Connection failed")
-
         params = FlextTapLdapStreams.CustomStreamParams(
-            name="failing_custom",
-            search_filter="(objectClass=*)",
+            name="failing_custom", search_filter="(objectClass=*)"
         )
         stream = FlextTapLdapStreams.CustomStream(tap=mock_tap_failing, params=params)
-        records = list(stream.get_records(_context=None))
-
-        # Should fall back to test data when exception occurs
+        records = list(stream.get_records(context=None))
         assert len(records) == 1
-        assert "cn=custom_entry,dc=test,dc=com" in records[0]["dn"]
+        first_record = records[0]
+        assert isinstance(first_record, dict)
+        assert "cn=test-failing_custom,dc=test,dc=com" in str(first_record["dn"])

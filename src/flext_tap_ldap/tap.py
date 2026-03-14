@@ -9,16 +9,28 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import ClassVar, override
 
-from flext_core import FlextLogger, FlextTypes as t
-from flext_meltano import FlextMeltanoStream as Stream, FlextMeltanoTap as Tap
+from flext_core import FlextLogger, r
+from flext_meltano import FlextMeltanoTapAbstractions as Tap, m
+from pydantic import ConfigDict, TypeAdapter, ValidationError
 
+from flext_tap_ldap.constants import c
 from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
 from flext_tap_ldap.settings import FlextTapLdapSettings
 from flext_tap_ldap.streams import FlextTapLdapStreams
+from flext_tap_ldap.typings import t
 
 logger = FlextLogger(__name__)
+_CONFIG_MAP_ADAPTER = TypeAdapter(
+    dict[str, t.ContainerValue], config=ConfigDict(strict=False)
+)
+
+type TapLdapStream = (
+    FlextTapLdapStreams.LDAPBaseStream
+    | FlextTapLdapLdifStreams.LdifStream
+    | FlextTapLdapLdifStreams.LdifAnalysisStream
+)
 
 
 class FlextTapLdapTap(Tap):
@@ -28,19 +40,15 @@ class FlextTapLdapTap(Tap):
     into single unified class following FlextTapLdap[Module] pattern.
     """
 
-    name: str = "tap-ldap"
-    config_class = FlextTapLdapSettings
-
-    # NOTE(@flext-team): Use centralized LDAP schema when flext-meltano common_schemas is available
-    # Issue: https://github.com/flext-team/flext-meltano/issues/1
-    config_jsonschema: ClassVar[dict[str, t.GeneralValueType]] = {
+    name: ClassVar[str] = "tap-ldap"
+    config_class: ClassVar[type[FlextTapLdapSettings]] = FlextTapLdapSettings
+    config_jsonschema: ClassVar[dict[str, t.ContainerValue]] = {
         "type": "object",
         "properties": {
-            # Basic LDAP connection properties
             "host": {"type": "string", "description": "LDAP server host"},
             "port": {
                 "type": "integer",
-                "default": 389,
+                "default": c.TapLdap.DEFAULT_PORT,
                 "description": "LDAP server port",
             },
             "bind_dn": {"type": "string", "description": "Bind DN for authentication"},
@@ -54,10 +62,9 @@ class FlextTapLdapTap(Tap):
                 "default": False,
                 "description": "Use SSL connection",
             },
-            # Tap-specific properties
             "page_size": {
                 "type": "integer",
-                "default": 1000,
+                "default": c.TapLdap.DEFAULT_PAGE_SIZE,
                 "description": "Page size for paged results",
             },
             "user_filter": {
@@ -70,7 +77,6 @@ class FlextTapLdapTap(Tap):
                 "default": "(objectClass=groupOfNames)",
                 "description": "LDAP filter for group entries",
             },
-            # LDIF processing properties
             "ldif_files": {
                 "type": "array",
                 "items": {"type": "string"},
@@ -92,55 +98,55 @@ class FlextTapLdapTap(Tap):
         },
     }
 
-    def discover_streams(self) -> list[Stream]:
+    @override
+    def discover_streams(
+        self,
+        source_config: m.Meltano.DataSourceConfig
+        | m.Meltano.TapConfig
+        | m.Meltano.TapInstance,
+    ) -> r[t.Meltano.Singer.StreamCatalog]:
         """Discover available streams.
 
         Discovers standard LDAP streams (users, groups, organizational units, schema)
         and optionally LDIF processing streams and custom streams based on configuration.
         """
-        streams: list[Stream] = []
+        source_payload = source_config.model_dump(mode="python")
+        raw_connection_config = source_payload.get("connection_config", {})
+        config_map: dict[str, t.ContainerValue]
+        try:
+            config_map = _CONFIG_MAP_ADAPTER.validate_python(raw_connection_config)
+        except ValidationError:
+            config_map = {}
 
-        # Standard LDAP streams (always available)
-        streams.extend(
-            [
-                FlextTapLdapStreams.UsersStream(self),
-                FlextTapLdapStreams.GroupsStream(self),
-                FlextTapLdapStreams.OrganizationalUnitsStream(self),
-                FlextTapLdapStreams.SchemaStream(self),
-            ],
-        )
+        streams: list[TapLdapStream] = [
+            FlextTapLdapStreams.UsersStream(self),
+            FlextTapLdapStreams.GroupsStream(self),
+            FlextTapLdapStreams.OrganizationalUnitsStream(self),
+            FlextTapLdapStreams.SchemaStream(self),
+        ]
+        if bool(config_map.get("enable_ldif_streams", False)):
+            streams.extend([
+                FlextTapLdapLdifStreams.LdifStream(self),
+                FlextTapLdapLdifStreams.LdifAnalysisStream(self),
+            ])
 
-        # Add LDIF streams if enabled
-        if self.config.get("enable_ldif_streams", False):
-            streams.extend(
-                [
-                    FlextTapLdapLdifStreams.LdifStream(self),
-                    FlextTapLdapLdifStreams.LdifAnalysisStream(self),
-                ],
-            )
-
-        # Add custom streams if configured
-        custom_streams_config: list[dict[str, t.GeneralValueType]] = self.config.get(
-            "custom_streams",
-            [],
-        )
-        for custom_config in custom_streams_config:
-            params = FlextTapLdapStreams.CustomStreamParams(
-                name=custom_config.get("name", ""),
-                search_filter=custom_config.get("search_filter", ""),
-                schema_properties=custom_config.get("schema", {}).get("properties", {}),
-                primary_keys=custom_config.get("primary_keys"),
-                replication_key=custom_config.get("replication_key"),
-            )
-            stream = FlextTapLdapStreams.CustomStream(tap=self, params=params)
-            streams.append(stream)
-
-        return streams
+        catalog: t.Meltano.Singer.StreamCatalog = {
+            "streams": [
+                {
+                    "stream": stream.name,
+                    "schema": {},
+                }
+                for stream in streams
+            ]
+        }
+        return r[t.Meltano.Singer.StreamCatalog].ok(catalog)
 
 
 def main() -> None:
     """Run the main entry point for the tap."""
-    FlextTapLdapTap.cli()
+    execute_result = FlextTapLdapTap().execute()
+    if execute_result.is_failure:
+        logger.error("Tap execution failed", error=execute_result.error or "")
 
 
 if __name__ == "__main__":

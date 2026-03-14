@@ -6,7 +6,6 @@ SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
-from flext_core import FlextTypes as t
 
 from unittest.mock import MagicMock, patch
 
@@ -19,7 +18,7 @@ class TestFlextTapLdapTapUnit:
     """Unit tests for FlextTapLdapTap."""
 
     @pytest.fixture
-    def config(self) -> dict[str, t.GeneralValueType]:
+    def config(self) -> dict[str, object]:
         """Create a test configuration fixture."""
         return {
             "ldap_host": "test.ldap.com",
@@ -31,7 +30,7 @@ class TestFlextTapLdapTapUnit:
             "page_size": 1000,
         }
 
-    def test_tap_initialization(self, config: dict[str, t.GeneralValueType]) -> None:
+    def test_tap_initialization(self, config: dict[str, object]) -> None:
         """Test tap initialization."""
         tap = FlextTapLdapTap(config=config)
         if tap.name != "tap-ldap":
@@ -39,12 +38,10 @@ class TestFlextTapLdapTapUnit:
             raise AssertionError(msg)
         assert tap.config == config
 
-    def test_stream_discovery(self, config: dict[str, t.GeneralValueType]) -> None:
+    def test_stream_discovery(self, config: dict[str, object]) -> None:
         """Test stream discovery."""
         tap = FlextTapLdapTap(config=config)
         streams = tap.discover_streams()
-
-        # Check default streams
         stream_names = [s.name for s in streams]
         if "users" not in stream_names:
             stream_error: str = f"Expected {'users'} in {stream_names}"
@@ -58,7 +55,7 @@ class TestFlextTapLdapTapUnit:
             count_error: str = f"Expected {4}, got {len(streams)}"
             raise AssertionError(count_error)
 
-    def test_custom_streams_configuration(self, config: dict[str, t.GeneralValueType]) -> None:
+    def test_custom_streams_configuration(self, config: dict[str, object]) -> None:
         """Test custom streams configuration."""
         config["custom_streams"] = [
             {
@@ -67,17 +64,12 @@ class TestFlextTapLdapTapUnit:
                 "primary_keys": ["dn"],
                 "replication_key": "modifyTimestamp",
                 "schema": {
-                    "properties": {
-                        "dn": {"type": "string"},
-                        "uid": {"type": "string"},
-                    },
+                    "properties": {"dn": {"type": "string"}, "uid": {"type": "string"}}
                 },
-            },
+            }
         ]
-
         tap = FlextTapLdapTap(config=config)
         streams = tap.discover_streams()
-
         stream_names = [s.name for s in streams]
         if "service_accounts" not in stream_names:
             stream_error: str = f"Expected {'service_accounts'} in {stream_names}"
@@ -86,19 +78,16 @@ class TestFlextTapLdapTapUnit:
             count_error: str = f"Expected {5}, got {len(streams)}"
             raise AssertionError(count_error)
 
-    def test_catalog_generation(self, config: dict[str, t.GeneralValueType]) -> None:
+    def test_catalog_generation(self, config: dict[str, object]) -> None:
         """Test catalog generation and metadata."""
         tap = FlextTapLdapTap(config=config)
         catalog = tap.catalog_dict
-
         if "streams" not in catalog:
             catalog_error: str = f"Expected {'streams'} in {catalog}"
             raise AssertionError(catalog_error)
         if len(catalog["streams"]) < 4:
             count_error: str = f"Expected {len(catalog['streams'])} >= {4}"
             raise AssertionError(count_error)
-
-        # Check users stream
         users_stream = next(
             s for s in catalog["streams"] if s["tap_stream_id"] == "users"
         )
@@ -116,16 +105,11 @@ class TestFlextTapLdapTapUnit:
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_stream_records(
-        self,
-        mock_client_class: MagicMock,
-        config: dict[str, t.GeneralValueType],
+        self, mock_client_class: MagicMock, config: dict[str, object]
     ) -> None:
         """Test streaming records from LDAP."""
-        # Mock LDAP client
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
-
-        # Mock search results
         mock_client.search.return_value = [
             {
                 "dn": "uid=jdoe,ou=users,dc=test,dc=com",
@@ -135,24 +119,19 @@ class TestFlextTapLdapTapUnit:
                     "mail": "jdoe@test.com",
                     "objectClass": ["inetOrgPerson", "person"],
                 },
-            },
+            }
         ]
-
         tap = FlextTapLdapTap(config=config)
         streams = tap.discover_streams()
         users_stream = next(s for s in streams if s.name == "users")
-
-        # Singer SDK get_records returns tuples (record, context) or just records
-        # We need to handle both cases
         raw_records = list(users_stream.get_records(None))
-        records: list[dict[str, t.GeneralValueType]] = []
+        records: list[dict[str, object]] = []
         for item in raw_records:
             if isinstance(item, tuple):
                 record, _context = item
                 records.append(record)
             else:
                 records.append(item)
-
         if len(records) != 1:
             count_error: str = f"Expected {1}, got {len(records)}"
             raise AssertionError(count_error)

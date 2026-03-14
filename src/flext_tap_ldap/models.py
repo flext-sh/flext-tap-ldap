@@ -11,18 +11,16 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Annotated
+from uuid import uuid4
 
-from flext_core import FlextModels, FlextTypes as t
-from flext_core.utilities import u
+from flext_core import FlextModels, t
 from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
-from pydantic import BaseModel, Field
-
-# Aliases for convenience
-m_core = FlextModels
+from pydantic import Field, model_validator
 
 
-class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
+class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
     """Complete models for LDAP tap operations extending FlextModels.
 
     Provides standardized models for all LDAP tap domain entities including:
@@ -38,116 +36,157 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
     class TapLdap:
         """Tap LDAP namespace for cross-project access."""
 
-        def __init_subclass__(cls, **kwargs: t.GeneralValueType) -> None:
-            """Warn when FlextMeltanoTapLdapModels is subclassed directly."""
-            super().__init_subclass__(**kwargs)
-            u.Deprecation.warn_once(
-                f"subclass:{cls.__name__}",
-                "Subclassing FlextMeltanoTapLdapModels is deprecated. Use FlextModels directly with composition instead.",
-            )
-
-        class TapExecutionStartedEvent(m_core.DomainEvent):
+        class TapExecutionStartedEvent(FlextModels.DomainEvent):
             """Event raised when tap execution starts."""
 
-            timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+            timestamp: Annotated[
+                datetime, Field(default_factory=lambda: datetime.now(UTC))
+            ]
             tap_name: str = "tap-ldap"
-            execution_id: str
+            execution_id: str = ""
             config_hash: str | None = None
 
-            def __init__(
-                self,
-                event_type: str,
-                aggregate_id: str,
-                execution_id: str,
-                config: dict[str, t.JsonValue] | None = None,
-                config_hash: str | None = None,
-                **kwargs: t.GeneralValueType,
-            ) -> None:
-                """Initialize with config data."""
-                super().__init__(
-                    event_type=event_type,
-                    aggregate_id=aggregate_id,
-                    data={"config": config} if config else {},
-                    **kwargs,
-                )
-                self.execution_id = execution_id
-                self.config_hash = config_hash
-
-            @property
-            def config(self) -> dict[str, t.JsonValue] | None:
-                """Get config from data field."""
-                config_data = self.data.get("config")
-                return config_data if isinstance(config_data, dict) else None
-
-        class TapExecutionCompletedEvent(m_core.DomainEvent):
+        class TapExecutionCompletedEvent(FlextModels.DomainEvent):
             """Event raised when tap execution completes."""
 
-            timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+            timestamp: Annotated[
+                datetime, Field(default_factory=lambda: datetime.now(UTC))
+            ]
             tap_name: str = "tap-ldap"
-            execution_id: str
+            execution_id: str = ""
             records_processed: int = 0
             streams_discovered: int = 0
             duration_seconds: float = 0.0
 
-            def __init__(
-                self,
-                event_type: str,
-                aggregate_id: str,
-                execution_id: str,
-                records_processed: int = 0,
-                streams_discovered: int = 0,
-                duration_seconds: float = 0.0,
-                **kwargs: t.GeneralValueType,
-            ) -> None:
-                """Initialize with execution data."""
-                super().__init__(
-                    event_type=event_type,
-                    aggregate_id=aggregate_id,
-                    data={
-                        "records_processed": records_processed,
-                        "streams_discovered": streams_discovered,
-                        "duration_seconds": duration_seconds,
-                    },
-                    **kwargs,
-                )
-                self.execution_id = execution_id
-                self.records_processed = records_processed
-                self.streams_discovered = streams_discovered
-                self.duration_seconds = duration_seconds
-
-            @property
-            def records_extracted(self) -> int:
-                """Alias for records_processed for backward compatibility."""
-                return self.records_processed
-
-            @property
-            def duration(self) -> float:
-                """Alias for duration_seconds for backward compatibility."""
-                return self.duration_seconds
-
-        class StreamDiscoveredEvent(BaseModel):
+        class StreamDiscoveredEvent(FlextModels.DomainEvent):
             """Event raised when a stream is discovered."""
 
-            timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+            event_type: Annotated[str, Field(default="stream_discovered", frozen=True)]
+            aggregate_id: Annotated[
+                str,
+                Field(
+                    default="",
+                    description="Stream name as aggregate identifier",
+                ),
+            ]
             stream_name: str
-            stream_key_properties: list[str] = Field(default_factory=list)
+            stream_key_properties: Annotated[list[str], Field(default_factory=list)]
             bookmark_key: str | None = None
 
-        class RecordExtractedEvent(BaseModel):
+            @model_validator(mode="before")
+            @classmethod
+            def set_aggregate_id(cls, data: t.ContainerValue) -> t.ContainerValue:
+                """Set aggregate_id from stream_name if not provided."""
+                if (
+                    isinstance(data, dict)
+                    and "aggregate_id" not in data
+                    and "stream_name" in data
+                ):
+                    data["aggregate_id"] = data["stream_name"]
+                return data
+
+        class RecordExtractedEvent(FlextModels.DomainEvent):
             """Event raised when a record is extracted."""
 
-            timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+            event_type: Annotated[str, Field(default="record_extracted", frozen=True)]
+            aggregate_id: Annotated[
+                str,
+                Field(
+                    default="",
+                    description="Stream name as aggregate identifier",
+                ),
+            ]
             stream_name: str
             record_id: str | None = None
             record_size_bytes: int = 0
 
-        class ConnectionTestedEvent(BaseModel):
+            @model_validator(mode="before")
+            @classmethod
+            def set_aggregate_id(cls, data: t.ContainerValue) -> t.ContainerValue:
+                """Set aggregate_id from stream_name if not provided."""
+                if (
+                    isinstance(data, dict)
+                    and "aggregate_id" not in data
+                    and "stream_name" in data
+                ):
+                    data["aggregate_id"] = data["stream_name"]
+                return data
+
+        class TapExecution(FlextModels.Entity):
+            """Execution state and metrics for a tap run."""
+
+            id: Annotated[str, Field(default_factory=lambda: uuid4().hex)]
+            execution_id: str
+            connection_id: str
+            command: str
+            tap_status: str = "created"
+            config: Annotated[t.ContainerValue, Field(default_factory=dict)]
+            catalog: Annotated[t.ContainerValue, Field(default_factory=dict)]
+            state: Annotated[t.ContainerValue, Field(default_factory=dict)]
+            started_at: datetime | None = None
+            completed_at: datetime | None = None
+            records_extracted: int = 0
+            streams_processed: int = 0
+            exit_code: int | None = None
+            stdout: str | None = None
+            stderr: str | None = None
+
+            def start_execution(self) -> None:
+                """Mark execution as running with current timestamp."""
+                self.tap_status = "running"
+                self.started_at = datetime.now(UTC)
+
+            def complete_execution(
+                self,
+                exit_code: int,
+                stdout: str | None = None,
+                stderr: str | None = None,
+            ) -> None:
+                """Mark execution as completed with exit code and output."""
+                self.tap_status = "completed" if exit_code == 0 else "failed"
+                self.completed_at = datetime.now(UTC)
+                self.exit_code = exit_code
+                self.stdout = stdout
+                self.stderr = stderr
+
+            def cancel_execution(self) -> None:
+                """Mark execution as cancelled."""
+                self.tap_status = "cancelled"
+                self.completed_at = datetime.now(UTC)
+
+            def update_metrics(
+                self, records_extracted: int, streams_processed: int
+            ) -> None:
+                """Update extraction metrics with record and stream counts."""
+                self.records_extracted = records_extracted
+                self.streams_processed = streams_processed
+
+        class ConnectionTestedEvent(FlextModels.DomainEvent):
             """Event raised after connection test."""
 
-            timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+            event_type: Annotated[str, Field(default="connection_tested", frozen=True)]
+            aggregate_id: Annotated[
+                str,
+                Field(
+                    default="",
+                    description="Server URI as aggregate identifier",
+                ),
+            ]
             success: bool
             server_uri: str
             error_message: str | None = None
+
+            @model_validator(mode="before")
+            @classmethod
+            def set_aggregate_id(cls, data: t.ContainerValue) -> t.ContainerValue:
+                """Set aggregate_id from server_uri if not provided."""
+                if (
+                    isinstance(data, dict)
+                    and "aggregate_id" not in data
+                    and "server_uri" in data
+                ):
+                    data["aggregate_id"] = data["server_uri"]
+                return data
 
         class Tests:
             """Test models namespace for flext-tap-ldap tests.
@@ -205,11 +244,11 @@ class FlextMeltanoTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
 
 # Runtime alias for simplified usage
-m = FlextMeltanoTapLdapModels
-m_tap_ldap = FlextMeltanoTapLdapModels
+m: type[FlextTapLdapModels] = FlextTapLdapModels
+TapExecution = FlextTapLdapModels.TapLdap.TapExecution
 
 __all__ = [
-    "FlextMeltanoTapLdapModels",
+    "FlextTapLdapModels",
+    "TapExecution",
     "m",
-    "m_tap_ldap",
 ]
