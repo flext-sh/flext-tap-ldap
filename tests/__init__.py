@@ -1,16 +1,7 @@
 # AUTO-GENERATED FILE — DO NOT EDIT MANUALLY.
 # Regenerate with: make codegen
 #
-"""Test module for flext-tap-ldap.
-
-This module provides test infrastructure for flext-tap-ldap using unified namespace patterns.
-Test objects are accessed via m.TapLdap.Tests.*, u.TapLdap.*, etc.
-Combines FlextTests* with project-specific functionality.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-"""
+"""Tests package."""
 
 from __future__ import annotations
 
@@ -21,6 +12,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
 
+    from tests import e2e
     from tests.conftest import (
         project_root,
         pytest_configure,
@@ -123,6 +115,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TestsFlextTapLdapUtilities": ("tests.utilities", "TestsFlextTapLdapUtilities"),
     "c": ("tests.constants", "TestsFlextTapLdapConstants"),
     "catalog_file": ("tests.e2e.conftest", "catalog_file"),
+    "e2e": ("tests.e2e", ""),
     "ldap_connection": ("tests.e2e.conftest", "ldap_connection"),
     "ldap_container": ("tests.e2e.conftest", "ldap_container"),
     "logger": ("tests.e2e.conftest", "logger"),
@@ -184,6 +177,7 @@ __all__ = [
     "TestsFlextTapLdapUtilities",
     "c",
     "catalog_file",
+    "e2e",
     "ldap_connection",
     "ldap_container",
     "logger",
