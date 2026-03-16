@@ -15,10 +15,11 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Literal
 
 from flext_ldap import FlextLdapTypes
 from flext_meltano import FlextMeltanoTypes
+
+from flext_tap_ldap import c
 
 
 class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
@@ -154,24 +155,7 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
         LDAP tap domain owns LDAP data extraction-specific types.
         """
 
-        type ProjectType = Literal[
-            "library",
-            "application",
-            "service",
-            "tap-ldap",
-            "ldap-extractor",
-            "ldap-tap",
-            "ldap-connector",
-            "singer-ldap-tap",
-            "ldap-data-source",
-            "ldap-extraction",
-            "ldif-processor",
-            "ldap-directory-tap",
-            "enterprise-ldap-tap",
-            "ldap-singer-tap",
-            "directory-extractor",
-            "ldap-integration",
-        ]
+        type ProjectType = c.ProjectType
         type TapLdapProjectConfig = dict[str, t.ContainerValue]
         type LdapExtractionConfig = dict[str, str | int | bool | list[str]]
         type LdapIntegrationConfig = dict[

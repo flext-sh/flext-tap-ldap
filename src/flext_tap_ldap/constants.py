@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import StrEnum, unique
 from typing import Final, Literal
 
 from flext_ldap import FlextLdapConstants
@@ -57,6 +57,7 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
         class Replication:
             """LDAP replication method constants."""
 
+            @unique
             class Method(StrEnum):
                 """LDAP replication methods using StrEnum for type safety.
 
@@ -113,6 +114,25 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
         TapSearchScope = Literal["BASE", "ONELEVEL", "SUBTREE"]
         TapConnectionMode = Literal["anonymous", "simple", "sasl"]
         TapExecutionMode = Literal["discovery", "extraction", "test", "validate"]
+
+    @unique
+    class ProjectType(StrEnum):
+        LIBRARY = "library"
+        APPLICATION = "application"
+        SERVICE = "service"
+        TAP_LDAP = "tap-ldap"
+        LDAP_EXTRACTOR = "ldap-extractor"
+        LDAP_TAP = "ldap-tap"
+        LDAP_CONNECTOR = "ldap-connector"
+        SINGER_LDAP_TAP = "singer-ldap-tap"
+        LDAP_DATA_SOURCE = "ldap-data-source"
+        LDAP_EXTRACTION = "ldap-extraction"
+        LDIF_PROCESSOR = "ldif-processor"
+        LDAP_DIRECTORY_TAP = "ldap-directory-tap"
+        ENTERPRISE_LDAP_TAP = "enterprise-ldap-tap"
+        LDAP_SINGER_TAP = "ldap-singer-tap"
+        DIRECTORY_EXTRACTOR = "directory-extractor"
+        LDAP_INTEGRATION = "ldap-integration"
 
 
 c = FlextTapLdapConstants
