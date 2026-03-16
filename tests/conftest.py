@@ -5,6 +5,8 @@ SPDX-License-Identifier: MIT
 
 """
 
+from __future__ import annotations
+
 from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import Mock
@@ -14,7 +16,7 @@ from flext_tests import FlextTestsDocker
 
 
 @pytest.fixture(scope="session")
-def shared_ldap_container(flext_docker: "FlextTestsDocker") -> str:
+def shared_ldap_container(flext_docker: FlextTestsDocker) -> str:
     """Managed LDAP container using centralized FlextTestsDocker with docker-compose."""
     compose_file = Path("~/flext/docker/docker-compose.openldap.yml").expanduser()
     start_result = flext_docker.start_compose_stack(str(compose_file))
