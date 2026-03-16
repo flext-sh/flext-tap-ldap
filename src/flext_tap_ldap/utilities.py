@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import ClassVar
 
-from flext_core import FlextContainer, FlextExceptions, FlextLogger, r
+from flext_core import FlextContainer, FlextExceptions, FlextLogger, p, r
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 
@@ -25,7 +25,7 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             self._logger = FlextLogger(__name__)
 
         @property
-        def container(self) -> FlextContainer:
+        def container(self) -> p.Container:
             """Return the global container instance."""
             return self._container
 

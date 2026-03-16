@@ -6,7 +6,7 @@ from collections.abc import Iterable, Iterator, Mapping
 from pathlib import Path
 from typing import ClassVar, override
 
-from flext_core import FlextLogger, t
+from flext_core import FlextLogger, p, t
 from flext_ldap import FlextLdapConnection
 from flext_ldif import FlextLdif, m
 from flext_meltano import (
@@ -56,7 +56,7 @@ class FlextTapLdapLdifStreams:
             self.tap = tap
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
-            self._logger_instance: FlextLogger | None = None
+            self._logger_instance: p.Logger | None = None
             schema: dict[str, t.ContainerValue] = {
                 "type": "object",
                 "properties": {
@@ -207,7 +207,7 @@ class FlextTapLdapLdifStreams:
             self.tap = tap
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
-            self._logger_instance: FlextLogger | None = None
+            self._logger_instance: p.Logger | None = None
             schema: dict[str, t.ContainerValue] = {
                 "type": "object",
                 "properties": {
