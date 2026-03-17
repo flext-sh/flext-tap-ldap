@@ -1,0 +1,31 @@
+src/flext_tap_ldap/typings.py
+  41de24182e2f0106 18,26-28,39-54
+src/flext_tap_ldap/services.py
+  41de24182e2f0106 18,23-24,31,38,57-60,233,237,242,247,249,259,264,269,271,282,288,299,301,307,312,315,317,323,335,337,343,348,353,355,361,366,371,373,425,432,468,475
+src/flext_tap_ldap/models.py
+  41de24182e2f0106 13,15,20,22,41,195,197-198,200-206,208-209,211-212,214-215,217-292,294-295,297-309,311-313
+src/flext_tap_ldap/streams.py
+  41de24182e2f0106 23-25,39,44,51-52,55,59-60,75,78,82,161,599
+src/flext_tap_ldap/client.py
+  41de24182e2f0106 25,37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.12",
+  "base_commit_sha": "e0abc7713460b98abb3803dae5d7fbdfc234ad83",
+  "prompts": {
+    "41de24182e2f0106": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9fe7f911-8a72-4792-b2cb-f3c62ff8bbce",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "FLEXT Bot <team@flext.sh>",
+      "messages": [],
+      "total_additions": 290,
+      "total_deletions": 256,
+      "accepted_lines": 208,
+      "overriden_lines": 0
+    }
+  }
+}
