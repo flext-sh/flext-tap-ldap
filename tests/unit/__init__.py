@@ -1,7 +1,7 @@
 # AUTO-GENERATED FILE — DO NOT EDIT MANUALLY.
 # Regenerate with: make codegen
 #
-"""Tests package."""
+"""Unit package."""
 
 from __future__ import annotations
 
@@ -12,29 +12,6 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
 
-    from tests import e2e, unit
-    from tests.conftest import (
-        project_root,
-        pytest_configure,
-        shared_ldap_container,
-        test_data_dir,
-    )
-    from tests.constants import (
-        TestsFlextTapLdapConstants,
-        TestsFlextTapLdapConstants as c,
-    )
-    from tests.e2e.conftest import (
-        catalog_file,
-        ldap_connection,
-        ldap_container,
-        logger,
-        sample_catalog,
-        tap_config_file,
-    )
-    from tests.e2e.test_integration import TestFlextTapLdapIntegration
-    from tests.models import TestsFlextTapLdapModels, m
-    from tests.protocols import TestsFlextTapLdapProtocols, p
-    from tests.typings import TestsFlextTapLdapTypes, t
     from tests.unit.test_client import TestLDAPClientCoverageBoost
     from tests.unit.test_client_quick import TestLDAPClientQuick
     from tests.unit.test_ldif_processor import TestLdifProcessor
@@ -59,7 +36,6 @@ if TYPE_CHECKING:
         TestUsersStream,
     )
     from tests.unit.test_tap import TestFlextTapLdapTapUnit
-    from tests.utilities import TestsFlextTapLdapUtilities, u
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TestConnectionTestedEvent": (
@@ -68,10 +44,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     ),
     "TestCustomStream": ("tests.unit.test_streams", "TestCustomStream"),
     "TestCustomStreamParams": ("tests.unit.test_streams", "TestCustomStreamParams"),
-    "TestFlextTapLdapIntegration": (
-        "tests.e2e.test_integration",
-        "TestFlextTapLdapIntegration",
-    ),
     "TestFlextTapLdapTapUnit": ("tests.unit.test_tap", "TestFlextTapLdapTapUnit"),
     "TestGroupsStream": ("tests.unit.test_streams", "TestGroupsStream"),
     "TestLDAPBaseStream": ("tests.unit.test_streams", "TestLDAPBaseStream"),
@@ -110,35 +82,12 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "TestTapExecutionStartedEvent",
     ),
     "TestUsersStream": ("tests.unit.test_streams", "TestUsersStream"),
-    "TestsFlextTapLdapConstants": ("tests.constants", "TestsFlextTapLdapConstants"),
-    "TestsFlextTapLdapModels": ("tests.models", "TestsFlextTapLdapModels"),
-    "TestsFlextTapLdapProtocols": ("tests.protocols", "TestsFlextTapLdapProtocols"),
-    "TestsFlextTapLdapTypes": ("tests.typings", "TestsFlextTapLdapTypes"),
-    "TestsFlextTapLdapUtilities": ("tests.utilities", "TestsFlextTapLdapUtilities"),
-    "c": ("tests.constants", "TestsFlextTapLdapConstants"),
-    "catalog_file": ("tests.e2e.conftest", "catalog_file"),
-    "e2e": ("tests.e2e", ""),
-    "ldap_connection": ("tests.e2e.conftest", "ldap_connection"),
-    "ldap_container": ("tests.e2e.conftest", "ldap_container"),
-    "logger": ("tests.e2e.conftest", "logger"),
-    "m": ("tests.models", "m"),
-    "p": ("tests.protocols", "p"),
-    "project_root": ("tests.conftest", "project_root"),
-    "pytest_configure": ("tests.conftest", "pytest_configure"),
-    "sample_catalog": ("tests.e2e.conftest", "sample_catalog"),
-    "shared_ldap_container": ("tests.conftest", "shared_ldap_container"),
-    "t": ("tests.typings", "t"),
-    "tap_config_file": ("tests.e2e.conftest", "tap_config_file"),
-    "test_data_dir": ("tests.conftest", "test_data_dir"),
-    "u": ("tests.utilities", "u"),
-    "unit": ("tests.unit", ""),
 }
 
 __all__ = [
     "TestConnectionTestedEvent",
     "TestCustomStream",
     "TestCustomStreamParams",
-    "TestFlextTapLdapIntegration",
     "TestFlextTapLdapTapUnit",
     "TestGroupsStream",
     "TestLDAPBaseStream",
@@ -156,28 +105,6 @@ __all__ = [
     "TestTapExecutionCompletedEvent",
     "TestTapExecutionStartedEvent",
     "TestUsersStream",
-    "TestsFlextTapLdapConstants",
-    "TestsFlextTapLdapModels",
-    "TestsFlextTapLdapProtocols",
-    "TestsFlextTapLdapTypes",
-    "TestsFlextTapLdapUtilities",
-    "c",
-    "catalog_file",
-    "e2e",
-    "ldap_connection",
-    "ldap_container",
-    "logger",
-    "m",
-    "p",
-    "project_root",
-    "pytest_configure",
-    "sample_catalog",
-    "shared_ldap_container",
-    "t",
-    "tap_config_file",
-    "test_data_dir",
-    "u",
-    "unit",
 ]
 
 

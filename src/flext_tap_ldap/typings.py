@@ -15,11 +15,17 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import TYPE_CHECKING
 
 from flext_ldap import FlextLdapTypes
 from flext_meltano import FlextMeltanoTypes
+from pydantic import ConfigDict, TypeAdapter
 
 from flext_tap_ldap import c
+
+if TYPE_CHECKING:
+    from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
+    from flext_tap_ldap.streams import FlextTapLdapStreams
 
 
 class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
@@ -29,6 +35,22 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
     Contains ONLY complex LDAP tap-specific types, no simple aliases.
     Uses Python 3.13+ type syntax and patterns.
     """
+
+    CONFIG_MAP_ADAPTER: TypeAdapter[dict[str, FlextMeltanoTypes.ContainerValue]] = (
+        TypeAdapter(
+            dict[str, FlextMeltanoTypes.ContainerValue],
+            config=ConfigDict(strict=False),
+        )
+    )
+    STRICT_STR_ADAPTER: TypeAdapter[str] = TypeAdapter(
+        str, config=ConfigDict(strict=True)
+    )
+
+    type TapLdapStream = (
+        FlextTapLdapStreams.LDAPBaseStream
+        | FlextTapLdapLdifStreams.LdifStream
+        | FlextTapLdapLdifStreams.LdifAnalysisStream
+    )
 
     class TapLdap:
         """LDAP connection complex types."""
@@ -147,21 +169,21 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
         type ResultList = list[ResultDict]
         type StringList = list[str]
 
-    class Project:
-        """LDAP tap-specific project types.
+        class Project:
+            """LDAP tap-specific project types.
 
-        Adds LDAP tap extraction-specific project types.
-        Follows domain separation principle:
-        LDAP tap domain owns LDAP data extraction-specific types.
-        """
+            Adds LDAP tap extraction-specific project types.
+            Follows domain separation principle:
+            LDAP tap domain owns LDAP data extraction-specific types.
+            """
 
-        type ProjectType = c.ProjectType
-        type TapLdapProjectConfig = dict[str, t.ContainerValue]
-        type LdapExtractionConfig = dict[str, str | int | bool | list[str]]
-        type LdapIntegrationConfig = dict[
-            str, bool | str | Mapping[str, t.ContainerValue]
-        ]
-        type TapLdapPipelineConfig = dict[str, t.ContainerValue]
+            type ProjectType = c.ProjectType
+            type TapLdapProjectConfig = dict[str, t.ContainerValue]
+            type LdapExtractionConfig = dict[str, str | int | bool | list[str]]
+            type LdapIntegrationConfig = dict[
+                str, bool | str | Mapping[str, t.ContainerValue]
+            ]
+            type TapLdapPipelineConfig = dict[str, t.ContainerValue]
 
 
 t = FlextTapLdapTypes

@@ -14,8 +14,6 @@ import pytest
 
 from flext_tap_ldap import FlextTapLdapClient
 
-LDAPClient = FlextTapLdapClient.LDAPClient
-
 
 class TestLDAPClientQuick:
     """Quick tests to maximize client.py coverage efficiently."""
@@ -78,7 +76,9 @@ class TestLDAPClientQuick:
         result = client._convert_entry_to_dict(None)
         assert result == {}
 
-    def test_search_result_processing(self, client: LDAPClient) -> None:
+    def test_search_result_processing(
+        self, client: FlextTapLdapClient.LDAPClient
+    ) -> None:
         """Test search result processing with different scenarios."""
         mock_result = Mock()
         mock_result.is_success = True
@@ -101,7 +101,7 @@ class TestLDAPClientQuick:
 
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_no_event_loop(
-        self, mock_get_loop: Mock, client: LDAPClient
+        self, mock_get_loop: Mock, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test search when no event loop is running."""
         mock_get_loop.side_effect = RuntimeError("no event loop")
@@ -112,14 +112,14 @@ class TestLDAPClientQuick:
 
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_with_event_loop(
-        self, mock_get_loop: Mock, client: LDAPClient
+        self, mock_get_loop: Mock, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test search when event loop is already running."""
         mock_get_loop.return_value = Mock()
         results = client.search("dc=test,dc=com")
         assert results == []
 
-    def test_run_in_new_loop(self, client: LDAPClient) -> None:
+    def test_run_in_new_loop(self, client: FlextTapLdapClient.LDAPClient) -> None:
         """Test search execution helper in new loop."""
         with patch.object(client, "search", return_value=[{"test": "data"}]):
             result = client.search("dc=test,dc=com")
@@ -145,14 +145,16 @@ class TestLDAPClientQuick:
 
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_test_connection_with_loop(
-        self, client: LDAPClient, mock_get_loop: Mock
+        self, client: FlextTapLdapClient.LDAPClient, mock_get_loop: Mock
     ) -> None:
         """Test connection test when event loop exists."""
         mock_get_loop.return_value = Mock()
         result = client.test_connection()
         assert result is True
 
-    def test_health_check_functionality(self, client: LDAPClient) -> None:
+    def test_health_check_functionality(
+        self, client: FlextTapLdapClient.LDAPClient
+    ) -> None:
         """Test health check functionality."""
         with patch.object(client, "test_connection", return_value=True):
             health = client.health_check()
@@ -165,7 +167,9 @@ class TestLDAPClientQuick:
             assert health["status"] == "unhealthy"
             assert health["connection_test"] is False
 
-    def test_oracle_entry_processing(self, client: LDAPClient) -> None:
+    def test_oracle_entry_processing(
+        self, client: FlextTapLdapClient.LDAPClient
+    ) -> None:
         """Test Oracle entry processing with all scenarios."""
         entry = {
             "dn": "uid=test,dc=oracle,dc=com",
@@ -207,7 +211,9 @@ class TestLDAPClientQuick:
         result = client._process_oracle_entry(entry_bad_attrs)
         assert result == entry_bad_attrs
 
-    def test_oracle_attribute_extension(self, client: LDAPClient) -> None:
+    def test_oracle_attribute_extension(
+        self, client: FlextTapLdapClient.LDAPClient
+    ) -> None:
         """Test Oracle attribute extension."""
         base_attrs = ["uid", "cn"]
         extended = client._extend_attributes_with_oracle_support(
@@ -228,7 +234,7 @@ class TestLDAPClientQuick:
         assert result is None
 
     def test_process_search_results_with_oracle_support(
-        self, client: LDAPClient
+        self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test Oracle search result processing."""
         search_results = [
@@ -252,7 +258,9 @@ class TestLDAPClientQuick:
         assert results[0] == search_results[0]
 
     @patch("flext_tap_ldap.client.get_running_loop")
-    def test_execute_oracle_search_in_new_loop(self, client: LDAPClient) -> None:
+    def test_execute_oracle_search_in_new_loop(
+        self, client: FlextTapLdapClient.LDAPClient
+    ) -> None:
         """Test Oracle search execution in new loop."""
         with patch.object(client, "search", return_value=[{"test": "data"}]):
             result = client._execute_oracle_search_in_new_loop(
@@ -263,7 +271,7 @@ class TestLDAPClientQuick:
 
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_with_oracle_support_scenarios(
-        self, mock_get_loop: Mock, client: LDAPClient
+        self, mock_get_loop: Mock, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test Oracle support search with different scenarios."""
         mock_get_loop.return_value = Mock()
@@ -273,7 +281,9 @@ class TestLDAPClientQuick:
         assert list(results) == []
         mock_get_loop.side_effect = RuntimeError("no event loop")
 
-    def test_attribute_delegation_to_flext_api(self, client: LDAPClient) -> None:
+    def test_attribute_delegation_to_flext_api(
+        self, client: FlextTapLdapClient.LDAPClient
+    ) -> None:
         """Test attribute delegation to flext API."""
         result = client.search
         assert callable(result)

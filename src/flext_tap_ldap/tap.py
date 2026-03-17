@@ -1,6 +1,6 @@
-"""FlextTapLdapTap - Singer tap for LDAP data extraction using FLEXT patterns.
+"""FlextTapLdapTap - Singer FlextMeltanoTapAbstractions for LDAP data extraction using FLEXT patterns.
 
-Consolidates tap functionality and client integration with Singer protocol compliance.
+Consolidates FlextMeltanoTapAbstractions functionality and client integration with Singer protocol compliance.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -12,14 +12,17 @@ from __future__ import annotations
 from typing import ClassVar, override
 
 from flext_core import FlextLogger, r
-from flext_meltano import FlextMeltanoTapAbstractions as Tap, m
+from flext_meltano import FlextMeltanoTapAbstractions
 from pydantic import ConfigDict, TypeAdapter, ValidationError
 
-from flext_tap_ldap.constants import c
-from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
-from flext_tap_ldap.settings import FlextTapLdapSettings
-from flext_tap_ldap.streams import FlextTapLdapStreams
-from flext_tap_ldap.typings import t
+from flext_tap_ldap import (
+    FlextTapLdapLdifStreams,
+    FlextTapLdapSettings,
+    FlextTapLdapStreams,
+    c,
+    m,
+    t,
+)
 
 logger = FlextLogger(__name__)
 _CONFIG_MAP_ADAPTER = TypeAdapter(
@@ -33,14 +36,14 @@ type TapLdapStream = (
 )
 
 
-class FlextTapLdapTap(Tap):
-    """Singer tap for LDAP data extraction using FLEXT centralized patterns.
+class FlextTapLdapTap(FlextMeltanoTapAbstractions):
+    """Singer FlextMeltanoTapAbstractions for LDAP data extraction using FLEXT centralized patterns.
 
-    Consolidates main tap class, stream discovery, and client integration
+    Consolidates main FlextMeltanoTapAbstractions class, stream discovery, and client integration
     into single unified class following FlextTapLdap[Module] pattern.
     """
 
-    name: ClassVar[str] = "tap-ldap"
+    name: ClassVar[str] = "FlextMeltanoTapAbstractions-ldap"
     config_class: ClassVar[type[FlextTapLdapSettings]] = FlextTapLdapSettings
     config_jsonschema: ClassVar[dict[str, t.ContainerValue]] = {
         "type": "object",
@@ -143,10 +146,13 @@ class FlextTapLdapTap(Tap):
 
 
 def main() -> None:
-    """Run the main entry point for the tap."""
+    """Run the main entry point for the FlextMeltanoTapAbstractions."""
     execute_result = FlextTapLdapTap().execute()
     if execute_result.is_failure:
-        logger.error("Tap execution failed", error=execute_result.error or "")
+        logger.error(
+            "FlextMeltanoTapAbstractions execution failed",
+            error=execute_result.error or "",
+        )
 
 
 if __name__ == "__main__":

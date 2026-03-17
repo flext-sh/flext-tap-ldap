@@ -21,8 +21,13 @@ if TYPE_CHECKING:
         sample_catalog,
         tap_config_file,
     )
+    from tests.e2e.test_integration import TestFlextTapLdapIntegration
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
+    "TestFlextTapLdapIntegration": (
+        "tests.e2e.test_integration",
+        "TestFlextTapLdapIntegration",
+    ),
     "catalog_file": ("tests.e2e.conftest", "catalog_file"),
     "ldap_connection": ("tests.e2e.conftest", "ldap_connection"),
     "ldap_container": ("tests.e2e.conftest", "ldap_container"),
@@ -33,6 +38,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
 }
 
 __all__ = [
+    "TestFlextTapLdapIntegration",
     "catalog_file",
     "ldap_connection",
     "ldap_container",

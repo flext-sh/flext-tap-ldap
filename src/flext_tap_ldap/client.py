@@ -13,18 +13,16 @@ import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
 from collections.abc import Mapping, Sequence
 
-from flext_core import FlextLogger, r, u, x
+from flext_core import FlextLogger, r, x
 from flext_ldap import (
     FlextLdap,
     FlextLdapConnection,
     FlextLdapOperations,
     FlextLdapSettings,
-    m,
 )
-from pydantic import BaseModel
 
-from flext_tap_ldap import t
-from flext_tap_ldap.constants import c
+from flext_tap_ldap import c, m, t, u
+from flext_tap_ldap.models import FlextTapLdapModels
 
 logger = FlextLogger(__name__)
 
@@ -36,16 +34,7 @@ class FlextTapLdapClient:
     with nested LDAPClient and LDAPClientConfig classes.
     """
 
-    class LDAPClientConfig(BaseModel):
-        """Parameter object for LDAP client initialization."""
-
-        host: str
-        port: int = c.TapLdap.DEFAULT_PORT
-        bind_dn: str | None = None
-        password: str | None = None
-        use_ssl: bool = False
-        timeout: int = c.TapLdap.DEFAULT_SEARCH_TIMEOUT
-        page_size: int = c.TapLdap.DEFAULT_PAGE_SIZE
+    LDAPClientConfig = FlextTapLdapModels.TapLdap.LdapClientConfig
 
     class LDAPClient:
         """Testing convenience LDAP client wrapper.

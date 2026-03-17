@@ -11,27 +11,20 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
-from typing import Annotated, ClassVar, override
+from typing import ClassVar, override
 
 from flext_core import FlextLogger, t
 from flext_meltano import (
     FlextMeltanoStream as Stream,
     FlextMeltanoTapAbstractions as Tap,
 )
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    TypeAdapter,
-    ValidationError,
-    model_validator,
-)
+from pydantic import ValidationError
 
-from flext_tap_ldap.client import LDAPClient
-from flext_tap_ldap.constants import c
+from flext_tap_ldap import LDAPClient, c
+from flext_tap_ldap.models import FlextTapLdapModels
+from flext_tap_ldap.typings import FlextTapLdapTypes
 
 logger = FlextLogger(__name__)
-_STRICT_STR_ADAPTER = TypeAdapter(str, config=ConfigDict(strict=True))
 
 
 def _coerce_positive_int(raw_value: t.ContainerValue, default: int) -> int:
@@ -43,62 +36,28 @@ def _coerce_positive_int(raw_value: t.ContainerValue, default: int) -> int:
     return parsed if parsed > 0 else default
 
 
-def _coerce_optional_string(raw_value: t.ContainerValue) -> str | None:
+def _coerce_optional_string(raw_value: t.ContainerValue | None) -> str | None:
     """Coerce value to string only when source is already string-like."""
     if raw_value is None:
         return None
     try:
-        validated = _STRICT_STR_ADAPTER.validate_python(raw_value)
+        validated = FlextTapLdapTypes.STRICT_STR_ADAPTER.validate_python(raw_value)
     except ValidationError:
         return None
     return validated or None
 
 
-class _LdapConnectionConfig(BaseModel):
-    host: str = ""
-    port: int = c.TapLdap.DEFAULT_PORT
-    bind_dn: str | None = None
-    bind_password: str | None = None
-    use_ssl: bool = False
-    timeout_seconds: int = c.TapLdap.DEFAULT_SEARCH_TIMEOUT
-    base_dn: str = ""
-
-
-class _CustomPropertyDefinition(BaseModel):
-    type: str = "string"
-    description: str | None = None
-
-
-class _CustomStreamParams(BaseModel):
-    name: str
-    search_filter: str
-    schema_properties: Annotated[
-        dict[str, t.ContainerValue], Field(default_factory=dict)
-    ]
-    primary_keys: Annotated[list[str], Field(default_factory=lambda: ["dn"])]
-    replication_key: str | None = None
-
-    @model_validator(mode="after")
-    def validate_required_fields(self) -> _CustomStreamParams:
-        if not self.name:
-            msg = "Stream name is required"
-            raise ValueError(msg)
-        if not self.search_filter:
-            msg = "Search filter is required"
-            raise ValueError(msg)
-        if self.primary_keys == []:
-            msg = "Primary keys cannot be empty list"
-            raise ValueError(msg)
-        return self
-
-
-def _parse_connection_config(raw_value: t.ContainerValue) -> _LdapConnectionConfig:
+def _parse_connection_config(
+    raw_value: t.ContainerValue,
+) -> FlextTapLdapModels.TapLdap.LdapConnectionConfig:
     """Validate LDAP connection payload through Pydantic."""
     try:
-        parsed = _LdapConnectionConfig.model_validate(raw_value, strict=True)
+        parsed = FlextTapLdapModels.TapLdap.LdapConnectionConfig.model_validate(
+            raw_value, strict=True
+        )
     except ValidationError:
-        parsed = _LdapConnectionConfig()
-    return _LdapConnectionConfig(
+        parsed = FlextTapLdapModels.TapLdap.LdapConnectionConfig()
+    return FlextTapLdapModels.TapLdap.LdapConnectionConfig(
         host=str(parsed.host),
         port=_coerce_positive_int(parsed.port, c.TapLdap.DEFAULT_PORT),
         bind_dn=_coerce_optional_string(parsed.bind_dn),
@@ -113,12 +72,14 @@ def _parse_connection_config(raw_value: t.ContainerValue) -> _LdapConnectionConf
 
 def _parse_property_definition(
     raw_value: t.ContainerValue,
-) -> _CustomPropertyDefinition:
+) -> FlextTapLdapModels.TapLdap.CustomPropertyDefinition:
     """Validate custom stream property definition through Pydantic."""
     try:
-        return _CustomPropertyDefinition.model_validate(raw_value, strict=True)
+        return FlextTapLdapModels.TapLdap.CustomPropertyDefinition.model_validate(
+            raw_value, strict=True
+        )
     except ValidationError:
-        return _CustomPropertyDefinition()
+        return FlextTapLdapModels.TapLdap.CustomPropertyDefinition()
 
 
 class FlextTapLdapStreams:
@@ -197,7 +158,7 @@ class FlextTapLdapStreams:
                 "modifyTimestamp": "2024-01-01T12:00:00Z",
             }
 
-    CustomStreamParams = _CustomStreamParams
+    CustomStreamParams = FlextTapLdapModels.TapLdap.CustomStreamParams
 
     class LDAPBaseStream(Stream):
         """Base class for LDAP streams with flext-ldap integration."""
@@ -634,7 +595,9 @@ class FlextTapLdapStreams:
         _default_primary_keys: ClassVar[list[str]] = ["dn"]
 
         @override
-        def __init__(self, tap: Tap, params: _CustomStreamParams) -> None:
+        def __init__(
+            self, tap: Tap, params: FlextTapLdapModels.TapLdap.CustomStreamParams
+        ) -> None:
             """Initialize custom stream with parameters."""
             self.params = params
 

@@ -10,18 +10,20 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import UTC, datetime
-from typing import Annotated
+from typing import Annotated, Self
 from uuid import uuid4
 
-from flext_core import FlextModels, t
 from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
-from pydantic import Field, model_validator
+from pydantic import BaseModel, Field, model_validator
+
+from flext_tap_ldap import c, t
 
 
 class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
-    """Complete models for LDAP tap operations extending FlextModels.
+    """Complete models for LDAP tap operations extending FlextLdapModels.
 
     Provides standardized models for all LDAP tap domain entities including:
     - Singer stream metadata and configuration
@@ -30,13 +32,15 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
     - Performance monitoring and metrics
     - Singer protocol compliance models
 
-    All nested classes inherit FlextModels validation and patterns.
+    All nested classes inherit FlextLdapModels validation and patterns.
     """
 
     class TapLdap:
         """Tap LDAP namespace for cross-project access."""
 
-        class TapExecutionStartedEvent(FlextModels.DomainEvent):
+        # ── Domain Events ────────────────────────────────────────────────────
+
+        class TapExecutionStartedEvent(FlextLdapModels.DomainEvent):
             """Event raised when tap execution starts."""
 
             timestamp: Annotated[
@@ -46,7 +50,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             execution_id: str = ""
             config_hash: str | None = None
 
-        class TapExecutionCompletedEvent(FlextModels.DomainEvent):
+        class TapExecutionCompletedEvent(FlextLdapModels.DomainEvent):
             """Event raised when tap execution completes."""
 
             timestamp: Annotated[
@@ -58,7 +62,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             streams_discovered: int = 0
             duration_seconds: float = 0.0
 
-        class StreamDiscoveredEvent(FlextModels.DomainEvent):
+        class StreamDiscoveredEvent(FlextLdapModels.DomainEvent):
             """Event raised when a stream is discovered."""
 
             event_type: Annotated[str, Field(default="stream_discovered", frozen=True)]
@@ -85,7 +89,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                     data["aggregate_id"] = data["stream_name"]
                 return data
 
-        class RecordExtractedEvent(FlextModels.DomainEvent):
+        class RecordExtractedEvent(FlextLdapModels.DomainEvent):
             """Event raised when a record is extracted."""
 
             event_type: Annotated[str, Field(default="record_extracted", frozen=True)]
@@ -112,7 +116,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                     data["aggregate_id"] = data["stream_name"]
                 return data
 
-        class TapExecution(FlextModels.Entity):
+        class TapExecution(FlextLdapModels.Entity):
             """Execution state and metrics for a tap run."""
 
             id: Annotated[str, Field(default_factory=lambda: uuid4().hex)]
@@ -161,7 +165,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 self.records_extracted = records_extracted
                 self.streams_processed = streams_processed
 
-        class ConnectionTestedEvent(FlextModels.DomainEvent):
+        class ConnectionTestedEvent(FlextLdapModels.DomainEvent):
             """Event raised after connection test."""
 
             event_type: Annotated[str, Field(default="connection_tested", frozen=True)]
@@ -188,67 +192,131 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                     data["aggregate_id"] = data["server_uri"]
                 return data
 
-        class Tests:
-            """Test models namespace for flext-tap-ldap tests.
+        # ── Config Parameter Objects ─────────────────────────────────────────
 
-            Contains test-specific models that extend the main models with test-only features.
-            These models are only used in tests and not in production code.
-            """
+        class LdapConnectionConfig(BaseModel):
+            """LDAP connection configuration extracted from tap config."""
 
-            class TestLdapConnection(FlextModels.Entity):
-                """Test model for LDAP database connections."""
+            host: str = ""
+            port: int = c.TapLdap.DEFAULT_PORT
+            bind_dn: str | None = None
+            bind_password: str | None = None
+            use_ssl: bool = False
+            timeout_seconds: int = c.TapLdap.DEFAULT_SEARCH_TIMEOUT
+            base_dn: str = ""
 
-                host: str
-                port: int
-                base_dn: str
-                bind_dn: str | None = None
-                bind_password: str | None = None
-                use_ssl: bool = False
+        class CustomPropertyDefinition(BaseModel):
+            """Definition of a custom stream property."""
 
-                @property
-                def connection_string(self) -> str:
-                    """Get LDAP connection string."""
-                    protocol = "ldaps" if self.use_ssl else "ldap"
-                    return f"{protocol}://{self.host}:{self.port}"
+            type: str = "string"
+            description: str | None = None
 
-            class TestLdapSearch(FlextModels.Entity):
-                """Test model for LDAP search operations."""
+        class CustomStreamParams(BaseModel):
+            """Parameters for creating a custom LDAP stream."""
 
-                base_dn: str
-                filter_str: str
-                attributes: list[str] | None = None
-                scope: str = "SUBTREE"
-                size_limit: int | None = None
-                time_limit: int | None = None
+            name: str
+            search_filter: str
+            schema_properties: Annotated[
+                dict[str, t.ContainerValue], Field(default_factory=dict)
+            ]
+            primary_keys: Annotated[list[str], Field(default_factory=lambda: ["dn"])]
+            replication_key: str | None = None
 
-            class TestLdapStream(FlextModels.Entity):
-                """Test model for LDAP Singer streams."""
+            @model_validator(mode="after")
+            def validate_required_fields(self) -> Self:
+                """Validate stream name, filter, and primary keys."""
+                if not self.name:
+                    msg = "Stream name is required"
+                    raise ValueError(msg)
+                if not self.search_filter:
+                    msg = "Search filter is required"
+                    raise ValueError(msg)
+                if self.primary_keys == []:
+                    msg = "Primary keys cannot be empty list"
+                    raise ValueError(msg)
+                return self
 
-                stream_name: str
-                base_dn: str
-                object_class: str
-                replication_method: str = "FULL_TABLE"
-                is_selected: bool = True
+        class LdapClientConfig(BaseModel):
+            """Parameter object for LDAP client initialization."""
 
-            class TestLdapEntry(FlextModels.Entity):
-                """Test model for LDAP directory entries."""
+            host: str
+            port: int = c.TapLdap.DEFAULT_PORT
+            bind_dn: str | None = None
+            password: str | None = None
+            use_ssl: bool = False
+            timeout: int = c.TapLdap.DEFAULT_SEARCH_TIMEOUT
+            page_size: int = c.TapLdap.DEFAULT_PAGE_SIZE
 
-                dn: str
-                attributes: dict[str, list[str]]
-                object_class: str
+        # ── Value Objects ────────────────────────────────────────────────────
 
-                @property
-                def attribute_count(self) -> int:
-                    """Get number of attributes."""
-                    return len(self.attributes)
+        class LdapConnectionParams(FlextLdapModels.Value):
+            """Parameters for establishing an LDAP connection."""
+
+            host: Annotated[str, Field(min_length=1)]
+            base_dn: Annotated[str, Field(min_length=1)]
+            port: Annotated[int, Field(default=c.TapLdap.DEFAULT_PORT, ge=1)]
+            bind_dn: str | None = None
+            bind_password: str | None = None
+            use_ssl: bool = False
+            timeout_seconds: Annotated[
+                int, Field(default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT, ge=1)
+            ]
+            page_size: Annotated[int, Field(default=c.TapLdap.DEFAULT_PAGE_SIZE, ge=1)]
+            max_retries: Annotated[int, Field(default=3, ge=0)]
+
+        class StreamCreationParams(FlextLdapModels.Value):
+            """Parameters for creating an LDAP data stream."""
+
+            stream_type: Annotated[str, Field(min_length=1)]
+            connection_id: Annotated[str, Field(min_length=1)]
+            search_filter: Annotated[str, Field(min_length=1)]
+            attributes: list[str] | None = None
+            tap_stream_id: str | None = None
+            key_properties: list[str] | None = None
+            replication_method: str = "FULL_TABLE"
+            replication_key: str | None = None
+
+        # ── Entities ─────────────────────────────────────────────────────────
+
+        class LdapConnection(FlextLdapModels.Entity):
+            """LDAP connection entity with test status and error tracking."""
+
+            host: Annotated[str, Field(min_length=1)]
+            port: Annotated[int, Field(ge=1)]
+            bind_dn: str | None = None
+            password: str | None = None
+            use_ssl: bool = False
+            timeout: Annotated[int, Field(ge=1)]
+            id: Annotated[str, Field(default_factory=lambda: uuid4().hex)]
+            last_tested: datetime | None = None
+            last_error: str | None = None
+
+        class LdapStream(FlextLdapModels.Entity):
+            """LDAP data stream with schema and replication configuration."""
+
+            id: Annotated[str, Field(default_factory=lambda: uuid4().hex)]
+            name: Annotated[str, Field(min_length=1)]
+            connection_id: Annotated[str, Field(min_length=1)]
+            stream_type: Annotated[str, Field(min_length=1)]
+            search_filter: Annotated[str, Field(min_length=1)]
+            attributes: Annotated[list[str], Field(default_factory=list)]
+            tap_stream_id: Annotated[str, Field(min_length=1)]
+            key_properties: Annotated[list[str], Field(default_factory=lambda: ["dn"])]
+            replication_method: str = "FULL_TABLE"
+            replication_key: str | None = None
+            stream_schema: Annotated[
+                dict[str, t.ContainerValue], Field(default_factory=dict)
+            ]
+
+            def update_schema(self, schema: Mapping[str, t.ContainerValue]) -> None:
+                """Update stream schema from mapping."""
+                self.stream_schema = dict(schema)
 
 
 # Runtime alias for simplified usage
 m: type[FlextTapLdapModels] = FlextTapLdapModels
-TapExecution = FlextTapLdapModels.TapLdap.TapExecution
 
 __all__ = [
     "FlextTapLdapModels",
-    "TapExecution",
     "m",
 ]

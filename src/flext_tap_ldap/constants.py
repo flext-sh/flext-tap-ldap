@@ -117,6 +117,8 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
 
     @unique
     class ProjectType(StrEnum):
+        """Project-type identifiers for LDAP tap packages."""
+
         LIBRARY = "library"
         APPLICATION = "application"
         SERVICE = "service"

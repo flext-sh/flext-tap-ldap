@@ -16,8 +16,7 @@ from unittest.mock import Mock, patch
 import pytest
 from click.testing import CliRunner
 
-from flext_tap_ldap import t
-from flext_tap_ldap.tap import CLI_COMMAND
+from flext_tap_ldap import CLI_COMMAND, t
 
 
 class TestFlextTapLdapIntegration:
