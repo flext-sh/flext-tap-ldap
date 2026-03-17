@@ -125,43 +125,44 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 """Sync Singer stream from LDAP entries."""
                 ...
 
+        @runtime_checkable
+        class TapConfig(Protocol):
+            """Protocol for tap configuration interface."""
+
+            def get_config(
+                self, key: str, default: t.Scalar | None = None
+            ) -> t.Scalar | None:
+                """Get configuration value by key.
+
+                Args:
+                    key: Configuration key.
+                    default: Default value if key not found.
+
+                Returns:
+                    Configuration value or default.
+
+                """
+                ...
+
+        @runtime_checkable
+        class Tap(Protocol):
+            """Protocol for tap interface used by streams.
+
+            Defines the minimal interface that streams need from tap instances,
+            avoiding circular dependencies through protocol-based typing.
+            """
+
+            @property
+            def config(self) -> FlextTapLdapProtocols.TapLdap.TapConfig:
+                """Get tap configuration.
+
+                Returns:
+                    Tap configuration object.
+
+                """
+                ...
+
 
 p = FlextTapLdapProtocols
 
-
-class TapConfig(Protocol):
-    """Protocol for tap configuration interface."""
-
-    def get_config(self, key: str, default: t.Scalar | None = None) -> t.Scalar | None:
-        """Get configuration value by key.
-
-        Args:
-            key: Configuration key.
-            default: Default value if key not found.
-
-        Returns:
-            Configuration value or default.
-
-        """
-        ...
-
-
-class Tap(Protocol):
-    """Protocol for tap interface used by streams.
-
-    Defines the minimal interface that streams need from tap instances,
-    avoiding circular dependencies through protocol-based typing.
-    """
-
-    @property
-    def config(self) -> TapConfig:
-        """Get tap configuration.
-
-        Returns:
-            Tap configuration object.
-
-        """
-        ...
-
-
-__all__ = ["FlextTapLdapProtocols", "Tap", "TapConfig", "p"]
+__all__ = ["FlextTapLdapProtocols", "p"]

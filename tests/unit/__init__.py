@@ -12,18 +12,18 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
 
-    from tests.unit.test_client import TestLDAPClientCoverageBoost
-    from tests.unit.test_client_quick import TestLDAPClientQuick
-    from tests.unit.test_ldif_processor import TestLdifProcessor
-    from tests.unit.test_ldif_stream import TestLDIFStreamBasic
-    from tests.unit.test_models import (
+    from .test_client import TestLDAPClientCoverageBoost
+    from .test_client_quick import TestLDAPClientQuick
+    from .test_ldif_processor import TestLdifProcessor
+    from .test_ldif_stream import TestLDIFStreamBasic
+    from .test_models import (
         TestConnectionTestedEvent,
         TestRecordExtractedEvent,
         TestStreamDiscoveredEvent,
         TestTapExecutionCompletedEvent,
         TestTapExecutionStartedEvent,
     )
-    from tests.unit.test_streams import (
+    from .test_streams import (
         TestCustomStream,
         TestCustomStreamParams,
         TestGroupsStream,
@@ -35,7 +35,7 @@ if TYPE_CHECKING:
         TestStreamIntegration,
         TestUsersStream,
     )
-    from tests.unit.test_tap import TestFlextTapLdapTapUnit
+    from .test_tap import TestFlextTapLdapTapUnit
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TestConnectionTestedEvent": (

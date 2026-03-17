@@ -12,18 +12,15 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
 
-    from tests import e2e, unit
-    from tests.conftest import (
+    from . import e2e as e2e, unit as unit
+    from .conftest import (
         project_root,
         pytest_configure,
         shared_ldap_container,
         test_data_dir,
     )
-    from tests.constants import (
-        TestsFlextTapLdapConstants,
-        TestsFlextTapLdapConstants as c,
-    )
-    from tests.e2e.conftest import (
+    from .constants import TestsFlextTapLdapConstants, TestsFlextTapLdapConstants as c
+    from .e2e.conftest import (
         catalog_file,
         ldap_connection,
         ldap_container,
@@ -31,22 +28,22 @@ if TYPE_CHECKING:
         sample_catalog,
         tap_config_file,
     )
-    from tests.e2e.test_integration import TestFlextTapLdapIntegration
-    from tests.models import TestsFlextTapLdapModels, m
-    from tests.protocols import TestsFlextTapLdapProtocols, p
-    from tests.typings import TestsFlextTapLdapTypes, t
-    from tests.unit.test_client import TestLDAPClientCoverageBoost
-    from tests.unit.test_client_quick import TestLDAPClientQuick
-    from tests.unit.test_ldif_processor import TestLdifProcessor
-    from tests.unit.test_ldif_stream import TestLDIFStreamBasic
-    from tests.unit.test_models import (
+    from .e2e.test_integration import TestFlextTapLdapIntegration
+    from .models import TestsFlextTapLdapModels, m
+    from .protocols import TestsFlextTapLdapProtocols, p
+    from .typings import TestsFlextTapLdapTypes, t
+    from .unit.test_client import TestLDAPClientCoverageBoost
+    from .unit.test_client_quick import TestLDAPClientQuick
+    from .unit.test_ldif_processor import TestLdifProcessor
+    from .unit.test_ldif_stream import TestLDIFStreamBasic
+    from .unit.test_models import (
         TestConnectionTestedEvent,
         TestRecordExtractedEvent,
         TestStreamDiscoveredEvent,
         TestTapExecutionCompletedEvent,
         TestTapExecutionStartedEvent,
     )
-    from tests.unit.test_streams import (
+    from .unit.test_streams import (
         TestCustomStream,
         TestCustomStreamParams,
         TestGroupsStream,
@@ -58,8 +55,8 @@ if TYPE_CHECKING:
         TestStreamIntegration,
         TestUsersStream,
     )
-    from tests.unit.test_tap import TestFlextTapLdapTapUnit
-    from tests.utilities import TestsFlextTapLdapUtilities, u
+    from .unit.test_tap import TestFlextTapLdapTapUnit
+    from .utilities import TestsFlextTapLdapUtilities, u
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TestConnectionTestedEvent": (

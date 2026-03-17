@@ -47,7 +47,7 @@ if TYPE_CHECKING:
         Transformer,
         Validator,
     )
-    from flext_tap_ldap.protocols import FlextTapLdapProtocols, Tap, TapConfig, p
+    from flext_tap_ldap.protocols import FlextTapLdapProtocols, p
     from flext_tap_ldap.services import FlextTapLdapServices
     from flext_tap_ldap.settings import FlextTapLdapSettings
     from flext_tap_ldap.streams import FlextTapLdapStreams
@@ -80,8 +80,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "LDAPClientConfig": ("flext_tap_ldap.client", "LDAPClientConfig"),
     "LDAPConnectionConfig": ("flext_tap_ldap.client", "LDAPConnectionConfig"),
     "LDAPEntry": ("flext_tap_ldap.client", "LDAPEntry"),
-    "Tap": ("flext_tap_ldap.protocols", "Tap"),
-    "TapConfig": ("flext_tap_ldap.protocols", "TapConfig"),
     "Transformer": ("flext_tap_ldap.processor", "Transformer"),
     "Validator": ("flext_tap_ldap.processor", "Validator"),
     "__all__": ("flext_tap_ldap.__version__", "__all__"),
@@ -121,8 +119,6 @@ __all__ = [
     "LDAPClientConfig",
     "LDAPConnectionConfig",
     "LDAPEntry",
-    "Tap",
-    "TapConfig",
     "Transformer",
     "Validator",
     "__all__",

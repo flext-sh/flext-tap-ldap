@@ -12,7 +12,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
 
-    from tests.e2e.conftest import (
+    from .conftest import (
         catalog_file,
         ldap_connection,
         ldap_container,
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
         sample_catalog,
         tap_config_file,
     )
-    from tests.e2e.test_integration import TestFlextTapLdapIntegration
+    from .test_integration import TestFlextTapLdapIntegration
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TestFlextTapLdapIntegration": (
