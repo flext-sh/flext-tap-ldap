@@ -33,7 +33,6 @@ if TYPE_CHECKING:
     from .protocols import TestsFlextTapLdapProtocols, p
     from .typings import TestsFlextTapLdapTypes, t
     from .unit.test_client import TestLDAPClientCoverageBoost
-    from .unit.test_client_quick import TestLDAPClientQuick
     from .unit.test_ldif_processor import TestLdifProcessor
     from .unit.test_ldif_stream import TestLDIFStreamBasic
     from .unit.test_models import (
@@ -80,7 +79,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "tests.unit.test_client",
         "TestLDAPClientCoverageBoost",
     ),
-    "TestLDAPClientQuick": ("tests.unit.test_client_quick", "TestLDAPClientQuick"),
     "TestLDIFStreamBasic": ("tests.unit.test_ldif_stream", "TestLDIFStreamBasic"),
     "TestLdifProcessor": ("tests.unit.test_ldif_processor", "TestLdifProcessor"),
     "TestOrganizationalUnitsStream": (
@@ -141,7 +139,6 @@ __all__ = [
     "TestLDAPBaseStream",
     "TestLDAPBaseStreamDirectUsage",
     "TestLDAPClientCoverageBoost",
-    "TestLDAPClientQuick",
     "TestLDIFStreamBasic",
     "TestLdifProcessor",
     "TestOrganizationalUnitsStream",

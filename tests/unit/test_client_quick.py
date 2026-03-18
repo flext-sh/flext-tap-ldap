@@ -52,32 +52,32 @@ class TestLDAPClientQuick:
         tm.that(client._convert_scope_to_enum("base") == "BASE", eq=True)
         tm.that(client._convert_scope_to_enum("INVALID") == "SUBTREE", eq=True)
 
-    def test_entry_conversion_scenarios(
-        self, client: FlextTapLdapClient.LDAPClient
-    ) -> None:
-        """Test entry conversion with different scenarios."""
-        mock_entry = Mock()
-        mock_entry.dn = "uid=test,dc=example,dc=com"
-        empty_attributes: list[str] = []
-        mock_entry.attributes = {
-            "uid": ["test"],
-            "cn": ["Test", "T. User"],
-            "empty": empty_attributes,
-        }
-        result = client._convert_entry_to_dict(mock_entry)
-        tm.that(result["dn"] == "uid=test,dc=example,dc=com", eq=True)
-        tm.that(result["uid"] == "test", eq=True)
-        tm.that(result["cn"] == ["Test", "T. User"], eq=True)
-        tm.that(result["empty"] == [], eq=True)
-        mail_values: list[dict[str, object]] = ["test@example.com"]
-        dict_entry: dict[str, dict[str, object]] = {
-            "dn": "uid=dict,dc=example,dc=com",
-            "attributes": {"mail": mail_values},
-        }
-        result = client._convert_entry_to_dict(dict_entry)
-        tm.that(result["dn"] == "uid=dict,dc=example,dc=com", eq=True)
-        result = client._convert_entry_to_dict(None)
-        tm.that(result == {}, eq=True)
+     def test_entry_conversion_scenarios(
+         self, client: FlextTapLdapClient.LDAPClient
+     ) -> None:
+         """Test entry conversion with different scenarios."""
+         mock_entry = Mock()
+         mock_entry.dn = "uid=test,dc=example,dc=com"
+         empty_attributes: list[str] = []
+         mock_entry.attributes = {
+             "uid": ["test"],
+             "cn": ["Test", "T. User"],
+             "empty": empty_attributes,
+         }
+         result = client._convert_entry_to_dict(mock_entry)
+         tm.that(result["dn"] == "uid=test,dc=example,dc=com", eq=True)
+         tm.that(result["uid"] == "test", eq=True)
+         tm.that(result["cn"] == ["Test", "T. User"], eq=True)
+         tm.that(result["empty"] == [], eq=True)
+         mail_values: list[str] = ["test@example.com"]
+         dict_entry: dict[str, object] = {
+             "dn": "uid=dict,dc=example,dc=com",
+             "attributes": {"mail": mail_values},
+         }
+         result = client._convert_entry_to_dict(dict_entry)
+         tm.that(result["dn"] == "uid=dict,dc=example,dc=com", eq=True)
+         result = client._convert_entry_to_dict(None)
+         tm.that(result == {}, eq=True)
 
     def test_search_result_processing(
         self, client: FlextTapLdapClient.LDAPClient
@@ -172,63 +172,63 @@ class TestLDAPClientQuick:
 
     def test_oracle_entry_processing(
         self, client: FlextTapLdapClient.LDAPClient
-    ) -> None:
-        """Test Oracle entry processing with all scenarios."""
-        uid_values: list[dict[str, object]] = ["test"]
-        oracle_password_values: list[dict[str, object]] = ["hashed_password"]
-        object_classes: list[dict[str, object]] = ["inetOrgPerson"]
-        entry: dict[str, dict[str, object]] = {
-            "dn": "uid=test,dc=oracle,dc=com",
-            "attributes": {
-                "uid": uid_values,
-                "orclPassword": oracle_password_values,
-                "objectClass": object_classes,
-            },
-        }
-        result = client._process_oracle_entry(entry)
-        attributes = result.get("attributes")
-        tm.that(isinstance(attributes, dict), eq=True)
-        assert isinstance(attributes, dict)
-        tm.that("userPassword" in attributes, eq=True)
-        user_password = attributes.get("userPassword")
-        tm.that(isinstance(user_password, list), eq=True)
-        assert isinstance(user_password, list)
-        tm.that("hashed_password" in user_password, eq=True)
+     ) -> None:
+         """Test Oracle entry processing with all scenarios."""
+         uid_values: list[str] = ["test"]
+         oracle_password_values: list[str] = ["hashed_password"]
+         object_classes: list[str] = ["inetOrgPerson"]
+         entry: dict[str, object] = {
+             "dn": "uid=test,dc=oracle,dc=com",
+             "attributes": {
+                 "uid": uid_values,
+                 "orclPassword": oracle_password_values,
+                 "objectClass": object_classes,
+             },
+         }
+         result = client._process_oracle_entry(entry)
+         attributes = result.get("attributes")
+         tm.that(isinstance(attributes, dict), eq=True)
+         assert isinstance(attributes, dict)
+         tm.that("userPassword" in attributes, eq=True)
+         user_password = attributes.get("userPassword")
+         tm.that(isinstance(user_password, list), eq=True)
+         assert isinstance(user_password, list)
+         tm.that("hashed_password" in user_password, eq=True)
 
-        ou_values: list[dict[str, object]] = ["test"]
-        container_classes: list[dict[str, object]] = ["orclContainer"]
-        entry_with_container: dict[str, dict[str, object]] = {
-            "dn": "ou=test,dc=oracle,dc=com",
-            "attributes": {"ou": ou_values, "objectClass": container_classes},
-        }
-        result = client._process_oracle_entry(entry_with_container)
-        attributes = result.get("attributes")
-        tm.that(isinstance(attributes, dict), eq=True)
-        assert isinstance(attributes, dict)
-        object_class = attributes.get("objectClass")
-        tm.that(isinstance(object_class, list), eq=True)
-        assert isinstance(object_class, list)
-        tm.that("organizationalUnit" in object_class, eq=True)
+         ou_values: list[str] = ["test"]
+         container_classes: list[str] = ["orclContainer"]
+         entry_with_container: dict[str, object] = {
+             "dn": "ou=test,dc=oracle,dc=com",
+             "attributes": {"ou": ou_values, "objectClass": container_classes},
+         }
+         result = client._process_oracle_entry(entry_with_container)
+         attributes = result.get("attributes")
+         tm.that(isinstance(attributes, dict), eq=True)
+         assert isinstance(attributes, dict)
+         object_class = attributes.get("objectClass")
+         tm.that(isinstance(object_class, list), eq=True)
+         assert isinstance(object_class, list)
+         tm.that("organizationalUnit" in object_class, eq=True)
 
-        entry_string_oc: dict[str, dict[str, object]] = {
-            "dn": "ou=test,dc=oracle,dc=com",
-            "attributes": {"objectClass": "orclContainer"},
-        }
-        result = client._process_oracle_entry(entry_string_oc)
-        attributes = result.get("attributes")
-        tm.that(isinstance(attributes, dict), eq=True)
-        assert isinstance(attributes, dict)
-        obj_classes = attributes.get("objectClass")
-        tm.that(isinstance(obj_classes, list), eq=True)
-        assert isinstance(obj_classes, list)
-        tm.that("organizationalUnit" in obj_classes, eq=True)
+         entry_string_oc: dict[str, object] = {
+             "dn": "ou=test,dc=oracle,dc=com",
+             "attributes": {"objectClass": "orclContainer"},
+         }
+         result = client._process_oracle_entry(entry_string_oc)
+         attributes = result.get("attributes")
+         tm.that(isinstance(attributes, dict), eq=True)
+         assert isinstance(attributes, dict)
+         obj_classes = attributes.get("objectClass")
+         tm.that(isinstance(obj_classes, list), eq=True)
+         assert isinstance(obj_classes, list)
+         tm.that("organizationalUnit" in obj_classes, eq=True)
 
-        entry_bad_attrs: dict[str, dict[str, object]] = {
-            "dn": "uid=test,dc=oracle,dc=com",
-            "attributes": "not_a_dict",
-        }
-        result = client._process_oracle_entry(entry_bad_attrs)
-        tm.that(result == entry_bad_attrs, eq=True)
+         entry_bad_attrs: dict[str, object] = {
+             "dn": "uid=test,dc=oracle,dc=com",
+             "attributes": "not_a_dict",
+         }
+         result = client._process_oracle_entry(entry_bad_attrs)
+         tm.that(result == entry_bad_attrs, eq=True)
 
     def test_oracle_attribute_extension(
         self, client: FlextTapLdapClient.LDAPClient
@@ -255,30 +255,30 @@ class TestLDAPClientQuick:
 
     def test_process_search_results_with_oracle_support(
         self, client: FlextTapLdapClient.LDAPClient
-    ) -> None:
-        """Test Oracle search result processing."""
-        first_passwords: list[dict[str, object]] = ["pass1"]
-        second_uids: list[dict[str, object]] = ["test2"]
-        search_results: list[dict[str, dict[str, object]]] = [
-            {
-                "dn": "uid=test1,dc=oracle,dc=com",
-                "attributes": {"orclPassword": first_passwords},
-            },
-            {"dn": "uid=test2,dc=oracle,dc=com", "attributes": {"uid": second_uids}},
-        ]
-        results = client._process_search_results_with_oracle_support(
-            search_results, oracle_oid_mode=True
-        )
-        tm.that(len(results) == 2, eq=True)
-        attributes = results[0].get("attributes")
-        tm.that(isinstance(attributes, dict), eq=True)
-        assert isinstance(attributes, dict)
-        tm.that("userPassword" in attributes, eq=True)
-        results = client._process_search_results_with_oracle_support(
-            search_results, oracle_oid_mode=False
-        )
-        tm.that(len(results) == 2, eq=True)
-        tm.that(results[0] == search_results[0], eq=True)
+     ) -> None:
+         """Test Oracle search result processing."""
+         first_passwords: list[str] = ["pass1"]
+         second_uids: list[str] = ["test2"]
+         search_results: list[dict[str, object]] = [
+             {
+                 "dn": "uid=test1,dc=oracle,dc=com",
+                 "attributes": {"orclPassword": first_passwords},
+             },
+             {"dn": "uid=test2,dc=oracle,dc=com", "attributes": {"uid": second_uids}},
+         ]
+         results = client._process_search_results_with_oracle_support(
+             search_results, oracle_oid_mode=True
+         )
+         tm.that(len(results) == 2, eq=True)
+         attributes = results[0].get("attributes")
+         tm.that(isinstance(attributes, dict), eq=True)
+         assert isinstance(attributes, dict)
+         tm.that("userPassword" in attributes, eq=True)
+         results = client._process_search_results_with_oracle_support(
+             search_results, oracle_oid_mode=False
+         )
+         tm.that(len(results) == 2, eq=True)
+         tm.that(results[0] == search_results[0], eq=True)
 
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_execute_oracle_search_in_new_loop(

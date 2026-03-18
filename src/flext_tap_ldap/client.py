@@ -90,7 +90,7 @@ class FlextTapLdapClient:
             protocol = "ldaps" if self.use_ssl else "ldap"
             return f"{protocol}://{self.host}:{self.port}"
 
-        def health_check(self) -> Mapping[str, dict[str, object]]:
+        def health_check(self) -> dict[str, str | bool | float]:
             """Perform health check for testing convenience."""
             start_time = time.time()
             connection_ok: bool = self.test_connection()
@@ -110,7 +110,7 @@ class FlextTapLdapClient:
             attributes: list[str] | None = None,
             scope: str = "SUBTREE",
             size_limit: int = 0,
-        ) -> Sequence[Mapping[str, dict[str, object]]]:
+        ) -> Sequence[dict[str, object]]:
             """Search for entries using flext-ldap infrastructure (synchronous).
 
             Returns a list of entries for testing convenience with Singer streams.
@@ -133,7 +133,7 @@ class FlextTapLdapClient:
             attributes: list[str] | None = None,
             *,
             oracle_oid_mode: bool = False,
-        ) -> Sequence[Mapping[str, dict[str, object]]]:
+        ) -> Sequence[dict[str, object]]:
             """Search with Oracle OID support for testing convenience.
 
             Refactored using Single Responsibility Principle to reduce complexity.
@@ -222,7 +222,7 @@ class FlextTapLdapClient:
         def _convert_entry_to_dict(
             self,
             entry_data: t.RuntimeData | None,
-        ) -> dict[str, dict[str, object]]:
+        ) -> dict[str, object]:
             """Convert FlextLdapModels.Entry to dict format for testing.
 
             Single Responsibility: Handle only entry format conversion.
@@ -231,19 +231,19 @@ class FlextTapLdapClient:
                 return {}
             if isinstance(entry_data, BaseModel):
                 dn_value: str = str(getattr(entry_data, "dn", ""))
-                attrs_raw = getattr(entry_data, "attributes", {})
-                attributes: dict[str, dict[str, object]] = (
-                    attrs_raw if isinstance(attrs_raw, dict) else {}
-                )
-                entry_dict: dict[str, dict[str, object]] = {"dn": dn_value}
-                for attr_name, attr_values in attributes.items():
-                    if isinstance(attr_values, list) and len(attr_values) == 1:
-                        entry_dict[attr_name] = attr_values[0]
+                attrs_raw: object = getattr(entry_data, "attributes", {})
+                if not isinstance(attrs_raw, dict):
+                    return {"dn": dn_value}
+                entry_dict: dict[str, object] = {"dn": dn_value}
+                for key, val in attrs_raw.items():
+                    key_str = str(key)
+                    if isinstance(val, list) and len(val) == 1:
+                        entry_dict[key_str] = val[0]
                     else:
-                        entry_dict[attr_name] = attr_values
+                        entry_dict[key_str] = val
                 return entry_dict
             if isinstance(entry_data, Mapping):
-                result: dict[str, dict[str, object]] = {}
+                result: dict[str, object] = {}
                 for key, value in entry_data.items():
                     if isinstance(
                         value,
@@ -304,7 +304,7 @@ class FlextTapLdapClient:
             attributes: list[str] | None,
             *,
             oracle_oid_mode: bool,
-        ) -> Sequence[Mapping[str, dict[str, object]]]:
+        ) -> Sequence[dict[str, object]]:
             """Execute Oracle search in new event loop.
 
             Single Responsibility: Handle only event loop management for Oracle search.
@@ -312,7 +312,7 @@ class FlextTapLdapClient:
             loop = new_event_loop()
             set_event_loop(loop)
             try:
-                search_result: Sequence[Mapping[str, dict[str, object]]] = self.search(
+                search_result: Sequence[dict[str, object]] = self.search(
                     base_dn,
                     search_filter,
                     attributes,
@@ -388,7 +388,7 @@ class FlextTapLdapClient:
             attributes: list[str] | None,
             ldap_scope: str,
             size_limit: int,
-        ) -> Sequence[Mapping[str, dict[str, object]]]:
+        ) -> Sequence[dict[str, object]]:
             """Perform actual LDAP search.
 
             Single Responsibility: Handle only search execution.
@@ -420,30 +420,25 @@ class FlextTapLdapClient:
 
         def _process_oracle_entry(
             self,
-            entry: Mapping[str, dict[str, object]],
-        ) -> Mapping[str, dict[str, object]]:
+            entry: dict[str, object],
+        ) -> dict[str, object]:
             """Process Oracle-specific LDAP entries for testing convenience."""
             raw_attrs = entry.get("attributes", {})
-            attributes: dict[str, dict[str, object]] = {}
+            attributes: dict[str, object] = {}
             if isinstance(raw_attrs, Mapping):
-                attributes = {
-                    str(attr_name): attr_value
-                    for attr_name, attr_value in raw_attrs.items()
-                }
+                for attr_name, attr_value in raw_attrs.items():
+                    attributes[str(attr_name)] = attr_value
             if "orclPassword" in attributes:
                 pwd_val = attributes.get("orclPassword")
                 if pwd_val is not None:
                     attributes["userPassword"] = pwd_val
             if "objectClass" in attributes:
                 raw_obj_classes = attributes["objectClass"]
-                obj_classes: list[dict[str, object]] = []
-                match raw_obj_classes:
-                    case str() as single_class:
-                        obj_classes = [single_class]
-                    case list() as class_list:
-                        obj_classes = [str(c) for c in class_list]
-                    case _:
-                        obj_classes = []
+                obj_classes: list[str] = []
+                if isinstance(raw_obj_classes, str):
+                    obj_classes = [raw_obj_classes]
+                elif isinstance(raw_obj_classes, list):
+                    obj_classes = [str(item) for item in raw_obj_classes]
                 if (
                     "orclContainer" in obj_classes
                     and "organizationalUnit" not in obj_classes
@@ -456,12 +451,12 @@ class FlextTapLdapClient:
             self,
             result: r[m.Ldap.SearchResult],
             size_limit: int,
-        ) -> Sequence[Mapping[str, dict[str, object]]]:
+        ) -> Sequence[dict[str, object]]:
             """Process LDAP search results with size limiting.
 
             Single Responsibility: Handle only result processing logic.
             """
-            entries: list[Mapping[str, dict[str, object]]] = []
+            entries: list[dict[str, object]] = []
             if not (result.is_success and result.value):
                 return entries
             search_result = result.value
@@ -475,19 +470,20 @@ class FlextTapLdapClient:
 
         def _process_search_results_with_oracle_support(
             self,
-            search_result: Sequence[m.Ldif.Entry]
-            | Sequence[Mapping[str, dict[str, object]]],
+            search_result: Sequence[m.Ldif.Entry] | Sequence[dict[str, object]],
             *,
             oracle_oid_mode: bool,
-        ) -> Sequence[Mapping[str, dict[str, object]]]:
+        ) -> Sequence[dict[str, object]]:
             """Process search results with Oracle OID support.
 
             Single Responsibility: Handle only result processing logic.
             """
-            results: list[Mapping[str, dict[str, object]]] = []
+            results: list[dict[str, object]] = []
             for entry in search_result:
                 if isinstance(entry, Mapping):
-                    entry_dict = {str(key): value for key, value in entry.items()}
+                    entry_dict: dict[str, object] = {
+                        str(key): value for key, value in entry.items()
+                    }
                 else:
                     entry_dict = self._convert_entry_to_dict(entry)
                 if oracle_oid_mode:

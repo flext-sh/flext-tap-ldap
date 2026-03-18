@@ -110,7 +110,7 @@ class Entry:
         ):
             return bool(self.dn and self.dn.strip())
 
-    def parse_dn(self) -> Mapping[str, dict[str, object]]:
+    def parse_dn(self) -> Mapping[str, object]:
         """Parse DN into components using flext-ldif DN parsing."""
         try:
             dn_obj = FlextLdifDistinguishedName(value=self.dn)
@@ -131,9 +131,9 @@ class Entry:
         if name in self.attributes:
             self.attributes[name] = []
 
-    def to_dict(self) -> Mapping[str, dict[str, object]]:
+    def to_dict(self) -> Mapping[str, object]:
         """Convert entry to dictionary format."""
-        entry_dict: dict[str, dict[str, object]] = {
+        entry_dict: dict[str, object] = {
             "dn": self.dn,
             "attributes": dict(self.attributes),
         }
@@ -225,7 +225,7 @@ class FlextTapLdapProcessor:
         """Filter entries by object class."""
         return [entry for entry in self.entries if entry.has_object_class(object_class)]
 
-    def get_statistics(self) -> Mapping[str, dict[str, object]]:
+    def get_statistics(self) -> Mapping[str, object]:
         """Get parsing statistics."""
         return {
             "processed_entries": self.processed_entries,
@@ -322,13 +322,13 @@ class FlextTapLdapProcessor:
     def to_singer_format(
         self,
         _stream_name: str,
-    ) -> list[Mapping[str, dict[str, object]]]:
+    ) -> list[Mapping[str, object]]:
         """Convert LDIF entries to Singer record format."""
-        records: list[Mapping[str, dict[str, object]]] = []
+        records: list[Mapping[str, object]] = []
         for entry in self.entries:
-            record_attributes: dict[str, dict[str, object]] = {"dn": entry.dn}
+            record_attributes: dict[str, object] = {"dn": entry.dn}
             record_attributes.update(dict(entry.attributes))
-            record: dict[str, dict[str, object]] = {
+            record: dict[str, object] = {
                 "type": "RECORD",
                 "stream": _stream_name,
                 "record": record_attributes,
