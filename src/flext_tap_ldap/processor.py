@@ -47,7 +47,9 @@ class Entry:
 
     @override
     def __init__(
-        self, dn: str, attributes: Mapping[str, list[str]] | None = None
+        self,
+        dn: str,
+        attributes: Mapping[str, list[str]] | None = None,
     ) -> None:
         """Initialize LDIF entry with testing convenience."""
         self.dn = dn
@@ -95,7 +97,7 @@ class Entry:
             api = FlextLdif()
             result = api.validate_entries([self._flext_entry])
             return result.is_success and bool(
-                result.value and result.value.valid_entries > 0
+                result.value and result.value.valid_entries > 0,
             )
         except (
             ValueError,
@@ -251,7 +253,9 @@ class FlextTapLdapProcessor:
             return r[str].fail(f"Failed to load LDIF content: {e}")
 
     def parse_content(
-        self, content: str, source_name: str = "content"
+        self,
+        content: str,
+        source_name: str = "content",
     ) -> Iterator[Entry]:
         """Parse LDIF content using flext-ldif and yield testing convenience entries."""
         logger.info("Parsing LDIF content with flext-ldif from %s", source_name)
@@ -316,7 +320,8 @@ class FlextTapLdapProcessor:
                 self._handle_parsing_error(file_path, e, "latin-1")
 
     def to_singer_format(
-        self, _stream_name: str
+        self,
+        _stream_name: str,
     ) -> list[Mapping[str, t.ContainerValue]]:
         """Convert LDIF entries to Singer record format."""
         records: list[Mapping[str, t.ContainerValue]] = []
@@ -341,7 +346,10 @@ class FlextTapLdapProcessor:
         return Entry(dn=dn, attributes=attributes)
 
     def _handle_parsing_error(
-        self, file_path: Path, error: Exception, _encoding: str
+        self,
+        file_path: Path,
+        error: Exception,
+        _encoding: str,
     ) -> None:
         """Handle parsing errors based on ignore_errors setting."""
         error_msg = f"Failed to parse LDIF file {file_path}: {error}"
@@ -352,7 +360,9 @@ class FlextTapLdapProcessor:
             raise ValueError(error_msg) from error
 
     def _parse_ldif_content(
-        self, content: str, file_path: Path
+        self,
+        content: str,
+        file_path: Path,
     ) -> r[list[m.Ldif.Entry]]:
         """Parse LDIF content using flext-ldif API."""
         result: r[list[m.Ldif.Entry]] = self._api.parse(content)
@@ -394,7 +404,8 @@ class FlextTapLdapProcessor:
             raise ValueError(msg)
 
     def _yield_entries_from_result(
-        self, result: r[list[m.Ldif.Entry]]
+        self,
+        result: r[list[m.Ldif.Entry]],
     ) -> Iterator[Entry]:
         """Yield testing convenience entries from parse result."""
         if result.value:
@@ -476,14 +487,17 @@ class Transformer:
 
     @override
     def __init__(
-        self, transformation_rules: Mapping[str, t.ContainerValue] | None = None
+        self,
+        transformation_rules: Mapping[str, t.ContainerValue] | None = None,
     ) -> None:
         """Initialize transformer with optional transformation rules."""
         self.transformation_rules = dict(transformation_rules or {})
         self._api = FlextLdif()
 
     def apply_attribute_mappings(
-        self, entry: Entry, mappings: Mapping[str, str]
+        self,
+        entry: Entry,
+        mappings: Mapping[str, str],
     ) -> Entry:
         """Apply attribute name mappings to entry."""
         new_attributes: dict[str, list[str]] = {}
@@ -496,11 +510,14 @@ class Transformer:
         return transformed_entry
 
     def apply_schema_mappings(
-        self, entry: Entry, schema_mappings: Mapping[str, t.ContainerValue]
+        self,
+        entry: Entry,
+        schema_mappings: Mapping[str, t.ContainerValue],
     ) -> Entry:
         """Apply schema mappings to normalize output attributes."""
         transformed_entry = Entry(
-            entry.dn, {k: list(v) for k, v in entry.attributes.items()}
+            entry.dn,
+            {k: list(v) for k, v in entry.attributes.items()},
         )
         transformed_entry.change_type = entry.change_type
         transformed_entry.controls = entry.controls.copy()
@@ -570,7 +587,8 @@ class Transformer:
             for attr_name, attr_value in raw_add_attributes.items():
                 if isinstance(attr_value, list):
                     transformed.add_attribute(
-                        attr_name, [str(item) for item in attr_value]
+                        attr_name,
+                        [str(item) for item in attr_value],
                     )
                 else:
                     transformed.add_attribute(attr_name, str(attr_value))

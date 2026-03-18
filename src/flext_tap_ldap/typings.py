@@ -43,7 +43,8 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
         )
     )
     STRICT_STR_ADAPTER: TypeAdapter[str] = TypeAdapter(
-        str, config=ConfigDict(strict=True)
+        str,
+        config=ConfigDict(strict=True),
     )
 
     type TapLdapStream = (
@@ -56,14 +57,17 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
         """LDAP connection complex types."""
 
         type ConnectionConfig = dict[
-            str, str | int | bool | Mapping[str, t.ContainerValue]
+            str,
+            str | int | bool | Mapping[str, t.ContainerValue],
         ]
         type AuthenticationConfig = dict[
-            str, str | bool | Mapping[str, t.ContainerValue]
+            str,
+            str | bool | Mapping[str, t.ContainerValue],
         ]
         type TlsConfig = dict[str, bool | str | Mapping[str, t.ContainerValue]]
         type ServerConfig = dict[
-            str, str | int | list[str] | Mapping[str, t.ContainerValue]
+            str,
+            str | int | list[str] | Mapping[str, t.ContainerValue],
         ]
         type PoolingConfig = dict[str, int | bool | Mapping[str, t.ContainerValue]]
         type TimeoutConfig = dict[str, int | float]
@@ -73,11 +77,13 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
 
         type LdapEntry = dict[str, str | list[str] | Mapping[str, t.ContainerValue]]
         type LdapAttribute = dict[
-            str, str | list[str] | bytes | Mapping[str, t.ContainerValue]
+            str,
+            str | list[str] | bytes | Mapping[str, t.ContainerValue],
         ]
         type LdapDn = dict[str, str | Mapping[str, t.ContainerValue]]
         type LdapObjectClass = dict[
-            str, str | list[str] | Mapping[str, t.ContainerValue]
+            str,
+            str | list[str] | Mapping[str, t.ContainerValue],
         ]
         type LdapSchema = dict[str, str | list[Mapping[str, t.ContainerValue]]]
         type LdapFilter = dict[str, str | Mapping[str, t.ContainerValue]]
@@ -88,14 +94,17 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
         type LdifRecord = dict[str, str | list[str] | Mapping[str, t.ContainerValue]]
         type LdifChangeRecord = dict[str, str | list[Mapping[str, t.ContainerValue]]]
         type LdifParserConfig = dict[
-            str, bool | str | int | Mapping[str, t.ContainerValue]
+            str,
+            bool | str | int | Mapping[str, t.ContainerValue],
         ]
         type LdifValidation = dict[
-            str, bool | str | list[str] | Mapping[str, t.ContainerValue]
+            str,
+            bool | str | list[str] | Mapping[str, t.ContainerValue],
         ]
         type LdifBatch = dict[str, int | list[Mapping[str, t.ContainerValue]]]
         type LdifProcessingMetrics = dict[
-            str, int | float | Mapping[str, t.ContainerValue]
+            str,
+            int | float | Mapping[str, t.ContainerValue],
         ]
 
     class SingerStream:
@@ -114,7 +123,8 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
         type TapConfig = dict[str, t.ContainerValue | Mapping[str, t.ContainerValue]]
         type ExtractionConfig = dict[str, str | int | bool | list[str]]
         type FilteringConfig = dict[
-            str, str | list[str] | Mapping[str, t.ContainerValue]
+            str,
+            str | list[str] | Mapping[str, t.ContainerValue],
         ]
         type BatchingConfig = dict[str, int | bool | Mapping[str, t.ContainerValue]]
         type ReplicationConfig = dict[str, str | bool | Mapping[str, t.ContainerValue]]
@@ -138,15 +148,18 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
         """
 
         type ConnectionDict = dict[
-            str, str | int | bool | Mapping[str, t.ContainerValue]
+            str,
+            str | int | bool | Mapping[str, t.ContainerValue],
         ]
         type AuthDict = dict[str, str | bool | Mapping[str, t.ContainerValue]]
         type TlsDict = dict[str, bool | str | Mapping[str, t.ContainerValue]]
         type ServerDict = dict[
-            str, str | int | list[str] | Mapping[str, t.ContainerValue]
+            str,
+            str | int | list[str] | Mapping[str, t.ContainerValue],
         ]
         type LdapRecordDict = dict[
-            str, t.ContainerValue | Mapping[str, t.ContainerValue]
+            str,
+            t.ContainerValue | Mapping[str, t.ContainerValue],
         ]
         type EntryDict = dict[str, t.ContainerValue | list[str]]
         type AttributeDict = dict[str, str | list[str] | Mapping[str, t.ContainerValue]]
@@ -181,7 +194,8 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
             type TapLdapProjectConfig = dict[str, t.ContainerValue]
             type LdapExtractionConfig = dict[str, str | int | bool | list[str]]
             type LdapIntegrationConfig = dict[
-                str, bool | str | Mapping[str, t.ContainerValue]
+                str,
+                bool | str | Mapping[str, t.ContainerValue],
             ]
             type TapLdapPipelineConfig = dict[str, t.ContainerValue]
 

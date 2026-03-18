@@ -53,7 +53,8 @@ def _parse_connection_config(
     """Validate LDAP connection payload through Pydantic."""
     try:
         parsed = FlextTapLdapModels.TapLdap.LdapConnectionConfig.model_validate(
-            raw_value, strict=True
+            raw_value,
+            strict=True,
         )
     except ValidationError:
         parsed = FlextTapLdapModels.TapLdap.LdapConnectionConfig()
@@ -64,7 +65,8 @@ def _parse_connection_config(
         bind_password=_coerce_optional_string(parsed.bind_password),
         use_ssl=bool(parsed.use_ssl),
         timeout_seconds=_coerce_positive_int(
-            parsed.timeout_seconds, c.TapLdap.DEFAULT_SEARCH_TIMEOUT
+            parsed.timeout_seconds,
+            c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
         ),
         base_dn=str(parsed.base_dn),
     )
@@ -76,7 +78,8 @@ def _parse_property_definition(
     """Validate custom stream property definition through Pydantic."""
     try:
         return FlextTapLdapModels.TapLdap.CustomPropertyDefinition.model_validate(
-            raw_value, strict=True
+            raw_value,
+            strict=True,
         )
     except ValidationError:
         return FlextTapLdapModels.TapLdap.CustomPropertyDefinition()
@@ -177,7 +180,8 @@ class FlextTapLdapStreams:
             self._create_ldap_client()
 
         def get_records(
-            self, context: Mapping[str, t.ContainerValue] | None = None
+            self,
+            context: Mapping[str, t.ContainerValue] | None = None,
         ) -> Iterable[t.ContainerValue]:
             """Get records from LDAP - base implementation."""
             _context = context
@@ -190,7 +194,8 @@ class FlextTapLdapStreams:
                 connection_config = _parse_connection_config(raw_connection)
                 page_size_raw = self.config.get("page_size", 1000)
                 page_size = _coerce_positive_int(
-                    page_size_raw, c.TapLdap.DEFAULT_PAGE_SIZE
+                    page_size_raw,
+                    c.TapLdap.DEFAULT_PAGE_SIZE,
                 )
                 if (
                     connection_config.bind_dn is not None
@@ -324,7 +329,8 @@ class FlextTapLdapStreams:
 
         @override
         def get_records(
-            self, context: Mapping[str, t.ContainerValue] | None = None
+            self,
+            context: Mapping[str, t.ContainerValue] | None = None,
         ) -> Iterable[t.ContainerValue]:
             """Get user records from LDAP."""
             _context = context
@@ -356,7 +362,8 @@ class FlextTapLdapStreams:
                 "modifyTimestamp",
             ]
             results: list[dict[str, t.ContainerValue]] = self._search_ldap(
-                user_filter, attributes=user_attributes
+                user_filter,
+                attributes=user_attributes,
             )
             yield from results
 
@@ -364,7 +371,7 @@ class FlextTapLdapStreams:
         def _get_fallback_data(self) -> list[dict[str, t.ContainerValue]]:
             """Get fallback user data."""
             return [
-                dict(FlextTapLdapStreams.FallbackDataFactory.create_test_user_record())
+                dict(FlextTapLdapStreams.FallbackDataFactory.create_test_user_record()),
             ]
 
     class GroupsStream(LDAPBaseStream):
@@ -407,13 +414,15 @@ class FlextTapLdapStreams:
 
         @override
         def get_records(
-            self, context: Mapping[str, t.ContainerValue] | None = None
+            self,
+            context: Mapping[str, t.ContainerValue] | None = None,
         ) -> Iterable[t.ContainerValue]:
             """Get group records from LDAP."""
             _context = context
             logger.info("Extracting LDAP groups")
             raw_group_filter = self.config.get(
-                "group_filter", "(objectClass=groupOfNames)"
+                "group_filter",
+                "(objectClass=groupOfNames)",
             )
             group_filter = (
                 _coerce_optional_string(raw_group_filter)
@@ -431,7 +440,8 @@ class FlextTapLdapStreams:
                 "modifyTimestamp",
             ]
             results: list[dict[str, t.ContainerValue]] = self._search_ldap(
-                group_filter, attributes=group_attributes
+                group_filter,
+                attributes=group_attributes,
             )
             yield from results
 
@@ -439,7 +449,9 @@ class FlextTapLdapStreams:
         def _get_fallback_data(self) -> list[dict[str, t.ContainerValue]]:
             """Get fallback group data."""
             return [
-                dict(FlextTapLdapStreams.FallbackDataFactory.create_test_group_record())
+                dict(
+                    FlextTapLdapStreams.FallbackDataFactory.create_test_group_record()
+                ),
             ]
 
     class OrganizationalUnitsStream(LDAPBaseStream):
@@ -470,7 +482,8 @@ class FlextTapLdapStreams:
 
         @override
         def get_records(
-            self, context: Mapping[str, t.ContainerValue] | None = None
+            self,
+            context: Mapping[str, t.ContainerValue] | None = None,
         ) -> Iterable[t.ContainerValue]:
             """Get organizational unit records from LDAP."""
             _context = context
@@ -484,7 +497,8 @@ class FlextTapLdapStreams:
                 "modifyTimestamp",
             ]
             results: list[dict[str, t.ContainerValue]] = self._search_ldap(
-                ou_filter, attributes=ou_attributes
+                ou_filter,
+                attributes=ou_attributes,
             )
             yield from results
 
@@ -492,7 +506,7 @@ class FlextTapLdapStreams:
         def _get_fallback_data(self) -> list[dict[str, t.ContainerValue]]:
             """Get fallback organizational unit data."""
             return [
-                dict(FlextTapLdapStreams.FallbackDataFactory.create_test_ou_record())
+                dict(FlextTapLdapStreams.FallbackDataFactory.create_test_ou_record()),
             ]
 
     class SchemaStream(LDAPBaseStream):
@@ -537,7 +551,8 @@ class FlextTapLdapStreams:
 
         @override
         def get_records(
-            self, context: Mapping[str, t.ContainerValue] | None = None
+            self,
+            context: Mapping[str, t.ContainerValue] | None = None,
         ) -> Iterable[t.ContainerValue]:
             """Get schema records from LDAP."""
             _context = context
@@ -555,7 +570,9 @@ class FlextTapLdapStreams:
             for base_dn in base_dns:
                 try:
                     results = self._search_ldap(
-                        schema_filter, base_dn=base_dn, attributes=schema_attributes
+                        schema_filter,
+                        base_dn=base_dn,
+                        attributes=schema_attributes,
                     )
                     if results:
                         for record in results:
@@ -585,8 +602,8 @@ class FlextTapLdapStreams:
             """Get fallback schema data."""
             return [
                 dict(
-                    FlextTapLdapStreams.FallbackDataFactory.create_test_schema_record()
-                )
+                    FlextTapLdapStreams.FallbackDataFactory.create_test_schema_record(),
+                ),
             ]
 
     class CustomStream(LDAPBaseStream):
@@ -596,13 +613,16 @@ class FlextTapLdapStreams:
 
         @override
         def __init__(
-            self, tap: Tap, params: FlextTapLdapModels.TapLdap.CustomStreamParams
+            self,
+            tap: Tap,
+            params: FlextTapLdapModels.TapLdap.CustomStreamParams,
         ) -> None:
             """Initialize custom stream with parameters."""
             self.params = params
 
             def _map_prop(
-                name: str, definition: t.ContainerValue
+                name: str,
+                definition: t.ContainerValue,
             ) -> dict[str, t.ContainerValue]:
                 parsed_definition = _parse_property_definition(definition)
                 prop_type = parsed_definition.type
@@ -669,15 +689,16 @@ class FlextTapLdapStreams:
 
         @override
         def get_records(
-            self, context: Mapping[str, t.ContainerValue] | None = None
+            self,
+            context: Mapping[str, t.ContainerValue] | None = None,
         ) -> Iterable[t.ContainerValue]:
             """Get records using custom filter."""
             _context = context
             logger.info(
-                f"Extracting LDAP records for custom stream: {self.params.name}"
+                f"Extracting LDAP records for custom stream: {self.params.name}",
             )
             results: list[dict[str, t.ContainerValue]] = self._search_ldap(
-                self.params.search_filter
+                self.params.search_filter,
             )
             yield from results
 
@@ -689,7 +710,7 @@ class FlextTapLdapStreams:
                     "dn": f"cn=test-{self.params.name},dc=test,dc=com",
                     "objectClass": ["top", "testObject"],
                     "modifyTimestamp": "2024-01-01T12:00:00Z",
-                }
+                },
             ]
 
 

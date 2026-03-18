@@ -107,7 +107,8 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             DEFAULT_TIME_LIMIT: Final[int] = 0
 
         type ReplicationMethodLiteral = Literal[
-            Replication.Method.FULL_TABLE, Replication.Method.INCREMENTAL
+            Replication.Method.FULL_TABLE,
+            Replication.Method.INCREMENTAL,
         ]
         "LDAP replication method literal - references Replication.Method StrEnum members."
         TapReplicationMethod = Literal["FULL_TABLE", "INCREMENTAL"]

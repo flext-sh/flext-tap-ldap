@@ -67,7 +67,8 @@ class FlextTapLdapServices:
             self._connections: dict[str, FlextTapLdapServices.LDAPConnection] = {}
 
         def create_connection(
-            self, params: FlextTapLdapServices.LDAPConnectionParams
+            self,
+            params: FlextTapLdapServices.LDAPConnectionParams,
         ) -> r[FlextTapLdapServices.LDAPConnection]:
             """Create LDAP connection using parameter object pattern."""
             try:
@@ -84,23 +85,24 @@ class FlextTapLdapServices:
                 return r[FlextTapLdapServices.LDAPConnection].ok(connection)
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[FlextTapLdapServices.LDAPConnection].fail(
-                    f"Failed to create connection: {e}"
+                    f"Failed to create connection: {e}",
                 )
 
         def get_connection(
-            self, connection_id: str
+            self,
+            connection_id: str,
         ) -> r[FlextTapLdapServices.LDAPConnection]:
             """Get LDAP connection by ID."""
             try:
                 connection = self._connections.get(connection_id)
                 if not connection:
                     return r[FlextTapLdapServices.LDAPConnection].fail(
-                        "Connection not found"
+                        "Connection not found",
                     )
                 return r[FlextTapLdapServices.LDAPConnection].ok(connection)
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[FlextTapLdapServices.LDAPConnection].fail(
-                    f"Failed to get connection: {e}"
+                    f"Failed to get connection: {e}",
                 )
 
         def list_connections(
@@ -112,18 +114,19 @@ class FlextTapLdapServices:
                 return r[list[FlextTapLdapServices.LDAPConnection]].ok(connections)
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[list[FlextTapLdapServices.LDAPConnection]].fail(
-                    f"Failed to list connections: {e}"
+                    f"Failed to list connections: {e}",
                 )
 
         def test_connection(
-            self, connection_id: str
+            self,
+            connection_id: str,
         ) -> r[Mapping[str, t.ContainerValue]]:
             """Test LDAP connection."""
             try:
                 connection = self._connections.get(connection_id)
                 if not connection:
                     return r[Mapping[str, t.ContainerValue]].fail(
-                        "Connection not found"
+                        "Connection not found",
                     )
                 connection.last_tested = datetime.now(UTC)
                 connection.last_error = None
@@ -139,7 +142,7 @@ class FlextTapLdapServices:
                     connection.last_error = str(e)
                     self._connections[connection_id] = connection
                 return r[Mapping[str, t.ContainerValue]].fail(
-                    f"Failed to test connection: {e}"
+                    f"Failed to test connection: {e}",
                 )
 
     class LDAPStreamService:
@@ -150,7 +153,8 @@ class FlextTapLdapServices:
             self._streams: dict[str, FlextTapLdapServices.LDAPStream] = {}
 
         def create_stream(
-            self, params: FlextTapLdapServices.StreamCreationParams
+            self,
+            params: FlextTapLdapServices.StreamCreationParams,
         ) -> r[FlextTapLdapServices.LDAPStream]:
             """Create LDAP stream using parameter object pattern."""
             try:
@@ -174,7 +178,7 @@ class FlextTapLdapServices:
                 return r[FlextTapLdapServices.LDAPStream].ok(stream)
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[FlextTapLdapServices.LDAPStream].fail(
-                    f"Failed to create stream: {e}"
+                    f"Failed to create stream: {e}",
                 )
 
         def discover_schema(self, stream_id: str) -> r[Mapping[str, t.ContainerValue]]:
@@ -196,7 +200,7 @@ class FlextTapLdapServices:
                 return r[Mapping[str, t.ContainerValue]].ok(schema)
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[Mapping[str, t.ContainerValue]].fail(
-                    f"Failed to discover schema: {e}"
+                    f"Failed to discover schema: {e}",
                 )
 
         def get_stream(self, stream_id: str) -> r[FlextTapLdapServices.LDAPStream]:
@@ -208,11 +212,12 @@ class FlextTapLdapServices:
                 return r[FlextTapLdapServices.LDAPStream].ok(stream)
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[FlextTapLdapServices.LDAPStream].fail(
-                    f"Failed to get stream: {e}"
+                    f"Failed to get stream: {e}",
                 )
 
         def list_streams(
-            self, connection_id: str | None = None
+            self,
+            connection_id: str | None = None,
         ) -> r[list[FlextTapLdapServices.LDAPStream]]:
             """List LDAP streams, optionally filtered by connection ID."""
             try:
@@ -222,7 +227,7 @@ class FlextTapLdapServices:
                 return r[list[FlextTapLdapServices.LDAPStream]].ok(streams)
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[list[FlextTapLdapServices.LDAPStream]].fail(
-                    f"Failed to list streams: {e}"
+                    f"Failed to list streams: {e}",
                 )
 
     class TapExecutionService:
@@ -233,21 +238,22 @@ class FlextTapLdapServices:
             self._executions: dict[str, FlextTapLdapModels.TapLdap.TapExecution] = {}
 
         def cancel_execution(
-            self, execution_id: str
+            self,
+            execution_id: str,
         ) -> r[FlextTapLdapModels.TapLdap.TapExecution]:
             """Cancel tap execution."""
             try:
                 execution = self._executions.get(execution_id)
                 if not execution:
                     return r[FlextTapLdapModels.TapLdap.TapExecution].fail(
-                        "Execution not found"
+                        "Execution not found",
                     )
                 execution.cancel_execution()
                 self._executions[execution_id] = execution
                 return r[FlextTapLdapModels.TapLdap.TapExecution].ok(execution)
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[FlextTapLdapModels.TapLdap.TapExecution].fail(
-                    f"Failed to cancel execution: {e}"
+                    f"Failed to cancel execution: {e}",
                 )
 
         def complete_execution(
@@ -262,14 +268,14 @@ class FlextTapLdapServices:
                 execution = self._executions.get(execution_id)
                 if not execution:
                     return r[FlextTapLdapModels.TapLdap.TapExecution].fail(
-                        "Execution not found"
+                        "Execution not found",
                     )
                 execution.complete_execution(exit_code, stdout, stderr)
                 self._executions[execution_id] = execution
                 return r[FlextTapLdapModels.TapLdap.TapExecution].ok(execution)
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[FlextTapLdapModels.TapLdap.TapExecution].fail(
-                    f"Failed to complete execution: {e}"
+                    f"Failed to complete execution: {e}",
                 )
 
         def create_execution(
@@ -299,27 +305,29 @@ class FlextTapLdapServices:
                 return r[FlextTapLdapModels.TapLdap.TapExecution].ok(execution)
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[FlextTapLdapModels.TapLdap.TapExecution].fail(
-                    f"Failed to create execution: {e}"
+                    f"Failed to create execution: {e}",
                 )
 
         def get_execution(
-            self, execution_id: str
+            self,
+            execution_id: str,
         ) -> r[FlextTapLdapModels.TapLdap.TapExecution]:
             """Get tap execution by ID."""
             try:
                 execution = self._executions.get(execution_id)
                 if not execution:
                     return r[FlextTapLdapModels.TapLdap.TapExecution].fail(
-                        "Execution not found"
+                        "Execution not found",
                     )
                 return r[FlextTapLdapModels.TapLdap.TapExecution].ok(execution)
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[FlextTapLdapModels.TapLdap.TapExecution].fail(
-                    f"Failed to get execution: {e}"
+                    f"Failed to get execution: {e}",
                 )
 
         def list_executions(
-            self, connection_id: str | None = None
+            self,
+            connection_id: str | None = None,
         ) -> r[list[FlextTapLdapModels.TapLdap.TapExecution]]:
             """List tap executions, optionally filtered by connection ID."""
             try:
@@ -335,43 +343,47 @@ class FlextTapLdapServices:
                 return r[list[FlextTapLdapModels.TapLdap.TapExecution]].ok(executions)
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[list[FlextTapLdapModels.TapLdap.TapExecution]].fail(
-                    f"Failed to list executions: {e}"
+                    f"Failed to list executions: {e}",
                 )
 
         def start_execution(
-            self, execution_id: str
+            self,
+            execution_id: str,
         ) -> r[FlextTapLdapModels.TapLdap.TapExecution]:
             """Start tap execution."""
             try:
                 execution = self._executions.get(execution_id)
                 if not execution:
                     return r[FlextTapLdapModels.TapLdap.TapExecution].fail(
-                        "Execution not found"
+                        "Execution not found",
                     )
                 execution.start_execution()
                 self._executions[execution_id] = execution
                 return r[FlextTapLdapModels.TapLdap.TapExecution].ok(execution)
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[FlextTapLdapModels.TapLdap.TapExecution].fail(
-                    f"Failed to start execution: {e}"
+                    f"Failed to start execution: {e}",
                 )
 
         def update_metrics(
-            self, execution_id: str, records_extracted: int, streams_processed: int
+            self,
+            execution_id: str,
+            records_extracted: int,
+            streams_processed: int,
         ) -> r[FlextTapLdapModels.TapLdap.TapExecution]:
             """Update execution metrics."""
             try:
                 execution = self._executions.get(execution_id)
                 if not execution:
                     return r[FlextTapLdapModels.TapLdap.TapExecution].fail(
-                        "Execution not found"
+                        "Execution not found",
                     )
                 execution.update_metrics(records_extracted, streams_processed)
                 self._executions[execution_id] = execution
                 return r[FlextTapLdapModels.TapLdap.TapExecution].ok(execution)
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[FlextTapLdapModels.TapLdap.TapExecution].fail(
-                    f"Failed to update metrics: {e}"
+                    f"Failed to update metrics: {e}",
                 )
 
     class LDIFProcessingService:
@@ -382,7 +394,8 @@ class FlextTapLdapServices:
             self._ldif_api = FlextLdif()
 
         def get_ldif_statistics(
-            self, file_path: str
+            self,
+            file_path: str,
         ) -> r[Mapping[str, t.ContainerValue]]:
             """Get LDIF file statistics using flext-ldif library."""
             try:
@@ -413,26 +426,29 @@ class FlextTapLdapServices:
             ) as e:
                 logger.exception("Error getting LDIF statistics for %s", file_path)
                 return r[Mapping[str, t.ContainerValue]].fail(
-                    f"LDIF statistics failed: {e}"
+                    f"LDIF statistics failed: {e}",
                 )
 
         def process_ldif_file(
-            self, file_path: str
+            self,
+            file_path: str,
         ) -> r[list[Mapping[str, t.ContainerValue]]]:
             """Process LDIF file using flext-ldif library."""
             try:
                 logger.info("Processing LDIF file: %s", file_path)
                 result: r[list[FlextTapLdapModels.Ldif.Entry]] = self._ldif_api.parse(
-                    Path(file_path)
+                    Path(file_path),
                 )
                 if not result.is_success:
                     return r[list[Mapping[str, t.ContainerValue]]].fail(
-                        f"Failed to parse LDIF file: {result.error}"
+                        f"Failed to parse LDIF file: {result.error}",
                     )
                 entries: list[FlextTapLdapModels.Ldif.Entry] = result.value or []
                 entry_count = len(entries)
                 logger.info(
-                    "Successfully processed %s entries from %s", entry_count, file_path
+                    "Successfully processed %s entries from %s",
+                    entry_count,
+                    file_path,
                 )
                 normalized: list[Mapping[str, t.ContainerValue]] = []
                 for entry in entries:
@@ -456,21 +472,22 @@ class FlextTapLdapServices:
             ) as e:
                 logger.exception("Error processing LDIF file %s", file_path)
                 return r[list[Mapping[str, t.ContainerValue]]].fail(
-                    f"LDIF processing failed: {e}"
+                    f"LDIF processing failed: {e}",
                 )
 
         def validate_ldif_file(
-            self, file_path: str
+            self,
+            file_path: str,
         ) -> r[Mapping[str, t.ContainerValue]]:
             """Validate LDIF file using flext-ldif library."""
             try:
                 logger.info("Validating LDIF file: %s", file_path)
                 result: r[list[FlextTapLdapModels.Ldif.Entry]] = self._ldif_api.parse(
-                    Path(file_path)
+                    Path(file_path),
                 )
                 if not result.is_success:
                     return r[Mapping[str, t.ContainerValue]].fail(
-                        f"Validation failed: {result.error}"
+                        f"Validation failed: {result.error}",
                     )
                 entries: list[FlextTapLdapModels.Ldif.Entry] = result.value or []
                 total_entries = len(entries)
@@ -493,7 +510,7 @@ class FlextTapLdapServices:
             ) as e:
                 logger.exception("Error validating LDIF file %s", file_path)
                 return r[Mapping[str, t.ContainerValue]].fail(
-                    f"LDIF validation failed: {e}"
+                    f"LDIF validation failed: {e}",
                 )
 
     @staticmethod
@@ -514,7 +531,7 @@ class FlextTapLdapServices:
             return r[FlextTapLdapSettings].ok(config)
         except (RuntimeError, ValueError, TypeError) as e:
             return r[FlextTapLdapSettings].fail(
-                f"Failed to create development config: {e}"
+                f"Failed to create development config: {e}",
             )
 
     @staticmethod
@@ -545,7 +562,7 @@ class FlextTapLdapServices:
             return r[Mapping[str, t.ContainerValue]].ok(config)
         except (RuntimeError, ValueError, TypeError) as e:
             return r[Mapping[str, t.ContainerValue]].fail(
-                f"Failed to create LDAP connection config: {e}"
+                f"Failed to create LDAP connection config: {e}",
             )
 
     @staticmethod
@@ -589,7 +606,7 @@ class FlextTapLdapServices:
             return r[FlextTapLdapSettings].ok(config)
         except (RuntimeError, ValueError, TypeError) as e:
             return r[FlextTapLdapSettings].fail(
-                f"Failed to create production config: {e}"
+                f"Failed to create production config: {e}",
             )
 
     @staticmethod
@@ -611,7 +628,7 @@ class FlextTapLdapServices:
             validation_result = FlextTapLdapServices.validate_ldap_config(config)
             if not validation_result.is_success or not validation_result.value:
                 return r[FlextTapLdapSettings].fail(
-                    validation_result.error or "Configuration validation failed"
+                    validation_result.error or "Configuration validation failed",
                 )
             return r[FlextTapLdapSettings].ok(config)
         except (RuntimeError, ValueError, TypeError) as e:

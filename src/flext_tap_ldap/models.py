@@ -44,7 +44,8 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             """Event raised when tap execution starts."""
 
             timestamp: Annotated[
-                datetime, Field(default_factory=lambda: datetime.now(UTC))
+                datetime,
+                Field(default_factory=lambda: datetime.now(UTC)),
             ]
             tap_name: str = "tap-ldap"
             execution_id: str = ""
@@ -54,7 +55,8 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             """Event raised when tap execution completes."""
 
             timestamp: Annotated[
-                datetime, Field(default_factory=lambda: datetime.now(UTC))
+                datetime,
+                Field(default_factory=lambda: datetime.now(UTC)),
             ]
             tap_name: str = "tap-ldap"
             execution_id: str = ""
@@ -159,7 +161,9 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 self.completed_at = datetime.now(UTC)
 
             def update_metrics(
-                self, records_extracted: int, streams_processed: int
+                self,
+                records_extracted: int,
+                streams_processed: int,
             ) -> None:
                 """Update extraction metrics with record and stream counts."""
                 self.records_extracted = records_extracted
@@ -217,7 +221,8 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             name: str
             search_filter: str
             schema_properties: Annotated[
-                dict[str, t.ContainerValue], Field(default_factory=dict)
+                dict[str, t.ContainerValue],
+                Field(default_factory=dict),
             ]
             primary_keys: Annotated[list[str], Field(default_factory=lambda: ["dn"])]
             replication_key: str | None = None
@@ -259,7 +264,8 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             bind_password: str | None = None
             use_ssl: bool = False
             timeout_seconds: Annotated[
-                int, Field(default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT, ge=1)
+                int,
+                Field(default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT, ge=1),
             ]
             page_size: Annotated[int, Field(default=c.TapLdap.DEFAULT_PAGE_SIZE, ge=1)]
             max_retries: Annotated[int, Field(default=3, ge=0)]
@@ -305,7 +311,8 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             replication_method: str = "FULL_TABLE"
             replication_key: str | None = None
             stream_schema: Annotated[
-                dict[str, t.ContainerValue], Field(default_factory=dict)
+                dict[str, t.ContainerValue],
+                Field(default_factory=dict),
             ]
 
             def update_schema(self, schema: Mapping[str, t.ContainerValue]) -> None:

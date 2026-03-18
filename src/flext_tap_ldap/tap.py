@@ -26,7 +26,8 @@ from flext_tap_ldap import (
 
 logger = FlextLogger(__name__)
 _CONFIG_MAP_ADAPTER = TypeAdapter(
-    dict[str, t.ContainerValue], config=ConfigDict(strict=False)
+    dict[str, t.ContainerValue],
+    config=ConfigDict(strict=False),
 )
 
 type TapLdapStream = (
@@ -140,7 +141,7 @@ class FlextTapLdapTap(FlextMeltanoTapAbstractions):
                     "schema": {},
                 }
                 for stream in streams
-            ]
+            ],
         }
         return r[t.Meltano.Singer.StreamCatalog].ok(catalog)
 

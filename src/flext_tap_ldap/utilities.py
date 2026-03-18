@@ -133,7 +133,7 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 """Validate LDAP configuration."""
                 if not isinstance(config, Mapping):
                     return r[Mapping[str, t.ContainerValue]].fail(
-                        "LDAP config must be a mapping"
+                        "LDAP config must be a mapping",
                     )
                 config_map: dict[str, t.ContainerValue] = {
                     str(key): value for key, value in config.items()
@@ -142,22 +142,22 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 for field in required_fields:
                     if field not in config_map:
                         return r[Mapping[str, t.ContainerValue]].fail(
-                            f"Missing required LDAP field: {field}"
+                            f"Missing required LDAP field: {field}",
                         )
                     if not str(config_map[field]).strip():
                         return r[Mapping[str, t.ContainerValue]].fail(
-                            f"Empty LDAP field: {field}"
+                            f"Empty LDAP field: {field}",
                         )
                 if "port" in config_map:
                     try:
                         port = int(str(config_map["port"]))
                     except ValueError:
                         return r[Mapping[str, t.ContainerValue]].fail(
-                            "LDAP port must be numeric"
+                            "LDAP port must be numeric",
                         )
                     if port <= 0 or port > c.TapLdap.Ldap.MAX_PORT:
                         return r[Mapping[str, t.ContainerValue]].fail(
-                            f"LDAP port must be between 1 and {c.TapLdap.Ldap.MAX_PORT}"
+                            f"LDAP port must be between 1 and {c.TapLdap.Ldap.MAX_PORT}",
                         )
                     config_map["port"] = port
                 return r[Mapping[str, t.ContainerValue]].ok(config_map)

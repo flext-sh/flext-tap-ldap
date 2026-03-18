@@ -16,10 +16,12 @@ from flext_meltano import (
 from pydantic import ConfigDict, TypeAdapter, ValidationError
 
 _OBJECT_LIST_ADAPTER = TypeAdapter(
-    list[t.ContainerValue], config=ConfigDict(strict=False)
+    list[t.ContainerValue],
+    config=ConfigDict(strict=False),
 )
 _COUNTER_MAP_ADAPTER = TypeAdapter(
-    dict[str, int | str], config=ConfigDict(strict=False)
+    dict[str, int | str],
+    config=ConfigDict(strict=False),
 )
 
 
@@ -86,7 +88,8 @@ class FlextTapLdapLdifStreams:
             return self._logger_instance
 
         def get_records(
-            self, context: Mapping[str, t.ContainerValue] | None = None
+            self,
+            context: Mapping[str, t.ContainerValue] | None = None,
         ) -> Iterator[dict[str, t.ContainerValue]]:
             """Get LDIF records using flext-ldif processing."""
             _ = context
@@ -115,7 +118,8 @@ class FlextTapLdapLdifStreams:
             return "other"
 
         def _convert_entry_to_record(
-            self, flext_entry: m.Ldif.Entry
+            self,
+            flext_entry: m.Ldif.Entry,
         ) -> dict[str, t.ContainerValue]:
             """Convert flext-ldif entry to Singer record."""
             dn_value = flext_entry.dn.value if flext_entry.dn is not None else ""
@@ -146,7 +150,8 @@ class FlextTapLdapLdifStreams:
             return files
 
         def _normalize_object_classes(
-            self, object_classes: t.ContainerValue
+            self,
+            object_classes: t.ContainerValue,
         ) -> list[str]:
             if isinstance(object_classes, str):
                 return [object_classes]
@@ -163,12 +168,13 @@ class FlextTapLdapLdifStreams:
             if not isinstance(base_dn_raw, str) or not base_dn_raw:
                 return iter(())
             self.logger.warning(
-                "LDAP directory traversal is disabled; provide LDIF files or ldif_directory"
+                "LDAP directory traversal is disabled; provide LDIF files or ldif_directory",
             )
             return iter(())
 
         def _process_ldif_file(
-            self, ldif_file: str
+            self,
+            ldif_file: str,
         ) -> Iterable[dict[str, t.ContainerValue]]:
             """Process single LDIF file using flext-ldif."""
             self.logger.info("Processing LDIF file: %s", ldif_file)
@@ -181,7 +187,7 @@ class FlextTapLdapLdifStreams:
                             yield self._convert_entry_to_record(entry)
                 else:
                     self.logger.error(
-                        f"Failed to parse LDIF file {ldif_file}: {result.error}"
+                        f"Failed to parse LDIF file {ldif_file}: {result.error}",
                     )
             except (
                 ValueError,
@@ -239,7 +245,8 @@ class FlextTapLdapLdifStreams:
             return self._logger_instance
 
         def get_records(
-            self, context: Mapping[str, t.ContainerValue] | None = None
+            self,
+            context: Mapping[str, t.ContainerValue] | None = None,
         ) -> Iterator[dict[str, t.ContainerValue]]:
             """Get analysis records using flext-ldif analysis capabilities."""
             _ = context
@@ -266,7 +273,7 @@ class FlextTapLdapLdifStreams:
                             case _:
                                 pass
                         validated_entry_types = _as_counter_map(
-                            stats.get("entry_types", {})
+                            stats.get("entry_types", {}),
                         )
                         for entry_type, count in validated_entry_types.items():
                             object_count = int(count)
@@ -274,7 +281,7 @@ class FlextTapLdapLdifStreams:
                                 entry_types.get(entry_type, 0) + object_count
                             )
                         validated_object_classes = _as_counter_map(
-                            stats.get("object_classes", {})
+                            stats.get("object_classes", {}),
                         )
                         for obj_class, count in validated_object_classes.items():
                             object_count = int(count)
@@ -283,7 +290,7 @@ class FlextTapLdapLdifStreams:
                             )
                 elif ldif_directory:
                     for discovered_file in self._discover_ldif_files(
-                        str(ldif_directory)
+                        str(ldif_directory),
                     ):
                         stats = self._analyze_ldif_file(str(discovered_file))
                         total_count = stats.get("total_entries", 0)
@@ -293,7 +300,7 @@ class FlextTapLdapLdifStreams:
                             case _:
                                 pass
                         validated_entry_types = _as_counter_map(
-                            stats.get("entry_types", {})
+                            stats.get("entry_types", {}),
                         )
                         for entry_type, count in validated_entry_types.items():
                             object_count = int(count)
@@ -301,7 +308,7 @@ class FlextTapLdapLdifStreams:
                                 entry_types.get(entry_type, 0) + object_count
                             )
                         validated_object_classes = _as_counter_map(
-                            stats.get("object_classes", {})
+                            stats.get("object_classes", {}),
                         )
                         for obj_class, count in validated_object_classes.items():
                             object_count = int(count)
@@ -357,7 +364,7 @@ class FlextTapLdapLdifStreams:
                         "object_classes": object_classes,
                     }
                 self.logger.error(
-                    f"Failed to analyze LDIF file {ldif_file}: {result.error}"
+                    f"Failed to analyze LDIF file {ldif_file}: {result.error}",
                 )
                 return {"total_entries": 0, "entry_types": {}, "object_classes": {}}
             except (
