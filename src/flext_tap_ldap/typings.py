@@ -117,9 +117,7 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
         type StreamDefinition = dict[str, str | Mapping[str, Mapping[str, object]]]
         type StreamSchema = dict[str, str | Mapping[str, Mapping[str, object]]]
         type StreamMetadata = dict[str, str | bool | Mapping[str, Mapping[str, object]]]
-        type StreamRecord = dict[
-            str, dict[str, object] | Mapping[str, object]
-        ]
+        type StreamRecord = dict[str, dict[str, object] | Mapping[str, object]]
         type StreamState = dict[str, str | Mapping[str, Mapping[str, object]]]
         type StreamCatalog = dict[str, str | list[Mapping[str, Mapping[str, object]]]]
 
@@ -181,12 +179,8 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
         ]
         type SchemaDict = dict[str, str | Mapping[str, Mapping[str, object]]]
         type StreamDict = dict[str, dict[str, object] | Mapping[str, object]]
-        type CatalogDict = dict[
-            str, dict[str, object] | Mapping[str, object]
-        ]
-        type MetadataDict = dict[
-            str, dict[str, object] | Mapping[str, object]
-        ]
+        type CatalogDict = dict[str, dict[str, object] | Mapping[str, object]]
+        type MetadataDict = dict[str, dict[str, object] | Mapping[str, object]]
         type StateDict = dict[str, str | Mapping[str, Mapping[str, object]]]
         type QueryDict = dict[str, str | list[str] | Mapping[str, Mapping[str, object]]]
         type FilterDict = dict[str, str | Mapping[str, Mapping[str, object]]]

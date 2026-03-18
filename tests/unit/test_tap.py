@@ -7,7 +7,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -134,8 +133,8 @@ class TestFlextTapLdapTapUnit:
         tap = FlextTapLdapTap()
         users_stream = FlextTapLdapStreams.UsersStream(tap)
         raw_records = list(users_stream.get_records(None))
-        records: list[Mapping[str, dict[str, object]]] = [
-            item for item in raw_records if isinstance(item, Mapping)
+        records: list[dict[str, object]] = [
+            item for item in raw_records if isinstance(item, dict)
         ]
         if len(records) != 1:
             count_error: str = f"Expected {1}, got {len(records)}"
