@@ -135,14 +135,15 @@ class FlextTapLdapTap(FlextMeltanoTapAbstractions):
                 FlextTapLdapLdifStreams.LdifAnalysisStream(self),
             ])
 
-        streams_list = [
+        streams_list: list[t.Meltano.Singer.CatalogEntry] = [
             {
-                "stream": stream.name,
-                "schema": stream.schema or {},
+                "stream": str(stream.name),
+                "schema": {},
             }
             for stream in streams
         ]
-        return r[t.Meltano.Singer.StreamCatalog].ok({"streams": streams_list})  # type: ignore[arg-type]
+        stream_catalog: t.Meltano.Singer.StreamCatalog = {"streams": streams_list}
+        return r[t.Meltano.Singer.StreamCatalog].ok(stream_catalog)
 
 
 def main() -> None:
