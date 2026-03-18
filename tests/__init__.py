@@ -19,7 +19,7 @@ if TYPE_CHECKING:
         shared_ldap_container,
         test_data_dir,
     )
-    from .constants import TestsFlextTapLdapConstants, TestsFlextTapLdapConstants as c
+    from .constants import TestsFlextTapLdapConstants, c
     from .e2e.conftest import (
         catalog_file,
         ldap_connection,
@@ -112,7 +112,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TestsFlextTapLdapProtocols": ("tests.protocols", "TestsFlextTapLdapProtocols"),
     "TestsFlextTapLdapTypes": ("tests.typings", "TestsFlextTapLdapTypes"),
     "TestsFlextTapLdapUtilities": ("tests.utilities", "TestsFlextTapLdapUtilities"),
-    "c": ("tests.constants", "TestsFlextTapLdapConstants"),
+    "c": ("tests.constants", "c"),
     "catalog_file": ("tests.e2e.conftest", "catalog_file"),
     "e2e": ("tests.e2e", ""),
     "ldap_connection": ("tests.e2e.conftest", "ldap_connection"),
