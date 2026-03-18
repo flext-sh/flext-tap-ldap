@@ -13,7 +13,7 @@ from unittest.mock import Mock, patch
 import pytest
 from flext_tests import tm
 
-from flext_tap_ldap import FlextTapLdapClient, t
+from flext_tap_ldap import FlextTapLdapClient
 
 
 class TestLDAPClientQuick:
@@ -69,8 +69,8 @@ class TestLDAPClientQuick:
         tm.that(result["uid"] == "test", eq=True)
         tm.that(result["cn"] == ["Test", "T. User"], eq=True)
         tm.that(result["empty"] == [], eq=True)
-        mail_values: list[t.ContainerValue] = ["test@example.com"]
-        dict_entry: dict[str, t.ContainerValue] = {
+        mail_values: list[dict[str, object]] = ["test@example.com"]
+        dict_entry: dict[str, dict[str, object]] = {
             "dn": "uid=dict,dc=example,dc=com",
             "attributes": {"mail": mail_values},
         }
@@ -174,10 +174,10 @@ class TestLDAPClientQuick:
         self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test Oracle entry processing with all scenarios."""
-        uid_values: list[t.ContainerValue] = ["test"]
-        oracle_password_values: list[t.ContainerValue] = ["hashed_password"]
-        object_classes: list[t.ContainerValue] = ["inetOrgPerson"]
-        entry: dict[str, t.ContainerValue] = {
+        uid_values: list[dict[str, object]] = ["test"]
+        oracle_password_values: list[dict[str, object]] = ["hashed_password"]
+        object_classes: list[dict[str, object]] = ["inetOrgPerson"]
+        entry: dict[str, dict[str, object]] = {
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": {
                 "uid": uid_values,
@@ -195,9 +195,9 @@ class TestLDAPClientQuick:
         assert isinstance(user_password, list)
         tm.that("hashed_password" in user_password, eq=True)
 
-        ou_values: list[t.ContainerValue] = ["test"]
-        container_classes: list[t.ContainerValue] = ["orclContainer"]
-        entry_with_container: dict[str, t.ContainerValue] = {
+        ou_values: list[dict[str, object]] = ["test"]
+        container_classes: list[dict[str, object]] = ["orclContainer"]
+        entry_with_container: dict[str, dict[str, object]] = {
             "dn": "ou=test,dc=oracle,dc=com",
             "attributes": {"ou": ou_values, "objectClass": container_classes},
         }
@@ -210,7 +210,7 @@ class TestLDAPClientQuick:
         assert isinstance(object_class, list)
         tm.that("organizationalUnit" in object_class, eq=True)
 
-        entry_string_oc: dict[str, t.ContainerValue] = {
+        entry_string_oc: dict[str, dict[str, object]] = {
             "dn": "ou=test,dc=oracle,dc=com",
             "attributes": {"objectClass": "orclContainer"},
         }
@@ -223,7 +223,7 @@ class TestLDAPClientQuick:
         assert isinstance(obj_classes, list)
         tm.that("organizationalUnit" in obj_classes, eq=True)
 
-        entry_bad_attrs: dict[str, t.ContainerValue] = {
+        entry_bad_attrs: dict[str, dict[str, object]] = {
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": "not_a_dict",
         }
@@ -257,9 +257,9 @@ class TestLDAPClientQuick:
         self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test Oracle search result processing."""
-        first_passwords: list[t.ContainerValue] = ["pass1"]
-        second_uids: list[t.ContainerValue] = ["test2"]
-        search_results: list[dict[str, t.ContainerValue]] = [
+        first_passwords: list[dict[str, object]] = ["pass1"]
+        second_uids: list[dict[str, object]] = ["test2"]
+        search_results: list[dict[str, dict[str, object]]] = [
             {
                 "dn": "uid=test1,dc=oracle,dc=com",
                 "attributes": {"orclPassword": first_passwords},

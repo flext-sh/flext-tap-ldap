@@ -19,7 +19,7 @@ from flext_core import FlextLogger, r
 from flext_ldif import FlextLdif
 from pydantic import TypeAdapter, ValidationError
 
-from flext_tap_ldap import m, t
+from flext_tap_ldap import m
 
 
 class FlextLdifDistinguishedName(m.Ldif.DN):
@@ -30,7 +30,7 @@ logger = FlextLogger(__name__)
 _LDIF_ENTRY_ADAPTER = TypeAdapter(m.Ldif.Entry)
 
 
-def _to_ldif_entry(raw_value: t.ContainerValue) -> m.Ldif.Entry | None:
+def _to_ldif_entry(raw_value: dict[str, object]) -> m.Ldif.Entry | None:
     """Validate and coerce value to LDIF entry model."""
     try:
         return _LDIF_ENTRY_ADAPTER.validate_python(raw_value)
@@ -110,7 +110,7 @@ class Entry:
         ):
             return bool(self.dn and self.dn.strip())
 
-    def parse_dn(self) -> Mapping[str, t.ContainerValue]:
+    def parse_dn(self) -> Mapping[str, dict[str, object]]:
         """Parse DN into components using flext-ldif DN parsing."""
         try:
             dn_obj = FlextLdifDistinguishedName(value=self.dn)
@@ -131,9 +131,9 @@ class Entry:
         if name in self.attributes:
             self.attributes[name] = []
 
-    def to_dict(self) -> Mapping[str, t.ContainerValue]:
+    def to_dict(self) -> Mapping[str, dict[str, object]]:
         """Convert entry to dictionary format."""
-        entry_dict: dict[str, t.ContainerValue] = {
+        entry_dict: dict[str, dict[str, object]] = {
             "dn": self.dn,
             "attributes": dict(self.attributes),
         }
@@ -225,7 +225,7 @@ class FlextTapLdapProcessor:
         """Filter entries by object class."""
         return [entry for entry in self.entries if entry.has_object_class(object_class)]
 
-    def get_statistics(self) -> Mapping[str, t.ContainerValue]:
+    def get_statistics(self) -> Mapping[str, dict[str, object]]:
         """Get parsing statistics."""
         return {
             "processed_entries": self.processed_entries,
@@ -322,13 +322,13 @@ class FlextTapLdapProcessor:
     def to_singer_format(
         self,
         _stream_name: str,
-    ) -> list[Mapping[str, t.ContainerValue]]:
+    ) -> list[Mapping[str, dict[str, object]]]:
         """Convert LDIF entries to Singer record format."""
-        records: list[Mapping[str, t.ContainerValue]] = []
+        records: list[Mapping[str, dict[str, object]]] = []
         for entry in self.entries:
-            record_attributes: dict[str, t.ContainerValue] = {"dn": entry.dn}
+            record_attributes: dict[str, dict[str, object]] = {"dn": entry.dn}
             record_attributes.update(dict(entry.attributes))
-            record: dict[str, t.ContainerValue] = {
+            record: dict[str, dict[str, object]] = {
                 "type": "RECORD",
                 "stream": _stream_name,
                 "record": record_attributes,
@@ -427,7 +427,7 @@ class Validator:
         self.warnings: list[str] = []
         self._api = FlextLdif()
 
-    def get_validation_results(self) -> Mapping[str, t.ContainerValue]:
+    def get_validation_results(self) -> Mapping[str, dict[str, object]]:
         """Get validation results."""
         return {
             "errors": self.validation_errors.copy(),
@@ -435,7 +435,7 @@ class Validator:
             "is_valid": len(self.validation_errors) == 0,
         }
 
-    def validate_entries(self, entries: list[Entry]) -> Mapping[str, t.ContainerValue]:
+    def validate_entries(self, entries: list[Entry]) -> Mapping[str, dict[str, object]]:
         """Validate a list of LDIF entries using flext-ldif."""
         valid_count = 0
         invalid_count = 0
@@ -488,7 +488,7 @@ class Transformer:
     @override
     def __init__(
         self,
-        transformation_rules: Mapping[str, t.ContainerValue] | None = None,
+        transformation_rules: Mapping[str, dict[str, object]] | None = None,
     ) -> None:
         """Initialize transformer with optional transformation rules."""
         self.transformation_rules = dict(transformation_rules or {})
@@ -512,7 +512,7 @@ class Transformer:
     def apply_schema_mappings(
         self,
         entry: Entry,
-        schema_mappings: Mapping[str, t.ContainerValue],
+        schema_mappings: Mapping[str, dict[str, object]],
     ) -> Entry:
         """Apply schema mappings to normalize output attributes."""
         transformed_entry = Entry(
