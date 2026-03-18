@@ -13,7 +13,6 @@ from pathlib import Path
 
 import pytest
 from flext_core import FlextDecorators as d, FlextLogger
-from flext_tests import FlextTestsDocker
 from ldap3 import ALL, Connection, Server
 
 logger = FlextLogger(__name__)

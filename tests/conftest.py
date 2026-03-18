@@ -12,7 +12,6 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
-from flext_tests import FlextTestsDocker
 
 
 @pytest.fixture(scope="session")
