@@ -117,7 +117,7 @@ class FlextTapLdapTap(FlextMeltanoTapAbstractions):
         """
         source_payload = source_config.model_dump(mode="python")
         raw_connection_config = source_payload.get("connection_config", {})
-        config_map: dict[str, object]
+        config_map: dict[str, Mapping[str, object]]
         try:
             config_map = _CONFIG_MAP_ADAPTER.validate_python(raw_connection_config)
         except ValidationError:

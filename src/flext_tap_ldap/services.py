@@ -26,14 +26,14 @@ from flext_tap_ldap.typings import FlextTapLdapTypes
 logger = FlextLogger(__name__)
 
 
-def _as_map(value: dict[str, object]) -> Mapping[str, object] | None:
+def _as_map(value: object) -> Mapping[str, object] | None:
     try:
         return FlextTapLdapTypes.CONFIG_MAP_ADAPTER.validate_python(value)
     except ValidationError:
         return None
 
 
-def _as_str(value: dict[str, object]) -> str | None:
+def _as_str(value: object) -> str | None:
     try:
         return FlextTapLdapTypes.STRICT_STR_ADAPTER.validate_python(value)
     except ValidationError:
@@ -186,9 +186,7 @@ class FlextTapLdapServices:
             try:
                 stream = self._streams.get(stream_id)
                 if not stream:
-                    return r[Mapping[str, object]].fail(
-                        "Stream not found"
-                    )
+                    return r[Mapping[str, object]].fail("Stream not found")
                 schema: dict[str, object] = {
                     "type": "object",
                     "properties": {
@@ -401,8 +399,8 @@ class FlextTapLdapServices:
         ) -> r[Mapping[str, object]]:
             """Get LDIF file statistics using flext-ldif library."""
             try:
-                validation_result: r[Mapping[str, object]] = (
-                    self.validate_ldif_file(file_path)
+                validation_result: r[Mapping[str, object]] = self.validate_ldif_file(
+                    file_path
                 )
                 if not validation_result.is_success:
                     return validation_result

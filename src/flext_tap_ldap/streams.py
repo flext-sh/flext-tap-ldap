@@ -70,7 +70,7 @@ def _parse_connection_config(
 
 
 def _parse_property_definition(
-    raw_value: dict[str, object],
+    raw_value: object,
 ) -> FlextTapLdapModels.TapLdap.CustomPropertyDefinition:
     """Validate custom stream property definition through Pydantic."""
     try:
@@ -624,7 +624,7 @@ class FlextTapLdapStreams:
 
             def _map_prop(
                 name: str,
-                definition: dict[str, object],
+                definition: object,
             ) -> dict[str, object]:
                 parsed_definition = _parse_property_definition(definition)
                 prop_type = parsed_definition.type
