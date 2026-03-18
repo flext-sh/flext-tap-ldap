@@ -134,10 +134,9 @@ class TestFlextTapLdapTapUnit:
         tap = FlextTapLdapTap()
         users_stream = FlextTapLdapStreams.UsersStream(tap)
         raw_records = list(users_stream.get_records(None))
-        records: list[Mapping[str, t.ContainerValue]] = []
-        for item in raw_records:
-            if isinstance(item, Mapping):
-                records.append(item)
+        records: list[Mapping[str, t.ContainerValue]] = [
+            item for item in raw_records if isinstance(item, Mapping)
+        ]
         if len(records) != 1:
             count_error: str = f"Expected {1}, got {len(records)}"
             raise AssertionError(count_error)
