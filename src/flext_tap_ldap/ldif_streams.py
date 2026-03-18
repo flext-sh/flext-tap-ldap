@@ -59,7 +59,7 @@ class FlextTapLdapLdifStreams:
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
             self._logger_instance: FlextLogger | None = None
-            self.schema: Mapping[str, t.Container] = {
+            self.schema = {
                 "type": "object",
                 "properties": {
                     "dn": {"type": "string", "description": "Distinguished Name"},
@@ -89,7 +89,7 @@ class FlextTapLdapLdifStreams:
         def get_records(
             self,
             context: Mapping[str, t.ContainerValue] | None = None,
-        ) -> Iterator[dict[str, t.ContainerValue]]:
+        ) -> Iterator[dict[str, object]]:
             """Get LDIF records using flext-ldif processing."""
             _ = context
             self.logger.info("Processing LDIF files using flext-ldif library")
@@ -119,17 +119,17 @@ class FlextTapLdapLdifStreams:
         def _convert_entry_to_record(
             self,
             flext_entry: m.Ldif.Entry,
-        ) -> dict[str, t.ContainerValue]:
+        ) -> dict[str, object]:
             """Convert flext-ldif entry to Singer record."""
             dn_value = flext_entry.dn.value if flext_entry.dn is not None else ""
             attrs = flext_entry.attributes
             object_classes: list[str] = []
             entry_type = "other"
-            entry_attrs: Mapping[str, t.ContainerValue] = {}
+            entry_attrs: dict[str, object] = {}
             if attrs is not None:
                 object_classes = attrs.get_values("objectClass")
                 entry_type = self._classify_entry_type(object_classes)
-                entry_attrs = attrs.attributes
+                entry_attrs = dict(attrs.attributes)
             return {
                 "dn": dn_value,
                 "entry_type": entry_type,
@@ -206,9 +206,6 @@ class FlextTapLdapLdifStreams:
         """
 
         primary_keys: ClassVar[list[str]] = ["analysis_id"]
-        schema: Mapping[str, t.Container]
-        name: str
-        tap_stream_id: str
 
         def __init__(self, tap: Tap) -> None:
             """Initialize LDIF analysis stream with library delegation."""
@@ -242,7 +239,7 @@ class FlextTapLdapLdifStreams:
             }
 
         @property
-        def logger(self) -> FlextLogger:
+        def logger(self) -> p.Logger:
             """Lazy logger."""
             if self._logger_instance is None:
                 self._logger_instance = FlextLogger.create_module_logger(__name__)

@@ -14,10 +14,7 @@ from collections.abc import Iterable, Mapping
 from typing import ClassVar, override
 
 from flext_core import FlextLogger, t
-from flext_meltano import (
-    FlextMeltanoStream as Stream,
-    FlextMeltanoTapAbstractions as Tap,
-)
+from flext_meltano import FlextMeltanoTapAbstractions as Tap
 from pydantic import ValidationError
 
 from flext_tap_ldap import LDAPClient, c
@@ -163,10 +160,12 @@ class FlextTapLdapStreams:
 
     CustomStreamParams = FlextTapLdapModels.TapLdap.CustomStreamParams
 
-    class LDAPBaseStream(Stream):
-        """Base class for LDAP streams with flext-ldap integration."""
+    class LDAPBaseStream:
+        """Base class for LDAP streams with flext-ldap integration.
 
-        @override
+        Implements FlextMeltanoProtocols.Singer.Stream protocol.
+        """
+
         def __init__(
             self,
             tap: Tap,
@@ -174,8 +173,11 @@ class FlextTapLdapStreams:
             schema: dict[str, t.ContainerValue] | None = None,
         ) -> None:
             """Initialize the LDAP stream."""
+            self.name = name
+            self.tap_stream_id = name or "ldap_stream"
+            self.schema = schema or {}
+            self.config: dict[str, t.ContainerValue] = getattr(tap, "config", {})
             self.client: LDAPClient | None = None
-            Stream.__init__(self, tap, name=name, schema=schema)
             self.tap = tap
             self._create_ldap_client()
 
