@@ -10,6 +10,7 @@ from __future__ import annotations
 from unittest.mock import Mock, patch
 
 import pytest
+from flext_tests import tm
 
 from flext_tap_ldap import FlextTapLdapStreams, FlextTapLdapTap
 
@@ -36,10 +37,10 @@ class TestLDAPBaseStream:
         """Test method."""
         "Test base stream has required attributes."
         stream = FlextTapLdapStreams.UsersStream(mock_tap)
-        assert hasattr(stream, "name")
-        assert hasattr(stream, "tap")
-        assert hasattr(stream, "schema")
-        assert stream.tap == mock_tap
+        tm.that(hasattr(stream, "name"), eq=True)
+        tm.that(hasattr(stream, "tap"), eq=True)
+        tm.that(hasattr(stream, "schema"), eq=True)
+        tm.that(stream.tap == mock_tap, eq=True)
 
 
 class TestUsersStream:
@@ -64,19 +65,19 @@ class TestUsersStream:
     def test_users_stream_creation(self, mock_tap: Mock) -> None:
         """Test users stream creation."""
         stream = FlextTapLdapStreams.UsersStream(mock_tap)
-        assert stream is not None
-        assert stream.name == "users"
-        assert stream.tap == mock_tap
+        tm.that(stream is not None, eq=True)
+        tm.that(stream.name == "users", eq=True)
+        tm.that(stream.tap == mock_tap, eq=True)
 
     def test_users_stream_schema_definition(self, mock_tap: Mock) -> None:
         """Test users stream schema definition."""
         stream = FlextTapLdapStreams.UsersStream(mock_tap)
         schema = stream.schema
-        assert isinstance(schema, dict)
-        assert "properties" in schema
+        tm.that(isinstance(schema, dict), eq=True)
+        tm.that("properties" in schema, eq=True)
         properties = schema["properties"]
-        assert "dn" in properties
-        assert "cn" in properties or "commonName" in properties
+        tm.that("dn" in properties, eq=True)
+        tm.that("cn" in properties or "commonName" in properties, eq=True)
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_users_stream_get_records(
@@ -113,11 +114,11 @@ class TestUsersStream:
         ]
         stream = FlextTapLdapStreams.UsersStream(mock_tap)
         records = list(stream.get_records(context=None))
-        assert len(records) == 1
+        tm.that(len(records) == 1, eq=True)
         first_record = records[0]
-        assert isinstance(first_record, dict)
-        assert first_record["dn"] == "uid=jdoe,ou=users,dc=test,dc=com"
-        assert first_record["uid"] == "jdoe"
+        tm.that(isinstance(first_record, dict), eq=True)
+        tm.that(first_record["dn"] == "uid=jdoe,ou=users,dc=test,dc=com", eq=True)
+        tm.that(first_record["uid"] == "jdoe", eq=True)
         mock_client_class.assert_called_once()
 
     @patch("flext_tap_ldap.client.LDAPClient")
@@ -130,11 +131,11 @@ class TestUsersStream:
         mock_client.search.return_value = []
         stream = FlextTapLdapStreams.GroupsStream(mock_tap)
         records = list(stream.get_records(context=None))
-        assert len(records) == 1
+        tm.that(len(records) == 1, eq=True)
         first_record = records[0]
-        assert isinstance(first_record, dict)
-        assert first_record["dn"] == "cn=developers,ou=groups,dc=test,dc=com"
-        assert first_record["cn"] == "developers"
+        tm.that(isinstance(first_record, dict), eq=True)
+        tm.that(first_record["dn"] == "cn=developers,ou=groups,dc=test,dc=com", eq=True)
+        tm.that(first_record["cn"] == "developers", eq=True)
         mock_client_class.assert_called_once()
 
     @patch("flext_tap_ldap.client.LDAPClient")
@@ -147,11 +148,11 @@ class TestUsersStream:
         mock_client.search.return_value = []
         stream = FlextTapLdapStreams.OrganizationalUnitsStream(mock_tap)
         records = list(stream.get_records(context=None))
-        assert len(records) == 1
+        tm.that(len(records) == 1, eq=True)
         first_record = records[0]
-        assert isinstance(first_record, dict)
-        assert first_record["dn"] == "ou=users,dc=test,dc=com"
-        assert first_record["ou"] == "users"
+        tm.that(isinstance(first_record, dict), eq=True)
+        tm.that(first_record["dn"] == "ou=users,dc=test,dc=com", eq=True)
+        tm.that(first_record["ou"] == "users", eq=True)
         mock_client_class.assert_called_once()
 
     @patch("flext_tap_ldap.client.LDAPClient")
@@ -164,11 +165,11 @@ class TestUsersStream:
         mock_client.search.return_value = []
         stream = FlextTapLdapStreams.SchemaStream(mock_tap)
         records = list(stream.get_records(context=None))
-        assert len(records) == 1
+        tm.that(len(records) == 1, eq=True)
         first_record = records[0]
-        assert isinstance(first_record, dict)
-        assert first_record["dn"] == "cn=schema"
-        assert first_record["cn"] == "schema"
+        tm.that(isinstance(first_record, dict), eq=True)
+        tm.that(first_record["dn"] == "cn=schema", eq=True)
+        tm.that(first_record["cn"] == "schema", eq=True)
         mock_client_class.assert_called_once()
 
 
@@ -194,19 +195,19 @@ class TestGroupsStream:
     def test_groups_stream_creation(self, mock_tap: Mock) -> None:
         """Test groups stream creation."""
         stream = FlextTapLdapStreams.GroupsStream(mock_tap)
-        assert stream is not None
-        assert stream.name == "groups"
-        assert stream.tap == mock_tap
+        tm.that(stream is not None, eq=True)
+        tm.that(stream.name == "groups", eq=True)
+        tm.that(stream.tap == mock_tap, eq=True)
 
     def test_groups_stream_schema_definition(self, mock_tap: Mock) -> None:
         """Test groups stream schema definition."""
         stream = FlextTapLdapStreams.GroupsStream(mock_tap)
         schema = stream.schema
-        assert isinstance(schema, dict)
-        assert "properties" in schema
+        tm.that(isinstance(schema, dict), eq=True)
+        tm.that("properties" in schema, eq=True)
         properties = schema["properties"]
-        assert "dn" in properties
-        assert "cn" in properties or "commonName" in properties
+        tm.that("dn" in properties, eq=True)
+        tm.that("cn" in properties or "commonName" in properties, eq=True)
 
 
 class TestOrganizationalUnitsStream:
@@ -230,9 +231,9 @@ class TestOrganizationalUnitsStream:
     def test_organizational_units_stream_creation(self, mock_tap: Mock) -> None:
         """Test organizational units stream creation."""
         stream = FlextTapLdapStreams.OrganizationalUnitsStream(mock_tap)
-        assert stream is not None
-        assert stream.name == "organizational_units"
-        assert stream.tap == mock_tap
+        tm.that(stream is not None, eq=True)
+        tm.that(stream.name == "organizational_units", eq=True)
+        tm.that(stream.tap == mock_tap, eq=True)
 
     def test_organizational_units_stream_schema_definition(
         self, mock_tap: Mock
@@ -240,11 +241,11 @@ class TestOrganizationalUnitsStream:
         """Test organizational units stream schema definition."""
         stream = FlextTapLdapStreams.OrganizationalUnitsStream(mock_tap)
         schema = stream.schema
-        assert isinstance(schema, dict)
-        assert "properties" in schema
+        tm.that(isinstance(schema, dict), eq=True)
+        tm.that("properties" in schema, eq=True)
         properties = schema["properties"]
-        assert "dn" in properties
-        assert "ou" in properties or "organizationalUnitName" in properties
+        tm.that("dn" in properties, eq=True)
+        tm.that("ou" in properties or "organizationalUnitName" in properties, eq=True)
 
 
 class TestSchemaStream:
@@ -268,19 +269,19 @@ class TestSchemaStream:
     def test_schema_stream_creation(self, mock_tap: Mock) -> None:
         """Test schema stream creation."""
         stream = FlextTapLdapStreams.SchemaStream(mock_tap)
-        assert stream is not None
-        assert stream.name == "schema"
-        assert stream.tap == mock_tap
+        tm.that(stream is not None, eq=True)
+        tm.that(stream.name == "schema", eq=True)
+        tm.that(stream.tap == mock_tap, eq=True)
 
     def test_schema_stream_schema_definition(self, mock_tap: Mock) -> None:
         """Test schema stream schema definition."""
         stream = FlextTapLdapStreams.SchemaStream(mock_tap)
         schema = stream.schema
-        assert isinstance(schema, dict)
-        assert "properties" in schema
+        tm.that(isinstance(schema, dict), eq=True)
+        tm.that("properties" in schema, eq=True)
         properties = schema["properties"]
-        assert "name" in properties
-        assert "type" in properties
+        tm.that("name" in properties, eq=True)
+        tm.that("type" in properties, eq=True)
 
 
 class TestCustomStreamParams:
@@ -296,11 +297,11 @@ class TestCustomStreamParams:
             primary_keys=["dn"],
             replication_key="modifyTimestamp",
         )
-        assert params.name == "test_stream"
-        assert params.search_filter == "(objectClass=person)"
-        assert params.schema_properties == {"cn": {"type": "string"}}
-        assert params.primary_keys == ["dn"]
-        assert params.replication_key == "modifyTimestamp"
+        tm.that(params.name == "test_stream", eq=True)
+        tm.that(params.search_filter == "(objectClass=person)", eq=True)
+        tm.that(params.schema_properties == {"cn": {"type": "string"}}, eq=True)
+        tm.that(params.primary_keys == ["dn"], eq=True)
+        tm.that(params.replication_key == "modifyTimestamp", eq=True)
 
     def test_custom_stream_params_validation(self) -> None:
         """Test method."""
@@ -308,7 +309,7 @@ class TestCustomStreamParams:
         params = FlextTapLdapStreams.CustomStreamParams(
             name="valid_stream", search_filter="(objectClass=*)"
         )
-        assert params.primary_keys == ["dn"]
+        tm.that(params.primary_keys == ["dn"], eq=True)
         with pytest.raises(ValueError, match="Stream name is required"):
             FlextTapLdapStreams.CustomStreamParams(
                 name="", search_filter="(objectClass=*)"
@@ -353,9 +354,9 @@ class TestCustomStream:
             replication_key="modifyTimestamp",
         )
         stream = FlextTapLdapStreams.CustomStream(tap=mock_tap, params=params)
-        assert stream is not None
-        assert stream.name == "service_accounts"
-        assert stream.tap == mock_tap
+        tm.that(stream is not None, eq=True)
+        tm.that(stream.name == "service_accounts", eq=True)
+        tm.that(stream.tap == mock_tap, eq=True)
 
     def test_custom_stream_minimal_configuration(self, mock_tap: Mock) -> None:
         """Test custom stream with minimal configuration."""
@@ -363,9 +364,9 @@ class TestCustomStream:
             name="minimal_custom", search_filter="(objectClass=*)"
         )
         stream = FlextTapLdapStreams.CustomStream(tap=mock_tap, params=params)
-        assert stream is not None
-        assert stream.name == "minimal_custom"
-        assert stream.tap == mock_tap
+        tm.that(stream is not None, eq=True)
+        tm.that(stream.name == "minimal_custom", eq=True)
+        tm.that(stream.tap == mock_tap, eq=True)
 
     def test_custom_stream_schema_properties(self, mock_tap: Mock) -> None:
         """Test custom stream schema properties."""
@@ -381,12 +382,12 @@ class TestCustomStream:
         )
         stream = FlextTapLdapStreams.CustomStream(tap=mock_tap, params=params)
         schema = stream.schema
-        assert isinstance(schema, dict)
-        assert "properties" in schema
+        tm.that(isinstance(schema, dict), eq=True)
+        tm.that("properties" in schema, eq=True)
         properties = schema["properties"]
-        assert "dn" in properties
+        tm.that("dn" in properties, eq=True)
         for prop_name in custom_properties:
-            assert prop_name in properties
+            tm.that(prop_name in properties, eq=True)
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_custom_stream_get_records(
@@ -403,10 +404,12 @@ class TestCustomStream:
         )
         stream = FlextTapLdapStreams.CustomStream(tap=mock_tap, params=params)
         records = list(stream.get_records(context=None))
-        assert len(records) == 1
+        tm.that(len(records) == 1, eq=True)
         first_record = records[0]
-        assert isinstance(first_record, dict)
-        assert "cn=test-custom_test,dc=test,dc=com" in str(first_record["dn"])
+        tm.that(isinstance(first_record, dict), eq=True)
+        tm.that(
+            "cn=test-custom_test,dc=test,dc=com" in str(first_record["dn"]), eq=True
+        )
         mock_client_class.assert_called_once()
 
     def test_custom_stream_schema_type_mappings(self, mock_tap: Mock) -> None:
@@ -426,11 +429,11 @@ class TestCustomStream:
         stream = FlextTapLdapStreams.CustomStream(tap=mock_tap, params=params)
         schema = stream.schema
         properties = schema["properties"]
-        assert "stringField" in properties
-        assert "arrayField" in properties
-        assert "booleanField" in properties
-        assert "integerField" in properties
-        assert "datetimeField" in properties
+        tm.that("stringField" in properties, eq=True)
+        tm.that("arrayField" in properties, eq=True)
+        tm.that("booleanField" in properties, eq=True)
+        tm.that("integerField" in properties, eq=True)
+        tm.that("datetimeField" in properties, eq=True)
 
 
 class TestStreamIntegration:
@@ -454,12 +457,12 @@ class TestStreamIntegration:
         """Test that all default streams can be created."""
         tap = FlextTapLdapTap(config=tap_config)
         streams = tap.discover_streams()
-        assert len(streams) >= 4
+        tm.that(len(streams) >= 4, eq=True)
         stream_names = [s.name for s in streams]
-        assert "users" in stream_names
-        assert "groups" in stream_names
-        assert "organizational_units" in stream_names
-        assert "schema" in stream_names
+        tm.that("users" in stream_names, eq=True)
+        tm.that("groups" in stream_names, eq=True)
+        tm.that("organizational_units" in stream_names, eq=True)
+        tm.that("schema" in stream_names, eq=True)
 
     def test_streams_with_custom_configuration(
         self, tap_config: dict[str, object]
@@ -477,9 +480,9 @@ class TestStreamIntegration:
         tap = FlextTapLdapTap(config=tap_config)
         streams = tap.discover_streams()
         stream_names = [s.name for s in streams]
-        assert "custom_test_stream" in stream_names
+        tm.that("custom_test_stream" in stream_names, eq=True)
         custom_stream = next(s for s in streams if s.name == "custom_test_stream")
-        assert isinstance(custom_stream, FlextTapLdapStreams.CustomStream)
+        tm.that(isinstance(custom_stream, FlextTapLdapStreams.CustomStream), eq=True)
 
     def test_self(self, tap_config: dict[str, object]) -> None:
         """Test method."""
@@ -489,7 +492,7 @@ class TestStreamIntegration:
         streams = tap.discover_streams()
         stream_names = [s.name for s in streams]
         ldif_stream_found = any("ldif" in name.lower() for name in stream_names)
-        assert ldif_stream_found or len(streams) > 4
+        tm.that(ldif_stream_found or len(streams) > 4, eq=True)
 
 
 class TestLDAPBaseStreamDirectUsage:
@@ -521,7 +524,7 @@ class TestLDAPBaseStreamDirectUsage:
             schema={"properties": {"dn": {"type": "string"}}},
         )
         records = list(base_stream.get_records(context=None))
-        assert len(records) == 0
+        tm.that(len(records) == 0, eq=True)
 
 
 class TestStreamExceptionHandling:
@@ -550,10 +553,10 @@ class TestStreamExceptionHandling:
         mock_client.search.side_effect = Exception("Connection failed")
         stream = FlextTapLdapStreams.UsersStream(mock_tap_failing)
         records = list(stream.get_records(context=None))
-        assert len(records) == 1
+        tm.that(len(records) == 1, eq=True)
         first_record = records[0]
-        assert isinstance(first_record, dict)
-        assert first_record["dn"] == "uid=jdoe,ou=users,dc=test,dc=com"
+        tm.that(isinstance(first_record, dict), eq=True)
+        tm.that(first_record["dn"] == "uid=jdoe,ou=users,dc=test,dc=com", eq=True)
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_groups_stream_exception_fallback(
@@ -565,10 +568,10 @@ class TestStreamExceptionHandling:
         mock_client.search.side_effect = Exception("Connection failed")
         stream = FlextTapLdapStreams.GroupsStream(mock_tap_failing)
         records = list(stream.get_records(context=None))
-        assert len(records) == 1
+        tm.that(len(records) == 1, eq=True)
         first_record = records[0]
-        assert isinstance(first_record, dict)
-        assert first_record["dn"] == "cn=developers,ou=groups,dc=test,dc=com"
+        tm.that(isinstance(first_record, dict), eq=True)
+        tm.that(first_record["dn"] == "cn=developers,ou=groups,dc=test,dc=com", eq=True)
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_organizational_units_stream_exception_fallback(
@@ -580,10 +583,10 @@ class TestStreamExceptionHandling:
         mock_client.search.side_effect = Exception("Connection failed")
         stream = FlextTapLdapStreams.OrganizationalUnitsStream(mock_tap_failing)
         records = list(stream.get_records(context=None))
-        assert len(records) == 1
+        tm.that(len(records) == 1, eq=True)
         first_record = records[0]
-        assert isinstance(first_record, dict)
-        assert first_record["dn"] == "ou=users,dc=test,dc=com"
+        tm.that(isinstance(first_record, dict), eq=True)
+        tm.that(first_record["dn"] == "ou=users,dc=test,dc=com", eq=True)
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_schema_stream_exception_fallback(
@@ -595,10 +598,10 @@ class TestStreamExceptionHandling:
         mock_client.search.side_effect = Exception("Connection failed")
         stream = FlextTapLdapStreams.SchemaStream(mock_tap_failing)
         records = list(stream.get_records(context=None))
-        assert len(records) == 1
+        tm.that(len(records) == 1, eq=True)
         first_record = records[0]
-        assert isinstance(first_record, dict)
-        assert first_record["dn"] == "cn=schema"
+        tm.that(isinstance(first_record, dict), eq=True)
+        tm.that(first_record["dn"] == "cn=schema", eq=True)
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_custom_stream_exception_fallback(
@@ -613,7 +616,9 @@ class TestStreamExceptionHandling:
         )
         stream = FlextTapLdapStreams.CustomStream(tap=mock_tap_failing, params=params)
         records = list(stream.get_records(context=None))
-        assert len(records) == 1
+        tm.that(len(records) == 1, eq=True)
         first_record = records[0]
-        assert isinstance(first_record, dict)
-        assert "cn=test-failing_custom,dc=test,dc=com" in str(first_record["dn"])
+        tm.that(isinstance(first_record, dict), eq=True)
+        tm.that(
+            "cn=test-failing_custom,dc=test,dc=com" in str(first_record["dn"]), eq=True
+        )

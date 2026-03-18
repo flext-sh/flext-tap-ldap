@@ -13,6 +13,7 @@ from typing import Self
 from unittest.mock import Mock
 
 import pytest
+from flext_tests import tm
 
 from flext_tap_ldap import FlextTapLdapLdifStreams, FlextTapLdapProcessor
 from flext_tap_ldap.processor import Entry, Transformer
@@ -24,7 +25,7 @@ class TestLdifProcessor:
 
     def test_placeholder(self) -> None:
         """Placeholder test to satisfy pytest collection."""
-        assert FlextTapLdapProcessor is not None
+        tm.that(FlextTapLdapProcessor is not None, eq=True)
 
     def test_ldif_directory_processing_traverses_ldif_files(
         self, tmp_path: Path
@@ -51,8 +52,8 @@ class TestLdifProcessor:
 
         stream._process_ldif_file = _process
         records = list(stream.get_records())
-        assert len(records) == 2
-        assert set(seen) == {str(file_a), str(file_b)}
+        tm.that(len(records) == 2, eq=True)
+        tm.that(set(seen) == {str(file_a), str(file_b)}, eq=True)
 
     def test_transform_entry_applies_rules(self) -> None:
         transformer = Transformer(
@@ -72,14 +73,16 @@ class TestLdifProcessor:
         entry.change_type = "modify"
         entry.controls = ["control-a"]
         transformed = transformer.transform_entry(entry)
-        assert transformed is not entry
-        assert transformed.attributes["cn"] == ["Alice"]
-        assert transformed.attributes["surname"] == ["Smith"]
-        assert transformed.attributes["department"] == ["Information Technology"]
-        assert "obsolete" not in transformed.attributes
-        assert transformed.attributes["status"] == ["active"]
-        assert transformed.change_type == "modify"
-        assert transformed.controls == ["control-a"]
+        tm.that(transformed is not entry, eq=True)
+        tm.that(transformed.attributes["cn"] == ["Alice"], eq=True)
+        tm.that(transformed.attributes["surname"] == ["Smith"], eq=True)
+        tm.that(
+            transformed.attributes["department"] == ["Information Technology"], eq=True
+        )
+        tm.that("obsolete" not in transformed.attributes, eq=True)
+        tm.that(transformed.attributes["status"] == ["active"], eq=True)
+        tm.that(transformed.change_type == "modify", eq=True)
+        tm.that(transformed.controls == ["control-a"], eq=True)
 
     def test_directory_processing_traverses_ldap_dit_with_mock_connection(
         self,
@@ -128,9 +131,9 @@ class TestLdifProcessor:
             "ldap_page_size": 100,
         }
         records = list(stream.get_records())
-        assert len(records) == 1
-        assert records[0]["dn"] == "cn=alice,dc=example,dc=com"
-        assert records[0]["entry_type"] == "user"
+        tm.that(len(records) == 1, eq=True)
+        tm.that(records[0]["dn"] == "cn=alice,dc=example,dc=com", eq=True)
+        tm.that(records[0]["entry_type"] == "user", eq=True)
 
     def test_transform_entry_applies_schema_mappings(self) -> None:
         transformer = Transformer(
@@ -143,5 +146,5 @@ class TestLdifProcessor:
         )
         entry = Entry("cn=alice,dc=example,dc=com", {"employeeId": ["1001"]})
         transformed = transformer.transform_entry(entry)
-        assert transformed.attributes["uid"] == ["1001"]
-        assert transformed.attributes["status"] == ["active"]
+        tm.that(transformed.attributes["uid"] == ["1001"], eq=True)
+        tm.that(transformed.attributes["status"] == ["active"], eq=True)

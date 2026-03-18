@@ -7,6 +7,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from flext_tests import tm
+
 from flext_tap_ldap import FlextTapLdapLdifStreams, FlextTapLdapTap
 
 
@@ -16,8 +18,8 @@ class TestLDIFStreamBasic:
     def test_imports(self) -> None:
         """Test method."""
         "Test that LDIF stream modules can be imported."
-        assert FlextTapLdapLdifStreams.LdifStream is not None
-        assert FlextTapLdapLdifStreams.LdifAnalysisStream is not None
+        tm.that(FlextTapLdapLdifStreams.LdifStream is not None, eq=True)
+        tm.that(FlextTapLdapLdifStreams.LdifAnalysisStream is not None, eq=True)
 
     def test_ldif_stream_creation(self) -> None:
         """Test method."""
@@ -33,6 +35,6 @@ class TestLDIFStreamBasic:
                 }
             )
             stream = FlextTapLdapLdifStreams.LdifStream(tap=tap)
-            assert stream is not None
+            tm.that(stream is not None, eq=True)
         except (TypeError, AttributeError, ImportError):
-            assert FlextTapLdapLdifStreams.LdifStream is not None
+            tm.that(FlextTapLdapLdifStreams.LdifStream is not None, eq=True)

@@ -10,6 +10,7 @@ from __future__ import annotations
 from unittest.mock import Mock, patch
 
 import pytest
+from flext_tests import tm
 
 from flext_tap_ldap import FlextTapLdapClient
 
@@ -33,12 +34,12 @@ class TestLDAPClientCoverageBoost:
     def test_build_server_uri(self, client: FlextTapLdapClient.LDAPClient) -> None:
         """Test _build_server_uri method directly."""
         uri = client._build_server_uri()
-        assert uri == "ldap://test.ldap.com:389"
+        tm.that(uri == "ldap://test.ldap.com:389", eq=True)
         ssl_client = FlextTapLdapClient.LDAPClient(
             host="secure.com", port=636, use_ssl=True
         )
         ssl_uri = ssl_client._build_server_uri()
-        assert ssl_uri == "ldaps://secure.com:636"
+        tm.that(ssl_uri == "ldaps://secure.com:636", eq=True)
 
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_method_coverage(
@@ -57,27 +58,27 @@ class TestLDAPClientCoverageBoost:
                 size_limit=100,
             )
             mock_run.assert_called_once()
-            assert results == [{"test": "data"}]
+            tm.that(results == [{"test": "data"}], eq=True)
             mock_run.call_args[0][0]
         mock_get_loop.side_effect = None
         mock_get_loop.return_value = Mock()
         results = client.search("dc=test,dc=com")
-        assert results == []
+        tm.that(results == [], eq=True)
 
     def test_health_check_coverage(self, client: FlextTapLdapClient.LDAPClient) -> None:
         """Test health_check method to cover lines 264-270."""
         with patch.object(client, "test_connection", return_value=True) as mock_test:
             health = client.health_check()
             mock_test.assert_called_once()
-            assert health["status"] == "healthy"
-            assert health["server_uri"] == "ldap://test.ldap.com:389"
-            assert health["connection_test"] is True
-            assert "response_time_ms" in health
-            assert isinstance(health["response_time_ms"], (int, float))
+            tm.that(health["status"] == "healthy", eq=True)
+            tm.that(health["server_uri"] == "ldap://test.ldap.com:389", eq=True)
+            tm.that(health["connection_test"] is True, eq=True)
+            tm.that("response_time_ms" in health, eq=True)
+            tm.that(isinstance(health["response_time_ms"], (int, float)), eq=True)
         with patch.object(client, "test_connection", return_value=False):
             health = client.health_check()
-            assert health["status"] == "unhealthy"
-            assert health["connection_test"] is False
+            tm.that(health["status"] == "unhealthy", eq=True)
+            tm.that(health["connection_test"] is False, eq=True)
 
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_with_oracle_support_no_loop(
@@ -97,7 +98,7 @@ class TestLDAPClientCoverageBoost:
                 oracle_oid_mode=True,
             )
             mock_exec.assert_called_once()
-            assert list(results) == [{"oracle": "data"}]
+            tm.that(list(results) == [{"oracle": "data"}], eq=True)
 
     def test_execute_oracle_search_in_new_loop_comprehensive(
         self, client: FlextTapLdapClient.LDAPClient
@@ -124,7 +125,7 @@ class TestLDAPClientCoverageBoost:
                 [{"test": "entry"}], oracle_oid_mode=True
             )
             result_list = list(result)
-            assert result_list == [{"processed": "entry"}]
+            tm.that(result_list == [{"processed": "entry"}], eq=True)
 
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_with_oracle_support_with_loop(
@@ -135,4 +136,4 @@ class TestLDAPClientCoverageBoost:
         results = client.search_with_oracle_support(
             "dc=oracle,dc=com", "(uid=*)", oracle_oid_mode=True
         )
-        assert results == []
+        tm.that(results == [], eq=True)

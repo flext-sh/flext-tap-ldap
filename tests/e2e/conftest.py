@@ -47,10 +47,10 @@ def sample_catalog() -> dict[str, object]:
 
 @pytest.fixture(scope="session")
 def ldap_container(project_root: Path) -> Iterator[None]:
-    """Start and manage LDAP test container using FlextTestsDocker."""
+    """Start and manage LDAP test container using tk."""
     compose_file = project_root / "docker-compose.yml"
     logger.info("Starting OpenLDAP container...")
-    docker_manager = FlextTestsDocker(workspace_root=project_root)
+    docker_manager = tk(workspace_root=project_root)
     start_result = docker_manager.compose_up(compose_file=str(compose_file))
     if start_result.is_failure:
         logger.error(f"Failed to start OpenLDAP container: {start_result.error}")

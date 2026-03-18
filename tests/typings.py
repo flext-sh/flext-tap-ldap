@@ -2,7 +2,7 @@
 
 This module provides test-specific types that extend the main flext-tap-ldap types.
 Uses the unified namespace pattern t.TapLdap.* for test-only types.
-Combines FlextTestsTypes functionality with project-specific test types.
+Combines t functionality with project-specific test types.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -16,8 +16,8 @@ from flext_tests import t
 from flext_tap_ldap import FlextTapLdapTypes
 
 
-class TestsFlextTapLdapTypes(FlextTestsTypes, FlextTapLdapTypes):
-    """Test types combining FlextTestsTypes with flext-tap-ldap types."""
+class TestsFlextTapLdapTypes(t, FlextTapLdapTypes):
+    """Test types combining t with flext-tap-ldap types."""
 
     class TapLdap(FlextTapLdapTypes.TapLdap):
         """TapLdap test types namespace."""

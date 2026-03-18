@@ -13,7 +13,7 @@ from flext_tests import c
 from flext_tap_ldap import FlextTapLdapConstants
 
 
-class TestsFlextTapLdapConstants(FlextTestsConstants):
+class TestsFlextTapLdapConstants(c):
     """Test constants for flexttapldap."""
 
     class TapLdap(FlextTapLdapConstants.TapLdap):

@@ -10,6 +10,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
+from flext_tests import tm
 
 from flext_tap_ldap import FlextTapLdapTap
 
@@ -36,7 +37,7 @@ class TestFlextTapLdapTapUnit:
         if tap.name != "tap-ldap":
             msg: str = f"Expected {'tap-ldap'}, got {tap.name}"
             raise AssertionError(msg)
-        assert tap.config == config
+        tm.that(tap.config == config, eq=True)
 
     def test_stream_discovery(self, config: dict[str, object]) -> None:
         """Test stream discovery."""
@@ -46,11 +47,11 @@ class TestFlextTapLdapTapUnit:
         if "users" not in stream_names:
             stream_error: str = f"Expected {'users'} in {stream_names}"
             raise AssertionError(stream_error)
-        assert "groups" in stream_names
+        tm.that("groups" in stream_names, eq=True)
         if "organizational_units" not in stream_names:
             ou_error: str = f"Expected {'organizational_units'} in {stream_names}"
             raise AssertionError(ou_error)
-        assert "schema" in stream_names
+        tm.that("schema" in stream_names, eq=True)
         if len(streams) != 4:
             count_error: str = f"Expected {4}, got {len(streams)}"
             raise AssertionError(count_error)
@@ -96,7 +97,7 @@ class TestFlextTapLdapTapUnit:
                 f"Expected {'INCREMENTAL'}, got {users_stream['replication_method']}"
             )
             raise AssertionError(replication_error)
-        assert users_stream["replication_key"] == "modifyTimestamp"
+        tm.that(users_stream["replication_key"] == "modifyTimestamp", eq=True)
         if "inclusion" not in users_stream["metadata"][0]["metadata"]:
             metadata_error: str = (
                 f"Expected {'inclusion'} in {users_stream['metadata'][0]['metadata']}"
@@ -141,4 +142,4 @@ class TestFlextTapLdapTapUnit:
                 f"Expected {'uid=jdoe,ou=users,dc=test,dc=com'}, got {record['dn']}"
             )
             raise AssertionError(record_error)
-        assert record["uid"] == "jdoe"
+        tm.that(record["uid"] == "jdoe", eq=True)
