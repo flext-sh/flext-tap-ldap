@@ -24,7 +24,7 @@ from flext_tap_ldap.typings import FlextTapLdapTypes
 logger = FlextLogger(__name__)
 
 
-def _coerce_positive_int(raw_value: dict[str, object], default: int) -> int:
+def _coerce_positive_int(raw_value: object, default: int) -> int:
     """Coerce value to positive integer with safe fallback."""
     try:
         parsed = int(str(raw_value))
@@ -33,7 +33,7 @@ def _coerce_positive_int(raw_value: dict[str, object], default: int) -> int:
     return parsed if parsed > 0 else default
 
 
-def _coerce_optional_string(raw_value: dict[str, object] | None) -> str | None:
+def _coerce_optional_string(raw_value: object | None) -> str | None:
     """Coerce value to string only when source is already string-like."""
     if raw_value is None:
         return None
@@ -45,7 +45,7 @@ def _coerce_optional_string(raw_value: dict[str, object] | None) -> str | None:
 
 
 def _parse_connection_config(
-    raw_value: dict[str, object],
+    raw_value: object,
 ) -> FlextTapLdapModels.TapLdap.LdapConnectionConfig:
     """Validate LDAP connection payload through Pydantic."""
     try:
@@ -100,7 +100,7 @@ class FlextTapLdapStreams:
         """
 
         @staticmethod
-        def create_test_group_record() -> Mapping[str, dict[str, object]]:
+        def create_test_group_record() -> Mapping[str, object]:
             """Create standardized test group record for fallback scenarios."""
             return {
                 "dn": "cn=developers,ou=groups,dc=test,dc=com",
@@ -115,7 +115,7 @@ class FlextTapLdapStreams:
             }
 
         @staticmethod
-        def create_test_ou_record() -> Mapping[str, dict[str, object]]:
+        def create_test_ou_record() -> Mapping[str, object]:
             """Create standardized test organizational unit record."""
             return {
                 "dn": "ou=users,dc=test,dc=com",
@@ -126,7 +126,7 @@ class FlextTapLdapStreams:
             }
 
         @staticmethod
-        def create_test_schema_record() -> Mapping[str, dict[str, object]]:
+        def create_test_schema_record() -> Mapping[str, object]:
             """Create standardized test schema record."""
             return {
                 "dn": "cn=schema",
@@ -138,7 +138,7 @@ class FlextTapLdapStreams:
             }
 
         @staticmethod
-        def create_test_user_record() -> Mapping[str, dict[str, object]]:
+        def create_test_user_record() -> Mapping[str, object]:
             """Create standardized test user record for fallback scenarios."""
             return {
                 "dn": "uid=jdoe,ou=users,dc=test,dc=com",
@@ -170,20 +170,20 @@ class FlextTapLdapStreams:
             self,
             tap: Tap,
             name: str | None = None,
-            schema: dict[str, dict[str, object]] | None = None,
+            schema: dict[str, object] | None = None,
         ) -> None:
             """Initialize the LDAP stream."""
             self.name = name
             self.tap_stream_id = name or "ldap_stream"
             self.schema = schema or {}
-            self.config: dict[str, dict[str, object]] = getattr(tap, "config", {})
+            self.config: dict[str, object] = getattr(tap, "config", {})
             self.client: LDAPClient | None = None
             self.tap = tap
             self._create_ldap_client()
 
         def get_records(
             self,
-            context: Mapping[str, dict[str, object]] | None = None,
+            context: Mapping[str, object] | None = None,
         ) -> Iterable[dict[str, object]]:
             """Get records from LDAP - base implementation."""
             _context = context
@@ -251,7 +251,7 @@ class FlextTapLdapStreams:
                 logger.warning("Failed to create LDAP client: %s", err_msg)
                 self.client = None
 
-        def _get_fallback_data(self) -> list[dict[str, dict[str, object]]]:
+        def _get_fallback_data(self) -> list[dict[str, object]]:
             """Get fallback data for testing/demo purposes."""
             return []
 
@@ -260,7 +260,7 @@ class FlextTapLdapStreams:
             search_filter: str,
             base_dn: str | None = None,
             attributes: list[str] | None = None,
-        ) -> list[dict[str, dict[str, object]]]:
+        ) -> list[dict[str, object]]:
             """Search LDAP directory with error handling."""
             if not self.client:
                 logger.warning("LDAP client not available, using fallback data")
@@ -270,7 +270,7 @@ class FlextTapLdapStreams:
                     raw_conn = self.config.get("connection", {})
                     connection_config = _parse_connection_config(raw_conn)
                     base_dn = connection_config.base_dn
-                results: list[dict[str, dict[str, object]]] = [
+                results: list[dict[str, object]] = [
                     dict(entry)
                     for entry in self.client.search(
                         base_dn=base_dn or "",
@@ -306,7 +306,7 @@ class FlextTapLdapStreams:
         def __init__(self, tap: Tap) -> None:
             """Initialize users stream."""
             name = "users"
-            schema: dict[str, dict[str, object]] = {
+            schema: dict[str, object] = {
                 "type": "object",
                 "properties": {
                     "dn": {"type": "string", "description": "Distinguished Name"},
@@ -332,7 +332,7 @@ class FlextTapLdapStreams:
         @override
         def get_records(
             self,
-            context: Mapping[str, dict[str, object]] | None = None,
+            context: Mapping[str, object] | None = None,
         ) -> Iterable[dict[str, object]]:
             """Get user records from LDAP."""
             _context = context
@@ -363,14 +363,14 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-            results: list[dict[str, dict[str, object]]] = self._search_ldap(
+            results: list[dict[str, object]] = self._search_ldap(
                 user_filter,
                 attributes=user_attributes,
             )
             yield from results
 
         @override
-        def _get_fallback_data(self) -> list[dict[str, dict[str, object]]]:
+        def _get_fallback_data(self) -> list[dict[str, object]]:
             """Get fallback user data."""
             return [
                 dict(FlextTapLdapStreams.FallbackDataFactory.create_test_user_record()),
@@ -386,7 +386,7 @@ class FlextTapLdapStreams:
         def __init__(self, tap: Tap) -> None:
             """Initialize groups stream."""
             name = "groups"
-            schema: dict[str, dict[str, object]] = {
+            schema: dict[str, object] = {
                 "type": "object",
                 "properties": {
                     "dn": {"type": "string", "description": "Distinguished Name"},
@@ -417,7 +417,7 @@ class FlextTapLdapStreams:
         @override
         def get_records(
             self,
-            context: Mapping[str, dict[str, object]] | None = None,
+            context: Mapping[str, object] | None = None,
         ) -> Iterable[dict[str, object]]:
             """Get group records from LDAP."""
             _context = context
@@ -441,14 +441,14 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-            results: list[dict[str, dict[str, object]]] = self._search_ldap(
+            results: list[dict[str, object]] = self._search_ldap(
                 group_filter,
                 attributes=group_attributes,
             )
             yield from results
 
         @override
-        def _get_fallback_data(self) -> list[dict[str, dict[str, object]]]:
+        def _get_fallback_data(self) -> list[dict[str, object]]:
             """Get fallback group data."""
             return [
                 dict(
@@ -465,7 +465,7 @@ class FlextTapLdapStreams:
         def __init__(self, tap: Tap) -> None:
             """Initialize organizational units stream."""
             name = "organizational_units"
-            schema: dict[str, dict[str, object]] = {
+            schema: dict[str, object] = {
                 "type": "object",
                 "properties": {
                     "dn": {"type": "string", "description": "Distinguished Name"},
@@ -485,7 +485,7 @@ class FlextTapLdapStreams:
         @override
         def get_records(
             self,
-            context: Mapping[str, dict[str, object]] | None = None,
+            context: Mapping[str, object] | None = None,
         ) -> Iterable[dict[str, object]]:
             """Get organizational unit records from LDAP."""
             _context = context
@@ -498,14 +498,14 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-            results: list[dict[str, dict[str, object]]] = self._search_ldap(
+            results: list[dict[str, object]] = self._search_ldap(
                 ou_filter,
                 attributes=ou_attributes,
             )
             yield from results
 
         @override
-        def _get_fallback_data(self) -> list[dict[str, dict[str, object]]]:
+        def _get_fallback_data(self) -> list[dict[str, object]]:
             """Get fallback organizational unit data."""
             return [
                 dict(FlextTapLdapStreams.FallbackDataFactory.create_test_ou_record()),
@@ -520,7 +520,7 @@ class FlextTapLdapStreams:
         def __init__(self, tap: Tap) -> None:
             """Initialize schema stream."""
             name = "schema"
-            schema: dict[str, dict[str, object]] = {
+            schema: dict[str, object] = {
                 "type": "object",
                 "properties": {
                     "objectClass": {
@@ -554,7 +554,7 @@ class FlextTapLdapStreams:
         @override
         def get_records(
             self,
-            context: Mapping[str, dict[str, object]] | None = None,
+            context: Mapping[str, object] | None = None,
         ) -> Iterable[dict[str, object]]:
             """Get schema records from LDAP."""
             _context = context
@@ -600,7 +600,7 @@ class FlextTapLdapStreams:
                 yield record
 
         @override
-        def _get_fallback_data(self) -> list[dict[str, dict[str, object]]]:
+        def _get_fallback_data(self) -> list[dict[str, object]]:
             """Get fallback schema data."""
             return [
                 dict(
@@ -625,7 +625,7 @@ class FlextTapLdapStreams:
             def _map_prop(
                 name: str,
                 definition: dict[str, object],
-            ) -> dict[str, dict[str, object]]:
+            ) -> dict[str, object]:
                 parsed_definition = _parse_property_definition(definition)
                 prop_type = parsed_definition.type
                 prop_desc = parsed_definition.description or f"{name} field"
@@ -644,11 +644,11 @@ class FlextTapLdapStreams:
                 return {"type": "string", "description": prop_desc}
 
             if params.schema_properties:
-                dynamic_properties: dict[str, dict[str, dict[str, object]]] = {
+                dynamic_properties: dict[str, dict[str, object]] = {
                     key: _map_prop(key, value)
                     for key, value in params.schema_properties.items()
                 }
-                schema: dict[str, dict[str, object]] = {
+                schema: dict[str, object] = {
                     "type": "object",
                     "properties": {
                         "dn": {
@@ -692,20 +692,20 @@ class FlextTapLdapStreams:
         @override
         def get_records(
             self,
-            context: Mapping[str, dict[str, object]] | None = None,
+            context: Mapping[str, object] | None = None,
         ) -> Iterable[dict[str, object]]:
             """Get records using custom filter."""
             _context = context
             logger.info(
                 f"Extracting LDAP records for custom stream: {self.params.name}",
             )
-            results: list[dict[str, dict[str, object]]] = self._search_ldap(
+            results: list[dict[str, object]] = self._search_ldap(
                 self.params.search_filter,
             )
             yield from results
 
         @override
-        def _get_fallback_data(self) -> list[dict[str, dict[str, object]]]:
+        def _get_fallback_data(self) -> list[dict[str, object]]:
             """Get fallback data for custom stream."""
             return [
                 {

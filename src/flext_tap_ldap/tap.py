@@ -47,7 +47,7 @@ class FlextTapLdapTap(FlextMeltanoTapAbstractions):
 
     name: ClassVar[str] = "FlextMeltanoTapAbstractions-ldap"
     config_class: ClassVar[type[FlextTapLdapSettings]] = FlextTapLdapSettings
-    config_jsonschema: ClassVar[dict[str, dict[str, object]]] = {
+    config_jsonschema: ClassVar[dict[str, object]] = {
         "type": "object",
         "properties": {
             "host": {"type": "string", "description": "LDAP server host"},
@@ -117,7 +117,7 @@ class FlextTapLdapTap(FlextMeltanoTapAbstractions):
         """
         source_payload = source_config.model_dump(mode="python")
         raw_connection_config = source_payload.get("connection_config", {})
-        config_map: dict[str, dict[str, object]]
+        config_map: dict[str, object]
         try:
             config_map = _CONFIG_MAP_ADAPTER.validate_python(raw_connection_config)
         except ValidationError:

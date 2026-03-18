@@ -221,7 +221,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             name: str
             search_filter: str
             schema_properties: Annotated[
-                dict[str, dict[str, object]],
+                dict[str, object],
                 Field(default_factory=dict),
             ]
             primary_keys: Annotated[list[str], Field(default_factory=lambda: ["dn"])]
@@ -311,11 +311,11 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             replication_method: str = "FULL_TABLE"
             replication_key: str | None = None
             stream_schema: Annotated[
-                dict[str, dict[str, object]],
+                dict[str, object],
                 Field(default_factory=dict),
             ]
 
-            def update_schema(self, schema: Mapping[str, dict[str, object]]) -> None:
+            def update_schema(self, schema: Mapping[str, object]) -> None:
                 """Update stream schema from mapping."""
                 self.stream_schema = dict(schema)
 

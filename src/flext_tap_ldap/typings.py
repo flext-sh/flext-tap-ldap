@@ -118,7 +118,7 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
         type StreamSchema = dict[str, str | Mapping[str, Mapping[str, object]]]
         type StreamMetadata = dict[str, str | bool | Mapping[str, Mapping[str, object]]]
         type StreamRecord = dict[
-            str, dict[str, object] | Mapping[str, dict[str, object]]
+            str, dict[str, object] | Mapping[str, object]
         ]
         type StreamState = dict[str, str | Mapping[str, Mapping[str, object]]]
         type StreamCatalog = dict[str, str | list[Mapping[str, Mapping[str, object]]]]
@@ -126,7 +126,7 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
     class TapConfiguration:
         """LDAP tap configuration complex types."""
 
-        type TapConfig = dict[str, dict[str, object] | Mapping[str, dict[str, object]]]
+        type TapConfig = dict[str, dict[str, object] | Mapping[str, object]]
         type ExtractionConfig = dict[str, str | int | bool | list[str]]
         type FilteringConfig = dict[
             str,
@@ -145,8 +145,8 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
 
         type SearchFilter = dict[str, str | Mapping[str, Mapping[str, object]]]
         type SearchScope = dict[str, str | int | Mapping[str, Mapping[str, object]]]
-        type SearchAttributes = dict[str, list[str] | dict[str, dict[str, object]]]
-        type SearchResult = dict[str, list[dict[str, dict[str, object]]]]
+        type SearchAttributes = dict[str, list[str] | dict[str, object]]
+        type SearchResult = dict[str, list[dict[str, object]]]
         type PaginationConfig = dict[
             str, int | str | Mapping[str, Mapping[str, object]]
         ]
@@ -173,30 +173,30 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
         ]
         type LdapRecordDict = dict[
             str,
-            dict[str, object] | Mapping[str, dict[str, object]],
+            dict[str, object] | Mapping[str, object],
         ]
         type EntryDict = dict[str, dict[str, object] | list[str]]
         type AttributeDict = dict[
             str, str | list[str] | Mapping[str, Mapping[str, object]]
         ]
         type SchemaDict = dict[str, str | Mapping[str, Mapping[str, object]]]
-        type StreamDict = dict[str, dict[str, object] | Mapping[str, dict[str, object]]]
+        type StreamDict = dict[str, dict[str, object] | Mapping[str, object]]
         type CatalogDict = dict[
-            str, dict[str, object] | Mapping[str, dict[str, object]]
+            str, dict[str, object] | Mapping[str, object]
         ]
         type MetadataDict = dict[
-            str, dict[str, object] | Mapping[str, dict[str, object]]
+            str, dict[str, object] | Mapping[str, object]
         ]
         type StateDict = dict[str, str | Mapping[str, Mapping[str, object]]]
         type QueryDict = dict[str, str | list[str] | Mapping[str, Mapping[str, object]]]
         type FilterDict = dict[str, str | Mapping[str, Mapping[str, object]]]
-        type ConfigDict = dict[str, dict[str, object] | Mapping[str, dict[str, object]]]
+        type ConfigDict = dict[str, dict[str, object] | Mapping[str, object]]
         type ExtractionDict = dict[str, str | int | bool | list[str]]
-        type RecordDict = dict[str, dict[str, object]]
-        type ResultDict = dict[str, dict[str, object]]
-        type ContextDict = dict[str, dict[str, object]]
-        type EntityDict = dict[str, dict[str, object]]
-        type DataDict = dict[str, dict[str, object]]
+        type RecordDict = dict[str, object]
+        type ResultDict = dict[str, object]
+        type ContextDict = dict[str, object]
+        type EntityDict = dict[str, object]
+        type DataDict = dict[str, object]
         type RecordList = list[RecordDict]
         type EntityList = list[EntityDict]
         type ResultList = list[ResultDict]
@@ -211,13 +211,13 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
             """
 
             type ProjectType = c.ProjectType
-            type TapLdapProjectConfig = dict[str, dict[str, object]]
+            type TapLdapProjectConfig = dict[str, object]
             type LdapExtractionConfig = dict[str, str | int | bool | list[str]]
             type LdapIntegrationConfig = dict[
                 str,
                 bool | str | Mapping[str, Mapping[str, object]],
             ]
-            type TapLdapPipelineConfig = dict[str, dict[str, object]]
+            type TapLdapPipelineConfig = dict[str, object]
 
 
 t = FlextTapLdapTypes

@@ -162,7 +162,7 @@ class Entry:
             ldif_content += "\n"
             result: r[list[m.Ldif.Entry]] = api.parse(ldif_content)
             if result.is_success and result.value and (len(result.value) > 0):
-                parsed_entry = _to_ldif_entry(result.value[0])
+                parsed_entry = _to_ldif_entry(result.value[0].model_dump())
                 if parsed_entry is not None:
                     return parsed_entry
             return m.Ldif.Entry(
@@ -273,7 +273,7 @@ class FlextTapLdapProcessor:
                     self._raise_parse_error(error_msg)
             if result.value:
                 for flext_entry in result.value:
-                    parsed_entry = _to_ldif_entry(flext_entry)
+                    parsed_entry = _to_ldif_entry(flext_entry.model_dump())
                     if parsed_entry is None:
                         continue
                     yield self._convert_from_flext_entry(parsed_entry)
@@ -410,7 +410,7 @@ class FlextTapLdapProcessor:
         """Yield testing convenience entries from parse result."""
         if result.value:
             for flext_entry in result.value:
-                parsed_entry = _to_ldif_entry(flext_entry)
+                parsed_entry = _to_ldif_entry(flext_entry.model_dump())
                 if parsed_entry is None:
                     continue
                 yield self._convert_from_flext_entry(parsed_entry)
@@ -427,7 +427,7 @@ class Validator:
         self.warnings: list[str] = []
         self._api = FlextLdif()
 
-    def get_validation_results(self) -> Mapping[str, dict[str, object]]:
+    def get_validation_results(self) -> Mapping[str, object]:
         """Get validation results."""
         return {
             "errors": self.validation_errors.copy(),
@@ -435,7 +435,7 @@ class Validator:
             "is_valid": len(self.validation_errors) == 0,
         }
 
-    def validate_entries(self, entries: list[Entry]) -> Mapping[str, dict[str, object]]:
+    def validate_entries(self, entries: list[Entry]) -> Mapping[str, object]:
         """Validate a list of LDIF entries using flext-ldif."""
         valid_count = 0
         invalid_count = 0
@@ -488,7 +488,7 @@ class Transformer:
     @override
     def __init__(
         self,
-        transformation_rules: Mapping[str, dict[str, object]] | None = None,
+        transformation_rules: Mapping[str, object] | None = None,
     ) -> None:
         """Initialize transformer with optional transformation rules."""
         self.transformation_rules = dict(transformation_rules or {})
@@ -512,7 +512,7 @@ class Transformer:
     def apply_schema_mappings(
         self,
         entry: Entry,
-        schema_mappings: Mapping[str, dict[str, object]],
+        schema_mappings: Mapping[str, object],
     ) -> Entry:
         """Apply schema mappings to normalize output attributes."""
         transformed_entry = Entry(
