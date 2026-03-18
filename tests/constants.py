@@ -21,3 +21,7 @@ class TestsFlextTapLdapConstants(FlextTestsConstants):
 
         class Tests:
             """Internal tests declarations."""
+
+
+c = TestsFlextTapLdapConstants
+__all__ = ["TestsFlextTapLdapConstants", "c"]

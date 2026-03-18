@@ -13,15 +13,16 @@ import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
 from collections.abc import Mapping, Sequence
 
-from flext_core import FlextLogger, r, x
+from flext_core import FlextLogger, r
 from flext_ldap import (
     FlextLdap,
     FlextLdapConnection,
     FlextLdapOperations,
     FlextLdapSettings,
 )
+from pydantic import BaseModel
 
-from flext_tap_ldap import c, m, t, u
+from flext_tap_ldap import c, m, t
 from flext_tap_ldap.models import FlextTapLdapModels
 
 logger = FlextLogger(__name__)
@@ -48,14 +49,18 @@ class FlextTapLdapClient:
             config: FlextTapLdapClient.LDAPClientConfig | None = None,
             **convenience_kwargs: t.Scalar,
         ) -> None:
-            """Initialize with Parameter Object Pattern (preferred) or testing convenience interface.
+            """Initialize with Parameter Object Pattern (preferred).
 
             Preferred Usage (Parameter Object Pattern):
-                config = FlextTapLdapClient.LDAPClientConfig(host="ldap.example.com", port=389)
+                config = FlextTapLdapClient.LDAPClientConfig(
+                    host="ldap.example.com", port=389
+                )
                 client = FlextTapLdapClient.LDAPClient(config=config)
 
-            Testing convenience Usage (for testing convenience):
-                client = FlextTapLdapClient.LDAPClient(host="ldap.example.com", port=389)
+            Testing convenience Usage:
+                client = FlextTapLdapClient.LDAPClient(
+                    host="ldap.example.com", port=389
+                )
             """
             self._flext_api: FlextLdap
             self._config: m.Ldap.ConnectionConfig
@@ -66,7 +71,6 @@ class FlextTapLdapClient:
             self.use_ssl: bool
             self.timeout: int
             self.page_size: int
-            self.client: t.ContainerValue
             self._bind_dn: str | None
             self._password: str | None
             client_config = (
@@ -162,9 +166,10 @@ class FlextTapLdapClient:
                 return result.is_success
             except (RuntimeError, ValueError, TypeError) as e:
                 err_msg = str(e)
-                logger.warning("LDAP connection test failed: %s", err_msg)
+                logger.warning(f"LDAP connection test failed: {err_msg}")
                 logger.info(
-                    "LDAP connection test fallback - required for Singer streams in test/mock environments"
+                    "LDAP connection test fallback - required for Singer streams in "
+                    "test/mock environments"
                 )
                 return True
 
@@ -176,7 +181,9 @@ class FlextTapLdapClient:
             protocol = "ldaps" if self.use_ssl else "ldap"
             return f"{protocol}://{self.host}:{self.port}"
 
-        def _coerce_int(self, value: t.ContainerValue, default: int) -> int:
+        def _coerce_int(
+            self, value: t.ContainerValue | t.Scalar | None, default: int
+        ) -> int:
             """Coerce value to int using pattern matching for better type safety."""
             match value:
                 case int() as int_val:
@@ -194,7 +201,9 @@ class FlextTapLdapClient:
                 case _:
                     return default
 
-        def _coerce_str_opt(self, value: t.ContainerValue) -> str | None:
+        def _coerce_str_opt(
+            self, value: t.ContainerValue | t.Scalar | None
+        ) -> str | None:
             """Coerce value to optional string using pattern matching."""
             match value:
                 case str() as str_val if str_val:
@@ -203,28 +212,36 @@ class FlextTapLdapClient:
                     return None
 
         def _convert_entry_to_dict(
-            self, entry_data: t.ContainerValue | None
+            self,
+            entry_data: t.RuntimeData | None,
         ) -> dict[str, t.ContainerValue]:
-            """Convert FlextLdapModels.Entry to dict[str, t.ContainerValue] format for testing convenience.
+            """Convert FlextLdapModels.Entry to dict format for testing.
 
             Single Responsibility: Handle only entry format conversion.
             """
-            if x.is_base_model(entry_data):
+            if entry_data is None:
+                return {}
+            if isinstance(entry_data, BaseModel):
                 dn_value: str = str(getattr(entry_data, "dn", ""))
-                attributes: dict[str, t.ContainerValue] = getattr(
-                    entry_data, "attributes", {}
+                attrs_raw = getattr(entry_data, "attributes", {})
+                attributes: dict[str, t.ContainerValue] = (
+                    attrs_raw if isinstance(attrs_raw, dict) else {}
                 )
                 entry_dict: dict[str, t.ContainerValue] = {"dn": dn_value}
                 for attr_name, attr_values in attributes.items():
-                    if u.is_list(attr_values) and len(attr_values) == 1:
+                    if isinstance(attr_values, list) and len(attr_values) == 1:
                         entry_dict[attr_name] = attr_values[0]
                     else:
                         entry_dict[attr_name] = attr_values
                 return entry_dict
-            if entry_data:
-                if isinstance(entry_data, Mapping):
-                    return {str(key): value for key, value in entry_data.items()}
-                return {}
+            if isinstance(entry_data, Mapping):
+                result: dict[str, t.ContainerValue] = {}
+                for key, value in entry_data.items():
+                    if isinstance(
+                        value, (str, int, float, bool, list, dict, type(None))
+                    ):
+                        result[str(key)] = value
+                return result
             return {}
 
         def _convert_scope_to_enum(self, scope: str) -> str:
@@ -330,6 +347,8 @@ class FlextTapLdapClient:
                 bind_dn=flext_connection_config.bind_dn or "",
                 bind_password=flext_connection_config.bind_password or "",
                 timeout=flext_connection_config.timeout,
+                auto_bind=True,
+                auto_range=True,
             )
             connection = FlextLdapConnection(config=settings)
             operations = FlextLdapOperations(connection=connection)
@@ -379,7 +398,7 @@ class FlextTapLdapClient:
                 ImportError,
             ) as e:
                 err_msg = str(e)
-                logger.debug("LDAP search failed: %s", err_msg)
+                logger.debug(f"LDAP search failed: {err_msg}")
                 return []
 
         def _process_oracle_entry(
@@ -394,10 +413,12 @@ class FlextTapLdapClient:
                     for attr_name, attr_value in raw_attrs.items()
                 }
             if "orclPassword" in attributes:
-                attributes["userPassword"] = attributes.get("orclPassword")
+                pwd_val = attributes.get("orclPassword")
+                if pwd_val is not None:
+                    attributes["userPassword"] = pwd_val
             if "objectClass" in attributes:
                 raw_obj_classes = attributes["objectClass"]
-                obj_classes: list[str]
+                obj_classes: list[t.ContainerValue] = []
                 match raw_obj_classes:
                     case str() as single_class:
                         obj_classes = [single_class]
@@ -424,8 +445,6 @@ class FlextTapLdapClient:
             if not (result.is_success and result.value):
                 return entries
             search_result = result.value
-            if not isinstance(search_result, m.Ldap.SearchResult):
-                return entries
             data_entries: list[dict[str, list[str]]] = search_result.entries
             for entries_returned, entry_data in enumerate(data_entries):
                 if size_limit > 0 and entries_returned >= size_limit:
@@ -459,18 +478,10 @@ class FlextTapLdapClient:
             return results
 
 
-class LDAPConnectionConfig(m.Ldap.ConnectionConfig):
-    """LDAPConnectionConfig - real inheritance from FlextLdapModels.ConnectionConfig."""
-
-
-class LDAPEntry(m.Ldif.Entry):
-    """LDAPEntry - real inheritance from FlextLdapModels.Entry."""
-
-
-class LDAPClient(FlextTapLdapClient.LDAPClient):
-    """LDAPClient - real inheritance from FlextTapLdapClient.LDAPClient."""
-
-
+# --- Module-level aliases for backward compatibility ---
+LDAPConnectionConfig = m.Ldap.ConnectionConfig
+LDAPEntry = m.Ldif.Entry
+LDAPClient = FlextTapLdapClient.LDAPClient
 LDAPClientConfig = FlextTapLdapClient.LDAPClientConfig
 
 
