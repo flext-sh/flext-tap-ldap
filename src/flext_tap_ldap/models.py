@@ -314,7 +314,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
 
 # Runtime alias for simplified usage
-m: type[FlextTapLdapModels] = FlextTapLdapModels
+m = FlextTapLdapModels
 
 __all__ = [
     "FlextTapLdapModels",
