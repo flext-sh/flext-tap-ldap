@@ -22,8 +22,10 @@ _COUNTER_MAP_ADAPTER = TypeAdapter(
 )
 
 
-def _as_object_list(value: dict[str, object] | list[object]) -> list[dict[str, object]]:
+def _as_object_list(value: object) -> list[dict[str, object]]:
     try:
+        if not isinstance(value, (dict, list)):
+            return []
         result = _OBJECT_LIST_ADAPTER.validate_python(value)
         return [dict(item) if isinstance(item, Mapping) else item for item in result]
     except ValidationError:
