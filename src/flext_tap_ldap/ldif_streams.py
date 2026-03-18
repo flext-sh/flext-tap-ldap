@@ -58,7 +58,7 @@ class FlextTapLdapLdifStreams:
             self.name = "ldif_entries"
             self.tap_stream_id = "ldif_entries"
             self.tap = tap
-            self.config: dict[str, dict[str, object]] = getattr(tap, "config", {})
+            self.config: dict[str, object] = getattr(tap, "config", {})
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
             self._logger_instance: FlextLogger | None = None
@@ -91,7 +91,7 @@ class FlextTapLdapLdifStreams:
 
         def get_records(
             self,
-            context: Mapping[str, dict[str, object]] | None = None,
+            context: Mapping[str, object] | None = None,
         ) -> Iterator[dict[str, object]]:
             """Get LDIF records using flext-ldif processing."""
             _ = context
@@ -215,7 +215,7 @@ class FlextTapLdapLdifStreams:
             self.name = "ldif_analysis"
             self.tap_stream_id = "ldif_analysis"
             self.tap = tap
-            self.config: dict[str, dict[str, object]] = getattr(tap, "config", {})
+            self.config: dict[str, object] = getattr(tap, "config", {})
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
             self._logger_instance: p.Logger | None = None
@@ -250,7 +250,7 @@ class FlextTapLdapLdifStreams:
 
         def get_records(
             self,
-            context: Mapping[str, dict[str, object]] | None = None,
+            context: Mapping[str, object] | None = None,
         ) -> Iterator[dict[str, object]]:
             """Get analysis records using flext-ldif analysis capabilities."""
             _ = context
