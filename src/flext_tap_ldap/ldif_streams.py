@@ -4,15 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Iterator, Mapping
 from pathlib import Path
-from typing import ClassVar, override
+from typing import ClassVar
 
 from flext_core import FlextLogger, p, t
 from flext_ldap import FlextLdapConnection
 from flext_ldif import FlextLdif, m
-from flext_meltano import (
-    FlextMeltanoStream as Stream,
-    FlextMeltanoTapAbstractions as Tap,
-)
+from flext_meltano import FlextMeltanoTapAbstractions as Tap
 from pydantic import ConfigDict, TypeAdapter, ValidationError
 
 _OBJECT_LIST_ADAPTER = TypeAdapter(
@@ -45,21 +42,24 @@ class FlextTapLdapLdifStreams:
     Consolidates all LDIF stream functionality following FlextTapLdap[Module] pattern.
     """
 
-    class LdifStream(Stream):
-        """LDIF stream using flext-ldif for ALL processing."""
+    class LdifStream:
+        """LDIF stream using flext-ldif for ALL processing.
+
+        Implements FlextMeltanoProtocols.Singer.Stream protocol.
+        """
 
         primary_keys: ClassVar[list[str]] = ["dn"]
 
-        @override
         def __init__(self, tap: Tap) -> None:
             """Initialize LDIF stream with library delegation."""
             self.name = "ldif_entries"
-            self.path = "/ldif_entries"
+            self.tap_stream_id = "ldif_entries"
             self.tap = tap
+            self.config: dict[str, t.ContainerValue] = getattr(tap, "config", {})
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
-            self._logger_instance: p.Logger | None = None
-            schema: dict[str, t.ContainerValue] = {
+            self._logger_instance: FlextLogger | None = None
+            self.schema: Mapping[str, t.Container] = {
                 "type": "object",
                 "properties": {
                     "dn": {"type": "string", "description": "Distinguished Name"},
@@ -78,7 +78,6 @@ class FlextTapLdapLdifStreams:
                     },
                 },
             }
-            Stream.__init__(self, tap, name=self.name, schema=schema)
 
         @property
         def logger(self) -> FlextLogger:
@@ -200,21 +199,27 @@ class FlextTapLdapLdifStreams:
             ):
                 self.logger.exception("Error processing LDIF file %s", ldif_file)
 
-    class LdifAnalysisStream(Stream):
-        """LDIF analysis stream using flext-ldif for ALL analysis."""
+    class LdifAnalysisStream:
+        """LDIF analysis stream using flext-ldif for ALL analysis.
+
+        Implements FlextMeltanoProtocols.Singer.Stream protocol.
+        """
 
         primary_keys: ClassVar[list[str]] = ["analysis_id"]
+        schema: Mapping[str, t.Container]
+        name: str
+        tap_stream_id: str
 
-        @override
         def __init__(self, tap: Tap) -> None:
             """Initialize LDIF analysis stream with library delegation."""
             self.name = "ldif_analysis"
-            self.path = "/ldif_analysis"
+            self.tap_stream_id = "ldif_analysis"
             self.tap = tap
+            self.config: dict[str, t.ContainerValue] = getattr(tap, "config", {})
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
             self._logger_instance: p.Logger | None = None
-            schema: dict[str, t.ContainerValue] = {
+            self.schema: dict[str, t.ContainerValue] = {
                 "type": "object",
                 "properties": {
                     "analysis_id": {
@@ -235,7 +240,6 @@ class FlextTapLdapLdifStreams:
                     },
                 },
             }
-            Stream.__init__(self, tap, name=self.name, schema=schema)
 
         @property
         def logger(self) -> FlextLogger:
