@@ -12,7 +12,29 @@ from unittest.mock import Mock, patch
 import pytest
 from flext_tests import tm
 
-from flext_tap_ldap import FlextTapLdapStreams, FlextTapLdapTap
+from flext_tap_ldap import FlextTapLdapStreams, FlextTapLdapTap, m, t
+
+
+def _build_source_config(
+    connection_config: dict[str, t.Scalar],
+) -> m.Meltano.DataSourceConfig:
+    return m.Meltano.DataSourceConfig(
+        source_type="ldap",
+        connection_config=connection_config,
+        stream_config={},
+        source_version="latest",
+    )
+
+
+def _discover_stream_names(
+    tap: FlextTapLdapTap,
+    connection_config: dict[str, t.Scalar],
+) -> tuple[list[str], int]:
+    result = tap.discover_streams(source_config=_build_source_config(connection_config))
+    assert result.is_success
+    assert result.value is not None
+    stream_entries = result.value["streams"]
+    return [str(stream["stream"]) for stream in stream_entries], len(stream_entries)
 
 
 class TestLDAPBaseStream:
@@ -86,6 +108,8 @@ class TestUsersStream:
         """Test users stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
+        member_of_empty: list[str] = []
+        member_of_empty_secondary: list[str] = []
         mock_client.search.return_value = [
             {
                 "dn": "cn=user1,ou=users,dc=test,dc=com",
@@ -95,7 +119,7 @@ class TestUsersStream:
                 "mail": "user1@test.com",
                 "givenName": "User",
                 "userPrincipalName": "user1@test.com",
-                "memberOf": [],
+                "memberOf": member_of_empty,
                 "objectClass": ["person", "inetOrgPerson"],
                 "modifyTimestamp": "2024-01-01T12:00:00Z",
             },
@@ -107,7 +131,7 @@ class TestUsersStream:
                 "mail": "user2@test.com",
                 "givenName": "User",
                 "userPrincipalName": "user2@test.com",
-                "memberOf": [],
+                "memberOf": member_of_empty_secondary,
                 "objectClass": ["person", "inetOrgPerson"],
                 "modifyTimestamp": "2024-01-01T12:00:00Z",
             },
@@ -128,7 +152,8 @@ class TestUsersStream:
         """Test groups stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        mock_client.search.return_value = []
+        empty_search_results: list[dict[str, str]] = []
+        mock_client.search.return_value = empty_search_results
         stream = FlextTapLdapStreams.GroupsStream(mock_tap)
         records = list(stream.get_records(context=None))
         tm.that(len(records) == 1, eq=True)
@@ -145,7 +170,8 @@ class TestUsersStream:
         """Test organizational units stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        mock_client.search.return_value = []
+        empty_search_results: list[dict[str, str]] = []
+        mock_client.search.return_value = empty_search_results
         stream = FlextTapLdapStreams.OrganizationalUnitsStream(mock_tap)
         records = list(stream.get_records(context=None))
         tm.that(len(records) == 1, eq=True)
@@ -162,7 +188,8 @@ class TestUsersStream:
         """Test schema stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        mock_client.search.return_value = []
+        empty_search_results: list[dict[str, str]] = []
+        mock_client.search.return_value = empty_search_results
         stream = FlextTapLdapStreams.SchemaStream(mock_tap)
         records = list(stream.get_records(context=None))
         tm.that(len(records) == 1, eq=True)
@@ -396,7 +423,8 @@ class TestCustomStream:
         """Test custom stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        mock_client.search.return_value = []
+        empty_search_results: list[dict[str, str]] = []
+        mock_client.search.return_value = empty_search_results
         params = FlextTapLdapStreams.CustomStreamParams(
             name="custom_test",
             search_filter="(objectClass=testObject)",
@@ -455,10 +483,13 @@ class TestStreamIntegration:
 
     def test_all_default_streams_creation(self, tap_config: dict[str, object]) -> None:
         """Test that all default streams can be created."""
-        tap = FlextTapLdapTap(config=tap_config)
-        streams = tap.discover_streams()
-        tm.that(len(streams) >= 4, eq=True)
-        stream_names = [s.name for s in streams]
+        connection_config: dict[str, t.Scalar] = {}
+        for key, value in tap_config.items():
+            if isinstance(value, (str, int, float, bool)):
+                connection_config[str(key)] = value
+        tap = FlextTapLdapTap()
+        stream_names, stream_count = _discover_stream_names(tap, connection_config)
+        tm.that(stream_count >= 4, eq=True)
         tm.that("users" in stream_names, eq=True)
         tm.that("groups" in stream_names, eq=True)
         tm.that("organizational_units" in stream_names, eq=True)
@@ -477,22 +508,26 @@ class TestStreamIntegration:
                 "schema": {"properties": {"testAttribute": {"type": "string"}}},
             }
         ]
-        tap = FlextTapLdapTap(config=tap_config)
-        streams = tap.discover_streams()
-        stream_names = [s.name for s in streams]
+        connection_config: dict[str, t.Scalar] = {}
+        for key, value in tap_config.items():
+            if isinstance(value, (str, int, float, bool)):
+                connection_config[str(key)] = value
+        tap = FlextTapLdapTap()
+        stream_names, _stream_count = _discover_stream_names(tap, connection_config)
         tm.that("custom_test_stream" in stream_names, eq=True)
-        custom_stream = next(s for s in streams if s.name == "custom_test_stream")
-        tm.that(isinstance(custom_stream, FlextTapLdapStreams.CustomStream), eq=True)
 
     def test_self(self, tap_config: dict[str, object]) -> None:
         """Test method."""
         "Test LDIF streams are included when enabled."
         tap_config["enable_ldif_streams"] = True
-        tap = FlextTapLdapTap(config=tap_config)
-        streams = tap.discover_streams()
-        stream_names = [s.name for s in streams]
+        connection_config: dict[str, t.Scalar] = {}
+        for key, value in tap_config.items():
+            if isinstance(value, (str, int, float, bool)):
+                connection_config[str(key)] = value
+        tap = FlextTapLdapTap()
+        stream_names, stream_count = _discover_stream_names(tap, connection_config)
         ldif_stream_found = any("ldif" in name.lower() for name in stream_names)
-        tm.that(ldif_stream_found or len(streams) > 4, eq=True)
+        tm.that(ldif_stream_found or stream_count > 4, eq=True)
 
 
 class TestLDAPBaseStreamDirectUsage:

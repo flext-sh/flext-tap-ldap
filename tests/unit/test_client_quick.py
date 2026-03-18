@@ -58,10 +58,11 @@ class TestLDAPClientQuick:
         """Test entry conversion with different scenarios."""
         mock_entry = Mock()
         mock_entry.dn = "uid=test,dc=example,dc=com"
+        empty_attributes: list[str] = []
         mock_entry.attributes = {
             "uid": ["test"],
             "cn": ["Test", "T. User"],
-            "empty": [],
+            "empty": empty_attributes,
         }
         result = client._convert_entry_to_dict(mock_entry)
         tm.that(result["dn"] == "uid=test,dc=example,dc=com", eq=True)
@@ -221,6 +222,7 @@ class TestLDAPClientQuick:
             base_attrs, oracle_oid_mode=True
         )
         tm.that(extended is not None, eq=True)
+        assert extended is not None
         tm.that("uid" in extended, eq=True)
         tm.that("cn" in extended, eq=True)
         tm.that("orclPassword" in extended, eq=True)

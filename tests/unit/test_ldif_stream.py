@@ -25,15 +25,7 @@ class TestLDIFStreamBasic:
         """Test method."""
         "Test LDIF stream can be created."
         try:
-            tap = FlextTapLdapTap(
-                config={
-                    "ldap_host": "test.ldap.com",
-                    "ldap_port": 389,
-                    "base_dn": "dc=test,dc=com",
-                    "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-                    "bind_password": "test_password",
-                }
-            )
+            tap = FlextTapLdapTap()
             stream = FlextTapLdapLdifStreams.LdifStream(tap=tap)
             tm.that(stream is not None, eq=True)
         except (TypeError, AttributeError, ImportError):

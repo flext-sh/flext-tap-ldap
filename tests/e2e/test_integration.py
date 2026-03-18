@@ -9,11 +9,12 @@ from __future__ import annotations
 
 import json
 import time
-from collections.abc import Generator
+from collections.abc import Generator, Mapping
 from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
+from click.core import BaseCommand
 from click.testing import CliRunner
 
 from flext_tap_ldap import CLI_COMMAND, t
@@ -21,6 +22,11 @@ from flext_tap_ldap import CLI_COMMAND, t
 
 class TestFlextTapLdapIntegration:
     """Integration tests for tap-ldap."""
+
+    @staticmethod
+    def _cli_command() -> BaseCommand:
+        assert isinstance(CLI_COMMAND, BaseCommand)
+        return CLI_COMMAND
 
     @pytest.fixture
     def runner(self) -> CliRunner:
@@ -86,9 +92,10 @@ class TestFlextTapLdapIntegration:
     ) -> None:
         """Test discovery mode functionality."""
         mock_client_instance = mock_ldap_client.return_value
-        mock_client_instance.search.return_value.__aenter__.return_value = []
+        empty_records: list[dict[str, t.Scalar | Mapping[str, t.Scalar]]] = []
+        mock_client_instance.search.return_value.__aenter__.return_value = empty_records
         result = runner.invoke(
-            CLI_COMMAND,
+            self._cli_command(),
             ["--config", str(config_file), "--discover"],
             catch_exceptions=False,
         )
@@ -126,7 +133,7 @@ class TestFlextTapLdapIntegration:
             }
         ]
         result = runner.invoke(
-            CLI_COMMAND,
+            self._cli_command(),
             ["--config", str(config_file), "--catalog", str(catalog_file)],
             catch_exceptions=False,
         )
@@ -151,9 +158,10 @@ class TestFlextTapLdapIntegration:
     ) -> None:
         """Test incremental sync functionality."""
         mock_client_instance = mock_ldap_client.return_value
-        mock_client_instance.search.return_value.__aenter__.return_value = []
+        empty_records: list[dict[str, t.Scalar | Mapping[str, t.Scalar]]] = []
+        mock_client_instance.search.return_value.__aenter__.return_value = empty_records
         result = runner.invoke(
-            CLI_COMMAND,
+            self._cli_command(),
             [
                 "--config",
                 str(config_file),
@@ -201,9 +209,12 @@ class TestFlextTapLdapIntegration:
             json.dump(config, f)
         with patch("flext_tap_ldap.client.LDAPClient") as mock_ldap_client:
             mock_client_instance = mock_ldap_client.return_value
-            mock_client_instance.search.return_value.__aenter__.return_value = []
+            empty_records: list[dict[str, t.Scalar | Mapping[str, t.Scalar]]] = []
+            mock_client_instance.search.return_value.__aenter__.return_value = (
+                empty_records
+            )
             result = runner.invoke(
-                CLI_COMMAND,
+                self._cli_command(),
                 ["--config", str(config_file), "--discover"],
                 catch_exceptions=False,
             )
@@ -225,7 +236,7 @@ class TestFlextTapLdapIntegration:
         with Path(config_file).open("w", encoding="utf-8") as f:
             json.dump({"invalid": "config"}, f)
         result = runner.invoke(
-            CLI_COMMAND, ["--config", str(config_file), "--discover"]
+            self._cli_command(), ["--config", str(config_file), "--discover"]
         )
         all_logs = " ".join(record.message for record in caplog.records)
         all_output = (
@@ -251,7 +262,10 @@ class TestFlextTapLdapIntegration:
         """Test pagination handling functionality."""
         mock_client_instance = mock_ldap_client.return_value
 
-        def mock_search(*_args, **_kwargs: t.Scalar) -> Generator[dict[str, object]]:
+        def mock_search(
+            *_args: t.Scalar,
+            **_kwargs: t.Scalar,
+        ) -> Generator[dict[str, t.Scalar | Mapping[str, t.Scalar]]]:
             time.sleep(0)
             yield {
                 "dn": "uid=user1,ou=users,dc=test,dc=com",
@@ -264,7 +278,7 @@ class TestFlextTapLdapIntegration:
 
         mock_client_instance.search = mock_search
         result = runner.invoke(
-            CLI_COMMAND,
+            self._cli_command(),
             ["--config", str(config_file), "--catalog", str(catalog_file)],
             catch_exceptions=False,
         )
