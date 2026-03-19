@@ -6,14 +6,14 @@ from collections.abc import Iterable, Iterator, Mapping
 from pathlib import Path
 from typing import ClassVar
 
-from flext_core import FlextLogger, p
+from flext_core import FlextLogger, p, t
 from flext_ldap import FlextLdapConnection
 from flext_ldif import FlextLdif, m
 from flext_meltano import FlextMeltanoTapAbstractions as Tap
 from pydantic import ConfigDict, TypeAdapter, ValidationError
 
 _OBJECT_LIST_ADAPTER = TypeAdapter(
-    list[Mapping[str, object]],
+    list[Mapping[str, t.ContainerValue]],
     config=ConfigDict(strict=False),
 )
 _COUNTER_MAP_ADAPTER = TypeAdapter(
@@ -22,7 +22,7 @@ _COUNTER_MAP_ADAPTER = TypeAdapter(
 )
 
 
-def _as_object_list(value: object) -> list[dict[str, object]]:
+def _as_object_list(value: t.ContainerValue) -> list[dict[str, t.ContainerValue]]:
     try:
         if not isinstance(value, (dict, list)):
             return []
@@ -60,7 +60,7 @@ class FlextTapLdapLdifStreams:
             self.name = "ldif_entries"
             self.tap_stream_id = "ldif_entries"
             self.tap = tap
-            self.config: dict[str, object] = getattr(tap, "config", {})
+            self.config: dict[str, t.ContainerValue] = getattr(tap, "config", {})
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
             self._logger_instance: FlextLogger | None = None
@@ -155,7 +155,7 @@ class FlextTapLdapLdifStreams:
 
         def _normalize_object_classes(
             self,
-            object_classes: dict[str, object],
+            object_classes: dict[str, t.ContainerValue],
         ) -> list[str]:
             if isinstance(object_classes, str):
                 return [object_classes]
@@ -217,7 +217,7 @@ class FlextTapLdapLdifStreams:
             self.name = "ldif_analysis"
             self.tap_stream_id = "ldif_analysis"
             self.tap = tap
-            self.config: dict[str, object] = getattr(tap, "config", {})
+            self.config: dict[str, t.ContainerValue] = getattr(tap, "config", {})
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
             self._logger_instance: p.Logger | None = None

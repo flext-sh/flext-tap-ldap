@@ -13,7 +13,7 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from typing import ClassVar, override
 
-from flext_core import FlextLogger
+from flext_core import FlextLogger, t
 from flext_meltano import FlextMeltanoTapAbstractions as Tap
 from pydantic import ValidationError
 
@@ -24,7 +24,7 @@ from flext_tap_ldap.typings import FlextTapLdapTypes
 logger = FlextLogger(__name__)
 
 
-def _coerce_positive_int(raw_value: object, default: int) -> int:
+def _coerce_positive_int(raw_value: t.ContainerValue, default: int) -> int:
     """Coerce value to positive integer with safe fallback."""
     try:
         parsed = int(str(raw_value))
@@ -33,7 +33,7 @@ def _coerce_positive_int(raw_value: object, default: int) -> int:
     return parsed if parsed > 0 else default
 
 
-def _coerce_optional_string(raw_value: object | None) -> str | None:
+def _coerce_optional_string(raw_value: t.ContainerValue | None) -> str | None:
     """Coerce value to string only when source is already string-like."""
     if raw_value is None:
         return None
@@ -45,7 +45,7 @@ def _coerce_optional_string(raw_value: object | None) -> str | None:
 
 
 def _parse_connection_config(
-    raw_value: object,
+    raw_value: t.ContainerValue,
 ) -> FlextTapLdapModels.TapLdap.LdapConnectionConfig:
     """Validate LDAP connection payload through Pydantic."""
     try:
@@ -70,7 +70,7 @@ def _parse_connection_config(
 
 
 def _parse_property_definition(
-    raw_value: object,
+    raw_value: t.ContainerValue,
 ) -> FlextTapLdapModels.TapLdap.CustomPropertyDefinition:
     """Validate custom stream property definition through Pydantic."""
     try:
@@ -624,7 +624,7 @@ class FlextTapLdapStreams:
 
             def _map_prop(
                 name: str,
-                definition: object,
+                definition: t.ContainerValue,
             ) -> dict[str, object]:
                 parsed_definition = _parse_property_definition(definition)
                 prop_type = parsed_definition.type

@@ -26,14 +26,14 @@ from flext_tap_ldap.typings import FlextTapLdapTypes
 logger = FlextLogger(__name__)
 
 
-def _as_map(value: object) -> Mapping[str, object] | None:
+def _as_map(value: t.ContainerValue) -> Mapping[str, t.ContainerValue] | None:
     try:
         return FlextTapLdapTypes.CONFIG_MAP_ADAPTER.validate_python(value)
     except ValidationError:
         return None
 
 
-def _as_str(value: object) -> str | None:
+def _as_str(value: t.ContainerValue) -> str | None:
     try:
         return FlextTapLdapTypes.STRICT_STR_ADAPTER.validate_python(value)
     except ValidationError:

@@ -231,8 +231,8 @@ class FlextTapLdapClient:
                 return {}
             if isinstance(entry_data, BaseModel):
                 dn_value: str = str(getattr(entry_data, "dn", ""))
-                attrs_raw: object = getattr(entry_data, "attributes", {})
-                if not isinstance(attrs_raw, dict):
+                attrs_raw = getattr(entry_data, "attributes", {})
+                if not isinstance(attrs_raw, Mapping):
                     return {"dn": dn_value}
                 entry_dict: dict[str, object] = {"dn": dn_value}
                 for key, val in attrs_raw.items():
