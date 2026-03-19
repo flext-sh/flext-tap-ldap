@@ -18,12 +18,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
-    from flext_ldap.decorators import d
-    from flext_ldap.exceptions import e
-    from flext_ldap.handlers import h
-    from flext_ldap.mixins import x
-    from flext_ldap.result import r
-    from flext_ldap.service import s
+    from flext_ldap import d, e, h, r, s, x
 
     from flext_tap_ldap.__version__ import (
         __all__,
@@ -98,18 +93,18 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "__version__": ("flext_tap_ldap.__version__", "__version__"),
     "__version_info__": ("flext_tap_ldap.__version__", "__version_info__"),
     "c": ("flext_tap_ldap.constants", "c"),
-    "d": ("flext_ldap.decorators", "d"),
-    "e": ("flext_ldap.exceptions", "e"),
-    "h": ("flext_ldap.handlers", "h"),
+    "d": ("flext_ldap", "d"),
+    "e": ("flext_ldap", "e"),
+    "h": ("flext_ldap", "h"),
     "logger": ("flext_tap_ldap.tap", "logger"),
     "m": ("flext_tap_ldap.models", "m"),
     "main": ("flext_tap_ldap.tap", "main"),
     "p": ("flext_tap_ldap.protocols", "p"),
-    "r": ("flext_ldap.result", "r"),
-    "s": ("flext_ldap.service", "s"),
+    "r": ("flext_ldap", "r"),
+    "s": ("flext_ldap", "s"),
     "t": ("flext_tap_ldap.typings", "t"),
     "u": ("flext_tap_ldap.utilities", "u"),
-    "x": ("flext_ldap.mixins", "x"),
+    "x": ("flext_ldap", "x"),
 }
 
 __all__ = [

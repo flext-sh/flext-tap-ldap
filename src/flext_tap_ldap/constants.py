@@ -27,18 +27,14 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
         """Tap LDAP namespace for cross-project access."""
 
         DEFAULT_PORT: Final[int] = 389
-        DEFAULT_SSL_PORT: Final[int] = 636
-        DEFAULT_PAGE_SIZE: Final[int] = 1000
-        MAX_LDAP_FILTER_LENGTH: Final[int] = 2048
+        DEFAULT_PAGE_SIZE: Final[int] = FlextMeltanoConstants.DEFAULT_BATCH_SIZE
         DEFAULT_SEARCH_TIMEOUT: Final[int] = FlextLdapConstants.Network.DEFAULT_TIMEOUT
 
         class Ldap:
             """LDAP connection constants."""
 
             DEFAULT_PORT: Final[int] = FlextLdapConstants.Ldap.ConnectionDefaults.PORT
-            DEFAULT_SSL_PORT: Final[int] = 636
-            DEFAULT_PAGE_SIZE: Final[int] = 1000
-            MAX_FILTER_LENGTH: Final[int] = 2048
+            DEFAULT_PAGE_SIZE: Final[int] = FlextMeltanoConstants.DEFAULT_BATCH_SIZE
             DEFAULT_TIMEOUT: Final[int] = (
                 FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
             )
@@ -69,42 +65,25 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
                 FULL_TABLE = "FULL_TABLE"
                 INCREMENTAL = "INCREMENTAL"
 
-            DEFAULT_METHOD: Final[str] = Method.INCREMENTAL
-
         class TapValidation:
             """LDAP tap validation constants.
 
             Note: Does not override parent Validation class to avoid inheritance conflicts.
             """
 
-            MIN_BATCH_SIZE: Final[int] = 1
-            MAX_TIMEOUT: Final[int] = (
-                FlextMeltanoConstants.Performance.MAX_TIMEOUT_SECONDS
-            )
-            MAX_DN_LENGTH: Final[int] = 1024
             MAX_ATTRIBUTE_NAME_LENGTH: Final[int] = 255
-            MAX_BASE_DN_LENGTH: Final[int] = 512
-            MAX_STREAM_PREFIX_LENGTH: Final[int] = 50
-            MAX_FILTER_COUNT: Final[int] = 100
-            MAX_ATTRIBUTE_COUNT: Final[int] = 500
 
         class Connection:
             """LDAP tap connection configuration."""
 
             DEFAULT_HOST: Final[str] = FlextLdapConstants.Network.LOCALHOST
             DEFAULT_PORT: Final[int] = 389
-            DEFAULT_SSL_PORT: Final[int] = 636
             DEFAULT_BASE_DN: Final[str] = ""
-            DEFAULT_BIND_DN: Final[str] = ""
-            DEFAULT_BIND_PASSWORD: Final[str] = ""
 
         class Search:
             """LDAP search configuration."""
 
             DEFAULT_SCOPE: Final[str] = "SUBTREE"
-            DEFAULT_DEREF: Final[str] = "ALWAYS"
-            DEFAULT_SIZE_LIMIT: Final[int] = 0
-            DEFAULT_TIME_LIMIT: Final[int] = 0
 
         type ReplicationMethodLiteral = Literal[
             Replication.Method.FULL_TABLE,

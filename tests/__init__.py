@@ -12,12 +12,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
 
-    from flext_tap_ldap.decorators import d
-    from flext_tap_ldap.exceptions import e
-    from flext_tap_ldap.handlers import h
-    from flext_tap_ldap.mixins import x
-    from flext_tap_ldap.result import r
-    from flext_tap_ldap.service import s
+    from flext_tap_ldap import d, e, h, r, s, x
 
     from . import e2e as e2e, unit as unit
     from .conftest import (
@@ -121,10 +116,10 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TestsFlextTapLdapUtilities": ("tests.utilities", "TestsFlextTapLdapUtilities"),
     "c": ("tests.constants", "c"),
     "catalog_file": ("tests.e2e.conftest", "catalog_file"),
-    "d": ("flext_tap_ldap.decorators", "d"),
-    "e": ("flext_tap_ldap.exceptions", "e"),
+    "d": ("flext_tap_ldap", "d"),
+    "e": ("flext_tap_ldap", "e"),
     "e2e": ("tests.e2e", ""),
-    "h": ("flext_tap_ldap.handlers", "h"),
+    "h": ("flext_tap_ldap", "h"),
     "ldap_connection": ("tests.e2e.conftest", "ldap_connection"),
     "ldap_container": ("tests.e2e.conftest", "ldap_container"),
     "logger": ("tests.e2e.conftest", "logger"),
@@ -132,8 +127,8 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "p": ("tests.protocols", "p"),
     "project_root": ("tests.conftest", "project_root"),
     "pytest_configure": ("tests.conftest", "pytest_configure"),
-    "r": ("flext_tap_ldap.result", "r"),
-    "s": ("flext_tap_ldap.service", "s"),
+    "r": ("flext_tap_ldap", "r"),
+    "s": ("flext_tap_ldap", "s"),
     "sample_catalog": ("tests.e2e.conftest", "sample_catalog"),
     "shared_ldap_container": ("tests.conftest", "shared_ldap_container"),
     "t": ("tests.typings", "t"),
@@ -141,7 +136,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "test_data_dir": ("tests.conftest", "test_data_dir"),
     "u": ("tests.utilities", "u"),
     "unit": ("tests.unit", ""),
-    "x": ("flext_tap_ldap.mixins", "x"),
+    "x": ("flext_tap_ldap", "x"),
 }
 
 __all__ = [
