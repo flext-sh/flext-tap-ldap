@@ -30,7 +30,7 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
         DEFAULT_SSL_PORT: Final[int] = 636
         DEFAULT_PAGE_SIZE: Final[int] = 1000
         MAX_LDAP_FILTER_LENGTH: Final[int] = 2048
-        DEFAULT_SEARCH_TIMEOUT: Final[int] = 30
+        DEFAULT_SEARCH_TIMEOUT: Final[int] = FlextLdapConstants.Network.DEFAULT_TIMEOUT
 
         class Ldap:
             """LDAP connection constants."""
@@ -91,7 +91,7 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
         class Connection:
             """LDAP tap connection configuration."""
 
-            DEFAULT_HOST: Final[str] = "localhost"
+            DEFAULT_HOST: Final[str] = FlextLdapConstants.Network.LOCALHOST
             DEFAULT_PORT: Final[int] = 389
             DEFAULT_SSL_PORT: Final[int] = 636
             DEFAULT_BASE_DN: Final[str] = ""
