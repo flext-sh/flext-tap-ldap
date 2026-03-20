@@ -28,7 +28,7 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
 
         DEFAULT_PORT: Final[int] = 389
         DEFAULT_PAGE_SIZE: Final[int] = FlextMeltanoConstants.DEFAULT_BATCH_SIZE
-        DEFAULT_SEARCH_TIMEOUT: Final[int] = FlextLdapConstants.Network.DEFAULT_TIMEOUT
+        DEFAULT_SEARCH_TIMEOUT: Final[int] = FlextLdapConstants.DEFAULT_TIMEOUT_SECONDS
 
         class Ldap:
             """LDAP connection constants."""
