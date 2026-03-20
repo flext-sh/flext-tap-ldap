@@ -12,7 +12,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
 
-    from flext_tap_ldap import d, e, h, r, s, x
+    from flext_tap_ldap import c, d, e, h, m, p, r, s, t, u, x
 
     from . import e2e as e2e, unit as unit
     from .conftest import (
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
         shared_ldap_container,
         test_data_dir,
     )
-    from .constants import TestsFlextTapLdapConstants, c
+    from .constants import TestsFlextTapLdapConstants
     from .e2e.conftest import (
         catalog_file,
         ldap_connection,
@@ -31,9 +31,9 @@ if TYPE_CHECKING:
         tap_config_file,
     )
     from .e2e.test_integration import TestFlextTapLdapIntegration
-    from .models import TestsFlextTapLdapModels, m
-    from .protocols import TestsFlextTapLdapProtocols, p
-    from .typings import TestsFlextTapLdapTypes, t
+    from .models import TestsFlextTapLdapModels
+    from .protocols import TestsFlextTapLdapProtocols
+    from .typings import TestsFlextTapLdapTypes
     from .unit.test_client import TestLDAPClientCoverageBoost
     from .unit.test_client_quick import TestLDAPClientQuick
     from .unit.test_ldif_processor import TestLdifProcessor
@@ -58,7 +58,7 @@ if TYPE_CHECKING:
         TestUsersStream,
     )
     from .unit.test_tap import TestFlextTapLdapTapUnit
-    from .utilities import TestsFlextTapLdapUtilities, u
+    from .utilities import TestsFlextTapLdapUtilities
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TestConnectionTestedEvent": (
@@ -114,7 +114,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TestsFlextTapLdapProtocols": ("tests.protocols", "TestsFlextTapLdapProtocols"),
     "TestsFlextTapLdapTypes": ("tests.typings", "TestsFlextTapLdapTypes"),
     "TestsFlextTapLdapUtilities": ("tests.utilities", "TestsFlextTapLdapUtilities"),
-    "c": ("tests.constants", "c"),
+    "c": ("flext_tap_ldap", "c"),
     "catalog_file": ("tests.e2e.conftest", "catalog_file"),
     "d": ("flext_tap_ldap", "d"),
     "e": ("flext_tap_ldap", "e"),
@@ -123,18 +123,18 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "ldap_connection": ("tests.e2e.conftest", "ldap_connection"),
     "ldap_container": ("tests.e2e.conftest", "ldap_container"),
     "logger": ("tests.e2e.conftest", "logger"),
-    "m": ("tests.models", "m"),
-    "p": ("tests.protocols", "p"),
+    "m": ("flext_tap_ldap", "m"),
+    "p": ("flext_tap_ldap", "p"),
     "project_root": ("tests.conftest", "project_root"),
     "pytest_configure": ("tests.conftest", "pytest_configure"),
     "r": ("flext_tap_ldap", "r"),
     "s": ("flext_tap_ldap", "s"),
     "sample_catalog": ("tests.e2e.conftest", "sample_catalog"),
     "shared_ldap_container": ("tests.conftest", "shared_ldap_container"),
-    "t": ("tests.typings", "t"),
+    "t": ("flext_tap_ldap", "t"),
     "tap_config_file": ("tests.e2e.conftest", "tap_config_file"),
     "test_data_dir": ("tests.conftest", "test_data_dir"),
-    "u": ("tests.utilities", "u"),
+    "u": ("flext_tap_ldap", "u"),
     "unit": ("tests.unit", ""),
     "x": ("flext_tap_ldap", "x"),
 }
