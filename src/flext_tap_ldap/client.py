@@ -223,7 +223,7 @@ class FlextTapLdapClient:
 
         def _convert_entry_to_dict(
             self,
-            entry_data: t.RuntimeData | None,
+            entry_data: t.RuntimeData | dict[str, object] | None,
         ) -> dict[str, object]:
             """Convert FlextLdapModels.Entry to dict format for testing.
 
@@ -233,12 +233,15 @@ class FlextTapLdapClient:
                 return {}
             if isinstance(entry_data, BaseModel):
                 dn_value: str = str(getattr(entry_data, "dn", ""))
-                attrs_raw = getattr(entry_data, "attributes", {})
-                if not isinstance(attrs_raw, Mapping):
+                model_data: dict[str, object] = dict(entry_data.model_dump())
+                attrs_val: object = model_data.get("attributes", {})
+                attrs_dict: dict[str, object]
+                if isinstance(attrs_val, dict):
+                    attrs_dict = dict(attrs_val)
+                else:
                     return {"dn": dn_value}
                 entry_dict: dict[str, object] = {"dn": dn_value}
-                for key, val in attrs_raw.items():
-                    key_str = str(key)
+                for key_str, val in attrs_dict.items():
                     if isinstance(val, list) and len(val) == 1:
                         entry_dict[key_str] = val[0]
                     else:
@@ -359,16 +362,16 @@ class FlextTapLdapClient:
                 bind_password=client_config.password,
                 timeout=int(client_config.timeout),
             )
-            settings = FlextLdapSettings(
-                host=flext_connection_config.host,
-                port=flext_connection_config.port,
-                use_ssl=flext_connection_config.use_ssl,
-                bind_dn=flext_connection_config.bind_dn or "",
-                bind_password=flext_connection_config.bind_password or "",
-                timeout=flext_connection_config.timeout,
-                auto_bind=True,
-                auto_range=True,
-            )
+            settings = FlextLdapSettings.model_validate({
+                "host": flext_connection_config.host,
+                "port": flext_connection_config.port,
+                "use_ssl": flext_connection_config.use_ssl,
+                "bind_dn": flext_connection_config.bind_dn or "",
+                "bind_password": flext_connection_config.bind_password or "",
+                "timeout": flext_connection_config.timeout,
+                "auto_bind": True,
+                "auto_range": True,
+            })
             connection = FlextLdapConnection(config=settings)
             operations = FlextLdapOperations(connection=connection)
             self._flext_api = FlextLdap(connection=connection, operations=operations)
@@ -425,11 +428,10 @@ class FlextTapLdapClient:
             entry: dict[str, object],
         ) -> dict[str, object]:
             """Process Oracle-specific LDAP entries for testing convenience."""
-            raw_attrs = entry.get("attributes", {})
+            raw_attrs: object = entry.get("attributes", {})
             attributes: dict[str, object] = {}
-            if isinstance(raw_attrs, Mapping):
-                for attr_name, attr_value in raw_attrs.items():
-                    attributes[str(attr_name)] = attr_value
+            if isinstance(raw_attrs, dict):
+                attributes.update({str(k): v for k, v in raw_attrs.items()})
             else:
                 return entry
             if "orclPassword" in attributes:
@@ -465,7 +467,7 @@ class FlextTapLdapClient:
             if not (result.is_success and result.value):
                 return entries
             search_result = result.value
-            data_entries: list[dict[str, list[str]]] = search_result.entries
+            data_entries = search_result.entries
             for entries_returned, entry_data in enumerate(data_entries):
                 if size_limit > 0 and entries_returned >= size_limit:
                     break

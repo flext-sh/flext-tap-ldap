@@ -18,7 +18,10 @@ from typing import override
 from flext_core import FlextLogger, r
 from flext_ldap.models import FlextLdapModels as m
 from flext_ldif import FlextLdif
+from flext_ldif._models.metadata import FlextLdifModelsMetadata
 from pydantic import TypeAdapter, ValidationError
+
+_DEFAULT_ENTRY_METADATA = FlextLdifModelsMetadata.EntryMetadata()
 
 
 class FlextLdifDistinguishedName(m.Ldif.DN):
@@ -112,7 +115,9 @@ class Entry:
     def parse_dn(self) -> Mapping[str, object]:
         """Parse DN into components using flext-ldif DN parsing."""
         try:
-            dn_obj = FlextLdifDistinguishedName(value=self.dn)
+            dn_obj = FlextLdifDistinguishedName(
+                value=self.dn, metadata=_DEFAULT_ENTRY_METADATA
+            )
             return {"dn": self.dn, "components": dn_obj.value}
         except (
             ValueError,
@@ -165,8 +170,17 @@ class Entry:
                 if parsed_entry is not None:
                     return parsed_entry
             return m.Ldif.Entry(
-                dn=FlextLdifDistinguishedName(value=self.dn),
-                attributes=m.Ldif.Attributes(attributes=self.attributes),
+                dn=FlextLdifDistinguishedName(
+                    value=self.dn, metadata=_DEFAULT_ENTRY_METADATA
+                ),
+                attributes=m.Ldif.Attributes(
+                    attributes=self.attributes,
+                    attribute_metadata={},
+                    metadata=_DEFAULT_ENTRY_METADATA,
+                ),
+                changetype=None,
+                metadata=None,
+                validation_metadata=None,
                 domain_events=[],
             )
         except (
@@ -179,8 +193,17 @@ class Entry:
             ImportError,
         ):
             return m.Ldif.Entry(
-                dn=FlextLdifDistinguishedName(value=self.dn),
-                attributes=m.Ldif.Attributes(attributes=self.attributes),
+                dn=FlextLdifDistinguishedName(
+                    value=self.dn, metadata=_DEFAULT_ENTRY_METADATA
+                ),
+                attributes=m.Ldif.Attributes(
+                    attributes=self.attributes,
+                    attribute_metadata={},
+                    metadata=_DEFAULT_ENTRY_METADATA,
+                ),
+                changetype=None,
+                metadata=None,
+                validation_metadata=None,
                 domain_events=[],
             )
 
@@ -520,16 +543,20 @@ class Transformer:
         )
         transformed_entry.change_type = entry.change_type
         transformed_entry.controls = entry.controls.copy()
-        for target_attr, mapping in schema_mappings.items():
+        for target_attr_key, mapping in schema_mappings.items():
+            target_attr: str = str(target_attr_key)
             source_attr: str | None = None
             default_values: list[str] | None = None
             if isinstance(mapping, str):
                 source_attr = mapping
-            elif isinstance(mapping, Mapping):
-                source_raw = mapping.get("source")
+            else:
+                mapping_dict: dict[str, object] = (
+                    dict(mapping) if isinstance(mapping, Mapping) else {}
+                )
+                source_raw: object = mapping_dict.get("source")
                 if isinstance(source_raw, str):
                     source_attr = source_raw
-                default_raw = mapping.get("default")
+                default_raw: object = mapping_dict.get("default")
                 if isinstance(default_raw, list):
                     default_values = [str(value) for value in default_raw]
                 elif default_raw is not None:
@@ -551,44 +578,58 @@ class Transformer:
         transformed = Entry(entry.dn, {k: list(v) for k, v in entry.attributes.items()})
         transformed.change_type = entry.change_type
         transformed.controls = entry.controls.copy()
-        raw_schema_mappings = self.transformation_rules.get("schema_mappings")
-        if isinstance(raw_schema_mappings, Mapping):
-            transformed = self.apply_schema_mappings(transformed, raw_schema_mappings)
-        raw_mappings = self.transformation_rules.get("attribute_mappings")
+        raw_schema_mappings: object = self.transformation_rules.get("schema_mappings")
+        if isinstance(raw_schema_mappings, dict):
+            schema_map: dict[str, object] = {
+                str(k): v for k, v in raw_schema_mappings.items()
+            }
+            transformed = self.apply_schema_mappings(transformed, schema_map)
+        raw_mappings: object = self.transformation_rules.get("attribute_mappings")
         mappings: dict[str, str] = {}
-        if isinstance(raw_mappings, Mapping):
+        if isinstance(raw_mappings, dict):
+            attr_map: dict[str, object] = {str(k): v for k, v in raw_mappings.items()}
             mappings.update({
-                source_attr: target_attr
-                for source_attr, target_attr in raw_mappings.items()
-                if isinstance(target_attr, str)
+                k: str(v) for k, v in attr_map.items() if isinstance(v, str)
             })
         if mappings:
             transformed = self.apply_attribute_mappings(transformed, mappings)
-        raw_value_mappings = self.transformation_rules.get("attribute_value_mappings")
-        if isinstance(raw_value_mappings, Mapping):
-            for attr_name, attr_value_map in raw_value_mappings.items():
-                if not isinstance(attr_value_map, Mapping):
+        raw_value_mappings: object = self.transformation_rules.get(
+            "attribute_value_mappings",
+        )
+        if isinstance(raw_value_mappings, dict):
+            vm_dict: dict[str, object] = {
+                str(k): v for k, v in raw_value_mappings.items()
+            }
+            for vm_key, vm_val in vm_dict.items():
+                if not isinstance(vm_val, dict):
                     continue
-                existing_values = transformed.attributes.get(attr_name)
+                val_map: dict[str, object] = {str(k): v for k, v in vm_val.items()}
+                existing_values = transformed.attributes.get(vm_key)
                 if existing_values is None:
                     continue
                 mapped_values: list[str] = []
                 for value in existing_values:
-                    mapped = attr_value_map.get(value, value)
+                    mapped: object = val_map.get(value, value)
                     mapped_values.append(str(mapped))
-                transformed.attributes[attr_name] = mapped_values
-        raw_remove_attributes = self.transformation_rules.get("remove_attributes")
+                transformed.attributes[vm_key] = mapped_values
+        raw_remove_attributes: object = self.transformation_rules.get(
+            "remove_attributes",
+        )
         if isinstance(raw_remove_attributes, list):
-            for attr_name in raw_remove_attributes:
-                transformed.attributes.pop(str(attr_name), None)
-        raw_add_attributes = self.transformation_rules.get("add_attributes")
-        if isinstance(raw_add_attributes, Mapping):
-            for attr_name, attr_value in raw_add_attributes.items():
-                if isinstance(attr_value, list):
+            remove_list: list[object] = list(raw_remove_attributes)
+            for rm_item in remove_list:
+                transformed.attributes.pop(str(rm_item), None)
+        raw_add_attributes: object = self.transformation_rules.get("add_attributes")
+        if isinstance(raw_add_attributes, dict):
+            add_dict: dict[str, object] = {
+                str(k): v for k, v in raw_add_attributes.items()
+            }
+            for add_key, add_val in add_dict.items():
+                if isinstance(add_val, list):
                     transformed.add_attribute(
-                        attr_name,
-                        [str(item) for item in attr_value],
+                        add_key,
+                        [str(item) for item in add_val],
                     )
                 else:
-                    transformed.add_attribute(attr_name, str(attr_value))
+                    transformed.add_attribute(add_key, str(add_val))
         return transformed

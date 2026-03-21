@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Iterator, Mapping
 from pathlib import Path
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from flext_core import FlextLogger
 from flext_core.protocols import FlextProtocols as p
@@ -14,10 +14,8 @@ from flext_ldap.models import FlextLdapModels as m
 from flext_ldif import FlextLdif
 from pydantic import ConfigDict, TypeAdapter, ValidationError
 
-try:
-    from flext_meltano import FlextMeltanoTapAbstractions as Tap
-except (ImportError, AttributeError):
-    Tap = object  # type: ignore[assignment,misc]
+if TYPE_CHECKING:
+    from flext_meltano import FlextMeltanoAbstractions as Tap
 
 _OBJECT_LIST_ADAPTER = TypeAdapter(
     list[Mapping[str, t.ContainerValue]],

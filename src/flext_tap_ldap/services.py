@@ -28,14 +28,14 @@ from flext_tap_ldap.typings import FlextTapLdapTypes
 logger = FlextLogger(__name__)
 
 
-def _as_map(value: t.ContainerValue) -> Mapping[str, t.ContainerValue] | None:
+def _as_map(value: object) -> Mapping[str, t.ContainerValue] | None:
     try:
         return FlextTapLdapTypes.CONFIG_MAP_ADAPTER.validate_python(value)
     except ValidationError:
         return None
 
 
-def _as_str(value: t.ContainerValue) -> str | None:
+def _as_str(value: object) -> str | None:
     try:
         return FlextTapLdapTypes.STRICT_STR_ADAPTER.validate_python(value)
     except ValidationError:
@@ -75,6 +75,7 @@ class FlextTapLdapServices:
             """Create LDAP connection using parameter object pattern."""
             try:
                 connection = FlextTapLdapServices.LDAPConnection(
+                    id=uuid4().hex,
                     host=params.host,
                     port=params.port,
                     bind_dn=params.bind_dn,
@@ -164,6 +165,7 @@ class FlextTapLdapServices:
                 if not tap_stream_id:
                     tap_stream_id = f"{params.stream_type.lower()}_stream"
                 stream = FlextTapLdapServices.LDAPStream(
+                    id=uuid4().hex,
                     name=params.stream_type.lower(),
                     connection_id=params.connection_id,
                     stream_type=params.stream_type.lower(),
@@ -294,6 +296,7 @@ class FlextTapLdapServices:
                 validated_catalog = _as_map(catalog or {}) or {}
                 validated_state = _as_map(state or {}) or {}
                 execution = FlextTapLdapModels.TapLdap.TapExecution(
+                    id=uuid4().hex,
                     execution_id=f"exec_{uuid4().hex[:8]}",
                     connection_id=connection_id,
                     command=command,
@@ -586,6 +589,9 @@ class FlextTapLdapServices:
             use_ssl=bool(kwargs.get("use_ssl")),
             bind_dn=_as_str(kwargs.get("bind_dn")),
             bind_password=_as_str(kwargs.get("bind_password")),
+            timeout_seconds=c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
+            page_size=c.TapLdap.DEFAULT_PAGE_SIZE,
+            max_retries=3,
         )
         return FlextTapLdapServices.create_ldap_connection_config(params)
 
@@ -626,7 +632,7 @@ class FlextTapLdapServices:
         """
         try:
             if config is None:
-                config = FlextTapLdapSettings()
+                config = FlextTapLdapSettings.model_validate({})
             validation_result = FlextTapLdapServices.validate_ldap_config(config)
             if not validation_result.is_success or not validation_result.value:
                 return r[FlextTapLdapSettings].fail(

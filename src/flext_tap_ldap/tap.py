@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping
 from pathlib import Path
-from typing import ClassVar, override
+from typing import ClassVar
 
 import click
 from flext_core import FlextLogger, r
@@ -47,7 +47,10 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
     """
 
     name: ClassVar[str] = "FlextMeltanoTapAbstractions-ldap"
-    config: dict[str, t.Scalar] = {}
+    config: dict[str, t.Scalar]
+
+    def __init__(self) -> None:
+        self.config = {}
     config_class: ClassVar[type[FlextTapLdapSettings]] = FlextTapLdapSettings
     config_jsonschema: ClassVar[dict[str, object]] = {
         "type": "object",
@@ -105,7 +108,6 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         },
     }
 
-    @override
     def discover_streams(
         self,
         source_config: m.Meltano.DataSourceConfig
@@ -125,17 +127,19 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         except ValidationError:
             config_map = {}
 
-        streams: list[TapLdapStream] = [
+        ldap_streams: list[FlextTapLdapStreams.LDAPBaseStream] = [
             FlextTapLdapStreams.UsersStream(self),
             FlextTapLdapStreams.GroupsStream(self),
             FlextTapLdapStreams.OrganizationalUnitsStream(self),
             FlextTapLdapStreams.SchemaStream(self),
         ]
+        streams: list[TapLdapStream] = list(ldap_streams)
         if bool(config_map.get("enable_ldif_streams", False)):
-            streams.extend([
+            ldif_stream_list: list[TapLdapStream] = [
                 FlextTapLdapLdifStreams.LdifStream(self),
                 FlextTapLdapLdifStreams.LdifAnalysisStream(self),
-            ])
+            ]
+            streams.extend(ldif_stream_list)
 
         streams_list: list[t.Meltano.Singer.CatalogEntry] = [
             {
@@ -206,15 +210,21 @@ def _build_cli_command() -> click.Command:
             result = tap.discover_streams(source_config=source_config)
             if result.is_success and result.value:
                 catalog = result.value
-                raw_custom = raw_config.get("custom_streams")
+                raw_custom: object = raw_config.get("custom_streams")
                 if isinstance(raw_custom, list):
-                    for cs in raw_custom:
-                        if isinstance(cs, Mapping) and "name" in cs:
-                            catalog["streams"].append({
-                                "stream": str(cs["name"]),
-                                "tap_stream_id": str(cs["name"]),
-                                "schema": cs.get("schema", {}),
-                            })
+                    custom_list: list[object] = list(raw_custom)
+                    for cs_item in custom_list:
+                        if isinstance(cs_item, dict):
+                            cs_dict: dict[str, object] = {
+                                str(k): v for k, v in cs_item.items()
+                            }
+                            if "name" in cs_dict:
+                                cs_entry: t.Meltano.Singer.CatalogEntry = {
+                                    "stream": str(cs_dict["name"]),
+                                    "tap_stream_id": str(cs_dict["name"]),
+                                    "schema": {},
+                                }
+                                catalog["streams"].append(cs_entry)
                 click.echo(json.dumps(catalog))
             return
 

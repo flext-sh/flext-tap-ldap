@@ -11,16 +11,13 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
-from typing import ClassVar, override
+from typing import TYPE_CHECKING, ClassVar, override
 
 from flext_core import FlextLogger
-from flext_core.typings import t
 from pydantic import ValidationError
 
-try:
-    from flext_meltano import FlextMeltanoTapAbstractions as Tap
-except (ImportError, AttributeError):
-    Tap = object  # type: ignore[assignment,misc]
+if TYPE_CHECKING:
+    from flext_meltano import FlextMeltanoAbstractions as Tap
 
 from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.constants import FlextTapLdapConstants as c
@@ -30,7 +27,7 @@ from flext_tap_ldap.typings import FlextTapLdapTypes
 logger = FlextLogger(__name__)
 
 
-def _coerce_positive_int(raw_value: t.ContainerValue, default: int) -> int:
+def _coerce_positive_int(raw_value: object, default: int) -> int:
     """Coerce value to positive integer with safe fallback."""
     try:
         parsed = int(str(raw_value))
@@ -39,7 +36,7 @@ def _coerce_positive_int(raw_value: t.ContainerValue, default: int) -> int:
     return parsed if parsed > 0 else default
 
 
-def _coerce_optional_string(raw_value: t.ContainerValue | None) -> str | None:
+def _coerce_optional_string(raw_value: object) -> str | None:
     """Coerce value to string only when source is already string-like."""
     if raw_value is None:
         return None
@@ -51,7 +48,7 @@ def _coerce_optional_string(raw_value: t.ContainerValue | None) -> str | None:
 
 
 def _parse_connection_config(
-    raw_value: t.ContainerValue,
+    raw_value: object,
 ) -> FlextTapLdapModels.TapLdap.LdapConnectionConfig:
     """Validate LDAP connection payload through Pydantic."""
     try:
@@ -76,7 +73,7 @@ def _parse_connection_config(
 
 
 def _parse_property_definition(
-    raw_value: t.ContainerValue,
+    raw_value: object,
 ) -> FlextTapLdapModels.TapLdap.CustomPropertyDefinition:
     """Validate custom stream property definition through Pydantic."""
     try:
@@ -630,7 +627,7 @@ class FlextTapLdapStreams:
 
             def _map_prop(
                 name: str,
-                definition: t.ContainerValue,
+                definition: object,
             ) -> dict[str, object]:
                 parsed_definition = _parse_property_definition(definition)
                 prop_type = parsed_definition.type

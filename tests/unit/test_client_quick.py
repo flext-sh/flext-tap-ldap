@@ -131,12 +131,11 @@ class TestLDAPClientQuick:
         client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test connection test succeeds via flext_api.search."""
-        mock_api = Mock()
         mock_result = Mock()
         mock_result.is_success = True
-        mock_api.search.return_value = mock_result
-        client._flext_api = mock_api
-        result = client.test_connection()
+        api_cls = type(client._flext_api)
+        with patch.object(api_cls, "search", return_value=mock_result):
+            result = client.test_connection()
         assert result is True
 
     def test_test_connection_fallback_on_error(
@@ -144,10 +143,9 @@ class TestLDAPClientQuick:
         client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test connection test returns True on expected errors (fallback)."""
-        mock_api = Mock()
-        mock_api.search.side_effect = RuntimeError("test error")
-        client._flext_api = mock_api
-        result = client.test_connection()
+        api_cls = type(client._flext_api)
+        with patch.object(api_cls, "search", side_effect=RuntimeError("test error")):
+            result = client.test_connection()
         assert result is True
 
     def test_health_check_functionality(
