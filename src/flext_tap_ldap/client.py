@@ -12,6 +12,7 @@ from __future__ import annotations
 import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
 from collections.abc import Mapping, Sequence
+from typing import cast
 
 from flext_core import FlextLogger, r
 from flext_core.typings import t
@@ -223,7 +224,7 @@ class FlextTapLdapClient:
 
         def _convert_entry_to_dict(
             self,
-            entry_data: t.RuntimeData | dict[str, object] | None,
+            entry_data: t.RuntimeData | Mapping[str, object] | None,
         ) -> dict[str, object]:
             """Convert FlextLdapModels.Entry to dict format for testing.
 
@@ -237,13 +238,16 @@ class FlextTapLdapClient:
                 attrs_val: object = model_data.get("attributes", {})
                 attrs_dict: dict[str, object]
                 if isinstance(attrs_val, dict):
-                    attrs_dict = dict(attrs_val)
+                    attrs_dict = cast("dict[str, object]", attrs_val)
                 else:
                     return {"dn": dn_value}
                 entry_dict: dict[str, object] = {"dn": dn_value}
                 for key_str, val in attrs_dict.items():
-                    if isinstance(val, list) and len(val) == 1:
-                        entry_dict[key_str] = val[0]
+                    typed_list: list[object] = (
+                        cast("list[object]", val) if isinstance(val, list) else []
+                    )
+                    if isinstance(val, list) and len(typed_list) == 1:
+                        entry_dict[key_str] = typed_list[0]
                     else:
                         entry_dict[key_str] = val
                 return entry_dict
@@ -431,7 +435,7 @@ class FlextTapLdapClient:
             raw_attrs: object = entry.get("attributes", {})
             attributes: dict[str, object] = {}
             if isinstance(raw_attrs, dict):
-                attributes.update({str(k): v for k, v in raw_attrs.items()})
+                attributes.update(cast("dict[str, object]", raw_attrs))
             else:
                 return entry
             if "orclPassword" in attributes:
@@ -444,7 +448,9 @@ class FlextTapLdapClient:
                 if isinstance(raw_obj_classes, str):
                     obj_classes = [raw_obj_classes]
                 elif isinstance(raw_obj_classes, list):
-                    obj_classes = [str(item) for item in raw_obj_classes]
+                    obj_classes = [
+                        str(item) for item in cast("list[object]", raw_obj_classes)
+                    ]
                 if (
                     "orclContainer" in obj_classes
                     and "organizationalUnit" not in obj_classes

@@ -8,6 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import contextlib
+from typing import cast
 from unittest.mock import Mock, patch
 
 import pytest
@@ -179,11 +180,11 @@ class TestLDAPClientQuick:
             },
         }
         result = client._process_oracle_entry(entry)
-        attributes = result.get("attributes")
-        assert isinstance(attributes, dict)
-        assert isinstance(attributes, dict)
+        attributes_raw = result.get("attributes")
+        assert isinstance(attributes_raw, dict)
+        attributes: dict[str, object] = cast("dict[str, object]", attributes_raw)
         assert "userPassword" in attributes
-        user_password = attributes.get("userPassword")
+        user_password: object = attributes.get("userPassword")
         assert isinstance(user_password, list)
         assert isinstance(user_password, list)
         assert "hashed_password" in user_password
@@ -195,10 +196,10 @@ class TestLDAPClientQuick:
             "attributes": {"ou": ou_values, "objectClass": container_classes},
         }
         result = client._process_oracle_entry(entry_with_container)
-        attributes = result.get("attributes")
-        assert isinstance(attributes, dict)
-        assert isinstance(attributes, dict)
-        object_class = attributes.get("objectClass")
+        attrs_raw2 = result.get("attributes")
+        assert isinstance(attrs_raw2, dict)
+        attributes = cast("dict[str, object]", attrs_raw2)
+        object_class: object = attributes.get("objectClass")
         assert isinstance(object_class, list)
         assert isinstance(object_class, list)
         assert "organizationalUnit" in object_class
@@ -208,10 +209,10 @@ class TestLDAPClientQuick:
             "attributes": {"objectClass": "orclContainer"},
         }
         result = client._process_oracle_entry(entry_string_oc)
-        attributes = result.get("attributes")
-        assert isinstance(attributes, dict)
-        assert isinstance(attributes, dict)
-        obj_classes = attributes.get("objectClass")
+        attrs_raw3 = result.get("attributes")
+        assert isinstance(attrs_raw3, dict)
+        attributes = cast("dict[str, object]", attrs_raw3)
+        obj_classes: object = attributes.get("objectClass")
         assert isinstance(obj_classes, list)
         assert isinstance(obj_classes, list)
         assert "organizationalUnit" in obj_classes

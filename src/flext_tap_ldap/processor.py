@@ -13,15 +13,15 @@ from __future__ import annotations
 
 from collections.abc import Iterator, Mapping
 from pathlib import Path
-from typing import override
+from typing import cast, override
 
 from flext_core import FlextLogger, r
 from flext_ldap.models import FlextLdapModels as m
 from flext_ldif import FlextLdif
-from flext_ldif._models.metadata import FlextLdifModelsMetadata
+from flext_ldif.models import FlextLdifModels
 from pydantic import TypeAdapter, ValidationError
 
-_DEFAULT_ENTRY_METADATA = FlextLdifModelsMetadata.EntryMetadata()
+_DEFAULT_ENTRY_METADATA = FlextLdifModels.Ldif.EntryMetadata()
 
 
 class FlextLdifDistinguishedName(m.Ldif.DN):
@@ -551,14 +551,18 @@ class Transformer:
                 source_attr = mapping
             else:
                 mapping_dict: dict[str, object] = (
-                    dict(mapping) if isinstance(mapping, Mapping) else {}
+                    cast("dict[str, object]", mapping)
+                    if isinstance(mapping, Mapping)
+                    else {}
                 )
                 source_raw: object = mapping_dict.get("source")
                 if isinstance(source_raw, str):
                     source_attr = source_raw
                 default_raw: object = mapping_dict.get("default")
                 if isinstance(default_raw, list):
-                    default_values = [str(value) for value in default_raw]
+                    default_values = [
+                        str(value) for value in cast("list[object]", default_raw)
+                    ]
                 elif default_raw is not None:
                     default_values = [str(default_raw)]
             if source_attr is None:
@@ -580,14 +584,14 @@ class Transformer:
         transformed.controls = entry.controls.copy()
         raw_schema_mappings: object = self.transformation_rules.get("schema_mappings")
         if isinstance(raw_schema_mappings, dict):
-            schema_map: dict[str, object] = {
-                str(k): v for k, v in raw_schema_mappings.items()
-            }
+            schema_map: dict[str, object] = cast(
+                "dict[str, object]", raw_schema_mappings
+            )
             transformed = self.apply_schema_mappings(transformed, schema_map)
         raw_mappings: object = self.transformation_rules.get("attribute_mappings")
         mappings: dict[str, str] = {}
         if isinstance(raw_mappings, dict):
-            attr_map: dict[str, object] = {str(k): v for k, v in raw_mappings.items()}
+            attr_map: dict[str, object] = cast("dict[str, object]", raw_mappings)
             mappings.update({
                 k: str(v) for k, v in attr_map.items() if isinstance(v, str)
             })
@@ -597,13 +601,11 @@ class Transformer:
             "attribute_value_mappings",
         )
         if isinstance(raw_value_mappings, dict):
-            vm_dict: dict[str, object] = {
-                str(k): v for k, v in raw_value_mappings.items()
-            }
+            vm_dict: dict[str, object] = cast("dict[str, object]", raw_value_mappings)
             for vm_key, vm_val in vm_dict.items():
                 if not isinstance(vm_val, dict):
                     continue
-                val_map: dict[str, object] = {str(k): v for k, v in vm_val.items()}
+                val_map: dict[str, object] = cast("dict[str, object]", vm_val)
                 existing_values = transformed.attributes.get(vm_key)
                 if existing_values is None:
                     continue
@@ -616,19 +618,17 @@ class Transformer:
             "remove_attributes",
         )
         if isinstance(raw_remove_attributes, list):
-            remove_list: list[object] = list(raw_remove_attributes)
+            remove_list: list[object] = cast("list[object]", raw_remove_attributes)
             for rm_item in remove_list:
                 transformed.attributes.pop(str(rm_item), None)
         raw_add_attributes: object = self.transformation_rules.get("add_attributes")
         if isinstance(raw_add_attributes, dict):
-            add_dict: dict[str, object] = {
-                str(k): v for k, v in raw_add_attributes.items()
-            }
+            add_dict: dict[str, object] = cast("dict[str, object]", raw_add_attributes)
             for add_key, add_val in add_dict.items():
                 if isinstance(add_val, list):
                     transformed.add_attribute(
                         add_key,
-                        [str(item) for item in add_val],
+                        [str(item) for item in cast("list[object]", add_val)],
                     )
                 else:
                     transformed.add_attribute(add_key, str(add_val))

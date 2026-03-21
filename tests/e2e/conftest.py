@@ -66,7 +66,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
             password="REDACTED_LDAP_BIND_PASSWORD_password",
             auto_bind=True,
         )
-        conn.unbind()
+        conn.unbind()  # pyright: ignore[reportUnknownMemberType]
 
     _check_ldap_ready()
     logger.info("LDAP container is ready")
@@ -88,7 +88,7 @@ def ldap_connection(_ldap_container: None) -> Generator[Connection]:
         auto_bind=True,
     )
     yield conn
-    conn.unbind()
+    conn.unbind()  # pyright: ignore[reportUnknownMemberType]
 
 
 @pytest.fixture

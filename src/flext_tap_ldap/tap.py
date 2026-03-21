@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, cast
 
 import click
 from flext_core import FlextLogger, r
@@ -38,6 +38,25 @@ type TapLdapStream = (
     | FlextTapLdapLdifStreams.LdifAnalysisStream
 )
 
+_CUSTOM_STREAM_ADAPTER = TypeAdapter(
+    dict[str, object],
+    config=ConfigDict(strict=False),
+)
+
+
+def _validate_custom_stream(raw_item: object) -> dict[str, str] | None:
+    """Validate a custom stream definition, returning name if valid."""
+    try:
+        validated: dict[str, object] = _CUSTOM_STREAM_ADAPTER.validate_python(
+            raw_item,
+        )
+    except ValidationError:
+        return None
+    name_val: object = validated.get("name")
+    if isinstance(name_val, str) and name_val:
+        return {"name": name_val}
+    return None
+
 
 class FlextTapLdapTap(FlextMeltanoAbstractions):
     """Singer FlextMeltanoTapAbstractions for LDAP data extraction using FLEXT centralized patterns.
@@ -50,7 +69,9 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
     config: dict[str, t.Scalar]
 
     def __init__(self) -> None:
+        """Initialize tap with empty config."""
         self.config = {}
+
     config_class: ClassVar[type[FlextTapLdapSettings]] = FlextTapLdapSettings
     config_jsonschema: ClassVar[dict[str, object]] = {
         "type": "object",
@@ -212,19 +233,15 @@ def _build_cli_command() -> click.Command:
                 catalog = result.value
                 raw_custom: object = raw_config.get("custom_streams")
                 if isinstance(raw_custom, list):
-                    custom_list: list[object] = list(raw_custom)
-                    for cs_item in custom_list:
-                        if isinstance(cs_item, dict):
-                            cs_dict: dict[str, object] = {
-                                str(k): v for k, v in cs_item.items()
+                    for cs_item in cast("list[object]", raw_custom):
+                        cs_dict = _validate_custom_stream(cs_item)
+                        if cs_dict is not None:
+                            cs_entry: t.Meltano.Singer.CatalogEntry = {
+                                "stream": cs_dict["name"],
+                                "tap_stream_id": cs_dict["name"],
+                                "schema": {},
                             }
-                            if "name" in cs_dict:
-                                cs_entry: t.Meltano.Singer.CatalogEntry = {
-                                    "stream": str(cs_dict["name"]),
-                                    "tap_stream_id": str(cs_dict["name"]),
-                                    "schema": {},
-                                }
-                                catalog["streams"].append(cs_entry)
+                            catalog["streams"].append(cs_entry)
                 click.echo(json.dumps(catalog))
             return
 

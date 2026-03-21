@@ -11,6 +11,7 @@ import json
 import time
 from collections.abc import Generator, Mapping
 from pathlib import Path
+from typing import cast
 from unittest.mock import Mock, patch
 
 import pytest
@@ -117,7 +118,10 @@ class TestFlextTapLdapIntegration:
         if "streams" not in catalog:
             catalog_error: str = f"Expected {'streams'} in {catalog}"
             raise AssertionError(catalog_error)
-        stream_names = [s["tap_stream_id"] for s in catalog["streams"]]
+        streams: list[dict[str, object]] = cast(
+            "list[dict[str, object]]", catalog["streams"]
+        )
+        stream_names: list[object] = [s["tap_stream_id"] for s in streams]
         if "users" not in stream_names:
             stream_error: str = f"Expected {'users'} in {stream_names}"
             raise AssertionError(stream_error)
@@ -241,8 +245,11 @@ class TestFlextTapLdapIntegration:
             raise AssertionError(exit_error)
         catalog = _extract_json_from_output(result.output)
         assert isinstance(catalog, dict)
-        stream_names = [
-            s.get("tap_stream_id", s.get("stream")) for s in catalog["streams"]
+        cat_streams: list[dict[str, object]] = cast(
+            "list[dict[str, object]]", catalog["streams"]
+        )
+        stream_names: list[object] = [
+            s.get("tap_stream_id", s.get("stream")) for s in cat_streams
         ]
         if "service_accounts" not in stream_names:
             stream_error: str = f"Expected {'service_accounts'} in {stream_names}"
