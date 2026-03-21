@@ -43,12 +43,8 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
         class Singer:
             """Singer tap configuration constants."""
 
-            DEFAULT_BATCH_SIZE: Final[int] = (
-                FlextMeltanoConstants.Performance.BatchProcessing.DEFAULT_SIZE
-            )
-            MAX_BATCH_SIZE: Final[int] = (
-                FlextMeltanoConstants.Performance.BatchProcessing.MAX_ITEMS
-            )
+            DEFAULT_BATCH_SIZE: Final[int] = FlextMeltanoConstants.DEFAULT_BATCH_SIZE
+            MAX_BATCH_SIZE: Final[int] = FlextMeltanoConstants.MAX_BATCH_SIZE
 
         class Replication:
             """LDAP replication method constants."""

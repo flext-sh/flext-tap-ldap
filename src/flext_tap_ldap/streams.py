@@ -17,9 +17,9 @@ from flext_core import FlextLogger
 from flext_core.constants import c
 from flext_core.typings import t
 from flext_meltano import FlextMeltanoTapAbstractions as Tap
-from flext_target_ldap.client import LDAPClient
 from pydantic import ValidationError
 
+from flext_tap_ldap.client import LDAPClient
 from flext_tap_ldap.models import FlextTapLdapModels
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
