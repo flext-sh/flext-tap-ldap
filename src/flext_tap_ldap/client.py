@@ -507,17 +507,6 @@ class FlextTapLdapClient:
             return results
 
 
-# --- Module-level aliases for backward compatibility ---
-LDAPConnectionConfig = m.Ldap.ConnectionConfig
-LDAPEntry = m.Ldif.Entry
-LDAPClient = FlextTapLdapClient.LDAPClient
-LDAPClientConfig = FlextTapLdapClient.LDAPClientConfig
-
-
 __all__: list[str] = [
     "FlextTapLdapClient",
-    "LDAPClient",
-    "LDAPClientConfig",
-    "LDAPConnectionConfig",
-    "LDAPEntry",
 ]
