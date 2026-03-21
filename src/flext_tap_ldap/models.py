@@ -16,6 +16,7 @@ from typing import Annotated, Self
 from uuid import uuid4
 
 from flext_core.constants import c
+from flext_core.typings import t
 from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
 from pydantic import BaseModel, Field, model_validator
@@ -256,25 +257,26 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
         class LdapConnectionParams(FlextLdapModels.Value):
             """Parameters for establishing an LDAP connection."""
 
-            host: Annotated[str, Field(min_length=1)]
-            base_dn: Annotated[str, Field(min_length=1)]
-            port: Annotated[int, Field(default=c.TapLdap.DEFAULT_PORT, ge=1)]
+            host: t.NonEmptyStr
+            base_dn: t.NonEmptyStr
+            port: Annotated[t.PortNumber, Field(default=c.TapLdap.DEFAULT_PORT)]
             bind_dn: str | None = None
             bind_password: str | None = None
             use_ssl: bool = False
             timeout_seconds: Annotated[
-                int,
-                Field(default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT, ge=1),
+                t.PositiveInt, Field(default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT)
             ]
-            page_size: Annotated[int, Field(default=c.TapLdap.DEFAULT_PAGE_SIZE, ge=1)]
-            max_retries: Annotated[int, Field(default=3, ge=0)]
+            page_size: Annotated[
+                t.PositiveInt, Field(default=c.TapLdap.DEFAULT_PAGE_SIZE)
+            ]
+            max_retries: Annotated[t.RetryCount, Field(default=3)]
 
         class StreamCreationParams(FlextLdapModels.Value):
             """Parameters for creating an LDAP data stream."""
 
-            stream_type: Annotated[str, Field(min_length=1)]
-            connection_id: Annotated[str, Field(min_length=1)]
-            search_filter: Annotated[str, Field(min_length=1)]
+            stream_type: t.NonEmptyStr
+            connection_id: t.NonEmptyStr
+            search_filter: t.NonEmptyStr
             attributes: list[str] | None = None
             tap_stream_id: str | None = None
             key_properties: list[str] | None = None
@@ -286,12 +288,12 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
         class LdapConnection(FlextLdapModels.Entity):
             """LDAP connection entity with test status and error tracking."""
 
-            host: Annotated[str, Field(min_length=1)]
-            port: Annotated[int, Field(ge=1)]
+            host: t.NonEmptyStr
+            port: t.PortNumber
             bind_dn: str | None = None
             password: str | None = None
             use_ssl: bool = False
-            timeout: Annotated[int, Field(ge=1)]
+            timeout: t.PositiveInt
             id: Annotated[str, Field(default_factory=lambda: uuid4().hex)]
             last_tested: datetime | None = None
             last_error: str | None = None
@@ -300,12 +302,12 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             """LDAP data stream with schema and replication configuration."""
 
             id: Annotated[str, Field(default_factory=lambda: uuid4().hex)]
-            name: Annotated[str, Field(min_length=1)]
-            connection_id: Annotated[str, Field(min_length=1)]
-            stream_type: Annotated[str, Field(min_length=1)]
-            search_filter: Annotated[str, Field(min_length=1)]
+            name: t.NonEmptyStr
+            connection_id: t.NonEmptyStr
+            stream_type: t.NonEmptyStr
+            search_filter: t.NonEmptyStr
             attributes: Annotated[list[str], Field(default_factory=list)]
-            tap_stream_id: Annotated[str, Field(min_length=1)]
+            tap_stream_id: t.NonEmptyStr
             key_properties: Annotated[list[str], Field(default_factory=lambda: ["dn"])]
             replication_method: str = "FULL_TABLE"
             replication_key: str | None = None
