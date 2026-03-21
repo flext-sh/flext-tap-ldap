@@ -22,7 +22,8 @@ if TYPE_CHECKING:
         test_data_dir,
     )
     from .constants import TestsFlextTapLdapConstants, TestsFlextTapLdapConstants as c
-    from .e2e.conftest import (
+    from .e2e import (
+        TestFlextTapLdapIntegration,
         catalog_file,
         ldap_connection,
         ldap_container,
@@ -30,109 +31,79 @@ if TYPE_CHECKING:
         sample_catalog,
         tap_config_file,
     )
-    from .e2e.test_integration import TestFlextTapLdapIntegration
     from .models import TestsFlextTapLdapModels, TestsFlextTapLdapModels as m
     from .protocols import TestsFlextTapLdapProtocols, TestsFlextTapLdapProtocols as p
     from .typings import TestsFlextTapLdapTypes, TestsFlextTapLdapTypes as t
-    from .unit.test_client import TestLDAPClientCoverageBoost
-    from .unit.test_client_quick import TestLDAPClientQuick
-    from .unit.test_ldif_processor import TestLdifProcessor
-    from .unit.test_ldif_stream import TestLDIFStreamBasic
-    from .unit.test_models import (
+    from .unit import (
         TestConnectionTestedEvent,
-        TestRecordExtractedEvent,
-        TestStreamDiscoveredEvent,
-        TestTapExecutionCompletedEvent,
-        TestTapExecutionStartedEvent,
-    )
-    from .unit.test_streams import (
         TestCustomStream,
         TestCustomStreamParams,
+        TestFlextTapLdapTapUnit,
         TestGroupsStream,
         TestLDAPBaseStream,
         TestLDAPBaseStreamDirectUsage,
+        TestLDAPClientCoverageBoost,
+        TestLDAPClientQuick,
+        TestLdifProcessor,
+        TestLDIFStreamBasic,
         TestOrganizationalUnitsStream,
+        TestRecordExtractedEvent,
         TestSchemaStream,
+        TestStreamDiscoveredEvent,
         TestStreamExceptionHandling,
         TestStreamIntegration,
+        TestTapExecutionCompletedEvent,
+        TestTapExecutionStartedEvent,
         TestUsersStream,
     )
-    from .unit.test_tap import TestFlextTapLdapTapUnit
     from .utilities import TestsFlextTapLdapUtilities, TestsFlextTapLdapUtilities as u
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    "TestConnectionTestedEvent": (
-        "tests.unit.test_models",
-        "TestConnectionTestedEvent",
-    ),
-    "TestCustomStream": ("tests.unit.test_streams", "TestCustomStream"),
-    "TestCustomStreamParams": ("tests.unit.test_streams", "TestCustomStreamParams"),
-    "TestFlextTapLdapIntegration": (
-        "tests.e2e.test_integration",
-        "TestFlextTapLdapIntegration",
-    ),
-    "TestFlextTapLdapTapUnit": ("tests.unit.test_tap", "TestFlextTapLdapTapUnit"),
-    "TestGroupsStream": ("tests.unit.test_streams", "TestGroupsStream"),
-    "TestLDAPBaseStream": ("tests.unit.test_streams", "TestLDAPBaseStream"),
-    "TestLDAPBaseStreamDirectUsage": (
-        "tests.unit.test_streams",
-        "TestLDAPBaseStreamDirectUsage",
-    ),
-    "TestLDAPClientCoverageBoost": (
-        "tests.unit.test_client",
-        "TestLDAPClientCoverageBoost",
-    ),
-    "TestLDAPClientQuick": ("tests.unit.test_client_quick", "TestLDAPClientQuick"),
-    "TestLDIFStreamBasic": ("tests.unit.test_ldif_stream", "TestLDIFStreamBasic"),
-    "TestLdifProcessor": ("tests.unit.test_ldif_processor", "TestLdifProcessor"),
-    "TestOrganizationalUnitsStream": (
-        "tests.unit.test_streams",
-        "TestOrganizationalUnitsStream",
-    ),
-    "TestRecordExtractedEvent": ("tests.unit.test_models", "TestRecordExtractedEvent"),
-    "TestSchemaStream": ("tests.unit.test_streams", "TestSchemaStream"),
-    "TestStreamDiscoveredEvent": (
-        "tests.unit.test_models",
-        "TestStreamDiscoveredEvent",
-    ),
-    "TestStreamExceptionHandling": (
-        "tests.unit.test_streams",
-        "TestStreamExceptionHandling",
-    ),
-    "TestStreamIntegration": ("tests.unit.test_streams", "TestStreamIntegration"),
-    "TestTapExecutionCompletedEvent": (
-        "tests.unit.test_models",
-        "TestTapExecutionCompletedEvent",
-    ),
-    "TestTapExecutionStartedEvent": (
-        "tests.unit.test_models",
-        "TestTapExecutionStartedEvent",
-    ),
-    "TestUsersStream": ("tests.unit.test_streams", "TestUsersStream"),
+    "TestConnectionTestedEvent": ("tests.unit", "TestConnectionTestedEvent"),
+    "TestCustomStream": ("tests.unit", "TestCustomStream"),
+    "TestCustomStreamParams": ("tests.unit", "TestCustomStreamParams"),
+    "TestFlextTapLdapIntegration": ("tests.e2e", "TestFlextTapLdapIntegration"),
+    "TestFlextTapLdapTapUnit": ("tests.unit", "TestFlextTapLdapTapUnit"),
+    "TestGroupsStream": ("tests.unit", "TestGroupsStream"),
+    "TestLDAPBaseStream": ("tests.unit", "TestLDAPBaseStream"),
+    "TestLDAPBaseStreamDirectUsage": ("tests.unit", "TestLDAPBaseStreamDirectUsage"),
+    "TestLDAPClientCoverageBoost": ("tests.unit", "TestLDAPClientCoverageBoost"),
+    "TestLDAPClientQuick": ("tests.unit", "TestLDAPClientQuick"),
+    "TestLDIFStreamBasic": ("tests.unit", "TestLDIFStreamBasic"),
+    "TestLdifProcessor": ("tests.unit", "TestLdifProcessor"),
+    "TestOrganizationalUnitsStream": ("tests.unit", "TestOrganizationalUnitsStream"),
+    "TestRecordExtractedEvent": ("tests.unit", "TestRecordExtractedEvent"),
+    "TestSchemaStream": ("tests.unit", "TestSchemaStream"),
+    "TestStreamDiscoveredEvent": ("tests.unit", "TestStreamDiscoveredEvent"),
+    "TestStreamExceptionHandling": ("tests.unit", "TestStreamExceptionHandling"),
+    "TestStreamIntegration": ("tests.unit", "TestStreamIntegration"),
+    "TestTapExecutionCompletedEvent": ("tests.unit", "TestTapExecutionCompletedEvent"),
+    "TestTapExecutionStartedEvent": ("tests.unit", "TestTapExecutionStartedEvent"),
+    "TestUsersStream": ("tests.unit", "TestUsersStream"),
     "TestsFlextTapLdapConstants": ("tests.constants", "TestsFlextTapLdapConstants"),
     "TestsFlextTapLdapModels": ("tests.models", "TestsFlextTapLdapModels"),
     "TestsFlextTapLdapProtocols": ("tests.protocols", "TestsFlextTapLdapProtocols"),
     "TestsFlextTapLdapTypes": ("tests.typings", "TestsFlextTapLdapTypes"),
     "TestsFlextTapLdapUtilities": ("tests.utilities", "TestsFlextTapLdapUtilities"),
     "c": ("tests.constants", "TestsFlextTapLdapConstants"),
-    "catalog_file": ("tests.e2e.conftest", "catalog_file"),
+    "catalog_file": ("tests.e2e", "catalog_file"),
     "d": ("flext_tap_ldap", "d"),
     "e": ("flext_tap_ldap", "e"),
     "e2e": ("tests.e2e", ""),
     "h": ("flext_tap_ldap", "h"),
-    "ldap_connection": ("tests.e2e.conftest", "ldap_connection"),
-    "ldap_container": ("tests.e2e.conftest", "ldap_container"),
-    "logger": ("tests.e2e.conftest", "logger"),
+    "ldap_connection": ("tests.e2e", "ldap_connection"),
+    "ldap_container": ("tests.e2e", "ldap_container"),
+    "logger": ("tests.e2e", "logger"),
     "m": ("tests.models", "TestsFlextTapLdapModels"),
     "p": ("tests.protocols", "TestsFlextTapLdapProtocols"),
     "project_root": ("tests.conftest", "project_root"),
     "pytest_configure": ("tests.conftest", "pytest_configure"),
     "r": ("flext_tap_ldap", "r"),
     "s": ("flext_tap_ldap", "s"),
-    "sample_catalog": ("tests.e2e.conftest", "sample_catalog"),
+    "sample_catalog": ("tests.e2e", "sample_catalog"),
     "shared_ldap_container": ("tests.conftest", "shared_ldap_container"),
     "t": ("tests.typings", "TestsFlextTapLdapTypes"),
-    "tap_config_file": ("tests.e2e.conftest", "tap_config_file"),
+    "tap_config_file": ("tests.e2e", "tap_config_file"),
     "test_data_dir": ("tests.conftest", "test_data_dir"),
     "u": ("tests.utilities", "TestsFlextTapLdapUtilities"),
     "unit": ("tests.unit", ""),
