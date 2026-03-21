@@ -15,18 +15,14 @@ if TYPE_CHECKING:
     from flext_tap_ldap import d, e, h, r, s, x
 
     from . import e2e as e2e, unit as unit
-    from .conftest import (
-        project_root,
-        pytest_configure,
-        shared_ldap_container,
-        test_data_dir,
-    )
+    from .conftest import pytest_configure, shared_ldap_container, test_data_dir
     from .constants import TestsFlextTapLdapConstants, TestsFlextTapLdapConstants as c
     from .e2e.conftest import (
         catalog_file,
         ldap_connection,
         ldap_container,
         logger,
+        project_root,
         sample_catalog,
         tap_config_file,
     )
@@ -125,7 +121,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "logger": ("tests.e2e.conftest", "logger"),
     "m": ("tests.models", "TestsFlextTapLdapModels"),
     "p": ("tests.protocols", "TestsFlextTapLdapProtocols"),
-    "project_root": ("tests.conftest", "project_root"),
+    "project_root": ("tests.e2e.conftest", "project_root"),
     "pytest_configure": ("tests.conftest", "pytest_configure"),
     "r": ("flext_tap_ldap", "r"),
     "s": ("flext_tap_ldap", "s"),
