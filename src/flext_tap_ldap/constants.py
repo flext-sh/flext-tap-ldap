@@ -76,7 +76,7 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
         class Connection:
             """LDAP tap connection configuration."""
 
-            DEFAULT_HOST: Final[str] = FlextLdapConstants.Network.LOCALHOST
+            DEFAULT_HOST: Final[str] = FlextLdapConstants.LOCALHOST
             DEFAULT_PORT: Final[int] = 389
             DEFAULT_BASE_DN: Final[str] = ""
 
