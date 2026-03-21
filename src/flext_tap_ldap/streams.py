@@ -14,12 +14,16 @@ from collections.abc import Iterable, Mapping
 from typing import ClassVar, override
 
 from flext_core import FlextLogger
-from flext_core.constants import c
 from flext_core.typings import t
-from flext_meltano import FlextMeltanoTapAbstractions as Tap
 from pydantic import ValidationError
 
+try:
+    from flext_meltano import FlextMeltanoTapAbstractions as Tap
+except (ImportError, AttributeError):
+    Tap = object  # type: ignore[assignment,misc]
+
 from flext_tap_ldap.client import LDAPClient
+from flext_tap_ldap.constants import FlextTapLdapConstants as c
 from flext_tap_ldap.models import FlextTapLdapModels
 from flext_tap_ldap.typings import FlextTapLdapTypes
 

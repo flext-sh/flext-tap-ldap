@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 from flext_core import FlextDecorators as d, FlextLogger
-from flext_tests import u
+from flext_tests.docker import tk
 from ldap3 import ALL, Connection, Server
 
 logger = FlextLogger(__name__)
@@ -50,9 +50,9 @@ def sample_catalog() -> dict[str, object]:
 def ldap_container(project_root: Path) -> Iterator[None]:
     """Start and manage LDAP test container using tk."""
     compose_file = project_root / "docker-compose.yml"
+    docker = tk()
     logger.info("Starting OpenLDAP container...")
-    docker_manager = u.Tests.Docker(workspace_root=project_root)
-    start_result = docker_manager.compose_up(compose_file=str(compose_file))
+    start_result = docker.compose_up(compose_file=str(compose_file))
     if start_result.is_failure:
         logger.error(f"Failed to start OpenLDAP container: {start_result.error}")
         raise RuntimeError(f"Container startup failed: {start_result.error}")
@@ -72,7 +72,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
     logger.info("LDAP container is ready")
     yield
     logger.info("Stopping OpenLDAP container...")
-    stop_result = docker_manager.compose_down(compose_file=str(compose_file))
+    stop_result = docker.compose_down(compose_file=str(compose_file))
     if stop_result.is_failure:
         logger.warning(f"Failed to stop container cleanly: {stop_result.error}")
 

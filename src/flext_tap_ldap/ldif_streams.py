@@ -7,13 +7,17 @@ from pathlib import Path
 from typing import ClassVar
 
 from flext_core import FlextLogger
-from flext_core.models import m
 from flext_core.protocols import FlextProtocols as p
 from flext_core.typings import t
 from flext_ldap import FlextLdapConnection
+from flext_ldap.models import FlextLdapModels as m
 from flext_ldif import FlextLdif
-from flext_meltano import FlextMeltanoTapAbstractions as Tap
 from pydantic import ConfigDict, TypeAdapter, ValidationError
+
+try:
+    from flext_meltano import FlextMeltanoTapAbstractions as Tap
+except (ImportError, AttributeError):
+    Tap = object  # type: ignore[assignment,misc]
 
 _OBJECT_LIST_ADAPTER = TypeAdapter(
     list[Mapping[str, t.ContainerValue]],

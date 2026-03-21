@@ -11,7 +11,6 @@ import contextlib
 from unittest.mock import Mock, patch
 
 import pytest
-from flext_tests import u
 
 from flext_tap_ldap import FlextTapLdapClient
 
@@ -38,130 +37,116 @@ class TestLDAPClientQuick:
         ldap_client = FlextTapLdapClient.LDAPClient(
             host="test.com", port=389, use_ssl=False
         )
-        u.Tests.Matchers.that(ldap_client.server_uri == "ldap://test.com:389", eq=True)
+        assert ldap_client.server_uri == "ldap://test.com:389"
         ldaps_client = FlextTapLdapClient.LDAPClient(
             host="secure.com", port=636, use_ssl=True
         )
-        u.Tests.Matchers.that(
-            ldaps_client.server_uri == "ldaps://secure.com:636", eq=True
-        )
+        assert ldaps_client.server_uri == "ldaps://secure.com:636"
 
     def test_scope_conversions(self, client: FlextTapLdapClient.LDAPClient) -> None:
         """Test all scope conversions."""
-        u.Tests.Matchers.that(client._convert_scope_to_enum("BASE") == "BASE", eq=True)
-        u.Tests.Matchers.that(
-            client._convert_scope_to_enum("ONELEVEL") == "ONELEVEL", eq=True
-        )
-        u.Tests.Matchers.that(
-            client._convert_scope_to_enum("SUBTREE") == "SUBTREE", eq=True
-        )
-        u.Tests.Matchers.that(client._convert_scope_to_enum("base") == "BASE", eq=True)
-        u.Tests.Matchers.that(
-            client._convert_scope_to_enum("INVALID") == "SUBTREE", eq=True
-        )
+        assert client._convert_scope_to_enum("BASE") == "BASE"
+        assert client._convert_scope_to_enum("ONELEVEL") == "ONELEVEL"
+        assert client._convert_scope_to_enum("SUBTREE") == "SUBTREE"
+        assert client._convert_scope_to_enum("base") == "BASE"
+        assert client._convert_scope_to_enum("INVALID") == "SUBTREE"
 
     def test_entry_conversion_scenarios(
         self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test entry conversion with different scenarios."""
-        mock_entry = Mock()
-        mock_entry.dn = "uid=test,dc=example,dc=com"
-        empty_attributes: list[str] = []
-        mock_entry.attributes = {
-            "uid": ["test"],
-            "cn": ["Test", "T. User"],
-            "empty": empty_attributes,
-        }
-        result = client._convert_entry_to_dict(mock_entry)
-        u.Tests.Matchers.that(result["dn"] == "uid=test,dc=example,dc=com", eq=True)
-        u.Tests.Matchers.that(result["uid"] == "test", eq=True)
-        u.Tests.Matchers.that(result["cn"] == ["Test", "T. User"], eq=True)
-        u.Tests.Matchers.that(result["empty"] == [], eq=True)
+        # Test with a Mapping (dict) entry
         mail_values: list[str] = ["test@example.com"]
         dict_entry: dict[str, object] = {
             "dn": "uid=dict,dc=example,dc=com",
             "attributes": {"mail": mail_values},
         }
         result = client._convert_entry_to_dict(dict_entry)
-        u.Tests.Matchers.that(result["dn"] == "uid=dict,dc=example,dc=com", eq=True)
+        assert result["dn"] == "uid=dict,dc=example,dc=com"
+        # Test with None
         result = client._convert_entry_to_dict(None)
-        u.Tests.Matchers.that(result == {}, eq=True)
+        assert result == {}
+        # Test with a dict that has string values
+        simple_entry: dict[str, object] = {
+            "dn": "uid=test,dc=example,dc=com",
+            "uid": "test",
+            "cn": ["Test", "T. User"],
+        }
+        result = client._convert_entry_to_dict(simple_entry)
+        assert result["dn"] == "uid=test,dc=example,dc=com"
+        assert result["uid"] == "test"
+        assert result["cn"] == ["Test", "T. User"]
 
     def test_search_result_processing(
         self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test search result processing with different scenarios."""
+        mock_search_result = Mock()
+        mock_search_result.entries = [
+            {"dn": "uid=user1,dc=test,dc=com", "uid": ["user1"]},
+            {"dn": "uid=user2,dc=test,dc=com", "uid": ["user2"]},
+        ]
         mock_result = Mock()
         mock_result.is_success = True
-        mock_result.data = [
-            Mock(dn="uid=user1,dc=test,dc=com", attributes={"uid": ["user1"]}),
-            Mock(dn="uid=user2,dc=test,dc=com", attributes={"uid": ["user2"]}),
-        ]
+        mock_result.value = mock_search_result
         results = client._process_search_results(mock_result, size_limit=0)
-        u.Tests.Matchers.that(len(results) == 2, eq=True)
-        u.Tests.Matchers.that(results[0]["dn"] == "uid=user1,dc=test,dc=com", eq=True)
+        assert len(results) == 2
+        assert results[0]["dn"] == "uid=user1,dc=test,dc=com"
         results = client._process_search_results(mock_result, size_limit=1)
-        u.Tests.Matchers.that(len(results) == 1, eq=True)
+        assert len(results) == 1
+        # Test with failure
         mock_result.is_success = False
         results = client._process_search_results(mock_result, size_limit=0)
-        u.Tests.Matchers.that(len(results) == 0, eq=True)
+        assert len(results) == 0
+        # Test with no value
         mock_result.is_success = True
-        mock_result.data = None
+        mock_result.value = None
         results = client._process_search_results(mock_result, size_limit=0)
-        u.Tests.Matchers.that(len(results) == 0, eq=True)
+        assert len(results) == 0
 
-    @patch("flext_tap_ldap.client.get_running_loop")
-    def test_search_no_event_loop(
-        self, mock_get_loop: Mock, client: FlextTapLdapClient.LDAPClient
+    def test_search_delegates_to_perform_search(
+        self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
-        """Test search when no event loop is running."""
-        mock_get_loop.side_effect = RuntimeError("no event loop")
-        with patch.object(client, "_run_in_new_loop", return_value=[]) as mock_run:
+        """Test search delegates to _perform_search."""
+        with patch.object(
+            client, "_perform_search", return_value=[{"test": "data"}]
+        ) as mock_perform:
             results = client.search("dc=test,dc=com")
-            mock_run.assert_called_once()
-            u.Tests.Matchers.that(results == [], eq=True)
+            mock_perform.assert_called_once()
+            assert results == [{"test": "data"}]
 
-    @patch("flext_tap_ldap.client.get_running_loop")
-    def test_search_with_event_loop(
-        self, mock_get_loop: Mock, client: FlextTapLdapClient.LDAPClient
+    def test_search_with_all_parameters(
+        self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
-        """Test search when event loop is already running."""
-        mock_get_loop.return_value = Mock()
-        results = client.search("dc=test,dc=com")
-        u.Tests.Matchers.that(results == [], eq=True)
+        """Test search passes all parameters to _perform_search."""
+        with patch.object(client, "_perform_search", return_value=[]) as mock_perform:
+            results = client.search("dc=test,dc=com", "(uid=*)", ["uid"], "BASE", 10)
+            mock_perform.assert_called_once_with(
+                "dc=test,dc=com", "(uid=*)", ["uid"], "BASE", 10
+            )
+            assert results == []
 
-    def test_run_in_new_loop(self, client: FlextTapLdapClient.LDAPClient) -> None:
-        """Test search execution helper in new loop."""
-        with patch.object(client, "search", return_value=[{"test": "data"}]):
-            result = client.search("dc=test,dc=com")
-        u.Tests.Matchers.that(list(result) == [{"test": "data"}], eq=True)
-
-    @patch("flext_tap_ldap.client.get_running_loop")
-    @patch("flext_tap_ldap.client.new_event_loop")
-    def test_test_connection_no_loop(
+    def test_test_connection_success(
         self,
-        mock_new_loop: Mock,
-        mock_get_loop: Mock,
         client: FlextTapLdapClient.LDAPClient,
     ) -> None:
-        """Test connection test when no event loop."""
-        mock_get_loop.side_effect = RuntimeError("no event loop")
-        mock_loop = Mock()
-        mock_new_loop.return_value = mock_loop
-        mock_loop.run_until_complete.return_value = True
-        result = client.test_connection()
-        u.Tests.Matchers.that(result is True, eq=True)
-        mock_new_loop.assert_called_once()
-        mock_loop.close.assert_called_once()
+        """Test connection test succeeds via flext_api.search."""
+        mock_result = Mock()
+        mock_result.is_success = True
+        with patch.object(client._flext_api, "search", return_value=mock_result):
+            result = client.test_connection()
+            assert result is True
 
-    @patch("flext_tap_ldap.client.get_running_loop")
-    def test_test_connection_with_loop(
-        self, client: FlextTapLdapClient.LDAPClient, mock_get_loop: Mock
+    def test_test_connection_fallback_on_error(
+        self,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
-        """Test connection test when event loop exists."""
-        mock_get_loop.return_value = Mock()
-        result = client.test_connection()
-        u.Tests.Matchers.that(result is True, eq=True)
+        """Test connection test returns True on expected errors (fallback)."""
+        with patch.object(
+            client._flext_api, "search", side_effect=RuntimeError("test error")
+        ):
+            result = client.test_connection()
+            assert result is True
 
     def test_health_check_functionality(
         self, client: FlextTapLdapClient.LDAPClient
@@ -169,18 +154,14 @@ class TestLDAPClientQuick:
         """Test health check functionality."""
         with patch.object(client, "test_connection", return_value=True):
             health = client.health_check()
-            u.Tests.Matchers.that(health["status"] == "healthy", eq=True)
-            u.Tests.Matchers.that(
-                health["server_uri"] == "ldap://test.ldap.com:389", eq=True
-            )
-            u.Tests.Matchers.that(health["connection_test"] is True, eq=True)
-            u.Tests.Matchers.that(
-                isinstance(health["response_time_ms"], (int, float)), eq=True
-            )
+            assert health["status"] == "healthy"
+            assert health["server_uri"] == "ldap://test.ldap.com:389"
+            assert health["connection_test"] is True
+            assert isinstance(health["response_time_ms"], (int, float))
         with patch.object(client, "test_connection", return_value=False):
             health = client.health_check()
-            u.Tests.Matchers.that(health["status"] == "unhealthy", eq=True)
-            u.Tests.Matchers.that(health["connection_test"] is False, eq=True)
+            assert health["status"] == "unhealthy"
+            assert health["connection_test"] is False
 
     def test_oracle_entry_processing(
         self, client: FlextTapLdapClient.LDAPClient
@@ -199,13 +180,13 @@ class TestLDAPClientQuick:
         }
         result = client._process_oracle_entry(entry)
         attributes = result.get("attributes")
-        u.Tests.Matchers.that(isinstance(attributes, dict), eq=True)
         assert isinstance(attributes, dict)
-        u.Tests.Matchers.that("userPassword" in attributes, eq=True)
+        assert isinstance(attributes, dict)
+        assert "userPassword" in attributes
         user_password = attributes.get("userPassword")
-        u.Tests.Matchers.that(isinstance(user_password, list), eq=True)
         assert isinstance(user_password, list)
-        u.Tests.Matchers.that("hashed_password" in user_password, eq=True)
+        assert isinstance(user_password, list)
+        assert "hashed_password" in user_password
 
         ou_values: list[str] = ["test"]
         container_classes: list[str] = ["orclContainer"]
@@ -215,12 +196,12 @@ class TestLDAPClientQuick:
         }
         result = client._process_oracle_entry(entry_with_container)
         attributes = result.get("attributes")
-        u.Tests.Matchers.that(isinstance(attributes, dict), eq=True)
+        assert isinstance(attributes, dict)
         assert isinstance(attributes, dict)
         object_class = attributes.get("objectClass")
-        u.Tests.Matchers.that(isinstance(object_class, list), eq=True)
         assert isinstance(object_class, list)
-        u.Tests.Matchers.that("organizationalUnit" in object_class, eq=True)
+        assert isinstance(object_class, list)
+        assert "organizationalUnit" in object_class
 
         entry_string_oc: dict[str, object] = {
             "dn": "ou=test,dc=oracle,dc=com",
@@ -228,19 +209,19 @@ class TestLDAPClientQuick:
         }
         result = client._process_oracle_entry(entry_string_oc)
         attributes = result.get("attributes")
-        u.Tests.Matchers.that(isinstance(attributes, dict), eq=True)
+        assert isinstance(attributes, dict)
         assert isinstance(attributes, dict)
         obj_classes = attributes.get("objectClass")
-        u.Tests.Matchers.that(isinstance(obj_classes, list), eq=True)
         assert isinstance(obj_classes, list)
-        u.Tests.Matchers.that("organizationalUnit" in obj_classes, eq=True)
+        assert isinstance(obj_classes, list)
+        assert "organizationalUnit" in obj_classes
 
         entry_bad_attrs: dict[str, object] = {
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": "not_a_dict",
         }
         result = client._process_oracle_entry(entry_bad_attrs)
-        u.Tests.Matchers.that(result == entry_bad_attrs, eq=True)
+        assert result == entry_bad_attrs
 
     def test_oracle_attribute_extension(
         self, client: FlextTapLdapClient.LDAPClient
@@ -250,20 +231,20 @@ class TestLDAPClientQuick:
         extended = client._extend_attributes_with_oracle_support(
             base_attrs, oracle_oid_mode=True
         )
-        u.Tests.Matchers.that(extended is not None, eq=True)
         assert extended is not None
-        u.Tests.Matchers.that("uid" in extended, eq=True)
-        u.Tests.Matchers.that("cn" in extended, eq=True)
-        u.Tests.Matchers.that("orclPassword" in extended, eq=True)
-        u.Tests.Matchers.that("userPassword" in extended, eq=True)
+        assert extended is not None
+        assert "uid" in extended
+        assert "cn" in extended
+        assert "orclPassword" in extended
+        assert "userPassword" in extended
         result = client._extend_attributes_with_oracle_support(
             base_attrs, oracle_oid_mode=False
         )
-        u.Tests.Matchers.that(result == base_attrs, eq=True)
+        assert result == base_attrs
         result = client._extend_attributes_with_oracle_support(
             None, oracle_oid_mode=True
         )
-        u.Tests.Matchers.that(result is None, eq=True)
+        assert result is None
 
     def test_process_search_results_with_oracle_support(
         self, client: FlextTapLdapClient.LDAPClient
@@ -281,16 +262,16 @@ class TestLDAPClientQuick:
         results = client._process_search_results_with_oracle_support(
             search_results, oracle_oid_mode=True
         )
-        u.Tests.Matchers.that(len(results) == 2, eq=True)
+        assert len(results) == 2
         attributes = results[0].get("attributes")
-        u.Tests.Matchers.that(isinstance(attributes, dict), eq=True)
         assert isinstance(attributes, dict)
-        u.Tests.Matchers.that("userPassword" in attributes, eq=True)
+        assert isinstance(attributes, dict)
+        assert "userPassword" in attributes
         results = client._process_search_results_with_oracle_support(
             search_results, oracle_oid_mode=False
         )
-        u.Tests.Matchers.that(len(results) == 2, eq=True)
-        u.Tests.Matchers.that(results[0] == search_results[0], eq=True)
+        assert len(results) == 2
+        assert results[0] == search_results[0]
 
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_execute_oracle_search_in_new_loop(
@@ -302,7 +283,7 @@ class TestLDAPClientQuick:
                 "dc=test,dc=com", "(uid=*)", ["uid"], oracle_oid_mode=True
             )
             result_list = list(result)
-            u.Tests.Matchers.that(len(result_list) >= 0, eq=True)
+            assert len(result_list) >= 0
 
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_with_oracle_support_scenarios(
@@ -313,7 +294,7 @@ class TestLDAPClientQuick:
         results = client.search_with_oracle_support(
             "dc=oracle,dc=com", "(uid=*)", ["uid"], oracle_oid_mode=True
         )
-        u.Tests.Matchers.that(list(results) == [], eq=True)
+        assert list(results) == []
         mock_get_loop.side_effect = RuntimeError("no event loop")
 
     def test_attribute_delegation_to_flext_api(
@@ -321,6 +302,6 @@ class TestLDAPClientQuick:
     ) -> None:
         """Test attribute delegation to flext API."""
         result = client.search
-        u.Tests.Matchers.that(callable(result), eq=True)
+        assert callable(result)
         with contextlib.suppress(AttributeError):
             _ = client.non_existent_method

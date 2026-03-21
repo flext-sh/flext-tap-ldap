@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import override
 
 from flext_core import FlextLogger, r
-from flext_core.models import m
+from flext_ldap.models import FlextLdapModels as m
 from flext_ldif import FlextLdif
 from pydantic import TypeAdapter, ValidationError
 

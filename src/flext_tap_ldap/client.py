@@ -14,8 +14,6 @@ from asyncio import get_running_loop, new_event_loop, set_event_loop
 from collections.abc import Mapping, Sequence
 
 from flext_core import FlextLogger, r
-from flext_core.constants import c
-from flext_core.models import m
 from flext_core.typings import t
 from flext_ldap import (
     FlextLdap,
@@ -25,8 +23,10 @@ from flext_ldap import (
 )
 from pydantic import BaseModel
 
+from flext_tap_ldap.constants import FlextTapLdapConstants as c
 from flext_tap_ldap.models import FlextTapLdapModels
 
+m = FlextTapLdapModels
 logger = FlextLogger(__name__)
 
 
@@ -430,6 +430,8 @@ class FlextTapLdapClient:
             if isinstance(raw_attrs, Mapping):
                 for attr_name, attr_value in raw_attrs.items():
                     attributes[str(attr_name)] = attr_value
+            else:
+                return entry
             if "orclPassword" in attributes:
                 pwd_val = attributes.get("orclPassword")
                 if pwd_val is not None:
@@ -447,6 +449,7 @@ class FlextTapLdapClient:
                 ):
                     obj_classes.append("organizationalUnit")
                     attributes["objectClass"] = obj_classes
+            entry["attributes"] = attributes
             return entry
 
         def _process_search_results(

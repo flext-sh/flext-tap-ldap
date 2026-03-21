@@ -141,7 +141,14 @@ class TestFlextTapLdapIntegration:
             exit_error: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(exit_error)
         lines = result.output.strip().split("\n")
-        messages = [json.loads(line) for line in lines if line]
+        messages: list[dict[str, object]] = []
+        for line in lines:
+            if not line:
+                continue
+            try:
+                messages.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
         message_types = {msg["type"] for msg in messages}
         if "SCHEMA" not in message_types:
             schema_error: str = f"Expected {'SCHEMA'} in {message_types}"

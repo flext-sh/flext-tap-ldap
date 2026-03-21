@@ -17,10 +17,11 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING
 
-from flext_core.constants import c
 from flext_ldap import FlextLdapTypes
 from flext_meltano import FlextMeltanoTypes
 from pydantic import ConfigDict, TypeAdapter
+
+from flext_tap_ldap.constants import FlextTapLdapConstants as c
 
 if TYPE_CHECKING:
     from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams

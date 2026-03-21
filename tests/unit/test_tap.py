@@ -10,7 +10,6 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
-from flext_tests import u
 
 from flext_tap_ldap import FlextTapLdapStreams, FlextTapLdapTap, m, t
 
@@ -61,8 +60,8 @@ class TestFlextTapLdapTapUnit:
             msg: str = f"Expected {'FlextMeltanoTapAbstractions-ldap'}, got {tap.name}"
             raise AssertionError(msg)
         stream_names, stream_count = _discover_stream_names(tap, config)
-        u.Tests.Matchers.that(stream_count >= 4, eq=True)
-        u.Tests.Matchers.that("users" in stream_names, eq=True)
+        assert stream_count >= 4
+        assert "users" in stream_names
 
     def test_stream_discovery(self, config: dict[str, t.Scalar]) -> None:
         """Test stream discovery."""
@@ -71,11 +70,11 @@ class TestFlextTapLdapTapUnit:
         if "users" not in stream_names:
             stream_error: str = f"Expected {'users'} in {stream_names}"
             raise AssertionError(stream_error)
-        u.Tests.Matchers.that("groups" in stream_names, eq=True)
+        assert "groups" in stream_names
         if "organizational_units" not in stream_names:
             ou_error: str = f"Expected {'organizational_units'} in {stream_names}"
             raise AssertionError(ou_error)
-        u.Tests.Matchers.that("schema" in stream_names, eq=True)
+        assert "schema" in stream_names
         if stream_count != 4:
             count_error: str = f"Expected {4}, got {stream_count}"
             raise AssertionError(count_error)
@@ -107,9 +106,9 @@ class TestFlextTapLdapTapUnit:
             count_error: str = f"Expected {len(streams)} >= {4}"
             raise AssertionError(count_error)
         users_stream = next(s for s in streams if s["stream"] == "users")
-        u.Tests.Matchers.that(users_stream["stream"] == "users", eq=True)
+        assert users_stream["stream"] == "users"
 
-    @patch("flext_tap_ldap.client.LDAPClient")
+    @patch("flext_tap_ldap.streams.LDAPClient")
     def test_stream_records(
         self,
         mock_client_class: MagicMock,
@@ -121,12 +120,10 @@ class TestFlextTapLdapTapUnit:
         mock_client.search.return_value = [
             {
                 "dn": "uid=jdoe,ou=users,dc=test,dc=com",
-                "attributes": {
-                    "uid": "jdoe",
-                    "cn": "John Doe",
-                    "mail": "jdoe@test.com",
-                    "objectClass": ["inetOrgPerson", "person"],
-                },
+                "uid": "jdoe",
+                "cn": "John Doe",
+                "mail": "jdoe@test.com",
+                "objectClass": ["inetOrgPerson", "person"],
             }
         ]
 
@@ -140,8 +137,6 @@ class TestFlextTapLdapTapUnit:
             count_error: str = f"Expected {1}, got {len(records)}"
             raise AssertionError(count_error)
         record = records[0]
-        u.Tests.Matchers.that(
-            str(record["dn"]) == "uid=jdoe,ou=users,dc=test,dc=com", eq=True
-        )
-        u.Tests.Matchers.that(str(record["uid"]) == "jdoe", eq=True)
-        u.Tests.Matchers.that(config["ldap_host"] == "test.ldap.com", eq=True)
+        assert str(record["dn"]) == "uid=jdoe,ou=users,dc=test,dc=com"
+        assert str(record["uid"]) == "jdoe"
+        assert config["ldap_host"] == "test.ldap.com"

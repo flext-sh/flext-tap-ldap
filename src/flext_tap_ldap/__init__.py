@@ -58,7 +58,7 @@ if TYPE_CHECKING:
     from flext_tap_ldap.services import FlextTapLdapServices
     from flext_tap_ldap.settings import FlextTapLdapSettings
     from flext_tap_ldap.streams import FlextTapLdapStreams
-    from flext_tap_ldap.tap import FlextTapLdapTap, logger, main
+    from flext_tap_ldap.tap import CLI_COMMAND, FlextTapLdapTap, logger, main
     from flext_tap_ldap.typings import FlextTapLdapTypes, FlextTapLdapTypes as t
     from flext_tap_ldap.utilities import (
         FlextTapLdapUtilities,
@@ -66,6 +66,7 @@ if TYPE_CHECKING:
     )
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
+    "CLI_COMMAND": ("flext_tap_ldap.tap", "CLI_COMMAND"),
     "Entry": ("flext_tap_ldap.processor", "Entry"),
     "FlextLdifDistinguishedName": (
         "flext_tap_ldap.processor",
@@ -117,6 +118,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
 }
 
 __all__ = [
+    "CLI_COMMAND",
     "Entry",
     "FlextLdifDistinguishedName",
     "FlextTapLdapClient",
