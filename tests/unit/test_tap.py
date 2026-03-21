@@ -10,7 +10,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
-from flext_tests import tm
+from flext_tests import m, t, u
 
 from flext_tap_ldap import FlextTapLdapStreams, FlextTapLdapTap, m, t
 
@@ -61,8 +61,8 @@ class TestFlextTapLdapTapUnit:
             msg: str = f"Expected {'FlextMeltanoTapAbstractions-ldap'}, got {tap.name}"
             raise AssertionError(msg)
         stream_names, stream_count = _discover_stream_names(tap, config)
-        tm.that(stream_count >= 4, eq=True)
-        tm.that("users" in stream_names, eq=True)
+        u.Tests.Matchers.that(stream_count >= 4, eq=True)
+        u.Tests.Matchers.that("users" in stream_names, eq=True)
 
     def test_stream_discovery(self, config: dict[str, t.Scalar]) -> None:
         """Test stream discovery."""
@@ -71,11 +71,11 @@ class TestFlextTapLdapTapUnit:
         if "users" not in stream_names:
             stream_error: str = f"Expected {'users'} in {stream_names}"
             raise AssertionError(stream_error)
-        tm.that("groups" in stream_names, eq=True)
+        u.Tests.Matchers.that("groups" in stream_names, eq=True)
         if "organizational_units" not in stream_names:
             ou_error: str = f"Expected {'organizational_units'} in {stream_names}"
             raise AssertionError(ou_error)
-        tm.that("schema" in stream_names, eq=True)
+        u.Tests.Matchers.that("schema" in stream_names, eq=True)
         if stream_count != 4:
             count_error: str = f"Expected {4}, got {stream_count}"
             raise AssertionError(count_error)
@@ -107,7 +107,7 @@ class TestFlextTapLdapTapUnit:
             count_error: str = f"Expected {len(streams)} >= {4}"
             raise AssertionError(count_error)
         users_stream = next(s for s in streams if s["stream"] == "users")
-        tm.that(users_stream["stream"] == "users", eq=True)
+        u.Tests.Matchers.that(users_stream["stream"] == "users", eq=True)
 
     @patch("flext_tap_ldap.client.LDAPClient")
     def test_stream_records(
@@ -140,6 +140,8 @@ class TestFlextTapLdapTapUnit:
             count_error: str = f"Expected {1}, got {len(records)}"
             raise AssertionError(count_error)
         record = records[0]
-        tm.that(str(record["dn"]) == "uid=jdoe,ou=users,dc=test,dc=com", eq=True)
-        tm.that(str(record["uid"]) == "jdoe", eq=True)
-        tm.that(config["ldap_host"] == "test.ldap.com", eq=True)
+        u.Tests.Matchers.that(
+            str(record["dn"]) == "uid=jdoe,ou=users,dc=test,dc=com", eq=True
+        )
+        u.Tests.Matchers.that(str(record["uid"]) == "jdoe", eq=True)
+        u.Tests.Matchers.that(config["ldap_host"] == "test.ldap.com", eq=True)

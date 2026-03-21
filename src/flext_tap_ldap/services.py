@@ -16,11 +16,13 @@ from pathlib import Path
 from uuid import uuid4
 
 from flext_core import FlextLogger, r
+from flext_core.constants import c
+from flext_core.typings import t
 from flext_ldif import FlextLdif
 from pydantic import ValidationError
 
-from flext_tap_ldap import FlextTapLdapSettings, c, t
 from flext_tap_ldap.models import FlextTapLdapModels
+from flext_tap_ldap.settings import FlextTapLdapSettings
 from flext_tap_ldap.typings import FlextTapLdapTypes
 
 logger = FlextLogger(__name__)

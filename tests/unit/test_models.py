@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import datetime
 
 import pytest
-from flext_tests import tm
+from flext_tests import m, u
 
 from flext_tap_ldap import m
 
@@ -26,10 +26,10 @@ class TestTapExecutionStartedEvent:
             execution_id="exec-123",
             config_hash="hash-abc",
         )
-        tm.that(event.execution_id == "exec-123", eq=True)
-        tm.that(event.config_hash == "hash-abc", eq=True)
-        tm.that(event.tap_name == "tap-ldap", eq=True)
-        tm.that(isinstance(event.timestamp, datetime), eq=True)
+        u.Tests.Matchers.that(event.execution_id == "exec-123", eq=True)
+        u.Tests.Matchers.that(event.config_hash == "hash-abc", eq=True)
+        u.Tests.Matchers.that(event.tap_name == "tap-ldap", eq=True)
+        u.Tests.Matchers.that(isinstance(event.timestamp, datetime), eq=True)
 
     def test_event_defaults(self) -> None:
         """Test event default values."""
@@ -38,9 +38,9 @@ class TestTapExecutionStartedEvent:
             aggregate_id="tap-ldap-002",
             execution_id="exec-456",
         )
-        tm.that(event.execution_id == "exec-456", eq=True)
-        tm.that(event.config_hash is None, eq=True)
-        tm.that(event.tap_name == "tap-ldap", eq=True)
+        u.Tests.Matchers.that(event.execution_id == "exec-456", eq=True)
+        u.Tests.Matchers.that(event.config_hash is None, eq=True)
+        u.Tests.Matchers.that(event.tap_name == "tap-ldap", eq=True)
 
 
 class TestTapExecutionCompletedEvent:
@@ -56,10 +56,10 @@ class TestTapExecutionCompletedEvent:
             streams_discovered=4,
             duration_seconds=15.5,
         )
-        tm.that(event.execution_id == "exec-789", eq=True)
-        tm.that(event.records_processed == 100, eq=True)
-        tm.that(event.streams_discovered == 4, eq=True)
-        tm.that(event.duration_seconds == pytest.approx(15.5), eq=True)
+        u.Tests.Matchers.that(event.execution_id == "exec-789", eq=True)
+        u.Tests.Matchers.that(event.records_processed == 100, eq=True)
+        u.Tests.Matchers.that(event.streams_discovered == 4, eq=True)
+        u.Tests.Matchers.that(event.duration_seconds == pytest.approx(15.5), eq=True)
 
     def test_event_defaults(self) -> None:
         """Test event default values."""
@@ -68,9 +68,9 @@ class TestTapExecutionCompletedEvent:
             aggregate_id="tap-ldap-004",
             execution_id="exec-000",
         )
-        tm.that(event.records_processed == 0, eq=True)
-        tm.that(event.streams_discovered == 0, eq=True)
-        tm.that(event.duration_seconds == pytest.approx(0.0), eq=True)
+        u.Tests.Matchers.that(event.records_processed == 0, eq=True)
+        u.Tests.Matchers.that(event.streams_discovered == 0, eq=True)
+        u.Tests.Matchers.that(event.duration_seconds == pytest.approx(0.0), eq=True)
 
 
 class TestStreamDiscoveredEvent:
@@ -85,9 +85,9 @@ class TestStreamDiscoveredEvent:
             stream_key_properties=["dn"],
             bookmark_key="modifyTimestamp",
         )
-        tm.that(event.stream_name == "users", eq=True)
-        tm.that(event.stream_key_properties == ["dn"], eq=True)
-        tm.that(event.bookmark_key == "modifyTimestamp", eq=True)
+        u.Tests.Matchers.that(event.stream_name == "users", eq=True)
+        u.Tests.Matchers.that(event.stream_key_properties == ["dn"], eq=True)
+        u.Tests.Matchers.that(event.bookmark_key == "modifyTimestamp", eq=True)
 
     def test_event_defaults(self) -> None:
         """Test event default values."""
@@ -96,8 +96,8 @@ class TestStreamDiscoveredEvent:
             aggregate_id="tap-ldap-006",
             stream_name="groups",
         )
-        tm.that(event.stream_key_properties == [], eq=True)
-        tm.that(event.bookmark_key is None, eq=True)
+        u.Tests.Matchers.that(event.stream_key_properties == [], eq=True)
+        u.Tests.Matchers.that(event.bookmark_key is None, eq=True)
 
 
 class TestRecordExtractedEvent:
@@ -112,9 +112,11 @@ class TestRecordExtractedEvent:
             record_id="uid=jdoe,ou=users,dc=example,dc=com",
             record_size_bytes=256,
         )
-        tm.that(event.stream_name == "users", eq=True)
-        tm.that(event.record_id == "uid=jdoe,ou=users,dc=example,dc=com", eq=True)
-        tm.that(event.record_size_bytes == 256, eq=True)
+        u.Tests.Matchers.that(event.stream_name == "users", eq=True)
+        u.Tests.Matchers.that(
+            event.record_id == "uid=jdoe,ou=users,dc=example,dc=com", eq=True
+        )
+        u.Tests.Matchers.that(event.record_size_bytes == 256, eq=True)
 
     def test_event_defaults(self) -> None:
         """Test event default values."""
@@ -123,8 +125,8 @@ class TestRecordExtractedEvent:
             aggregate_id="tap-ldap-008",
             stream_name="groups",
         )
-        tm.that(event.record_id is None, eq=True)
-        tm.that(event.record_size_bytes == 0, eq=True)
+        u.Tests.Matchers.that(event.record_id is None, eq=True)
+        u.Tests.Matchers.that(event.record_size_bytes == 0, eq=True)
 
 
 class TestConnectionTestedEvent:
@@ -135,9 +137,9 @@ class TestConnectionTestedEvent:
         event = m.TapLdap.ConnectionTestedEvent(
             success=True, server_uri="ldap://localhost:389"
         )
-        tm.that(event.success is True, eq=True)
-        tm.that(event.server_uri == "ldap://localhost:389", eq=True)
-        tm.that(event.error_message is None, eq=True)
+        u.Tests.Matchers.that(event.success is True, eq=True)
+        u.Tests.Matchers.that(event.server_uri == "ldap://localhost:389", eq=True)
+        u.Tests.Matchers.that(event.error_message is None, eq=True)
 
     def test_event_creation_failure(self) -> None:
         """Test creating failed connection tested event."""
@@ -146,5 +148,5 @@ class TestConnectionTestedEvent:
             server_uri="ldap://invalid:389",
             error_message="Connection refused",
         )
-        tm.that(event.success is False, eq=True)
-        tm.that(event.error_message == "Connection refused", eq=True)
+        u.Tests.Matchers.that(event.success is False, eq=True)
+        u.Tests.Matchers.that(event.error_message == "Connection refused", eq=True)

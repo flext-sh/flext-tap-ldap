@@ -16,10 +16,9 @@ from pathlib import Path
 from typing import override
 
 from flext_core import FlextLogger, r
+from flext_core.models import m
 from flext_ldif import FlextLdif
 from pydantic import TypeAdapter, ValidationError
-
-from flext_tap_ldap import m
 
 
 class FlextLdifDistinguishedName(m.Ldif.DN):
