@@ -17,7 +17,6 @@ from flext_tests import t, u
 
 from flext_tap_ldap import FlextTapLdapLdifStreams, FlextTapLdapProcessor
 from flext_tap_ldap.processor import Entry, Transformer
-from tests import t
 
 
 class TestLdifProcessor:

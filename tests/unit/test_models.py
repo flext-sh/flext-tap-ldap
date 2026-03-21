@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import datetime
 
 import pytest
-from flext_tests import m, u
+from flext_tests import u
 
 from flext_tap_ldap import m
 
