@@ -20,6 +20,16 @@ from click.testing import CliRunner
 from flext_tap_ldap import CLI_COMMAND, t
 
 
+def _extract_json_from_output(output: str) -> object:
+    """Extract the JSON object from CLI output that may contain log lines."""
+    for line in output.strip().splitlines():
+        stripped = line.strip()
+        if stripped.startswith("{"):
+            return json.loads(stripped)
+    msg = f"No JSON found in output: {output[:200]}"
+    raise ValueError(msg)
+
+
 class TestFlextTapLdapIntegration:
     """Integration tests for tap-ldap."""
 
@@ -102,7 +112,8 @@ class TestFlextTapLdapIntegration:
         if result.exit_code != 0:
             exit_error: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(exit_error)
-        catalog = json.loads(result.output)
+        catalog = _extract_json_from_output(result.output)
+        assert isinstance(catalog, dict)
         if "streams" not in catalog:
             catalog_error: str = f"Expected {'streams'} in {catalog}"
             raise AssertionError(catalog_error)
@@ -228,8 +239,11 @@ class TestFlextTapLdapIntegration:
         if result.exit_code != 0:
             exit_error: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(exit_error)
-        catalog = json.loads(result.output)
-        stream_names = [s["tap_stream_id"] for s in catalog["streams"]]
+        catalog = _extract_json_from_output(result.output)
+        assert isinstance(catalog, dict)
+        stream_names = [
+            s.get("tap_stream_id", s.get("stream")) for s in catalog["streams"]
+        ]
         if "service_accounts" not in stream_names:
             stream_error: str = f"Expected {'service_accounts'} in {stream_names}"
             raise AssertionError(stream_error)
