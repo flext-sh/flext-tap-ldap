@@ -108,7 +108,7 @@ class TestFlextTapLdapTapUnit:
         users_stream = next(s for s in streams if s["stream"] == "users")
         assert users_stream["stream"] == "users"
 
-    @patch("flext_tap_ldap.streams.LDAPClient")
+    @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_stream_records(
         self,
         mock_client_class: MagicMock,
