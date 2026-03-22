@@ -32,12 +32,6 @@ _CONFIG_MAP_ADAPTER = TypeAdapter(
     config=ConfigDict(strict=False),
 )
 
-type TapLdapStream = (
-    FlextTapLdapStreams.LDAPBaseStream
-    | FlextTapLdapLdifStreams.LdifStream
-    | FlextTapLdapLdifStreams.LdifAnalysisStream
-)
-
 _CUSTOM_STREAM_ADAPTER = TypeAdapter(
     dict[str, object],
     config=ConfigDict(strict=False),
@@ -154,9 +148,16 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             FlextTapLdapStreams.OrganizationalUnitsStream(self),
             FlextTapLdapStreams.SchemaStream(self),
         ]
-        streams: list[TapLdapStream] = list(ldap_streams)
+        streams: list[
+            FlextTapLdapStreams.LDAPBaseStream
+            | FlextTapLdapLdifStreams.LdifStream
+            | FlextTapLdapLdifStreams.LdifAnalysisStream
+        ] = list(ldap_streams)
         if bool(config_map.get("enable_ldif_streams", False)):
-            ldif_stream_list: list[TapLdapStream] = [
+            ldif_stream_list: list[
+                FlextTapLdapLdifStreams.LdifStream
+                | FlextTapLdapLdifStreams.LdifAnalysisStream
+            ] = [
                 FlextTapLdapLdifStreams.LdifStream(self),
                 FlextTapLdapLdifStreams.LdifAnalysisStream(self),
             ]
@@ -176,7 +177,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
     def execute(self) -> r[bool]:
         """Execute the tap. Delegates to parent if available, otherwise returns success."""
         if hasattr(super(), "execute"):
-            return super().execute()  # type: ignore[misc]
+            return super().execute()
         return r[bool].ok(True)
 
 
