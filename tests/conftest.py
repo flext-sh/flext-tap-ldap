@@ -10,7 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from flext_tests.docker import tk
+from flext_tests import tk
 
 
 @pytest.fixture(scope="session")

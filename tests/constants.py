@@ -1,6 +1,6 @@
-"""Module skeleton for TestsFlextTapLdapConstants.
+"""Module skeleton for FlextTapLdapTestConstants.
 
-Test constants for flexttapldap.
+Test constants for flext-tap-ldap.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -8,20 +8,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tests import c
-
-from flext_tap_ldap import FlextTapLdapConstants
+from flext_tests import FlextTestsConstants
 
 
-class TestsFlextTapLdapConstants(c):
-    """Test constants for flexttapldap."""
-
-    class TapLdap(FlextTapLdapConstants.TapLdap):
-        """TapLdap contants namespace."""
-
-        class Tests:
-            """Internal tests declarations."""
+class FlextTapLdapTestConstants(FlextTestsConstants):
+    """Test constants for flext-tap-ldap."""
 
 
-c = TestsFlextTapLdapConstants
-__all__ = ["TestsFlextTapLdapConstants", "c"]
+c = FlextTapLdapTestConstants
+__all__ = ["FlextTapLdapTestConstants", "c"]

@@ -9,7 +9,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import json
 from collections.abc import Mapping
 from pathlib import Path
 from typing import ClassVar
@@ -27,6 +26,10 @@ from flext_tap_ldap.streams import FlextTapLdapStreams
 from flext_tap_ldap.typings import FlextTapLdapTypes as t
 
 logger = FlextLogger(__name__)
+_SINGER_OUTPUT_ADAPTER: TypeAdapter[dict[str, t.NormalizedValue]] = TypeAdapter(
+    dict[str, t.NormalizedValue],
+    config=ConfigDict(strict=False),
+)
 _CONFIG_MAP_ADAPTER = TypeAdapter(
     dict[str, Mapping[str, t.NormalizedValue]],
     config=ConfigDict(strict=False),
@@ -211,8 +214,8 @@ def _build_cli_command() -> click.Command:
         state_path: str | None,
     ) -> None:
         """Singer-compatible CLI for LDAP data extraction."""
-        raw_config: dict[str, t.NormalizedValue] = json.loads(
-            Path(config_path).read_text(encoding="utf-8")
+        raw_config: dict[str, t.NormalizedValue] = _CUSTOM_STREAM_ADAPTER.validate_json(
+            Path(config_path).read_bytes()
         )
         config_data: dict[str, t.Scalar] = {
             k: v
@@ -243,14 +246,14 @@ def _build_cli_command() -> click.Command:
                                 "schema": {},
                             }
                             catalog["streams"].append(cs_entry)
-                click.echo(json.dumps(catalog))
+                click.echo(_SINGER_OUTPUT_ADAPTER.dump_json(catalog).decode())
             return
 
         if catalog_path:
-            json.loads(Path(catalog_path).read_text(encoding="utf-8"))
+            _SINGER_OUTPUT_ADAPTER.validate_json(Path(catalog_path).read_bytes())
 
         if state_path:
-            json.loads(Path(state_path).read_text(encoding="utf-8"))
+            _SINGER_OUTPUT_ADAPTER.validate_json(Path(state_path).read_bytes())
 
         source_config = m.Meltano.DataSourceConfig(
             source_type="ldap",
@@ -267,7 +270,7 @@ def _build_cli_command() -> click.Command:
                     "schema": stream_entry.get("schema", {}),
                     "key_properties": ["dn"],
                 }
-                click.echo(json.dumps(schema_msg))
+                click.echo(_SINGER_OUTPUT_ADAPTER.dump_json(schema_msg).decode())
 
     return _cli
 

@@ -229,7 +229,9 @@ class TestFlextTapLdapIntegration:
         config_file = tmp_path / "config.json"
         with Path(config_file).open("w", encoding="utf-8") as f:
             json.dump(config, f)
-        with patch("flext_tap_ldap.client.LDAPClient") as mock_ldap_client:
+        with patch(
+            "flext_tap_ldap.client.FlextTapLdapClient.LDAPClient"
+        ) as mock_ldap_client:
             mock_client_instance = mock_ldap_client.return_value
             empty_records: list[dict[str, t.Scalar | Mapping[str, t.Scalar]]] = []
             mock_client_instance.search.return_value.__aenter__.return_value = (

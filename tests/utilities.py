@@ -2,7 +2,7 @@
 
 This module provides test-specific utilities that extend the main flext-tap-ldap utilities.
 Uses the unified namespace pattern u.TapLdap.* for test-only utilities.
-Combines u functionality with project-specific test utilities.
+Combines FlextTestsUtilities functionality with project-specific test utilities.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -11,13 +11,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tests import u
+from flext_tests import FlextTestsUtilities
 
 from flext_tap_ldap import FlextTapLdapUtilities
 
 
-class TestsFlextTapLdapUtilities(u, FlextTapLdapUtilities):
-    """Test utilities combining u with flext-tap-ldap utilities."""
+class FlextTapLdapTestUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
+    """Test utilities combining FlextTestsUtilities with flext-tap-ldap utilities."""
 
     class TapLdap(FlextTapLdapUtilities.TapLdap):
         """TapLdap test utilities namespace."""
@@ -26,5 +26,5 @@ class TestsFlextTapLdapUtilities(u, FlextTapLdapUtilities):
             """Internal tests declarations."""
 
 
-u = TestsFlextTapLdapUtilities
-__all__ = ["TestsFlextTapLdapUtilities", "u"]
+u = FlextTapLdapTestUtilities
+__all__ = ["FlextTapLdapTestUtilities", "u"]

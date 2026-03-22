@@ -82,7 +82,9 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             @model_validator(mode="before")
             @classmethod
-            def set_aggregate_id(cls, data: dict[str, object]) -> dict[str, object]:
+            def set_aggregate_id(
+                cls, data: dict[str, t.NormalizedValue]
+            ) -> dict[str, t.NormalizedValue]:
                 """Set aggregate_id from stream_name if not provided."""
                 if (
                     isinstance(data, dict)
@@ -109,7 +111,9 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             @model_validator(mode="before")
             @classmethod
-            def set_aggregate_id(cls, data: dict[str, object]) -> dict[str, object]:
+            def set_aggregate_id(
+                cls, data: dict[str, t.NormalizedValue]
+            ) -> dict[str, t.NormalizedValue]:
                 """Set aggregate_id from stream_name if not provided."""
                 if (
                     isinstance(data, dict)
@@ -127,9 +131,11 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             connection_id: str
             command: str
             tap_status: str = "created"
-            config: Annotated[dict[str, object], Field(default_factory=dict)]
-            catalog: Annotated[dict[str, object], Field(default_factory=dict)]
-            state: Annotated[dict[str, object], Field(default_factory=dict)]
+            config: Annotated[dict[str, t.NormalizedValue], Field(default_factory=dict)]
+            catalog: Annotated[
+                dict[str, t.NormalizedValue], Field(default_factory=dict)
+            ]
+            state: Annotated[dict[str, t.NormalizedValue], Field(default_factory=dict)]
             started_at: datetime | None = None
             completed_at: datetime | None = None
             records_extracted: int = 0
@@ -187,7 +193,9 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             @model_validator(mode="before")
             @classmethod
-            def set_aggregate_id(cls, data: dict[str, object]) -> dict[str, object]:
+            def set_aggregate_id(
+                cls, data: dict[str, t.NormalizedValue]
+            ) -> dict[str, t.NormalizedValue]:
                 """Set aggregate_id from server_uri if not provided."""
                 if (
                     isinstance(data, dict)
@@ -222,7 +230,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             name: str
             search_filter: str
             schema_properties: Annotated[
-                dict[str, object],
+                dict[str, t.NormalizedValue],
                 Field(default_factory=dict),
             ]
             primary_keys: Annotated[list[str], Field(default_factory=lambda: ["dn"])]
@@ -313,11 +321,11 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             replication_method: str = "FULL_TABLE"
             replication_key: str | None = None
             stream_schema: Annotated[
-                dict[str, object],
+                dict[str, t.NormalizedValue],
                 Field(default_factory=dict),
             ]
 
-            def update_schema(self, schema: Mapping[str, object]) -> None:
+            def update_schema(self, schema: Mapping[str, t.NormalizedValue]) -> None:
                 """Update stream schema from mapping."""
                 self.stream_schema = dict(schema)
 

@@ -11,12 +11,11 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
-
-    from flext_tap_ldap import d, e, h, r, s, x
+    from flext_tests import d, e, h, r, s, x
 
     from . import e2e as e2e, unit as unit
     from .conftest import pytest_configure, shared_ldap_container, test_data_dir
-    from .constants import TestsFlextTapLdapConstants, TestsFlextTapLdapConstants as c
+    from .constants import FlextTapLdapTestConstants, FlextTapLdapTestConstants as c
     from .e2e.conftest import (
         catalog_file,
         ldap_connection,
@@ -27,9 +26,9 @@ if TYPE_CHECKING:
         tap_config_file,
     )
     from .e2e.test_integration import TestFlextTapLdapIntegration
-    from .models import TestsFlextTapLdapModels, TestsFlextTapLdapModels as m
-    from .protocols import TestsFlextTapLdapProtocols, TestsFlextTapLdapProtocols as p
-    from .typings import TestsFlextTapLdapTypes, TestsFlextTapLdapTypes as t
+    from .models import FlextTapLdapTestModels, FlextTapLdapTestModels as m
+    from .protocols import FlextTapLdapTestProtocols, FlextTapLdapTestProtocols as p
+    from .typings import FlextTapLdapTestTypes, FlextTapLdapTestTypes as t
     from .unit.test_client import TestLDAPClientCoverageBoost
     from .unit.test_client_quick import TestLDAPClientQuick
     from .unit.test_ldif_processor import TestLdifProcessor
@@ -54,9 +53,14 @@ if TYPE_CHECKING:
         TestUsersStream,
     )
     from .unit.test_tap import TestFlextTapLdapTapUnit
-    from .utilities import TestsFlextTapLdapUtilities, TestsFlextTapLdapUtilities as u
+    from .utilities import FlextTapLdapTestUtilities, FlextTapLdapTestUtilities as u
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
+    "FlextTapLdapTestConstants": ("tests.constants", "FlextTapLdapTestConstants"),
+    "FlextTapLdapTestModels": ("tests.models", "FlextTapLdapTestModels"),
+    "FlextTapLdapTestProtocols": ("tests.protocols", "FlextTapLdapTestProtocols"),
+    "FlextTapLdapTestTypes": ("tests.typings", "FlextTapLdapTestTypes"),
+    "FlextTapLdapTestUtilities": ("tests.utilities", "FlextTapLdapTestUtilities"),
     "TestConnectionTestedEvent": (
         "tests.unit.test_models",
         "TestConnectionTestedEvent",
@@ -105,37 +109,37 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "TestTapExecutionStartedEvent",
     ),
     "TestUsersStream": ("tests.unit.test_streams", "TestUsersStream"),
-    "TestsFlextTapLdapConstants": ("tests.constants", "TestsFlextTapLdapConstants"),
-    "TestsFlextTapLdapModels": ("tests.models", "TestsFlextTapLdapModels"),
-    "TestsFlextTapLdapProtocols": ("tests.protocols", "TestsFlextTapLdapProtocols"),
-    "TestsFlextTapLdapTypes": ("tests.typings", "TestsFlextTapLdapTypes"),
-    "TestsFlextTapLdapUtilities": ("tests.utilities", "TestsFlextTapLdapUtilities"),
-    "c": ("tests.constants", "TestsFlextTapLdapConstants"),
+    "c": ("tests.constants", "FlextTapLdapTestConstants"),
     "catalog_file": ("tests.e2e.conftest", "catalog_file"),
-    "d": ("flext_tap_ldap", "d"),
-    "e": ("flext_tap_ldap", "e"),
+    "d": ("flext_tests", "d"),
+    "e": ("flext_tests", "e"),
     "e2e": ("tests.e2e", ""),
-    "h": ("flext_tap_ldap", "h"),
+    "h": ("flext_tests", "h"),
     "ldap_connection": ("tests.e2e.conftest", "ldap_connection"),
     "ldap_container": ("tests.e2e.conftest", "ldap_container"),
     "logger": ("tests.e2e.conftest", "logger"),
-    "m": ("tests.models", "TestsFlextTapLdapModels"),
-    "p": ("tests.protocols", "TestsFlextTapLdapProtocols"),
+    "m": ("tests.models", "FlextTapLdapTestModels"),
+    "p": ("tests.protocols", "FlextTapLdapTestProtocols"),
     "project_root": ("tests.e2e.conftest", "project_root"),
     "pytest_configure": ("tests.conftest", "pytest_configure"),
-    "r": ("flext_tap_ldap", "r"),
-    "s": ("flext_tap_ldap", "s"),
+    "r": ("flext_tests", "r"),
+    "s": ("flext_tests", "s"),
     "sample_catalog": ("tests.e2e.conftest", "sample_catalog"),
     "shared_ldap_container": ("tests.conftest", "shared_ldap_container"),
-    "t": ("tests.typings", "TestsFlextTapLdapTypes"),
+    "t": ("tests.typings", "FlextTapLdapTestTypes"),
     "tap_config_file": ("tests.e2e.conftest", "tap_config_file"),
     "test_data_dir": ("tests.conftest", "test_data_dir"),
-    "u": ("tests.utilities", "TestsFlextTapLdapUtilities"),
+    "u": ("tests.utilities", "FlextTapLdapTestUtilities"),
     "unit": ("tests.unit", ""),
-    "x": ("flext_tap_ldap", "x"),
+    "x": ("flext_tests", "x"),
 }
 
 __all__ = [
+    "FlextTapLdapTestConstants",
+    "FlextTapLdapTestModels",
+    "FlextTapLdapTestProtocols",
+    "FlextTapLdapTestTypes",
+    "FlextTapLdapTestUtilities",
     "TestConnectionTestedEvent",
     "TestCustomStream",
     "TestCustomStreamParams",
@@ -157,11 +161,6 @@ __all__ = [
     "TestTapExecutionCompletedEvent",
     "TestTapExecutionStartedEvent",
     "TestUsersStream",
-    "TestsFlextTapLdapConstants",
-    "TestsFlextTapLdapModels",
-    "TestsFlextTapLdapProtocols",
-    "TestsFlextTapLdapTypes",
-    "TestsFlextTapLdapUtilities",
     "c",
     "catalog_file",
     "d",
