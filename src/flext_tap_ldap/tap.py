@@ -176,7 +176,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
     def execute(self) -> r[bool]:
         """Execute the tap. Delegates to parent if available, otherwise returns success."""
         if hasattr(super(), "execute"):
-            return super().execute()  # type: ignore[no-any-return]
+            return super().execute()  # type: ignore[misc]
         return r[bool].ok(True)
 
 
