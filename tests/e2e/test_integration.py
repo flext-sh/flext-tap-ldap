@@ -97,7 +97,7 @@ class TestFlextTapLdapIntegration:
             json.dump(sample_state, f)
         return state_path
 
-    @patch("flext_tap_ldap.client.LDAPClient")
+    @patch("flext_tap_ldap.client.FlextTapLdapClient.LDAPClient")
     def test_discovery_mode(
         self, mock_ldap_client: Mock, runner: CliRunner, config_file: Path
     ) -> None:
@@ -131,7 +131,7 @@ class TestFlextTapLdapIntegration:
             raise AssertionError(ou_error)
         assert "schema" in stream_names
 
-    @patch("flext_tap_ldap.client.LDAPClient")
+    @patch("flext_tap_ldap.client.FlextTapLdapClient.LDAPClient")
     def test_sync_mode(
         self,
         mock_ldap_client: Mock,
@@ -169,7 +169,7 @@ class TestFlextTapLdapIntegration:
             schema_error: str = f"Expected {'SCHEMA'} in {message_types}"
             raise AssertionError(schema_error)
 
-    @patch("flext_tap_ldap.client.LDAPClient")
+    @patch("flext_tap_ldap.client.FlextTapLdapClient.LDAPClient")
     def test_incremental_sync(
         self,
         mock_ldap_client: Mock,
@@ -279,7 +279,7 @@ class TestFlextTapLdapIntegration:
             f"Expected config validation failure. Logs: {all_logs}, Output: {all_output}, Exit code: {result.exit_code}"
         )
 
-    @patch("flext_tap_ldap.client.LDAPClient")
+    @patch("flext_tap_ldap.client.FlextTapLdapClient.LDAPClient")
     def test_pagination_handling(
         self,
         mock_ldap_client: Mock,
