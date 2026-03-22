@@ -19,7 +19,7 @@ from pydantic import ValidationError
 if TYPE_CHECKING:
     from flext_meltano import FlextMeltanoAbstractions as Tap
 
-from flext_tap_ldap.client import LDAPClient
+from flext_tap_ldap.client import FlextTapLdapClient
 from flext_tap_ldap.constants import FlextTapLdapConstants as c
 from flext_tap_ldap.models import FlextTapLdapModels
 from flext_tap_ldap.typings import FlextTapLdapTypes
@@ -180,7 +180,7 @@ class FlextTapLdapStreams:
             self.tap_stream_id = name or "ldap_stream"
             self.schema = schema or {}
             self.config: dict[str, object] = getattr(tap, "config", {})
-            self.client: LDAPClient | None = None
+            self.client: FlextTapLdapClient.LDAPClient | None = None
             self.tap = tap
             self._create_ldap_client()
 
@@ -206,7 +206,7 @@ class FlextTapLdapStreams:
                     connection_config.bind_dn is not None
                     and connection_config.bind_password is not None
                 ):
-                    self.client = LDAPClient(
+                    self.client = FlextTapLdapClient.LDAPClient(
                         host=connection_config.host,
                         port=connection_config.port,
                         bind_dn=connection_config.bind_dn,
@@ -216,7 +216,7 @@ class FlextTapLdapStreams:
                         page_size=page_size,
                     )
                 elif connection_config.bind_dn is not None:
-                    self.client = LDAPClient(
+                    self.client = FlextTapLdapClient.LDAPClient(
                         host=connection_config.host,
                         port=connection_config.port,
                         bind_dn=connection_config.bind_dn,
@@ -225,7 +225,7 @@ class FlextTapLdapStreams:
                         page_size=page_size,
                     )
                 elif connection_config.bind_password is not None:
-                    self.client = LDAPClient(
+                    self.client = FlextTapLdapClient.LDAPClient(
                         host=connection_config.host,
                         port=connection_config.port,
                         password=connection_config.bind_password,
@@ -234,7 +234,7 @@ class FlextTapLdapStreams:
                         page_size=page_size,
                     )
                 else:
-                    self.client = LDAPClient(
+                    self.client = FlextTapLdapClient.LDAPClient(
                         host=connection_config.host,
                         port=connection_config.port,
                         use_ssl=connection_config.use_ssl,
