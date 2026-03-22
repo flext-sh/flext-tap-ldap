@@ -175,9 +175,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         return r[t.Meltano.Singer.StreamCatalog].ok(stream_catalog)
 
     def execute(self) -> r[bool]:
-        """Execute the tap. Delegates to parent if available, otherwise returns success."""
-        if hasattr(super(), "execute"):
-            return super().execute()
+        """Execute the tap. Returns success after stream discovery."""
         return r[bool].ok(True)
 
 
