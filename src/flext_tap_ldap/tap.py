@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping
 from pathlib import Path
-from typing import ClassVar, cast
+from typing import ClassVar
 
 import click
 from flext_core import FlextLogger, r
@@ -28,25 +28,27 @@ from flext_tap_ldap.typings import FlextTapLdapTypes as t
 
 logger = FlextLogger(__name__)
 _CONFIG_MAP_ADAPTER = TypeAdapter(
-    dict[str, Mapping[str, object]],
+    dict[str, Mapping[str, t.NormalizedValue]],
     config=ConfigDict(strict=False),
 )
 
 _CUSTOM_STREAM_ADAPTER = TypeAdapter(
-    dict[str, object],
+    dict[str, t.NormalizedValue],
     config=ConfigDict(strict=False),
 )
 
 
-def _validate_custom_stream(raw_item: object) -> dict[str, str] | None:
+def _validate_custom_stream(raw_item: t.NormalizedValue) -> dict[str, str] | None:
     """Validate a custom stream definition, returning name if valid."""
     try:
-        validated: dict[str, object] = _CUSTOM_STREAM_ADAPTER.validate_python(
-            raw_item,
+        validated: dict[str, t.NormalizedValue] = (
+            _CUSTOM_STREAM_ADAPTER.validate_python(
+                raw_item,
+            )
         )
     except ValidationError:
         return None
-    name_val: object = validated.get("name")
+    name_val: t.NormalizedValue = validated.get("name")
     if isinstance(name_val, str) and name_val:
         return {"name": name_val}
     return None
@@ -67,7 +69,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         self.config = {}
 
     config_class: ClassVar[type[FlextTapLdapSettings]] = FlextTapLdapSettings
-    config_jsonschema: ClassVar[dict[str, object]] = {
+    config_jsonschema: ClassVar[dict[str, t.NormalizedValue]] = {
         "type": "object",
         "properties": {
             "host": {"type": "string", "description": "LDAP server host"},
@@ -136,7 +138,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         """
         source_payload = source_config.model_dump(mode="python")
         raw_connection_config = source_payload.get("connection_config", {})
-        config_map: dict[str, Mapping[str, object]]
+        config_map: dict[str, Mapping[str, t.NormalizedValue]]
         try:
             config_map = _CONFIG_MAP_ADAPTER.validate_python(raw_connection_config)
         except ValidationError:
@@ -209,7 +211,7 @@ def _build_cli_command() -> click.Command:
         state_path: str | None,
     ) -> None:
         """Singer-compatible CLI for LDAP data extraction."""
-        raw_config: dict[str, object] = json.loads(
+        raw_config: dict[str, t.NormalizedValue] = json.loads(
             Path(config_path).read_text(encoding="utf-8")
         )
         config_data: dict[str, t.Scalar] = {
@@ -230,9 +232,9 @@ def _build_cli_command() -> click.Command:
             result = tap.discover_streams(source_config=source_config)
             if result.is_success and result.value:
                 catalog = result.value
-                raw_custom: object = raw_config.get("custom_streams")
+                raw_custom: t.NormalizedValue = raw_config.get("custom_streams")
                 if isinstance(raw_custom, list):
-                    for cs_item in cast("list[object]", raw_custom):
+                    for cs_item in raw_custom:
                         cs_dict = _validate_custom_stream(cs_item)
                         if cs_dict is not None:
                             cs_entry: t.Meltano.Singer.CatalogEntry = {
