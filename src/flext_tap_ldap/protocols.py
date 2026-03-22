@@ -73,7 +73,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 self,
                 base_dn: str,
             ) -> FlextMeltanoProtocols.Result[list[str]]:
-                """Discover object classes in LDAP directory."""
+                """Discover t.NormalizedValue classes in LDAP directory."""
                 ...
 
             def get_directory_metadata(
@@ -178,7 +178,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 """Get tap configuration.
 
                 Returns:
-                    Tap configuration object.
+                    Tap configuration t.NormalizedValue.
 
                 """
                 ...

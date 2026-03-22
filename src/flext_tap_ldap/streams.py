@@ -311,7 +311,7 @@ class FlextTapLdapStreams:
             """Initialize users stream."""
             name = "users"
             schema: dict[str, t.NormalizedValue] = {
-                "type": "object",
+                "type": "t.NormalizedValue",
                 "properties": {
                     "dn": {"type": "string", "description": "Distinguished Name"},
                     "objectClass": {
@@ -391,7 +391,7 @@ class FlextTapLdapStreams:
             """Initialize groups stream."""
             name = "groups"
             schema: dict[str, t.NormalizedValue] = {
-                "type": "object",
+                "type": "t.NormalizedValue",
                 "properties": {
                     "dn": {"type": "string", "description": "Distinguished Name"},
                     "member": {
@@ -470,7 +470,7 @@ class FlextTapLdapStreams:
             """Initialize organizational units stream."""
             name = "organizational_units"
             schema: dict[str, t.NormalizedValue] = {
-                "type": "object",
+                "type": "t.NormalizedValue",
                 "properties": {
                     "dn": {"type": "string", "description": "Distinguished Name"},
                     "objectClass": {
@@ -525,7 +525,7 @@ class FlextTapLdapStreams:
             """Initialize schema stream."""
             name = "schema"
             schema: dict[str, t.NormalizedValue] = {
-                "type": "object",
+                "type": "t.NormalizedValue",
                 "properties": {
                     "objectClass": {
                         "type": "array",
@@ -653,7 +653,7 @@ class FlextTapLdapStreams:
                     for key, value in params.schema_properties.items()
                 }
                 schema: dict[str, t.NormalizedValue] = {
-                    "type": "object",
+                    "type": "t.NormalizedValue",
                     "properties": {
                         "dn": {
                             "type": "string",
@@ -664,7 +664,7 @@ class FlextTapLdapStreams:
                 }
             else:
                 schema = {
-                    "type": "object",
+                    "type": "t.NormalizedValue",
                     "properties": {
                         "dn": {
                             "type": "string",

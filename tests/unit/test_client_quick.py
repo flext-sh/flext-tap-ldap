@@ -14,6 +14,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from flext_tap_ldap import FlextTapLdapClient
+from tests import t
 
 
 class TestLDAPClientQuick:
@@ -58,7 +59,7 @@ class TestLDAPClientQuick:
         """Test entry conversion with different scenarios."""
         # Test with a Mapping (dict) entry
         mail_values: list[str] = ["test@example.com"]
-        dict_entry: dict[str, object] = {
+        dict_entry: dict[str, t.NormalizedValue] = {
             "dn": "uid=dict,dc=example,dc=com",
             "attributes": {"mail": mail_values},
         }
@@ -68,7 +69,7 @@ class TestLDAPClientQuick:
         result = client._convert_entry_to_dict(None)
         assert result == {}
         # Test with a dict that has string values
-        simple_entry: dict[str, object] = {
+        simple_entry: dict[str, t.NormalizedValue] = {
             "dn": "uid=test,dc=example,dc=com",
             "uid": "test",
             "cn": ["Test", "T. User"],
@@ -109,7 +110,7 @@ class TestLDAPClientQuick:
         self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test search delegates to _perform_search."""
-        with patch.object(
+        with patch.t.NormalizedValue(
             client, "_perform_search", return_value=[{"test": "data"}]
         ) as mock_perform:
             results = client.search("dc=test,dc=com")
@@ -120,7 +121,9 @@ class TestLDAPClientQuick:
         self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test search passes all parameters to _perform_search."""
-        with patch.object(client, "_perform_search", return_value=[]) as mock_perform:
+        with patch.t.NormalizedValue(
+            client, "_perform_search", return_value=[]
+        ) as mock_perform:
             results = client.search("dc=test,dc=com", "(uid=*)", ["uid"], "BASE", 10)
             mock_perform.assert_called_once_with(
                 "dc=test,dc=com", "(uid=*)", ["uid"], "BASE", 10
@@ -135,7 +138,7 @@ class TestLDAPClientQuick:
         mock_result = Mock()
         mock_result.is_success = True
         api_cls = type(client._flext_api)
-        with patch.object(api_cls, "search", return_value=mock_result):
+        with patch.t.NormalizedValue(api_cls, "search", return_value=mock_result):
             result = client.test_connection()
         assert result is True
 
@@ -145,7 +148,9 @@ class TestLDAPClientQuick:
     ) -> None:
         """Test connection test returns True on expected errors (fallback)."""
         api_cls = type(client._flext_api)
-        with patch.object(api_cls, "search", side_effect=RuntimeError("test error")):
+        with patch.t.NormalizedValue(
+            api_cls, "search", side_effect=RuntimeError("test error")
+        ):
             result = client.test_connection()
         assert result is True
 
@@ -153,13 +158,13 @@ class TestLDAPClientQuick:
         self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test health check functionality."""
-        with patch.object(client, "test_connection", return_value=True):
+        with patch.t.NormalizedValue(client, "test_connection", return_value=True):
             health = client.health_check()
             assert health["status"] == "healthy"
             assert health["server_uri"] == "ldap://test.ldap.com:389"
             assert health["connection_test"] is True
             assert isinstance(health["response_time_ms"], (int, float))
-        with patch.object(client, "test_connection", return_value=False):
+        with patch.t.NormalizedValue(client, "test_connection", return_value=False):
             health = client.health_check()
             assert health["status"] == "unhealthy"
             assert health["connection_test"] is False
@@ -171,7 +176,7 @@ class TestLDAPClientQuick:
         uid_values: list[str] = ["test"]
         oracle_password_values: list[str] = ["hashed_password"]
         object_classes: list[str] = ["inetOrgPerson"]
-        entry: dict[str, object] = {
+        entry: dict[str, t.NormalizedValue] = {
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": {
                 "uid": uid_values,
@@ -182,42 +187,44 @@ class TestLDAPClientQuick:
         result = client._process_oracle_entry(entry)
         attributes_raw = result.get("attributes")
         assert isinstance(attributes_raw, dict)
-        attributes: dict[str, object] = cast("dict[str, object]", attributes_raw)
+        attributes: dict[str, t.NormalizedValue] = cast(
+            "dict[str, t.NormalizedValue]", attributes_raw
+        )
         assert "userPassword" in attributes
-        user_password: object = attributes.get("userPassword")
+        user_password: t.NormalizedValue = attributes.get("userPassword")
         assert isinstance(user_password, list)
         assert isinstance(user_password, list)
         assert "hashed_password" in user_password
 
         ou_values: list[str] = ["test"]
         container_classes: list[str] = ["orclContainer"]
-        entry_with_container: dict[str, object] = {
+        entry_with_container: dict[str, t.NormalizedValue] = {
             "dn": "ou=test,dc=oracle,dc=com",
             "attributes": {"ou": ou_values, "objectClass": container_classes},
         }
         result = client._process_oracle_entry(entry_with_container)
         attrs_raw2 = result.get("attributes")
         assert isinstance(attrs_raw2, dict)
-        attributes = cast("dict[str, object]", attrs_raw2)
-        object_class: object = attributes.get("objectClass")
+        attributes = cast("dict[str, t.NormalizedValue]", attrs_raw2)
+        object_class: t.NormalizedValue = attributes.get("objectClass")
         assert isinstance(object_class, list)
         assert isinstance(object_class, list)
         assert "organizationalUnit" in object_class
 
-        entry_string_oc: dict[str, object] = {
+        entry_string_oc: dict[str, t.NormalizedValue] = {
             "dn": "ou=test,dc=oracle,dc=com",
             "attributes": {"objectClass": "orclContainer"},
         }
         result = client._process_oracle_entry(entry_string_oc)
         attrs_raw3 = result.get("attributes")
         assert isinstance(attrs_raw3, dict)
-        attributes = cast("dict[str, object]", attrs_raw3)
-        obj_classes: object = attributes.get("objectClass")
+        attributes = cast("dict[str, t.NormalizedValue]", attrs_raw3)
+        obj_classes: t.NormalizedValue = attributes.get("objectClass")
         assert isinstance(obj_classes, list)
         assert isinstance(obj_classes, list)
         assert "organizationalUnit" in obj_classes
 
-        entry_bad_attrs: dict[str, object] = {
+        entry_bad_attrs: dict[str, t.NormalizedValue] = {
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": "not_a_dict",
         }
@@ -253,7 +260,7 @@ class TestLDAPClientQuick:
         """Test Oracle search result processing."""
         first_passwords: list[str] = ["pass1"]
         second_uids: list[str] = ["test2"]
-        search_results: list[dict[str, object]] = [
+        search_results: list[dict[str, t.NormalizedValue]] = [
             {
                 "dn": "uid=test1,dc=oracle,dc=com",
                 "attributes": {"orclPassword": first_passwords},
@@ -279,7 +286,7 @@ class TestLDAPClientQuick:
         self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test Oracle search execution in new loop."""
-        with patch.object(client, "search", return_value=[{"test": "data"}]):
+        with patch.t.NormalizedValue(client, "search", return_value=[{"test": "data"}]):
             result = client._execute_oracle_search_in_new_loop(
                 "dc=test,dc=com", "(uid=*)", ["uid"], oracle_oid_mode=True
             )

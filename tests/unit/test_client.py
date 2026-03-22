@@ -44,7 +44,7 @@ class TestLDAPClientCoverageBoost:
         self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test search method delegates to _perform_search."""
-        with patch.object(
+        with patch.t.NormalizedValue(
             client, "_perform_search", return_value=[{"test": "data"}]
         ) as mock_perform:
             results = client.search(
@@ -65,7 +65,9 @@ class TestLDAPClientCoverageBoost:
 
     def test_health_check_coverage(self, client: FlextTapLdapClient.LDAPClient) -> None:
         """Test health_check method to cover lines 264-270."""
-        with patch.object(client, "test_connection", return_value=True) as mock_test:
+        with patch.t.NormalizedValue(
+            client, "test_connection", return_value=True
+        ) as mock_test:
             health = client.health_check()
             mock_test.assert_called_once()
             assert health["status"] == "healthy"
@@ -73,7 +75,7 @@ class TestLDAPClientCoverageBoost:
             assert health["connection_test"] is True
             assert "response_time_ms" in health
             assert isinstance(health["response_time_ms"], (int, float))
-        with patch.object(client, "test_connection", return_value=False):
+        with patch.t.NormalizedValue(client, "test_connection", return_value=False):
             health = client.health_check()
             assert health["status"] == "unhealthy"
             assert health["connection_test"] is False
@@ -84,7 +86,7 @@ class TestLDAPClientCoverageBoost:
     ) -> None:
         """Test oracle support search without event loop."""
         mock_get_loop.side_effect = RuntimeError("no event loop")
-        with patch.object(
+        with patch.t.NormalizedValue(
             client,
             "_execute_oracle_search_in_new_loop",
             return_value=iter([{"oracle": "data"}]),
@@ -103,10 +105,10 @@ class TestLDAPClientCoverageBoost:
     ) -> None:
         """Test Oracle search execution to cover lines 350-361."""
         with (
-            patch.object(
+            patch.t.NormalizedValue(
                 client, "search", return_value=[{"test": "entry"}]
             ) as mock_search,
-            patch.object(
+            patch.t.NormalizedValue(
                 client,
                 "_process_search_results_with_oracle_support",
                 return_value=[{"processed": "entry"}],

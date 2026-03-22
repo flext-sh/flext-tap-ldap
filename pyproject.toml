@@ -110,7 +110,7 @@ known_first_party = [
 pep621_dev_dependency_groups = [ "dev" ]
 
 [tool.pyrefly]
-
+python-interpreter-path = "/home/marlonsc/flext/.venv/bin/python"
 ignore-errors-in-generated-code = true
 project-excludes = [
   "**/*_pb2*.py",

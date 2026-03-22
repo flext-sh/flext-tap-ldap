@@ -12,6 +12,7 @@ from unittest.mock import Mock
 
 from flext_tap_ldap import FlextTapLdapLdifStreams, FlextTapLdapProcessor
 from flext_tap_ldap.processor import Entry, Transformer
+from tests import t
 
 
 class TestLdifProcessor:
@@ -43,7 +44,7 @@ class TestLdifProcessor:
         stream._logger_instance = None
         seen: list[str] = []
 
-        def _process(ldif_file: str) -> list[dict[str, object]]:
+        def _process(ldif_file: str) -> list[dict[str, t.NormalizedValue]]:
             seen.append(ldif_file)
             return [{"dn": ldif_file}]
 

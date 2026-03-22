@@ -72,7 +72,7 @@ class FlextTapLdapServices:
             self,
             params: FlextTapLdapServices.LDAPConnectionParams,
         ) -> r[FlextTapLdapServices.LDAPConnection]:
-            """Create LDAP connection using parameter object pattern."""
+            """Create LDAP connection using parameter t.NormalizedValue pattern."""
             try:
                 connection = FlextTapLdapServices.LDAPConnection(
                     id=uuid4().hex,
@@ -159,7 +159,7 @@ class FlextTapLdapServices:
             self,
             params: FlextTapLdapServices.StreamCreationParams,
         ) -> r[FlextTapLdapServices.LDAPStream]:
-            """Create LDAP stream using parameter object pattern."""
+            """Create LDAP stream using parameter t.NormalizedValue pattern."""
             try:
                 tap_stream_id = params.tap_stream_id
                 if not tap_stream_id:
@@ -192,7 +192,7 @@ class FlextTapLdapServices:
                 if not stream:
                     return r[Mapping[str, t.NormalizedValue]].fail("Stream not found")
                 schema: dict[str, t.NormalizedValue] = {
-                    "type": "object",
+                    "type": "t.NormalizedValue",
                     "properties": {
                         "dn": {"type": "string"},
                         "objectClass": {"type": "array", "items": {"type": "string"}},
@@ -546,7 +546,7 @@ class FlextTapLdapServices:
         """Create LDAP connection configuration using Parameter Object Pattern.
 
         Args:
-        params: LDAP connection parameters object
+        params: LDAP connection parameters t.NormalizedValue
 
         Returns:
         r with connection configuration or error message.

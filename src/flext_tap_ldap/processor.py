@@ -90,7 +90,7 @@ class Entry:
         return []
 
     def has_object_class(self, object_class: str) -> bool:
-        """Check if entry has specific object class."""
+        """Check if entry has specific t.NormalizedValue class."""
         object_classes: list[str] = self.get_attribute("objectClass") or []
         return any(oc.lower() == object_class.lower() for oc in object_classes)
 
@@ -245,7 +245,7 @@ class FlextTapLdapProcessor:
         ]
 
     def filter_by_objectclass(self, object_class: str) -> list[Entry]:
-        """Filter entries by object class."""
+        """Filter entries by t.NormalizedValue class."""
         return [entry for entry in self.entries if entry.has_object_class(object_class)]
 
     def get_statistics(self) -> Mapping[str, t.NormalizedValue]:

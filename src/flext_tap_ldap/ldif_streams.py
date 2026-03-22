@@ -70,7 +70,7 @@ class FlextTapLdapLdifStreams:
             self._ldap_api = FlextLdapConnection()
             self._logger_instance: FlextLogger | None = None
             self.schema = {
-                "type": "object",
+                "type": "t.NormalizedValue",
                 "properties": {
                     "dn": {"type": "string", "description": "Distinguished Name"},
                     "entry_type": {
@@ -83,7 +83,7 @@ class FlextTapLdapLdifStreams:
                         "description": "Object classes",
                     },
                     "attributes": {
-                        "type": "object",
+                        "type": "t.NormalizedValue",
                         "description": "Entry attributes",
                     },
                 },
@@ -227,7 +227,7 @@ class FlextTapLdapLdifStreams:
             self._ldap_api = FlextLdapConnection()
             self._logger_instance: p.Logger | None = None
             self.schema: dict[str, t.NormalizedValue] = {
-                "type": "object",
+                "type": "t.NormalizedValue",
                 "properties": {
                     "analysis_id": {
                         "type": "string",
@@ -238,12 +238,12 @@ class FlextTapLdapLdifStreams:
                         "description": "Total number of entries",
                     },
                     "entry_types": {
-                        "type": "object",
+                        "type": "t.NormalizedValue",
                         "description": "Count by entry type",
                     },
                     "object_classes": {
-                        "type": "object",
-                        "description": "Count by object class",
+                        "type": "t.NormalizedValue",
+                        "description": "Count by t.NormalizedValue class",
                     },
                 },
             }

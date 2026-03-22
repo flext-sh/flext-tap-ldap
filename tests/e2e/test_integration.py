@@ -21,8 +21,8 @@ from click.testing import CliRunner
 from flext_tap_ldap import CLI_COMMAND, t
 
 
-def _extract_json_from_output(output: str) -> object:
-    """Extract the JSON object from CLI output that may contain log lines."""
+def _extract_json_from_output(output: str) -> t.NormalizedValue:
+    """Extract the JSON t.NormalizedValue from CLI output that may contain log lines."""
     for line in output.strip().splitlines():
         stripped = line.strip()
         if stripped.startswith("{"):
@@ -45,7 +45,7 @@ class TestFlextTapLdapIntegration:
         return CliRunner()
 
     @pytest.fixture
-    def mock_ldap_config(self) -> dict[str, object]:
+    def mock_ldap_config(self) -> dict[str, t.NormalizedValue]:
         """Mock LDAP configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -56,7 +56,7 @@ class TestFlextTapLdapIntegration:
         }
 
     @pytest.fixture
-    def sample_catalog(self) -> dict[str, object]:
+    def sample_catalog(self) -> dict[str, t.NormalizedValue]:
         """Sample catalog for testing."""
         return {
             "streams": [
@@ -69,12 +69,14 @@ class TestFlextTapLdapIntegration:
         }
 
     @pytest.fixture
-    def sample_state(self) -> dict[str, object]:
+    def sample_state(self) -> dict[str, t.NormalizedValue]:
         """Sample state for testing."""
         return {"bookmarks": {}}
 
     @pytest.fixture
-    def config_file(self, tmp_path: Path, mock_ldap_config: dict[str, object]) -> Path:
+    def config_file(
+        self, tmp_path: Path, mock_ldap_config: dict[str, t.NormalizedValue]
+    ) -> Path:
         """Create temporary config file."""
         config_path = tmp_path / "config.json"
         with Path(config_path).open("w", encoding="utf-8") as f:
@@ -82,7 +84,9 @@ class TestFlextTapLdapIntegration:
         return config_path
 
     @pytest.fixture
-    def catalog_file(self, tmp_path: Path, sample_catalog: dict[str, object]) -> Path:
+    def catalog_file(
+        self, tmp_path: Path, sample_catalog: dict[str, t.NormalizedValue]
+    ) -> Path:
         """Create temporary catalog file."""
         catalog_path = tmp_path / "catalog.json"
         with Path(catalog_path).open("w", encoding="utf-8") as f:
@@ -90,7 +94,9 @@ class TestFlextTapLdapIntegration:
         return catalog_path
 
     @pytest.fixture
-    def state_file(self, tmp_path: Path, sample_state: dict[str, object]) -> Path:
+    def state_file(
+        self, tmp_path: Path, sample_state: dict[str, t.NormalizedValue]
+    ) -> Path:
         """Create a state file fixture for testing."""
         state_path = tmp_path / "state.json"
         with Path(state_path).open("w", encoding="utf-8") as f:
@@ -118,10 +124,10 @@ class TestFlextTapLdapIntegration:
         if "streams" not in catalog:
             catalog_error: str = f"Expected {'streams'} in {catalog}"
             raise AssertionError(catalog_error)
-        streams: list[dict[str, object]] = cast(
-            "list[dict[str, object]]", catalog["streams"]
+        streams: list[dict[str, t.NormalizedValue]] = cast(
+            "list[dict[str, t.NormalizedValue]]", catalog["streams"]
         )
-        stream_names: list[object] = [s["tap_stream_id"] for s in streams]
+        stream_names: list[t.NormalizedValue] = [s["tap_stream_id"] for s in streams]
         if "users" not in stream_names:
             stream_error: str = f"Expected {'users'} in {stream_names}"
             raise AssertionError(stream_error)
@@ -156,7 +162,7 @@ class TestFlextTapLdapIntegration:
             exit_error: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(exit_error)
         lines = result.output.strip().split("\n")
-        messages: list[dict[str, object]] = []
+        messages: list[dict[str, t.NormalizedValue]] = []
         for line in lines:
             if not line:
                 continue
@@ -247,10 +253,10 @@ class TestFlextTapLdapIntegration:
             raise AssertionError(exit_error)
         catalog = _extract_json_from_output(result.output)
         assert isinstance(catalog, dict)
-        cat_streams: list[dict[str, object]] = cast(
-            "list[dict[str, object]]", catalog["streams"]
+        cat_streams: list[dict[str, t.NormalizedValue]] = cast(
+            "list[dict[str, t.NormalizedValue]]", catalog["streams"]
         )
-        stream_names: list[object] = [
+        stream_names: list[t.NormalizedValue] = [
             s.get("tap_stream_id", s.get("stream")) for s in cat_streams
         ]
         if "service_accounts" not in stream_names:

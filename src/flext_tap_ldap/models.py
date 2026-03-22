@@ -251,7 +251,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 return self
 
         class LdapClientConfig(BaseModel):
-            """Parameter object for LDAP client initialization."""
+            """Parameter t.NormalizedValue for LDAP client initialization."""
 
             host: str
             port: int = c.TapLdap.DEFAULT_PORT

@@ -73,7 +73,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
 
     config_class: ClassVar[type[FlextTapLdapSettings]] = FlextTapLdapSettings
     config_jsonschema: ClassVar[dict[str, t.NormalizedValue]] = {
-        "type": "object",
+        "type": "t.NormalizedValue",
         "properties": {
             "host": {"type": "string", "description": "LDAP server host"},
             "port": {
