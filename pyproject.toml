@@ -120,6 +120,19 @@ project-excludes = [
 python-version = "3.13"
 search-path = [
   ".",
+  "../flext-core/examples",
+  "../flext-core/src",
+  "../flext-core/tests",
+  "../flext-ldap/docs",
+  "../flext-ldap/src",
+  "../flext-ldap/tests",
+  "../flext-meltano/docs",
+  "../flext-meltano/examples",
+  "../flext-meltano/src",
+  "../flext-meltano/tests",
+  "docs",
+  "src",
+  "tests",
 ]
 
 [tool.pyrefly.errors]
@@ -153,7 +166,26 @@ python_version = "3.13"
 # [MANAGED] pydantic-mypy
 explicit_package_bases = true
 ignore_missing_imports = true
+mypy_path = [
+  ".",
+  "../flext-core/examples",
+  "../flext-core/src",
+  "../flext-core/tests",
+  "../flext-ldap/docs",
+  "../flext-ldap/src",
+  "../flext-ldap/tests",
+  "../flext-meltano/docs",
+  "../flext-meltano/examples",
+  "../flext-meltano/src",
+  "../flext-meltano/tests",
+  "../typings",
+  "../typings/generated",
+  "docs",
+  "src",
+  "tests",
+]
 namespace_packages = true
+
 [tool.pydantic-mypy]
 init_forbid_extra = true
 init_typed = true
@@ -183,7 +215,9 @@ preview = true
 respect-gitignore = true
 show-fixes = true
 src = [
+  "docs",
   "src",
+  "tests",
 ]
 target-version = "py313"
 
@@ -526,7 +560,22 @@ line-ending = "lf"
 quote-style = "double"
 [tool.pyright]
 extraPaths = [
+  ".",
+  "../flext-core/examples",
+  "../flext-core/src",
+  "../flext-core/tests",
+  "../flext-ldap/docs",
+  "../flext-ldap/src",
+  "../flext-ldap/tests",
+  "../flext-meltano/docs",
+  "../flext-meltano/examples",
+  "../flext-meltano/src",
+  "../flext-meltano/tests",
+  "../typings",
+  "../typings/generated",
+  "docs",
   "src",
+  "tests",
 ]
 pythonPlatform = "Linux"
 pythonVersion = "3.13"
@@ -559,6 +608,8 @@ root = "src"
 [[tool.pyright.executionEnvironments]]
 reportPrivateUsage = "none"
 root = "tests"
+
+# [MANAGED] tomlsort
 [tool.tomlsort]
 all = true
 in_place = true
