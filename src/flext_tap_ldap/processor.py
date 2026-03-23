@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Iterator, Mapping, Sequence
+from collections.abc import Iterator, Mapping, MutableMapping, MutableSequence, Sequence
 from pathlib import Path
 from typing import override
 
@@ -56,13 +56,13 @@ class Entry:
         self.dn = dn
         self.attributes = dict(attributes or {})
         self.change_type: str | None = None
-        self.controls: Sequence[str] = []
+        self.controls: MutableSequence[str] = []
         self._flext_entry = self._create_flext_entry()
 
     @property
-    def validation_errors(self) -> Sequence[Mapping[str, str]]:
+    def validation_errors(self) -> MutableSequence[MutableMapping[str, str]]:
         """Get validation errors for this entry."""
-        errors: Sequence[Mapping[str, str]] = []
+        errors: MutableSequence[MutableMapping[str, str]] = []
         if not self.is_valid():
             errors.append({
                 "code": "invalid_entry",
@@ -70,7 +70,7 @@ class Entry:
             })
         return errors
 
-    def add_attribute(self, name: str, value: str | Sequence[str]) -> None:
+    def add_attribute(self, name: str, value: str | MutableSequence[str]) -> None:
         """Add an attribute to the entry."""
         if name not in self.attributes:
             self.attributes[name] = []
@@ -134,9 +134,9 @@ class Entry:
         if name in self.attributes:
             self.attributes[name] = []
 
-    def to_dict(self) -> Mapping[str, t.NormalizedValue]:
+    def to_dict(self) -> MutableMapping[str, t.NormalizedValue]:
         """Convert entry to dictionary format."""
-        entry_dict: Mapping[str, t.NormalizedValue] = {
+        entry_dict: MutableMapping[str, t.NormalizedValue] = {
             "dn": self.dn,
             "attributes": dict(self.attributes),
         }
@@ -146,7 +146,7 @@ class Entry:
             entry_dict["controls"] = self.controls
         return entry_dict
 
-    def update_attribute(self, name: str, value: str | Sequence[str]) -> None:
+    def update_attribute(self, name: str, value: str | MutableSequence[str]) -> None:
         """Update an attribute value, replacing existing values."""
         match value:
             case list() as value_list:

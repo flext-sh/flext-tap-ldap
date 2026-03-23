@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
 
 from flext_core import FlextLogger, r, t
 from flext_ldap import (
@@ -223,7 +223,7 @@ class FlextTapLdapClient:
         def _convert_entry_to_dict(
             self,
             entry_data: t.RuntimeData | Mapping[str, t.NormalizedValue] | None,
-        ) -> Mapping[str, t.NormalizedValue]:
+        ) -> MutableMapping[str, t.NormalizedValue]:
             """Convert FlextLdapModels.Entry to dict format for testing.
 
             Single Responsibility: Handle only entry format conversion.
@@ -232,18 +232,18 @@ class FlextTapLdapClient:
                 return {}
             if isinstance(entry_data, BaseModel):
                 dn_value: str = str(getattr(entry_data, "dn", ""))
-                model_data: Mapping[str, t.NormalizedValue] = dict(
+                model_data: MutableMapping[str, t.NormalizedValue] = dict(
                     entry_data.model_dump()
                 )
                 attrs_val: t.NormalizedValue = model_data.get("attributes", {})
-                attrs_dict: Mapping[str, t.NormalizedValue]
+                attrs_dict: MutableMapping[str, t.NormalizedValue]
                 if isinstance(attrs_val, dict):
                     attrs_dict = attrs_val
                 else:
                     return {"dn": dn_value}
-                entry_dict: Mapping[str, t.NormalizedValue] = {"dn": dn_value}
+                entry_dict: MutableMapping[str, t.NormalizedValue] = {"dn": dn_value}
                 for key_str, val in attrs_dict.items():
-                    typed_list: Sequence[t.NormalizedValue] = (
+                    typed_list: MutableSequence[t.NormalizedValue] = (
                         val if isinstance(val, list) else []
                     )
                     if isinstance(val, list) and len(typed_list) == 1:
@@ -252,7 +252,7 @@ class FlextTapLdapClient:
                         entry_dict[key_str] = val
                 return entry_dict
             if isinstance(entry_data, Mapping):
-                result: Mapping[str, t.NormalizedValue] = {}
+                result: MutableMapping[str, t.NormalizedValue] = {}
                 for key, value in entry_data.items():
                     if isinstance(
                         value,
@@ -339,15 +339,15 @@ class FlextTapLdapClient:
             attributes: Sequence[str] | None,
             *,
             oracle_oid_mode: bool,
-        ) -> Sequence[str] | None:
+        ) -> MutableSequence[str] | None:
             """Extend attributes list with Oracle-specific attributes.
 
             Single Responsibility: Handle only Oracle attribute extension logic.
             """
             if not oracle_oid_mode or not attributes:
-                return attributes
+                return list(attributes) if attributes else None
             oracle_attrs = ["orclPassword", "orclPasswordAttribute", "userPassword"]
-            extended_attributes = attributes.copy()
+            extended_attributes = list(attributes)
             for oracle_attr in oracle_attrs:
                 if oracle_attr not in extended_attributes:
                     extended_attributes.append(oracle_attr)
@@ -397,7 +397,7 @@ class FlextTapLdapClient:
             attributes: Sequence[str] | None,
             ldap_scope: str,
             size_limit: int,
-        ) -> Sequence[Mapping[str, t.NormalizedValue]]:
+        ) -> MutableSequence[MutableMapping[str, t.NormalizedValue]]:
             """Perform actual LDAP search.
 
             Single Responsibility: Handle only search execution.
@@ -429,11 +429,11 @@ class FlextTapLdapClient:
 
         def _process_oracle_entry(
             self,
-            entry: Mapping[str, t.NormalizedValue],
-        ) -> Mapping[str, t.NormalizedValue]:
+            entry: MutableMapping[str, t.NormalizedValue],
+        ) -> MutableMapping[str, t.NormalizedValue]:
             """Process Oracle-specific LDAP entries for testing convenience."""
             raw_attrs: t.NormalizedValue = entry.get("attributes", {})
-            attributes: Mapping[str, t.NormalizedValue] = {}
+            attributes: MutableMapping[str, t.NormalizedValue] = {}
             if isinstance(raw_attrs, dict):
                 attributes.update(raw_attrs)
             else:
@@ -444,7 +444,7 @@ class FlextTapLdapClient:
                     attributes["userPassword"] = pwd_val
             if "objectClass" in attributes:
                 raw_obj_classes = attributes["objectClass"]
-                obj_classes: Sequence[str] = []
+                obj_classes: MutableSequence[str] = []
                 if isinstance(raw_obj_classes, str):
                     obj_classes = [raw_obj_classes]
                 elif isinstance(raw_obj_classes, list):
@@ -462,12 +462,12 @@ class FlextTapLdapClient:
             self,
             result: r[m.Ldap.SearchResult],
             size_limit: int,
-        ) -> Sequence[Mapping[str, t.NormalizedValue]]:
+        ) -> MutableSequence[MutableMapping[str, t.NormalizedValue]]:
             """Process LDAP search results with size limiting.
 
             Single Responsibility: Handle only result processing logic.
             """
-            entries: Sequence[Mapping[str, t.NormalizedValue]] = []
+            entries: MutableSequence[MutableMapping[str, t.NormalizedValue]] = []
             if not (result.is_success and result.value):
                 return entries
             search_result = result.value
@@ -485,15 +485,15 @@ class FlextTapLdapClient:
             | Sequence[Mapping[str, t.NormalizedValue]],
             *,
             oracle_oid_mode: bool,
-        ) -> Sequence[Mapping[str, t.NormalizedValue]]:
+        ) -> MutableSequence[MutableMapping[str, t.NormalizedValue]]:
             """Process search results with Oracle OID support.
 
             Single Responsibility: Handle only result processing logic.
             """
-            results: Sequence[Mapping[str, t.NormalizedValue]] = []
+            results: MutableSequence[MutableMapping[str, t.NormalizedValue]] = []
             for entry in search_result:
                 if isinstance(entry, Mapping):
-                    entry_dict: Mapping[str, t.NormalizedValue] = {
+                    entry_dict: MutableMapping[str, t.NormalizedValue] = {
                         str(key): value for key, value in entry.items()
                     }
                 else:

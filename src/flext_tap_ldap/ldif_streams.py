@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator, Mapping, Sequence
+from collections.abc import Iterable, Iterator, Mapping, MutableMapping, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
@@ -266,8 +266,8 @@ class FlextTapLdapLdifStreams:
             ldif_directory = self.config.get("ldif_directory")
             try:
                 total_entries = 0
-                entry_types: Mapping[str, int] = {}
-                object_classes: Mapping[str, int] = {}
+                entry_types: MutableMapping[str, int] = {}
+                object_classes: MutableMapping[str, int] = {}
                 if ldif_files:
                     for ldif_file in ldif_files:
                         match ldif_file:
@@ -355,8 +355,8 @@ class FlextTapLdapLdifStreams:
                 content = Path(ldif_file).read_text(encoding="utf-8")
                 result = self._ldif_api.parse(content)
                 if result.is_success and result.value:
-                    entry_types: Mapping[str, int] = {}
-                    object_classes: Mapping[str, int] = {}
+                    entry_types: MutableMapping[str, int] = {}
+                    object_classes: MutableMapping[str, int] = {}
                     for entry in result.value:
                         if not isinstance(entry, m.Ldif.Entry):
                             continue
