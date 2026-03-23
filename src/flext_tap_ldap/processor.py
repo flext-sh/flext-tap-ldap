@@ -15,11 +15,9 @@ from collections.abc import Iterator, Mapping
 from pathlib import Path
 from typing import override
 
-from flext_core import FlextLogger, r
-from flext_core.typings import t
-from flext_ldap.models import FlextLdapModels as m
-from flext_ldif import FlextLdif
-from flext_ldif.models import FlextLdifModels
+from flext_core import FlextLogger, r, t
+from flext_ldap import m
+from flext_ldif import FlextLdif, FlextLdifModels
 from pydantic import TypeAdapter, ValidationError
 
 _DEFAULT_ENTRY_METADATA = FlextLdifModels.Ldif.EntryMetadata()

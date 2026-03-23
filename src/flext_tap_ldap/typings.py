@@ -21,7 +21,7 @@ from flext_ldap import FlextLdapTypes
 from flext_meltano import FlextMeltanoTypes
 from pydantic import ConfigDict, TypeAdapter
 
-from flext_tap_ldap.constants import FlextTapLdapConstants as c
+from flext_tap_ldap.constants import c
 
 if TYPE_CHECKING:
     from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams

@@ -6,11 +6,8 @@ from collections.abc import Iterable, Iterator, Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
-from flext_core import FlextLogger
-from flext_core.protocols import FlextProtocols as p
-from flext_core.typings import t
-from flext_ldap import FlextLdapConnection
-from flext_ldap.models import FlextLdapModels as m
+from flext_core import FlextLogger, p, t
+from flext_ldap import FlextLdapConnection, m
 from flext_ldif import FlextLdif
 from pydantic import ConfigDict, TypeAdapter, ValidationError
 

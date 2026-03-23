@@ -13,8 +13,7 @@ import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
 from collections.abc import Mapping, Sequence
 
-from flext_core import FlextLogger, r
-from flext_core.typings import t
+from flext_core import FlextLogger, r, t
 from flext_ldap import (
     FlextLdap,
     FlextLdapConnection,
@@ -23,7 +22,7 @@ from flext_ldap import (
 )
 from pydantic import BaseModel
 
-from flext_tap_ldap.constants import FlextTapLdapConstants as c
+from flext_tap_ldap.constants import c
 from flext_tap_ldap.models import FlextTapLdapModels
 
 m = FlextTapLdapModels
