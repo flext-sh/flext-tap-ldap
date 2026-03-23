@@ -14,9 +14,11 @@ from pathlib import Path
 import pytest
 from flext_core import FlextDecorators as d, FlextLogger
 from flext_tests import tk
-from ldap3 import ALL, Connection, Server
+from ldap3 import Connection, Server
 
 from tests import t
+
+_LDAP3_ALL = "ALL"
 
 logger = FlextLogger(__name__)
 
@@ -35,7 +37,7 @@ def sample_catalog() -> dict[str, t.NormalizedValue]:
             {
                 "tap_stream_id": "users",
                 "schema": {
-                    "type": "t.NormalizedValue",
+                    "type": "object",
                     "properties": {
                         "dn": {"type": "string"},
                         "uid": {"type": "string"},
@@ -61,7 +63,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
 
     @d.retry(max_attempts=30, delay_seconds=2.0, backoff_strategy="linear")
     def _check_ldap_ready() -> None:
-        server = Server("localhost", port=10389, get_info=ALL)
+        server = Server("localhost", port=10389, get_info=_LDAP3_ALL)
         conn = Connection(
             server,
             user="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
@@ -82,7 +84,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
 @pytest.fixture
 def ldap_connection(_ldap_container: None) -> Generator[Connection]:
     """Create LDAP connection for testing."""
-    server = Server("localhost", port=10389, get_info=ALL)
+    server = Server("localhost", port=10389, get_info=_LDAP3_ALL)
     conn = Connection(
         server,
         user="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",

@@ -191,7 +191,7 @@ class FlextTapLdapServices:
                 if not stream:
                     return r[Mapping[str, t.NormalizedValue]].fail("Stream not found")
                 schema: dict[str, t.NormalizedValue] = {
-                    "type": "t.NormalizedValue",
+                    "type": "object",
                     "properties": {
                         "dn": {"type": "string"},
                         "objectClass": {"type": "array", "items": {"type": "string"}},
