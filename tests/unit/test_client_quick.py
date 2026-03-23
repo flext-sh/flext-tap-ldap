@@ -110,7 +110,7 @@ class TestLDAPClientQuick:
         self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test search delegates to _perform_search."""
-        with patch.t.NormalizedValue(
+        with patch.object(
             client, "_perform_search", return_value=[{"test": "data"}]
         ) as mock_perform:
             results = client.search("dc=test,dc=com")
@@ -121,9 +121,7 @@ class TestLDAPClientQuick:
         self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test search passes all parameters to _perform_search."""
-        with patch.t.NormalizedValue(
-            client, "_perform_search", return_value=[]
-        ) as mock_perform:
+        with patch.object(client, "_perform_search", return_value=[]) as mock_perform:
             results = client.search("dc=test,dc=com", "(uid=*)", ["uid"], "BASE", 10)
             mock_perform.assert_called_once_with(
                 "dc=test,dc=com", "(uid=*)", ["uid"], "BASE", 10
@@ -138,7 +136,7 @@ class TestLDAPClientQuick:
         mock_result = Mock()
         mock_result.is_success = True
         api_cls = type(client._flext_api)
-        with patch.t.NormalizedValue(api_cls, "search", return_value=mock_result):
+        with patch.object(api_cls, "search", return_value=mock_result):
             result = client.test_connection()
         assert result is True
 
@@ -148,9 +146,7 @@ class TestLDAPClientQuick:
     ) -> None:
         """Test connection test returns True on expected errors (fallback)."""
         api_cls = type(client._flext_api)
-        with patch.t.NormalizedValue(
-            api_cls, "search", side_effect=RuntimeError("test error")
-        ):
+        with patch.object(api_cls, "search", side_effect=RuntimeError("test error")):
             result = client.test_connection()
         assert result is True
 
@@ -158,13 +154,13 @@ class TestLDAPClientQuick:
         self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test health check functionality."""
-        with patch.t.NormalizedValue(client, "test_connection", return_value=True):
+        with patch.object(client, "test_connection", return_value=True):
             health = client.health_check()
             assert health["status"] == "healthy"
             assert health["server_uri"] == "ldap://test.ldap.com:389"
             assert health["connection_test"] is True
             assert isinstance(health["response_time_ms"], (int, float))
-        with patch.t.NormalizedValue(client, "test_connection", return_value=False):
+        with patch.object(client, "test_connection", return_value=False):
             health = client.health_check()
             assert health["status"] == "unhealthy"
             assert health["connection_test"] is False
@@ -286,7 +282,7 @@ class TestLDAPClientQuick:
         self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test Oracle search execution in new loop."""
-        with patch.t.NormalizedValue(client, "search", return_value=[{"test": "data"}]):
+        with patch.object(client, "search", return_value=[{"test": "data"}]):
             result = client._execute_oracle_search_in_new_loop(
                 "dc=test,dc=com", "(uid=*)", ["uid"], oracle_oid_mode=True
             )
