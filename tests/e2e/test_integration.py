@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import time
-from collections.abc import Generator, Mapping
+from collections.abc import Generator, Mapping, Sequence
 from pathlib import Path
 from typing import cast
 from unittest.mock import Mock, patch
@@ -45,7 +45,7 @@ class TestFlextTapLdapIntegration:
         return CliRunner()
 
     @pytest.fixture
-    def mock_ldap_config(self) -> dict[str, t.NormalizedValue]:
+    def mock_ldap_config(self) -> Mapping[str, t.NormalizedValue]:
         """Mock LDAP configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -56,7 +56,7 @@ class TestFlextTapLdapIntegration:
         }
 
     @pytest.fixture
-    def sample_catalog(self) -> dict[str, t.NormalizedValue]:
+    def sample_catalog(self) -> Mapping[str, t.NormalizedValue]:
         """Sample catalog for testing."""
         return {
             "streams": [
@@ -69,13 +69,13 @@ class TestFlextTapLdapIntegration:
         }
 
     @pytest.fixture
-    def sample_state(self) -> dict[str, t.NormalizedValue]:
+    def sample_state(self) -> Mapping[str, t.NormalizedValue]:
         """Sample state for testing."""
         return {"bookmarks": {}}
 
     @pytest.fixture
     def config_file(
-        self, tmp_path: Path, mock_ldap_config: dict[str, t.NormalizedValue]
+        self, tmp_path: Path, mock_ldap_config: Mapping[str, t.NormalizedValue]
     ) -> Path:
         """Create temporary config file."""
         config_path = tmp_path / "config.json"
@@ -85,7 +85,7 @@ class TestFlextTapLdapIntegration:
 
     @pytest.fixture
     def catalog_file(
-        self, tmp_path: Path, sample_catalog: dict[str, t.NormalizedValue]
+        self, tmp_path: Path, sample_catalog: Mapping[str, t.NormalizedValue]
     ) -> Path:
         """Create temporary catalog file."""
         catalog_path = tmp_path / "catalog.json"
@@ -95,7 +95,7 @@ class TestFlextTapLdapIntegration:
 
     @pytest.fixture
     def state_file(
-        self, tmp_path: Path, sample_state: dict[str, t.NormalizedValue]
+        self, tmp_path: Path, sample_state: Mapping[str, t.NormalizedValue]
     ) -> Path:
         """Create a state file fixture for testing."""
         state_path = tmp_path / "state.json"
@@ -109,7 +109,7 @@ class TestFlextTapLdapIntegration:
     ) -> None:
         """Test discovery mode functionality."""
         mock_client_instance = mock_ldap_client.return_value
-        empty_records: list[dict[str, t.Scalar | Mapping[str, t.Scalar]]] = []
+        empty_records: Sequence[Mapping[str, t.Scalar | Mapping[str, t.Scalar]]] = []
         mock_client_instance.search.return_value.__aenter__.return_value = empty_records
         result = runner.invoke(
             self._cli_command(),
@@ -124,10 +124,12 @@ class TestFlextTapLdapIntegration:
         if "streams" not in catalog:
             catalog_error: str = f"Expected {'streams'} in {catalog}"
             raise AssertionError(catalog_error)
-        streams: list[dict[str, t.NormalizedValue]] = cast(
-            "list[dict[str, t.NormalizedValue]]", catalog["streams"]
+        streams: Sequence[Mapping[str, t.NormalizedValue]] = cast(
+            "Sequence[Mapping[str, t.NormalizedValue]]", catalog["streams"]
         )
-        stream_names: list[t.NormalizedValue] = [s["tap_stream_id"] for s in streams]
+        stream_names: Sequence[t.NormalizedValue] = [
+            s["tap_stream_id"] for s in streams
+        ]
         if "users" not in stream_names:
             stream_error: str = f"Expected {'users'} in {stream_names}"
             raise AssertionError(stream_error)
@@ -162,7 +164,7 @@ class TestFlextTapLdapIntegration:
             exit_error: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(exit_error)
         lines = result.output.strip().split("\n")
-        messages: list[dict[str, t.NormalizedValue]] = []
+        messages: Sequence[Mapping[str, t.NormalizedValue]] = []
         for line in lines:
             if not line:
                 continue
@@ -186,7 +188,7 @@ class TestFlextTapLdapIntegration:
     ) -> None:
         """Test incremental sync functionality."""
         mock_client_instance = mock_ldap_client.return_value
-        empty_records: list[dict[str, t.Scalar | Mapping[str, t.Scalar]]] = []
+        empty_records: Sequence[Mapping[str, t.Scalar | Mapping[str, t.Scalar]]] = []
         mock_client_instance.search.return_value.__aenter__.return_value = empty_records
         result = runner.invoke(
             self._cli_command(),
@@ -239,7 +241,9 @@ class TestFlextTapLdapIntegration:
             "flext_tap_ldap.client.FlextTapLdapClient.LDAPClient"
         ) as mock_ldap_client:
             mock_client_instance = mock_ldap_client.return_value
-            empty_records: list[dict[str, t.Scalar | Mapping[str, t.Scalar]]] = []
+            empty_records: Sequence[
+                Mapping[str, t.Scalar | Mapping[str, t.Scalar]]
+            ] = []
             mock_client_instance.search.return_value.__aenter__.return_value = (
                 empty_records
             )
@@ -253,10 +257,10 @@ class TestFlextTapLdapIntegration:
             raise AssertionError(exit_error)
         catalog = _extract_json_from_output(result.output)
         assert isinstance(catalog, dict)
-        cat_streams: list[dict[str, t.NormalizedValue]] = cast(
-            "list[dict[str, t.NormalizedValue]]", catalog["streams"]
+        cat_streams: Sequence[Mapping[str, t.NormalizedValue]] = cast(
+            "Sequence[Mapping[str, t.NormalizedValue]]", catalog["streams"]
         )
-        stream_names: list[t.NormalizedValue] = [
+        stream_names: Sequence[t.NormalizedValue] = [
             s.get("tap_stream_id", s.get("stream")) for s in cat_streams
         ]
         if "service_accounts" not in stream_names:
@@ -301,7 +305,7 @@ class TestFlextTapLdapIntegration:
         def mock_search(
             *_args: t.Scalar,
             **_kwargs: t.Scalar,
-        ) -> Generator[dict[str, t.Scalar | Mapping[str, t.Scalar]]]:
+        ) -> Generator[Mapping[str, t.Scalar | Mapping[str, t.Scalar]]]:
             time.sleep(0)
             yield {
                 "dn": "uid=user1,ou=users,dc=test,dc=com",

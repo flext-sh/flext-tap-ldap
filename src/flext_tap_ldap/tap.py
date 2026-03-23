@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import ClassVar
 
@@ -26,25 +26,25 @@ from flext_tap_ldap.streams import FlextTapLdapStreams
 from flext_tap_ldap.typings import t
 
 logger = FlextLogger(__name__)
-_SINGER_OUTPUT_ADAPTER: TypeAdapter[dict[str, t.NormalizedValue]] = TypeAdapter(
-    dict[str, t.NormalizedValue],
+_SINGER_OUTPUT_ADAPTER: TypeAdapter[Mapping[str, t.NormalizedValue]] = TypeAdapter(
+    Mapping[str, t.NormalizedValue],
     config=ConfigDict(strict=False),
 )
 _CONFIG_MAP_ADAPTER = TypeAdapter(
-    dict[str, Mapping[str, t.NormalizedValue]],
+    Mapping[str, Mapping[str, t.NormalizedValue]],
     config=ConfigDict(strict=False),
 )
 
 _CUSTOM_STREAM_ADAPTER = TypeAdapter(
-    dict[str, t.NormalizedValue],
+    Mapping[str, t.NormalizedValue],
     config=ConfigDict(strict=False),
 )
 
 
-def _validate_custom_stream(raw_item: t.NormalizedValue) -> dict[str, str] | None:
+def _validate_custom_stream(raw_item: t.NormalizedValue) -> Mapping[str, str] | None:
     """Validate a custom stream definition, returning name if valid."""
     try:
-        validated: dict[str, t.NormalizedValue] = (
+        validated: Mapping[str, t.NormalizedValue] = (
             _CUSTOM_STREAM_ADAPTER.validate_python(
                 raw_item,
             )
@@ -65,14 +65,14 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
     """
 
     name: ClassVar[str] = "FlextMeltanoTapAbstractions-ldap"
-    config: dict[str, t.Scalar]
+    config: Mapping[str, t.Scalar]
 
     def __init__(self) -> None:
         """Initialize tap with empty config."""
         self.config = {}
 
     config_class: ClassVar[type[FlextTapLdapSettings]] = FlextTapLdapSettings
-    config_jsonschema: ClassVar[dict[str, t.NormalizedValue]] = {
+    config_jsonschema: ClassVar[Mapping[str, t.NormalizedValue]] = {
         "type": "object",
         "properties": {
             "host": {"type": "string", "description": "LDAP server host"},
@@ -141,25 +141,25 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         """
         source_payload = source_config.model_dump(mode="python")
         raw_connection_config = source_payload.get("connection_config", {})
-        config_map: dict[str, Mapping[str, t.NormalizedValue]]
+        config_map: Mapping[str, Mapping[str, t.NormalizedValue]]
         try:
             config_map = _CONFIG_MAP_ADAPTER.validate_python(raw_connection_config)
         except ValidationError:
             config_map = {}
 
-        ldap_streams: list[FlextTapLdapStreams.LDAPBaseStream] = [
+        ldap_streams: Sequence[FlextTapLdapStreams.LDAPBaseStream] = [
             FlextTapLdapStreams.UsersStream(self),
             FlextTapLdapStreams.GroupsStream(self),
             FlextTapLdapStreams.OrganizationalUnitsStream(self),
             FlextTapLdapStreams.SchemaStream(self),
         ]
-        streams: list[
+        streams: Sequence[
             FlextTapLdapStreams.LDAPBaseStream
             | FlextTapLdapLdifStreams.LdifStream
             | FlextTapLdapLdifStreams.LdifAnalysisStream
         ] = list(ldap_streams)
         if bool(config_map.get("enable_ldif_streams", False)):
-            ldif_stream_list: list[
+            ldif_stream_list: Sequence[
                 FlextTapLdapLdifStreams.LdifStream
                 | FlextTapLdapLdifStreams.LdifAnalysisStream
             ] = [
@@ -168,7 +168,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             ]
             streams.extend(ldif_stream_list)
 
-        streams_list: list[t.Meltano.Singer.CatalogEntry] = [
+        streams_list: Sequence[t.Meltano.Singer.CatalogEntry] = [
             {
                 "stream": str(stream.name),
                 "tap_stream_id": str(stream.name),
@@ -214,10 +214,10 @@ def _build_cli_command() -> click.Command:
         state_path: str | None,
     ) -> None:
         """Singer-compatible CLI for LDAP data extraction."""
-        raw_config: dict[str, t.NormalizedValue] = _CUSTOM_STREAM_ADAPTER.validate_json(
-            Path(config_path).read_bytes()
+        raw_config: Mapping[str, t.NormalizedValue] = (
+            _CUSTOM_STREAM_ADAPTER.validate_json(Path(config_path).read_bytes())
         )
-        config_data: dict[str, t.Scalar] = {
+        config_data: Mapping[str, t.Scalar] = {
             k: v
             for k, v in raw_config.items()
             if isinstance(v, (str, int, float, bool))

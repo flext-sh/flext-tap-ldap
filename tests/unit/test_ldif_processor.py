@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -42,9 +43,9 @@ class TestLdifProcessor:
         stream._ldif_api = Mock()
         stream._ldap_api = Mock()
         stream._logger_instance = None
-        seen: list[str] = []
+        seen: Sequence[str] = []
 
-        def _process(ldif_file: str) -> list[dict[str, t.NormalizedValue]]:
+        def _process(ldif_file: str) -> Sequence[Mapping[str, t.NormalizedValue]]:
             seen.append(ldif_file)
             return [{"dn": ldif_file}]
 

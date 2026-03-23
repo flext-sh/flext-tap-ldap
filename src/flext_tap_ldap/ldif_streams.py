@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator, Mapping
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
@@ -15,16 +15,18 @@ if TYPE_CHECKING:
     from flext_meltano import FlextMeltanoAbstractions as Tap
 
 _OBJECT_LIST_ADAPTER = TypeAdapter(
-    list[Mapping[str, t.ContainerValue]],
+    Sequence[Mapping[str, t.ContainerValue]],
     config=ConfigDict(strict=False),
 )
 _COUNTER_MAP_ADAPTER = TypeAdapter(
-    dict[str, int | str],
+    Mapping[str, int | str],
     config=ConfigDict(strict=False),
 )
 
 
-def _as_object_list(value: t.ContainerValue) -> list[dict[str, t.ContainerValue]]:
+def _as_object_list(
+    value: t.ContainerValue,
+) -> Sequence[Mapping[str, t.ContainerValue]]:
     try:
         if not isinstance(value, (dict, list)):
             return []
@@ -34,7 +36,7 @@ def _as_object_list(value: t.ContainerValue) -> list[dict[str, t.ContainerValue]
         return []
 
 
-def _as_counter_map(value: t.NormalizedValue) -> dict[str, int | str]:
+def _as_counter_map(value: t.NormalizedValue) -> Mapping[str, int | str]:
     try:
         if not isinstance(value, dict):
             return {}
@@ -55,14 +57,14 @@ class FlextTapLdapLdifStreams:
         Implements FlextMeltanoProtocols.Singer.Stream protocol.
         """
 
-        primary_keys: ClassVar[list[str]] = ["dn"]
+        primary_keys: ClassVar[Sequence[str]] = ["dn"]
 
         def __init__(self, tap: Tap) -> None:
             """Initialize LDIF stream with library delegation."""
             self.name = "ldif_entries"
             self.tap_stream_id = "ldif_entries"
             self.tap = tap
-            self.config: dict[str, t.ContainerValue] = getattr(tap, "config", {})
+            self.config: Mapping[str, t.ContainerValue] = getattr(tap, "config", {})
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
             self._logger_instance: FlextLogger | None = None
@@ -96,7 +98,7 @@ class FlextTapLdapLdifStreams:
         def get_records(
             self,
             context: Mapping[str, t.NormalizedValue] | None = None,
-        ) -> Iterator[dict[str, t.NormalizedValue]]:
+        ) -> Iterator[Mapping[str, t.NormalizedValue]]:
             """Get LDIF records using flext-ldif processing."""
             _ = context
             self.logger.info("Processing LDIF files using flext-ldif library")
@@ -112,7 +114,7 @@ class FlextTapLdapLdifStreams:
             else:
                 yield from self._process_ldap_directory()
 
-        def _classify_entry_type(self, object_classes: list[str]) -> str:
+        def _classify_entry_type(self, object_classes: Sequence[str]) -> str:
             """Classify entry type by simple objectClass heuristics."""
             lowered = {oc.lower() for oc in object_classes}
             if "inetorgperson" in lowered or "person" in lowered:
@@ -126,13 +128,13 @@ class FlextTapLdapLdifStreams:
         def _convert_entry_to_record(
             self,
             flext_entry: m.Ldif.Entry,
-        ) -> dict[str, t.NormalizedValue]:
+        ) -> Mapping[str, t.NormalizedValue]:
             """Convert flext-ldif entry to Singer record."""
             dn_value = flext_entry.dn.value if flext_entry.dn is not None else ""
             attrs = flext_entry.attributes
-            object_classes: list[str] = []
+            object_classes: Sequence[str] = []
             entry_type = "other"
-            entry_attrs: dict[str, t.NormalizedValue] = {}
+            entry_attrs: Mapping[str, t.NormalizedValue] = {}
             if attrs is not None:
                 object_classes = attrs.get_values("objectClass")
                 entry_type = self._classify_entry_type(object_classes)
@@ -144,7 +146,7 @@ class FlextTapLdapLdifStreams:
                 "attributes": entry_attrs,
             }
 
-        def _discover_ldif_files(self, ldif_directory: str) -> list[Path]:
+        def _discover_ldif_files(self, ldif_directory: str) -> Sequence[Path]:
             directory = Path(ldif_directory)
             if not directory.exists() or not directory.is_dir():
                 self.logger.warning("LDIF directory not found: %s", ldif_directory)
@@ -157,8 +159,8 @@ class FlextTapLdapLdifStreams:
 
         def _normalize_object_classes(
             self,
-            object_classes: dict[str, t.ContainerValue],
-        ) -> list[str]:
+            object_classes: Mapping[str, t.ContainerValue],
+        ) -> Sequence[str]:
             if isinstance(object_classes, str):
                 return [object_classes]
             object_values = _as_object_list(object_classes)
@@ -166,7 +168,7 @@ class FlextTapLdapLdifStreams:
                 return [str(value) for value in object_values if value is not None]
             return []
 
-        def _process_ldap_directory(self) -> Iterator[dict[str, t.NormalizedValue]]:
+        def _process_ldap_directory(self) -> Iterator[Mapping[str, t.NormalizedValue]]:
             host_raw = self.config.get("ldap_host")
             base_dn_raw = self.config.get("ldap_base_dn")
             if not isinstance(host_raw, str) or not host_raw:
@@ -181,7 +183,7 @@ class FlextTapLdapLdifStreams:
         def _process_ldif_file(
             self,
             ldif_file: str,
-        ) -> Iterable[dict[str, t.NormalizedValue]]:
+        ) -> Iterable[Mapping[str, t.NormalizedValue]]:
             """Process single LDIF file using flext-ldif."""
             self.logger.info("Processing LDIF file: %s", ldif_file)
             try:
@@ -212,18 +214,18 @@ class FlextTapLdapLdifStreams:
         Implements FlextMeltanoProtocols.Singer.Stream protocol.
         """
 
-        primary_keys: ClassVar[list[str]] = ["analysis_id"]
+        primary_keys: ClassVar[Sequence[str]] = ["analysis_id"]
 
         def __init__(self, tap: Tap) -> None:
             """Initialize LDIF analysis stream with library delegation."""
             self.name = "ldif_analysis"
             self.tap_stream_id = "ldif_analysis"
             self.tap = tap
-            self.config: dict[str, t.ContainerValue] = getattr(tap, "config", {})
+            self.config: Mapping[str, t.ContainerValue] = getattr(tap, "config", {})
             self._ldif_api = FlextLdif()
             self._ldap_api = FlextLdapConnection()
             self._logger_instance: p.Logger | None = None
-            self.schema: dict[str, t.NormalizedValue] = {
+            self.schema: Mapping[str, t.NormalizedValue] = {
                 "type": "object",
                 "properties": {
                     "analysis_id": {
@@ -255,7 +257,7 @@ class FlextTapLdapLdifStreams:
         def get_records(
             self,
             context: Mapping[str, t.NormalizedValue] | None = None,
-        ) -> Iterator[dict[str, t.NormalizedValue]]:
+        ) -> Iterator[Mapping[str, t.NormalizedValue]]:
             """Get analysis records using flext-ldif analysis capabilities."""
             _ = context
             self.logger.info("Generating LDIF analysis using flext-ldif library")
@@ -264,8 +266,8 @@ class FlextTapLdapLdifStreams:
             ldif_directory = self.config.get("ldif_directory")
             try:
                 total_entries = 0
-                entry_types: dict[str, int] = {}
-                object_classes: dict[str, int] = {}
+                entry_types: Mapping[str, int] = {}
+                object_classes: Mapping[str, int] = {}
                 if ldif_files:
                     for ldif_file in ldif_files:
                         match ldif_file:
@@ -346,21 +348,23 @@ class FlextTapLdapLdifStreams:
                     "object_classes": {},
                 }
 
-        def _analyze_ldif_file(self, ldif_file: str) -> dict[str, t.NormalizedValue]:
+        def _analyze_ldif_file(self, ldif_file: str) -> Mapping[str, t.NormalizedValue]:
             """Analyze single LDIF file using flext-ldif."""
             self.logger.info("Analyzing LDIF file: %s", ldif_file)
             try:
                 content = Path(ldif_file).read_text(encoding="utf-8")
                 result = self._ldif_api.parse(content)
                 if result.is_success and result.value:
-                    entry_types: dict[str, int] = {}
-                    object_classes: dict[str, int] = {}
+                    entry_types: Mapping[str, int] = {}
+                    object_classes: Mapping[str, int] = {}
                     for entry in result.value:
                         if not isinstance(entry, m.Ldif.Entry):
                             continue
                         if entry.attributes is None:
                             continue
-                        oc_list: list[str] = entry.attributes.get_values("objectClass")
+                        oc_list: Sequence[str] = entry.attributes.get_values(
+                            "objectClass"
+                        )
                         oc_strs = [str(oc_val) for oc_val in oc_list]
                         entry_type = self._classify_entry_type(oc_strs)
                         entry_types[entry_type] = entry_types.get(entry_type, 0) + 1
@@ -387,7 +391,7 @@ class FlextTapLdapLdifStreams:
                 self.logger.exception("Error analyzing LDIF file %s", ldif_file)
                 return {"total_entries": 0, "entry_types": {}, "object_classes": {}}
 
-        def _classify_entry_type(self, object_classes: list[str]) -> str:
+        def _classify_entry_type(self, object_classes: Sequence[str]) -> str:
             """Classify entry type by simple objectClass heuristics."""
             lowered = {oc.lower() for oc in object_classes}
             if "inetorgperson" in lowered or "person" in lowered:
@@ -398,7 +402,7 @@ class FlextTapLdapLdifStreams:
                 return "ou"
             return "other"
 
-        def _discover_ldif_files(self, ldif_directory: str) -> list[Path]:
+        def _discover_ldif_files(self, ldif_directory: str) -> Sequence[Path]:
             directory = Path(ldif_directory)
             if not directory.exists() or not directory.is_dir():
                 self.logger.warning("LDIF directory not found: %s", ldif_directory)

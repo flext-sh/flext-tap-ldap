@@ -13,6 +13,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Protocol, runtime_checkable
 
 from flext_core import t
@@ -65,14 +66,14 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
             def discover_base_dns(
                 self,
                 config: t.ConfigMap,
-            ) -> FlextMeltanoProtocols.Result[list[str]]:
+            ) -> FlextMeltanoProtocols.Result[Sequence[str]]:
                 """Discover available base DNs in LDAP directory."""
                 ...
 
             def discover_object_classes(
                 self,
                 base_dn: str,
-            ) -> FlextMeltanoProtocols.Result[list[str]]:
+            ) -> FlextMeltanoProtocols.Result[Sequence[str]]:
                 """Discover t.NormalizedValue classes in LDAP directory."""
                 ...
 
@@ -91,15 +92,15 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 self,
                 base_dn: str,
                 filter_str: str,
-                attributes: list[str] | None = None,
-            ) -> FlextMeltanoProtocols.Result[list[t.ConfigMap]]:
+                attributes: Sequence[str] | None = None,
+            ) -> FlextMeltanoProtocols.Result[Sequence[t.ConfigMap]]:
                 """Extract LDAP entries matching filter."""
                 ...
 
             def extract_single_entry(
                 self,
                 dn: str,
-                attributes: list[str] | None = None,
+                attributes: Sequence[str] | None = None,
             ) -> FlextMeltanoProtocols.Result[t.ConfigMap]:
                 """Extract single LDAP entry by DN."""
                 ...

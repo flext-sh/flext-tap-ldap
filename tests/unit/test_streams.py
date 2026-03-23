@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from unittest.mock import Mock, patch
 
 import pytest
@@ -15,7 +16,7 @@ from flext_tap_ldap import FlextTapLdapStreams, FlextTapLdapTap, m, t
 
 
 def _build_source_config(
-    connection_config: dict[str, t.Scalar],
+    connection_config: Mapping[str, t.Scalar],
 ) -> m.Meltano.DataSourceConfig:
     return m.Meltano.DataSourceConfig(
         source_type="ldap",
@@ -27,8 +28,8 @@ def _build_source_config(
 
 def _discover_stream_names(
     tap: FlextTapLdapTap,
-    connection_config: dict[str, t.Scalar],
-) -> tuple[list[str], int]:
+    connection_config: Mapping[str, t.Scalar],
+) -> tuple[Sequence[str], int]:
     result = tap.discover_streams(source_config=_build_source_config(connection_config))
     assert result.is_success
     assert result.value is not None
@@ -108,8 +109,8 @@ class TestUsersStream:
         """Test users stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        member_of_empty: list[str] = []
-        member_of_empty_secondary: list[str] = []
+        member_of_empty: Sequence[str] = []
+        member_of_empty_secondary: Sequence[str] = []
         mock_client.search.return_value = [
             {
                 "dn": "cn=user1,ou=users,dc=test,dc=com",
@@ -151,7 +152,7 @@ class TestUsersStream:
         """Test groups stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        empty_search_results: list[dict[str, str]] = []
+        empty_search_results: Sequence[Mapping[str, str]] = []
         mock_client.search.return_value = empty_search_results
         stream = FlextTapLdapStreams.GroupsStream(mock_tap)
         records = list(stream.get_records(context=None))
@@ -169,7 +170,7 @@ class TestUsersStream:
         """Test organizational units stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        empty_search_results: list[dict[str, str]] = []
+        empty_search_results: Sequence[Mapping[str, str]] = []
         mock_client.search.return_value = empty_search_results
         stream = FlextTapLdapStreams.OrganizationalUnitsStream(mock_tap)
         records = list(stream.get_records(context=None))
@@ -187,7 +188,7 @@ class TestUsersStream:
         """Test schema stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        empty_search_results: list[dict[str, str]] = []
+        empty_search_results: Sequence[Mapping[str, str]] = []
         mock_client.search.return_value = empty_search_results
         stream = FlextTapLdapStreams.SchemaStream(mock_tap)
         records = list(stream.get_records(context=None))
@@ -416,7 +417,7 @@ class TestCustomStream:
 
     def test_custom_stream_schema_properties(self, mock_tap: Mock) -> None:
         """Test custom stream schema properties."""
-        custom_properties: dict[str, t.NormalizedValue] = {
+        custom_properties: Mapping[str, t.NormalizedValue] = {
             "employeeNumber": {"type": "string"},
             "department": {"type": "string"},
             "manager": {"type": "string"},
@@ -444,7 +445,7 @@ class TestCustomStream:
         """Test custom stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        empty_search_results: list[dict[str, str]] = []
+        empty_search_results: Sequence[Mapping[str, str]] = []
         mock_client.search.return_value = empty_search_results
         params = FlextTapLdapStreams.CustomStreamParams(
             name="custom_test",
@@ -462,7 +463,7 @@ class TestCustomStream:
 
     def test_custom_stream_schema_type_mappings(self, mock_tap: Mock) -> None:
         """Test custom stream schema type mappings."""
-        custom_properties: dict[str, t.NormalizedValue] = {
+        custom_properties: Mapping[str, t.NormalizedValue] = {
             "stringField": {"type": "string"},
             "arrayField": {"type": "array"},
             "booleanField": {"type": "boolean"},
@@ -490,7 +491,7 @@ class TestStreamIntegration:
     """Integration tests for stream functionality."""
 
     @pytest.fixture
-    def tap_config(self) -> dict[str, t.NormalizedValue]:
+    def tap_config(self) -> Mapping[str, t.NormalizedValue]:
         """Standard tap configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -504,10 +505,10 @@ class TestStreamIntegration:
         }
 
     def test_all_default_streams_creation(
-        self, tap_config: dict[str, t.NormalizedValue]
+        self, tap_config: Mapping[str, t.NormalizedValue]
     ) -> None:
         """Test that all default streams can be created."""
-        connection_config: dict[str, t.Scalar] = {}
+        connection_config: Mapping[str, t.Scalar] = {}
         for key, value in tap_config.items():
             if isinstance(value, (str, int, float, bool)):
                 connection_config[str(key)] = value
@@ -520,7 +521,7 @@ class TestStreamIntegration:
         assert "schema" in stream_names
 
     def test_streams_with_custom_configuration(
-        self, tap_config: dict[str, t.NormalizedValue]
+        self, tap_config: Mapping[str, t.NormalizedValue]
     ) -> None:
         """Test streams with custom configuration."""
         tap_config["custom_streams"] = [
@@ -532,7 +533,7 @@ class TestStreamIntegration:
                 "schema": {"properties": {"testAttribute": {"type": "string"}}},
             }
         ]
-        connection_config: dict[str, t.Scalar] = {}
+        connection_config: Mapping[str, t.Scalar] = {}
         for key, value in tap_config.items():
             if isinstance(value, (str, int, float, bool)):
                 connection_config[str(key)] = value
@@ -541,11 +542,11 @@ class TestStreamIntegration:
         assert stream_count >= 4
         assert "users" in stream_names
 
-    def test_self(self, tap_config: dict[str, t.NormalizedValue]) -> None:
+    def test_self(self, tap_config: Mapping[str, t.NormalizedValue]) -> None:
         """Test method."""
         "Test LDIF streams are included when enabled."
         tap_config["enable_ldif_streams"] = True
-        connection_config: dict[str, t.Scalar] = {}
+        connection_config: Mapping[str, t.Scalar] = {}
         for key, value in tap_config.items():
             if isinstance(value, (str, int, float, bool)):
                 connection_config[str(key)] = value

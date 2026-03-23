@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
@@ -65,7 +65,7 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize the connection service."""
-            self._connections: dict[str, FlextTapLdapServices.LDAPConnection] = {}
+            self._connections: Mapping[str, FlextTapLdapServices.LDAPConnection] = {}
 
         def create_connection(
             self,
@@ -109,13 +109,13 @@ class FlextTapLdapServices:
 
         def list_connections(
             self,
-        ) -> r[list[FlextTapLdapServices.LDAPConnection]]:
+        ) -> r[Sequence[FlextTapLdapServices.LDAPConnection]]:
             """List all LDAP connections."""
             try:
                 connections = list(self._connections.values())
-                return r[list[FlextTapLdapServices.LDAPConnection]].ok(connections)
+                return r[Sequence[FlextTapLdapServices.LDAPConnection]].ok(connections)
             except (RuntimeError, ValueError, TypeError) as e:
-                return r[list[FlextTapLdapServices.LDAPConnection]].fail(
+                return r[Sequence[FlextTapLdapServices.LDAPConnection]].fail(
                     f"Failed to list connections: {e}",
                 )
 
@@ -152,7 +152,7 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize the stream service."""
-            self._streams: dict[str, FlextTapLdapServices.LDAPStream] = {}
+            self._streams: Mapping[str, FlextTapLdapServices.LDAPStream] = {}
 
         def create_stream(
             self,
@@ -190,7 +190,7 @@ class FlextTapLdapServices:
                 stream = self._streams.get(stream_id)
                 if not stream:
                     return r[Mapping[str, t.NormalizedValue]].fail("Stream not found")
-                schema: dict[str, t.NormalizedValue] = {
+                schema: Mapping[str, t.NormalizedValue] = {
                     "type": "object",
                     "properties": {
                         "dn": {"type": "string"},
@@ -221,15 +221,15 @@ class FlextTapLdapServices:
         def list_streams(
             self,
             connection_id: str | None = None,
-        ) -> r[list[FlextTapLdapServices.LDAPStream]]:
+        ) -> r[Sequence[FlextTapLdapServices.LDAPStream]]:
             """List LDAP streams, optionally filtered by connection ID."""
             try:
                 streams = list(self._streams.values())
                 if connection_id:
                     streams = [s for s in streams if s.connection_id == connection_id]
-                return r[list[FlextTapLdapServices.LDAPStream]].ok(streams)
+                return r[Sequence[FlextTapLdapServices.LDAPStream]].ok(streams)
             except (RuntimeError, ValueError, TypeError) as e:
-                return r[list[FlextTapLdapServices.LDAPStream]].fail(
+                return r[Sequence[FlextTapLdapServices.LDAPStream]].fail(
                     f"Failed to list streams: {e}",
                 )
 
@@ -238,7 +238,7 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize the execution service."""
-            self._executions: dict[str, FlextTapLdapModels.TapLdap.TapExecution] = {}
+            self._executions: Mapping[str, FlextTapLdapModels.TapLdap.TapExecution] = {}
 
         def cancel_execution(
             self,
@@ -332,7 +332,7 @@ class FlextTapLdapServices:
         def list_executions(
             self,
             connection_id: str | None = None,
-        ) -> r[list[FlextTapLdapModels.TapLdap.TapExecution]]:
+        ) -> r[Sequence[FlextTapLdapModels.TapLdap.TapExecution]]:
             """List tap executions, optionally filtered by connection ID."""
             try:
                 executions = list(self._executions.values())
@@ -344,9 +344,11 @@ class FlextTapLdapServices:
                     key=lambda e: e.started_at or datetime.min.replace(tzinfo=UTC),
                     reverse=True,
                 )
-                return r[list[FlextTapLdapModels.TapLdap.TapExecution]].ok(executions)
+                return r[Sequence[FlextTapLdapModels.TapLdap.TapExecution]].ok(
+                    executions
+                )
             except (RuntimeError, ValueError, TypeError) as e:
-                return r[list[FlextTapLdapModels.TapLdap.TapExecution]].fail(
+                return r[Sequence[FlextTapLdapModels.TapLdap.TapExecution]].fail(
                     f"Failed to list executions: {e}",
                 )
 
@@ -411,7 +413,7 @@ class FlextTapLdapServices:
                 validation_data: Mapping[str, t.NormalizedValue] = (
                     _as_map(validation_result.value) or {}
                 )
-                file_stats: dict[str, t.NormalizedValue] = {
+                file_stats: Mapping[str, t.NormalizedValue] = {
                     "file_path": file_path,
                     "file_size_bytes": Path(file_path).stat().st_size
                     if Path(file_path).exists()
@@ -436,25 +438,27 @@ class FlextTapLdapServices:
         def process_ldif_file(
             self,
             file_path: str,
-        ) -> r[list[Mapping[str, t.NormalizedValue]]]:
+        ) -> r[Sequence[Mapping[str, t.NormalizedValue]]]:
             """Process LDIF file using flext-ldif library."""
             try:
                 logger.info("Processing LDIF file: %s", file_path)
-                result: r[list[FlextTapLdapModels.Ldif.Entry]] = self._ldif_api.parse(
-                    Path(file_path),
+                result: r[Sequence[FlextTapLdapModels.Ldif.Entry]] = (
+                    self._ldif_api.parse(
+                        Path(file_path),
+                    )
                 )
                 if not result.is_success:
-                    return r[list[Mapping[str, t.NormalizedValue]]].fail(
+                    return r[Sequence[Mapping[str, t.NormalizedValue]]].fail(
                         f"Failed to parse LDIF file: {result.error}",
                     )
-                entries: list[FlextTapLdapModels.Ldif.Entry] = result.value or []
+                entries: Sequence[FlextTapLdapModels.Ldif.Entry] = result.value or []
                 entry_count = len(entries)
                 logger.info(
                     "Successfully processed %s entries from %s",
                     entry_count,
                     file_path,
                 )
-                normalized: list[Mapping[str, t.NormalizedValue]] = []
+                normalized: Sequence[Mapping[str, t.NormalizedValue]] = []
                 for entry in entries:
                     dn_value = entry.dn.value if entry.dn is not None else ""
                     attributes_raw: Mapping[str, t.NormalizedValue] = (
@@ -464,7 +468,7 @@ class FlextTapLdapServices:
                     )
                     attrs = _as_map(attributes_raw) or {}
                     normalized.append({"dn": dn_value, "attributes": attrs})
-                return r[list[Mapping[str, t.NormalizedValue]]].ok(normalized)
+                return r[Sequence[Mapping[str, t.NormalizedValue]]].ok(normalized)
             except (
                 ValueError,
                 TypeError,
@@ -475,7 +479,7 @@ class FlextTapLdapServices:
                 ImportError,
             ) as e:
                 logger.exception("Error processing LDIF file %s", file_path)
-                return r[list[Mapping[str, t.NormalizedValue]]].fail(
+                return r[Sequence[Mapping[str, t.NormalizedValue]]].fail(
                     f"LDIF processing failed: {e}",
                 )
 
@@ -486,16 +490,18 @@ class FlextTapLdapServices:
             """Validate LDIF file using flext-ldif library."""
             try:
                 logger.info("Validating LDIF file: %s", file_path)
-                result: r[list[FlextTapLdapModels.Ldif.Entry]] = self._ldif_api.parse(
-                    Path(file_path),
+                result: r[Sequence[FlextTapLdapModels.Ldif.Entry]] = (
+                    self._ldif_api.parse(
+                        Path(file_path),
+                    )
                 )
                 if not result.is_success:
                     return r[Mapping[str, t.NormalizedValue]].fail(
                         f"Validation failed: {result.error}",
                     )
-                entries: list[FlextTapLdapModels.Ldif.Entry] = result.value or []
+                entries: Sequence[FlextTapLdapModels.Ldif.Entry] = result.value or []
                 total_entries = len(entries)
-                validation_data: dict[str, t.NormalizedValue] = {
+                validation_data: Mapping[str, t.NormalizedValue] = {
                     "total_entries": total_entries,
                     "valid_entries": total_entries,
                     "invalid_entries": 0,
@@ -552,7 +558,7 @@ class FlextTapLdapServices:
 
         """
         try:
-            config: dict[str, t.NormalizedValue] = {
+            config: Mapping[str, t.NormalizedValue] = {
                 "host": params.host,
                 "port": params.port,
                 "bind_dn": params.bind_dn,

@@ -8,6 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import contextlib
+from collections.abc import Mapping, Sequence
 from typing import cast
 from unittest.mock import Mock, patch
 
@@ -58,8 +59,8 @@ class TestLDAPClientQuick:
     ) -> None:
         """Test entry conversion with different scenarios."""
         # Test with a Mapping (dict) entry
-        mail_values: list[str] = ["test@example.com"]
-        dict_entry: dict[str, t.NormalizedValue] = {
+        mail_values: Sequence[str] = ["test@example.com"]
+        dict_entry: Mapping[str, t.NormalizedValue] = {
             "dn": "uid=dict,dc=example,dc=com",
             "attributes": {"mail": mail_values},
         }
@@ -69,7 +70,7 @@ class TestLDAPClientQuick:
         result = client._convert_entry_to_dict(None)
         assert result == {}
         # Test with a dict that has string values
-        simple_entry: dict[str, t.NormalizedValue] = {
+        simple_entry: Mapping[str, t.NormalizedValue] = {
             "dn": "uid=test,dc=example,dc=com",
             "uid": "test",
             "cn": ["Test", "T. User"],
@@ -169,10 +170,10 @@ class TestLDAPClientQuick:
         self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test Oracle entry processing with all scenarios."""
-        uid_values: list[str] = ["test"]
-        oracle_password_values: list[str] = ["hashed_password"]
-        object_classes: list[str] = ["inetOrgPerson"]
-        entry: dict[str, t.NormalizedValue] = {
+        uid_values: Sequence[str] = ["test"]
+        oracle_password_values: Sequence[str] = ["hashed_password"]
+        object_classes: Sequence[str] = ["inetOrgPerson"]
+        entry: Mapping[str, t.NormalizedValue] = {
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": {
                 "uid": uid_values,
@@ -183,8 +184,8 @@ class TestLDAPClientQuick:
         result = client._process_oracle_entry(entry)
         attributes_raw = result.get("attributes")
         assert isinstance(attributes_raw, dict)
-        attributes: dict[str, t.NormalizedValue] = cast(
-            "dict[str, t.NormalizedValue]", attributes_raw
+        attributes: Mapping[str, t.NormalizedValue] = cast(
+            "Mapping[str, t.NormalizedValue]", attributes_raw
         )
         assert "userPassword" in attributes
         user_password: t.NormalizedValue = attributes.get("userPassword")
@@ -192,35 +193,35 @@ class TestLDAPClientQuick:
         assert isinstance(user_password, list)
         assert "hashed_password" in user_password
 
-        ou_values: list[str] = ["test"]
-        container_classes: list[str] = ["orclContainer"]
-        entry_with_container: dict[str, t.NormalizedValue] = {
+        ou_values: Sequence[str] = ["test"]
+        container_classes: Sequence[str] = ["orclContainer"]
+        entry_with_container: Mapping[str, t.NormalizedValue] = {
             "dn": "ou=test,dc=oracle,dc=com",
             "attributes": {"ou": ou_values, "objectClass": container_classes},
         }
         result = client._process_oracle_entry(entry_with_container)
         attrs_raw2 = result.get("attributes")
         assert isinstance(attrs_raw2, dict)
-        attributes = cast("dict[str, t.NormalizedValue]", attrs_raw2)
+        attributes = cast("Mapping[str, t.NormalizedValue]", attrs_raw2)
         object_class: t.NormalizedValue = attributes.get("objectClass")
         assert isinstance(object_class, list)
         assert isinstance(object_class, list)
         assert "organizationalUnit" in object_class
 
-        entry_string_oc: dict[str, t.NormalizedValue] = {
+        entry_string_oc: Mapping[str, t.NormalizedValue] = {
             "dn": "ou=test,dc=oracle,dc=com",
             "attributes": {"objectClass": "orclContainer"},
         }
         result = client._process_oracle_entry(entry_string_oc)
         attrs_raw3 = result.get("attributes")
         assert isinstance(attrs_raw3, dict)
-        attributes = cast("dict[str, t.NormalizedValue]", attrs_raw3)
+        attributes = cast("Mapping[str, t.NormalizedValue]", attrs_raw3)
         obj_classes: t.NormalizedValue = attributes.get("objectClass")
         assert isinstance(obj_classes, list)
         assert isinstance(obj_classes, list)
         assert "organizationalUnit" in obj_classes
 
-        entry_bad_attrs: dict[str, t.NormalizedValue] = {
+        entry_bad_attrs: Mapping[str, t.NormalizedValue] = {
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": "not_a_dict",
         }
@@ -254,9 +255,9 @@ class TestLDAPClientQuick:
         self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test Oracle search result processing."""
-        first_passwords: list[str] = ["pass1"]
-        second_uids: list[str] = ["test2"]
-        search_results: list[dict[str, t.NormalizedValue]] = [
+        first_passwords: Sequence[str] = ["pass1"]
+        second_uids: Sequence[str] = ["test2"]
+        search_results: Sequence[Mapping[str, t.NormalizedValue]] = [
             {
                 "dn": "uid=test1,dc=oracle,dc=com",
                 "attributes": {"orclPassword": first_passwords},

@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -15,7 +16,7 @@ from flext_tap_ldap import FlextTapLdapStreams, FlextTapLdapTap, m, t
 
 
 def _build_source_config(
-    connection_config: dict[str, t.Scalar],
+    connection_config: Mapping[str, t.Scalar],
 ) -> m.Meltano.DataSourceConfig:
     return m.Meltano.DataSourceConfig(
         source_type="ldap",
@@ -27,8 +28,8 @@ def _build_source_config(
 
 def _discover_stream_names(
     tap: FlextTapLdapTap,
-    connection_config: dict[str, t.Scalar],
-) -> tuple[list[str], int]:
+    connection_config: Mapping[str, t.Scalar],
+) -> tuple[Sequence[str], int]:
     result = tap.discover_streams(source_config=_build_source_config(connection_config))
     assert result.is_success
     assert result.value is not None
@@ -41,7 +42,7 @@ class TestFlextTapLdapTapUnit:
     """Unit tests for FlextTapLdapTap."""
 
     @pytest.fixture
-    def config(self) -> dict[str, t.Scalar]:
+    def config(self) -> Mapping[str, t.Scalar]:
         """Create a test configuration fixture."""
         return {
             "ldap_host": "test.ldap.com",
@@ -53,7 +54,7 @@ class TestFlextTapLdapTapUnit:
             "page_size": 1000,
         }
 
-    def test_tap_initialization(self, config: dict[str, t.Scalar]) -> None:
+    def test_tap_initialization(self, config: Mapping[str, t.Scalar]) -> None:
         """Test tap initialization."""
         tap = FlextTapLdapTap()
         if tap.name != "FlextMeltanoTapAbstractions-ldap":
@@ -63,7 +64,7 @@ class TestFlextTapLdapTapUnit:
         assert stream_count >= 4
         assert "users" in stream_names
 
-    def test_stream_discovery(self, config: dict[str, t.Scalar]) -> None:
+    def test_stream_discovery(self, config: Mapping[str, t.Scalar]) -> None:
         """Test stream discovery."""
         tap = FlextTapLdapTap()
         stream_names, stream_count = _discover_stream_names(tap, config)
@@ -79,7 +80,7 @@ class TestFlextTapLdapTapUnit:
             count_error: str = f"Expected {4}, got {stream_count}"
             raise AssertionError(count_error)
 
-    def test_custom_streams_configuration(self, config: dict[str, t.Scalar]) -> None:
+    def test_custom_streams_configuration(self, config: Mapping[str, t.Scalar]) -> None:
         """Test custom streams configuration."""
         config["custom_streams"] = "configured"
         tap = FlextTapLdapTap()
@@ -91,7 +92,7 @@ class TestFlextTapLdapTapUnit:
             count_error: str = f"Expected >= {4}, got {stream_count}"
             raise AssertionError(count_error)
 
-    def test_catalog_generation(self, config: dict[str, t.Scalar]) -> None:
+    def test_catalog_generation(self, config: Mapping[str, t.Scalar]) -> None:
         """Test catalog generation and metadata."""
         tap = FlextTapLdapTap()
         result = tap.discover_streams(source_config=_build_source_config(config))
@@ -112,7 +113,7 @@ class TestFlextTapLdapTapUnit:
     def test_stream_records(
         self,
         mock_client_class: MagicMock,
-        config: dict[str, t.Scalar],
+        config: Mapping[str, t.Scalar],
     ) -> None:
         """Test streaming records from LDAP."""
         mock_client = MagicMock()
@@ -130,7 +131,7 @@ class TestFlextTapLdapTapUnit:
         tap = FlextTapLdapTap()
         users_stream = FlextTapLdapStreams.UsersStream(tap)
         raw_records = list(users_stream.get_records(None))
-        records: list[dict[str, t.NormalizedValue]] = [
+        records: Sequence[Mapping[str, t.NormalizedValue]] = [
             item for item in raw_records if isinstance(item, dict)
         ]
         if len(records) != 1:
