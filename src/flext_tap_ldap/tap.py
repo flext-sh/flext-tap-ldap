@@ -126,7 +126,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         config_map: Mapping[str, t.ContainerMapping]
         try:
             config_map = FlextTapLdapTap._config_map_adapter.validate_python(
-                raw_connection_config
+                raw_connection_config,
             )
         except ValidationError:
             config_map = {}

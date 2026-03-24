@@ -125,7 +125,7 @@ class FlextTapLdapStreams:
                 return None
             try:
                 validated = FlextTapLdapTypes.STRICT_STR_ADAPTER.validate_python(
-                    raw_value
+                    raw_value,
                 )
             except ValidationError:
                 return None
@@ -146,13 +146,13 @@ class FlextTapLdapStreams:
             return FlextTapLdapModels.TapLdap.LdapConnectionConfig(
                 host=str(parsed.host),
                 port=FlextTapLdapStreams.LDAPBaseStream.coerce_positive_int(
-                    parsed.port, c.TapLdap.DEFAULT_PORT
+                    parsed.port, c.TapLdap.DEFAULT_PORT,
                 ),
                 bind_dn=FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
-                    parsed.bind_dn
+                    parsed.bind_dn,
                 ),
                 bind_password=FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
-                    parsed.bind_password
+                    parsed.bind_password,
                 ),
                 use_ssl=bool(parsed.use_ssl),
                 timeout_seconds=FlextTapLdapStreams.LDAPBaseStream.coerce_positive_int(
@@ -206,7 +206,7 @@ class FlextTapLdapStreams:
                 raw_connection = self.config.get("connection", {})
                 connection_config = (
                     FlextTapLdapStreams.LDAPBaseStream.parse_connection_config(
-                        raw_connection
+                        raw_connection,
                     )
                 )
                 page_size_raw = self.config.get("page_size", 1000)
@@ -285,7 +285,7 @@ class FlextTapLdapStreams:
                     raw_conn = self.config.get("connection", {})
                     connection_config = (
                         FlextTapLdapStreams.LDAPBaseStream.parse_connection_config(
-                            raw_conn
+                            raw_conn,
                         )
                     )
                     base_dn = connection_config.base_dn
@@ -448,7 +448,7 @@ class FlextTapLdapStreams:
             )
             group_filter = (
                 FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
-                    raw_group_filter
+                    raw_group_filter,
                 )
                 or "(objectClass=groupOfNames)"
             )
@@ -650,7 +650,7 @@ class FlextTapLdapStreams:
             ) -> t.ContainerMapping:
                 parsed_definition = (
                     FlextTapLdapStreams.LDAPBaseStream.parse_property_definition(
-                        definition
+                        definition,
                     )
                 )
                 prop_type = parsed_definition.type

@@ -112,7 +112,7 @@ class FlextTapLdapServices:
             try:
                 connections = list(self._connections.values())
                 return r[Sequence[FlextTapLdapModels.TapLdap.LdapConnection]].ok(
-                    connections
+                    connections,
                 )
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[Sequence[FlextTapLdapModels.TapLdap.LdapConnection]].fail(
@@ -153,7 +153,7 @@ class FlextTapLdapServices:
         def __init__(self) -> None:
             """Initialize the stream service."""
             self._streams: MutableMapping[
-                str, FlextTapLdapModels.TapLdap.LdapStream
+                str, FlextTapLdapModels.TapLdap.LdapStream,
             ] = {}
 
         def create_stream(
@@ -209,14 +209,14 @@ class FlextTapLdapServices:
                 )
 
         def get_stream(
-            self, stream_id: str
+            self, stream_id: str,
         ) -> r[FlextTapLdapModels.TapLdap.LdapStream]:
             """Get LDAP stream by ID."""
             try:
                 stream = self._streams.get(stream_id)
                 if not stream:
                     return r[FlextTapLdapModels.TapLdap.LdapStream].fail(
-                        "Stream not found"
+                        "Stream not found",
                     )
                 return r[FlextTapLdapModels.TapLdap.LdapStream].ok(stream)
             except (RuntimeError, ValueError, TypeError) as e:
