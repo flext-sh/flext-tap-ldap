@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from enum import StrEnum, unique
-from typing import Final, Literal
+from typing import Final
 
 from flext_ldap import FlextLdapConstants
 from flext_meltano import FlextMeltanoConstants
@@ -80,16 +80,6 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             """LDAP search configuration."""
 
             DEFAULT_SCOPE: Final[str] = "SUBTREE"
-
-        type ReplicationMethodLiteral = Literal[
-            Replication.Method.FULL_TABLE,
-            Replication.Method.INCREMENTAL,
-        ]
-        "LDAP replication method literal - references Replication.Method StrEnum members."
-        TapReplicationMethod = Literal["FULL_TABLE", "INCREMENTAL"]
-        TapSearchScope = Literal["BASE", "ONELEVEL", "SUBTREE"]
-        TapConnectionMode = Literal["anonymous", "simple", "sasl"]
-        TapExecutionMode = Literal["discovery", "extraction", "test", "validate"]
 
     @unique
     class ProjectType(StrEnum):
