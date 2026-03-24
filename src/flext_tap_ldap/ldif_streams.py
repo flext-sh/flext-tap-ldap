@@ -57,7 +57,7 @@ class FlextTapLdapLdifStreams:
         Implements FlextMeltanoProtocols.Singer.Stream protocol.
         """
 
-        primary_keys: ClassVar[Sequence[str]] = ["dn"]
+        primary_keys: ClassVar[t.StrSequence] = ["dn"]
 
         def __init__(self, tap: Tap) -> None:
             """Initialize LDIF stream with library delegation."""
@@ -114,7 +114,7 @@ class FlextTapLdapLdifStreams:
             else:
                 yield from self._process_ldap_directory()
 
-        def _classify_entry_type(self, object_classes: Sequence[str]) -> str:
+        def _classify_entry_type(self, object_classes: t.StrSequence) -> str:
             """Classify entry type by simple objectClass heuristics."""
             lowered = {oc.lower() for oc in object_classes}
             if "inetorgperson" in lowered or "person" in lowered:
@@ -132,7 +132,7 @@ class FlextTapLdapLdifStreams:
             """Convert flext-ldif entry to Singer record."""
             dn_value = flext_entry.dn.value if flext_entry.dn is not None else ""
             attrs = flext_entry.attributes
-            object_classes: Sequence[str] = []
+            object_classes: t.StrSequence = []
             entry_type = "other"
             entry_attrs: t.ContainerMapping = {}
             if attrs is not None:
@@ -160,7 +160,7 @@ class FlextTapLdapLdifStreams:
         def _normalize_object_classes(
             self,
             object_classes: Mapping[str, t.ContainerValue],
-        ) -> Sequence[str]:
+        ) -> t.StrSequence:
             if isinstance(object_classes, str):
                 return [object_classes]
             object_values = _as_object_list(object_classes)
@@ -214,7 +214,7 @@ class FlextTapLdapLdifStreams:
         Implements FlextMeltanoProtocols.Singer.Stream protocol.
         """
 
-        primary_keys: ClassVar[Sequence[str]] = ["analysis_id"]
+        primary_keys: ClassVar[t.StrSequence] = ["analysis_id"]
 
         def __init__(self, tap: Tap) -> None:
             """Initialize LDIF analysis stream with library delegation."""
@@ -362,7 +362,7 @@ class FlextTapLdapLdifStreams:
                             continue
                         if entry.attributes is None:
                             continue
-                        oc_list: Sequence[str] = entry.attributes.get_values(
+                        oc_list: t.StrSequence = entry.attributes.get_values(
                             "objectClass"
                         )
                         oc_strs = [str(oc_val) for oc_val in oc_list]
@@ -391,7 +391,7 @@ class FlextTapLdapLdifStreams:
                 self.logger.exception("Error analyzing LDIF file %s", ldif_file)
                 return {"total_entries": 0, "entry_types": {}, "object_classes": {}}
 
-        def _classify_entry_type(self, object_classes: Sequence[str]) -> str:
+        def _classify_entry_type(self, object_classes: t.StrSequence) -> str:
             """Classify entry type by simple objectClass heuristics."""
             lowered = {oc.lower() for oc in object_classes}
             if "inetorgperson" in lowered or "person" in lowered:

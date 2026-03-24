@@ -50,7 +50,7 @@ class Entry:
     def __init__(
         self,
         dn: str,
-        attributes: Mapping[str, Sequence[str]] | None = None,
+        attributes: Mapping[str, t.StrSequence] | None = None,
     ) -> None:
         """Initialize LDIF entry with testing convenience."""
         self.dn = dn
@@ -80,7 +80,7 @@ class Entry:
             case str() as value_str:
                 self.attributes[name].append(value_str)
 
-    def get_attribute(self, name: str) -> Sequence[str]:
+    def get_attribute(self, name: str) -> t.StrSequence:
         """Get attribute values by name (case-insensitive)."""
         for attr_name, values in self.attributes.items():
             if attr_name.lower() == name.lower():
@@ -89,7 +89,7 @@ class Entry:
 
     def has_object_class(self, object_class: str) -> bool:
         """Check if entry has specific t.NormalizedValue class."""
-        object_classes: Sequence[str] = self.get_attribute("objectClass") or []
+        object_classes: t.StrSequence = self.get_attribute("objectClass") or []
         return any(oc.lower() == object_class.lower() for oc in object_classes)
 
     def is_valid(self) -> bool:
@@ -219,7 +219,7 @@ class FlextTapLdapProcessor:
         """Initialize the processor with a flext-ldif backend."""
         self.ignore_errors = ignore_errors
         self.max_errors = max_errors
-        self.errors: Sequence[str] = []
+        self.errors: t.StrSequence = []
         self.processed_entries = 0
         self.skipped_entries = 0
         self.entries: Sequence[Entry] = []
@@ -360,7 +360,7 @@ class FlextTapLdapProcessor:
     def _convert_from_flext_entry(self, flext_entry: m.Ldif.Entry) -> Entry:
         """Convert m.Ldif.Entry to testing convenience Entry."""
         dn = flext_entry.dn.value if flext_entry.dn else ""
-        attributes: Mapping[str, Sequence[str]] = {}
+        attributes: Mapping[str, t.StrSequence] = {}
         if flext_entry.attributes and flext_entry.attributes.attributes:
             for attr_name, attr_values in flext_entry.attributes.attributes.items():
                 attributes[attr_name] = [str(v) for v in attr_values]
@@ -444,8 +444,8 @@ class Validator:
     @override
     def __init__(self) -> None:
         """Initialize validator with in-memory state and API client."""
-        self.validation_errors: Sequence[str] = []
-        self.warnings: Sequence[str] = []
+        self.validation_errors: t.StrSequence = []
+        self.warnings: t.StrSequence = []
         self._api = FlextLdif()
 
     def get_validation_results(self) -> t.ContainerMapping:
@@ -460,7 +460,7 @@ class Validator:
         """Validate a list of LDIF entries using flext-ldif."""
         valid_count = 0
         invalid_count = 0
-        errors: Sequence[str] = []
+        errors: t.StrSequence = []
         try:
             valid_count = len(entries)
             invalid_count = 0
@@ -518,10 +518,10 @@ class Transformer:
     def apply_attribute_mappings(
         self,
         entry: Entry,
-        mappings: Mapping[str, str],
+        mappings: t.StrMapping,
     ) -> Entry:
         """Apply attribute name mappings to entry."""
-        new_attributes: Mapping[str, Sequence[str]] = {}
+        new_attributes: Mapping[str, t.StrSequence] = {}
         for attr_name, values in entry.attributes.items():
             new_name = mappings.get(attr_name, attr_name)
             new_attributes[new_name] = values
@@ -545,7 +545,7 @@ class Transformer:
         for target_attr_key, mapping in schema_mappings.items():
             target_attr: str = str(target_attr_key)
             source_attr: str | None = None
-            default_values: Sequence[str] | None = None
+            default_values: t.StrSequence | None = None
             if isinstance(mapping, str):
                 source_attr = mapping
             else:
@@ -586,7 +586,7 @@ class Transformer:
         raw_mappings: t.NormalizedValue = self.transformation_rules.get(
             "attribute_mappings"
         )
-        mappings: Mapping[str, str] = {}
+        mappings: t.StrMapping = {}
         if isinstance(raw_mappings, dict):
             attr_map: t.ContainerMapping = raw_mappings
             mappings.update({
@@ -606,7 +606,7 @@ class Transformer:
                 existing_values = transformed.attributes.get(vm_key)
                 if existing_values is None:
                     continue
-                mapped_values: Sequence[str] = []
+                mapped_values: t.StrSequence = []
                 for value in existing_values:
                     mapped: t.NormalizedValue = val_map.get(value, value)
                     mapped_values.append(str(mapped))

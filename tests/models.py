@@ -52,7 +52,7 @@ class FlextTapLdapTestModels(FlextTestsModels, FlextTapLdapModels):
 
                 base_dn: str
                 filter_str: str
-                attributes: Sequence[str] | None = None
+                attributes: t.StrSequence | None = None
                 scope: str = "SUBTREE"
                 size_limit: int | None = None
                 time_limit: int | None = None
@@ -70,7 +70,7 @@ class FlextTapLdapTestModels(FlextTestsModels, FlextTapLdapModels):
                 """Test model for LDAP directory entries."""
 
                 dn: str
-                attributes: Mapping[str, Sequence[str]]
+                attributes: Mapping[str, t.StrSequence]
                 object_class: str
 
                 @property

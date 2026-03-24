@@ -41,7 +41,7 @@ _CUSTOM_STREAM_ADAPTER = TypeAdapter(
 )
 
 
-def _validate_custom_stream(raw_item: t.NormalizedValue) -> Mapping[str, str] | None:
+def _validate_custom_stream(raw_item: t.NormalizedValue) -> t.StrMapping | None:
     """Validate a custom stream definition, returning name if valid."""
     try:
         validated: t.ContainerMapping = _CUSTOM_STREAM_ADAPTER.validate_python(
