@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator, Mapping, MutableMapping, MutableSequence, Sequence
 from pathlib import Path
-from typing import override
+from typing import ClassVar, override
 
 from flext_core import FlextLogger, r, t
 from flext_ldap import m
@@ -28,7 +28,7 @@ class FlextLdifDistinguishedName(m.Ldif.DN):
 
 
 logger = FlextLogger(__name__)
-_LDIF_ENTRY_ADAPTER = TypeAdapter(m.Ldif.Entry)
+_LDIF_ENTRY_ADAPTER: TypeAdapter[m.Ldif.Entry] = TypeAdapter(m.Ldif.Entry)
 
 
 def _to_ldif_entry(raw_value: t.ContainerMapping) -> m.Ldif.Entry | None:
@@ -222,6 +222,8 @@ class FlextTapLdapProcessor:
     This class provides testing convenience while delegating
     all LDIF processing to the flext-ldif library.
     """
+
+    _ldif_entry_adapter: ClassVar[TypeAdapter[m.Ldif.Entry]] = _LDIF_ENTRY_ADAPTER
 
     @override
     def __init__(self, *, ignore_errors: bool = True, max_errors: int = 100) -> None:

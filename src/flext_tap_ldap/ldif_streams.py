@@ -14,11 +14,11 @@ from pydantic import ConfigDict, TypeAdapter, ValidationError
 if TYPE_CHECKING:
     from flext_meltano import FlextMeltanoAbstractions as Tap
 
-_OBJECT_LIST_ADAPTER = TypeAdapter(
+_OBJECT_LIST_ADAPTER: TypeAdapter[Sequence[t.ContainerValueMapping]] = TypeAdapter(
     Sequence[t.ContainerValueMapping],
     config=ConfigDict(strict=False),
 )
-_COUNTER_MAP_ADAPTER = TypeAdapter(
+_COUNTER_MAP_ADAPTER: TypeAdapter[Mapping[str, int | str]] = TypeAdapter(
     Mapping[str, int | str],
     config=ConfigDict(strict=False),
 )
@@ -50,6 +50,13 @@ class FlextTapLdapLdifStreams:
 
     Consolidates all LDIF stream functionality following FlextTapLdap[Module] pattern.
     """
+
+    _object_list_adapter: ClassVar[TypeAdapter[Sequence[t.ContainerValueMapping]]] = (
+        _OBJECT_LIST_ADAPTER
+    )
+    _counter_map_adapter: ClassVar[TypeAdapter[Mapping[str, int | str]]] = (
+        _COUNTER_MAP_ADAPTER
+    )
 
     class LdifStream:
         """LDIF stream using flext-ldif for ALL processing.

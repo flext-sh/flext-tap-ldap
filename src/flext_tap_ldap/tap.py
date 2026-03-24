@@ -30,11 +30,6 @@ _SINGER_OUTPUT_ADAPTER: TypeAdapter[t.ContainerMapping] = TypeAdapter(
     t.ContainerMapping,
     config=ConfigDict(strict=False),
 )
-_CONFIG_MAP_ADAPTER = TypeAdapter(
-    Mapping[str, t.ContainerMapping],
-    config=ConfigDict(strict=False),
-)
-
 _CUSTOM_STREAM_ADAPTER: TypeAdapter[t.ContainerMapping] = TypeAdapter(
     t.ContainerMapping,
     config=ConfigDict(strict=False),
@@ -63,6 +58,9 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
     """
 
     name: ClassVar[str] = "FlextMeltanoTapAbstractions-ldap"
+    _config_map_adapter: ClassVar[TypeAdapter[Mapping[str, t.ContainerMapping]]] = (
+        TypeAdapter(Mapping[str, t.ContainerMapping], config=ConfigDict(strict=False))
+    )
     config: t.MutableConfigurationMapping
 
     def __init__(self) -> None:
@@ -141,7 +139,9 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         raw_connection_config = source_payload.get("connection_config", {})
         config_map: Mapping[str, t.ContainerMapping]
         try:
-            config_map = _CONFIG_MAP_ADAPTER.validate_python(raw_connection_config)
+            config_map = FlextTapLdapTap._config_map_adapter.validate_python(
+                raw_connection_config
+            )
         except ValidationError:
             config_map = {}
 
