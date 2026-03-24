@@ -62,11 +62,17 @@ if TYPE_CHECKING:
 
 _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
     "CLI_COMMAND": ("flext_tap_ldap.tap", "CLI_COMMAND"),
-    "FlextLdifDistinguishedName": ("flext_tap_ldap.processor", "FlextLdifDistinguishedName"),
+    "FlextLdifDistinguishedName": (
+        "flext_tap_ldap.processor",
+        "FlextLdifDistinguishedName",
+    ),
     "FlextTapLdapClient": ("flext_tap_ldap.client", "FlextTapLdapClient"),
     "FlextTapLdapConstants": ("flext_tap_ldap.constants", "FlextTapLdapConstants"),
     "FlextTapLdapEntry": ("flext_tap_ldap.processor", "FlextTapLdapEntry"),
-    "FlextTapLdapLdifStreams": ("flext_tap_ldap.ldif_streams", "FlextTapLdapLdifStreams"),
+    "FlextTapLdapLdifStreams": (
+        "flext_tap_ldap.ldif_streams",
+        "FlextTapLdapLdifStreams",
+    ),
     "FlextTapLdapModels": ("flext_tap_ldap.models", "FlextTapLdapModels"),
     "FlextTapLdapProcessor": ("flext_tap_ldap.processor", "FlextTapLdapProcessor"),
     "FlextTapLdapProtocols": ("flext_tap_ldap.protocols", "FlextTapLdapProtocols"),

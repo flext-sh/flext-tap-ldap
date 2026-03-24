@@ -104,7 +104,9 @@ class TestLdifProcessor:
                 }
             }
         )
-        entry = FlextTapLdapEntry("cn=alice,dc=example,dc=com", {"employeeId": ["1001"]})
+        entry = FlextTapLdapEntry(
+            "cn=alice,dc=example,dc=com", {"employeeId": ["1001"]}
+        )
         transformed = transformer.transform_entry(entry)
         assert transformed.attributes["uid"] == ["1001"]
         assert transformed.attributes["status"] == ["active"]

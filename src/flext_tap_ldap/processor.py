@@ -462,7 +462,9 @@ class FlextTapLdapValidator:
             "is_valid": not self.validation_errors,
         }
 
-    def validate_entries(self, entries: Sequence[FlextTapLdapEntry]) -> t.ContainerMapping:
+    def validate_entries(
+        self, entries: Sequence[FlextTapLdapEntry]
+    ) -> t.ContainerMapping:
         """Validate a list of LDIF entries using flext-ldif."""
         valid_count = 0
         invalid_count = 0
@@ -580,7 +582,9 @@ class FlextTapLdapTransformer:
 
     def transform_entry(self, entry: FlextTapLdapEntry) -> FlextTapLdapEntry:
         """Transform LDIF entry using configured transformation rules."""
-        transformed = FlextTapLdapEntry(entry.dn, {k: list(v) for k, v in entry.attributes.items()})
+        transformed = FlextTapLdapEntry(
+            entry.dn, {k: list(v) for k, v in entry.attributes.items()}
+        )
         transformed.change_type = entry.change_type
         transformed.controls = list(entry.controls)
         raw_schema_mappings: t.NormalizedValue = self.transformation_rules.get(

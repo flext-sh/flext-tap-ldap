@@ -378,7 +378,12 @@ class FlextTapLdapLdifStreams:
                 self.logger.error(
                     f"Failed to analyze LDIF file {ldif_file}: {result.error}",
                 )
-                return {"total_entries": 0, "entry_types": {}, "object_classes": {}}
+                empty: dict[str, int] = {}
+                return {
+                    "total_entries": 0,
+                    "entry_types": empty,
+                    "object_classes": dict(empty),
+                }
             except (
                 ValueError,
                 TypeError,
@@ -389,7 +394,12 @@ class FlextTapLdapLdifStreams:
                 ImportError,
             ):
                 self.logger.exception("Error analyzing LDIF file %s", ldif_file)
-                return {"total_entries": 0, "entry_types": {}, "object_classes": {}}
+                empty_dict: dict[str, int] = {}
+                return {
+                    "total_entries": 0,
+                    "entry_types": empty_dict,
+                    "object_classes": dict(empty_dict),
+                }
 
         def _classify_entry_type(self, object_classes: t.StrSequence) -> str:
             """Classify entry type by simple objectClass heuristics."""
