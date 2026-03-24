@@ -36,20 +36,6 @@ _CUSTOM_STREAM_ADAPTER: TypeAdapter[t.ContainerMapping] = TypeAdapter(
 )
 
 
-def _validate_custom_stream(raw_item: t.NormalizedValue) -> t.StrMapping | None:
-    """Validate a custom stream definition, returning name if valid."""
-    try:
-        validated: t.ContainerMapping = _CUSTOM_STREAM_ADAPTER.validate_python(
-            raw_item,
-        )
-    except ValidationError:
-        return None
-    name_val: t.NormalizedValue = validated.get("name")
-    if isinstance(name_val, str) and name_val:
-        return {"name": name_val}
-    return None
-
-
 class FlextTapLdapTap(FlextMeltanoAbstractions):
     """Singer FlextMeltanoTapAbstractions for LDAP data extraction using FLEXT centralized patterns.
 
@@ -181,6 +167,20 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         """Execute the tap. Returns success after stream discovery."""
         return r[bool].ok(True)
 
+    @staticmethod
+    def _validate_custom_stream(raw_item: t.NormalizedValue) -> t.StrMapping | None:
+        """Validate a custom stream definition, returning name if valid."""
+        try:
+            validated: t.ContainerMapping = _CUSTOM_STREAM_ADAPTER.validate_python(
+                raw_item,
+            )
+        except ValidationError:
+            return None
+        name_val: t.NormalizedValue = validated.get("name")
+        if isinstance(name_val, str) and name_val:
+            return {"name": name_val}
+        return None
+
 
 def main() -> None:
     """Run the main entry point for the FlextMeltanoTapAbstractions."""
@@ -245,7 +245,7 @@ def _build_cli_command() -> click.Command:
                 raw_custom: t.NormalizedValue = raw_config.get("custom_streams")
                 if isinstance(raw_custom, list):
                     for cs_item in raw_custom:
-                        cs_dict = _validate_custom_stream(cs_item)
+                        cs_dict = FlextTapLdapTap._validate_custom_stream(cs_item)
                         if cs_dict is not None:
                             cs_entry: t.Meltano.Singer.CatalogEntry = {
                                 "stream": cs_dict["name"],

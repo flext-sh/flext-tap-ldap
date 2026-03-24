@@ -161,8 +161,6 @@ class FlextTapLdapStreams:
                 "modifyTimestamp": "2024-01-01T12:00:00Z",
             }
 
-    CustomStreamParams = FlextTapLdapModels.TapLdap.CustomStreamParams
-
     class LDAPBaseStream:
         """Base class for LDAP streams with flext-ldap integration.
 

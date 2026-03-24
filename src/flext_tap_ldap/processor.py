@@ -170,7 +170,7 @@ class FlextTapLdapEntry:
                 for value in attr_values:
                     ldif_content += f"{attr_name}: {value}\n"
             ldif_content += "\n"
-            result: r[MutableSequence[m.Ldif.Entry]] = api.parse(ldif_content)
+            result: r[MutableSequence[m.Ldif.Entry]] = api.parse_ldif(ldif_content)
             if result.is_success and result.value and (result.value):
                 parsed_entry = _to_ldif_entry(result.value[0].model_dump())
                 if parsed_entry is not None:
@@ -292,7 +292,7 @@ class FlextTapLdapProcessor:
         """Parse LDIF content using flext-ldif and yield testing convenience entries."""
         logger.info("Parsing LDIF content with flext-ldif from %s", source_name)
         try:
-            result: r[MutableSequence[m.Ldif.Entry]] = self._api.parse(content)
+            result: r[MutableSequence[m.Ldif.Entry]] = self._api.parse_ldif(content)
             if not result.is_success:
                 error_msg = (
                     f"Failed to parse LDIF content from {source_name}: {result.error}"
@@ -397,7 +397,7 @@ class FlextTapLdapProcessor:
         file_path: Path,
     ) -> r[MutableSequence[m.Ldif.Entry]]:
         """Parse LDIF content using flext-ldif API."""
-        result: r[MutableSequence[m.Ldif.Entry]] = self._api.parse(content)
+        result: r[MutableSequence[m.Ldif.Entry]] = self._api.parse_ldif(content)
         if not result.is_success:
             error_msg = f"Failed to parse LDIF file {file_path}: {result.error}"
             if self.ignore_errors:

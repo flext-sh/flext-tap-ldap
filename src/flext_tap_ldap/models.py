@@ -40,7 +40,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
         # ── Domain Events ────────────────────────────────────────────────────
 
-        class TapExecutionStartedEvent(FlextLdapModels.DomainEvent):
+        class TapExecutionStartedEvent(FlextLdapModels.Event):
             """Event raised when tap execution starts."""
 
             timestamp: Annotated[
@@ -51,7 +51,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             execution_id: str = ""
             config_hash: str | None = None
 
-        class TapExecutionCompletedEvent(FlextLdapModels.DomainEvent):
+        class TapExecutionCompletedEvent(FlextLdapModels.Event):
             """Event raised when tap execution completes."""
 
             timestamp: Annotated[
@@ -64,7 +64,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             streams_discovered: int = 0
             duration_seconds: float = 0.0
 
-        class StreamDiscoveredEvent(FlextLdapModels.DomainEvent):
+        class StreamDiscoveredEvent(FlextLdapModels.Event):
             """Event raised when a stream is discovered."""
 
             event_type: Annotated[str, Field(default="stream_discovered", frozen=True)]
@@ -91,7 +91,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                     data["aggregate_id"] = data["stream_name"]
                 return data
 
-        class RecordExtractedEvent(FlextLdapModels.DomainEvent):
+        class RecordExtractedEvent(FlextLdapModels.Event):
             """Event raised when a record is extracted."""
 
             event_type: Annotated[str, Field(default="record_extracted", frozen=True)]
@@ -169,7 +169,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 self.records_extracted = records_extracted
                 self.streams_processed = streams_processed
 
-        class ConnectionTestedEvent(FlextLdapModels.DomainEvent):
+        class ConnectionTestedEvent(FlextLdapModels.Event):
             """Event raised after connection test."""
 
             event_type: Annotated[str, Field(default="connection_tested", frozen=True)]

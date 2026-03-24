@@ -36,8 +36,6 @@ class FlextTapLdapClient:
     with nested LDAPClient and LDAPClientConfig classes.
     """
 
-    LDAPClientConfig = FlextTapLdapModels.TapLdap.LdapClientConfig
-
     class LDAPClient:
         """Testing convenience LDAP client wrapper.
 
@@ -47,13 +45,13 @@ class FlextTapLdapClient:
 
         def __init__(
             self,
-            config: FlextTapLdapClient.LDAPClientConfig | None = None,
+            config: FlextTapLdapModels.TapLdap.LdapClientConfig | None = None,
             **convenience_kwargs: t.Scalar,
         ) -> None:
             """Initialize with Parameter Object Pattern (preferred).
 
             Preferred Usage (Parameter Object Pattern):
-                config = FlextTapLdapClient.LDAPClientConfig(
+                config = FlextTapLdapModels.TapLdap.LdapClientConfig(
                     host="ldap.example.com", port=389
                 )
                 client = FlextTapLdapClient.LDAPClient(config=config)
@@ -275,7 +273,7 @@ class FlextTapLdapClient:
         def _create_config_from_kwargs(
             self,
             **convenience_kwargs: t.Scalar,
-        ) -> FlextTapLdapClient.LDAPClientConfig:
+        ) -> FlextTapLdapModels.TapLdap.LdapClientConfig:
             """Create config from convenience keyword arguments."""
             raw_host = convenience_kwargs.get("host")
             host: str
@@ -285,7 +283,7 @@ class FlextTapLdapClient:
                 case _:
                     msg = "Either 'config' or valid string 'host' must be provided"
                     raise ValueError(msg)
-            return FlextTapLdapClient.LDAPClientConfig(
+            return FlextTapLdapModels.TapLdap.LdapClientConfig(
                 host=host,
                 port=self._coerce_int(
                     convenience_kwargs.get("port", c.TapLdap.DEFAULT_PORT),
@@ -353,7 +351,7 @@ class FlextTapLdapClient:
 
         def _initialize_flext_api(
             self,
-            client_config: FlextTapLdapClient.LDAPClientConfig,
+            client_config: FlextTapLdapModels.TapLdap.LdapClientConfig,
         ) -> None:
             """Initialize the FlextLdap API with the given configuration."""
             flext_connection_config = m.Ldap.ConnectionConfig(
