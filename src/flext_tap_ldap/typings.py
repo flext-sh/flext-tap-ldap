@@ -58,7 +58,7 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
 
         type ConnectionConfig = Mapping[
             str,
-            str | int | bool | Mapping[str, Mapping[str, t.ContainerValue]],
+            t.Scalar | Mapping[str, Mapping[str, t.ContainerValue]],
         ]
         type AuthenticationConfig = Mapping[
             str,
@@ -162,7 +162,7 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
             str,
             Mapping[str, t.ContainerValue],
         ]
-        type ExtractionConfig = Mapping[str, str | int | bool | Sequence[str]]
+        type ExtractionConfig = Mapping[str, t.Scalar | Sequence[str]]
         type FilteringConfig = Mapping[
             str,
             str | Sequence[str] | Mapping[str, Mapping[str, t.ContainerValue]],
@@ -209,7 +209,7 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
 
         type ConnectionDict = Mapping[
             str,
-            str | int | bool | Mapping[str, Mapping[str, t.ContainerValue]],
+            t.Scalar | Mapping[str, Mapping[str, t.ContainerValue]],
         ]
         type AuthDict = Mapping[
             str,
@@ -261,7 +261,7 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
             str,
             Mapping[str, t.ContainerValue],
         ]
-        type ExtractionDict = Mapping[str, str | int | bool | Sequence[str]]
+        type ExtractionDict = Mapping[str, t.Scalar | Sequence[str]]
         type RecordDict = Mapping[str, t.ContainerValue]
         type ResultDict = Mapping[str, t.ContainerValue]
         type ContextDict = Mapping[str, t.ContainerValue]
@@ -282,7 +282,7 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
 
             type ProjectType = c.ProjectType
             type TapLdapProjectConfig = Mapping[str, t.ContainerValue]
-            type LdapExtractionConfig = Mapping[str, str | int | bool | Sequence[str]]
+            type LdapExtractionConfig = Mapping[str, t.Scalar | Sequence[str]]
             type LdapIntegrationConfig = Mapping[
                 str,
                 bool | str | Mapping[str, Mapping[str, t.ContainerValue]],
