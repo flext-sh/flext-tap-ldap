@@ -12,7 +12,7 @@ from pathlib import Path
 from unittest.mock import Mock
 
 from flext_tap_ldap import FlextTapLdapLdifStreams, FlextTapLdapProcessor
-from flext_tap_ldap.processor import Entry, Transformer
+from flext_tap_ldap.processor import FlextTapLdapEntry, FlextTapLdapTransformer
 from tests import t
 
 
@@ -55,7 +55,7 @@ class TestLdifProcessor:
         assert set(seen) == {str(file_a), str(file_b)}
 
     def test_transform_entry_applies_rules(self) -> None:
-        transformer = Transformer(
+        transformer = FlextTapLdapTransformer(
             transformation_rules={
                 "attribute_mappings": {"CN": "cn", "sn": "surname"},
                 "attribute_value_mappings": {
@@ -65,7 +65,7 @@ class TestLdifProcessor:
                 "add_attributes": {"status": "active"},
             }
         )
-        entry = Entry(
+        entry = FlextTapLdapEntry(
             "cn=alice,dc=example,dc=com",
             {"CN": ["Alice"], "sn": ["Smith"], "department": ["IT"], "obsolete": ["x"]},
         )
@@ -96,7 +96,7 @@ class TestLdifProcessor:
         assert not records
 
     def test_transform_entry_applies_schema_mappings(self) -> None:
-        transformer = Transformer(
+        transformer = FlextTapLdapTransformer(
             transformation_rules={
                 "schema_mappings": {
                     "uid": "employeeId",
@@ -104,7 +104,7 @@ class TestLdifProcessor:
                 }
             }
         )
-        entry = Entry("cn=alice,dc=example,dc=com", {"employeeId": ["1001"]})
+        entry = FlextTapLdapEntry("cn=alice,dc=example,dc=com", {"employeeId": ["1001"]})
         transformed = transformer.transform_entry(entry)
         assert transformed.attributes["uid"] == ["1001"]
         assert transformed.attributes["status"] == ["active"]

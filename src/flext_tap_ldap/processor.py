@@ -228,19 +228,19 @@ class FlextTapLdapProcessor:
         self.errors: MutableSequence[str] = []
         self.processed_entries = 0
         self.skipped_entries = 0
-        self.entries: MutableSequence[Entry] = []
+        self.entries: MutableSequence[FlextTapLdapEntry] = []
         self.stats = {"total_entries": 0, "valid_entries": 0, "invalid_entries": 0}
         self._api = FlextLdif()
 
-    def filter_by_attribute_exists(self, attr_name: str) -> Sequence[Entry]:
+    def filter_by_attribute_exists(self, attr_name: str) -> Sequence[FlextTapLdapEntry]:
         """Filter entries that have a specific attribute."""
         return [entry for entry in self.entries if entry.get_attribute(attr_name)]
 
-    def filter_by_dn_contains(self, substring: str) -> Sequence[Entry]:
+    def filter_by_dn_contains(self, substring: str) -> Sequence[FlextTapLdapEntry]:
         """Filter entries by DN containing substring."""
         return [entry for entry in self.entries if substring in entry.dn]
 
-    def filter_by_dn_pattern(self, dn_pattern: str) -> Sequence[Entry]:
+    def filter_by_dn_pattern(self, dn_pattern: str) -> Sequence[FlextTapLdapEntry]:
         """Filter entries by DN pattern - entries under the pattern."""
         return [
             entry
@@ -248,7 +248,7 @@ class FlextTapLdapProcessor:
             if dn_pattern in entry.dn and entry.dn != dn_pattern
         ]
 
-    def filter_by_objectclass(self, object_class: str) -> Sequence[Entry]:
+    def filter_by_objectclass(self, object_class: str) -> Sequence[FlextTapLdapEntry]:
         """Filter entries by t.NormalizedValue class."""
         return [entry for entry in self.entries if entry.has_object_class(object_class)]
 
@@ -283,7 +283,7 @@ class FlextTapLdapProcessor:
         self,
         content: str,
         source_name: str = "content",
-    ) -> Iterator[Entry]:
+    ) -> Iterator[FlextTapLdapEntry]:
         """Parse LDIF content using flext-ldif and yield testing convenience entries."""
         logger.info("Parsing LDIF content with flext-ldif from %s", source_name)
         try:
@@ -321,7 +321,7 @@ class FlextTapLdapProcessor:
             else:
                 raise ValueError(error_msg) from e
 
-    def parse_file(self, file_path: Path) -> Iterator[Entry]:
+    def parse_file(self, file_path: Path) -> Iterator[FlextTapLdapEntry]:
         """Parse LDIF file using flext-ldif and yield testing convenience entries."""
         self._validate_file_exists(file_path)
         logger.info("Starting LDIF parsing with flext-ldif: %s", file_path)
@@ -363,14 +363,14 @@ class FlextTapLdapProcessor:
             records.append(record)
         return records
 
-    def _convert_from_flext_entry(self, flext_entry: m.Ldif.Entry) -> Entry:
-        """Convert m.Ldif.Entry to testing convenience Entry."""
+    def _convert_from_flext_entry(self, flext_entry: m.Ldif.Entry) -> FlextTapLdapEntry:
+        """Convert m.Ldif.Entry to testing convenience FlextTapLdapEntry."""
         dn = flext_entry.dn.value if flext_entry.dn else ""
         attributes: MutableMapping[str, MutableSequence[str]] = {}
         if flext_entry.attributes and flext_entry.attributes.attributes:
             for attr_name, attr_values in flext_entry.attributes.attributes.items():
                 attributes[attr_name] = [str(v) for v in attr_values]
-        return Entry(dn=dn, attributes=attributes)
+        return FlextTapLdapEntry(dn=dn, attributes=attributes)
 
     def _handle_parsing_error(
         self,
@@ -433,7 +433,7 @@ class FlextTapLdapProcessor:
     def _yield_entries_from_result(
         self,
         result: r[MutableSequence[m.Ldif.Entry]],
-    ) -> Iterator[Entry]:
+    ) -> Iterator[FlextTapLdapEntry]:
         """Yield testing convenience entries from parse result."""
         if result.value:
             for flext_entry in result.value:
@@ -444,7 +444,7 @@ class FlextTapLdapProcessor:
                 self.processed_entries += 1
 
 
-class Validator:
+class FlextTapLdapValidator:
     """LDIF content validator using flext-ldif validation capabilities."""
 
     @override
@@ -462,7 +462,7 @@ class Validator:
             "is_valid": not self.validation_errors,
         }
 
-    def validate_entries(self, entries: Sequence[Entry]) -> t.ContainerMapping:
+    def validate_entries(self, entries: Sequence[FlextTapLdapEntry]) -> t.ContainerMapping:
         """Validate a list of LDIF entries using flext-ldif."""
         valid_count = 0
         invalid_count = 0
@@ -492,7 +492,7 @@ class Validator:
             "errors": errors,
         }
 
-    def validate_entry(self, entry: Entry) -> bool:
+    def validate_entry(self, entry: FlextTapLdapEntry) -> bool:
         """Validate LDIF entry using flext-ldif validation."""
         try:
             return True
@@ -509,7 +509,7 @@ class Validator:
             return False
 
 
-class Transformer:
+class FlextTapLdapTransformer:
     """Transform LDIF entries using flext-ldif transformation capabilities."""
 
     @override
@@ -523,26 +523,26 @@ class Transformer:
 
     def apply_attribute_mappings(
         self,
-        entry: Entry,
+        entry: FlextTapLdapEntry,
         mappings: t.StrMapping,
-    ) -> Entry:
+    ) -> FlextTapLdapEntry:
         """Apply attribute name mappings to entry."""
         new_attributes: MutableMapping[str, MutableSequence[str]] = {}
         for attr_name, values in entry.attributes.items():
             new_name = mappings.get(attr_name, attr_name)
             new_attributes[new_name] = list(values)
-        transformed_entry = Entry(entry.dn, new_attributes)
+        transformed_entry = FlextTapLdapEntry(entry.dn, new_attributes)
         transformed_entry.change_type = entry.change_type
         transformed_entry.controls = list(entry.controls)
         return transformed_entry
 
     def apply_schema_mappings(
         self,
-        entry: Entry,
+        entry: FlextTapLdapEntry,
         schema_mappings: t.ContainerMapping,
-    ) -> Entry:
+    ) -> FlextTapLdapEntry:
         """Apply schema mappings to normalize output attributes."""
-        transformed_entry = Entry(
+        transformed_entry = FlextTapLdapEntry(
             entry.dn,
             {k: list(v) for k, v in entry.attributes.items()},
         )
@@ -578,9 +578,9 @@ class Transformer:
                 transformed_entry.attributes[target_attr] = default_values
         return transformed_entry
 
-    def transform_entry(self, entry: Entry) -> Entry:
+    def transform_entry(self, entry: FlextTapLdapEntry) -> FlextTapLdapEntry:
         """Transform LDIF entry using configured transformation rules."""
-        transformed = Entry(entry.dn, {k: list(v) for k, v in entry.attributes.items()})
+        transformed = FlextTapLdapEntry(entry.dn, {k: list(v) for k, v in entry.attributes.items()})
         transformed.change_type = entry.change_type
         transformed.controls = list(entry.controls)
         raw_schema_mappings: t.NormalizedValue = self.transformation_rules.get(
