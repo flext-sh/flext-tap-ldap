@@ -27,20 +27,6 @@ from flext_tap_ldap.typings import FlextTapLdapTypes
 logger = FlextLogger(__name__)
 
 
-def _as_map(value: t.NormalizedValue) -> Mapping[str, t.ContainerValue] | None:
-    try:
-        return FlextTapLdapTypes.CONFIG_MAP_ADAPTER.validate_python(value)
-    except ValidationError:
-        return None
-
-
-def _as_str(value: t.NormalizedValue) -> str | None:
-    try:
-        return FlextTapLdapTypes.STRICT_STR_ADAPTER.validate_python(value)
-    except ValidationError:
-        return None
-
-
 class FlextTapLdapServices:
     """Unified services class for LDAP tap operations with complete service management.
 
@@ -52,6 +38,20 @@ class FlextTapLdapServices:
     to maintain single responsibility while providing complete LDAP/LDIF
     data extraction and processing capabilities.
     """
+
+    @staticmethod
+    def _as_map(value: t.NormalizedValue) -> Mapping[str, t.ContainerValue] | None:
+        try:
+            return FlextTapLdapTypes.CONFIG_MAP_ADAPTER.validate_python(value)
+        except ValidationError:
+            return None
+
+    @staticmethod
+    def _as_str(value: t.NormalizedValue) -> str | None:
+        try:
+            return FlextTapLdapTypes.STRICT_STR_ADAPTER.validate_python(value)
+        except ValidationError:
+            return None
 
     EXPECTED_DATA_COUNT = 3
 
@@ -291,9 +291,9 @@ class FlextTapLdapServices:
         ) -> r[FlextTapLdapModels.TapLdap.TapExecution]:
             """Create tap execution."""
             try:
-                validated_config = _as_map(config or {}) or {}
-                validated_catalog = _as_map(catalog or {}) or {}
-                validated_state = _as_map(state or {}) or {}
+                validated_config = FlextTapLdapServices._as_map(config or {}) or {}
+                validated_catalog = FlextTapLdapServices._as_map(catalog or {}) or {}
+                validated_state = FlextTapLdapServices._as_map(state or {}) or {}
                 execution = FlextTapLdapModels.TapLdap.TapExecution(
                     id=uuid4().hex,
                     execution_id=f"exec_{uuid4().hex[:8]}",
@@ -411,7 +411,7 @@ class FlextTapLdapServices:
                 if not validation_result.is_success:
                     return validation_result
                 validation_data: t.ContainerMapping = (
-                    _as_map(validation_result.value) or {}
+                    FlextTapLdapServices._as_map(validation_result.value) or {}
                 )
                 file_stats: t.ContainerMapping = {
                     "file_path": file_path,
@@ -466,7 +466,7 @@ class FlextTapLdapServices:
                         if entry.attributes is not None
                         else {}
                     )
-                    attrs = _as_map(attributes_raw) or {}
+                    attrs = FlextTapLdapServices._as_map(attributes_raw) or {}
                     normalized.append({"dn": dn_value, "attributes": attrs})
                 return r[Sequence[t.ContainerMapping]].ok(normalized)
             except (
@@ -592,8 +592,8 @@ class FlextTapLdapServices:
             base_dn=base_dn,
             port=port,
             use_ssl=bool(kwargs.get("use_ssl")),
-            bind_dn=_as_str(kwargs.get("bind_dn")),
-            bind_password=_as_str(kwargs.get("bind_password")),
+            bind_dn=FlextTapLdapServices._as_str(kwargs.get("bind_dn")),
+            bind_password=FlextTapLdapServices._as_str(kwargs.get("bind_password")),
             timeout_seconds=c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
             page_size=c.TapLdap.DEFAULT_PAGE_SIZE,
             max_retries=3,
