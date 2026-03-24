@@ -103,7 +103,7 @@ class TestFlextTapLdapIntegration:
     ) -> None:
         """Test discovery mode functionality."""
         mock_client_instance = mock_ldap_client.return_value
-        empty_records: Sequence[Mapping[str, t.Scalar | Mapping[str, t.Scalar]]] = []
+        empty_records: Sequence[Mapping[str, t.Scalar | t.ScalarMapping]] = []
         mock_client_instance.search.return_value.__aenter__.return_value = empty_records
         result = runner.invoke(
             self._cli_command(),
@@ -180,7 +180,7 @@ class TestFlextTapLdapIntegration:
     ) -> None:
         """Test incremental sync functionality."""
         mock_client_instance = mock_ldap_client.return_value
-        empty_records: Sequence[Mapping[str, t.Scalar | Mapping[str, t.Scalar]]] = []
+        empty_records: Sequence[Mapping[str, t.Scalar | t.ScalarMapping]] = []
         mock_client_instance.search.return_value.__aenter__.return_value = empty_records
         result = runner.invoke(
             self._cli_command(),
@@ -233,9 +233,7 @@ class TestFlextTapLdapIntegration:
             "flext_tap_ldap.client.FlextTapLdapClient.LDAPClient"
         ) as mock_ldap_client:
             mock_client_instance = mock_ldap_client.return_value
-            empty_records: Sequence[
-                Mapping[str, t.Scalar | Mapping[str, t.Scalar]]
-            ] = []
+            empty_records: Sequence[Mapping[str, t.Scalar | t.ScalarMapping]] = []
             mock_client_instance.search.return_value.__aenter__.return_value = (
                 empty_records
             )
@@ -297,7 +295,7 @@ class TestFlextTapLdapIntegration:
         def mock_search(
             *_args: t.Scalar,
             **_kwargs: t.Scalar,
-        ) -> Generator[Mapping[str, t.Scalar | Mapping[str, t.Scalar]]]:
+        ) -> Generator[Mapping[str, t.Scalar | t.ScalarMapping]]:
             time.sleep(0)
             yield {
                 "dn": "uid=user1,ou=users,dc=test,dc=com",
