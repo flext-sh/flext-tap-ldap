@@ -58,23 +58,23 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
 
         type ConnectionConfig = Mapping[
             str,
-            t.Scalar | Mapping[str, Mapping[str, t.ContainerValue]],
+            t.Scalar | Mapping[str, t.ContainerValueMapping],
         ]
         type AuthenticationConfig = Mapping[
             str,
-            str | bool | Mapping[str, Mapping[str, t.ContainerValue]],
+            str | bool | Mapping[str, t.ContainerValueMapping],
         ]
         type TlsConfig = Mapping[
             str,
-            bool | str | Mapping[str, Mapping[str, t.ContainerValue]],
+            bool | str | Mapping[str, t.ContainerValueMapping],
         ]
         type ServerConfig = Mapping[
             str,
-            str | int | Sequence[str] | Mapping[str, Mapping[str, t.ContainerValue]],
+            str | int | Sequence[str] | Mapping[str, t.ContainerValueMapping],
         ]
         type PoolingConfig = Mapping[
             str,
-            int | bool | Mapping[str, Mapping[str, t.ContainerValue]],
+            int | bool | Mapping[str, t.ContainerValueMapping],
         ]
         type TimeoutConfig = Mapping[str, int | float]
 
@@ -83,50 +83,50 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
 
         type LdapEntry = Mapping[
             str,
-            str | Sequence[str] | Mapping[str, Mapping[str, t.ContainerValue]],
+            str | Sequence[str] | Mapping[str, t.ContainerValueMapping],
         ]
         type LdapAttribute = Mapping[
             str,
-            str | Sequence[str] | bytes | Mapping[str, Mapping[str, t.ContainerValue]],
+            str | Sequence[str] | bytes | Mapping[str, t.ContainerValueMapping],
         ]
-        type LdapDn = Mapping[str, str | Mapping[str, Mapping[str, t.ContainerValue]]]
+        type LdapDn = Mapping[str, str | Mapping[str, t.ContainerValueMapping]]
         type LdapObjectClass = Mapping[
             str,
-            str | Sequence[str] | Mapping[str, Mapping[str, t.ContainerValue]],
+            str | Sequence[str] | Mapping[str, t.ContainerValueMapping],
         ]
         type LdapSchema = Mapping[
             str,
-            str | Sequence[Mapping[str, Mapping[str, t.ContainerValue]]],
+            str | Sequence[Mapping[str, t.ContainerValueMapping]],
         ]
         type LdapFilter = Mapping[
             str,
-            str | Mapping[str, Mapping[str, t.ContainerValue]],
+            str | Mapping[str, t.ContainerValueMapping],
         ]
 
     class LdifProcessing:
         """LDIF processing complex types."""
 
         type LdifRecord = Mapping[
-            str, str | Sequence[str] | Mapping[str, Mapping[str, t.ContainerValue]]
+            str, str | Sequence[str] | Mapping[str, t.ContainerValueMapping]
         ]
         type LdifChangeRecord = Mapping[
-            str, str | Sequence[Mapping[str, Mapping[str, t.ContainerValue]]]
+            str, str | Sequence[Mapping[str, t.ContainerValueMapping]]
         ]
         type LdifParserConfig = Mapping[
             str,
-            bool | str | int | Mapping[str, Mapping[str, t.ContainerValue]],
+            bool | str | int | Mapping[str, t.ContainerValueMapping],
         ]
         type LdifValidation = Mapping[
             str,
-            bool | str | Sequence[str] | Mapping[str, Mapping[str, t.ContainerValue]],
+            bool | str | Sequence[str] | Mapping[str, t.ContainerValueMapping],
         ]
         type LdifBatch = Mapping[
             str,
-            int | Sequence[Mapping[str, Mapping[str, t.ContainerValue]]],
+            int | Sequence[Mapping[str, t.ContainerValueMapping]],
         ]
         type LdifProcessingMetrics = Mapping[
             str,
-            int | float | Mapping[str, Mapping[str, t.ContainerValue]],
+            int | float | Mapping[str, t.ContainerValueMapping],
         ]
 
     class SingerStream:
@@ -134,25 +134,21 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
 
         type StreamDefinition = Mapping[
             str,
-            str | Mapping[str, Mapping[str, t.ContainerValue]],
+            str | Mapping[str, t.ContainerValueMapping],
         ]
-        type StreamSchema = Mapping[
-            str, str | Mapping[str, Mapping[str, t.ContainerValue]]
-        ]
+        type StreamSchema = Mapping[str, str | Mapping[str, t.ContainerValueMapping]]
         type StreamMetadata = Mapping[
             str,
-            str | bool | Mapping[str, Mapping[str, t.ContainerValue]],
+            str | bool | Mapping[str, t.ContainerValueMapping],
         ]
         type StreamRecord = Mapping[
             str,
             Mapping[str, t.ContainerValue],
         ]
-        type StreamState = Mapping[
-            str, str | Mapping[str, Mapping[str, t.ContainerValue]]
-        ]
+        type StreamState = Mapping[str, str | Mapping[str, t.ContainerValueMapping]]
         type StreamCatalog = Mapping[
             str,
-            str | Sequence[Mapping[str, Mapping[str, t.ContainerValue]]],
+            str | Sequence[Mapping[str, t.ContainerValueMapping]],
         ]
 
     class TapConfiguration:
@@ -165,17 +161,17 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
         type ExtractionConfig = Mapping[str, t.Scalar | Sequence[str]]
         type FilteringConfig = Mapping[
             str,
-            str | Sequence[str] | Mapping[str, Mapping[str, t.ContainerValue]],
+            str | Sequence[str] | Mapping[str, t.ContainerValueMapping],
         ]
         type BatchingConfig = Mapping[
             str,
-            int | bool | Mapping[str, Mapping[str, t.ContainerValue]],
+            int | bool | Mapping[str, t.ContainerValueMapping],
         ]
         type ReplicationConfig = Mapping[
-            str, str | bool | Mapping[str, Mapping[str, t.ContainerValue]]
+            str, str | bool | Mapping[str, t.ContainerValueMapping]
         ]
         type PerformanceConfig = Mapping[
-            str, int | float | Mapping[str, Mapping[str, t.ContainerValue]]
+            str, int | float | Mapping[str, t.ContainerValueMapping]
         ]
 
     class LdapQuery:
@@ -183,21 +179,21 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
 
         type SearchFilter = Mapping[
             str,
-            str | Mapping[str, Mapping[str, t.ContainerValue]],
+            str | Mapping[str, t.ContainerValueMapping],
         ]
         type SearchScope = Mapping[
             str,
-            str | int | Mapping[str, Mapping[str, t.ContainerValue]],
+            str | int | Mapping[str, t.ContainerValueMapping],
         ]
         type SearchAttributes = Mapping[
             str, Sequence[str] | Mapping[str, t.ContainerValue]
         ]
         type SearchResult = Mapping[str, Sequence[Mapping[str, t.ContainerValue]]]
         type PaginationConfig = Mapping[
-            str, int | str | Mapping[str, Mapping[str, t.ContainerValue]]
+            str, int | str | Mapping[str, t.ContainerValueMapping]
         ]
         type QueryOptimization = Mapping[
-            str, bool | str | Mapping[str, Mapping[str, t.ContainerValue]]
+            str, bool | str | Mapping[str, t.ContainerValueMapping]
         ]
 
     class TapLdapCore:
@@ -209,19 +205,19 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
 
         type ConnectionDict = Mapping[
             str,
-            t.Scalar | Mapping[str, Mapping[str, t.ContainerValue]],
+            t.Scalar | Mapping[str, t.ContainerValueMapping],
         ]
         type AuthDict = Mapping[
             str,
-            str | bool | Mapping[str, Mapping[str, t.ContainerValue]],
+            str | bool | Mapping[str, t.ContainerValueMapping],
         ]
         type TlsDict = Mapping[
             str,
-            bool | str | Mapping[str, Mapping[str, t.ContainerValue]],
+            bool | str | Mapping[str, t.ContainerValueMapping],
         ]
         type ServerDict = Mapping[
             str,
-            str | int | Sequence[str] | Mapping[str, Mapping[str, t.ContainerValue]],
+            str | int | Sequence[str] | Mapping[str, t.ContainerValueMapping],
         ]
         type LdapRecordDict = Mapping[
             str,
@@ -229,11 +225,9 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
         ]
         type EntryDict = Mapping[str, Mapping[str, t.ContainerValue] | Sequence[str]]
         type AttributeDict = Mapping[
-            str, str | Sequence[str] | Mapping[str, Mapping[str, t.ContainerValue]]
+            str, str | Sequence[str] | Mapping[str, t.ContainerValueMapping]
         ]
-        type SchemaDict = Mapping[
-            str, str | Mapping[str, Mapping[str, t.ContainerValue]]
-        ]
+        type SchemaDict = Mapping[str, str | Mapping[str, t.ContainerValueMapping]]
         type StreamDict = Mapping[
             str,
             Mapping[str, t.ContainerValue],
@@ -246,16 +240,14 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
             str,
             Mapping[str, t.ContainerValue],
         ]
-        type StateDict = Mapping[
-            str, str | Mapping[str, Mapping[str, t.ContainerValue]]
-        ]
+        type StateDict = Mapping[str, str | Mapping[str, t.ContainerValueMapping]]
         type QueryDict = Mapping[
             str,
-            str | Sequence[str] | Mapping[str, Mapping[str, t.ContainerValue]],
+            str | Sequence[str] | Mapping[str, t.ContainerValueMapping],
         ]
         type FilterDict = Mapping[
             str,
-            str | Mapping[str, Mapping[str, t.ContainerValue]],
+            str | Mapping[str, t.ContainerValueMapping],
         ]
         type ConfigDict = Mapping[
             str,
@@ -285,7 +277,7 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
             type LdapExtractionConfig = Mapping[str, t.Scalar | Sequence[str]]
             type LdapIntegrationConfig = Mapping[
                 str,
-                bool | str | Mapping[str, Mapping[str, t.ContainerValue]],
+                bool | str | Mapping[str, t.ContainerValueMapping],
             ]
             type TapLdapPipelineConfig = Mapping[str, t.ContainerValue]
 

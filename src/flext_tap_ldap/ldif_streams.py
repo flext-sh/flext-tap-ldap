@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from flext_meltano import FlextMeltanoAbstractions as Tap
 
 _OBJECT_LIST_ADAPTER = TypeAdapter(
-    Sequence[Mapping[str, t.ContainerValue]],
+    Sequence[t.ContainerValueMapping],
     config=ConfigDict(strict=False),
 )
 _COUNTER_MAP_ADAPTER = TypeAdapter(
