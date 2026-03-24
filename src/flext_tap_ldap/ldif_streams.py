@@ -363,7 +363,7 @@ class FlextTapLdapLdifStreams:
                         if entry.attributes is None:
                             continue
                         oc_list: t.StrSequence = entry.attributes.get_values(
-                            "objectClass"
+                            "objectClass",
                         )
                         oc_strs = [str(oc_val) for oc_val in oc_list]
                         entry_type = self._classify_entry_type(oc_strs)

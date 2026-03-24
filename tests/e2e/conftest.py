@@ -45,8 +45,8 @@ def sample_catalog() -> t.ContainerMapping:
                     },
                 },
                 "metadata": [],
-            }
-        ]
+            },
+        ],
     }
 
 

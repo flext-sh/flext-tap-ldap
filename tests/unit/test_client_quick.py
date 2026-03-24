@@ -38,11 +38,15 @@ class TestLDAPClientQuick:
         """Test method."""
         "Test server_uri property for both LDAP and LDAPS."
         ldap_client = FlextTapLdapClient.LDAPClient(
-            host="test.com", port=389, use_ssl=False
+            host="test.com",
+            port=389,
+            use_ssl=False,
         )
         assert ldap_client.server_uri == "ldap://test.com:389"
         ldaps_client = FlextTapLdapClient.LDAPClient(
-            host="secure.com", port=636, use_ssl=True
+            host="secure.com",
+            port=636,
+            use_ssl=True,
         )
         assert ldaps_client.server_uri == "ldaps://secure.com:636"
 
@@ -55,7 +59,8 @@ class TestLDAPClientQuick:
         assert client._convert_scope_to_enum("INVALID") == "SUBTREE"
 
     def test_entry_conversion_scenarios(
-        self, client: FlextTapLdapClient.LDAPClient
+        self,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test entry conversion with different scenarios."""
         # Test with a Mapping (dict) entry
@@ -81,7 +86,8 @@ class TestLDAPClientQuick:
         assert result["cn"] == ["Test", "T. User"]
 
     def test_search_result_processing(
-        self, client: FlextTapLdapClient.LDAPClient
+        self,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test search result processing with different scenarios."""
         mock_search_result = Mock()
@@ -108,24 +114,32 @@ class TestLDAPClientQuick:
         assert not results
 
     def test_search_delegates_to_perform_search(
-        self, client: FlextTapLdapClient.LDAPClient
+        self,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test search delegates to _perform_search."""
         with patch.object(
-            client, "_perform_search", return_value=[{"test": "data"}]
+            client,
+            "_perform_search",
+            return_value=[{"test": "data"}],
         ) as mock_perform:
             results = client.search("dc=test,dc=com")
             mock_perform.assert_called_once()
             assert results == [{"test": "data"}]
 
     def test_search_with_all_parameters(
-        self, client: FlextTapLdapClient.LDAPClient
+        self,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test search passes all parameters to _perform_search."""
         with patch.object(client, "_perform_search", return_value=[]) as mock_perform:
             results = client.search("dc=test,dc=com", "(uid=*)", ["uid"], "BASE", 10)
             mock_perform.assert_called_once_with(
-                "dc=test,dc=com", "(uid=*)", ["uid"], "BASE", 10
+                "dc=test,dc=com",
+                "(uid=*)",
+                ["uid"],
+                "BASE",
+                10,
             )
             assert results == []
 
@@ -152,7 +166,8 @@ class TestLDAPClientQuick:
         assert result is True
 
     def test_health_check_functionality(
-        self, client: FlextTapLdapClient.LDAPClient
+        self,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test health check functionality."""
         with patch.object(client, "test_connection", return_value=True):
@@ -167,7 +182,8 @@ class TestLDAPClientQuick:
             assert health["connection_test"] is False
 
     def test_oracle_entry_processing(
-        self, client: FlextTapLdapClient.LDAPClient
+        self,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test Oracle entry processing with all scenarios."""
         uid_values: t.StrSequence = ["test"]
@@ -227,12 +243,14 @@ class TestLDAPClientQuick:
         assert result == entry_bad_attrs
 
     def test_oracle_attribute_extension(
-        self, client: FlextTapLdapClient.LDAPClient
+        self,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test Oracle attribute extension."""
         base_attrs = ["uid", "cn"]
         extended = client._extend_attributes_with_oracle_support(
-            base_attrs, oracle_oid_mode=True
+            base_attrs,
+            oracle_oid_mode=True,
         )
         assert extended is not None
         assert extended is not None
@@ -241,16 +259,19 @@ class TestLDAPClientQuick:
         assert "orclPassword" in extended
         assert "userPassword" in extended
         result = client._extend_attributes_with_oracle_support(
-            base_attrs, oracle_oid_mode=False
+            base_attrs,
+            oracle_oid_mode=False,
         )
         assert result == base_attrs
         result = client._extend_attributes_with_oracle_support(
-            None, oracle_oid_mode=True
+            None,
+            oracle_oid_mode=True,
         )
         assert result is None
 
     def test_process_search_results_with_oracle_support(
-        self, client: FlextTapLdapClient.LDAPClient
+        self,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test Oracle search result processing."""
         first_passwords: t.StrSequence = ["pass1"]
@@ -263,7 +284,8 @@ class TestLDAPClientQuick:
             {"dn": "uid=test2,dc=oracle,dc=com", "attributes": {"uid": second_uids}},
         ]
         results = client._process_search_results_with_oracle_support(
-            search_results, oracle_oid_mode=True
+            search_results,
+            oracle_oid_mode=True,
         )
         assert len(results) == 2
         attributes = results[0].get("attributes")
@@ -271,37 +293,48 @@ class TestLDAPClientQuick:
         assert isinstance(attributes, dict)
         assert "userPassword" in attributes
         results = client._process_search_results_with_oracle_support(
-            search_results, oracle_oid_mode=False
+            search_results,
+            oracle_oid_mode=False,
         )
         assert len(results) == 2
         assert results[0] == search_results[0]
 
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_execute_oracle_search_in_new_loop(
-        self, client: FlextTapLdapClient.LDAPClient
+        self,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test Oracle search execution in new loop."""
         with patch.object(client, "search", return_value=[{"test": "data"}]):
             result = client._execute_oracle_search_in_new_loop(
-                "dc=test,dc=com", "(uid=*)", ["uid"], oracle_oid_mode=True
+                "dc=test,dc=com",
+                "(uid=*)",
+                ["uid"],
+                oracle_oid_mode=True,
             )
             result_list = list(result)
             assert len(result_list) >= 0
 
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_with_oracle_support_scenarios(
-        self, mock_get_loop: Mock, client: FlextTapLdapClient.LDAPClient
+        self,
+        mock_get_loop: Mock,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test Oracle support search with different scenarios."""
         mock_get_loop.return_value = Mock()
         results = client.search_with_oracle_support(
-            "dc=oracle,dc=com", "(uid=*)", ["uid"], oracle_oid_mode=True
+            "dc=oracle,dc=com",
+            "(uid=*)",
+            ["uid"],
+            oracle_oid_mode=True,
         )
         assert list(results) == []
         mock_get_loop.side_effect = RuntimeError("no event loop")
 
     def test_attribute_delegation_to_flext_api(
-        self, client: FlextTapLdapClient.LDAPClient
+        self,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test attribute delegation to flext API."""
         result = client.search

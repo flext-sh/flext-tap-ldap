@@ -24,7 +24,8 @@ class TestLdifProcessor:
         assert FlextTapLdapProcessor is not None
 
     def test_ldif_directory_processing_traverses_ldif_files(
-        self, tmp_path: Path
+        self,
+        tmp_path: Path,
     ) -> None:
         nested = tmp_path / "nested"
         nested.mkdir()
@@ -59,11 +60,11 @@ class TestLdifProcessor:
             transformation_rules={
                 "attribute_mappings": {"CN": "cn", "sn": "surname"},
                 "attribute_value_mappings": {
-                    "department": {"IT": "Information Technology"}
+                    "department": {"IT": "Information Technology"},
                 },
                 "remove_attributes": ["obsolete"],
                 "add_attributes": {"status": "active"},
-            }
+            },
         )
         entry = FlextTapLdapEntry(
             "cn=alice,dc=example,dc=com",
@@ -101,11 +102,12 @@ class TestLdifProcessor:
                 "schema_mappings": {
                     "uid": "employeeId",
                     "status": {"source": "employmentStatus", "default": "active"},
-                }
-            }
+                },
+            },
         )
         entry = FlextTapLdapEntry(
-            "cn=alice,dc=example,dc=com", {"employeeId": ["1001"]}
+            "cn=alice,dc=example,dc=com",
+            {"employeeId": ["1001"]},
         )
         transformed = transformer.transform_entry(entry)
         assert transformed.attributes["uid"] == ["1001"]

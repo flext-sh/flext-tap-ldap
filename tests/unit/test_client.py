@@ -35,17 +35,22 @@ class TestLDAPClientCoverageBoost:
         uri = client._build_server_uri()
         assert uri == "ldap://test.ldap.com:389"
         ssl_client = FlextTapLdapClient.LDAPClient(
-            host="secure.com", port=636, use_ssl=True
+            host="secure.com",
+            port=636,
+            use_ssl=True,
         )
         ssl_uri = ssl_client._build_server_uri()
         assert ssl_uri == "ldaps://secure.com:636"
 
     def test_search_method_coverage(
-        self, client: FlextTapLdapClient.LDAPClient
+        self,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test search method delegates to _perform_search."""
         with patch.object(
-            client, "_perform_search", return_value=[{"test": "data"}]
+            client,
+            "_perform_search",
+            return_value=[{"test": "data"}],
         ) as mock_perform:
             results = client.search(
                 base_dn="dc=test,dc=com",
@@ -80,7 +85,9 @@ class TestLDAPClientCoverageBoost:
 
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_with_oracle_support_no_loop(
-        self, mock_get_loop: Mock, client: FlextTapLdapClient.LDAPClient
+        self,
+        mock_get_loop: Mock,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test oracle support search without event loop."""
         mock_get_loop.side_effect = RuntimeError("no event loop")
@@ -99,12 +106,15 @@ class TestLDAPClientCoverageBoost:
             assert list(results) == [{"oracle": "data"}]
 
     def test_execute_oracle_search_in_new_loop_comprehensive(
-        self, client: FlextTapLdapClient.LDAPClient
+        self,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test Oracle search execution to cover lines 350-361."""
         with (
             patch.object(
-                client, "search", return_value=[{"test": "entry"}]
+                client,
+                "search",
+                return_value=[{"test": "entry"}],
             ) as mock_search,
             patch.object(
                 client,
@@ -120,18 +130,23 @@ class TestLDAPClientCoverageBoost:
             )
             mock_search.assert_called_once_with("dc=oracle,dc=com", "(uid=*)", ["uid"])
             mock_process.assert_called_once_with(
-                [{"test": "entry"}], oracle_oid_mode=True
+                [{"test": "entry"}],
+                oracle_oid_mode=True,
             )
             result_list = list(result)
             assert result_list == [{"processed": "entry"}]
 
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_with_oracle_support_with_loop(
-        self, mock_get_loop: Mock, client: FlextTapLdapClient.LDAPClient
+        self,
+        mock_get_loop: Mock,
+        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
         """Test oracle support search with existing loop (covers lines 381-385)."""
         mock_get_loop.return_value = Mock()
         results = client.search_with_oracle_support(
-            "dc=oracle,dc=com", "(uid=*)", oracle_oid_mode=True
+            "dc=oracle,dc=com",
+            "(uid=*)",
+            oracle_oid_mode=True,
         )
         assert results == []

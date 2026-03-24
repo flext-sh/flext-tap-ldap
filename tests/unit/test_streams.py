@@ -104,7 +104,9 @@ class TestUsersStream:
 
     @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_users_stream_get_records(
-        self, mock_client_class: Mock, mock_tap: Mock
+        self,
+        mock_client_class: Mock,
+        mock_tap: Mock,
     ) -> None:
         """Test users stream record retrieval."""
         mock_client = Mock()
@@ -147,7 +149,9 @@ class TestUsersStream:
 
     @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_groups_stream_get_records(
-        self, mock_client_class: Mock, mock_tap: Mock
+        self,
+        mock_client_class: Mock,
+        mock_tap: Mock,
     ) -> None:
         """Test groups stream record retrieval."""
         mock_client = Mock()
@@ -165,7 +169,9 @@ class TestUsersStream:
 
     @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_organizational_units_stream_get_records(
-        self, mock_client_class: Mock, mock_tap: Mock
+        self,
+        mock_client_class: Mock,
+        mock_tap: Mock,
     ) -> None:
         """Test organizational units stream record retrieval."""
         mock_client = Mock()
@@ -183,7 +189,9 @@ class TestUsersStream:
 
     @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_schema_stream_get_records(
-        self, mock_client_class: Mock, mock_tap: Mock
+        self,
+        mock_client_class: Mock,
+        mock_tap: Mock,
     ) -> None:
         """Test schema stream record retrieval."""
         mock_client = Mock()
@@ -264,7 +272,8 @@ class TestOrganizationalUnitsStream:
         assert stream.tap == mock_tap
 
     def test_organizational_units_stream_schema_definition(
-        self, mock_tap: Mock
+        self,
+        mock_tap: Mock,
     ) -> None:
         """Test organizational units stream schema definition."""
         stream = FlextTapLdapStreams.OrganizationalUnitsStream(mock_tap)
@@ -440,7 +449,9 @@ class TestCustomStream:
 
     @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_custom_stream_get_records(
-        self, mock_client_class: Mock, mock_tap: Mock
+        self,
+        mock_client_class: Mock,
+        mock_tap: Mock,
     ) -> None:
         """Test custom stream record retrieval."""
         mock_client = Mock()
@@ -519,7 +530,8 @@ class TestStreamIntegration:
         assert "schema" in stream_names
 
     def test_streams_with_custom_configuration(
-        self, tap_config: t.ContainerMapping
+        self,
+        tap_config: t.ContainerMapping,
     ) -> None:
         """Test streams with custom configuration."""
         tap_config["custom_streams"] = [
@@ -529,7 +541,7 @@ class TestStreamIntegration:
                 "primary_keys": ["dn"],
                 "replication_key": "modifyTimestamp",
                 "schema": {"properties": {"testAttribute": {"type": "string"}}},
-            }
+            },
         ]
         connection_config: t.ScalarMapping = {}
         for key, value in tap_config.items():
@@ -604,7 +616,9 @@ class TestStreamExceptionHandling:
 
     @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_users_stream_exception_fallback(
-        self, mock_client_class: Mock, mock_tap_failing: Mock
+        self,
+        mock_client_class: Mock,
+        mock_tap_failing: Mock,
     ) -> None:
         """Test users stream exception handling fallback (covers lines 168-171)."""
         mock_client = Mock()
@@ -619,7 +633,9 @@ class TestStreamExceptionHandling:
 
     @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_groups_stream_exception_fallback(
-        self, mock_client_class: Mock, mock_tap_failing: Mock
+        self,
+        mock_client_class: Mock,
+        mock_tap_failing: Mock,
     ) -> None:
         """Test groups stream exception handling fallback."""
         mock_client = Mock()
@@ -634,7 +650,9 @@ class TestStreamExceptionHandling:
 
     @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_organizational_units_stream_exception_fallback(
-        self, mock_client_class: Mock, mock_tap_failing: Mock
+        self,
+        mock_client_class: Mock,
+        mock_tap_failing: Mock,
     ) -> None:
         """Test organizational units stream exception handling fallback."""
         mock_client = Mock()
@@ -649,7 +667,9 @@ class TestStreamExceptionHandling:
 
     @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_schema_stream_exception_fallback(
-        self, mock_client_class: Mock, mock_tap_failing: Mock
+        self,
+        mock_client_class: Mock,
+        mock_tap_failing: Mock,
     ) -> None:
         """Test schema stream exception handling fallback."""
         mock_client = Mock()
@@ -664,7 +684,9 @@ class TestStreamExceptionHandling:
 
     @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_custom_stream_exception_fallback(
-        self, mock_client_class: Mock, mock_tap_failing: Mock
+        self,
+        mock_client_class: Mock,
+        mock_tap_failing: Mock,
     ) -> None:
         """Test custom stream exception handling fallback."""
         mock_client = Mock()

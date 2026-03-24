@@ -455,7 +455,7 @@ class FlextTapLdapStreams:
             """Get fallback group data."""
             return [
                 dict(
-                    FlextTapLdapStreams.FallbackDataFactory.create_test_group_record()
+                    FlextTapLdapStreams.FallbackDataFactory.create_test_group_record(),
                 ),
             ]
 

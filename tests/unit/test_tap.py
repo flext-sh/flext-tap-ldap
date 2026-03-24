@@ -125,7 +125,7 @@ class TestFlextTapLdapTapUnit:
                 "cn": "John Doe",
                 "mail": "jdoe@test.com",
                 "objectClass": ["inetOrgPerson", "person"],
-            }
+            },
         ]
 
         tap = FlextTapLdapTap()

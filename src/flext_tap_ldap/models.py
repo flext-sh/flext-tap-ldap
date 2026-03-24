@@ -225,7 +225,8 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 Field(default_factory=dict),
             ]
             primary_keys: Annotated[
-                t.StrSequence, Field(default_factory=lambda: ["dn"])
+                t.StrSequence,
+                Field(default_factory=lambda: ["dn"]),
             ]
             replication_key: str | None = None
 
@@ -266,10 +267,12 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             bind_password: str | None = None
             use_ssl: bool = False
             timeout_seconds: Annotated[
-                t.PositiveInt, Field(default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT)
+                t.PositiveInt,
+                Field(default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT),
             ]
             page_size: Annotated[
-                t.PositiveInt, Field(default=c.TapLdap.DEFAULT_PAGE_SIZE)
+                t.PositiveInt,
+                Field(default=c.TapLdap.DEFAULT_PAGE_SIZE),
             ]
             max_retries: Annotated[t.RetryCount, Field(default=3)]
 
@@ -311,7 +314,8 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             attributes: Annotated[t.StrSequence, Field(default_factory=list)]
             tap_stream_id: t.NonEmptyStr
             key_properties: Annotated[
-                t.StrSequence, Field(default_factory=lambda: ["dn"])
+                t.StrSequence,
+                Field(default_factory=lambda: ["dn"]),
             ]
             replication_method: str = "FULL_TABLE"
             replication_key: str | None = None

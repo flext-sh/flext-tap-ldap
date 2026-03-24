@@ -119,7 +119,8 @@ class FlextTapLdapEntry:
         """Parse DN into components using flext-ldif DN parsing."""
         try:
             dn_obj = FlextLdifDistinguishedName(
-                value=self.dn, metadata=_DEFAULT_ENTRY_METADATA
+                value=self.dn,
+                metadata=_DEFAULT_ENTRY_METADATA,
             )
             return {"dn": self.dn, "components": dn_obj.value}
         except (
@@ -176,7 +177,8 @@ class FlextTapLdapEntry:
                     return parsed_entry
             return m.Ldif.Entry(
                 dn=FlextLdifDistinguishedName(
-                    value=self.dn, metadata=_DEFAULT_ENTRY_METADATA
+                    value=self.dn,
+                    metadata=_DEFAULT_ENTRY_METADATA,
                 ),
                 attributes=m.Ldif.Attributes(
                     attributes={str(k): list(v) for k, v in self.attributes.items()},
@@ -199,7 +201,8 @@ class FlextTapLdapEntry:
         ):
             return m.Ldif.Entry(
                 dn=FlextLdifDistinguishedName(
-                    value=self.dn, metadata=_DEFAULT_ENTRY_METADATA
+                    value=self.dn,
+                    metadata=_DEFAULT_ENTRY_METADATA,
                 ),
                 attributes=m.Ldif.Attributes(
                     attributes={str(k): list(v) for k, v in self.attributes.items()},
@@ -463,7 +466,8 @@ class FlextTapLdapValidator:
         }
 
     def validate_entries(
-        self, entries: Sequence[FlextTapLdapEntry]
+        self,
+        entries: Sequence[FlextTapLdapEntry],
     ) -> t.ContainerMapping:
         """Validate a list of LDIF entries using flext-ldif."""
         valid_count = 0
@@ -583,18 +587,19 @@ class FlextTapLdapTransformer:
     def transform_entry(self, entry: FlextTapLdapEntry) -> FlextTapLdapEntry:
         """Transform LDIF entry using configured transformation rules."""
         transformed = FlextTapLdapEntry(
-            entry.dn, {k: list(v) for k, v in entry.attributes.items()}
+            entry.dn,
+            {k: list(v) for k, v in entry.attributes.items()},
         )
         transformed.change_type = entry.change_type
         transformed.controls = list(entry.controls)
         raw_schema_mappings: t.NormalizedValue = self.transformation_rules.get(
-            "schema_mappings"
+            "schema_mappings",
         )
         if isinstance(raw_schema_mappings, dict):
             schema_map: t.ContainerMapping = raw_schema_mappings
             transformed = self.apply_schema_mappings(transformed, schema_map)
         raw_mappings: t.NormalizedValue = self.transformation_rules.get(
-            "attribute_mappings"
+            "attribute_mappings",
         )
         mappings: MutableMapping[str, str] = {}
         if isinstance(raw_mappings, dict):
@@ -629,7 +634,7 @@ class FlextTapLdapTransformer:
             for rm_item in remove_list:
                 transformed.attributes.pop(str(rm_item), None)
         raw_add_attributes: t.NormalizedValue = self.transformation_rules.get(
-            "add_attributes"
+            "add_attributes",
         )
         if isinstance(raw_add_attributes, dict):
             add_dict: t.ContainerMapping = raw_add_attributes

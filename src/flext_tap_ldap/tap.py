@@ -197,11 +197,17 @@ def _build_cli_command() -> click.Command:
 
     @click.command("tap-ldap")
     @click.option(
-        "--config", "config_path", type=click.Path(exists=True), required=True
+        "--config",
+        "config_path",
+        type=click.Path(exists=True),
+        required=True,
     )
     @click.option("--discover", is_flag=True, default=False)
     @click.option(
-        "--catalog", "catalog_path", type=click.Path(exists=True), default=None
+        "--catalog",
+        "catalog_path",
+        type=click.Path(exists=True),
+        default=None,
     )
     @click.option("--state", "state_path", type=click.Path(exists=True), default=None)
     def _cli(
@@ -213,7 +219,7 @@ def _build_cli_command() -> click.Command:
     ) -> None:
         """Singer-compatible CLI for LDAP data extraction."""
         raw_config: t.ContainerMapping = _CUSTOM_STREAM_ADAPTER.validate_json(
-            Path(config_path).read_bytes()
+            Path(config_path).read_bytes(),
         )
         config_data: t.MutableConfigurationMapping = {
             k: v
@@ -234,7 +240,7 @@ def _build_cli_command() -> click.Command:
             if result.is_success and result.value:
                 catalog = result.value
                 catalog_streams: MutableSequence[t.Meltano.Singer.CatalogEntry] = list(
-                    catalog.get("streams", [])
+                    catalog.get("streams", []),
                 )
                 raw_custom: t.NormalizedValue = raw_config.get("custom_streams")
                 if isinstance(raw_custom, list):

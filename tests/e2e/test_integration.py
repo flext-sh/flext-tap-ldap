@@ -64,8 +64,8 @@ class TestFlextTapLdapIntegration:
                     "tap_stream_id": "users",
                     "schema": {"properties": {"dn": {"type": "string"}}},
                     "metadata": [],
-                }
-            ]
+                },
+            ],
         }
 
     @pytest.fixture
@@ -99,7 +99,10 @@ class TestFlextTapLdapIntegration:
 
     @patch("flext_tap_ldap.client.FlextTapLdapClient.LDAPClient")
     def test_discovery_mode(
-        self, mock_ldap_client: Mock, runner: CliRunner, config_file: Path
+        self,
+        mock_ldap_client: Mock,
+        runner: CliRunner,
+        config_file: Path,
     ) -> None:
         """Test discovery mode functionality."""
         mock_client_instance = mock_ldap_client.return_value
@@ -119,7 +122,8 @@ class TestFlextTapLdapIntegration:
             catalog_error: str = f"Expected {'streams'} in {catalog}"
             raise AssertionError(catalog_error)
         streams: Sequence[t.ContainerMapping] = cast(
-            "Sequence[t.ContainerMapping]", catalog["streams"]
+            "Sequence[t.ContainerMapping]",
+            catalog["streams"],
         )
         stream_names: t.ContainerList = [s["tap_stream_id"] for s in streams]
         if "users" not in stream_names:
@@ -145,7 +149,7 @@ class TestFlextTapLdapIntegration:
             {
                 "dn": "uid=jdoe,ou=users,dc=test,dc=com",
                 "attributes": {"uid": "jdoe", "cn": "John Doe"},
-            }
+            },
         ]
         result = runner.invoke(
             self._cli_command(),
@@ -221,16 +225,16 @@ class TestFlextTapLdapIntegration:
                         "properties": {
                             "dn": {"type": "string"},
                             "uid": {"type": "string"},
-                        }
+                        },
                     },
-                }
+                },
             ],
         }
         config_file = tmp_path / "config.json"
         with Path(config_file).open("w", encoding="utf-8") as f:
             json.dump(config, f)
         with patch(
-            "flext_tap_ldap.client.FlextTapLdapClient.LDAPClient"
+            "flext_tap_ldap.client.FlextTapLdapClient.LDAPClient",
         ) as mock_ldap_client:
             mock_client_instance = mock_ldap_client.return_value
             empty_records: Sequence[Mapping[str, t.Scalar | t.ScalarMapping]] = []
@@ -248,7 +252,8 @@ class TestFlextTapLdapIntegration:
         catalog = _extract_json_from_output(result.output)
         assert isinstance(catalog, dict)
         cat_streams: Sequence[t.ContainerMapping] = cast(
-            "Sequence[t.ContainerMapping]", catalog["streams"]
+            "Sequence[t.ContainerMapping]",
+            catalog["streams"],
         )
         stream_names: t.ContainerList = [
             s.get("tap_stream_id", s.get("stream")) for s in cat_streams
@@ -259,14 +264,18 @@ class TestFlextTapLdapIntegration:
 
     @pytest.mark.skip(reason="Config validation edge case - tap has fallback behavior")
     def test_error_handling(
-        self, runner: CliRunner, tmp_path: Path, caplog: pytest.LogCaptureFixture
+        self,
+        runner: CliRunner,
+        tmp_path: Path,
+        caplog: pytest.LogCaptureFixture,
     ) -> None:
         """Test error handling functionality."""
         config_file = tmp_path / "bad_config.json"
         with Path(config_file).open("w", encoding="utf-8") as f:
             json.dump({"invalid": "config"}, f)
         result = runner.invoke(
-            self._cli_command(), ["--config", str(config_file), "--discover"]
+            self._cli_command(),
+            ["--config", str(config_file), "--discover"],
         )
         all_logs = " ".join(record.message for record in caplog.records)
         all_output = (

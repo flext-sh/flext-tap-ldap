@@ -66,7 +66,8 @@ class FlextTapLdapServices:
         def __init__(self) -> None:
             """Initialize the connection service."""
             self._connections: MutableMapping[
-                str, FlextTapLdapServices.LDAPConnection
+                str,
+                FlextTapLdapServices.LDAPConnection,
             ] = {}
 
         def create_connection(
@@ -241,7 +242,8 @@ class FlextTapLdapServices:
         def __init__(self) -> None:
             """Initialize the execution service."""
             self._executions: MutableMapping[
-                str, FlextTapLdapModels.TapLdap.TapExecution
+                str,
+                FlextTapLdapModels.TapLdap.TapExecution,
             ] = {}
 
         def cancel_execution(
@@ -349,7 +351,7 @@ class FlextTapLdapServices:
                     reverse=True,
                 )
                 return r[Sequence[FlextTapLdapModels.TapLdap.TapExecution]].ok(
-                    executions
+                    executions,
                 )
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[Sequence[FlextTapLdapModels.TapLdap.TapExecution]].fail(
@@ -410,7 +412,7 @@ class FlextTapLdapServices:
             """Get LDIF file statistics using flext-ldif library."""
             try:
                 validation_result: r[t.ContainerMapping] = self.validate_ldif_file(
-                    file_path
+                    file_path,
                 )
                 if not validation_result.is_success:
                     return validation_result
