@@ -81,7 +81,8 @@ class TestFlextTapLdapTapUnit:
             raise AssertionError(count_error)
 
     def test_custom_streams_configuration(
-        self, config: t.MutableContainerMapping,
+        self,
+        config: t.MutableContainerMapping,
     ) -> None:
         """Test custom streams configuration."""
         config["custom_streams"] = "configured"

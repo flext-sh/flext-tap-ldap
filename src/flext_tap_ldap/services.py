@@ -153,7 +153,8 @@ class FlextTapLdapServices:
         def __init__(self) -> None:
             """Initialize the stream service."""
             self._streams: MutableMapping[
-                str, FlextTapLdapModels.TapLdap.LdapStream,
+                str,
+                FlextTapLdapModels.TapLdap.LdapStream,
             ] = {}
 
         def create_stream(
@@ -209,7 +210,8 @@ class FlextTapLdapServices:
                 )
 
         def get_stream(
-            self, stream_id: str,
+            self,
+            stream_id: str,
         ) -> r[FlextTapLdapModels.TapLdap.LdapStream]:
             """Get LDAP stream by ID."""
             try:
