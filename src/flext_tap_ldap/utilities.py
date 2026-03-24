@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import ClassVar
 
 from flext_core import FlextContainer, FlextExceptions, FlextLogger, p, r, t
@@ -34,9 +34,9 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """Return the logger instance."""
             return self._logger
 
-        def execute(self) -> r[Mapping[str, str | t.StrSequence]]:
+        def execute(self) -> r[Mapping[str, str | Sequence[str]]]:
             """Execute tap LDAP utilities and return operational status."""
-            return r[Mapping[str, str | t.StrSequence]].ok({
+            return r[Mapping[str, str | Sequence[str]]].ok({
                 "status": "operational",
                 "service": "flext-tap-ldap-utilities",
                 "capabilities": [
@@ -103,7 +103,7 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             @staticmethod
             def create_stream_info_from_ldap_entry(
                 dn: str,
-                attributes: Mapping[str, t.StrSequence],
+                attributes: Mapping[str, Sequence[str]],
                 stream_prefix: str = "ldap",
                 replication_method: str = "FULL_TABLE",
             ) -> r[Mapping[str, str | int]]:

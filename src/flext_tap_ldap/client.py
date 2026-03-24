@@ -108,7 +108,7 @@ class FlextTapLdapClient:
             self,
             base_dn: str,
             search_filter: str = "(objectClass=*)",
-            attributes: t.StrSequence | None = None,
+            attributes: Sequence[str] | None = None,
             scope: str = "SUBTREE",
             size_limit: int = 0,
         ) -> Sequence[t.ContainerMapping]:
@@ -131,7 +131,7 @@ class FlextTapLdapClient:
             self,
             base_dn: str,
             search_filter: str = "(objectClass=*)",
-            attributes: t.StrSequence | None = None,
+            attributes: Sequence[str] | None = None,
             *,
             oracle_oid_mode: bool = False,
         ) -> Sequence[t.ContainerMapping]:
@@ -265,7 +265,7 @@ class FlextTapLdapClient:
 
             Single Responsibility: Handle only scope conversion logic.
             """
-            scope_map: t.StrMapping = {
+            scope_map: Mapping[str, str] = {
                 "SUBTREE": "SUBTREE",
                 "ONELEVEL": "ONELEVEL",
                 "BASE": "BASE",
@@ -308,7 +308,7 @@ class FlextTapLdapClient:
             self,
             base_dn: str,
             search_filter: str,
-            attributes: t.StrSequence | None,
+            attributes: Sequence[str] | None,
             *,
             oracle_oid_mode: bool,
         ) -> Sequence[t.ContainerMapping]:
@@ -334,7 +334,7 @@ class FlextTapLdapClient:
 
         def _extend_attributes_with_oracle_support(
             self,
-            attributes: t.StrSequence | None,
+            attributes: Sequence[str] | None,
             *,
             oracle_oid_mode: bool,
         ) -> MutableSequence[str] | None:
@@ -392,7 +392,7 @@ class FlextTapLdapClient:
             self,
             base_dn: str,
             search_filter: str,
-            attributes: t.StrSequence | None,
+            attributes: Sequence[str] | None,
             ldap_scope: str,
             size_limit: int,
         ) -> MutableSequence[t.MutableContainerMapping]:
@@ -503,6 +503,6 @@ class FlextTapLdapClient:
             return results
 
 
-__all__: t.StrSequence = [
+__all__: Sequence[str] = [
     "FlextTapLdapClient",
 ]

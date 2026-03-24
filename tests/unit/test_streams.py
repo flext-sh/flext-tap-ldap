@@ -29,7 +29,7 @@ def _build_source_config(
 def _discover_stream_names(
     tap: FlextTapLdapTap,
     connection_config: Mapping[str, t.Scalar],
-) -> tuple[t.StrSequence, int]:
+) -> tuple[Sequence[str], int]:
     result = tap.discover_streams(source_config=_build_source_config(connection_config))
     assert result.is_success
     assert result.value is not None
@@ -109,8 +109,8 @@ class TestUsersStream:
         """Test users stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        member_of_empty: t.StrSequence = []
-        member_of_empty_secondary: t.StrSequence = []
+        member_of_empty: Sequence[str] = []
+        member_of_empty_secondary: Sequence[str] = []
         mock_client.search.return_value = [
             {
                 "dn": "cn=user1,ou=users,dc=test,dc=com",
@@ -152,7 +152,7 @@ class TestUsersStream:
         """Test groups stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        empty_search_results: Sequence[t.StrMapping] = []
+        empty_search_results: Sequence[Mapping[str, str]] = []
         mock_client.search.return_value = empty_search_results
         stream = FlextTapLdapStreams.GroupsStream(mock_tap)
         records = list(stream.get_records(context=None))
@@ -170,7 +170,7 @@ class TestUsersStream:
         """Test organizational units stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        empty_search_results: Sequence[t.StrMapping] = []
+        empty_search_results: Sequence[Mapping[str, str]] = []
         mock_client.search.return_value = empty_search_results
         stream = FlextTapLdapStreams.OrganizationalUnitsStream(mock_tap)
         records = list(stream.get_records(context=None))
@@ -188,7 +188,7 @@ class TestUsersStream:
         """Test schema stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        empty_search_results: Sequence[t.StrMapping] = []
+        empty_search_results: Sequence[Mapping[str, str]] = []
         mock_client.search.return_value = empty_search_results
         stream = FlextTapLdapStreams.SchemaStream(mock_tap)
         records = list(stream.get_records(context=None))
@@ -445,7 +445,7 @@ class TestCustomStream:
         """Test custom stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        empty_search_results: Sequence[t.StrMapping] = []
+        empty_search_results: Sequence[Mapping[str, str]] = []
         mock_client.search.return_value = empty_search_results
         params = FlextTapLdapStreams.CustomStreamParams(
             name="custom_test",

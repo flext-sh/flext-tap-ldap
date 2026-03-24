@@ -59,7 +59,7 @@ class TestLDAPClientQuick:
     ) -> None:
         """Test entry conversion with different scenarios."""
         # Test with a Mapping (dict) entry
-        mail_values: t.StrSequence = ["test@example.com"]
+        mail_values: Sequence[str] = ["test@example.com"]
         dict_entry: t.ContainerMapping = {
             "dn": "uid=dict,dc=example,dc=com",
             "attributes": {"mail": mail_values},
@@ -170,9 +170,9 @@ class TestLDAPClientQuick:
         self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test Oracle entry processing with all scenarios."""
-        uid_values: t.StrSequence = ["test"]
-        oracle_password_values: t.StrSequence = ["hashed_password"]
-        object_classes: t.StrSequence = ["inetOrgPerson"]
+        uid_values: Sequence[str] = ["test"]
+        oracle_password_values: Sequence[str] = ["hashed_password"]
+        object_classes: Sequence[str] = ["inetOrgPerson"]
         entry: t.ContainerMapping = {
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": {
@@ -191,8 +191,8 @@ class TestLDAPClientQuick:
         assert isinstance(user_password, list)
         assert "hashed_password" in user_password
 
-        ou_values: t.StrSequence = ["test"]
-        container_classes: t.StrSequence = ["orclContainer"]
+        ou_values: Sequence[str] = ["test"]
+        container_classes: Sequence[str] = ["orclContainer"]
         entry_with_container: t.ContainerMapping = {
             "dn": "ou=test,dc=oracle,dc=com",
             "attributes": {"ou": ou_values, "objectClass": container_classes},
@@ -253,8 +253,8 @@ class TestLDAPClientQuick:
         self, client: FlextTapLdapClient.LDAPClient
     ) -> None:
         """Test Oracle search result processing."""
-        first_passwords: t.StrSequence = ["pass1"]
-        second_uids: t.StrSequence = ["test2"]
+        first_passwords: Sequence[str] = ["pass1"]
+        second_uids: Sequence[str] = ["test2"]
         search_results: Sequence[t.ContainerMapping] = [
             {
                 "dn": "uid=test1,dc=oracle,dc=com",
