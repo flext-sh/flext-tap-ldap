@@ -25,7 +25,10 @@ if TYPE_CHECKING:
     from tests.e2e.test_integration import TestFlextTapLdapIntegration
 
 _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
-    "TestFlextTapLdapIntegration": ("tests.e2e.test_integration", "TestFlextTapLdapIntegration"),
+    "TestFlextTapLdapIntegration": (
+        "tests.e2e.test_integration",
+        "TestFlextTapLdapIntegration",
+    ),
     "catalog_file": ("tests.e2e.conftest", "catalog_file"),
     "ldap_connection": ("tests.e2e.conftest", "ldap_connection"),
     "ldap_container": ("tests.e2e.conftest", "ldap_container"),
