@@ -64,13 +64,13 @@ def ldap_container(project_root: Path) -> Iterator[None]:
     @d.retry(max_attempts=30, delay_seconds=2.0, backoff_strategy="linear")
     def _check_ldap_ready() -> None:
         server = Server("localhost", port=10389, get_info=_LDAP3_ALL)
-        conn = Connection(
+        with Connection(
             server,
             user="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
             password="REDACTED_LDAP_BIND_PASSWORD_password",
             auto_bind=True,
-        )
-        conn.unbind()
+        ):
+            pass  # Connection auto-unbinds via context manager
 
     _check_ldap_ready()
     logger.info("LDAP container is ready")
@@ -92,7 +92,9 @@ def ldap_connection(_ldap_container: None) -> Generator[Connection]:
         auto_bind=True,
     )
     yield conn
-    conn.unbind()
+    # Use context manager pattern to avoid ldap3 stub's partially unknown unbind type
+    with conn:
+        pass
 
 
 @pytest.fixture

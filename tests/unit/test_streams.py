@@ -12,7 +12,15 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from flext_tap_ldap import FlextTapLdapStreams, FlextTapLdapTap, m, t
+from flext_tap_ldap import (
+    FlextTapLdapModels,
+    FlextTapLdapStreams,
+    FlextTapLdapTap,
+    m,
+    t,
+)
+
+_CustomStreamParams = FlextTapLdapModels.TapLdap.CustomStreamParams
 
 
 def _build_source_config(
@@ -329,7 +337,7 @@ class TestCustomStreamParams:
     def test_custom_stream_params_creation(self) -> None:
         """Test method."""
         "Test creating custom stream parameters."
-        params = FlextTapLdapStreams.CustomStreamParams(
+        params = _CustomStreamParams(
             name="test_stream",
             search_filter="(objectClass=person)",
             schema_properties={"cn": {"type": "string"}},
@@ -345,7 +353,7 @@ class TestCustomStreamParams:
     def test_custom_stream_params_validation(self) -> None:
         """Test method."""
         "Test parameter validation."
-        params = FlextTapLdapStreams.CustomStreamParams(
+        params = _CustomStreamParams(
             name="valid_stream",
             search_filter="(objectClass=*)",
             schema_properties={},
@@ -353,21 +361,21 @@ class TestCustomStreamParams:
         )
         assert params.primary_keys == ["dn"]
         with pytest.raises(ValueError, match="Stream name is required"):
-            FlextTapLdapStreams.CustomStreamParams(
+            _CustomStreamParams(
                 name="",
                 search_filter="(objectClass=*)",
                 schema_properties={},
                 primary_keys=["dn"],
             )
         with pytest.raises(ValueError, match="Search filter is required"):
-            FlextTapLdapStreams.CustomStreamParams(
+            _CustomStreamParams(
                 name="test",
                 search_filter="",
                 schema_properties={},
                 primary_keys=["dn"],
             )
         with pytest.raises(ValueError, match="Primary keys cannot be empty list"):
-            FlextTapLdapStreams.CustomStreamParams(
+            _CustomStreamParams(
                 name="test",
                 search_filter="(objectClass=*)",
                 schema_properties={},
@@ -395,7 +403,7 @@ class TestCustomStream:
 
     def test_custom_stream_creation(self, mock_tap: Mock) -> None:
         """Test custom stream creation."""
-        params = FlextTapLdapStreams.CustomStreamParams(
+        params = _CustomStreamParams(
             name="service_accounts",
             search_filter="(&(objectClass=account)(uid=svc-*))",
             schema_properties={
@@ -413,7 +421,7 @@ class TestCustomStream:
 
     def test_custom_stream_minimal_configuration(self, mock_tap: Mock) -> None:
         """Test custom stream with minimal configuration."""
-        params = FlextTapLdapStreams.CustomStreamParams(
+        params = _CustomStreamParams(
             name="minimal_custom",
             search_filter="(objectClass=*)",
             schema_properties={},
@@ -431,7 +439,7 @@ class TestCustomStream:
             "department": {"type": "string"},
             "manager": {"type": "string"},
         }
-        params = FlextTapLdapStreams.CustomStreamParams(
+        params = _CustomStreamParams(
             name="employees",
             search_filter="(objectClass=employee)",
             schema_properties=custom_properties,
@@ -458,7 +466,7 @@ class TestCustomStream:
         mock_client_class.return_value = mock_client
         empty_search_results: Sequence[t.StrMapping] = []
         mock_client.search.return_value = empty_search_results
-        params = FlextTapLdapStreams.CustomStreamParams(
+        params = _CustomStreamParams(
             name="custom_test",
             search_filter="(objectClass=testObject)",
             schema_properties={"testAttribute": {"type": "string"}},
@@ -481,7 +489,7 @@ class TestCustomStream:
             "integerField": {"type": "integer"},
             "datetimeField": {"type": "datetime"},
         }
-        params = FlextTapLdapStreams.CustomStreamParams(
+        params = _CustomStreamParams(
             name="type_test",
             search_filter="(objectClass=typeTest)",
             schema_properties=custom_properties,
@@ -531,7 +539,7 @@ class TestStreamIntegration:
 
     def test_streams_with_custom_configuration(
         self,
-        tap_config: t.ContainerMapping,
+        tap_config: t.MutableContainerMapping,
     ) -> None:
         """Test streams with custom configuration."""
         tap_config["custom_streams"] = [
@@ -552,7 +560,7 @@ class TestStreamIntegration:
         assert stream_count >= 4
         assert "users" in stream_names
 
-    def test_self(self, tap_config: t.ContainerMapping) -> None:
+    def test_self(self, tap_config: t.MutableContainerMapping) -> None:
         """Test method."""
         "Test LDIF streams are included when enabled."
         tap_config["enable_ldif_streams"] = True
@@ -692,7 +700,7 @@ class TestStreamExceptionHandling:
         mock_client = Mock()
         mock_client_class.return_value = mock_client
         mock_client.search.side_effect = RuntimeError("Connection failed")
-        params = FlextTapLdapStreams.CustomStreamParams(
+        params = _CustomStreamParams(
             name="failing_custom",
             search_filter="(objectClass=*)",
             schema_properties={},

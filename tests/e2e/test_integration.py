@@ -168,7 +168,7 @@ class TestFlextTapLdapIntegration:
                 messages.append(json.loads(line))
             except json.JSONDecodeError:
                 continue
-        message_types = {msg["type"] for msg in messages}
+        message_types = {str(msg["type"]) for msg in messages}
         if "SCHEMA" not in message_types:
             schema_error: str = f"Expected {'SCHEMA'} in {message_types}"
             raise AssertionError(schema_error)
