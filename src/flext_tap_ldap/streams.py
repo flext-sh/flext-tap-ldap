@@ -262,7 +262,7 @@ class FlextTapLdapStreams:
             self,
             search_filter: str,
             base_dn: str | None = None,
-            attributes: Sequence[str] | None = None,
+            attributes: t.StrSequence | None = None,
         ) -> Sequence[t.ContainerMapping]:
             """Search LDAP directory with error handling."""
             if not self.client:
@@ -302,7 +302,7 @@ class FlextTapLdapStreams:
     class UsersStream(LDAPBaseStream):
         """Stream for LDAP user entries."""
 
-        primary_keys: ClassVar[Sequence[str]] = ["dn"]
+        primary_keys: ClassVar[t.StrSequence] = ["dn"]
         replication_key: ClassVar[str] = "modifyTimestamp"
 
         @override
@@ -382,7 +382,7 @@ class FlextTapLdapStreams:
     class GroupsStream(LDAPBaseStream):
         """Stream for LDAP group entries."""
 
-        primary_keys: ClassVar[Sequence[str]] = ["dn"]
+        primary_keys: ClassVar[t.StrSequence] = ["dn"]
         replication_key: ClassVar[str] = "modifyTimestamp"
 
         @override
@@ -462,7 +462,7 @@ class FlextTapLdapStreams:
     class OrganizationalUnitsStream(LDAPBaseStream):
         """Stream for LDAP organizational unit entries."""
 
-        primary_keys: ClassVar[Sequence[str]] = ["dn"]
+        primary_keys: ClassVar[t.StrSequence] = ["dn"]
 
         @override
         def __init__(self, tap: Tap) -> None:
@@ -517,7 +517,7 @@ class FlextTapLdapStreams:
     class SchemaStream(LDAPBaseStream):
         """Stream for LDAP schema information."""
 
-        primary_keys: ClassVar[Sequence[str]] = ["dn"]
+        primary_keys: ClassVar[t.StrSequence] = ["dn"]
 
         @override
         def __init__(self, tap: Tap) -> None:
@@ -614,7 +614,7 @@ class FlextTapLdapStreams:
     class CustomStream(LDAPBaseStream):
         """Custom LDAP stream with configurable filter and schema."""
 
-        _default_primary_keys: ClassVar[Sequence[str]] = ["dn"]
+        _default_primary_keys: ClassVar[t.StrSequence] = ["dn"]
 
         @override
         def __init__(
@@ -683,7 +683,7 @@ class FlextTapLdapStreams:
             super().__init__(tap, name=params.name, schema=schema)
 
         @property
-        def primary_keys(self) -> Sequence[str]:
+        def primary_keys(self) -> t.StrSequence:
             """Get primary key columns for this stream."""
             return self.params.primary_keys or self._default_primary_keys
 

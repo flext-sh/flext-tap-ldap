@@ -29,7 +29,7 @@ def _build_source_config(
 def _discover_stream_names(
     tap: FlextTapLdapTap,
     connection_config: Mapping[str, t.Scalar],
-) -> tuple[Sequence[str], int]:
+) -> tuple[t.StrSequence, int]:
     result = tap.discover_streams(source_config=_build_source_config(connection_config))
     assert result.is_success
     assert result.value is not None
@@ -102,15 +102,15 @@ class TestUsersStream:
             assert "dn" in properties
             assert "objectClass" in properties
 
-    @patch("flext_tap_ldap.streams.LDAPClient")
+    @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_users_stream_get_records(
         self, mock_client_class: Mock, mock_tap: Mock
     ) -> None:
         """Test users stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        member_of_empty: Sequence[str] = []
-        member_of_empty_secondary: Sequence[str] = []
+        member_of_empty: t.StrSequence = []
+        member_of_empty_secondary: t.StrSequence = []
         mock_client.search.return_value = [
             {
                 "dn": "cn=user1,ou=users,dc=test,dc=com",
@@ -145,14 +145,14 @@ class TestUsersStream:
         assert first_record["dn"] == "cn=user1,ou=users,dc=test,dc=com"
         mock_client_class.assert_called_once()
 
-    @patch("flext_tap_ldap.streams.LDAPClient")
+    @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_groups_stream_get_records(
         self, mock_client_class: Mock, mock_tap: Mock
     ) -> None:
         """Test groups stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        empty_search_results: Sequence[Mapping[str, str]] = []
+        empty_search_results: Sequence[t.StrMapping] = []
         mock_client.search.return_value = empty_search_results
         stream = FlextTapLdapStreams.GroupsStream(mock_tap)
         records = list(stream.get_records(context=None))
@@ -163,14 +163,14 @@ class TestUsersStream:
         assert first_record["cn"] == "developers"
         mock_client_class.assert_called_once()
 
-    @patch("flext_tap_ldap.streams.LDAPClient")
+    @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_organizational_units_stream_get_records(
         self, mock_client_class: Mock, mock_tap: Mock
     ) -> None:
         """Test organizational units stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        empty_search_results: Sequence[Mapping[str, str]] = []
+        empty_search_results: Sequence[t.StrMapping] = []
         mock_client.search.return_value = empty_search_results
         stream = FlextTapLdapStreams.OrganizationalUnitsStream(mock_tap)
         records = list(stream.get_records(context=None))
@@ -181,14 +181,14 @@ class TestUsersStream:
         assert first_record["ou"] == "users"
         mock_client_class.assert_called_once()
 
-    @patch("flext_tap_ldap.streams.LDAPClient")
+    @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_schema_stream_get_records(
         self, mock_client_class: Mock, mock_tap: Mock
     ) -> None:
         """Test schema stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        empty_search_results: Sequence[Mapping[str, str]] = []
+        empty_search_results: Sequence[t.StrMapping] = []
         mock_client.search.return_value = empty_search_results
         stream = FlextTapLdapStreams.SchemaStream(mock_tap)
         records = list(stream.get_records(context=None))
@@ -438,14 +438,14 @@ class TestCustomStream:
             for prop_name in custom_properties:
                 assert prop_name in properties
 
-    @patch("flext_tap_ldap.streams.LDAPClient")
+    @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_custom_stream_get_records(
         self, mock_client_class: Mock, mock_tap: Mock
     ) -> None:
         """Test custom stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        empty_search_results: Sequence[Mapping[str, str]] = []
+        empty_search_results: Sequence[t.StrMapping] = []
         mock_client.search.return_value = empty_search_results
         params = FlextTapLdapStreams.CustomStreamParams(
             name="custom_test",
@@ -602,7 +602,7 @@ class TestStreamExceptionHandling:
         tap.logger = Mock()
         return tap
 
-    @patch("flext_tap_ldap.streams.LDAPClient")
+    @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_users_stream_exception_fallback(
         self, mock_client_class: Mock, mock_tap_failing: Mock
     ) -> None:
@@ -617,7 +617,7 @@ class TestStreamExceptionHandling:
         assert isinstance(first_record, dict)
         assert first_record["dn"] == "uid=jdoe,ou=users,dc=test,dc=com"
 
-    @patch("flext_tap_ldap.streams.LDAPClient")
+    @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_groups_stream_exception_fallback(
         self, mock_client_class: Mock, mock_tap_failing: Mock
     ) -> None:
@@ -632,7 +632,7 @@ class TestStreamExceptionHandling:
         assert isinstance(first_record, dict)
         assert first_record["dn"] == "cn=developers,ou=groups,dc=test,dc=com"
 
-    @patch("flext_tap_ldap.streams.LDAPClient")
+    @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_organizational_units_stream_exception_fallback(
         self, mock_client_class: Mock, mock_tap_failing: Mock
     ) -> None:
@@ -647,7 +647,7 @@ class TestStreamExceptionHandling:
         assert isinstance(first_record, dict)
         assert first_record["dn"] == "ou=users,dc=test,dc=com"
 
-    @patch("flext_tap_ldap.streams.LDAPClient")
+    @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_schema_stream_exception_fallback(
         self, mock_client_class: Mock, mock_tap_failing: Mock
     ) -> None:
@@ -662,7 +662,7 @@ class TestStreamExceptionHandling:
         assert isinstance(first_record, dict)
         assert first_record["dn"] == "cn=schema"
 
-    @patch("flext_tap_ldap.streams.LDAPClient")
+    @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_custom_stream_exception_fallback(
         self, mock_client_class: Mock, mock_tap_failing: Mock
     ) -> None:

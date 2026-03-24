@@ -29,7 +29,7 @@ def _build_source_config(
 def _discover_stream_names(
     tap: FlextTapLdapTap,
     connection_config: Mapping[str, t.Scalar],
-) -> tuple[Sequence[str], int]:
+) -> tuple[t.StrSequence, int]:
     result = tap.discover_streams(source_config=_build_source_config(connection_config))
     assert result.is_success
     assert result.value is not None

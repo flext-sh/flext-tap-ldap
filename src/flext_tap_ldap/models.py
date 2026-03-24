@@ -10,7 +10,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import Annotated, Self
 from uuid import uuid4
@@ -77,7 +76,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 ),
             ]
             stream_name: str
-            stream_key_properties: Annotated[Sequence[str], Field(default_factory=list)]
+            stream_key_properties: Annotated[t.StrSequence, Field(default_factory=list)]
             bookmark_key: str | None = None
 
             @model_validator(mode="before")
@@ -226,7 +225,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 Field(default_factory=dict),
             ]
             primary_keys: Annotated[
-                Sequence[str], Field(default_factory=lambda: ["dn"])
+                t.StrSequence, Field(default_factory=lambda: ["dn"])
             ]
             replication_key: str | None = None
 
@@ -280,9 +279,9 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             stream_type: t.NonEmptyStr
             connection_id: t.NonEmptyStr
             search_filter: t.NonEmptyStr
-            attributes: Sequence[str] | None = None
+            attributes: t.StrSequence | None = None
             tap_stream_id: str | None = None
-            key_properties: Sequence[str] | None = None
+            key_properties: t.StrSequence | None = None
             replication_method: str = "FULL_TABLE"
             replication_key: str | None = None
 
@@ -309,10 +308,10 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             connection_id: t.NonEmptyStr
             stream_type: t.NonEmptyStr
             search_filter: t.NonEmptyStr
-            attributes: Annotated[Sequence[str], Field(default_factory=list)]
+            attributes: Annotated[t.StrSequence, Field(default_factory=list)]
             tap_stream_id: t.NonEmptyStr
             key_properties: Annotated[
-                Sequence[str], Field(default_factory=lambda: ["dn"])
+                t.StrSequence, Field(default_factory=lambda: ["dn"])
             ]
             replication_method: str = "FULL_TABLE"
             replication_key: str | None = None

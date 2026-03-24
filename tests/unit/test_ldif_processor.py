@@ -43,7 +43,7 @@ class TestLdifProcessor:
         stream._ldif_api = Mock()
         stream._ldap_api = Mock()
         stream._logger_instance = None
-        seen: Sequence[str] = []
+        seen: t.StrSequence = []
 
         def _process(ldif_file: str) -> Sequence[t.ContainerMapping]:
             seen.append(ldif_file)

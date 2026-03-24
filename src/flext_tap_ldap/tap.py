@@ -41,7 +41,7 @@ _CUSTOM_STREAM_ADAPTER = TypeAdapter(
 )
 
 
-def _validate_custom_stream(raw_item: t.NormalizedValue) -> Mapping[str, str] | None:
+def _validate_custom_stream(raw_item: t.NormalizedValue) -> t.StrMapping | None:
     """Validate a custom stream definition, returning name if valid."""
     try:
         validated: t.ContainerMapping = _CUSTOM_STREAM_ADAPTER.validate_python(
@@ -63,7 +63,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
     """
 
     name: ClassVar[str] = "FlextMeltanoTapAbstractions-ldap"
-    config: Mapping[str, t.Scalar]
+    config: t.ConfigurationMapping
 
     def __init__(self) -> None:
         """Initialize tap with empty config."""
@@ -215,7 +215,7 @@ def _build_cli_command() -> click.Command:
         raw_config: t.ContainerMapping = _CUSTOM_STREAM_ADAPTER.validate_json(
             Path(config_path).read_bytes()
         )
-        config_data: Mapping[str, t.Scalar] = {
+        config_data: t.ConfigurationMapping = {
             k: v
             for k, v in raw_config.items()
             if isinstance(v, (str, int, float, bool))

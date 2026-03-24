@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from typing import ClassVar
 
 from flext_core import FlextContainer, FlextExceptions, FlextLogger, p, r, t
@@ -34,9 +34,9 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """Return the logger instance."""
             return self._logger
 
-        def execute(self) -> r[Mapping[str, str | Sequence[str]]]:
+        def execute(self) -> r[Mapping[str, str | t.StrSequence]]:
             """Execute tap LDAP utilities and return operational status."""
-            return r[Mapping[str, str | Sequence[str]]].ok({
+            return r[Mapping[str, str | t.StrSequence]].ok({
                 "status": "operational",
                 "service": "flext-tap-ldap-utilities",
                 "capabilities": [
@@ -59,7 +59,7 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 **kwargs: t.Scalar,
             ) -> FlextExceptions.AuthenticationError:
                 """Create bind error with context."""
-                context: Mapping[str, t.Scalar] = dict(kwargs)
+                context: t.ConfigurationMapping = dict(kwargs)
                 if bind_dn is not None:
                     context["bind_dn"] = bind_dn
                 return FlextExceptions.AuthenticationError(message, context=context)
@@ -73,7 +73,7 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 **kwargs: t.Scalar,
             ) -> FlextExceptions.ConnectionError:
                 """Create connection error with context."""
-                context: Mapping[str, t.Scalar] = dict(kwargs)
+                context: t.ConfigurationMapping = dict(kwargs)
                 if host is not None:
                     context["host"] = host
                 if port is not None:
@@ -90,7 +90,7 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 **kwargs: t.Scalar,
             ) -> FlextExceptions.OperationError:
                 """Create search error with context."""
-                context: Mapping[str, t.Scalar] = dict(kwargs)
+                context: t.ConfigurationMapping = dict(kwargs)
                 if base_dn is not None:
                     context["base_dn"] = base_dn
                 if filter_str is not None:
@@ -103,7 +103,7 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             @staticmethod
             def create_stream_info_from_ldap_entry(
                 dn: str,
-                attributes: Mapping[str, Sequence[str]],
+                attributes: Mapping[str, t.StrSequence],
                 stream_prefix: str = "ldap",
                 replication_method: str = "FULL_TABLE",
             ) -> r[Mapping[str, str | int]]:

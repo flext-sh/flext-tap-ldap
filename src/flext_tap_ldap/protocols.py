@@ -66,14 +66,14 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
             def discover_base_dns(
                 self,
                 config: t.ConfigMap,
-            ) -> FlextMeltanoProtocols.Result[Sequence[str]]:
+            ) -> FlextMeltanoProtocols.Result[t.StrSequence]:
                 """Discover available base DNs in LDAP directory."""
                 ...
 
             def discover_object_classes(
                 self,
                 base_dn: str,
-            ) -> FlextMeltanoProtocols.Result[Sequence[str]]:
+            ) -> FlextMeltanoProtocols.Result[t.StrSequence]:
                 """Discover t.NormalizedValue classes in LDAP directory."""
                 ...
 
@@ -92,7 +92,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 self,
                 base_dn: str,
                 filter_str: str,
-                attributes: Sequence[str] | None = None,
+                attributes: t.StrSequence | None = None,
             ) -> FlextMeltanoProtocols.Result[Sequence[t.ConfigMap]]:
                 """Extract LDAP entries matching filter."""
                 ...
@@ -100,7 +100,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
             def extract_single_entry(
                 self,
                 dn: str,
-                attributes: Sequence[str] | None = None,
+                attributes: t.StrSequence | None = None,
             ) -> FlextMeltanoProtocols.Result[t.ConfigMap]:
                 """Extract single LDAP entry by DN."""
                 ...
