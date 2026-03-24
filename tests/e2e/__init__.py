@@ -24,18 +24,18 @@ if TYPE_CHECKING:
     )
     from tests.e2e.test_integration import TestFlextTapLdapIntegration
 
-_LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
-    "TestFlextTapLdapIntegration": (
+_LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
+    "TestFlextTapLdapIntegration": [
         "tests.e2e.test_integration",
         "TestFlextTapLdapIntegration",
-    ),
-    "catalog_file": ("tests.e2e.conftest", "catalog_file"),
-    "ldap_connection": ("tests.e2e.conftest", "ldap_connection"),
-    "ldap_container": ("tests.e2e.conftest", "ldap_container"),
-    "logger": ("tests.e2e.conftest", "logger"),
-    "project_root": ("tests.e2e.conftest", "project_root"),
-    "sample_catalog": ("tests.e2e.conftest", "sample_catalog"),
-    "tap_config_file": ("tests.e2e.conftest", "tap_config_file"),
+    ],
+    "catalog_file": ["tests.e2e.conftest", "catalog_file"],
+    "ldap_connection": ["tests.e2e.conftest", "ldap_connection"],
+    "ldap_container": ["tests.e2e.conftest", "ldap_container"],
+    "logger": ["tests.e2e.conftest", "logger"],
+    "project_root": ["tests.e2e.conftest", "project_root"],
+    "sample_catalog": ["tests.e2e.conftest", "sample_catalog"],
+    "tap_config_file": ["tests.e2e.conftest", "tap_config_file"],
 }
 
 __all__ = [

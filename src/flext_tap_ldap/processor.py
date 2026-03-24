@@ -74,8 +74,7 @@ class FlextTapLdapEntry:
 
     def add_attribute(self, name: str, value: str | MutableSequence[str]) -> None:
         """Add an attribute to the entry."""
-        if name not in self.attributes:
-            self.attributes[name] = []
+        self.attributes.setdefault(name, [])
         match value:
             case list() as value_list:
                 self.attributes[name].extend(value_list)
@@ -137,7 +136,8 @@ class FlextTapLdapEntry:
     def remove_attribute(self, name: str) -> None:
         """Remove an attribute from the entry."""
         if name in self.attributes:
-            self.attributes[name] = []
+            empty_attrs: list[str] = []
+            self.attributes[name] = empty_attrs
 
     def to_dict(self) -> t.MutableContainerMapping:
         """Convert entry to dictionary format."""

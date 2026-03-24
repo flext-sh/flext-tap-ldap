@@ -51,7 +51,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
 
     def __init__(self) -> None:
         """Initialize tap with empty config."""
-        self.config = {}
+        self.config: t.MutableConfigurationMapping = {}
 
     config_class: ClassVar[type[FlextTapLdapSettings]] = FlextTapLdapSettings
     config_jsonschema: ClassVar[t.ContainerMapping] = {
@@ -129,7 +129,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
                 raw_connection_config,
             )
         except ValidationError:
-            config_map = {}
+            config_map: t.ConfigurationMapping = {}
 
         ldap_streams: MutableSequence[FlextTapLdapStreams.LDAPBaseStream] = [
             FlextTapLdapStreams.UsersStream(self),
