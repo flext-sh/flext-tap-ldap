@@ -136,7 +136,7 @@ class FlextTapLdapEntry:
     def remove_attribute(self, name: str) -> None:
         """Remove an attribute from the entry."""
         if name in self.attributes:
-            empty_attrs: list[str] = []
+            empty_attrs: MutableSequence[str] = []
             self.attributes[name] = empty_attrs
 
     def to_dict(self) -> t.MutableContainerMapping:

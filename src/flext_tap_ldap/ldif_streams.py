@@ -385,7 +385,7 @@ class FlextTapLdapLdifStreams:
                 self.logger.error(
                     f"Failed to analyze LDIF file {ldif_file}: {result.error}",
                 )
-                empty: dict[str, int] = {}
+                empty: Mapping[str, int] = {}
                 return {
                     "total_entries": 0,
                     "entry_types": empty,
@@ -401,7 +401,7 @@ class FlextTapLdapLdifStreams:
                 ImportError,
             ):
                 self.logger.exception("Error analyzing LDIF file %s", ldif_file)
-                empty_dict: dict[str, int] = {}
+                empty_dict: Mapping[str, int] = {}
                 return {
                     "total_entries": 0,
                     "entry_types": empty_dict,
