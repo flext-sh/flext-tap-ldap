@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 
 from flext_tests import FlextTestsModels
 
@@ -52,7 +52,7 @@ class FlextTapLdapTestModels(FlextTestsModels, FlextTapLdapModels):
 
                 base_dn: str
                 filter_str: str
-                attributes: t.StrSequence | None = None
+                attributes: Sequence[str] | None = None
                 scope: str = "SUBTREE"
                 size_limit: int | None = None
                 time_limit: int | None = None
@@ -70,7 +70,7 @@ class FlextTapLdapTestModels(FlextTestsModels, FlextTapLdapModels):
                 """Test model for LDAP directory entries."""
 
                 dn: str
-                attributes: Mapping[str, t.StrSequence]
+                attributes: Mapping[str, Sequence[str]]
                 object_class: str
 
                 @property
