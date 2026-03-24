@@ -585,7 +585,7 @@ class TestLDAPBaseStreamDirectUsage:
             schema={"properties": {"dn": {"type": "string"}}},
         )
         records = list(base_stream.get_records(context=None))
-        assert len(records) == 0
+        assert not records
 
 
 class TestStreamExceptionHandling:

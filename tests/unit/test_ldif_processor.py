@@ -93,7 +93,7 @@ class TestLdifProcessor:
         stream._ldap_api = Mock()
         stream._logger_instance = None
         records = list(stream.get_records())
-        assert len(records) == 0
+        assert not records
 
     def test_transform_entry_applies_schema_mappings(self) -> None:
         transformer = Transformer(

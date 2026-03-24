@@ -100,12 +100,12 @@ class TestLDAPClientQuick:
         # Test with failure
         mock_result.is_success = False
         results = client._process_search_results(mock_result, size_limit=0)
-        assert len(results) == 0
+        assert not results
         # Test with no value
         mock_result.is_success = True
         mock_result.value = None
         results = client._process_search_results(mock_result, size_limit=0)
-        assert len(results) == 0
+        assert not results
 
     def test_search_delegates_to_perform_search(
         self, client: FlextTapLdapClient.LDAPClient

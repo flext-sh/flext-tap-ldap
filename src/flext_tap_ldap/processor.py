@@ -164,7 +164,7 @@ class Entry:
                     ldif_content += f"{attr_name}: {value}\n"
             ldif_content += "\n"
             result: r[Sequence[m.Ldif.Entry]] = api.parse(ldif_content)
-            if result.is_success and result.value and (len(result.value) > 0):
+            if result.is_success and result.value and (result.value):
                 parsed_entry = _to_ldif_entry(result.value[0].model_dump())
                 if parsed_entry is not None:
                     return parsed_entry
@@ -453,7 +453,7 @@ class Validator:
         return {
             "errors": self.validation_errors.copy(),
             "warnings": self.warnings.copy(),
-            "is_valid": len(self.validation_errors) == 0,
+            "is_valid": not self.validation_errors,
         }
 
     def validate_entries(
