@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, MutableSequence
 from pathlib import Path
 from typing import ClassVar
 
@@ -63,7 +63,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
     """
 
     name: ClassVar[str] = "FlextMeltanoTapAbstractions-ldap"
-    config: t.ConfigurationMapping
+    config: t.MutableConfigurationMapping
 
     def __init__(self) -> None:
         """Initialize tap with empty config."""
@@ -145,19 +145,19 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         except ValidationError:
             config_map = {}
 
-        ldap_streams: Sequence[FlextTapLdapStreams.LDAPBaseStream] = [
+        ldap_streams: MutableSequence[FlextTapLdapStreams.LDAPBaseStream] = [
             FlextTapLdapStreams.UsersStream(self),
             FlextTapLdapStreams.GroupsStream(self),
             FlextTapLdapStreams.OrganizationalUnitsStream(self),
             FlextTapLdapStreams.SchemaStream(self),
         ]
-        streams: Sequence[
+        streams: MutableSequence[
             FlextTapLdapStreams.LDAPBaseStream
             | FlextTapLdapLdifStreams.LdifStream
             | FlextTapLdapLdifStreams.LdifAnalysisStream
         ] = list(ldap_streams)
         if bool(config_map.get("enable_ldif_streams", False)):
-            ldif_stream_list: Sequence[
+            ldif_stream_list: MutableSequence[
                 FlextTapLdapLdifStreams.LdifStream
                 | FlextTapLdapLdifStreams.LdifAnalysisStream
             ] = [
@@ -166,7 +166,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             ]
             streams.extend(ldif_stream_list)
 
-        streams_list: Sequence[t.Meltano.Singer.CatalogEntry] = [
+        streams_list: MutableSequence[t.Meltano.Singer.CatalogEntry] = [
             {
                 "stream": str(stream.name),
                 "tap_stream_id": str(stream.name),
@@ -215,7 +215,7 @@ def _build_cli_command() -> click.Command:
         raw_config: t.ContainerMapping = _CUSTOM_STREAM_ADAPTER.validate_json(
             Path(config_path).read_bytes()
         )
-        config_data: t.ConfigurationMapping = {
+        config_data: t.MutableConfigurationMapping = {
             k: v
             for k, v in raw_config.items()
             if isinstance(v, (str, int, float, bool))
@@ -226,13 +226,16 @@ def _build_cli_command() -> click.Command:
         if discover:
             source_config = m.Meltano.DataSourceConfig(
                 source_type="ldap",
-                connection_config=dict(config_data),
+                connection_config={str(k): v for k, v in config_data.items()},
                 stream_config={},
                 source_version="latest",
             )
             result = tap.discover_streams(source_config=source_config)
             if result.is_success and result.value:
                 catalog = result.value
+                catalog_streams: MutableSequence[t.Meltano.Singer.CatalogEntry] = list(
+                    catalog.get("streams", [])
+                )
                 raw_custom: t.NormalizedValue = raw_config.get("custom_streams")
                 if isinstance(raw_custom, list):
                     for cs_item in raw_custom:
@@ -243,8 +246,11 @@ def _build_cli_command() -> click.Command:
                                 "tap_stream_id": cs_dict["name"],
                                 "schema": {},
                             }
-                            catalog["streams"].append(cs_entry)
-                click.echo(_SINGER_OUTPUT_ADAPTER.dump_json(catalog).decode())
+                            catalog_streams.append(cs_entry)
+                output_catalog: t.Meltano.Singer.StreamCatalog = {
+                    "streams": catalog_streams,
+                }
+                click.echo(_SINGER_OUTPUT_ADAPTER.dump_json(output_catalog).decode())
             return
 
         if catalog_path:
@@ -255,7 +261,7 @@ def _build_cli_command() -> click.Command:
 
         source_config = m.Meltano.DataSourceConfig(
             source_type="ldap",
-            connection_config=config_data,
+            connection_config={str(k): v for k, v in config_data.items()},
             stream_config={},
             source_version="latest",
         )

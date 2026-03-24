@@ -59,7 +59,7 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 **kwargs: t.Scalar,
             ) -> FlextExceptions.AuthenticationError:
                 """Create bind error with context."""
-                context: t.ConfigurationMapping = dict(kwargs)
+                context: t.MutableConfigurationMapping = dict(kwargs)
                 if bind_dn is not None:
                     context["bind_dn"] = bind_dn
                 return FlextExceptions.AuthenticationError(message, context=context)
@@ -73,7 +73,7 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 **kwargs: t.Scalar,
             ) -> FlextExceptions.ConnectionError:
                 """Create connection error with context."""
-                context: t.ConfigurationMapping = dict(kwargs)
+                context: t.MutableConfigurationMapping = dict(kwargs)
                 if host is not None:
                     context["host"] = host
                 if port is not None:
@@ -90,7 +90,7 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 **kwargs: t.Scalar,
             ) -> FlextExceptions.OperationError:
                 """Create search error with context."""
-                context: t.ConfigurationMapping = dict(kwargs)
+                context: t.MutableConfigurationMapping = dict(kwargs)
                 if base_dn is not None:
                     context["base_dn"] = base_dn
                 if filter_str is not None:
@@ -135,7 +135,7 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     return r[t.ContainerMapping].fail(
                         "LDAP config must be a mapping",
                     )
-                config_map: t.ContainerMapping = {
+                config_map: t.MutableContainerMapping = {
                     str(key): value for key, value in config.items()
                 }
                 required_fields = ["host", "base_dn"]

@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
@@ -65,7 +65,7 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize the connection service."""
-            self._connections: Mapping[str, FlextTapLdapServices.LDAPConnection] = {}
+            self._connections: MutableMapping[str, FlextTapLdapServices.LDAPConnection] = {}
 
         def create_connection(
             self,
@@ -152,7 +152,7 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize the stream service."""
-            self._streams: Mapping[str, FlextTapLdapServices.LDAPStream] = {}
+            self._streams: MutableMapping[str, FlextTapLdapServices.LDAPStream] = {}
 
         def create_stream(
             self,
@@ -238,7 +238,7 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize the execution service."""
-            self._executions: Mapping[str, FlextTapLdapModels.TapLdap.TapExecution] = {}
+            self._executions: MutableMapping[str, FlextTapLdapModels.TapLdap.TapExecution] = {}
 
         def cancel_execution(
             self,
@@ -442,7 +442,7 @@ class FlextTapLdapServices:
             """Process LDIF file using flext-ldif library."""
             try:
                 logger.info("Processing LDIF file: %s", file_path)
-                result: r[Sequence[FlextTapLdapModels.Ldif.Entry]] = (
+                result: r[MutableSequence[FlextTapLdapModels.Ldif.Entry]] = (
                     self._ldif_api.parse(
                         Path(file_path),
                     )
@@ -451,14 +451,14 @@ class FlextTapLdapServices:
                     return r[Sequence[t.ContainerMapping]].fail(
                         f"Failed to parse LDIF file: {result.error}",
                     )
-                entries: Sequence[FlextTapLdapModels.Ldif.Entry] = result.value or []
+                entries: MutableSequence[FlextTapLdapModels.Ldif.Entry] = result.value or []
                 entry_count = len(entries)
                 logger.info(
                     "Successfully processed %s entries from %s",
                     entry_count,
                     file_path,
                 )
-                normalized: Sequence[t.ContainerMapping] = []
+                normalized: MutableSequence[t.ContainerMapping] = []
                 for entry in entries:
                     dn_value = entry.dn.value if entry.dn is not None else ""
                     attributes_raw: t.ContainerMapping = (
@@ -490,7 +490,7 @@ class FlextTapLdapServices:
             """Validate LDIF file using flext-ldif library."""
             try:
                 logger.info("Validating LDIF file: %s", file_path)
-                result: r[Sequence[FlextTapLdapModels.Ldif.Entry]] = (
+                result: r[MutableSequence[FlextTapLdapModels.Ldif.Entry]] = (
                     self._ldif_api.parse(
                         Path(file_path),
                     )
@@ -499,7 +499,7 @@ class FlextTapLdapServices:
                     return r[t.ContainerMapping].fail(
                         f"Validation failed: {result.error}",
                     )
-                entries: Sequence[FlextTapLdapModels.Ldif.Entry] = result.value or []
+                entries: MutableSequence[FlextTapLdapModels.Ldif.Entry] = result.value or []
                 total_entries = len(entries)
                 validation_data: t.ContainerMapping = {
                     "total_entries": total_entries,
