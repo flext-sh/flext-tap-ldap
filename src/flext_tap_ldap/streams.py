@@ -27,64 +27,6 @@ from flext_tap_ldap.typings import FlextTapLdapTypes
 logger = FlextLogger(__name__)
 
 
-def _coerce_positive_int(raw_value: t.NormalizedValue, default: int) -> int:
-    """Coerce value to positive integer with safe fallback."""
-    try:
-        parsed = int(str(raw_value))
-    except (TypeError, ValueError):
-        return default
-    return parsed if parsed > 0 else default
-
-
-def _coerce_optional_string(raw_value: t.NormalizedValue) -> str | None:
-    """Coerce value to string only when source is already string-like."""
-    if raw_value is None:
-        return None
-    try:
-        validated = FlextTapLdapTypes.STRICT_STR_ADAPTER.validate_python(raw_value)
-    except ValidationError:
-        return None
-    return validated or None
-
-
-def _parse_connection_config(
-    raw_value: t.NormalizedValue,
-) -> FlextTapLdapModels.TapLdap.LdapConnectionConfig:
-    """Validate LDAP connection payload through Pydantic."""
-    try:
-        parsed = FlextTapLdapModels.TapLdap.LdapConnectionConfig.model_validate(
-            raw_value,
-            strict=True,
-        )
-    except ValidationError:
-        parsed = FlextTapLdapModels.TapLdap.LdapConnectionConfig()
-    return FlextTapLdapModels.TapLdap.LdapConnectionConfig(
-        host=str(parsed.host),
-        port=_coerce_positive_int(parsed.port, c.TapLdap.DEFAULT_PORT),
-        bind_dn=_coerce_optional_string(parsed.bind_dn),
-        bind_password=_coerce_optional_string(parsed.bind_password),
-        use_ssl=bool(parsed.use_ssl),
-        timeout_seconds=_coerce_positive_int(
-            parsed.timeout_seconds,
-            c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
-        ),
-        base_dn=str(parsed.base_dn),
-    )
-
-
-def _parse_property_definition(
-    raw_value: t.NormalizedValue,
-) -> FlextTapLdapModels.TapLdap.CustomPropertyDefinition:
-    """Validate custom stream property definition through Pydantic."""
-    try:
-        return FlextTapLdapModels.TapLdap.CustomPropertyDefinition.model_validate(
-            raw_value,
-            strict=True,
-        )
-    except ValidationError:
-        return FlextTapLdapModels.TapLdap.CustomPropertyDefinition()
-
-
 class FlextTapLdapStreams:
     """Unified streams class for LDAP tap operations with complete stream management.
 
@@ -167,6 +109,74 @@ class FlextTapLdapStreams:
         Implements FlextMeltanoProtocols.Singer.Stream protocol.
         """
 
+        @staticmethod
+        def coerce_positive_int(raw_value: t.NormalizedValue, default: int) -> int:
+            """Coerce value to positive integer with safe fallback."""
+            try:
+                parsed = int(str(raw_value))
+            except (TypeError, ValueError):
+                return default
+            return parsed if parsed > 0 else default
+
+        @staticmethod
+        def coerce_optional_string(raw_value: t.NormalizedValue) -> str | None:
+            """Coerce value to string only when source is already string-like."""
+            if raw_value is None:
+                return None
+            try:
+                validated = FlextTapLdapTypes.STRICT_STR_ADAPTER.validate_python(
+                    raw_value
+                )
+            except ValidationError:
+                return None
+            return validated or None
+
+        @staticmethod
+        def parse_connection_config(
+            raw_value: t.NormalizedValue,
+        ) -> FlextTapLdapModels.TapLdap.LdapConnectionConfig:
+            """Validate LDAP connection payload through Pydantic."""
+            try:
+                parsed = FlextTapLdapModels.TapLdap.LdapConnectionConfig.model_validate(
+                    raw_value,
+                    strict=True,
+                )
+            except ValidationError:
+                parsed = FlextTapLdapModels.TapLdap.LdapConnectionConfig()
+            return FlextTapLdapModels.TapLdap.LdapConnectionConfig(
+                host=str(parsed.host),
+                port=FlextTapLdapStreams.LDAPBaseStream.coerce_positive_int(
+                    parsed.port, c.TapLdap.DEFAULT_PORT
+                ),
+                bind_dn=FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
+                    parsed.bind_dn
+                ),
+                bind_password=FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
+                    parsed.bind_password
+                ),
+                use_ssl=bool(parsed.use_ssl),
+                timeout_seconds=FlextTapLdapStreams.LDAPBaseStream.coerce_positive_int(
+                    parsed.timeout_seconds,
+                    c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
+                ),
+                base_dn=str(parsed.base_dn),
+            )
+
+        @staticmethod
+        def parse_property_definition(
+            raw_value: t.NormalizedValue,
+        ) -> FlextTapLdapModels.TapLdap.CustomPropertyDefinition:
+            """Validate custom stream property definition through Pydantic."""
+            try:
+                return (
+                    FlextTapLdapModels.TapLdap.CustomPropertyDefinition.model_validate(
+                        raw_value,
+                        strict=True,
+                    )
+                )
+            except ValidationError:
+                return FlextTapLdapModels.TapLdap.CustomPropertyDefinition()
+
         def __init__(
             self,
             tap: Tap,
@@ -194,9 +204,13 @@ class FlextTapLdapStreams:
             """Create LDAP client from tap configuration."""
             try:
                 raw_connection = self.config.get("connection", {})
-                connection_config = _parse_connection_config(raw_connection)
+                connection_config = (
+                    FlextTapLdapStreams.LDAPBaseStream.parse_connection_config(
+                        raw_connection
+                    )
+                )
                 page_size_raw = self.config.get("page_size", 1000)
-                page_size = _coerce_positive_int(
+                page_size = FlextTapLdapStreams.LDAPBaseStream.coerce_positive_int(
                     page_size_raw,
                     c.TapLdap.DEFAULT_PAGE_SIZE,
                 )
@@ -269,7 +283,11 @@ class FlextTapLdapStreams:
             try:
                 if base_dn is None:
                     raw_conn = self.config.get("connection", {})
-                    connection_config = _parse_connection_config(raw_conn)
+                    connection_config = (
+                        FlextTapLdapStreams.LDAPBaseStream.parse_connection_config(
+                            raw_conn
+                        )
+                    )
                     base_dn = connection_config.base_dn
                 results: Sequence[t.ContainerMapping] = [
                     dict(entry)
@@ -340,7 +358,8 @@ class FlextTapLdapStreams:
             logger.info("Extracting LDAP users")
             raw_filter = self.config.get("user_filter", "(objectClass=inetOrgPerson)")
             user_filter = (
-                _coerce_optional_string(raw_filter) or "(objectClass=inetOrgPerson)"
+                FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(raw_filter)
+                or "(objectClass=inetOrgPerson)"
             )
             user_attributes = [
                 "uid",
@@ -428,7 +447,9 @@ class FlextTapLdapStreams:
                 "(objectClass=groupOfNames)",
             )
             group_filter = (
-                _coerce_optional_string(raw_group_filter)
+                FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
+                    raw_group_filter
+                )
                 or "(objectClass=groupOfNames)"
             )
             group_attributes = [
@@ -627,7 +648,11 @@ class FlextTapLdapStreams:
                 name: str,
                 definition: t.NormalizedValue,
             ) -> t.ContainerMapping:
-                parsed_definition = _parse_property_definition(definition)
+                parsed_definition = (
+                    FlextTapLdapStreams.LDAPBaseStream.parse_property_definition(
+                        definition
+                    )
+                )
                 prop_type = parsed_definition.type
                 prop_desc = parsed_definition.description or f"{name} field"
                 if prop_type == "integer":

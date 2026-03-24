@@ -168,7 +168,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         return r[bool].ok(True)
 
     @staticmethod
-    def _validate_custom_stream(raw_item: t.NormalizedValue) -> t.StrMapping | None:
+    def validate_custom_stream(raw_item: t.NormalizedValue) -> t.StrMapping | None:
         """Validate a custom stream definition, returning name if valid."""
         try:
             validated: t.ContainerMapping = _CUSTOM_STREAM_ADAPTER.validate_python(
@@ -245,7 +245,7 @@ def _build_cli_command() -> click.Command:
                 raw_custom: t.NormalizedValue = raw_config.get("custom_streams")
                 if isinstance(raw_custom, list):
                     for cs_item in raw_custom:
-                        cs_dict = FlextTapLdapTap._validate_custom_stream(cs_item)
+                        cs_dict = FlextTapLdapTap.validate_custom_stream(cs_item)
                         if cs_dict is not None:
                             cs_entry: t.Meltano.Singer.CatalogEntry = {
                                 "stream": cs_dict["name"],
