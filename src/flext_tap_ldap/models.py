@@ -10,7 +10,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
+
 from datetime import UTC, datetime
 from typing import Annotated, Self
 from uuid import uuid4

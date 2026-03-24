@@ -16,7 +16,7 @@ from flext_tap_ldap import FlextTapLdapStreams, FlextTapLdapTap, m, t
 
 
 def _build_source_config(
-    connection_config: Mapping[str, t.Scalar],
+    connection_config: t.ScalarMapping,
 ) -> m.Meltano.DataSourceConfig:
     return m.Meltano.DataSourceConfig(
         source_type="ldap",
@@ -28,7 +28,7 @@ def _build_source_config(
 
 def _discover_stream_names(
     tap: FlextTapLdapTap,
-    connection_config: Mapping[str, t.Scalar],
+    connection_config: t.ScalarMapping,
 ) -> tuple[Sequence[str], int]:
     result = tap.discover_streams(source_config=_build_source_config(connection_config))
     assert result.is_success
@@ -506,7 +506,7 @@ class TestStreamIntegration:
 
     def test_all_default_streams_creation(self, tap_config: t.ContainerMapping) -> None:
         """Test that all default streams can be created."""
-        connection_config: Mapping[str, t.Scalar] = {}
+        connection_config: t.ScalarMapping = {}
         for key, value in tap_config.items():
             if isinstance(value, (str, int, float, bool)):
                 connection_config[str(key)] = value
@@ -531,7 +531,7 @@ class TestStreamIntegration:
                 "schema": {"properties": {"testAttribute": {"type": "string"}}},
             }
         ]
-        connection_config: Mapping[str, t.Scalar] = {}
+        connection_config: t.ScalarMapping = {}
         for key, value in tap_config.items():
             if isinstance(value, (str, int, float, bool)):
                 connection_config[str(key)] = value
@@ -544,7 +544,7 @@ class TestStreamIntegration:
         """Test method."""
         "Test LDIF streams are included when enabled."
         tap_config["enable_ldif_streams"] = True
-        connection_config: Mapping[str, t.Scalar] = {}
+        connection_config: t.ScalarMapping = {}
         for key, value in tap_config.items():
             if isinstance(value, (str, int, float, bool)):
                 connection_config[str(key)] = value
