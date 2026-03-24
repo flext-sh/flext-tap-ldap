@@ -35,7 +35,7 @@ _CONFIG_MAP_ADAPTER = TypeAdapter(
     config=ConfigDict(strict=False),
 )
 
-_CUSTOM_STREAM_ADAPTER = TypeAdapter(
+_CUSTOM_STREAM_ADAPTER: TypeAdapter[t.ContainerMapping] = TypeAdapter(
     t.ContainerMapping,
     config=ConfigDict(strict=False),
 )

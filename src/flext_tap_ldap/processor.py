@@ -39,7 +39,7 @@ def _to_ldif_entry(raw_value: t.ContainerMapping) -> m.Ldif.Entry | None:
         return None
 
 
-class Entry:
+class FlextTapLdapEntry:
     """Testing convenience wrapper for m.Ldif.Entry.
 
     This class maintains the existing interface while delegating
@@ -81,6 +81,8 @@ class Entry:
                 self.attributes[name].extend(value_list)
             case str() as value_str:
                 self.attributes[name].append(value_str)
+            case _:
+                self.attributes[name].extend(list(value))
 
     def get_attribute(self, name: str) -> Sequence[str]:
         """Get attribute values by name (case-insensitive)."""
@@ -155,6 +157,8 @@ class Entry:
                 self.attributes[name] = value_list.copy()
             case str() as value_str:
                 self.attributes[name] = [value_str]
+            case _:
+                self.attributes[name] = list(value)
 
     def _create_flext_entry(self) -> m.Ldif.Entry:
         """Create m.Entry from current data."""

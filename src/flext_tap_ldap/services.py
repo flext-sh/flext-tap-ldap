@@ -65,7 +65,9 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize the connection service."""
-            self._connections: MutableMapping[str, FlextTapLdapServices.LDAPConnection] = {}
+            self._connections: MutableMapping[
+                str, FlextTapLdapServices.LDAPConnection
+            ] = {}
 
         def create_connection(
             self,
@@ -238,7 +240,9 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize the execution service."""
-            self._executions: MutableMapping[str, FlextTapLdapModels.TapLdap.TapExecution] = {}
+            self._executions: MutableMapping[
+                str, FlextTapLdapModels.TapLdap.TapExecution
+            ] = {}
 
         def cancel_execution(
             self,
@@ -451,7 +455,9 @@ class FlextTapLdapServices:
                     return r[Sequence[t.ContainerMapping]].fail(
                         f"Failed to parse LDIF file: {result.error}",
                     )
-                entries: MutableSequence[FlextTapLdapModels.Ldif.Entry] = result.value or []
+                entries: MutableSequence[FlextTapLdapModels.Ldif.Entry] = (
+                    result.value or []
+                )
                 entry_count = len(entries)
                 logger.info(
                     "Successfully processed %s entries from %s",
@@ -499,7 +505,9 @@ class FlextTapLdapServices:
                     return r[t.ContainerMapping].fail(
                         f"Validation failed: {result.error}",
                     )
-                entries: MutableSequence[FlextTapLdapModels.Ldif.Entry] = result.value or []
+                entries: MutableSequence[FlextTapLdapModels.Ldif.Entry] = (
+                    result.value or []
+                )
                 total_entries = len(entries)
                 validation_data: t.ContainerMapping = {
                     "total_entries": total_entries,
