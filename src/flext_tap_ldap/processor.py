@@ -31,7 +31,7 @@ logger = FlextLogger(__name__)
 _LDIF_ENTRY_ADAPTER = TypeAdapter(m.Ldif.Entry)
 
 
-def _to_ldif_entry(raw_value: Mapping[str, t.NormalizedValue]) -> m.Ldif.Entry | None:
+def _to_ldif_entry(raw_value: t.ContainerMapping) -> m.Ldif.Entry | None:
     """Validate and coerce value to LDIF entry model."""
     try:
         return _LDIF_ENTRY_ADAPTER.validate_python(raw_value)
@@ -111,7 +111,7 @@ class Entry:
         ):
             return bool(self.dn and self.dn.strip())
 
-    def parse_dn(self) -> Mapping[str, t.NormalizedValue]:
+    def parse_dn(self) -> t.ContainerMapping:
         """Parse DN into components using flext-ldif DN parsing."""
         try:
             dn_obj = FlextLdifDistinguishedName(
@@ -134,9 +134,9 @@ class Entry:
         if name in self.attributes:
             self.attributes[name] = []
 
-    def to_dict(self) -> MutableMapping[str, t.NormalizedValue]:
+    def to_dict(self) -> t.MutableContainerMapping:
         """Convert entry to dictionary format."""
-        entry_dict: MutableMapping[str, t.NormalizedValue] = {
+        entry_dict: t.MutableContainerMapping = {
             "dn": self.dn,
             "attributes": dict(self.attributes),
         }
@@ -246,7 +246,7 @@ class FlextTapLdapProcessor:
         """Filter entries by t.NormalizedValue class."""
         return [entry for entry in self.entries if entry.has_object_class(object_class)]
 
-    def get_statistics(self) -> Mapping[str, t.NormalizedValue]:
+    def get_statistics(self) -> t.ContainerMapping:
         """Get parsing statistics."""
         return {
             "processed_entries": self.processed_entries,
@@ -343,13 +343,13 @@ class FlextTapLdapProcessor:
     def to_singer_format(
         self,
         _stream_name: str,
-    ) -> Sequence[Mapping[str, t.NormalizedValue]]:
+    ) -> Sequence[t.ContainerMapping]:
         """Convert LDIF entries to Singer record format."""
-        records: Sequence[Mapping[str, t.NormalizedValue]] = []
+        records: Sequence[t.ContainerMapping] = []
         for entry in self.entries:
-            record_attributes: Mapping[str, t.NormalizedValue] = {"dn": entry.dn}
+            record_attributes: t.ContainerMapping = {"dn": entry.dn}
             record_attributes.update(dict(entry.attributes))
-            record: Mapping[str, t.NormalizedValue] = {
+            record: t.ContainerMapping = {
                 "type": "RECORD",
                 "stream": _stream_name,
                 "record": record_attributes,
@@ -448,7 +448,7 @@ class Validator:
         self.warnings: Sequence[str] = []
         self._api = FlextLdif()
 
-    def get_validation_results(self) -> Mapping[str, t.NormalizedValue]:
+    def get_validation_results(self) -> t.ContainerMapping:
         """Get validation results."""
         return {
             "errors": self.validation_errors.copy(),
@@ -456,9 +456,7 @@ class Validator:
             "is_valid": not self.validation_errors,
         }
 
-    def validate_entries(
-        self, entries: Sequence[Entry]
-    ) -> Mapping[str, t.NormalizedValue]:
+    def validate_entries(self, entries: Sequence[Entry]) -> t.ContainerMapping:
         """Validate a list of LDIF entries using flext-ldif."""
         valid_count = 0
         invalid_count = 0
@@ -511,7 +509,7 @@ class Transformer:
     @override
     def __init__(
         self,
-        transformation_rules: Mapping[str, t.NormalizedValue] | None = None,
+        transformation_rules: t.ContainerMapping | None = None,
     ) -> None:
         """Initialize transformer with optional transformation rules."""
         self.transformation_rules = dict(transformation_rules or {})
@@ -535,7 +533,7 @@ class Transformer:
     def apply_schema_mappings(
         self,
         entry: Entry,
-        schema_mappings: Mapping[str, t.NormalizedValue],
+        schema_mappings: t.ContainerMapping,
     ) -> Entry:
         """Apply schema mappings to normalize output attributes."""
         transformed_entry = Entry(
@@ -551,7 +549,7 @@ class Transformer:
             if isinstance(mapping, str):
                 source_attr = mapping
             else:
-                mapping_dict: Mapping[str, t.NormalizedValue] = (
+                mapping_dict: t.ContainerMapping = (
                     dict(mapping) if isinstance(mapping, Mapping) else {}
                 )
                 source_raw: t.NormalizedValue = mapping_dict.get("source")
@@ -583,14 +581,14 @@ class Transformer:
             "schema_mappings"
         )
         if isinstance(raw_schema_mappings, dict):
-            schema_map: Mapping[str, t.NormalizedValue] = raw_schema_mappings
+            schema_map: t.ContainerMapping = raw_schema_mappings
             transformed = self.apply_schema_mappings(transformed, schema_map)
         raw_mappings: t.NormalizedValue = self.transformation_rules.get(
             "attribute_mappings"
         )
         mappings: Mapping[str, str] = {}
         if isinstance(raw_mappings, dict):
-            attr_map: Mapping[str, t.NormalizedValue] = raw_mappings
+            attr_map: t.ContainerMapping = raw_mappings
             mappings.update({
                 k: str(v) for k, v in attr_map.items() if isinstance(v, str)
             })
@@ -600,11 +598,11 @@ class Transformer:
             "attribute_value_mappings",
         )
         if isinstance(raw_value_mappings, dict):
-            vm_dict: Mapping[str, t.NormalizedValue] = raw_value_mappings
+            vm_dict: t.ContainerMapping = raw_value_mappings
             for vm_key, vm_val in vm_dict.items():
                 if not isinstance(vm_val, dict):
                     continue
-                val_map: Mapping[str, t.NormalizedValue] = vm_val
+                val_map: t.ContainerMapping = vm_val
                 existing_values = transformed.attributes.get(vm_key)
                 if existing_values is None:
                     continue
@@ -617,14 +615,14 @@ class Transformer:
             "remove_attributes",
         )
         if isinstance(raw_remove_attributes, list):
-            remove_list: Sequence[t.NormalizedValue] = raw_remove_attributes
+            remove_list: t.ContainerList = raw_remove_attributes
             for rm_item in remove_list:
                 transformed.attributes.pop(str(rm_item), None)
         raw_add_attributes: t.NormalizedValue = self.transformation_rules.get(
             "add_attributes"
         )
         if isinstance(raw_add_attributes, dict):
-            add_dict: Mapping[str, t.NormalizedValue] = raw_add_attributes
+            add_dict: t.ContainerMapping = raw_add_attributes
             for add_key, add_val in add_dict.items():
                 if isinstance(add_val, list):
                     transformed.add_attribute(

@@ -417,7 +417,7 @@ class TestCustomStream:
 
     def test_custom_stream_schema_properties(self, mock_tap: Mock) -> None:
         """Test custom stream schema properties."""
-        custom_properties: Mapping[str, t.NormalizedValue] = {
+        custom_properties: t.ContainerMapping = {
             "employeeNumber": {"type": "string"},
             "department": {"type": "string"},
             "manager": {"type": "string"},
@@ -463,7 +463,7 @@ class TestCustomStream:
 
     def test_custom_stream_schema_type_mappings(self, mock_tap: Mock) -> None:
         """Test custom stream schema type mappings."""
-        custom_properties: Mapping[str, t.NormalizedValue] = {
+        custom_properties: t.ContainerMapping = {
             "stringField": {"type": "string"},
             "arrayField": {"type": "array"},
             "booleanField": {"type": "boolean"},
@@ -491,7 +491,7 @@ class TestStreamIntegration:
     """Integration tests for stream functionality."""
 
     @pytest.fixture
-    def tap_config(self) -> Mapping[str, t.NormalizedValue]:
+    def tap_config(self) -> t.ContainerMapping:
         """Standard tap configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -504,9 +504,7 @@ class TestStreamIntegration:
             "page_size": 1000,
         }
 
-    def test_all_default_streams_creation(
-        self, tap_config: Mapping[str, t.NormalizedValue]
-    ) -> None:
+    def test_all_default_streams_creation(self, tap_config: t.ContainerMapping) -> None:
         """Test that all default streams can be created."""
         connection_config: Mapping[str, t.Scalar] = {}
         for key, value in tap_config.items():
@@ -521,7 +519,7 @@ class TestStreamIntegration:
         assert "schema" in stream_names
 
     def test_streams_with_custom_configuration(
-        self, tap_config: Mapping[str, t.NormalizedValue]
+        self, tap_config: t.ContainerMapping
     ) -> None:
         """Test streams with custom configuration."""
         tap_config["custom_streams"] = [
@@ -542,7 +540,7 @@ class TestStreamIntegration:
         assert stream_count >= 4
         assert "users" in stream_names
 
-    def test_self(self, tap_config: Mapping[str, t.NormalizedValue]) -> None:
+    def test_self(self, tap_config: t.ContainerMapping) -> None:
         """Test method."""
         "Test LDIF streams are included when enabled."
         tap_config["enable_ldif_streams"] = True

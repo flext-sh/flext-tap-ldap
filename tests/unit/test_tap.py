@@ -131,7 +131,7 @@ class TestFlextTapLdapTapUnit:
         tap = FlextTapLdapTap()
         users_stream = FlextTapLdapStreams.UsersStream(tap)
         raw_records = list(users_stream.get_records(None))
-        records: Sequence[Mapping[str, t.NormalizedValue]] = [
+        records: Sequence[t.ContainerMapping] = [
             item for item in raw_records if isinstance(item, dict)
         ]
         if len(records) != 1:

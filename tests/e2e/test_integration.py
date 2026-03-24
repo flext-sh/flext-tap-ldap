@@ -45,7 +45,7 @@ class TestFlextTapLdapIntegration:
         return CliRunner()
 
     @pytest.fixture
-    def mock_ldap_config(self) -> Mapping[str, t.NormalizedValue]:
+    def mock_ldap_config(self) -> t.ContainerMapping:
         """Mock LDAP configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -56,7 +56,7 @@ class TestFlextTapLdapIntegration:
         }
 
     @pytest.fixture
-    def sample_catalog(self) -> Mapping[str, t.NormalizedValue]:
+    def sample_catalog(self) -> t.ContainerMapping:
         """Sample catalog for testing."""
         return {
             "streams": [
@@ -69,14 +69,12 @@ class TestFlextTapLdapIntegration:
         }
 
     @pytest.fixture
-    def sample_state(self) -> Mapping[str, t.NormalizedValue]:
+    def sample_state(self) -> t.ContainerMapping:
         """Sample state for testing."""
         return {"bookmarks": {}}
 
     @pytest.fixture
-    def config_file(
-        self, tmp_path: Path, mock_ldap_config: Mapping[str, t.NormalizedValue]
-    ) -> Path:
+    def config_file(self, tmp_path: Path, mock_ldap_config: t.ContainerMapping) -> Path:
         """Create temporary config file."""
         config_path = tmp_path / "config.json"
         with Path(config_path).open("w", encoding="utf-8") as f:
@@ -84,9 +82,7 @@ class TestFlextTapLdapIntegration:
         return config_path
 
     @pytest.fixture
-    def catalog_file(
-        self, tmp_path: Path, sample_catalog: Mapping[str, t.NormalizedValue]
-    ) -> Path:
+    def catalog_file(self, tmp_path: Path, sample_catalog: t.ContainerMapping) -> Path:
         """Create temporary catalog file."""
         catalog_path = tmp_path / "catalog.json"
         with Path(catalog_path).open("w", encoding="utf-8") as f:
@@ -94,9 +90,7 @@ class TestFlextTapLdapIntegration:
         return catalog_path
 
     @pytest.fixture
-    def state_file(
-        self, tmp_path: Path, sample_state: Mapping[str, t.NormalizedValue]
-    ) -> Path:
+    def state_file(self, tmp_path: Path, sample_state: t.ContainerMapping) -> Path:
         """Create a state file fixture for testing."""
         state_path = tmp_path / "state.json"
         with Path(state_path).open("w", encoding="utf-8") as f:
@@ -124,12 +118,10 @@ class TestFlextTapLdapIntegration:
         if "streams" not in catalog:
             catalog_error: str = f"Expected {'streams'} in {catalog}"
             raise AssertionError(catalog_error)
-        streams: Sequence[Mapping[str, t.NormalizedValue]] = cast(
-            "Sequence[Mapping[str, t.NormalizedValue]]", catalog["streams"]
+        streams: Sequence[t.ContainerMapping] = cast(
+            "Sequence[t.ContainerMapping]", catalog["streams"]
         )
-        stream_names: Sequence[t.NormalizedValue] = [
-            s["tap_stream_id"] for s in streams
-        ]
+        stream_names: t.ContainerList = [s["tap_stream_id"] for s in streams]
         if "users" not in stream_names:
             stream_error: str = f"Expected {'users'} in {stream_names}"
             raise AssertionError(stream_error)
@@ -164,7 +156,7 @@ class TestFlextTapLdapIntegration:
             exit_error: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(exit_error)
         lines = result.output.strip().split("\n")
-        messages: Sequence[Mapping[str, t.NormalizedValue]] = []
+        messages: Sequence[t.ContainerMapping] = []
         for line in lines:
             if not line:
                 continue
@@ -257,10 +249,10 @@ class TestFlextTapLdapIntegration:
             raise AssertionError(exit_error)
         catalog = _extract_json_from_output(result.output)
         assert isinstance(catalog, dict)
-        cat_streams: Sequence[Mapping[str, t.NormalizedValue]] = cast(
-            "Sequence[Mapping[str, t.NormalizedValue]]", catalog["streams"]
+        cat_streams: Sequence[t.ContainerMapping] = cast(
+            "Sequence[t.ContainerMapping]", catalog["streams"]
         )
-        stream_names: Sequence[t.NormalizedValue] = [
+        stream_names: t.ContainerList = [
             s.get("tap_stream_id", s.get("stream")) for s in cat_streams
         ]
         if "service_accounts" not in stream_names:

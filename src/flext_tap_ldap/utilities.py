@@ -128,39 +128,39 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             @staticmethod
             def validate_ldap_config(
-                config: Mapping[str, t.NormalizedValue],
-            ) -> r[Mapping[str, t.NormalizedValue]]:
+                config: t.ContainerMapping,
+            ) -> r[t.ContainerMapping]:
                 """Validate LDAP configuration."""
                 if not isinstance(config, Mapping):
-                    return r[Mapping[str, t.NormalizedValue]].fail(
+                    return r[t.ContainerMapping].fail(
                         "LDAP config must be a mapping",
                     )
-                config_map: Mapping[str, t.NormalizedValue] = {
+                config_map: t.ContainerMapping = {
                     str(key): value for key, value in config.items()
                 }
                 required_fields = ["host", "base_dn"]
                 for field in required_fields:
                     if field not in config_map:
-                        return r[Mapping[str, t.NormalizedValue]].fail(
+                        return r[t.ContainerMapping].fail(
                             f"Missing required LDAP field: {field}",
                         )
                     if not str(config_map[field]).strip():
-                        return r[Mapping[str, t.NormalizedValue]].fail(
+                        return r[t.ContainerMapping].fail(
                             f"Empty LDAP field: {field}",
                         )
                 if "port" in config_map:
                     try:
                         port = int(str(config_map["port"]))
                     except ValueError:
-                        return r[Mapping[str, t.NormalizedValue]].fail(
+                        return r[t.ContainerMapping].fail(
                             "LDAP port must be numeric",
                         )
                     if port <= 0 or port > c.TapLdap.Ldap.MAX_PORT:
-                        return r[Mapping[str, t.NormalizedValue]].fail(
+                        return r[t.ContainerMapping].fail(
                             f"LDAP port must be between 1 and {c.TapLdap.Ldap.MAX_PORT}",
                         )
                     config_map["port"] = port
-                return r[Mapping[str, t.NormalizedValue]].ok(config_map)
+                return r[t.ContainerMapping].ok(config_map)
 
         class PerformanceOptimization:
             """LDAP tap performance optimization utilities."""

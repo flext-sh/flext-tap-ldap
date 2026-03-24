@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import Annotated, Self
 from uuid import uuid4
@@ -82,9 +82,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             @model_validator(mode="before")
             @classmethod
-            def set_aggregate_id(
-                cls, data: Mapping[str, t.NormalizedValue]
-            ) -> Mapping[str, t.NormalizedValue]:
+            def set_aggregate_id(cls, data: t.ContainerMapping) -> t.ContainerMapping:
                 """Set aggregate_id from stream_name if not provided."""
                 if (
                     isinstance(data, dict)
@@ -111,9 +109,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             @model_validator(mode="before")
             @classmethod
-            def set_aggregate_id(
-                cls, data: Mapping[str, t.NormalizedValue]
-            ) -> Mapping[str, t.NormalizedValue]:
+            def set_aggregate_id(cls, data: t.ContainerMapping) -> t.ContainerMapping:
                 """Set aggregate_id from stream_name if not provided."""
                 if (
                     isinstance(data, dict)
@@ -131,15 +127,9 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             connection_id: str
             command: str
             tap_status: str = "created"
-            config: Annotated[
-                Mapping[str, t.NormalizedValue], Field(default_factory=dict)
-            ]
-            catalog: Annotated[
-                Mapping[str, t.NormalizedValue], Field(default_factory=dict)
-            ]
-            state: Annotated[
-                Mapping[str, t.NormalizedValue], Field(default_factory=dict)
-            ]
+            config: Annotated[t.ContainerMapping, Field(default_factory=dict)]
+            catalog: Annotated[t.ContainerMapping, Field(default_factory=dict)]
+            state: Annotated[t.ContainerMapping, Field(default_factory=dict)]
             started_at: datetime | None = None
             completed_at: datetime | None = None
             records_extracted: int = 0
@@ -197,9 +187,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             @model_validator(mode="before")
             @classmethod
-            def set_aggregate_id(
-                cls, data: Mapping[str, t.NormalizedValue]
-            ) -> Mapping[str, t.NormalizedValue]:
+            def set_aggregate_id(cls, data: t.ContainerMapping) -> t.ContainerMapping:
                 """Set aggregate_id from server_uri if not provided."""
                 if (
                     isinstance(data, dict)
@@ -234,7 +222,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             name: str
             search_filter: str
             schema_properties: Annotated[
-                Mapping[str, t.NormalizedValue],
+                t.ContainerMapping,
                 Field(default_factory=dict),
             ]
             primary_keys: Annotated[
@@ -329,11 +317,11 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             replication_method: str = "FULL_TABLE"
             replication_key: str | None = None
             stream_schema: Annotated[
-                Mapping[str, t.NormalizedValue],
+                t.ContainerMapping,
                 Field(default_factory=dict),
             ]
 
-            def update_schema(self, schema: Mapping[str, t.NormalizedValue]) -> None:
+            def update_schema(self, schema: t.ContainerMapping) -> None:
                 """Update stream schema from mapping."""
                 self.stream_schema = dict(schema)
 

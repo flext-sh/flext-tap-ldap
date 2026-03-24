@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import contextlib
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from typing import cast
 from unittest.mock import Mock, patch
 
@@ -60,7 +60,7 @@ class TestLDAPClientQuick:
         """Test entry conversion with different scenarios."""
         # Test with a Mapping (dict) entry
         mail_values: Sequence[str] = ["test@example.com"]
-        dict_entry: Mapping[str, t.NormalizedValue] = {
+        dict_entry: t.ContainerMapping = {
             "dn": "uid=dict,dc=example,dc=com",
             "attributes": {"mail": mail_values},
         }
@@ -70,7 +70,7 @@ class TestLDAPClientQuick:
         result = client._convert_entry_to_dict(None)
         assert result == {}
         # Test with a dict that has string values
-        simple_entry: Mapping[str, t.NormalizedValue] = {
+        simple_entry: t.ContainerMapping = {
             "dn": "uid=test,dc=example,dc=com",
             "uid": "test",
             "cn": ["Test", "T. User"],
@@ -173,7 +173,7 @@ class TestLDAPClientQuick:
         uid_values: Sequence[str] = ["test"]
         oracle_password_values: Sequence[str] = ["hashed_password"]
         object_classes: Sequence[str] = ["inetOrgPerson"]
-        entry: Mapping[str, t.NormalizedValue] = {
+        entry: t.ContainerMapping = {
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": {
                 "uid": uid_values,
@@ -184,9 +184,7 @@ class TestLDAPClientQuick:
         result = client._process_oracle_entry(entry)
         attributes_raw = result.get("attributes")
         assert isinstance(attributes_raw, dict)
-        attributes: Mapping[str, t.NormalizedValue] = cast(
-            "Mapping[str, t.NormalizedValue]", attributes_raw
-        )
+        attributes: t.ContainerMapping = cast("t.ContainerMapping", attributes_raw)
         assert "userPassword" in attributes
         user_password: t.NormalizedValue = attributes.get("userPassword")
         assert isinstance(user_password, list)
@@ -195,33 +193,33 @@ class TestLDAPClientQuick:
 
         ou_values: Sequence[str] = ["test"]
         container_classes: Sequence[str] = ["orclContainer"]
-        entry_with_container: Mapping[str, t.NormalizedValue] = {
+        entry_with_container: t.ContainerMapping = {
             "dn": "ou=test,dc=oracle,dc=com",
             "attributes": {"ou": ou_values, "objectClass": container_classes},
         }
         result = client._process_oracle_entry(entry_with_container)
         attrs_raw2 = result.get("attributes")
         assert isinstance(attrs_raw2, dict)
-        attributes = cast("Mapping[str, t.NormalizedValue]", attrs_raw2)
+        attributes = cast("t.ContainerMapping", attrs_raw2)
         object_class: t.NormalizedValue = attributes.get("objectClass")
         assert isinstance(object_class, list)
         assert isinstance(object_class, list)
         assert "organizationalUnit" in object_class
 
-        entry_string_oc: Mapping[str, t.NormalizedValue] = {
+        entry_string_oc: t.ContainerMapping = {
             "dn": "ou=test,dc=oracle,dc=com",
             "attributes": {"objectClass": "orclContainer"},
         }
         result = client._process_oracle_entry(entry_string_oc)
         attrs_raw3 = result.get("attributes")
         assert isinstance(attrs_raw3, dict)
-        attributes = cast("Mapping[str, t.NormalizedValue]", attrs_raw3)
+        attributes = cast("t.ContainerMapping", attrs_raw3)
         obj_classes: t.NormalizedValue = attributes.get("objectClass")
         assert isinstance(obj_classes, list)
         assert isinstance(obj_classes, list)
         assert "organizationalUnit" in obj_classes
 
-        entry_bad_attrs: Mapping[str, t.NormalizedValue] = {
+        entry_bad_attrs: t.ContainerMapping = {
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": "not_a_dict",
         }
@@ -257,7 +255,7 @@ class TestLDAPClientQuick:
         """Test Oracle search result processing."""
         first_passwords: Sequence[str] = ["pass1"]
         second_uids: Sequence[str] = ["test2"]
-        search_results: Sequence[Mapping[str, t.NormalizedValue]] = [
+        search_results: Sequence[t.ContainerMapping] = [
             {
                 "dn": "uid=test1,dc=oracle,dc=com",
                 "attributes": {"orclPassword": first_passwords},

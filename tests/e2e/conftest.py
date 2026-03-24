@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import json
-from collections.abc import Generator, Iterator, Mapping
+from collections.abc import Generator, Iterator
 from pathlib import Path
 
 import pytest
@@ -30,7 +30,7 @@ def project_root() -> Path:
 
 
 @pytest.fixture(scope="session")
-def sample_catalog() -> Mapping[str, t.NormalizedValue]:
+def sample_catalog() -> t.ContainerMapping:
     """Create a sample Singer catalog for testing."""
     return {
         "streams": [
@@ -112,9 +112,7 @@ def tap_config_file(tmp_path: Path, _ldap_container: None) -> Path:
 
 
 @pytest.fixture
-def catalog_file(
-    tmp_path: Path, sample_catalog: Mapping[str, t.NormalizedValue]
-) -> Path:
+def catalog_file(tmp_path: Path, sample_catalog: t.ContainerMapping) -> Path:
     """Create catalog file for testing."""
     catalog_file = tmp_path / "catalog.json"
     catalog_file.write_text(json.dumps(sample_catalog, indent=2))

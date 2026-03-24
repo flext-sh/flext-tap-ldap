@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
-from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
+from collections.abc import Mapping, MutableSequence, Sequence
 
 from flext_core import FlextLogger, r, t
 from flext_ldap import (
@@ -81,7 +81,7 @@ class FlextTapLdapClient:
             )
             self._initialize_flext_api(client_config)
 
-        def __getattr__(self, name: str) -> Mapping[str, t.NormalizedValue]:
+        def __getattr__(self, name: str) -> t.ContainerMapping:
             """Delegate unknown attributes to the real API."""
             return getattr(self._flext_api, name)
 
@@ -111,7 +111,7 @@ class FlextTapLdapClient:
             attributes: Sequence[str] | None = None,
             scope: str = "SUBTREE",
             size_limit: int = 0,
-        ) -> Sequence[Mapping[str, t.NormalizedValue]]:
+        ) -> Sequence[t.ContainerMapping]:
             """Search for entries using flext-ldap infrastructure (synchronous).
 
             Returns a list of entries for testing convenience with Singer streams.
@@ -134,7 +134,7 @@ class FlextTapLdapClient:
             attributes: Sequence[str] | None = None,
             *,
             oracle_oid_mode: bool = False,
-        ) -> Sequence[Mapping[str, t.NormalizedValue]]:
+        ) -> Sequence[t.ContainerMapping]:
             """Search with Oracle OID support for testing convenience.
 
             Refactored using Single Responsibility Principle to reduce complexity.
@@ -222,8 +222,8 @@ class FlextTapLdapClient:
 
         def _convert_entry_to_dict(
             self,
-            entry_data: t.RuntimeData | Mapping[str, t.NormalizedValue] | None,
-        ) -> MutableMapping[str, t.NormalizedValue]:
+            entry_data: t.RuntimeData | t.ContainerMapping | None,
+        ) -> t.MutableContainerMapping:
             """Convert FlextLdapModels.Entry to dict format for testing.
 
             Single Responsibility: Handle only entry format conversion.
@@ -232,18 +232,16 @@ class FlextTapLdapClient:
                 return {}
             if isinstance(entry_data, BaseModel):
                 dn_value: str = str(getattr(entry_data, "dn", ""))
-                model_data: MutableMapping[str, t.NormalizedValue] = dict(
-                    entry_data.model_dump()
-                )
+                model_data: t.MutableContainerMapping = dict(entry_data.model_dump())
                 attrs_val: t.NormalizedValue = model_data.get("attributes", {})
-                attrs_dict: MutableMapping[str, t.NormalizedValue]
+                attrs_dict: t.MutableContainerMapping
                 if isinstance(attrs_val, dict):
                     attrs_dict = attrs_val
                 else:
                     return {"dn": dn_value}
-                entry_dict: MutableMapping[str, t.NormalizedValue] = {"dn": dn_value}
+                entry_dict: t.MutableContainerMapping = {"dn": dn_value}
                 for key_str, val in attrs_dict.items():
-                    typed_list: MutableSequence[t.NormalizedValue] = (
+                    typed_list: t.MutableContainerList = (
                         val if isinstance(val, list) else []
                     )
                     if isinstance(val, list) and len(typed_list) == 1:
@@ -252,7 +250,7 @@ class FlextTapLdapClient:
                         entry_dict[key_str] = val
                 return entry_dict
             if isinstance(entry_data, Mapping):
-                result: MutableMapping[str, t.NormalizedValue] = {}
+                result: t.MutableContainerMapping = {}
                 for key, value in entry_data.items():
                     if isinstance(
                         value,
@@ -313,7 +311,7 @@ class FlextTapLdapClient:
             attributes: Sequence[str] | None,
             *,
             oracle_oid_mode: bool,
-        ) -> Sequence[Mapping[str, t.NormalizedValue]]:
+        ) -> Sequence[t.ContainerMapping]:
             """Execute Oracle search in new event loop.
 
             Single Responsibility: Handle only event loop management for Oracle search.
@@ -321,7 +319,7 @@ class FlextTapLdapClient:
             loop = new_event_loop()
             set_event_loop(loop)
             try:
-                search_result: Sequence[Mapping[str, t.NormalizedValue]] = self.search(
+                search_result: Sequence[t.ContainerMapping] = self.search(
                     base_dn,
                     search_filter,
                     attributes,
@@ -397,7 +395,7 @@ class FlextTapLdapClient:
             attributes: Sequence[str] | None,
             ldap_scope: str,
             size_limit: int,
-        ) -> MutableSequence[MutableMapping[str, t.NormalizedValue]]:
+        ) -> MutableSequence[t.MutableContainerMapping]:
             """Perform actual LDAP search.
 
             Single Responsibility: Handle only search execution.
@@ -429,11 +427,11 @@ class FlextTapLdapClient:
 
         def _process_oracle_entry(
             self,
-            entry: MutableMapping[str, t.NormalizedValue],
-        ) -> MutableMapping[str, t.NormalizedValue]:
+            entry: t.MutableContainerMapping,
+        ) -> t.MutableContainerMapping:
             """Process Oracle-specific LDAP entries for testing convenience."""
             raw_attrs: t.NormalizedValue = entry.get("attributes", {})
-            attributes: MutableMapping[str, t.NormalizedValue] = {}
+            attributes: t.MutableContainerMapping = {}
             if isinstance(raw_attrs, dict):
                 attributes.update(raw_attrs)
             else:
@@ -462,12 +460,12 @@ class FlextTapLdapClient:
             self,
             result: r[m.Ldap.SearchResult],
             size_limit: int,
-        ) -> MutableSequence[MutableMapping[str, t.NormalizedValue]]:
+        ) -> MutableSequence[t.MutableContainerMapping]:
             """Process LDAP search results with size limiting.
 
             Single Responsibility: Handle only result processing logic.
             """
-            entries: MutableSequence[MutableMapping[str, t.NormalizedValue]] = []
+            entries: MutableSequence[t.MutableContainerMapping] = []
             if not (result.is_success and result.value):
                 return entries
             search_result = result.value
@@ -481,19 +479,18 @@ class FlextTapLdapClient:
 
         def _process_search_results_with_oracle_support(
             self,
-            search_result: Sequence[m.Ldif.Entry]
-            | Sequence[Mapping[str, t.NormalizedValue]],
+            search_result: Sequence[m.Ldif.Entry] | Sequence[t.ContainerMapping],
             *,
             oracle_oid_mode: bool,
-        ) -> MutableSequence[MutableMapping[str, t.NormalizedValue]]:
+        ) -> MutableSequence[t.MutableContainerMapping]:
             """Process search results with Oracle OID support.
 
             Single Responsibility: Handle only result processing logic.
             """
-            results: MutableSequence[MutableMapping[str, t.NormalizedValue]] = []
+            results: MutableSequence[t.MutableContainerMapping] = []
             for entry in search_result:
                 if isinstance(entry, Mapping):
-                    entry_dict: MutableMapping[str, t.NormalizedValue] = {
+                    entry_dict: t.MutableContainerMapping = {
                         str(key): value for key, value in entry.items()
                     }
                 else:
