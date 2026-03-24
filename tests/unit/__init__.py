@@ -39,49 +39,25 @@ if TYPE_CHECKING:
     from tests.unit.test_tap import TestFlextTapLdapTapUnit
 
 _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
-    "TestConnectionTestedEvent": [
-        "tests.unit.test_models",
-        "TestConnectionTestedEvent",
-    ],
+    "TestConnectionTestedEvent": ["tests.unit.test_models", "TestConnectionTestedEvent"],
     "TestCustomStream": ["tests.unit.test_streams", "TestCustomStream"],
     "TestCustomStreamParams": ["tests.unit.test_streams", "TestCustomStreamParams"],
     "TestFlextTapLdapTapUnit": ["tests.unit.test_tap", "TestFlextTapLdapTapUnit"],
     "TestGroupsStream": ["tests.unit.test_streams", "TestGroupsStream"],
     "TestLDAPBaseStream": ["tests.unit.test_streams", "TestLDAPBaseStream"],
-    "TestLDAPBaseStreamDirectUsage": [
-        "tests.unit.test_streams",
-        "TestLDAPBaseStreamDirectUsage",
-    ],
-    "TestLDAPClientCoverageBoost": [
-        "tests.unit.test_client",
-        "TestLDAPClientCoverageBoost",
-    ],
+    "TestLDAPBaseStreamDirectUsage": ["tests.unit.test_streams", "TestLDAPBaseStreamDirectUsage"],
+    "TestLDAPClientCoverageBoost": ["tests.unit.test_client", "TestLDAPClientCoverageBoost"],
     "TestLDAPClientQuick": ["tests.unit.test_client_quick", "TestLDAPClientQuick"],
     "TestLDIFStreamBasic": ["tests.unit.test_ldif_stream", "TestLDIFStreamBasic"],
     "TestLdifProcessor": ["tests.unit.test_ldif_processor", "TestLdifProcessor"],
-    "TestOrganizationalUnitsStream": [
-        "tests.unit.test_streams",
-        "TestOrganizationalUnitsStream",
-    ],
+    "TestOrganizationalUnitsStream": ["tests.unit.test_streams", "TestOrganizationalUnitsStream"],
     "TestRecordExtractedEvent": ["tests.unit.test_models", "TestRecordExtractedEvent"],
     "TestSchemaStream": ["tests.unit.test_streams", "TestSchemaStream"],
-    "TestStreamDiscoveredEvent": [
-        "tests.unit.test_models",
-        "TestStreamDiscoveredEvent",
-    ],
-    "TestStreamExceptionHandling": [
-        "tests.unit.test_streams",
-        "TestStreamExceptionHandling",
-    ],
+    "TestStreamDiscoveredEvent": ["tests.unit.test_models", "TestStreamDiscoveredEvent"],
+    "TestStreamExceptionHandling": ["tests.unit.test_streams", "TestStreamExceptionHandling"],
     "TestStreamIntegration": ["tests.unit.test_streams", "TestStreamIntegration"],
-    "TestTapExecutionCompletedEvent": [
-        "tests.unit.test_models",
-        "TestTapExecutionCompletedEvent",
-    ],
-    "TestTapExecutionStartedEvent": [
-        "tests.unit.test_models",
-        "TestTapExecutionStartedEvent",
-    ],
+    "TestTapExecutionCompletedEvent": ["tests.unit.test_models", "TestTapExecutionCompletedEvent"],
+    "TestTapExecutionStartedEvent": ["tests.unit.test_models", "TestTapExecutionStartedEvent"],
     "TestUsersStream": ["tests.unit.test_streams", "TestUsersStream"],
 }
 
