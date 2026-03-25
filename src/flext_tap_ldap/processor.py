@@ -356,16 +356,14 @@ class FlextTapLdapProcessor:
         _stream_name: str,
     ) -> Sequence[t.ContainerMapping]:
         """Convert LDIF entries to Singer record format."""
-        records: MutableSequence[t.ContainerMapping] = []
-        for entry in self.entries:
-            record_attributes: t.MutableContainerMapping = {"dn": entry.dn}
-            record_attributes.update(dict(entry.attributes))
-            record: t.ContainerMapping = {
+        records: Sequence[t.ContainerMapping] = [
+            {
                 "type": "RECORD",
                 "stream": _stream_name,
-                "record": record_attributes,
+                "record": {"dn": entry.dn, **dict(entry.attributes)},
             }
-            records.append(record)
+            for entry in self.entries
+        ]
         return records
 
     def _convert_from_flext_entry(self, flext_entry: m.Ldif.Entry) -> FlextTapLdapEntry:
@@ -623,10 +621,9 @@ class FlextTapLdapTransformer:
                 existing_values = transformed.attributes.get(vm_key)
                 if existing_values is None:
                     continue
-                mapped_values: MutableSequence[str] = []
-                for value in existing_values:
-                    mapped: t.NormalizedValue = val_map.get(value, value)
-                    mapped_values.append(str(mapped))
+                mapped_values: Sequence[str] = [
+                    str(val_map.get(value, value)) for value in existing_values
+                ]
                 transformed.attributes[vm_key] = mapped_values
         raw_remove_attributes: t.NormalizedValue = self.transformation_rules.get(
             "remove_attributes",

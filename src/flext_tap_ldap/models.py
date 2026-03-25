@@ -43,10 +43,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
         class TapExecutionStartedEvent(FlextLdapModels.Event):
             """Event raised when tap execution starts."""
 
-            timestamp: Annotated[
-                datetime,
-                Field(default_factory=lambda: datetime.now(UTC)),
-            ]
+            timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
             tap_name: str = "tap-ldap"
             execution_id: str = ""
             config_hash: str | None = None
@@ -54,10 +51,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
         class TapExecutionCompletedEvent(FlextLdapModels.Event):
             """Event raised when tap execution completes."""
 
-            timestamp: Annotated[
-                datetime,
-                Field(default_factory=lambda: datetime.now(UTC)),
-            ]
+            timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
             tap_name: str = "tap-ldap"
             execution_id: str = ""
             records_processed: int = 0
@@ -76,7 +70,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 ),
             ]
             stream_name: str
-            stream_key_properties: Annotated[t.StrSequence, Field(default_factory=list)]
+            stream_key_properties: t.StrSequence = Field(default_factory=list)
             bookmark_key: str | None = None
 
             @model_validator(mode="before")
@@ -121,14 +115,14 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
         class TapExecution(FlextLdapModels.Entity):
             """Execution state and metrics for a tap run."""
 
-            id: Annotated[str, Field(default_factory=lambda: uuid4().hex)]
+            id: str = Field(default_factory=lambda: uuid4().hex)
             execution_id: str
             connection_id: str
             command: str
             tap_status: str = "created"
-            config: Annotated[t.ContainerMapping, Field(default_factory=dict)]
-            catalog: Annotated[t.ContainerMapping, Field(default_factory=dict)]
-            state: Annotated[t.ContainerMapping, Field(default_factory=dict)]
+            config: t.ContainerMapping = Field(default_factory=dict)
+            catalog: t.ContainerMapping = Field(default_factory=dict)
+            state: t.ContainerMapping = Field(default_factory=dict)
             started_at: datetime | None = None
             completed_at: datetime | None = None
             records_extracted: int = 0
@@ -220,14 +214,8 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             name: str
             search_filter: str
-            schema_properties: Annotated[
-                t.ContainerMapping,
-                Field(default_factory=dict),
-            ]
-            primary_keys: Annotated[
-                t.StrSequence,
-                Field(default_factory=lambda: ["dn"]),
-            ]
+            schema_properties: t.ContainerMapping = Field(default_factory=dict)
+            primary_keys: t.StrSequence = Field(default_factory=lambda: ["dn"])
             replication_key: str | None = None
 
             @model_validator(mode="after")
@@ -299,30 +287,24 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             password: str | None = None
             use_ssl: bool = False
             timeout: t.PositiveInt
-            id: Annotated[str, Field(default_factory=lambda: uuid4().hex)]
+            id: str = Field(default_factory=lambda: uuid4().hex)
             last_tested: datetime | None = None
             last_error: str | None = None
 
         class LdapStream(FlextLdapModels.Entity):
             """LDAP data stream with schema and replication configuration."""
 
-            id: Annotated[str, Field(default_factory=lambda: uuid4().hex)]
+            id: str = Field(default_factory=lambda: uuid4().hex)
             name: t.NonEmptyStr
             connection_id: t.NonEmptyStr
             stream_type: t.NonEmptyStr
             search_filter: t.NonEmptyStr
-            attributes: Annotated[t.StrSequence, Field(default_factory=list)]
+            attributes: t.StrSequence = Field(default_factory=list)
             tap_stream_id: t.NonEmptyStr
-            key_properties: Annotated[
-                t.StrSequence,
-                Field(default_factory=lambda: ["dn"]),
-            ]
+            key_properties: t.StrSequence = Field(default_factory=lambda: ["dn"])
             replication_method: str = "FULL_TABLE"
             replication_key: str | None = None
-            stream_schema: Annotated[
-                t.ContainerMapping,
-                Field(default_factory=dict),
-            ]
+            stream_schema: t.ContainerMapping = Field(default_factory=dict)
 
             def update_schema(self, schema: t.ContainerMapping) -> None:
                 """Update stream schema from mapping."""

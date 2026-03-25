@@ -471,16 +471,18 @@ class FlextTapLdapServices:
                     entry_count,
                     file_path,
                 )
-                normalized: MutableSequence[t.ContainerMapping] = []
-                for entry in entries:
-                    dn_value = entry.dn.value if entry.dn is not None else ""
-                    attributes_raw: t.ContainerMapping = (
-                        entry.attributes.attributes
-                        if entry.attributes is not None
-                        else {}
-                    )
-                    attrs = FlextTapLdapServices._as_map(attributes_raw) or {}
-                    normalized.append({"dn": dn_value, "attributes": attrs})
+                normalized: Sequence[t.ContainerMapping] = [
+                    {
+                        "dn": entry.dn.value if entry.dn is not None else "",
+                        "attributes": FlextTapLdapServices._as_map(
+                            entry.attributes.attributes
+                            if entry.attributes is not None
+                            else {}
+                        )
+                        or {},
+                    }
+                    for entry in entries
+                ]
                 return r[Sequence[t.ContainerMapping]].ok(normalized)
             except (
                 ValueError,
