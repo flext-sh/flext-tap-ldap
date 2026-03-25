@@ -281,7 +281,7 @@ def _build_cli_command() -> click.Command:
             if isinstance(raw_streams_val, Sequence):
                 for se_item in raw_streams_val:
                     if isinstance(se_item, Mapping):
-                        stream_entries.append(se_item)  # noqa: PERF401
+                        stream_entries.append(se_item)
             for stream_entry in stream_entries:
                 schema_msg = {
                     "type": "SCHEMA",

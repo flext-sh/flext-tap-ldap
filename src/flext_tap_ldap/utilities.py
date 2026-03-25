@@ -132,10 +132,6 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 config: t.ContainerMapping,
             ) -> r[t.ContainerMapping]:
                 """Validate LDAP configuration."""
-                if not isinstance(config, Mapping):
-                    return r[t.ContainerMapping].fail(
-                        "LDAP config must be a mapping",
-                    )
                 config_map: t.MutableContainerMapping = {
                     str(key): value for key, value in config.items()
                 }

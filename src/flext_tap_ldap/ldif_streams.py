@@ -33,7 +33,7 @@ def _as_object_list(
         if not isinstance(value, (dict, list)):
             return []
         result = _OBJECT_LIST_ADAPTER.validate_python(value)
-        return [dict(item) if isinstance(item, Mapping) else item for item in result]
+        return [dict(item) for item in result]
     except ValidationError:
         return []
 
@@ -174,7 +174,7 @@ class FlextTapLdapLdifStreams:
                 return [object_classes]
             object_values = _as_object_list(object_classes)
             if object_values:
-                return [str(value) for value in object_values if value is not None]
+                return [str(value) for value in object_values]
             return []
 
         def _process_ldap_directory(self) -> Iterator[t.ContainerMapping]:
@@ -200,8 +200,7 @@ class FlextTapLdapLdifStreams:
                 result = self._ldif_api.parse_ldif(content)
                 if result.is_success and result.value:
                     for entry in result.value:
-                        if isinstance(entry, m.Ldif.Entry):
-                            yield self._convert_entry_to_record(entry)
+                        yield self._convert_entry_to_record(entry)
                 else:
                     self.logger.error(
                         f"Failed to parse LDIF file {ldif_file}: {result.error}",
@@ -278,12 +277,12 @@ class FlextTapLdapLdifStreams:
                 entry_types: MutableMapping[str, int] = {}
                 object_classes: MutableMapping[str, int] = {}
                 if ldif_files:
-                    for ldif_file in ldif_files:
-                        match ldif_file:
-                            case str() as ldif_file_value:
-                                pass
-                            case _:
-                                continue
+                    for ldif_file_map in ldif_files:
+                        ldif_file_value = str(
+                            ldif_file_map.get("path", ldif_file_map.get("file", "")),
+                        )
+                        if not ldif_file_value:
+                            continue
                         stats = self._analyze_ldif_file(ldif_file_value)
                         total_count = stats.get("total_entries", 0)
                         match total_count:
@@ -367,8 +366,6 @@ class FlextTapLdapLdifStreams:
                     entry_types: MutableMapping[str, int] = {}
                     object_classes: MutableMapping[str, int] = {}
                     for entry in result.value:
-                        if not isinstance(entry, m.Ldif.Entry):
-                            continue
                         if entry.attributes is None:
                             continue
                         oc_list: t.StrSequence = entry.attributes.get_values(
