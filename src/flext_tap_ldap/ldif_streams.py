@@ -6,10 +6,12 @@ from collections.abc import Iterable, Iterator, Mapping, MutableMapping, Sequenc
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
-from flext_core import FlextLogger, p, t
+from flext_core import FlextLogger, p
 from flext_ldap import FlextLdapConnection, m
 from flext_ldif import FlextLdif
 from pydantic import ConfigDict, TypeAdapter, ValidationError
+
+from flext_tap_ldap import t
 
 if TYPE_CHECKING:
     from flext_meltano import FlextMeltanoAbstractions as Tap

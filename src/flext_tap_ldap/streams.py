@@ -13,12 +13,13 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping, Sequence
 from typing import TYPE_CHECKING, ClassVar, override
 
-from flext_core import FlextLogger, t
+from flext_core import FlextLogger
 from pydantic import ValidationError
 
 if TYPE_CHECKING:
     from flext_meltano import FlextMeltanoAbstractions as Tap
 
+from flext_tap_ldap import t
 from flext_tap_ldap.client import FlextTapLdapClient
 from flext_tap_ldap.constants import c
 from flext_tap_ldap.models import FlextTapLdapModels

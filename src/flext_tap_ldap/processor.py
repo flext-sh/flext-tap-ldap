@@ -15,10 +15,12 @@ from collections.abc import Iterator, Mapping, MutableMapping, MutableSequence, 
 from pathlib import Path
 from typing import ClassVar, override
 
-from flext_core import FlextLogger, r, t
+from flext_core import FlextLogger, r
 from flext_ldap import m
 from flext_ldif import FlextLdif, FlextLdifModels
 from pydantic import TypeAdapter, ValidationError
+
+from flext_tap_ldap import t
 
 _DEFAULT_ENTRY_METADATA = FlextLdifModels.Ldif.EntryMetadata()
 
