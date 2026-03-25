@@ -160,7 +160,7 @@ class TestFlextTapLdapIntegration:
             exit_error: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(exit_error)
         lines = result.output.strip().split("\n")
-        messages: Sequence[t.ContainerMapping] = []
+        messages: list[t.ContainerMapping] = []
         for line in lines:
             if not line:
                 continue

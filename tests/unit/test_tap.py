@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -30,10 +30,14 @@ def _discover_stream_names(
     tap: FlextTapLdapTap,
     connection_config: t.ContainerMapping,
 ) -> tuple[t.StrSequence, int]:
-    result = tap.discover_streams(source_config=_build_source_config(connection_config))
+    result = tap.discover_streams(_tap_instance=_build_source_config(connection_config))
     assert result.is_success
     assert result.value is not None
-    stream_entries = result.value["streams"]
+    raw_entries = result.value["streams"]
+    assert isinstance(raw_entries, Sequence)
+    stream_entries: Sequence[Mapping[str, t.NormalizedValue]] = [
+        entry for entry in raw_entries if isinstance(entry, Mapping)
+    ]
     stream_names = [str(stream["stream"]) for stream in stream_entries]
     return stream_names, len(stream_entries)
 
@@ -98,14 +102,18 @@ class TestFlextTapLdapTapUnit:
     def test_catalog_generation(self, config: t.ScalarMapping) -> None:
         """Test catalog generation and metadata."""
         tap = FlextTapLdapTap()
-        result = tap.discover_streams(source_config=_build_source_config(config))
+        result = tap.discover_streams(_tap_instance=_build_source_config(config))
         assert result.is_success
         assert result.value is not None
         catalog = result.value
         if "streams" not in catalog:
             catalog_error: str = f"Expected {'streams'} in {catalog}"
             raise AssertionError(catalog_error)
-        streams = catalog["streams"]
+        raw_streams = catalog["streams"]
+        assert isinstance(raw_streams, Sequence)
+        streams: Sequence[Mapping[str, t.NormalizedValue]] = [
+            entry for entry in raw_streams if isinstance(entry, Mapping)
+        ]
         if len(streams) < 4:
             count_error: str = f"Expected {len(streams)} >= {4}"
             raise AssertionError(count_error)

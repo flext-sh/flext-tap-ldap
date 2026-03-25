@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, MutableSequence, Sequence
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, override
 
 import click
 from flext_core import FlextLogger, r
@@ -110,9 +110,10 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         },
     }
 
+    @override
     def discover_streams(
         self,
-        source_config: m.Meltano.DataSourceConfig
+        _tap_instance: m.Meltano.DataSourceConfig
         | m.Meltano.TapConfig
         | m.Meltano.TapInstance,
     ) -> r[t.ContainerMapping]:
@@ -121,7 +122,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         Discovers standard LDAP streams (users, groups, organizational units, schema)
         and optionally LDIF processing streams and custom streams based on configuration.
         """
-        source_payload = source_config.model_dump(mode="python")
+        source_payload = _tap_instance.model_dump(mode="python")
         raw_connection_config = source_payload.get("connection_config", {})
         config_map: Mapping[str, t.ContainerMapping] | t.ConfigurationMapping
         try:
@@ -152,17 +153,19 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             ]
             streams.extend(ldif_stream_list)
 
+        empty_schema: Mapping[str, t.Scalar | None] = {}
         streams_list: MutableSequence[t.Meltano.Singer.CatalogEntry] = [
             {
                 "stream": str(stream.name),
                 "tap_stream_id": str(stream.name),
-                "schema": {},
+                "schema": empty_schema,
             }
             for stream in streams
         ]
         stream_catalog: t.Meltano.Singer.StreamCatalog = {"streams": streams_list}
         return r[t.ContainerMapping].ok(stream_catalog)
 
+    @override
     def execute(self) -> r[t.ContainerMapping]:
         """Execute the tap. Returns success after stream discovery."""
         return r[t.ContainerMapping].ok({"success": True})
@@ -236,7 +239,7 @@ def _build_cli_command() -> click.Command:
                 stream_config={},
                 source_version="latest",
             )
-            result = tap.discover_streams(source_config=source_config)
+            result = tap.discover_streams(_tap_instance=source_config)
             if result.is_success and result.value:
                 catalog = result.value
                 raw_streams = catalog.get("streams", [])
@@ -250,10 +253,11 @@ def _build_cli_command() -> click.Command:
                     for cs_item in raw_custom:
                         cs_dict = FlextTapLdapTap.validate_custom_stream(cs_item)
                         if cs_dict is not None:
+                            cs_schema: Mapping[str, t.Scalar | None] = {}
                             cs_entry: t.Meltano.Singer.CatalogEntry = {
                                 "stream": cs_dict["name"],
                                 "tap_stream_id": cs_dict["name"],
-                                "schema": {},
+                                "schema": cs_schema,
                             }
                             catalog_streams.append(cs_entry)
                 output_catalog: Mapping[str, t.NormalizedValue] = {
@@ -274,7 +278,7 @@ def _build_cli_command() -> click.Command:
             stream_config={},
             source_version="latest",
         )
-        result = tap.discover_streams(source_config=source_config)
+        result = tap.discover_streams(_tap_instance=source_config)
         if result.is_success and result.value:
             raw_streams_val = result.value.get("streams", [])
             stream_entries: list[Mapping[str, t.NormalizedValue]] = []

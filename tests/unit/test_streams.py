@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from unittest.mock import Mock, patch
 
 import pytest
@@ -38,10 +38,14 @@ def _discover_stream_names(
     tap: FlextTapLdapTap,
     connection_config: t.ScalarMapping,
 ) -> tuple[t.StrSequence, int]:
-    result = tap.discover_streams(source_config=_build_source_config(connection_config))
+    result = tap.discover_streams(_tap_instance=_build_source_config(connection_config))
     assert result.is_success
     assert result.value is not None
-    stream_entries = result.value["streams"]
+    raw_entries = result.value["streams"]
+    assert isinstance(raw_entries, Sequence)
+    stream_entries: Sequence[Mapping[str, t.NormalizedValue]] = [
+        entry for entry in raw_entries if isinstance(entry, Mapping)
+    ]
     return [str(stream["stream"]) for stream in stream_entries], len(stream_entries)
 
 
@@ -525,7 +529,7 @@ class TestStreamIntegration:
 
     def test_all_default_streams_creation(self, tap_config: t.ContainerMapping) -> None:
         """Test that all default streams can be created."""
-        connection_config: t.ScalarMapping = {}
+        connection_config: dict[str, t.Scalar] = {}
         for key, value in tap_config.items():
             if isinstance(value, (str, int, float, bool)):
                 connection_config[str(key)] = value
@@ -551,7 +555,7 @@ class TestStreamIntegration:
                 "schema": {"properties": {"testAttribute": {"type": "string"}}},
             },
         ]
-        connection_config: t.ScalarMapping = {}
+        connection_config: dict[str, t.Scalar] = {}
         for key, value in tap_config.items():
             if isinstance(value, (str, int, float, bool)):
                 connection_config[str(key)] = value
@@ -564,7 +568,7 @@ class TestStreamIntegration:
         """Test method."""
         "Test LDIF streams are included when enabled."
         tap_config["enable_ldif_streams"] = True
-        connection_config: t.ScalarMapping = {}
+        connection_config: dict[str, t.Scalar] = {}
         for key, value in tap_config.items():
             if isinstance(value, (str, int, float, bool)):
                 connection_config[str(key)] = value

@@ -523,7 +523,7 @@ class FlextTapLdapServices:
                     "total_entries": total_entries,
                     "valid_entries": total_entries,
                     "invalid_entries": 0,
-                    "errors": [],
+                    "errors": list[str](),
                 }
                 logger.info("LDIF file validation completed: %s", file_path)
                 return r[t.ContainerMapping].ok(validation_data)
