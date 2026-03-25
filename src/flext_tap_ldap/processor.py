@@ -355,7 +355,6 @@ class FlextTapLdapProcessor:
 
     def to_singer_format(
         self,
-<<<<<<< Updated upstream
         _stream_name: str,
     ) -> Sequence[t.ContainerMapping]:
         """Convert LDIF entries to Singer record format."""
@@ -377,18 +376,6 @@ class FlextTapLdapProcessor:
             for attr_name, attr_values in flext_entry.attributes.attributes.items():
                 attributes[attr_name] = [str(v) for v in attr_values]
         return FlextTapLdapEntry(dn=dn, attributes=attributes)
-=======
-        result: FlextResult[list[t.GeneralValueType]],
-    ) -> Iterator[Entry]:
-        """Yield testing convenience entries from parse result."""
-        if result.value:
-            for flext_entry in result.value:
-                parsed_entry = _to_ldif_entry(flext_entry)
-                if parsed_entry is None:
-                    continue
-                yield self._convert_from_flext_entry(parsed_entry)
-                self.processed_entries += 1
->>>>>>> Stashed changes
 
     def _handle_parsing_error(
         self,
@@ -407,43 +394,12 @@ class FlextTapLdapProcessor:
     def _parse_ldif_content(
         self,
         content: str,
-<<<<<<< Updated upstream
         file_path: Path,
     ) -> r[MutableSequence[m.Ldif.Entry]]:
         """Parse LDIF content using flext-ldif API."""
         result: r[MutableSequence[m.Ldif.Entry]] = self._api.parse_ldif(content)
         if not result.is_success:
             error_msg = f"Failed to parse LDIF file {file_path}: {result.error}"
-=======
-        source_name: str = "content",
-    ) -> Iterator[Entry]:
-        """Parse LDIF content using flext-ldif and yield testing convenience entries."""
-        logger.info("Parsing LDIF content with flext-ldif from %s", source_name)
-
-        try:
-            result: FlextResult[list[t.GeneralValueType]] = self._api.parse(content)
-            if not result.is_success:
-                error_msg = (
-                    f"Failed to parse LDIF content from {source_name}: {result.error}"
-                )
-                if self.ignore_errors:
-                    logger.error(error_msg)
-                    self.errors.append(error_msg)
-                    return
-                else:
-                    self._raise_parse_error(error_msg)
-
-            if result.value:
-                for flext_entry in result.value:
-                    parsed_entry = _to_ldif_entry(flext_entry)
-                    if parsed_entry is None:
-                        continue
-                    yield self._convert_from_flext_entry(parsed_entry)
-                    self.processed_entries += 1
-
-        except Exception as e:
-            error_msg = f"Failed to parse LDIF content from {source_name}: {e}"
->>>>>>> Stashed changes
             if self.ignore_errors:
                 logger.error(error_msg)
                 self.errors.append(error_msg)

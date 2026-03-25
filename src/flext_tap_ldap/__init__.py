@@ -17,7 +17,6 @@ from typing import TYPE_CHECKING
 
 from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 
-
 if TYPE_CHECKING:
     from flext_core import FlextTypes
     from flext_ldap import d, e, h, r, s, x
@@ -40,6 +39,13 @@ if TYPE_CHECKING:
     )
     from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
     from flext_tap_ldap.models import FlextTapLdapModels, FlextTapLdapModels as m
+    from flext_tap_ldap.processor import (
+        FlextLdifDistinguishedName,
+        FlextTapLdapEntry,
+        FlextTapLdapProcessor,
+        FlextTapLdapTransformer,
+        FlextTapLdapValidator,
+    )
     from flext_tap_ldap.protocols import (
         FlextTapLdapProtocols,
         FlextTapLdapProtocols as p,
@@ -56,17 +62,28 @@ if TYPE_CHECKING:
 
 _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "CLI_COMMAND": ["flext_tap_ldap.tap", "CLI_COMMAND"],
+    "FlextLdifDistinguishedName": [
+        "flext_tap_ldap.processor",
+        "FlextLdifDistinguishedName",
+    ],
     "FlextTapLdapClient": ["flext_tap_ldap.client", "FlextTapLdapClient"],
     "FlextTapLdapConstants": ["flext_tap_ldap.constants", "FlextTapLdapConstants"],
-    "FlextTapLdapLdifStreams": ["flext_tap_ldap.ldif_streams", "FlextTapLdapLdifStreams"],
+    "FlextTapLdapEntry": ["flext_tap_ldap.processor", "FlextTapLdapEntry"],
+    "FlextTapLdapLdifStreams": [
+        "flext_tap_ldap.ldif_streams",
+        "FlextTapLdapLdifStreams",
+    ],
     "FlextTapLdapModels": ["flext_tap_ldap.models", "FlextTapLdapModels"],
+    "FlextTapLdapProcessor": ["flext_tap_ldap.processor", "FlextTapLdapProcessor"],
     "FlextTapLdapProtocols": ["flext_tap_ldap.protocols", "FlextTapLdapProtocols"],
     "FlextTapLdapServices": ["flext_tap_ldap.services", "FlextTapLdapServices"],
     "FlextTapLdapSettings": ["flext_tap_ldap.settings", "FlextTapLdapSettings"],
     "FlextTapLdapStreams": ["flext_tap_ldap.streams", "FlextTapLdapStreams"],
     "FlextTapLdapTap": ["flext_tap_ldap.tap", "FlextTapLdapTap"],
+    "FlextTapLdapTransformer": ["flext_tap_ldap.processor", "FlextTapLdapTransformer"],
     "FlextTapLdapTypes": ["flext_tap_ldap.typings", "FlextTapLdapTypes"],
     "FlextTapLdapUtilities": ["flext_tap_ldap.utilities", "FlextTapLdapUtilities"],
+    "FlextTapLdapValidator": ["flext_tap_ldap.processor", "FlextTapLdapValidator"],
     "__all__": ["flext_tap_ldap.__version__", "__all__"],
     "__author__": ["flext_tap_ldap.__version__", "__author__"],
     "__author_email__": ["flext_tap_ldap.__version__", "__author_email__"],
@@ -93,17 +110,22 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
 
 __all__ = [
     "CLI_COMMAND",
+    "FlextLdifDistinguishedName",
     "FlextTapLdapClient",
     "FlextTapLdapConstants",
+    "FlextTapLdapEntry",
     "FlextTapLdapLdifStreams",
     "FlextTapLdapModels",
+    "FlextTapLdapProcessor",
     "FlextTapLdapProtocols",
     "FlextTapLdapServices",
     "FlextTapLdapSettings",
     "FlextTapLdapStreams",
     "FlextTapLdapTap",
+    "FlextTapLdapTransformer",
     "FlextTapLdapTypes",
     "FlextTapLdapUtilities",
+    "FlextTapLdapValidator",
     "__all__",
     "__author__",
     "__author_email__",
@@ -146,6 +168,7 @@ def __getattr__(name: str) -> FlextTypes.ModuleExport:
 
     Raises:
         AttributeError: If attribute not registered.
+
     """
     if name in _LAZY_CACHE:
         return _LAZY_CACHE[name]
@@ -160,6 +183,7 @@ def __dir__() -> Sequence[str]:
 
     Returns:
         List of public names from module exports.
+
     """
     return sorted(__all__)
 

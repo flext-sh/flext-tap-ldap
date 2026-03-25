@@ -10,9 +10,9 @@ from typing import TYPE_CHECKING
 
 from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 
-
 if TYPE_CHECKING:
     from flext_core import FlextTypes
+
     from tests.e2e.conftest import (
         catalog_file,
         ldap_connection,
@@ -25,7 +25,10 @@ if TYPE_CHECKING:
     from tests.e2e.test_integration import TestFlextTapLdapIntegration
 
 _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
-    "TestFlextTapLdapIntegration": ["tests.e2e.test_integration", "TestFlextTapLdapIntegration"],
+    "TestFlextTapLdapIntegration": [
+        "tests.e2e.test_integration",
+        "TestFlextTapLdapIntegration",
+    ],
     "catalog_file": ["tests.e2e.conftest", "catalog_file"],
     "ldap_connection": ["tests.e2e.conftest", "ldap_connection"],
     "ldap_container": ["tests.e2e.conftest", "ldap_container"],
@@ -64,6 +67,7 @@ def __getattr__(name: str) -> FlextTypes.ModuleExport:
 
     Raises:
         AttributeError: If attribute not registered.
+
     """
     if name in _LAZY_CACHE:
         return _LAZY_CACHE[name]
@@ -78,6 +82,7 @@ def __dir__() -> Sequence[str]:
 
     Returns:
         List of public names from module exports.
+
     """
     return sorted(__all__)
 
