@@ -279,9 +279,11 @@ def _build_cli_command() -> click.Command:
             raw_streams_val = result.value.get("streams", [])
             stream_entries: list[Mapping[str, t.NormalizedValue]] = []
             if isinstance(raw_streams_val, Sequence):
-                for se_item in raw_streams_val:
-                    if isinstance(se_item, Mapping):
-                        stream_entries.append(se_item)
+                stream_entries.extend(
+                    se_item
+                    for se_item in raw_streams_val
+                    if isinstance(se_item, Mapping)
+                )
             for stream_entry in stream_entries:
                 schema_msg = {
                     "type": "SCHEMA",
