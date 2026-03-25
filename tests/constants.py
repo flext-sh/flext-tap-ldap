@@ -10,8 +10,10 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsConstants
 
+from flext_tap_ldap import FlextTapLdapConstants
 
-class FlextTapLdapTestConstants(FlextTestsConstants):
+
+class FlextTapLdapTestConstants(FlextTestsConstants, FlextTapLdapConstants):
     """Test constants for flext-tap-ldap."""
 
 
