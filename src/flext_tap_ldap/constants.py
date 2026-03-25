@@ -103,7 +103,5 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             LDAP_INTEGRATION = "ldap-integration"
 
 
-ProjectType = FlextTapLdapConstants.TapLdap.ProjectType
-
 c = FlextTapLdapConstants
 __all__ = ["FlextTapLdapConstants", "c"]

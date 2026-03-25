@@ -335,7 +335,7 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
             LDAP tap domain owns LDAP data extraction-specific types.
             """
 
-            type ProjectType = c.ProjectType
+            type ProjectType = c.TapLdap.ProjectType
             type TapLdapProjectConfig = Mapping[str, FlextMeltanoTypes.ContainerValue]
             type LdapExtractionConfig = Mapping[
                 str,
