@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, MutableSequence
+from collections.abc import Mapping, MutableSequence, Sequence
 from pathlib import Path
 from typing import ClassVar
 
@@ -115,7 +115,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         source_config: m.Meltano.DataSourceConfig
         | m.Meltano.TapConfig
         | m.Meltano.TapInstance,
-    ) -> r[t.Meltano.Singer.StreamCatalog]:
+    ) -> r[t.ContainerMapping]:
         """Discover available streams.
 
         Discovers standard LDAP streams (users, groups, organizational units, schema)
@@ -123,13 +123,13 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         """
         source_payload = source_config.model_dump(mode="python")
         raw_connection_config = source_payload.get("connection_config", {})
-        config_map: Mapping[str, t.ContainerMapping]
+        config_map: Mapping[str, t.ContainerMapping] | t.ConfigurationMapping
         try:
             config_map = FlextTapLdapTap._config_map_adapter.validate_python(
                 raw_connection_config,
             )
         except ValidationError:
-            config_map: t.ConfigurationMapping = {}
+            config_map = {}
 
         ldap_streams: MutableSequence[FlextTapLdapStreams.LDAPBaseStream] = [
             FlextTapLdapStreams.UsersStream(self),
@@ -161,11 +161,11 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             for stream in streams
         ]
         stream_catalog: t.Meltano.Singer.StreamCatalog = {"streams": streams_list}
-        return r[t.Meltano.Singer.StreamCatalog].ok(stream_catalog)
+        return r[t.ContainerMapping].ok(stream_catalog)
 
-    def execute(self) -> r[bool]:
+    def execute(self) -> r[t.ContainerMapping]:
         """Execute the tap. Returns success after stream discovery."""
-        return r[bool].ok(True)
+        return r[t.ContainerMapping].ok({"success": True})
 
     @staticmethod
     def validate_custom_stream(raw_item: t.NormalizedValue) -> t.StrMapping | None:
@@ -239,9 +239,12 @@ def _build_cli_command() -> click.Command:
             result = tap.discover_streams(source_config=source_config)
             if result.is_success and result.value:
                 catalog = result.value
-                catalog_streams: MutableSequence[t.Meltano.Singer.CatalogEntry] = list(
-                    catalog.get("streams", []),
-                )
+                raw_streams = catalog.get("streams", [])
+                catalog_streams: MutableSequence[Mapping[str, t.NormalizedValue]] = []
+                if isinstance(raw_streams, Sequence):
+                    for rs_item in raw_streams:
+                        if isinstance(rs_item, Mapping):
+                            catalog_streams.append(rs_item)
                 raw_custom: t.NormalizedValue = raw_config.get("custom_streams")
                 if isinstance(raw_custom, list):
                     for cs_item in raw_custom:
@@ -253,7 +256,7 @@ def _build_cli_command() -> click.Command:
                                 "schema": {},
                             }
                             catalog_streams.append(cs_entry)
-                output_catalog: t.Meltano.Singer.StreamCatalog = {
+                output_catalog: Mapping[str, t.NormalizedValue] = {
                     "streams": catalog_streams,
                 }
                 click.echo(_SINGER_OUTPUT_ADAPTER.dump_json(output_catalog).decode())
@@ -273,7 +276,13 @@ def _build_cli_command() -> click.Command:
         )
         result = tap.discover_streams(source_config=source_config)
         if result.is_success and result.value:
-            for stream_entry in result.value.get("streams", []):
+            raw_streams_val = result.value.get("streams", [])
+            stream_entries: list[Mapping[str, t.NormalizedValue]] = []
+            if isinstance(raw_streams_val, Sequence):
+                for se_item in raw_streams_val:
+                    if isinstance(se_item, Mapping):
+                        stream_entries.append(se_item)  # noqa: PERF401
+            for stream_entry in stream_entries:
                 schema_msg = {
                     "type": "SCHEMA",
                     "stream": stream_entry["stream"],

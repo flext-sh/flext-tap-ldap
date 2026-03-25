@@ -623,7 +623,7 @@ class FlextTapLdapTransformer:
                 existing_values = transformed.attributes.get(vm_key)
                 if existing_values is None:
                     continue
-                mapped_values: Sequence[str] = [
+                mapped_values: MutableSequence[str] = [
                     str(val_map.get(value, value)) for value in existing_values
                 ]
                 transformed.attributes[vm_key] = mapped_values
