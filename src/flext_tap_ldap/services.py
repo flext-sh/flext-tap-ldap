@@ -16,7 +16,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from flext_core import FlextLogger, r
-from flext_ldif import FlextLdif
+from flext_ldif import ldif
 from pydantic import ValidationError
 
 from flext_tap_ldap import t
@@ -409,7 +409,7 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize LDIF processing service."""
-            self._ldif_api = FlextLdif()
+            self._ldif_api = ldif()
 
         def get_ldif_statistics(
             self,

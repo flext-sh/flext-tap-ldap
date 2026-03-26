@@ -16,13 +16,12 @@ from pathlib import Path
 from typing import ClassVar, override
 
 from flext_core import FlextLogger, r
-from flext_ldap import m
-from flext_ldif import FlextLdif, FlextLdifModels
+from flext_ldif import ldif
 from pydantic import TypeAdapter, ValidationError
 
-from flext_tap_ldap import t
+from flext_tap_ldap import m, t
 
-_DEFAULT_ENTRY_METADATA = FlextLdifModels.Ldif.EntryMetadata()
+_DEFAULT_ENTRY_METADATA = m.Ldif.EntryMetadata()
 
 
 class FlextLdifDistinguishedName(m.Ldif.DN):
@@ -100,7 +99,7 @@ class FlextTapLdapEntry:
     def is_valid(self) -> bool:
         """Check if the entry is valid using flext-ldif validation."""
         try:
-            api = FlextLdif()
+            api = ldif()
             result = api.validate_entries([self._flext_entry])
             return result.is_success and bool(
                 result.value and result.value.valid_entries > 0,
@@ -166,7 +165,7 @@ class FlextTapLdapEntry:
     def _create_flext_entry(self) -> m.Ldif.Entry:
         """Create m.Entry from current data."""
         try:
-            api = FlextLdif()
+            api = ldif()
             ldif_content = f"dn: {self.dn}\n"
             for attr_name, attr_values in self.attributes.items():
                 for value in attr_values:
@@ -237,7 +236,7 @@ class FlextTapLdapProcessor:
         self.skipped_entries = 0
         self.entries: MutableSequence[FlextTapLdapEntry] = []
         self.stats = {"total_entries": 0, "valid_entries": 0, "invalid_entries": 0}
-        self._api = FlextLdif()
+        self._api = ldif()
 
     def filter_by_attribute_exists(self, attr_name: str) -> Sequence[FlextTapLdapEntry]:
         """Filter entries that have a specific attribute."""
@@ -457,7 +456,7 @@ class FlextTapLdapValidator:
         """Initialize validator with in-memory state and API client."""
         self.validation_errors: MutableSequence[str] = []
         self.warnings: MutableSequence[str] = []
-        self._api = FlextLdif()
+        self._api = ldif()
 
     def get_validation_results(self) -> t.ContainerMapping:
         """Get validation results."""
@@ -527,7 +526,7 @@ class FlextTapLdapTransformer:
     ) -> None:
         """Initialize transformer with optional transformation rules."""
         self.transformation_rules = dict(transformation_rules or {})
-        self._api = FlextLdif()
+        self._api = ldif()
 
     def apply_attribute_mappings(
         self,

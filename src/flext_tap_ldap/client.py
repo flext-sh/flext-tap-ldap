@@ -14,19 +14,11 @@ from asyncio import get_running_loop, new_event_loop, set_event_loop
 from collections.abc import Mapping, MutableSequence, Sequence
 
 from flext_core import FlextLogger, r
-from flext_ldap import (
-    FlextLdap,
-    FlextLdapConnection,
-    FlextLdapOperations,
-    FlextLdapSettings,
-)
+from flext_ldap import ldap
 from pydantic import BaseModel
 
-from flext_tap_ldap import t
-from flext_tap_ldap.constants import c
-from flext_tap_ldap.models import FlextTapLdapModels
+from flext_tap_ldap import c, m, t
 
-m = FlextTapLdapModels
 logger = FlextLogger(__name__)
 
 
@@ -40,19 +32,19 @@ class FlextTapLdapClient:
     class LDAPClient:
         """Testing convenience LDAP client wrapper.
 
-        Provides the old interface while using FlextLdap internally.
+        Provides the old interface while using ldap internally.
         This eliminates code duplication while maintaining testing convenience.
         """
 
         def __init__(
             self,
-            config: FlextTapLdapModels.TapLdap.LdapClientConfig | None = None,
+            config: m.TapLdap.LdapClientConfig | None = None,
             **convenience_kwargs: t.Scalar,
         ) -> None:
             """Initialize with Parameter Object Pattern (preferred).
 
             Preferred Usage (Parameter Object Pattern):
-                config = FlextTapLdapModels.TapLdap.LdapClientConfig(
+                config = m.TapLdap.LdapClientConfig(
                     host="ldap.example.com", port=389
                 )
                 client = FlextTapLdapClient.LDAPClient(config=config)
@@ -62,7 +54,7 @@ class FlextTapLdapClient:
                     host="ldap.example.com", port=389
                 )
             """
-            self._flext_api: FlextLdap
+            self._flext_api: ldap
             self._config: m.Ldap.ConnectionConfig
             self.host: str
             self.port: int
@@ -274,7 +266,7 @@ class FlextTapLdapClient:
         def _create_config_from_kwargs(
             self,
             **convenience_kwargs: t.Scalar,
-        ) -> FlextTapLdapModels.TapLdap.LdapClientConfig:
+        ) -> m.TapLdap.LdapClientConfig:
             """Create config from convenience keyword arguments."""
             raw_host = convenience_kwargs.get("host")
             host: str
@@ -284,7 +276,7 @@ class FlextTapLdapClient:
                 case _:
                     msg = "Either 'config' or valid string 'host' must be provided"
                     raise ValueError(msg)
-            return FlextTapLdapModels.TapLdap.LdapClientConfig(
+            return m.TapLdap.LdapClientConfig(
                 host=host,
                 port=self._coerce_int(
                     convenience_kwargs.get("port", c.TapLdap.DEFAULT_PORT),
@@ -352,9 +344,9 @@ class FlextTapLdapClient:
 
         def _initialize_flext_api(
             self,
-            client_config: FlextTapLdapModels.TapLdap.LdapClientConfig,
+            client_config: m.TapLdap.LdapClientConfig,
         ) -> None:
-            """Initialize the FlextLdap API with the given configuration."""
+            """Initialize the ldap API with the given configuration."""
             flext_connection_config = m.Ldap.ConnectionConfig(
                 host=client_config.host,
                 port=int(client_config.port),
@@ -363,19 +355,7 @@ class FlextTapLdapClient:
                 bind_password=client_config.password,
                 timeout=int(client_config.timeout),
             )
-            settings = FlextLdapSettings.model_validate({
-                "host": flext_connection_config.host,
-                "port": flext_connection_config.port,
-                "use_ssl": flext_connection_config.use_ssl,
-                "bind_dn": flext_connection_config.bind_dn or "",
-                "bind_password": flext_connection_config.bind_password or "",
-                "timeout": flext_connection_config.timeout,
-                "auto_bind": True,
-                "auto_range": True,
-            })
-            connection = FlextLdapConnection(config=settings)
-            operations = FlextLdapOperations(connection=connection)
-            self._flext_api = FlextLdap(connection=connection, operations=operations)
+            self._flext_api = ldap()
             self._config = flext_connection_config
             self.host = client_config.host
             self.port = client_config.port

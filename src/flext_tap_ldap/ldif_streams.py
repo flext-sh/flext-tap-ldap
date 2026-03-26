@@ -1,4 +1,4 @@
-"""FLEXT Tap LDAP - LDIF stream processing."""
+"""FLEXT FlextMeltanoAbstractions LDAP - LDIF stream processing."""
 
 from __future__ import annotations
 
@@ -6,15 +6,14 @@ from collections.abc import Iterable, Iterator, Mapping, MutableMapping, Sequenc
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
-from flext_core import FlextLogger, p
-from flext_ldap import FlextLdapConnection, m
-from flext_ldif import FlextLdif
+from flext_core import FlextLogger
+from flext_ldif import ldif
 from pydantic import ConfigDict, TypeAdapter, ValidationError
 
-from flext_tap_ldap import t
+from flext_tap_ldap import m, p, t
 
 if TYPE_CHECKING:
-    from flext_meltano import FlextMeltanoAbstractions as Tap
+    from flext_meltano import FlextMeltanoAbstractions
 
 _OBJECT_LIST_ADAPTER: TypeAdapter[Sequence[t.ContainerValueMapping]] = TypeAdapter(
     Sequence[t.ContainerValueMapping],
@@ -68,14 +67,13 @@ class FlextTapLdapLdifStreams:
 
         primary_keys: ClassVar[t.StrSequence] = ["dn"]
 
-        def __init__(self, tap: Tap) -> None:
+        def __init__(self, tap: FlextMeltanoAbstractions) -> None:
             """Initialize LDIF stream with library delegation."""
             self.name = "ldif_entries"
             self.tap_stream_id = "ldif_entries"
             self.tap = tap
             self.config: Mapping[str, t.ContainerValue] = getattr(tap, "config", {})
-            self._ldif_api = FlextLdif()
-            self._ldap_api = FlextLdapConnection()
+            self._ldif_api = ldif()
             self._logger_instance: FlextLogger | None = None
             self.schema = {
                 "type": "object",
@@ -224,14 +222,13 @@ class FlextTapLdapLdifStreams:
 
         primary_keys: ClassVar[t.StrSequence] = ["analysis_id"]
 
-        def __init__(self, tap: Tap) -> None:
+        def __init__(self, tap: FlextMeltanoAbstractions) -> None:
             """Initialize LDIF analysis stream with library delegation."""
             self.name = "ldif_analysis"
             self.tap_stream_id = "ldif_analysis"
             self.tap = tap
             self.config: Mapping[str, t.ContainerValue] = getattr(tap, "config", {})
-            self._ldif_api = FlextLdif()
-            self._ldap_api = FlextLdapConnection()
+            self._ldif_api = ldif()
             self._logger_instance: p.Logger | None = None
             self.schema: t.ContainerMapping = {
                 "type": "object",
