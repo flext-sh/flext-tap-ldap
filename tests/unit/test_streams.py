@@ -67,14 +67,13 @@ class TestLDAPBaseStream:
         tap.logger = Mock()
         return tap
 
-    def test_self(self, mock_tap: Mock) -> None:
-        """Test method."""
-        "Test base stream has required attributes."
+    def test_users_stream_initialization(self, mock_tap: Mock) -> None:
+        """Test UsersStream initializes with correct tap reference and schema."""
         stream = FlextTapLdapStreams.UsersStream(mock_tap)
-        assert hasattr(stream, "name")
-        assert hasattr(stream, "tap")
-        assert hasattr(stream, "schema")
         assert stream.tap == mock_tap
+        assert isinstance(stream.name, str)
+        assert stream.name != ""
+        assert isinstance(stream.schema, dict)
 
 
 class TestUsersStream:
