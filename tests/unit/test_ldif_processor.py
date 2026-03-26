@@ -11,6 +11,8 @@ from collections.abc import Sequence
 from pathlib import Path
 from unittest.mock import Mock
 
+import pytest
+
 from flext_tap_ldap import FlextTapLdapLdifStreams, FlextTapLdapProcessor
 from flext_tap_ldap.processor import FlextTapLdapEntry, FlextTapLdapTransformer
 from tests import t
@@ -26,6 +28,7 @@ class TestLdifProcessor:
     def test_ldif_directory_processing_traverses_ldif_files(
         self,
         tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         nested = tmp_path / "nested"
         nested.mkdir()
@@ -42,7 +45,6 @@ class TestLdifProcessor:
             "ldif_file_pattern": "*.ldif",
         }
         stream._ldif_api = Mock()
-        stream._ldap_api = Mock()
         stream._logger_instance = None
         seen: list[str] = []
 
@@ -50,7 +52,7 @@ class TestLdifProcessor:
             seen.append(ldif_file)
             return [{"dn": ldif_file}]
 
-        stream._process_ldif_file = _process
+        monkeypatch.setattr(stream, "_process_ldif_file", _process)
         records = list(stream.get_records())
         assert len(records) == 2
         assert set(seen) == {str(file_a), str(file_b)}
@@ -91,7 +93,6 @@ class TestLdifProcessor:
             "ldap_base_dn": "dc=example,dc=com",
         }
         stream._ldif_api = Mock()
-        stream._ldap_api = Mock()
         stream._logger_instance = None
         records = list(stream.get_records())
         assert not records
