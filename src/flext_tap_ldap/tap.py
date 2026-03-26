@@ -18,12 +18,14 @@ from flext_core import FlextLogger, r
 from flext_meltano import FlextMeltanoAbstractions
 from pydantic import ConfigDict, TypeAdapter, ValidationError
 
-from flext_tap_ldap.constants import c
-from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
-from flext_tap_ldap.models import m
-from flext_tap_ldap.settings import FlextTapLdapSettings
-from flext_tap_ldap.streams import FlextTapLdapStreams
-from flext_tap_ldap.typings import t
+from flext_tap_ldap import (
+    FlextTapLdapLdifStreams,
+    FlextTapLdapSettings,
+    FlextTapLdapStreams,
+    c,
+    m,
+    t,
+)
 
 logger = FlextLogger(__name__)
 _SINGER_OUTPUT_ADAPTER: TypeAdapter[t.ContainerMapping] = TypeAdapter(

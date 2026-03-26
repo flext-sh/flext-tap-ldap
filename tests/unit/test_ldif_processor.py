@@ -13,8 +13,12 @@ from unittest.mock import Mock
 
 import pytest
 
-from flext_tap_ldap import FlextTapLdapLdifStreams, FlextTapLdapProcessor
-from flext_tap_ldap.processor import FlextTapLdapEntry, FlextTapLdapTransformer
+from flext_tap_ldap import (
+    FlextTapLdapEntry,
+    FlextTapLdapLdifStreams,
+    FlextTapLdapProcessor,
+    FlextTapLdapTransformer,
+)
 from tests import t
 
 

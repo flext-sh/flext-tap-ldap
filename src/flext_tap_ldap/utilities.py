@@ -5,11 +5,11 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import ClassVar
 
-from flext_core import FlextContainer, FlextLogger, e, p, r
+from flext_core import FlextContainer, FlextLogger, e, r
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 
-from flext_tap_ldap import c, t
+from flext_tap_ldap import c, p, t
 
 
 class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):

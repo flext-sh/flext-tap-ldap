@@ -12,7 +12,7 @@ from collections.abc import Generator, Iterator
 from pathlib import Path
 
 import pytest
-from flext_core import FlextDecorators as d, FlextLogger
+from flext_core import FlextLogger, d
 from flext_tests import tk
 from ldap3 import ALL as LDAP3_ALL, Connection, Server
 
