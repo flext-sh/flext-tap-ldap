@@ -5,12 +5,11 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import ClassVar
 
-from flext_core import FlextContainer, FlextExceptions, FlextLogger, p, r
+from flext_core import FlextContainer, FlextLogger, e, p, r
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 
-from flext_tap_ldap import t
-from flext_tap_ldap.constants import c
+from flext_tap_ldap import c, t
 
 
 class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
@@ -58,12 +57,12 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 message: str = "LDAP bind failed",
                 bind_dn: str | None = None,
                 **kwargs: t.Scalar,
-            ) -> FlextExceptions.AuthenticationError:
+            ) -> e.AuthenticationError:
                 """Create bind error with context."""
                 context: t.MutableConfigurationMapping = dict(kwargs)
                 if bind_dn is not None:
                     context["bind_dn"] = bind_dn
-                return FlextExceptions.AuthenticationError(message, context=context)
+                return e.AuthenticationError(message, context=context)
 
             @staticmethod
             def create_connection_error(
@@ -72,7 +71,7 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 port: int | None = None,
                 base_dn: str | None = None,
                 **kwargs: t.Scalar,
-            ) -> FlextExceptions.ConnectionError:
+            ) -> e.ConnectionError:
                 """Create connection error with context."""
                 context: t.MutableConfigurationMapping = dict(kwargs)
                 if host is not None:
@@ -81,7 +80,7 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     context["port"] = port
                 if base_dn is not None:
                     context["base_dn"] = base_dn
-                return FlextExceptions.ConnectionError(message, context=context)
+                return e.ConnectionError(message, context=context)
 
             @staticmethod
             def create_search_error(
@@ -89,14 +88,14 @@ class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 base_dn: str | None = None,
                 filter_str: str | None = None,
                 **kwargs: t.Scalar,
-            ) -> FlextExceptions.OperationError:
+            ) -> e.OperationError:
                 """Create search error with context."""
                 context: t.MutableConfigurationMapping = dict(kwargs)
                 if base_dn is not None:
                     context["base_dn"] = base_dn
                 if filter_str is not None:
                     context["filter"] = filter_str[:100]
-                return FlextExceptions.OperationError(message, context=context)
+                return e.OperationError(message, context=context)
 
         class StreamManagement:
             """LDAP tap stream management utilities."""

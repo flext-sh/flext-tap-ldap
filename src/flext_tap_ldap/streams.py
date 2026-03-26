@@ -19,11 +19,7 @@ from pydantic import ValidationError
 if TYPE_CHECKING:
     from flext_meltano import FlextMeltanoAbstractions as Tap
 
-from flext_tap_ldap import t
-from flext_tap_ldap.client import FlextTapLdapClient
-from flext_tap_ldap.constants import c
-from flext_tap_ldap.models import FlextTapLdapModels
-from flext_tap_ldap.typings import FlextTapLdapTypes
+from flext_tap_ldap import FlextTapLdapClient, c, m, t
 
 logger = FlextLogger(__name__)
 
@@ -125,7 +121,7 @@ class FlextTapLdapStreams:
             if raw_value is None:
                 return None
             try:
-                validated = FlextTapLdapTypes.STRICT_STR_ADAPTER.validate_python(
+                validated = t.STRICT_STR_ADAPTER.validate_python(
                     raw_value,
                 )
             except ValidationError:
@@ -135,16 +131,16 @@ class FlextTapLdapStreams:
         @staticmethod
         def parse_connection_config(
             raw_value: t.NormalizedValue,
-        ) -> FlextTapLdapModels.TapLdap.LdapConnectionConfig:
+        ) -> m.TapLdap.LdapConnectionConfig:
             """Validate LDAP connection payload through Pydantic."""
             try:
-                parsed = FlextTapLdapModels.TapLdap.LdapConnectionConfig.model_validate(
+                parsed = m.TapLdap.LdapConnectionConfig.model_validate(
                     raw_value,
                     strict=True,
                 )
             except ValidationError:
-                parsed = FlextTapLdapModels.TapLdap.LdapConnectionConfig()
-            return FlextTapLdapModels.TapLdap.LdapConnectionConfig(
+                parsed = m.TapLdap.LdapConnectionConfig()
+            return m.TapLdap.LdapConnectionConfig(
                 host=str(parsed.host),
                 port=FlextTapLdapStreams.LDAPBaseStream.coerce_positive_int(
                     parsed.port,
@@ -167,17 +163,15 @@ class FlextTapLdapStreams:
         @staticmethod
         def parse_property_definition(
             raw_value: t.NormalizedValue,
-        ) -> FlextTapLdapModels.TapLdap.CustomPropertyDefinition:
+        ) -> m.TapLdap.CustomPropertyDefinition:
             """Validate custom stream property definition through Pydantic."""
             try:
-                return (
-                    FlextTapLdapModels.TapLdap.CustomPropertyDefinition.model_validate(
-                        raw_value,
-                        strict=True,
-                    )
+                return m.TapLdap.CustomPropertyDefinition.model_validate(
+                    raw_value,
+                    strict=True,
                 )
             except ValidationError:
-                return FlextTapLdapModels.TapLdap.CustomPropertyDefinition()
+                return m.TapLdap.CustomPropertyDefinition()
 
         def __init__(
             self,
@@ -641,7 +635,7 @@ class FlextTapLdapStreams:
         def __init__(
             self,
             tap: Tap,
-            params: FlextTapLdapModels.TapLdap.CustomStreamParams,
+            params: m.TapLdap.CustomStreamParams,
         ) -> None:
             """Initialize custom stream with parameters."""
             self.params = params

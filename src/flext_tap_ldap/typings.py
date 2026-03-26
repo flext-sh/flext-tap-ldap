@@ -21,11 +21,10 @@ from flext_ldap import FlextLdapTypes
 from flext_meltano import FlextMeltanoTypes
 from pydantic import ConfigDict, TypeAdapter
 
-from flext_tap_ldap.constants import c
+from flext_tap_ldap import c
 
 if TYPE_CHECKING:
-    from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
-    from flext_tap_ldap.streams import FlextTapLdapStreams
+    from flext_tap_ldap import FlextTapLdapLdifStreams, FlextTapLdapStreams
 
 
 class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
