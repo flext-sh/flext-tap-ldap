@@ -72,7 +72,7 @@ class FlextTapLdapLdifStreams:
             self.name = "ldif_entries"
             self.tap_stream_id = "ldif_entries"
             self.tap = tap
-            self.config: Mapping[str, t.ContainerValue] = getattr(tap, "config", {})
+            self.config: Mapping[str, t.ContainerValue] = getattr(tap, "tap_config", {})
             self._ldif_api = ldif()
             self._logger_instance: FlextLogger | None = None
             self.schema = {
@@ -227,7 +227,7 @@ class FlextTapLdapLdifStreams:
             self.name = "ldif_analysis"
             self.tap_stream_id = "ldif_analysis"
             self.tap = tap
-            self.config: Mapping[str, t.ContainerValue] = getattr(tap, "config", {})
+            self.config: Mapping[str, t.ContainerValue] = getattr(tap, "tap_config", {})
             self._ldif_api = ldif()
             self._logger_instance: p.Logger | None = None
             self.schema: t.ContainerMapping = {

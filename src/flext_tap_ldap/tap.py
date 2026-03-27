@@ -49,11 +49,22 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
     _config_map_adapter: ClassVar[TypeAdapter[Mapping[str, t.ContainerMapping]]] = (
         TypeAdapter(Mapping[str, t.ContainerMapping], config=ConfigDict(strict=False))
     )
-    config: t.MutableConfigurationMapping
+
+    _tap_config: t.MutableConfigurationMapping
 
     def __init__(self) -> None:
         """Initialize tap with empty config."""
-        self.config: t.MutableConfigurationMapping = {}
+        self._tap_config = {}
+
+    @property
+    def tap_config(self) -> t.MutableConfigurationMapping:
+        """Return mutable tap configuration mapping."""
+        return self._tap_config
+
+    @tap_config.setter
+    def tap_config(self, value: t.MutableConfigurationMapping) -> None:
+        """Set mutable tap configuration mapping."""
+        self._tap_config = value
 
     config_class: ClassVar[type[FlextTapLdapSettings]] = FlextTapLdapSettings
     config_jsonschema: ClassVar[t.ContainerMapping] = {
@@ -232,7 +243,7 @@ def _build_cli_command() -> click.Command:
             if isinstance(v, (str, int, float, bool))
         }
         tap = FlextTapLdapTap()
-        tap.config = config_data
+        tap.tap_config = config_data
 
         if discover:
             source_config = m.Meltano.DataSourceConfig(

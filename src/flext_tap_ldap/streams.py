@@ -183,7 +183,7 @@ class FlextTapLdapStreams:
             self.name = name
             self.tap_stream_id = name or "ldap_stream"
             self.schema = schema or {}
-            self.config: t.ContainerMapping = getattr(tap, "config", {})
+            self.config: t.ContainerMapping = getattr(tap, "tap_config", {})
             self.client: FlextTapLdapClient.LDAPClient | None = None
             self.tap = tap
             self._create_ldap_client()

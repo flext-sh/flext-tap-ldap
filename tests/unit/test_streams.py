@@ -56,7 +56,7 @@ class TestLDAPBaseStream:
     def mock_tap(self) -> Mock:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLdapTap)
-        tap.config = {
+        tap.tap_config = {
             "ldap_host": "test.ldap.com",
             "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
@@ -83,7 +83,7 @@ class TestUsersStream:
     def mock_tap(self) -> Mock:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLdapTap)
-        tap.config = {
+        tap.tap_config = {
             "ldap_host": "test.ldap.com",
             "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
@@ -226,7 +226,7 @@ class TestGroupsStream:
     def mock_tap(self) -> Mock:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLdapTap)
-        tap.config = {
+        tap.tap_config = {
             "ldap_host": "test.ldap.com",
             "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
@@ -264,7 +264,7 @@ class TestOrganizationalUnitsStream:
     def mock_tap(self) -> Mock:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLdapTap)
-        tap.config = {
+        tap.tap_config = {
             "ldap_host": "test.ldap.com",
             "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
@@ -304,7 +304,7 @@ class TestSchemaStream:
     def mock_tap(self) -> Mock:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLdapTap)
-        tap.config = {
+        tap.tap_config = {
             "ldap_host": "test.ldap.com",
             "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
@@ -393,7 +393,7 @@ class TestCustomStream:
     def mock_tap(self) -> Mock:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLdapTap)
-        tap.config = {
+        tap.tap_config = {
             "ldap_host": "test.ldap.com",
             "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
@@ -584,7 +584,7 @@ class TestLDAPBaseStreamDirectUsage:
     def mock_tap(self) -> Mock:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLdapTap)
-        tap.config = {
+        tap.tap_config = {
             "ldap_host": "test.ldap.com",
             "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
@@ -616,7 +616,7 @@ class TestStreamExceptionHandling:
     def mock_tap_failing(self) -> Mock:
         """Create mock tap that will cause exceptions."""
         tap = Mock(spec=FlextTapLdapTap)
-        tap.config = {
+        tap.tap_config = {
             "ldap_host": "failing.ldap.com",
             "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
