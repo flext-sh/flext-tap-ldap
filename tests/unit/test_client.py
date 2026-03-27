@@ -118,7 +118,7 @@ class TestLDAPClientCoverageBoost:
             ) as mock_search,
             patch.object(
                 client,
-                "_process_search_results_with_oracle_support",
+                "_process_search_results",
                 return_value=[{"processed": "entry"}],
             ) as mock_process,
         ):

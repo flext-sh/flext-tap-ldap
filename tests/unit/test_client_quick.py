@@ -269,7 +269,7 @@ class TestLDAPClientQuick:
         )
         assert result is None
 
-    def test_process_search_results_with_oracle_support(
+    def test_process_search_results(
         self,
         client: FlextTapLdapClient.LDAPClient,
     ) -> None:
@@ -283,7 +283,7 @@ class TestLDAPClientQuick:
             },
             {"dn": "uid=test2,dc=oracle,dc=com", "attributes": {"uid": second_uids}},
         ]
-        results = client._process_search_results_with_oracle_support(
+        results = client._process_oracle_search_results(
             search_results,
             oracle_oid_mode=True,
         )
@@ -292,7 +292,7 @@ class TestLDAPClientQuick:
         assert isinstance(attributes, dict)
         assert isinstance(attributes, dict)
         assert "userPassword" in attributes
-        results = client._process_search_results_with_oracle_support(
+        results = client._process_oracle_search_results(
             search_results,
             oracle_oid_mode=False,
         )

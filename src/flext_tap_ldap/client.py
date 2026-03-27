@@ -315,7 +315,7 @@ class FlextTapLdapClient:
                     search_filter,
                     attributes,
                 )
-                return self._process_search_results_with_oracle_support(
+                return self._process_oracle_search_results(
                     search_result,
                     oracle_oid_mode=oracle_oid_mode,
                 )
@@ -456,7 +456,7 @@ class FlextTapLdapClient:
                 entries.append(converted)
             return entries
 
-        def _process_search_results_with_oracle_support(
+        def _process_oracle_search_results(
             self,
             search_result: Sequence[m.Ldif.Entry] | Sequence[t.ContainerMapping],
             *,

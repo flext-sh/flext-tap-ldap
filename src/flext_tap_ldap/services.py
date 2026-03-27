@@ -582,7 +582,7 @@ class FlextTapLdapServices:
             )
 
     @staticmethod
-    def create_ldap_connection_config_convenience(
+    def create_default_ldap_config(
         host: str,
         base_dn: str,
         port: int = c.TapLdap.DEFAULT_PORT,
