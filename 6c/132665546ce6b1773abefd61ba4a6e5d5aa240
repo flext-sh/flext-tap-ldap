@@ -1,0 +1,29 @@
+src/flext_tap_ldap/streams.py
+  68dbd4878595068b 186
+src/flext_tap_ldap/tap.py
+  68dbd4878595068b 53,57-67,246
+tests/unit/test_streams.py
+  68dbd4878595068b 59,86,229,267,307,396,587,619
+src/flext_tap_ldap/ldif_streams.py
+  68dbd4878595068b 75,230
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.20",
+  "base_commit_sha": "6c132665546ce6b1773abefd61ba4a6e5d5aa240",
+  "prompts": {
+    "68dbd4878595068b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e713beea-5d5d-4f90-bbc7-9650893a58f6",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "FLEXT Bot <team@flext.sh>",
+      "messages": [],
+      "total_additions": 32,
+      "total_deletions": 22,
+      "accepted_lines": 25,
+      "overriden_lines": 0
+    }
+  }
+}
