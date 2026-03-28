@@ -32,6 +32,7 @@ if TYPE_CHECKING:
         __version__,
         __version_info__,
     )
+    from flext_tap_ldap._utilities._processor import FlextTapLdapUtilitiesProcessorMixin
     from flext_tap_ldap.client import FlextTapLdapClient
     from flext_tap_ldap.constants import (
         FlextTapLdapConstants,
@@ -83,6 +84,10 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "FlextTapLdapTransformer": ["flext_tap_ldap.processor", "FlextTapLdapTransformer"],
     "FlextTapLdapTypes": ["flext_tap_ldap.typings", "FlextTapLdapTypes"],
     "FlextTapLdapUtilities": ["flext_tap_ldap.utilities", "FlextTapLdapUtilities"],
+    "FlextTapLdapUtilitiesProcessorMixin": [
+        "flext_tap_ldap._utilities._processor",
+        "FlextTapLdapUtilitiesProcessorMixin",
+    ],
     "FlextTapLdapValidator": ["flext_tap_ldap.processor", "FlextTapLdapValidator"],
     "__all__": ["flext_tap_ldap.__version__", "__all__"],
     "__author__": ["flext_tap_ldap.__version__", "__author__"],
@@ -125,6 +130,7 @@ __all__ = [
     "FlextTapLdapTransformer",
     "FlextTapLdapTypes",
     "FlextTapLdapUtilities",
+    "FlextTapLdapUtilitiesProcessorMixin",
     "FlextTapLdapValidator",
     "__all__",
     "__author__",
