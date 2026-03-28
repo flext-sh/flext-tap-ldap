@@ -32,7 +32,10 @@ if TYPE_CHECKING:
         __version__,
         __version_info__,
     )
-    from flext_tap_ldap._utilities._processor import FlextTapLdapUtilitiesProcessorMixin
+    from flext_tap_ldap._utilities._processor import (
+        FlextTapLdapUtilitiesProcessorMixin,
+        logger,
+    )
     from flext_tap_ldap.client import FlextTapLdapClient
     from flext_tap_ldap.constants import (
         FlextTapLdapConstants,
@@ -54,7 +57,7 @@ if TYPE_CHECKING:
     from flext_tap_ldap.services import FlextTapLdapServices
     from flext_tap_ldap.settings import FlextTapLdapSettings
     from flext_tap_ldap.streams import FlextTapLdapStreams
-    from flext_tap_ldap.tap import CLI_COMMAND, FlextTapLdapTap, logger, main
+    from flext_tap_ldap.tap import CLI_COMMAND, FlextTapLdapTap, main
     from flext_tap_ldap.typings import FlextTapLdapTypes, FlextTapLdapTypes as t
     from flext_tap_ldap.utilities import (
         FlextTapLdapUtilities,
@@ -102,7 +105,7 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "d": ["flext_ldap", "d"],
     "e": ["flext_ldap", "e"],
     "h": ["flext_ldap", "h"],
-    "logger": ["flext_tap_ldap.tap", "logger"],
+    "logger": ["flext_tap_ldap._utilities._processor", "logger"],
     "m": ["flext_tap_ldap.models", "FlextTapLdapModels"],
     "main": ["flext_tap_ldap.tap", "main"],
     "p": ["flext_tap_ldap.protocols", "FlextTapLdapProtocols"],
