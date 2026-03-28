@@ -10,12 +10,17 @@ from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 
 from flext_tap_ldap import c, p, t
+from flext_tap_ldap._utilities import FlextTapLdapUtilitiesProcessorMixin
 
 
-class FlextTapLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
+class FlextTapLdapUtilities(
+    FlextTapLdapUtilitiesProcessorMixin,
+    FlextMeltanoUtilities,
+    FlextLdapUtilities,
+):
     """Unified LDAP tap utilities class."""
 
-    class TapLdap:
+    class TapLdap(FlextTapLdapUtilitiesProcessorMixin.TapLdap):
         """Tap LDAP namespace for cross-project access."""
 
         def __init__(self) -> None:
