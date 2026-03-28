@@ -70,10 +70,11 @@ class TestLDAPClientQuick:
             "attributes": {"mail": mail_values},
         }
         result = client._convert_entry_to_dict(dict_entry)
-        assert result["dn"] == "uid=dict,dc=example,dc=com"
+        assert result.is_success
+        assert result.value["dn"] == "uid=dict,dc=example,dc=com"
         # Test with None
-        result = client._convert_entry_to_dict(None)
-        assert result == {}
+        none_result = client._convert_entry_to_dict(None)
+        assert none_result.is_failure
         # Test with a dict that has string values
         simple_entry: t.ContainerMapping = {
             "dn": "uid=test,dc=example,dc=com",
@@ -81,9 +82,10 @@ class TestLDAPClientQuick:
             "cn": ["Test", "T. User"],
         }
         result = client._convert_entry_to_dict(simple_entry)
-        assert result["dn"] == "uid=test,dc=example,dc=com"
-        assert result["uid"] == "test"
-        assert result["cn"] == ["Test", "T. User"]
+        assert result.is_success
+        assert result.value["dn"] == "uid=test,dc=example,dc=com"
+        assert result.value["uid"] == "test"
+        assert result.value["cn"] == ["Test", "T. User"]
 
     def test_search_result_processing(
         self,

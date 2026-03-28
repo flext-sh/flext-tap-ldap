@@ -34,72 +34,6 @@ class FlextTapLdapStreams:
     while providing complete LDAP/LDIF data extraction capabilities.
     """
 
-    class FallbackDataFactory:
-        """Factory for creating fallback test data.
-
-        Implements Factory Pattern to eliminate code duplication
-        following DRY principle (Don't Repeat Yourself).
-        """
-
-        @staticmethod
-        def create_test_group_record() -> t.ContainerMapping:
-            """Create standardized test group record for fallback scenarios."""
-            return {
-                "dn": "cn=developers,ou=groups,dc=test,dc=com",
-                "cn": "developers",
-                "objectClass": ["groupOfNames", "top"],
-                "description": "Developer group",
-                "member": [
-                    "uid=jdoe,ou=users,dc=test,dc=com",
-                    "uid=asmith,ou=users,dc=test,dc=com",
-                ],
-                "modifyTimestamp": "2024-01-01T12:00:00Z",
-            }
-
-        @staticmethod
-        def create_test_ou_record() -> t.ContainerMapping:
-            """Create standardized test organizational unit record."""
-            return {
-                "dn": "ou=users,dc=test,dc=com",
-                "ou": "users",
-                "objectClass": ["organizationalUnit", "top"],
-                "description": "Users organizational unit",
-                "modifyTimestamp": "2024-01-01T12:00:00Z",
-            }
-
-        @staticmethod
-        def create_test_schema_record() -> t.ContainerMapping:
-            """Create standardized test schema record."""
-            return {
-                "dn": "cn=schema",
-                "objectClass": ["top", "ldapSubentry", "schema"],
-                "cn": "schema",
-                "objectClasses": ["inetOrgPerson", "organizationalPerson", "person"],
-                "attributeTypes": ["uid", "cn", "sn", "mail"],
-                "modifyTimestamp": "2024-01-01T12:00:00Z",
-            }
-
-        @staticmethod
-        def create_test_user_record() -> t.ContainerMapping:
-            """Create standardized test user record for fallback scenarios."""
-            return {
-                "dn": "uid=jdoe,ou=users,dc=test,dc=com",
-                "uid": "jdoe",
-                "cn": "John Doe",
-                "mail": "jdoe@test.com",
-                "sn": "Doe",
-                "givenName": "John",
-                "userPrincipalName": "jdoe@test.com",
-                "memberOf": ["cn=developers,ou=groups,dc=test,dc=com"],
-                "objectClass": [
-                    "inetOrgPerson",
-                    "organizationalPerson",
-                    "person",
-                    "top",
-                ],
-                "modifyTimestamp": "2024-01-01T12:00:00Z",
-            }
-
     class LDAPBaseStream:
         """Base class for LDAP streams with flext-ldap integration.
 
@@ -138,8 +72,9 @@ class FlextTapLdapStreams:
                     raw_value,
                     strict=True,
                 )
-            except ValidationError:
-                parsed = m.TapLdap.LdapConnectionConfig()
+            except ValidationError as exc:
+                msg = f"Invalid LDAP connection configuration: {exc}"
+                raise ValueError(msg) from exc
             return m.TapLdap.LdapConnectionConfig(
                 host=str(parsed.host),
                 port=FlextTapLdapStreams.LDAPBaseStream.coerce_positive_int(
@@ -205,6 +140,9 @@ class FlextTapLdapStreams:
                         raw_connection,
                     )
                 )
+                if not connection_config.host:
+                    msg = "LDAP connection host is required"
+                    raise ValueError(msg)
                 page_size_raw = self.config.get("page_size", 1000)
                 page_size = FlextTapLdapStreams.LDAPBaseStream.coerce_positive_int(
                     page_size_raw,
@@ -262,10 +200,6 @@ class FlextTapLdapStreams:
                 logger.warning("Failed to create LDAP client: %s", err_msg)
                 self.client = None
 
-        def _get_fallback_data(self) -> Sequence[t.ContainerMapping]:
-            """Get fallback data for testing/demo purposes."""
-            return []
-
         def _search_ldap(
             self,
             search_filter: str,
@@ -274,8 +208,8 @@ class FlextTapLdapStreams:
         ) -> Sequence[t.ContainerMapping]:
             """Search LDAP directory with error handling."""
             if not self.client:
-                logger.warning("LDAP client not available, using fallback data")
-                return self._get_fallback_data()
+                msg = "LDAP client is not available"
+                raise RuntimeError(msg)
             try:
                 if base_dn is None:
                     raw_conn = self.config.get("connection", {})
@@ -296,7 +230,7 @@ class FlextTapLdapStreams:
                 ]
                 if not results:
                     logger.info("No results found for filter: %s", search_filter)
-                    return self._get_fallback_data()
+                    return []
                 return results
             except (
                 ValueError,
@@ -307,9 +241,8 @@ class FlextTapLdapStreams:
                 RuntimeError,
                 ImportError,
             ) as e:
-                err_msg = str(e)
-                logger.warning("LDAP search failed: %s, using fallback data", err_msg)
-                return self._get_fallback_data()
+                msg = f"LDAP search failed: {e}"
+                raise RuntimeError(msg) from e
 
     class UsersStream(LDAPBaseStream):
         """Stream for LDAP user entries."""
@@ -385,13 +318,6 @@ class FlextTapLdapStreams:
             )
             yield from results
 
-        @override
-        def _get_fallback_data(self) -> Sequence[t.ContainerMapping]:
-            """Get fallback user data."""
-            return [
-                dict(FlextTapLdapStreams.FallbackDataFactory.create_test_user_record()),
-            ]
-
     class GroupsStream(LDAPBaseStream):
         """Stream for LDAP group entries."""
 
@@ -465,15 +391,6 @@ class FlextTapLdapStreams:
             )
             yield from results
 
-        @override
-        def _get_fallback_data(self) -> Sequence[t.ContainerMapping]:
-            """Get fallback group data."""
-            return [
-                dict(
-                    FlextTapLdapStreams.FallbackDataFactory.create_test_group_record(),
-                ),
-            ]
-
     class OrganizationalUnitsStream(LDAPBaseStream):
         """Stream for LDAP organizational unit entries."""
 
@@ -521,13 +438,6 @@ class FlextTapLdapStreams:
                 attributes=ou_attributes,
             )
             yield from results
-
-        @override
-        def _get_fallback_data(self) -> Sequence[t.ContainerMapping]:
-            """Get fallback organizational unit data."""
-            return [
-                dict(FlextTapLdapStreams.FallbackDataFactory.create_test_ou_record()),
-            ]
 
     class SchemaStream(LDAPBaseStream):
         """Stream for LDAP schema information."""
@@ -587,6 +497,7 @@ class FlextTapLdapStreams:
                 "modifyTimestamp",
             ]
             base_dns = ["", "cn=schema"]
+            last_error: str | None = None
             for base_dn in base_dns:
                 try:
                     results = self._search_ldap(
@@ -595,8 +506,7 @@ class FlextTapLdapStreams:
                         attributes=schema_attributes,
                     )
                     if results:
-                        for record in results:
-                            yield record
+                        yield from results
                         return
                 except (
                     ValueError,
@@ -608,23 +518,17 @@ class FlextTapLdapStreams:
                     ImportError,
                 ) as e:
                     err_msg = str(e)
+                    last_error = err_msg
                     logger.debug(
                         "Schema search failed for base DN '%s': %s",
                         base_dn,
                         err_msg,
                     )
                     continue
-            for record in self._get_fallback_data():
-                yield record
-
-        @override
-        def _get_fallback_data(self) -> Sequence[t.ContainerMapping]:
-            """Get fallback schema data."""
-            return [
-                dict(
-                    FlextTapLdapStreams.FallbackDataFactory.create_test_schema_record(),
-                ),
-            ]
+            if last_error is not None:
+                msg = f"LDAP schema search failed: {last_error}"
+                raise RuntimeError(msg)
+            logger.info("No LDAP schema records found")
 
     class CustomStream(LDAPBaseStream):
         """Custom LDAP stream with configurable filter and schema."""
@@ -725,17 +629,6 @@ class FlextTapLdapStreams:
                 self.params.search_filter,
             )
             yield from results
-
-        @override
-        def _get_fallback_data(self) -> Sequence[t.ContainerMapping]:
-            """Get fallback data for custom stream."""
-            return [
-                {
-                    "dn": f"cn=test-{self.params.name},dc=test,dc=com",
-                    "objectClass": ["top", "testObject"],
-                    "modifyTimestamp": "2024-01-01T12:00:00Z",
-                },
-            ]
 
 
 __all__ = ["FlextTapLdapStreams"]

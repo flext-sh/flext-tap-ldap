@@ -126,7 +126,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
     @override
     def discover_streams(
         self,
-        _tap_instance: m.Meltano.DataSourceConfig
+        tap_instance: m.Meltano.DataSourceConfig
         | m.Meltano.TapConfig
         | m.Meltano.TapInstance,
     ) -> r[t.ContainerMapping]:
@@ -135,7 +135,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         Discovers standard LDAP streams (users, groups, organizational units, schema)
         and optionally LDIF processing streams and custom streams based on configuration.
         """
-        source_payload = _tap_instance.model_dump(mode="python")
+        source_payload = tap_instance.model_dump(mode="python")
         raw_connection_config = source_payload.get("connection_config", {})
         config_map: Mapping[str, t.ContainerMapping] | t.ConfigurationMapping
         try:
@@ -180,8 +180,24 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
 
     @override
     def execute(self) -> r[t.ContainerMapping]:
-        """Execute the tap. Returns success after stream discovery."""
-        return r[t.ContainerMapping].ok({"success": True})
+        """Execute the tap and return execution state with stream discovery results."""
+        discover_result = self.discover_streams(
+            m.Meltano.TapConfig(
+                name=self.name,
+                tap_type="tap-ldap",
+                connection_config=self._tap_config,
+            ),
+        )
+        status = (
+            c.Meltano.Enums.StreamStatus.COMPLETED
+            if discover_result.is_success
+            else c.Meltano.Enums.StreamStatus.FAILED
+        )
+        return r[t.ContainerMapping].ok({
+            "status": status,
+            "tap_name": self.name,
+            "streams_discovered": discover_result.is_success,
+        })
 
     @staticmethod
     def validate_custom_stream(raw_item: t.NormalizedValue) -> t.StrMapping | None:
@@ -252,7 +268,7 @@ def _build_cli_command() -> click.Command:
                 stream_config={},
                 source_version="latest",
             )
-            result = tap.discover_streams(_tap_instance=source_config)
+            result = tap.discover_streams(tap_instance=source_config)
             if result.is_success and result.value:
                 catalog = result.value
                 raw_streams = catalog.get("streams", [])
@@ -291,7 +307,7 @@ def _build_cli_command() -> click.Command:
             stream_config={},
             source_version="latest",
         )
-        result = tap.discover_streams(_tap_instance=source_config)
+        result = tap.discover_streams(tap_instance=source_config)
         if result.is_success and result.value:
             raw_streams_val = result.value.get("streams", [])
             stream_entries: list[Mapping[str, t.NormalizedValue]] = []

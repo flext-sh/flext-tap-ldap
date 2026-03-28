@@ -15,7 +15,7 @@ from collections.abc import Mapping, MutableSequence, Sequence
 
 from flext_core import FlextLogger, r
 from flext_ldap import ldap
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from flext_tap_ldap import c, m, t
 
@@ -137,7 +137,8 @@ class FlextTapLdapClient:
             )
             try:
                 get_running_loop()
-                return []
+                msg = "Oracle LDAP search within an existing event loop is not implemented natively."
+                raise NotImplementedError(msg)
             except RuntimeError:
                 return self._execute_oracle_search_in_new_loop(
                     base_dn=base_dn,
@@ -147,7 +148,7 @@ class FlextTapLdapClient:
                 )
 
         def test_connection(self) -> bool:
-            """Test the connection to the LDAP server for testing convenience."""
+            """Test the connection to the LDAP server."""
             try:
                 test_search_options = m.Ldap.SearchOptions(
                     base_dn="",
@@ -164,11 +165,7 @@ class FlextTapLdapClient:
             except (RuntimeError, ValueError, TypeError) as e:
                 err_msg = str(e)
                 logger.warning("LDAP connection test failed: %s", err_msg)
-                logger.info(
-                    "LDAP connection test fallback - required for Singer streams in "
-                    "test/mock environments",
-                )
-                return True
+                return False
 
         def _build_server_uri(self) -> str:
             """Build server URI from connection parameters.
@@ -178,49 +175,18 @@ class FlextTapLdapClient:
             protocol = "ldaps" if self.use_ssl else "ldap"
             return f"{protocol}://{self.host}:{self.port}"
 
-        def _coerce_int(
-            self,
-            value: t.NormalizedValue,
-            default: int,
-        ) -> int:
-            """Coerce value to int using pattern matching for better type safety."""
-            match value:
-                case int() as int_val:
-                    return int_val
-                case str() as str_val:
-                    try:
-                        return int(str_val)
-                    except ValueError:
-                        return default
-                case float() as float_val:
-                    try:
-                        return int(float_val)
-                    except (ValueError, OverflowError):
-                        return default
-                case _:
-                    return default
-
-        def _coerce_str_opt(
-            self,
-            value: t.NormalizedValue,
-        ) -> str | None:
-            """Coerce value to optional string using pattern matching."""
-            match value:
-                case str() as str_val if str_val:
-                    return str_val
-                case _:
-                    return None
-
         def _convert_entry_to_dict(
             self,
             entry_data: t.RuntimeData | t.ContainerMapping | None,
-        ) -> t.MutableContainerMapping:
+        ) -> r[t.MutableContainerMapping]:
             """Convert FlextLdapModels.Entry to dict format for testing.
 
             Single Responsibility: Handle only entry format conversion.
             """
             if entry_data is None:
-                return {}
+                return r[t.MutableContainerMapping].fail(
+                    "Cannot convert None entry data",
+                )
             if isinstance(entry_data, BaseModel):
                 dn_value: str = str(getattr(entry_data, "dn", ""))
                 model_data: t.MutableContainerMapping = dict(entry_data.model_dump())
@@ -229,7 +195,7 @@ class FlextTapLdapClient:
                 if isinstance(attrs_val, dict):
                     attrs_dict = attrs_val
                 else:
-                    return {"dn": dn_value}
+                    return r[t.MutableContainerMapping].ok({"dn": dn_value})
                 entry_dict: t.MutableContainerMapping = {"dn": dn_value}
                 for key_str, val in attrs_dict.items():
                     typed_list: t.MutableContainerList = (
@@ -239,7 +205,7 @@ class FlextTapLdapClient:
                         entry_dict[key_str] = typed_list[0]
                     else:
                         entry_dict[key_str] = val
-                return entry_dict
+                return r[t.MutableContainerMapping].ok(entry_dict)
             if isinstance(entry_data, Mapping):
                 result: t.MutableContainerMapping = {}
                 for key, value in entry_data.items():
@@ -248,8 +214,10 @@ class FlextTapLdapClient:
                         (str, int, float, bool, list, dict, type(None)),
                     ):
                         result[str(key)] = value
-                return result
-            return {}
+                return r[t.MutableContainerMapping].ok(result)
+            return r[t.MutableContainerMapping].fail(
+                f"Unsupported entry data type: {type(entry_data).__name__}",
+            )
 
         def _convert_scope_to_enum(self, scope: str) -> str:
             """Convert scope string to flext-ldap scope string.
@@ -268,32 +236,28 @@ class FlextTapLdapClient:
             **convenience_kwargs: t.Scalar,
         ) -> m.TapLdap.LdapClientConfig:
             """Create config from convenience keyword arguments."""
-            raw_host = convenience_kwargs.get("host")
-            host: str
-            match raw_host:
-                case str() as host_value if host_value:
-                    host = host_value
-                case _:
+            try:
+                config_dict = {
+                    "host": convenience_kwargs.get("host", ""),
+                    "port": convenience_kwargs.get("port", c.TapLdap.DEFAULT_PORT),
+                    "bind_dn": convenience_kwargs.get("bind_dn") or None,
+                    "password": convenience_kwargs.get("password") or None,
+                    "use_ssl": bool(convenience_kwargs.get("use_ssl")),
+                    "timeout": convenience_kwargs.get(
+                        "timeout", c.TapLdap.DEFAULT_SEARCH_TIMEOUT
+                    ),
+                    "page_size": convenience_kwargs.get(
+                        "page_size", c.TapLdap.DEFAULT_PAGE_SIZE
+                    ),
+                }
+                return m.TapLdap.LdapClientConfig.model_validate(config_dict)
+            except ValidationError as e:
+                host_val = convenience_kwargs.get("host")
+                if not host_val or not isinstance(host_val, str):
                     msg = "Either 'config' or valid string 'host' must be provided"
-                    raise ValueError(msg)
-            return m.TapLdap.LdapClientConfig(
-                host=host,
-                port=self._coerce_int(
-                    convenience_kwargs.get("port", c.TapLdap.DEFAULT_PORT),
-                    c.TapLdap.DEFAULT_PORT,
-                ),
-                bind_dn=self._coerce_str_opt(convenience_kwargs.get("bind_dn")),
-                password=self._coerce_str_opt(convenience_kwargs.get("password")),
-                use_ssl=bool(convenience_kwargs.get("use_ssl")),
-                timeout=self._coerce_int(
-                    convenience_kwargs.get("timeout", c.TapLdap.DEFAULT_SEARCH_TIMEOUT),
-                    c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
-                ),
-                page_size=self._coerce_int(
-                    convenience_kwargs.get("page_size", c.TapLdap.DEFAULT_PAGE_SIZE),
-                    c.TapLdap.DEFAULT_PAGE_SIZE,
-                ),
-            )
+                    raise ValueError(msg) from e
+                msg = f"Invalid configuration: {e}"
+                raise ValueError(msg) from e
 
         def _execute_oracle_search_in_new_loop(
             self,
@@ -400,9 +364,9 @@ class FlextTapLdapClient:
                 RuntimeError,
                 ImportError,
             ) as e:
-                err_msg = str(e)
-                logger.debug("LDAP search failed: %s", err_msg)
-                return []
+                err_msg = f"LDAP search failed: {e}"
+                logger.exception("LDAP search failed: %s", err_msg)
+                raise RuntimeError(err_msg) from e
 
         def _process_oracle_entry(
             self,
@@ -452,8 +416,15 @@ class FlextTapLdapClient:
             for entries_returned, entry_data in enumerate(data_entries):
                 if size_limit > 0 and entries_returned >= size_limit:
                     break
-                converted = self._convert_entry_to_dict(entry_data)
-                entries.append(converted)
+                convert_result = self._convert_entry_to_dict(entry_data)
+                if convert_result.is_failure:
+                    logger.warning(
+                        "Skipping entry %d: %s",
+                        entries_returned,
+                        convert_result.error or "conversion failed",
+                    )
+                    continue
+                entries.append(convert_result.value)
             return entries
 
         def _process_oracle_search_results(
@@ -467,13 +438,21 @@ class FlextTapLdapClient:
             Single Responsibility: Handle only result processing logic.
             """
             results: MutableSequence[t.MutableContainerMapping] = []
-            for entry in search_result:
+            for idx, entry in enumerate(search_result):
                 if isinstance(entry, Mapping):
                     entry_dict: t.MutableContainerMapping = {
                         str(key): value for key, value in entry.items()
                     }
                 else:
-                    entry_dict = self._convert_entry_to_dict(entry)
+                    convert_result = self._convert_entry_to_dict(entry)
+                    if convert_result.is_failure:
+                        logger.warning(
+                            "Skipping Oracle entry %d: %s",
+                            idx,
+                            convert_result.error or "conversion failed",
+                        )
+                        continue
+                    entry_dict = convert_result.value
                 if oracle_oid_mode:
                     processed_entry = self._process_oracle_entry(entry_dict)
                     results.append(processed_entry)

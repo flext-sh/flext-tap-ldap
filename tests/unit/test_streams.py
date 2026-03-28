@@ -38,7 +38,7 @@ def _discover_stream_names(
     tap: FlextTapLdapTap,
     connection_config: t.ScalarMapping,
 ) -> tuple[t.StrSequence, int]:
-    result = tap.discover_streams(_tap_instance=_build_source_config(connection_config))
+    result = tap.discover_streams(tap_instance=_build_source_config(connection_config))
     assert result.is_success
     assert result.value is not None
     raw_entries = result.value["streams"]
