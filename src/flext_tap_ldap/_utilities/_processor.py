@@ -18,7 +18,7 @@ from flext_core import FlextLogger, r
 from flext_ldif import ldif
 from pydantic import TypeAdapter, ValidationError
 
-from flext_tap_ldap import m, t
+from flext_tap_ldap import c, m, t
 
 _DEFAULT_ENTRY_METADATA = m.Ldif.EntryMetadata()
 
@@ -109,15 +109,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     return result.is_success and bool(
                         result.value and result.value.valid_entries > 0,
                     )
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ):
+                except c.Meltano.Singer.SAFE_EXCEPTIONS:
                     return bool(self.dn and self.dn.strip())
 
             def parse_dn(self) -> t.ContainerMapping:
@@ -130,15 +122,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                         )
                     )
                     return {"dn": self.dn, "components": dn_obj.value}
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ):
+                except c.Meltano.Singer.SAFE_EXCEPTIONS:
                     return {"dn": self.dn}
 
             def remove_attribute(self, name: str) -> None:
@@ -188,15 +172,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                         if parsed_entry is not None:
                             return parsed_entry
                     return self._fallback_entry()
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ):
+                except c.Meltano.Singer.SAFE_EXCEPTIONS:
                     return self._fallback_entry()
 
             def _fallback_entry(self) -> m.Ldif.Entry:
@@ -347,15 +323,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                                 continue
                             yield self._convert_from_flext_entry(parsed_entry)
                             self.processed_entries += 1
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ) as e:
+                except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
                     error_msg = f"Failed to parse LDIF content from {source_name}: {e}"
                     if self.ignore_errors:
                         logger.exception(error_msg)
@@ -383,15 +351,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                         content = self._read_file_content(file_path, "latin-1")
                         result = self._parse_ldif_content(content, file_path)
                         yield from self._yield_entries_from_result(result)
-                    except (
-                        ValueError,
-                        TypeError,
-                        KeyError,
-                        AttributeError,
-                        OSError,
-                        RuntimeError,
-                        ImportError,
-                    ) as e:
+                    except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
                         self._handle_parsing_error(file_path, e, "latin-1")
 
             def to_singer_format(
@@ -531,15 +491,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 try:
                     valid_count = len(entries)
                     invalid_count = 0
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ):
+                except c.Meltano.Singer.SAFE_EXCEPTIONS:
                     for entry in entries:
                         if self.validate_entry(entry):
                             valid_count += 1
@@ -560,15 +512,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 """Validate LDIF entry using flext-ldif validation."""
                 try:
                     return True
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ) as e:
+                except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
                     self.validation_errors.append(
                         f"Validation error for {entry.dn}: {e}",
                     )
