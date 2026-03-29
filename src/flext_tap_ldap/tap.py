@@ -73,7 +73,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             "host": {"type": "string", "description": "LDAP server host"},
             "port": {
                 "type": "integer",
-                "default": c.TapLdap.DEFAULT_PORT,
+                "default": c.Ldap.ConnectionDefaults.PORT,
                 "description": "LDAP server port",
             },
             "bind_dn": {"type": "string", "description": "Bind DN for authentication"},

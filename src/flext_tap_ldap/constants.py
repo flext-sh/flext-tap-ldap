@@ -24,20 +24,24 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
     """
 
     class TapLdap:
-        """Tap LDAP namespace for cross-project access."""
+        """Tap LDAP namespace for cross-project access.
 
-        DEFAULT_PORT: Final[int] = 389
+        LDAP-generic constants are inherited from c.Ldap via MRO:
+        - c.Ldap.ConnectionDefaults.PORT (389)
+        - c.Ldap.ConnectionDefaults.TIMEOUT (30)
+
+        Meltano-generic constants are inherited from c.Meltano via MRO:
+        - c.DEFAULT_BATCH_SIZE (page size)
+        """
+
         DEFAULT_PAGE_SIZE: Final[int] = FlextMeltanoConstants.DEFAULT_BATCH_SIZE
-        DEFAULT_SEARCH_TIMEOUT: Final[int] = FlextLdapConstants.DEFAULT_TIMEOUT_SECONDS
+        DEFAULT_SEARCH_TIMEOUT: Final[int] = (
+            FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
+        )
 
         class Ldap:
-            """LDAP connection constants."""
+            """LDAP tap-specific connection constants."""
 
-            DEFAULT_PORT: Final[int] = FlextLdapConstants.Ldap.ConnectionDefaults.PORT
-            DEFAULT_PAGE_SIZE: Final[int] = FlextMeltanoConstants.DEFAULT_BATCH_SIZE
-            DEFAULT_TIMEOUT: Final[int] = (
-                FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
-            )
             MAX_PORT: Final[int] = 65535
 
         class Singer:
@@ -73,7 +77,6 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             """LDAP tap connection configuration."""
 
             DEFAULT_HOST: Final[str] = FlextLdapConstants.LOCALHOST
-            DEFAULT_PORT: Final[int] = 389
             DEFAULT_BASE_DN: Final[str] = ""
 
         class Search:

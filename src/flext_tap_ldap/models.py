@@ -195,7 +195,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             """LDAP connection configuration extracted from tap config."""
 
             host: str = ""
-            port: int = c.TapLdap.DEFAULT_PORT
+            port: int = c.Ldap.ConnectionDefaults.PORT
             bind_dn: str | None = None
             bind_password: str | None = None
             use_ssl: bool = False
@@ -235,7 +235,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             """Parameter t.NormalizedValue for LDAP client initialization."""
 
             host: str
-            port: int = c.TapLdap.DEFAULT_PORT
+            port: int = c.Ldap.ConnectionDefaults.PORT
             bind_dn: str | None = None
             password: str | None = None
             use_ssl: bool = False
@@ -249,7 +249,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             host: t.NonEmptyStr
             base_dn: t.NonEmptyStr
-            port: Annotated[t.PortNumber, Field(default=c.TapLdap.DEFAULT_PORT)]
+            port: Annotated[t.PortNumber, Field(default=c.Ldap.ConnectionDefaults.PORT)]
             bind_dn: str | None = None
             bind_password: str | None = None
             use_ssl: bool = False

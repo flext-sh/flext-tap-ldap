@@ -239,7 +239,9 @@ class FlextTapLdapClient:
             try:
                 config_dict = {
                     "host": convenience_kwargs.get("host", ""),
-                    "port": convenience_kwargs.get("port", c.TapLdap.DEFAULT_PORT),
+                    "port": convenience_kwargs.get(
+                        "port", c.Ldap.ConnectionDefaults.PORT
+                    ),
                     "bind_dn": convenience_kwargs.get("bind_dn") or None,
                     "password": convenience_kwargs.get("password") or None,
                     "use_ssl": bool(convenience_kwargs.get("use_ssl")),
