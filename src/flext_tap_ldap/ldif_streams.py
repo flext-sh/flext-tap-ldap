@@ -10,7 +10,7 @@ from flext_core import FlextLogger
 from flext_ldif import ldif
 from pydantic import ConfigDict, TypeAdapter, ValidationError
 
-from flext_tap_ldap import m, p, t
+from flext_tap_ldap import c, m, p, t
 
 if TYPE_CHECKING:
     from flext_meltano import FlextMeltanoAbstractions
@@ -203,15 +203,7 @@ class FlextTapLdapLdifStreams:
                     self.logger.error(
                         f"Failed to parse LDIF file {ldif_file}: {result.error}",
                     )
-            except (
-                ValueError,
-                TypeError,
-                KeyError,
-                AttributeError,
-                OSError,
-                RuntimeError,
-                ImportError,
-            ):
+            except c.Meltano.Singer.SAFE_EXCEPTIONS:
                 self.logger.exception("Error processing LDIF file %s", ldif_file)
 
     class LdifAnalysisStream:
@@ -336,15 +328,7 @@ class FlextTapLdapLdifStreams:
                     "entry_types": entry_types,
                     "object_classes": object_classes,
                 }
-            except (
-                ValueError,
-                TypeError,
-                KeyError,
-                AttributeError,
-                OSError,
-                RuntimeError,
-                ImportError,
-            ):
+            except c.Meltano.Singer.SAFE_EXCEPTIONS:
                 self.logger.exception("LDIF analysis error")
                 yield {
                     "analysis_id": "ldif_summary_error",
@@ -387,15 +371,7 @@ class FlextTapLdapLdifStreams:
                     "entry_types": empty,
                     "object_classes": dict(empty),
                 }
-            except (
-                ValueError,
-                TypeError,
-                KeyError,
-                AttributeError,
-                OSError,
-                RuntimeError,
-                ImportError,
-            ):
+            except c.Meltano.Singer.SAFE_EXCEPTIONS:
                 self.logger.exception("Error analyzing LDIF file %s", ldif_file)
                 empty_dict: Mapping[str, int] = {}
                 return {
