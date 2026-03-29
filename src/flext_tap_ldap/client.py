@@ -355,15 +355,7 @@ class FlextTapLdapClient:
                 )
                 result: r[m.Ldap.SearchResult] = self._flext_api.search(search_options)
                 return self._process_search_results(result, size_limit)
-            except (
-                ValueError,
-                TypeError,
-                KeyError,
-                AttributeError,
-                OSError,
-                RuntimeError,
-                ImportError,
-            ) as e:
+            except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
                 err_msg = f"LDAP search failed: {e}"
                 logger.exception("LDAP search failed: %s", err_msg)
                 raise RuntimeError(err_msg) from e

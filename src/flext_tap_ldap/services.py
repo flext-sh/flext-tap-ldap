@@ -429,15 +429,7 @@ class FlextTapLdapServices:
                     **validation_data,
                 }
                 return r[t.ContainerMapping].ok(file_stats)
-            except (
-                ValueError,
-                TypeError,
-                KeyError,
-                AttributeError,
-                OSError,
-                RuntimeError,
-                ImportError,
-            ) as e:
+            except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
                 logger.exception("Error getting LDIF statistics for %s", file_path)
                 return r[t.ContainerMapping].fail(
                     f"LDIF statistics failed: {e}",
@@ -477,15 +469,7 @@ class FlextTapLdapServices:
                     for entry in entries
                 ]
                 return r[Sequence[t.ContainerMapping]].ok(normalized)
-            except (
-                ValueError,
-                TypeError,
-                KeyError,
-                AttributeError,
-                OSError,
-                RuntimeError,
-                ImportError,
-            ) as e:
+            except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
                 logger.exception("Error processing LDIF file %s", file_path)
                 return r[Sequence[t.ContainerMapping]].fail(
                     f"LDIF processing failed: {e}",
@@ -515,15 +499,7 @@ class FlextTapLdapServices:
                 }
                 logger.info("LDIF file validation completed: %s", file_path)
                 return r[t.ContainerMapping].ok(validation_data)
-            except (
-                ValueError,
-                TypeError,
-                KeyError,
-                AttributeError,
-                OSError,
-                RuntimeError,
-                ImportError,
-            ) as e:
+            except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
                 logger.exception("Error validating LDIF file %s", file_path)
                 return r[t.ContainerMapping].fail(
                     f"LDIF validation failed: {e}",

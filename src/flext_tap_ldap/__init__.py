@@ -63,11 +63,17 @@ if TYPE_CHECKING:
 
 _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "CLI_COMMAND": ["flext_tap_ldap.tap", "CLI_COMMAND"],
-    "FlextLdifDistinguishedName": ["flext_tap_ldap.processor", "FlextLdifDistinguishedName"],
+    "FlextLdifDistinguishedName": [
+        "flext_tap_ldap.processor",
+        "FlextLdifDistinguishedName",
+    ],
     "FlextTapLdapClient": ["flext_tap_ldap.client", "FlextTapLdapClient"],
     "FlextTapLdapConstants": ["flext_tap_ldap.constants", "FlextTapLdapConstants"],
     "FlextTapLdapEntry": ["flext_tap_ldap.processor", "FlextTapLdapEntry"],
-    "FlextTapLdapLdifStreams": ["flext_tap_ldap.ldif_streams", "FlextTapLdapLdifStreams"],
+    "FlextTapLdapLdifStreams": [
+        "flext_tap_ldap.ldif_streams",
+        "FlextTapLdapLdifStreams",
+    ],
     "FlextTapLdapModels": ["flext_tap_ldap.models", "FlextTapLdapModels"],
     "FlextTapLdapProcessor": ["flext_tap_ldap.processor", "FlextTapLdapProcessor"],
     "FlextTapLdapProtocols": ["flext_tap_ldap.protocols", "FlextTapLdapProtocols"],
@@ -78,7 +84,10 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "FlextTapLdapTransformer": ["flext_tap_ldap.processor", "FlextTapLdapTransformer"],
     "FlextTapLdapTypes": ["flext_tap_ldap.typings", "FlextTapLdapTypes"],
     "FlextTapLdapUtilities": ["flext_tap_ldap.utilities", "FlextTapLdapUtilities"],
-    "FlextTapLdapUtilitiesProcessorMixin": ["flext_tap_ldap._utilities._processor", "FlextTapLdapUtilitiesProcessorMixin"],
+    "FlextTapLdapUtilitiesProcessorMixin": [
+        "flext_tap_ldap._utilities._processor",
+        "FlextTapLdapUtilitiesProcessorMixin",
+    ],
     "FlextTapLdapValidator": ["flext_tap_ldap.processor", "FlextTapLdapValidator"],
     "__all__": ["flext_tap_ldap.__version__", "__all__"],
     "__author__": ["flext_tap_ldap.__version__", "__author__"],
