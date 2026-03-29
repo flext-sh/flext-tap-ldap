@@ -13,8 +13,8 @@ from pathlib import Path
 
 import pytest
 from flext_core import FlextLogger, d
+from flext_ldap import p, u
 from flext_tests import tk
-from ldap3 import ALL as LDAP3_ALL, Connection, Server
 
 from tests import t
 
@@ -61,14 +61,14 @@ def ldap_container(project_root: Path) -> Iterator[None]:
 
     @d.retry(max_attempts=30, delay_seconds=2.0, backoff_strategy="linear")
     def _check_ldap_ready() -> None:
-        server = Server("localhost", port=10389, get_info=LDAP3_ALL)
-        with Connection(
+        server = u.Ldap.create_server(host="localhost", port=10389, get_info="ALL")
+        conn = u.Ldap.create_connection(
             server,
             user="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
             password="REDACTED_LDAP_BIND_PASSWORD_password",
             auto_bind=True,
-        ):
-            pass  # Connection auto-unbinds via context manager
+        )
+        conn.unbind()
 
     _check_ldap_ready()
     logger.info("LDAP container is ready")
@@ -80,19 +80,17 @@ def ldap_container(project_root: Path) -> Iterator[None]:
 
 
 @pytest.fixture
-def ldap_connection(_ldap_container: None) -> Generator[Connection]:
+def ldap_connection(_ldap_container: None) -> Generator[p.Ldap.Ldap3Connection]:
     """Create LDAP connection for testing."""
-    server = Server("localhost", port=10389, get_info=LDAP3_ALL)
-    conn = Connection(
+    server = u.Ldap.create_server(host="localhost", port=10389, get_info="ALL")
+    conn = u.Ldap.create_connection(
         server,
         user="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
         password="REDACTED_LDAP_BIND_PASSWORD_password",
         auto_bind=True,
     )
     yield conn
-    # Use context manager pattern to avoid ldap3 stub's partially unknown unbind type
-    with conn:
-        pass
+    conn.unbind()
 
 
 @pytest.fixture
