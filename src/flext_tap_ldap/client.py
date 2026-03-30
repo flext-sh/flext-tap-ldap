@@ -438,7 +438,7 @@ class FlextTapLdapClient:
                         str(key): value for key, value in entry.items()
                     }
                 else:
-                    convert_result = self._convert_entry_to_dict(entry)
+                    convert_result = self._convert_entry_to_dict(entry if isinstance(entry, (m.Ldif.Entry, Mapping)) else None)
                     if convert_result.is_failure:
                         logger.warning(
                             "Skipping Oracle entry %d: %s",

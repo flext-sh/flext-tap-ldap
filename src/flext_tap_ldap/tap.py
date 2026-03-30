@@ -182,11 +182,11 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
     def execute(self) -> r[t.ContainerMapping]:
         """Execute the tap and return execution state with stream discovery results."""
         discover_result = self.discover_streams(
-            m.Meltano.TapConfig(
-                name=self.name,
-                tap_type="tap-ldap",
-                connection_config=self._tap_config,
-            ),
+            m.Meltano.TapConfig.model_validate({
+                "name": self.name,
+                "tap_type": "tap-ldap",
+                "connection_config": self._tap_config,
+            }),
         )
         status = (
             c.Meltano.Enums.StreamStatus.COMPLETED
