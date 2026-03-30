@@ -13,10 +13,10 @@ from pathlib import Path
 
 import pytest
 from flext_core import FlextLogger, d
-from flext_ldap import p, u
+from flext_ldap import p
 from flext_tests import tk
 
-from tests import t
+from tests import c, t, u
 
 logger = FlextLogger(__name__)
 
@@ -59,13 +59,16 @@ def ldap_container(project_root: Path) -> Iterator[None]:
         logger.error(f"Failed to start OpenLDAP container: {start_result.error}")
         raise RuntimeError(f"Container startup failed: {start_result.error}")
 
+    dc = c.Ldap.Tests.Docker
+
     @d.retry(max_attempts=30, delay_seconds=2.0, backoff_strategy="linear")
     def _check_ldap_ready() -> None:
-        server = u.Ldap.create_server(host="localhost", port=10389, get_info="ALL")
+        admin_dn, admin_password = u.Ldap.Tests.get_admin_credentials()
+        server = u.Ldap.create_server(host="localhost", port=dc.PORT, get_info="ALL")
         conn = u.Ldap.create_connection(
             server,
-            user="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            password="REDACTED_LDAP_BIND_PASSWORD_password",
+            user=admin_dn,
+            password=admin_password,
             auto_bind=True,
         )
         conn.unbind()
@@ -82,11 +85,13 @@ def ldap_container(project_root: Path) -> Iterator[None]:
 @pytest.fixture
 def ldap_connection(_ldap_container: None) -> Generator[p.Ldap.Ldap3Connection]:
     """Create LDAP connection for testing."""
-    server = u.Ldap.create_server(host="localhost", port=10389, get_info="ALL")
+    dc = c.Ldap.Tests.Docker
+    admin_dn, admin_password = u.Ldap.Tests.get_admin_credentials()
+    server = u.Ldap.create_server(host="localhost", port=dc.PORT, get_info="ALL")
     conn = u.Ldap.create_connection(
         server,
-        user="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-        password="REDACTED_LDAP_BIND_PASSWORD_password",
+        user=admin_dn,
+        password=admin_password,
         auto_bind=True,
     )
     yield conn
@@ -96,12 +101,14 @@ def ldap_connection(_ldap_container: None) -> Generator[p.Ldap.Ldap3Connection]:
 @pytest.fixture
 def tap_config_file(tmp_path: Path, _ldap_container: None) -> Path:
     """Create tap configuration file for testing."""
+    dc = c.Ldap.Tests.Docker
+    admin_dn, admin_password = u.Ldap.Tests.get_admin_credentials()
     config = {
         "ldap_host": "localhost",
-        "ldap_port": 10389,
-        "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-        "bind_password": "REDACTED_LDAP_BIND_PASSWORD_password",
-        "base_dn": "dc=test,dc=com",
+        "ldap_port": dc.PORT,
+        "bind_dn": admin_dn,
+        "bind_password": admin_password,
+        "base_dn": dc.BASE_DN,
         "page_size": 1000,
     }
     config_file = tmp_path / "tap_config.json"
