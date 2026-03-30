@@ -5,82 +5,93 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, MutableMapping, Sequence
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING
 
-from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
+from flext_core.lazy import install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_core import FlextTypes
-    from flext_tests import d, e, h, r, s, x
-
     from tests import (
-        conftest,
-        constants,
-        e2e,
-        models,
-        protocols,
-        typings,
-        unit,
-        utilities,
+        conftest as conftest,
+        constants as constants,
+        e2e as e2e,
+        models as models,
+        protocols as protocols,
+        typings as typings,
+        unit as unit,
+        utilities as utilities,
     )
-    from tests.conftest import pytest_configure, shared_ldap_container, test_data_dir
+    from tests.conftest import (
+        pytest_configure as pytest_configure,
+        shared_ldap_container as shared_ldap_container,
+        test_data_dir as test_data_dir,
+    )
     from tests.constants import (
-        FlextTapLdapTestConstants,
+        FlextTapLdapTestConstants as FlextTapLdapTestConstants,
         FlextTapLdapTestConstants as c,
     )
-    from tests.e2e import test_integration
+    from tests.e2e import test_integration as test_integration
     from tests.e2e.conftest import (
-        catalog_file,
-        ldap_connection,
-        ldap_container,
-        logger,
-        project_root,
-        sample_catalog,
-        tap_config_file,
+        catalog_file as catalog_file,
+        ldap_connection as ldap_connection,
+        ldap_container as ldap_container,
+        logger as logger,
+        project_root as project_root,
+        sample_catalog as sample_catalog,
+        tap_config_file as tap_config_file,
     )
-    from tests.e2e.test_integration import TestFlextTapLdapIntegration
-    from tests.models import FlextTapLdapTestModels, FlextTapLdapTestModels as m
+    from tests.e2e.test_integration import (
+        TestFlextTapLdapIntegration as TestFlextTapLdapIntegration,
+    )
+    from tests.models import (
+        FlextTapLdapTestModels as FlextTapLdapTestModels,
+        FlextTapLdapTestModels as m,
+    )
     from tests.protocols import (
-        FlextTapLdapTestProtocols,
+        FlextTapLdapTestProtocols as FlextTapLdapTestProtocols,
         FlextTapLdapTestProtocols as p,
     )
-    from tests.typings import FlextTapLdapTestTypes, FlextTapLdapTestTypes as t
-    from tests.unit import (
-        test_client,
-        test_client_quick,
-        test_ldif_processor,
-        test_ldif_stream,
-        test_models,
-        test_streams,
-        test_tap,
+    from tests.typings import (
+        FlextTapLdapTestTypes as FlextTapLdapTestTypes,
+        FlextTapLdapTestTypes as t,
     )
-    from tests.unit.test_client import TestLDAPClientCoverageBoost
-    from tests.unit.test_client_quick import TestLDAPClientQuick
-    from tests.unit.test_ldif_processor import TestLdifProcessor
-    from tests.unit.test_ldif_stream import TestLDIFStreamBasic
+    from tests.unit import (
+        test_client as test_client,
+        test_client_quick as test_client_quick,
+        test_ldif_processor as test_ldif_processor,
+        test_ldif_stream as test_ldif_stream,
+        test_models as test_models,
+        test_streams as test_streams,
+        test_tap as test_tap,
+    )
+    from tests.unit.test_client import (
+        TestLDAPClientCoverageBoost as TestLDAPClientCoverageBoost,
+    )
+    from tests.unit.test_client_quick import TestLDAPClientQuick as TestLDAPClientQuick
+    from tests.unit.test_ldif_processor import TestLdifProcessor as TestLdifProcessor
+    from tests.unit.test_ldif_stream import TestLDIFStreamBasic as TestLDIFStreamBasic
     from tests.unit.test_models import (
-        TestConnectionTestedEvent,
-        TestRecordExtractedEvent,
-        TestStreamDiscoveredEvent,
-        TestTapExecutionCompletedEvent,
-        TestTapExecutionStartedEvent,
+        TestConnectionTestedEvent as TestConnectionTestedEvent,
+        TestRecordExtractedEvent as TestRecordExtractedEvent,
+        TestStreamDiscoveredEvent as TestStreamDiscoveredEvent,
+        TestTapExecutionCompletedEvent as TestTapExecutionCompletedEvent,
+        TestTapExecutionStartedEvent as TestTapExecutionStartedEvent,
     )
     from tests.unit.test_streams import (
-        TestCustomStream,
-        TestCustomStreamParams,
-        TestGroupsStream,
-        TestLDAPBaseStream,
-        TestLDAPBaseStreamDirectUsage,
-        TestOrganizationalUnitsStream,
-        TestSchemaStream,
-        TestStreamExceptionHandling,
-        TestStreamIntegration,
-        TestUsersStream,
+        TestCustomStream as TestCustomStream,
+        TestCustomStreamParams as TestCustomStreamParams,
+        TestGroupsStream as TestGroupsStream,
+        TestLDAPBaseStream as TestLDAPBaseStream,
+        TestLDAPBaseStreamDirectUsage as TestLDAPBaseStreamDirectUsage,
+        TestOrganizationalUnitsStream as TestOrganizationalUnitsStream,
+        TestSchemaStream as TestSchemaStream,
+        TestStreamExceptionHandling as TestStreamExceptionHandling,
+        TestStreamIntegration as TestStreamIntegration,
+        TestUsersStream as TestUsersStream,
     )
-    from tests.unit.test_tap import TestFlextTapLdapTapUnit
+    from tests.unit.test_tap import TestFlextTapLdapTapUnit as TestFlextTapLdapTapUnit
     from tests.utilities import (
-        FlextTapLdapTestUtilities,
+        FlextTapLdapTestUtilities as FlextTapLdapTestUtilities,
         FlextTapLdapTestUtilities as u,
     )
 
@@ -177,7 +188,7 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "x": ["flext_tests", "x"],
 }
 
-__all__ = [
+_EXPORTS: Sequence[str] = [
     "FlextTapLdapTestConstants",
     "FlextTapLdapTestModels",
     "FlextTapLdapTestProtocols",
@@ -244,41 +255,4 @@ __all__ = [
 ]
 
 
-_LAZY_CACHE: MutableMapping[str, FlextTypes.ModuleExport] = {}
-
-
-def __getattr__(name: str) -> FlextTypes.ModuleExport:
-    """Lazy-load module attributes on first access (PEP 562).
-
-    A local cache ``_LAZY_CACHE`` persists resolved objects across repeated
-    accesses during process lifetime.
-
-    Args:
-        name: Attribute name requested by dir()/import.
-
-    Returns:
-        Lazy-loaded module export type.
-
-    Raises:
-        AttributeError: If attribute not registered.
-
-    """
-    if name in _LAZY_CACHE:
-        return _LAZY_CACHE[name]
-
-    value = lazy_getattr(name, _LAZY_IMPORTS, globals(), __name__)
-    _LAZY_CACHE[name] = value
-    return value
-
-
-def __dir__() -> Sequence[str]:
-    """Return list of available attributes for dir() and autocomplete.
-
-    Returns:
-        List of public names from module exports.
-
-    """
-    return sorted(__all__)
-
-
-cleanup_submodule_namespace(__name__, _LAZY_IMPORTS)
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, _EXPORTS)
