@@ -13,6 +13,15 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core import FlextTypes
 
+    from tests.unit import (
+        test_client,
+        test_client_quick,
+        test_ldif_processor,
+        test_ldif_stream,
+        test_models,
+        test_streams,
+        test_tap,
+    )
     from tests.unit.test_client import TestLDAPClientCoverageBoost
     from tests.unit.test_client_quick import TestLDAPClientQuick
     from tests.unit.test_ldif_processor import TestLdifProcessor
@@ -83,6 +92,13 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "TestTapExecutionStartedEvent",
     ],
     "TestUsersStream": ["tests.unit.test_streams", "TestUsersStream"],
+    "test_client": ["tests.unit.test_client", ""],
+    "test_client_quick": ["tests.unit.test_client_quick", ""],
+    "test_ldif_processor": ["tests.unit.test_ldif_processor", ""],
+    "test_ldif_stream": ["tests.unit.test_ldif_stream", ""],
+    "test_models": ["tests.unit.test_models", ""],
+    "test_streams": ["tests.unit.test_streams", ""],
+    "test_tap": ["tests.unit.test_tap", ""],
 }
 
 __all__ = [
@@ -106,6 +122,13 @@ __all__ = [
     "TestTapExecutionCompletedEvent",
     "TestTapExecutionStartedEvent",
     "TestUsersStream",
+    "test_client",
+    "test_client_quick",
+    "test_ldif_processor",
+    "test_ldif_stream",
+    "test_models",
+    "test_streams",
+    "test_tap",
 ]
 
 

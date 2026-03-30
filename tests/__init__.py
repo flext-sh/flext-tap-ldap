@@ -14,12 +14,22 @@ if TYPE_CHECKING:
     from flext_core import FlextTypes
     from flext_tests import d, e, h, r, s, x
 
-    from tests import e2e, unit
+    from tests import (
+        conftest,
+        constants,
+        e2e,
+        models,
+        protocols,
+        typings,
+        unit,
+        utilities,
+    )
     from tests.conftest import pytest_configure, shared_ldap_container, test_data_dir
     from tests.constants import (
         FlextTapLdapTestConstants,
         FlextTapLdapTestConstants as c,
     )
+    from tests.e2e import test_integration
     from tests.e2e.conftest import (
         catalog_file,
         ldap_connection,
@@ -36,6 +46,15 @@ if TYPE_CHECKING:
         FlextTapLdapTestProtocols as p,
     )
     from tests.typings import FlextTapLdapTestTypes, FlextTapLdapTestTypes as t
+    from tests.unit import (
+        test_client,
+        test_client_quick,
+        test_ldif_processor,
+        test_ldif_stream,
+        test_models,
+        test_streams,
+        test_tap,
+    )
     from tests.unit.test_client import TestLDAPClientCoverageBoost
     from tests.unit.test_client_quick import TestLDAPClientQuick
     from tests.unit.test_ldif_processor import TestLdifProcessor
@@ -121,6 +140,8 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "TestUsersStream": ["tests.unit.test_streams", "TestUsersStream"],
     "c": ["tests.constants", "FlextTapLdapTestConstants"],
     "catalog_file": ["tests.e2e.conftest", "catalog_file"],
+    "conftest": ["tests.conftest", ""],
+    "constants": ["tests.constants", ""],
     "d": ["flext_tests", "d"],
     "e": ["flext_tests", "e"],
     "e2e": ["tests.e2e", ""],
@@ -129,8 +150,10 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "ldap_container": ["tests.e2e.conftest", "ldap_container"],
     "logger": ["tests.e2e.conftest", "logger"],
     "m": ["tests.models", "FlextTapLdapTestModels"],
+    "models": ["tests.models", ""],
     "p": ["tests.protocols", "FlextTapLdapTestProtocols"],
     "project_root": ["tests.e2e.conftest", "project_root"],
+    "protocols": ["tests.protocols", ""],
     "pytest_configure": ["tests.conftest", "pytest_configure"],
     "r": ["flext_tests", "r"],
     "s": ["flext_tests", "s"],
@@ -138,9 +161,19 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "shared_ldap_container": ["tests.conftest", "shared_ldap_container"],
     "t": ["tests.typings", "FlextTapLdapTestTypes"],
     "tap_config_file": ["tests.e2e.conftest", "tap_config_file"],
+    "test_client": ["tests.unit.test_client", ""],
+    "test_client_quick": ["tests.unit.test_client_quick", ""],
     "test_data_dir": ["tests.conftest", "test_data_dir"],
+    "test_integration": ["tests.e2e.test_integration", ""],
+    "test_ldif_processor": ["tests.unit.test_ldif_processor", ""],
+    "test_ldif_stream": ["tests.unit.test_ldif_stream", ""],
+    "test_models": ["tests.unit.test_models", ""],
+    "test_streams": ["tests.unit.test_streams", ""],
+    "test_tap": ["tests.unit.test_tap", ""],
+    "typings": ["tests.typings", ""],
     "u": ["tests.utilities", "FlextTapLdapTestUtilities"],
     "unit": ["tests.unit", ""],
+    "utilities": ["tests.utilities", ""],
     "x": ["flext_tests", "x"],
 }
 
@@ -173,6 +206,8 @@ __all__ = [
     "TestUsersStream",
     "c",
     "catalog_file",
+    "conftest",
+    "constants",
     "d",
     "e",
     "e2e",
@@ -181,8 +216,10 @@ __all__ = [
     "ldap_container",
     "logger",
     "m",
+    "models",
     "p",
     "project_root",
+    "protocols",
     "pytest_configure",
     "r",
     "s",
@@ -190,9 +227,19 @@ __all__ = [
     "shared_ldap_container",
     "t",
     "tap_config_file",
+    "test_client",
+    "test_client_quick",
     "test_data_dir",
+    "test_integration",
+    "test_ldif_processor",
+    "test_ldif_stream",
+    "test_models",
+    "test_streams",
+    "test_tap",
+    "typings",
     "u",
     "unit",
+    "utilities",
     "x",
 ]
 

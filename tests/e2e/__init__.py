@@ -13,6 +13,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core import FlextTypes
 
+    from tests.e2e import conftest, test_integration
     from tests.e2e.conftest import (
         catalog_file,
         ldap_connection,
@@ -30,23 +31,27 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "TestFlextTapLdapIntegration",
     ],
     "catalog_file": ["tests.e2e.conftest", "catalog_file"],
+    "conftest": ["tests.e2e.conftest", ""],
     "ldap_connection": ["tests.e2e.conftest", "ldap_connection"],
     "ldap_container": ["tests.e2e.conftest", "ldap_container"],
     "logger": ["tests.e2e.conftest", "logger"],
     "project_root": ["tests.e2e.conftest", "project_root"],
     "sample_catalog": ["tests.e2e.conftest", "sample_catalog"],
     "tap_config_file": ["tests.e2e.conftest", "tap_config_file"],
+    "test_integration": ["tests.e2e.test_integration", ""],
 }
 
 __all__ = [
     "TestFlextTapLdapIntegration",
     "catalog_file",
+    "conftest",
     "ldap_connection",
     "ldap_container",
     "logger",
     "project_root",
     "sample_catalog",
     "tap_config_file",
+    "test_integration",
 ]
 
 
