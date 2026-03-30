@@ -93,9 +93,7 @@ class FlextTapLdapTestUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
                 u_ldap = FlextTapLdapTestUtilities.Ldap
                 for candidate_dn, candidate_password in candidates:
                     try:
-                        server = u_ldap.create_bare_server(
-                            "localhost", port=d.PORT
-                        )
+                        server = u_ldap.create_bare_server("localhost", port=d.PORT)
                         test_conn = u_ldap.create_connection(
                             server,
                             user=candidate_dn,
