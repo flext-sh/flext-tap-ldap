@@ -17,35 +17,11 @@ from typing import TYPE_CHECKING
 
 from flext_core.lazy import install_lazy_exports
 
-from flext_tap_ldap.__version__ import (
-    __author__,
-    __author_email__,
-    __description__,
-    __license__,
-    __title__,
-    __url__,
-    __version__,
-    __version_info__,
-)
+from flext_tap_ldap._utilities import _LAZY_IMPORTS as _CHILD_LAZY_0
 
 if TYPE_CHECKING:
-    from flext_ldap import *
-
-    from flext_tap_ldap import (
-        client,
-        constants,
-        ldif_streams,
-        models,
-        processor,
-        protocols,
-        services,
-        settings,
-        streams,
-        tap,
-        typings,
-        utilities,
-    )
-    from flext_tap_ldap._utilities._processor import *
+    from flext_tap_ldap.__version__ import *
+    from flext_tap_ldap._utilities import *
     from flext_tap_ldap.client import *
     from flext_tap_ldap.constants import *
     from flext_tap_ldap.ldif_streams import *
@@ -60,6 +36,7 @@ if TYPE_CHECKING:
     from flext_tap_ldap.utilities import *
 
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
+    **_CHILD_LAZY_0,
     "CLI_COMMAND": "flext_tap_ldap.tap",
     "FlextLdifDistinguishedName": "flext_tap_ldap.processor",
     "FlextTapLdapClient": "flext_tap_ldap.client",
@@ -76,8 +53,16 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "FlextTapLdapTransformer": "flext_tap_ldap.processor",
     "FlextTapLdapTypes": "flext_tap_ldap.typings",
     "FlextTapLdapUtilities": "flext_tap_ldap.utilities",
-    "FlextTapLdapUtilitiesProcessorMixin": "flext_tap_ldap._utilities._processor",
     "FlextTapLdapValidator": "flext_tap_ldap.processor",
+    "__author__": "flext_tap_ldap.__version__",
+    "__author_email__": "flext_tap_ldap.__version__",
+    "__description__": "flext_tap_ldap.__version__",
+    "__license__": "flext_tap_ldap.__version__",
+    "__title__": "flext_tap_ldap.__version__",
+    "__url__": "flext_tap_ldap.__version__",
+    "__version__": "flext_tap_ldap.__version__",
+    "__version_info__": "flext_tap_ldap.__version__",
+    "_utilities": "flext_tap_ldap._utilities",
     "c": ["flext_tap_ldap.constants", "FlextTapLdapConstants"],
     "client": "flext_tap_ldap.client",
     "constants": "flext_tap_ldap.constants",
@@ -106,4 +91,4 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
 }
 
 
-install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, sorted(_LAZY_IMPORTS))
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)
