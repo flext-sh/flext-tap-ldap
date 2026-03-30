@@ -22,7 +22,6 @@ if TYPE_CHECKING:
     from flext_ldap import d, e, h, r, s, x
 
     from flext_tap_ldap.__version__ import (
-        __all__,
         __author__,
         __author_email__,
         __description__,
@@ -89,7 +88,6 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "FlextTapLdapUtilitiesProcessorMixin",
     ],
     "FlextTapLdapValidator": ["flext_tap_ldap.processor", "FlextTapLdapValidator"],
-    "__all__": ["flext_tap_ldap.__version__", "__all__"],
     "__author__": ["flext_tap_ldap.__version__", "__author__"],
     "__author_email__": ["flext_tap_ldap.__version__", "__author_email__"],
     "__description__": ["flext_tap_ldap.__version__", "__description__"],
@@ -132,7 +130,6 @@ __all__ = [
     "FlextTapLdapUtilities",
     "FlextTapLdapUtilitiesProcessorMixin",
     "FlextTapLdapValidator",
-    "__all__",
     "__author__",
     "__author_email__",
     "__description__",

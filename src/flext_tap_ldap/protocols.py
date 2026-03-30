@@ -19,8 +19,7 @@ from typing import Protocol, runtime_checkable
 from flext_ldap import FlextLdapProtocols
 from flext_meltano import FlextMeltanoProtocols
 
-from flext_tap_ldap import t
-from flext_tap_ldap.models import m
+from flext_tap_ldap import m, t
 
 
 class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):

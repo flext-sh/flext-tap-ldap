@@ -9,8 +9,7 @@ from flext_core import FlextContainer, FlextLogger, e, r
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 
-from flext_tap_ldap import c, p, t
-from flext_tap_ldap._utilities import FlextTapLdapUtilitiesProcessorMixin
+from flext_tap_ldap import FlextTapLdapUtilitiesProcessorMixin, c, p, t
 
 
 class FlextTapLdapUtilities(

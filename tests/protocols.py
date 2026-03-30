@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsProtocols
 
-from flext_tap_ldap.protocols import FlextTapLdapProtocols
+from flext_tap_ldap import FlextTapLdapProtocols
 
 
 class FlextTapLdapTestProtocols(FlextTestsProtocols, FlextTapLdapProtocols):

@@ -14,7 +14,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tap_ldap.utilities import FlextTapLdapUtilities
+from flext_tap_ldap import FlextTapLdapUtilities
 
 FlextLdifDistinguishedName = FlextTapLdapUtilities.TapLdap.DistinguishedName
 FlextTapLdapEntry = FlextTapLdapUtilities.TapLdap.Entry
