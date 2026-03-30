@@ -17,20 +17,21 @@ from typing import TYPE_CHECKING
 
 from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 
+from flext_tap_ldap.__version__ import (
+    __author__,
+    __author_email__,
+    __description__,
+    __license__,
+    __title__,
+    __url__,
+    __version__,
+    __version_info__,
+)
+
 if TYPE_CHECKING:
     from flext_core import FlextTypes
     from flext_ldap import d, e, h, r, s, x
 
-    from flext_tap_ldap.__version__ import (
-        __author__,
-        __author_email__,
-        __description__,
-        __license__,
-        __title__,
-        __url__,
-        __version__,
-        __version_info__,
-    )
     from flext_tap_ldap._utilities._processor import FlextTapLdapUtilitiesProcessorMixin
     from flext_tap_ldap.client import FlextTapLdapClient
     from flext_tap_ldap.constants import (
@@ -88,14 +89,6 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "FlextTapLdapUtilitiesProcessorMixin",
     ],
     "FlextTapLdapValidator": ["flext_tap_ldap.processor", "FlextTapLdapValidator"],
-    "__author__": ["flext_tap_ldap.__version__", "__author__"],
-    "__author_email__": ["flext_tap_ldap.__version__", "__author_email__"],
-    "__description__": ["flext_tap_ldap.__version__", "__description__"],
-    "__license__": ["flext_tap_ldap.__version__", "__license__"],
-    "__title__": ["flext_tap_ldap.__version__", "__title__"],
-    "__url__": ["flext_tap_ldap.__version__", "__url__"],
-    "__version__": ["flext_tap_ldap.__version__", "__version__"],
-    "__version_info__": ["flext_tap_ldap.__version__", "__version_info__"],
     "c": ["flext_tap_ldap.constants", "FlextTapLdapConstants"],
     "d": ["flext_ldap", "d"],
     "e": ["flext_ldap", "e"],
