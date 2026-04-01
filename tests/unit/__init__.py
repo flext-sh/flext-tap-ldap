@@ -13,6 +13,15 @@ from flext_core.lazy import install_lazy_exports
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
 
+    from tests.unit import (
+        test_client,
+        test_client_quick,
+        test_ldif_processor,
+        test_ldif_stream,
+        test_models,
+        test_streams,
+        test_tap,
+    )
     from tests.unit.test_client import TestLDAPClientCoverageBoost
     from tests.unit.test_client_quick import TestLDAPClientQuick
     from tests.unit.test_ldif_processor import TestLdifProcessor

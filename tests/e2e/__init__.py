@@ -13,7 +13,16 @@ from flext_core.lazy import install_lazy_exports
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
 
-    from tests.e2e.conftest import *
+    from tests.e2e import conftest, test_integration
+    from tests.e2e.conftest import (
+        catalog_file,
+        ldap_connection,
+        ldap_container,
+        logger,
+        project_root,
+        sample_catalog,
+        tap_config_file,
+    )
     from tests.e2e.test_integration import TestFlextTapLdapIntegration
 
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {

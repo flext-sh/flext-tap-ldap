@@ -32,19 +32,49 @@ if _TYPE_CHECKING:
     from flext_core import FlextTypes
     from flext_ldap import d, e, h, r, s, x
 
-    from flext_tap_ldap._utilities import *
-    from flext_tap_ldap.client import *
-    from flext_tap_ldap.constants import *
-    from flext_tap_ldap.ldif_streams import *
-    from flext_tap_ldap.models import *
-    from flext_tap_ldap.processor import *
-    from flext_tap_ldap.protocols import *
-    from flext_tap_ldap.services import *
-    from flext_tap_ldap.settings import *
-    from flext_tap_ldap.streams import *
-    from flext_tap_ldap.tap import *
-    from flext_tap_ldap.typings import *
-    from flext_tap_ldap.utilities import *
+    from flext_tap_ldap import (
+        _utilities,
+        client,
+        constants,
+        ldif_streams,
+        models,
+        processor,
+        protocols,
+        services,
+        settings,
+        streams,
+        tap,
+        typings,
+        utilities,
+    )
+    from flext_tap_ldap._utilities import FlextTapLdapUtilitiesProcessorMixin
+    from flext_tap_ldap.client import FlextTapLdapClient
+    from flext_tap_ldap.constants import (
+        FlextTapLdapConstants,
+        FlextTapLdapConstants as c,
+    )
+    from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
+    from flext_tap_ldap.models import FlextTapLdapModels, FlextTapLdapModels as m
+    from flext_tap_ldap.processor import (
+        FlextLdifDistinguishedName,
+        FlextTapLdapEntry,
+        FlextTapLdapProcessor,
+        FlextTapLdapTransformer,
+        FlextTapLdapValidator,
+    )
+    from flext_tap_ldap.protocols import (
+        FlextTapLdapProtocols,
+        FlextTapLdapProtocols as p,
+    )
+    from flext_tap_ldap.services import FlextTapLdapServices
+    from flext_tap_ldap.settings import FlextTapLdapSettings
+    from flext_tap_ldap.streams import FlextTapLdapStreams
+    from flext_tap_ldap.tap import CLI_COMMAND, FlextTapLdapTap, logger, main
+    from flext_tap_ldap.typings import FlextTapLdapTypes, FlextTapLdapTypes as t
+    from flext_tap_ldap.utilities import (
+        FlextTapLdapUtilities,
+        FlextTapLdapUtilities as u,
+    )
 
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = merge_lazy_imports(
     ("flext_tap_ldap._utilities",),

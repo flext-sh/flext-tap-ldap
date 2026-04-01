@@ -14,14 +14,71 @@ if _TYPE_CHECKING:
     from flext_core import FlextTypes
     from flext_tests import d, e, h, r, s, x
 
-    from tests.conftest import *
-    from tests.constants import *
-    from tests.e2e import *
-    from tests.models import *
-    from tests.protocols import *
-    from tests.typings import *
-    from tests.unit import *
-    from tests.utilities import *
+    from tests import (
+        conftest,
+        constants,
+        e2e,
+        models,
+        protocols,
+        typings,
+        unit,
+        utilities,
+    )
+    from tests.conftest import pytest_configure, shared_ldap_container, test_data_dir
+    from tests.constants import (
+        FlextTapLdapTestConstants,
+        FlextTapLdapTestConstants as c,
+    )
+    from tests.e2e import (
+        TestFlextTapLdapIntegration,
+        catalog_file,
+        ldap_connection,
+        ldap_container,
+        logger,
+        project_root,
+        sample_catalog,
+        tap_config_file,
+        test_integration,
+    )
+    from tests.models import FlextTapLdapTestModels, FlextTapLdapTestModels as m
+    from tests.protocols import (
+        FlextTapLdapTestProtocols,
+        FlextTapLdapTestProtocols as p,
+    )
+    from tests.typings import FlextTapLdapTestTypes, FlextTapLdapTestTypes as t
+    from tests.unit import (
+        TestConnectionTestedEvent,
+        TestCustomStream,
+        TestCustomStreamParams,
+        TestFlextTapLdapTapUnit,
+        TestGroupsStream,
+        TestLDAPBaseStream,
+        TestLDAPBaseStreamDirectUsage,
+        TestLDAPClientCoverageBoost,
+        TestLDAPClientQuick,
+        TestLdifProcessor,
+        TestLDIFStreamBasic,
+        TestOrganizationalUnitsStream,
+        TestRecordExtractedEvent,
+        TestSchemaStream,
+        TestStreamDiscoveredEvent,
+        TestStreamExceptionHandling,
+        TestStreamIntegration,
+        TestTapExecutionCompletedEvent,
+        TestTapExecutionStartedEvent,
+        TestUsersStream,
+        test_client,
+        test_client_quick,
+        test_ldif_processor,
+        test_ldif_stream,
+        test_models,
+        test_streams,
+        test_tap,
+    )
+    from tests.utilities import (
+        FlextTapLdapTestUtilities,
+        FlextTapLdapTestUtilities as u,
+    )
 
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = merge_lazy_imports(
     (
