@@ -13,13 +13,30 @@ from flext_core.lazy import install_lazy_exports
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
 
-    from tests.unit.test_client import *
-    from tests.unit.test_client_quick import *
-    from tests.unit.test_ldif_processor import *
-    from tests.unit.test_ldif_stream import *
-    from tests.unit.test_models import *
-    from tests.unit.test_streams import *
-    from tests.unit.test_tap import *
+    from tests.unit.test_client import TestLDAPClientCoverageBoost
+    from tests.unit.test_client_quick import TestLDAPClientQuick
+    from tests.unit.test_ldif_processor import TestLdifProcessor
+    from tests.unit.test_ldif_stream import TestLDIFStreamBasic
+    from tests.unit.test_models import (
+        TestConnectionTestedEvent,
+        TestRecordExtractedEvent,
+        TestStreamDiscoveredEvent,
+        TestTapExecutionCompletedEvent,
+        TestTapExecutionStartedEvent,
+    )
+    from tests.unit.test_streams import (
+        TestCustomStream,
+        TestCustomStreamParams,
+        TestGroupsStream,
+        TestLDAPBaseStream,
+        TestLDAPBaseStreamDirectUsage,
+        TestOrganizationalUnitsStream,
+        TestSchemaStream,
+        TestStreamExceptionHandling,
+        TestStreamIntegration,
+        TestUsersStream,
+    )
+    from tests.unit.test_tap import TestFlextTapLdapTapUnit
 
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "TestConnectionTestedEvent": "tests.unit.test_models",

@@ -14,7 +14,7 @@ if _TYPE_CHECKING:
     from flext_core import FlextTypes
 
     from tests.e2e.conftest import *
-    from tests.e2e.test_integration import *
+    from tests.e2e.test_integration import TestFlextTapLdapIntegration
 
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "TestFlextTapLdapIntegration": "tests.e2e.test_integration",
