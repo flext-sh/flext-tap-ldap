@@ -17,10 +17,21 @@ from typing import TYPE_CHECKING as _TYPE_CHECKING
 
 from flext_core.lazy import install_lazy_exports, merge_lazy_imports
 
+from flext_tap_ldap.__version__ import (
+    __author__,
+    __author_email__,
+    __description__,
+    __license__,
+    __title__,
+    __url__,
+    __version__,
+    __version_info__,
+)
+
 if _TYPE_CHECKING:
+    from flext_core import FlextTypes
     from flext_ldap import d, e, h, r, s, x
 
-    from flext_tap_ldap.__version__ import *
     from flext_tap_ldap._utilities import *
     from flext_tap_ldap.client import *
     from flext_tap_ldap.constants import *
@@ -55,14 +66,6 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = merge_lazy_imports(
         "FlextTapLdapTypes": "flext_tap_ldap.typings",
         "FlextTapLdapUtilities": "flext_tap_ldap.utilities",
         "FlextTapLdapValidator": "flext_tap_ldap.processor",
-        "__author__": "flext_tap_ldap.__version__",
-        "__author_email__": "flext_tap_ldap.__version__",
-        "__description__": "flext_tap_ldap.__version__",
-        "__license__": "flext_tap_ldap.__version__",
-        "__title__": "flext_tap_ldap.__version__",
-        "__url__": "flext_tap_ldap.__version__",
-        "__version__": "flext_tap_ldap.__version__",
-        "__version_info__": "flext_tap_ldap.__version__",
         "_utilities": "flext_tap_ldap._utilities",
         "c": ("flext_tap_ldap.constants", "FlextTapLdapConstants"),
         "client": "flext_tap_ldap.client",
@@ -93,4 +96,18 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = merge_lazy_imports(
 )
 
 
-install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)
+install_lazy_exports(
+    __name__,
+    globals(),
+    _LAZY_IMPORTS,
+    [
+        "__author__",
+        "__author_email__",
+        "__description__",
+        "__license__",
+        "__title__",
+        "__url__",
+        "__version__",
+        "__version_info__",
+    ],
+)
