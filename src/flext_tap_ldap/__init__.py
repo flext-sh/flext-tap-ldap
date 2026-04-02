@@ -29,7 +29,12 @@ from flext_tap_ldap.__version__ import (
 
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
-    from flext_ldap import d, e, h, r, s, x
+    from flext_core.decorators import FlextDecorators as d
+    from flext_core.exceptions import FlextExceptions as e
+    from flext_core.handlers import FlextHandlers as h
+    from flext_core.mixins import FlextMixins as x
+    from flext_core.result import FlextResult as r
+    from flext_core.service import FlextService as s
     from flext_tap_ldap import (
         _utilities,
         api,
@@ -102,9 +107,9 @@ _LAZY_IMPORTS: FlextTypes.LazyImportIndex = merge_lazy_imports(
         "c": ("flext_tap_ldap.constants", "FlextTapLdapConstants"),
         "client": "flext_tap_ldap.client",
         "constants": "flext_tap_ldap.constants",
-        "d": "flext_ldap",
-        "e": "flext_ldap",
-        "h": "flext_ldap",
+        "d": ("flext_core.decorators", "FlextDecorators"),
+        "e": ("flext_core.exceptions", "FlextExceptions"),
+        "h": ("flext_core.handlers", "FlextHandlers"),
         "ldif_streams": "flext_tap_ldap.ldif_streams",
         "logger": "flext_tap_ldap.tap",
         "m": ("flext_tap_ldap.models", "FlextTapLdapModels"),
@@ -113,8 +118,8 @@ _LAZY_IMPORTS: FlextTypes.LazyImportIndex = merge_lazy_imports(
         "p": ("flext_tap_ldap.protocols", "FlextTapLdapProtocols"),
         "processor": "flext_tap_ldap.processor",
         "protocols": "flext_tap_ldap.protocols",
-        "r": "flext_ldap",
-        "s": "flext_ldap",
+        "r": ("flext_core.result", "FlextResult"),
+        "s": ("flext_core.service", "FlextService"),
         "services": "flext_tap_ldap.services",
         "settings": "flext_tap_ldap.settings",
         "streams": "flext_tap_ldap.streams",
@@ -123,7 +128,7 @@ _LAZY_IMPORTS: FlextTypes.LazyImportIndex = merge_lazy_imports(
         "typings": "flext_tap_ldap.typings",
         "u": ("flext_tap_ldap.utilities", "FlextTapLdapUtilities"),
         "utilities": "flext_tap_ldap.utilities",
-        "x": "flext_ldap",
+        "x": ("flext_core.mixins", "FlextMixins"),
     },
 )
 
