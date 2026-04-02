@@ -13,10 +13,10 @@ import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
 from collections.abc import Mapping, MutableSequence, Sequence
 
-from flext_core import FlextLogger, r
-from flext_ldap import ldap
 from pydantic import BaseModel, ValidationError
 
+from flext_core import FlextLogger, r
+from flext_ldap import ldap
 from flext_tap_ldap import c, m, t
 
 logger = FlextLogger(__name__)
@@ -82,7 +82,7 @@ class FlextTapLdapClient:
             protocol = "ldaps" if self.use_ssl else "ldap"
             return f"{protocol}://{self.host}:{self.port}"
 
-        def health_check(self) -> Mapping[str, str | bool | float]:
+        def health_check(self) -> t.ScalarMapping:
             """Perform health check for testing convenience."""
             start_time = time.time()
             connection_ok: bool = self.test_connection()

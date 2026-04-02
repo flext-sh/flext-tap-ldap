@@ -14,10 +14,10 @@ from pathlib import Path
 from typing import ClassVar, override
 
 import click
+from pydantic import ValidationError
+
 from flext_core import FlextLogger, r
 from flext_meltano import FlextMeltanoAbstractions
-from pydantic import ConfigDict, TypeAdapter, ValidationError
-
 from flext_tap_ldap import (
     FlextTapLdapLdifStreams,
     FlextTapLdapSettings,
@@ -28,14 +28,6 @@ from flext_tap_ldap import (
 )
 
 logger = FlextLogger(__name__)
-_SINGER_OUTPUT_ADAPTER: TypeAdapter[t.ContainerMapping] = TypeAdapter(
-    t.ContainerMapping,
-    config=ConfigDict(strict=False),
-)
-_CUSTOM_STREAM_ADAPTER: TypeAdapter[t.ContainerMapping] = TypeAdapter(
-    t.ContainerMapping,
-    config=ConfigDict(strict=False),
-)
 
 
 class FlextTapLdapTap(FlextMeltanoAbstractions):
@@ -46,9 +38,6 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
     """
 
     name: ClassVar[str] = "FlextMeltanoTapAbstractions-ldap"
-    _config_map_adapter: ClassVar[TypeAdapter[Mapping[str, t.ContainerMapping]]] = (
-        TypeAdapter(Mapping[str, t.ContainerMapping], config=ConfigDict(strict=False))
-    )
 
     _tap_config: t.MutableConfigurationMapping
 
@@ -139,7 +128,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         raw_connection_config = source_payload.get("connection_config", {})
         config_map: Mapping[str, t.ContainerMapping] | t.ConfigurationMapping
         try:
-            config_map = FlextTapLdapTap._config_map_adapter.validate_python(
+            config_map = t.CONFIG_STREAM_MAP_ADAPTER.validate_python(
                 raw_connection_config,
             )
         except ValidationError:
@@ -203,7 +192,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
     def validate_custom_stream(raw_item: t.NormalizedValue) -> t.StrMapping | None:
         """Validate a custom stream definition, returning name if valid."""
         try:
-            validated: t.ContainerMapping = _CUSTOM_STREAM_ADAPTER.validate_python(
+            validated: t.ContainerMapping = t.SINGER_OUTPUT_ADAPTER.validate_python(
                 raw_item,
             )
         except ValidationError:
@@ -250,7 +239,7 @@ def _build_cli_command() -> click.Command:
         state_path: str | None,
     ) -> None:
         """Singer-compatible CLI for LDAP data extraction."""
-        raw_config: t.ContainerMapping = _CUSTOM_STREAM_ADAPTER.validate_json(
+        raw_config: t.ContainerMapping = t.SINGER_OUTPUT_ADAPTER.validate_json(
             Path(config_path).read_bytes(),
         )
         config_data: t.MutableConfigurationMapping = {
@@ -292,14 +281,14 @@ def _build_cli_command() -> click.Command:
                 output_catalog: Mapping[str, t.NormalizedValue] = {
                     "streams": catalog_streams,
                 }
-                click.echo(_SINGER_OUTPUT_ADAPTER.dump_json(output_catalog).decode())
+                click.echo(t.SINGER_OUTPUT_ADAPTER.dump_json(output_catalog).decode())
             return
 
         if catalog_path:
-            _SINGER_OUTPUT_ADAPTER.validate_json(Path(catalog_path).read_bytes())
+            t.SINGER_OUTPUT_ADAPTER.validate_json(Path(catalog_path).read_bytes())
 
         if state_path:
-            _SINGER_OUTPUT_ADAPTER.validate_json(Path(state_path).read_bytes())
+            t.SINGER_OUTPUT_ADAPTER.validate_json(Path(state_path).read_bytes())
 
         source_config = m.Meltano.DataSourceConfig(
             source_type="ldap",
@@ -324,7 +313,7 @@ def _build_cli_command() -> click.Command:
                     "schema": stream_entry.get("schema", {}),
                     "key_properties": ["dn"],
                 }
-                click.echo(_SINGER_OUTPUT_ADAPTER.dump_json(schema_msg).decode())
+                click.echo(t.SINGER_OUTPUT_ADAPTER.dump_json(schema_msg).decode())
 
     return _cli
 

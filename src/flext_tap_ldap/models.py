@@ -14,10 +14,10 @@ from datetime import UTC, datetime
 from typing import Annotated, Self
 from uuid import uuid4
 
-from flext_ldap import FlextLdapModels
-from flext_meltano import FlextMeltanoModels
 from pydantic import BaseModel, Field, model_validator
 
+from flext_ldap import FlextLdapModels
+from flext_meltano import FlextMeltanoModels
 from flext_tap_ldap import c, t
 
 

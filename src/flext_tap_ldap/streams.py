@@ -13,9 +13,9 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping, Sequence
 from typing import TYPE_CHECKING, ClassVar, override
 
-from flext_core import FlextLogger
 from pydantic import ValidationError
 
+from flext_core import FlextLogger
 from flext_tap_ldap import FlextTapLdapClient, c, m, t
 
 if TYPE_CHECKING:
@@ -44,8 +44,8 @@ class FlextTapLdapStreams:
         def coerce_positive_int(raw_value: t.NormalizedValue, default: int) -> int:
             """Coerce value to positive integer with safe fallback."""
             try:
-                parsed = int(str(raw_value))
-            except (TypeError, ValueError):
+                parsed = t.INTEGER_ADAPTER.validate_python(raw_value)
+            except ValidationError:
                 return default
             return parsed if parsed > 0 else default
 

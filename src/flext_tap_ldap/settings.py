@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from typing import Annotated, ClassVar
 
-from flext_ldap import FlextLdapSettings
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
+
+from flext_ldap import FlextLdapSettings
 
 
 class FlextTapLdapSettings(FlextLdapSettings):

@@ -12,7 +12,6 @@ from flext_core.lazy import install_lazy_exports
 
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
-
     from tests.unit import (
         test_client,
         test_client_quick,
@@ -47,7 +46,7 @@ if _TYPE_CHECKING:
     )
     from tests.unit.test_tap import TestFlextTapLdapTapUnit
 
-_LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
+_LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
     "TestConnectionTestedEvent": "tests.unit.test_models",
     "TestCustomStream": "tests.unit.test_streams",
     "TestCustomStreamParams": "tests.unit.test_streams",

@@ -16,7 +16,6 @@ from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING as _TYPE_CHECKING
 
 from flext_core.lazy import install_lazy_exports, merge_lazy_imports
-
 from flext_tap_ldap.__version__ import (
     __author__,
     __author_email__,
@@ -31,7 +30,6 @@ from flext_tap_ldap.__version__ import (
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
     from flext_ldap import d, e, h, r, s, x
-
     from flext_tap_ldap import (
         _utilities,
         api,
@@ -78,7 +76,7 @@ if _TYPE_CHECKING:
         FlextTapLdapUtilities as u,
     )
 
-_LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = merge_lazy_imports(
+_LAZY_IMPORTS: FlextTypes.LazyImportIndex = merge_lazy_imports(
     ("flext_tap_ldap._utilities",),
     {
         "CLI_COMMAND": "flext_tap_ldap.tap",

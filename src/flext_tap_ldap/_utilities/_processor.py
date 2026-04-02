@@ -14,24 +14,15 @@ from collections.abc import Iterator, Mapping, MutableMapping, MutableSequence, 
 from pathlib import Path
 from typing import ClassVar, override
 
-from flext_core import FlextLogger, r
 from flext_ldif import ldif
 from pydantic import TypeAdapter, ValidationError
 
+from flext_core import FlextLogger, r
 from flext_tap_ldap import c, m, t
 
 _DEFAULT_ENTRY_METADATA = m.Ldif.EntryMetadata()
 
 logger = FlextLogger(__name__)
-_LDIF_ENTRY_ADAPTER: TypeAdapter[m.Ldif.Entry] = TypeAdapter(m.Ldif.Entry)
-
-
-def _to_ldif_entry(raw_value: t.ContainerMapping) -> m.Ldif.Entry | None:
-    """Validate and coerce value to LDIF entry model."""
-    try:
-        return _LDIF_ENTRY_ADAPTER.validate_python(raw_value)
-    except ValidationError:
-        return None
 
 
 class FlextTapLdapUtilitiesProcessorMixin:
@@ -168,7 +159,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                         ldif_content
                     )
                     if result.is_success and result.value and (result.value):
-                        parsed_entry = _to_ldif_entry(result.value[0].model_dump())
+                        parsed_entry = self._to_ldif_entry(result.value[0].model_dump())
                         if parsed_entry is not None:
                             return parsed_entry
                     return self._fallback_entry()
@@ -202,9 +193,17 @@ class FlextTapLdapUtilitiesProcessorMixin:
             all LDIF processing to the flext-ldif library.
             """
 
-            _ldif_entry_adapter: ClassVar[TypeAdapter[m.Ldif.Entry]] = (
-                _LDIF_ENTRY_ADAPTER
+            _ldif_entry_adapter: ClassVar[TypeAdapter[m.Ldif.Entry]] = TypeAdapter(
+                m.Ldif.Entry
             )
+
+            @staticmethod
+            def _to_ldif_entry(raw_value: t.ContainerMapping) -> m.Ldif.Entry | None:
+                """Validate and coerce value to LDIF entry model."""
+                try:
+                    return m.Ldif.Entry.model_validate(raw_value)
+                except ValidationError:
+                    return None
 
             @override
             def __init__(
@@ -318,7 +317,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                             self._raise_parse_error(error_msg)
                     if result.value:
                         for flext_entry in result.value:
-                            parsed_entry = _to_ldif_entry(flext_entry.model_dump())
+                            parsed_entry = self._to_ldif_entry(flext_entry.model_dump())
                             if parsed_entry is None:
                                 continue
                             yield self._convert_from_flext_entry(parsed_entry)
@@ -456,7 +455,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 """Yield testing convenience entries from parse result."""
                 if result.value:
                     for flext_entry in result.value:
-                        parsed_entry = _to_ldif_entry(flext_entry.model_dump())
+                        parsed_entry = self._to_ldif_entry(flext_entry.model_dump())
                         if parsed_entry is None:
                             continue
                         yield self._convert_from_flext_entry(parsed_entry)

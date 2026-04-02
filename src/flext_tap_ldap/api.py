@@ -12,7 +12,6 @@ from __future__ import annotations
 from typing import Never, override
 
 from flext_meltano import FlextMeltanoTapServiceBase
-
 from flext_tap_ldap import t
 
 

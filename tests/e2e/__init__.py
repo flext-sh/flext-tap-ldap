@@ -12,7 +12,6 @@ from flext_core.lazy import install_lazy_exports
 
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
-
     from tests.e2e import conftest, test_integration
     from tests.e2e.conftest import (
         catalog_file,
@@ -25,7 +24,7 @@ if _TYPE_CHECKING:
     )
     from tests.e2e.test_integration import TestFlextTapLdapIntegration
 
-_LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
+_LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
     "TestFlextTapLdapIntegration": "tests.e2e.test_integration",
     "catalog_file": "tests.e2e.conftest",
     "conftest": "tests.e2e.conftest",

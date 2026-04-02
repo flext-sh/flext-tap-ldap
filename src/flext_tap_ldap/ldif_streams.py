@@ -6,23 +6,14 @@ from collections.abc import Iterable, Iterator, Mapping, MutableMapping, Sequenc
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
-from flext_core import FlextLogger
 from flext_ldif import ldif
-from pydantic import ConfigDict, TypeAdapter, ValidationError
+from pydantic import ValidationError
 
+from flext_core import FlextLogger
 from flext_tap_ldap import c, m, p, t
 
 if TYPE_CHECKING:
     from flext_meltano import FlextMeltanoAbstractions
-
-_OBJECT_LIST_ADAPTER: TypeAdapter[Sequence[t.ContainerValueMapping]] = TypeAdapter(
-    Sequence[t.ContainerValueMapping],
-    config=ConfigDict(strict=False),
-)
-_COUNTER_MAP_ADAPTER: TypeAdapter[Mapping[str, int | str]] = TypeAdapter(
-    Mapping[str, int | str],
-    config=ConfigDict(strict=False),
-)
 
 
 def _as_object_list(
@@ -31,17 +22,17 @@ def _as_object_list(
     try:
         if not isinstance(value, (dict, list)):
             return []
-        result = _OBJECT_LIST_ADAPTER.validate_python(value)
+        result = t.OBJECT_LIST_ADAPTER.validate_python(value)
         return [dict(item) for item in result]
     except ValidationError:
         return []
 
 
-def _as_counter_map(value: t.NormalizedValue) -> Mapping[str, int | str]:
+def _as_counter_map(value: t.NormalizedValue) -> t.HeaderMapping:
     try:
         if not isinstance(value, dict):
             return {}
-        return _COUNTER_MAP_ADAPTER.validate_python(value)
+        return t.COUNTER_MAP_ADAPTER.validate_python(value)
     except ValidationError:
         return {}
 
@@ -51,13 +42,6 @@ class FlextTapLdapLdifStreams:
 
     Consolidates all LDIF stream functionality following FlextTapLdap[Module] pattern.
     """
-
-    _object_list_adapter: ClassVar[TypeAdapter[Sequence[t.ContainerValueMapping]]] = (
-        _OBJECT_LIST_ADAPTER
-    )
-    _counter_map_adapter: ClassVar[TypeAdapter[Mapping[str, int | str]]] = (
-        _COUNTER_MAP_ADAPTER
-    )
 
     class LdifStream:
         """LDIF stream using flext-ldif for ALL processing.

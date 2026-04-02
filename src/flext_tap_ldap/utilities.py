@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
+from pydantic import ValidationError
+
 from flext_core import e, r
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
-
 from flext_tap_ldap import FlextTapLdapUtilitiesProcessorMixin, c, t
 
 
@@ -78,14 +79,14 @@ class FlextTapLdapUtilities(
                 attributes: Mapping[str, t.StrSequence],
                 stream_prefix: str = "ldap",
                 replication_method: str = "FULL_TABLE",
-            ) -> r[Mapping[str, str | int]]:
+            ) -> r[t.HeaderMapping]:
                 """Create stream info from LDAP entry."""
                 object_classes = attributes.get("objectClass", [])
                 if not object_classes:
-                    return r[Mapping[str, str | int]].fail("Entry has no objectClass")
+                    return r[t.HeaderMapping].fail("Entry has no objectClass")
                 primary_class = object_classes[0].lower()
                 stream_name = f"{stream_prefix}_{primary_class}"
-                stream_info: Mapping[str, str | int] = {
+                stream_info: t.HeaderMapping = {
                     "stream_name": stream_name,
                     "table_name": primary_class,
                     "dn": dn,
@@ -93,7 +94,7 @@ class FlextTapLdapUtilities(
                     "attribute_count": len(attributes),
                     "object_class": primary_class,
                 }
-                return r[Mapping[str, str | int]].ok(stream_info)
+                return r[t.HeaderMapping].ok(stream_info)
 
         class ConfigurationValidation:
             """LDAP tap configuration validation utilities."""
@@ -118,8 +119,8 @@ class FlextTapLdapUtilities(
                         )
                 if "port" in config_map:
                     try:
-                        port = int(str(config_map["port"]))
-                    except ValueError:
+                        port = t.INTEGER_ADAPTER.validate_python(config_map["port"])
+                    except ValidationError:
                         return r[t.ContainerMapping].fail(
                             "LDAP port must be numeric",
                         )

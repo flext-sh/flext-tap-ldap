@@ -10,9 +10,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
+
+from pydantic import ConfigDict, TypeAdapter
+
 from flext_ldap import FlextLdapTypes
 from flext_meltano import FlextMeltanoTypes
-from pydantic import ConfigDict, TypeAdapter
 
 
 class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
@@ -31,6 +34,31 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
     STRICT_STR_ADAPTER: TypeAdapter[FlextMeltanoTypes.TextValue] = TypeAdapter(
         FlextMeltanoTypes.TextValue,
         config=ConfigDict(strict=True),
+    )
+    INTEGER_ADAPTER: TypeAdapter[FlextMeltanoTypes.IntegerValue] = TypeAdapter(
+        FlextMeltanoTypes.IntegerValue,
+    )
+    OBJECT_LIST_ADAPTER: TypeAdapter[
+        Sequence[FlextMeltanoTypes.ContainerValueMapping]
+    ] = TypeAdapter(
+        Sequence[FlextMeltanoTypes.ContainerValueMapping],
+        config=ConfigDict(strict=False),
+    )
+    COUNTER_MAP_ADAPTER: TypeAdapter[Mapping[str, int | str]] = TypeAdapter(
+        Mapping[str, int | str],
+        config=ConfigDict(strict=False),
+    )
+    SINGER_OUTPUT_ADAPTER: TypeAdapter[FlextMeltanoTypes.ContainerMapping] = (
+        TypeAdapter(
+            FlextMeltanoTypes.ContainerMapping,
+            config=ConfigDict(strict=False),
+        )
+    )
+    CONFIG_STREAM_MAP_ADAPTER: TypeAdapter[
+        Mapping[str, FlextMeltanoTypes.ContainerMapping]
+    ] = TypeAdapter(
+        Mapping[str, FlextMeltanoTypes.ContainerMapping],
+        config=ConfigDict(strict=False),
     )
 
 

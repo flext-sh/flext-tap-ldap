@@ -12,9 +12,9 @@ from collections.abc import Generator, Iterator
 from pathlib import Path
 
 import pytest
-from flext_core import FlextLogger, d
 from flext_tests import tk
 
+from flext_core import FlextLogger, d
 from tests import c, p, t, u
 
 logger = FlextLogger(__name__)

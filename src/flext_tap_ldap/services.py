@@ -15,10 +15,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
-from flext_core import FlextLogger, r
 from flext_ldif import ldif
 from pydantic import ValidationError
 
+from flext_core import FlextLogger, r
 from flext_tap_ldap import FlextTapLdapSettings, c, m, t
 
 logger = FlextLogger(__name__)
