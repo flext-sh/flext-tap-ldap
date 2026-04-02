@@ -36,7 +36,7 @@ def _discover_stream_names(
     assert result.value is not None
     raw_entries = result.value["streams"]
     assert isinstance(raw_entries, Sequence)
-    stream_entries: Sequence[Mapping[str, t.NormalizedValue]] = [
+    stream_entries: Sequence[t.ContainerMapping] = [
         entry for entry in raw_entries if isinstance(entry, Mapping)
     ]
     stream_names = [str(stream["stream"]) for stream in stream_entries]
@@ -112,7 +112,7 @@ class TestFlextTapLdapTapUnit:
             raise AssertionError(catalog_error)
         raw_streams = catalog["streams"]
         assert isinstance(raw_streams, Sequence)
-        streams: Sequence[Mapping[str, t.NormalizedValue]] = [
+        streams: Sequence[t.ContainerMapping] = [
             entry for entry in raw_streams if isinstance(entry, Mapping)
         ]
         if len(streams) < 4:

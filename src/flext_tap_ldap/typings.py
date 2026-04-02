@@ -2,7 +2,7 @@
 
 All Singer protocol types are in ``FlextMeltanoTypes.Meltano.*``.
 All LDAP domain types are in ``FlextLdapTypes.Ldap.*``.
-This facade composes both via MRO — access as ``t.Meltano.*`` and ``t.Ldap.*``.
+This facade composes both via MRO — access as ``FlextMeltanoTypes.Meltano.*`` and ``FlextMeltanoTypes.Ldap.*``.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -21,8 +21,8 @@ from flext_meltano import FlextMeltanoTypes
 class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
     """MRO facade composing Meltano + LDAP type namespaces.
 
-    Access: ``t.Meltano.*`` (Singer protocol), ``t.Ldap.*`` (LDAP domain),
-    and all core ``t.*`` types via MRO inheritance.
+    Access: ``FlextMeltanoTypes.Meltano.*`` (Singer protocol), ``FlextMeltanoTypes.Ldap.*`` (LDAP domain),
+    and all core ``FlextMeltanoTypes.*`` types via MRO inheritance.
     """
 
     CONFIG_MAP_ADAPTER: TypeAdapter[FlextMeltanoTypes.ContainerValueMapping] = (
@@ -44,8 +44,8 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
         Sequence[FlextMeltanoTypes.ContainerValueMapping],
         config=ConfigDict(strict=False),
     )
-    COUNTER_MAP_ADAPTER: TypeAdapter[Mapping[str, int | str]] = TypeAdapter(
-        Mapping[str, int | str],
+    COUNTER_MAP_ADAPTER: TypeAdapter[FlextMeltanoTypes.HeaderMapping] = TypeAdapter(
+        FlextMeltanoTypes.HeaderMapping,
         config=ConfigDict(strict=False),
     )
     SINGER_OUTPUT_ADAPTER: TypeAdapter[FlextMeltanoTypes.ContainerMapping] = (

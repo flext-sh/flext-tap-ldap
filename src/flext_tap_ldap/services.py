@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
+from collections.abc import MutableMapping, MutableSequence, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
@@ -37,7 +37,7 @@ class FlextTapLdapServices:
     """
 
     @staticmethod
-    def _as_map(value: t.NormalizedValue) -> Mapping[str, t.ContainerValue] | None:
+    def _as_map(value: t.NormalizedValue) -> t.ContainerValueMapping | None:
         try:
             return t.CONFIG_MAP_ADAPTER.validate_python(value)
         except ValidationError:

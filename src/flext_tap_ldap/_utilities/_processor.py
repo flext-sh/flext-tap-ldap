@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Iterator, Mapping, MutableMapping, MutableSequence, Sequence
+from collections.abc import Iterator, Mapping, MutableSequence, Sequence
 from pathlib import Path
 from typing import ClassVar, override
 
@@ -49,7 +49,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
             ) -> None:
                 """Initialize LDIF entry with testing convenience."""
                 self.dn = dn
-                self.attributes: MutableMapping[str, MutableSequence[str]] = {
+                self.attributes: t.MutableStrSequenceMapping = {
                     k: list(v) for k, v in (attributes or {}).items()
                 }
                 self.change_type: str | None = None
@@ -57,9 +57,9 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 self._flext_entry = self._create_flext_entry()
 
             @property
-            def validation_errors(self) -> MutableSequence[MutableMapping[str, str]]:
+            def validation_errors(self) -> MutableSequence[t.MutableStrMapping]:
                 """Get validation errors for this entry."""
-                errors: MutableSequence[MutableMapping[str, str]] = []
+                errors: MutableSequence[t.MutableStrMapping] = []
                 if not self.is_valid():
                     errors.append({
                         "code": "invalid_entry",
@@ -80,7 +80,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     case _:
                         self.attributes[name].extend(list(value))
 
-            def get_attribute(self, name: str) -> Sequence[str]:
+            def get_attribute(self, name: str) -> t.StrSequence:
                 """Get attribute values by name (case-insensitive)."""
                 for attr_name, values in self.attributes.items():
                     if attr_name.lower() == name.lower():
@@ -89,7 +89,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             def has_object_class(self, object_class: str) -> bool:
                 """Check if entry has specific object class."""
-                object_classes: Sequence[str] = self.get_attribute("objectClass") or []
+                object_classes: t.StrSequence = self.get_attribute("objectClass") or []
                 return any(oc.lower() == object_class.lower() for oc in object_classes)
 
             def is_valid(self) -> bool:
@@ -374,7 +374,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
             ) -> FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry:
                 """Convert m.Ldif.Entry to testing convenience Entry."""
                 dn = flext_entry.dn.value if flext_entry.dn else ""
-                attributes: MutableMapping[str, MutableSequence[str]] = {}
+                attributes: t.MutableStrSequenceMapping = {}
                 if flext_entry.attributes and flext_entry.attributes.attributes:
                     for (
                         attr_name,
@@ -535,7 +535,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 mappings: t.StrMapping,
             ) -> FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry:
                 """Apply attribute name mappings to entry."""
-                new_attributes: MutableMapping[str, MutableSequence[str]] = {}
+                new_attributes: t.MutableStrSequenceMapping = {}
                 for attr_name, values in entry.attributes.items():
                     new_name = mappings.get(attr_name, attr_name)
                     new_attributes[new_name] = list(values)
@@ -609,7 +609,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 raw_mappings: t.NormalizedValue = self.transformation_rules.get(
                     "attribute_mappings",
                 )
-                mappings: MutableMapping[str, str] = {}
+                mappings: t.MutableStrMapping = {}
                 if isinstance(raw_mappings, dict):
                     attr_map: t.ContainerMapping = raw_mappings
                     mappings.update({

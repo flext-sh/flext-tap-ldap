@@ -261,7 +261,7 @@ def _build_cli_command() -> click.Command:
             if result.is_success and result.value:
                 catalog = result.value
                 raw_streams = catalog.get("streams", [])
-                catalog_streams: MutableSequence[Mapping[str, t.NormalizedValue]] = []
+                catalog_streams: MutableSequence[t.ContainerMapping] = []
                 if isinstance(raw_streams, Sequence):
                     for rs_item in raw_streams:
                         if isinstance(rs_item, Mapping):
@@ -278,7 +278,7 @@ def _build_cli_command() -> click.Command:
                                 "schema": cs_schema,
                             }
                             catalog_streams.append(cs_entry)
-                output_catalog: Mapping[str, t.NormalizedValue] = {
+                output_catalog: t.ContainerMapping = {
                     "streams": catalog_streams,
                 }
                 click.echo(t.SINGER_OUTPUT_ADAPTER.dump_json(output_catalog).decode())
@@ -299,7 +299,7 @@ def _build_cli_command() -> click.Command:
         result = tap.discover_streams(tap_instance=source_config)
         if result.is_success and result.value:
             raw_streams_val = result.value.get("streams", [])
-            stream_entries: list[Mapping[str, t.NormalizedValue]] = []
+            stream_entries: list[t.ContainerMapping] = []
             if isinstance(raw_streams_val, Sequence):
                 stream_entries.extend(
                     se_item

@@ -43,7 +43,7 @@ def _discover_stream_names(
     assert result.value is not None
     raw_entries = result.value["streams"]
     assert isinstance(raw_entries, Sequence)
-    stream_entries: Sequence[Mapping[str, t.NormalizedValue]] = [
+    stream_entries: Sequence[t.ContainerMapping] = [
         entry for entry in raw_entries if isinstance(entry, Mapping)
     ]
     return [str(stream["stream"]) for stream in stream_entries], len(stream_entries)

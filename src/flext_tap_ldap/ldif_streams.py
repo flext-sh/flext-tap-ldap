@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator, Mapping, MutableMapping, Sequence
+from collections.abc import Iterable, Iterator, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 def _as_object_list(
     value: t.ContainerValue,
-) -> Sequence[Mapping[str, t.ContainerValue]]:
+) -> Sequence[t.ContainerValueMapping]:
     try:
         if not isinstance(value, (dict, list)):
             return []
@@ -56,7 +56,7 @@ class FlextTapLdapLdifStreams:
             self.name = "ldif_entries"
             self.tap_stream_id = "ldif_entries"
             self.tap = tap
-            self.config: Mapping[str, t.ContainerValue] = getattr(tap, "tap_config", {})
+            self.config: t.ContainerValueMapping = getattr(tap, "tap_config", {})
             self._ldif_api = ldif()
             self._logger_instance: FlextLogger | None = None
             self.schema = {
@@ -150,7 +150,7 @@ class FlextTapLdapLdifStreams:
 
         def _normalize_object_classes(
             self,
-            object_classes: Mapping[str, t.ContainerValue],
+            object_classes: t.ContainerValueMapping,
         ) -> t.StrSequence:
             if isinstance(object_classes, str):
                 return [object_classes]
@@ -203,7 +203,7 @@ class FlextTapLdapLdifStreams:
             self.name = "ldif_analysis"
             self.tap_stream_id = "ldif_analysis"
             self.tap = tap
-            self.config: Mapping[str, t.ContainerValue] = getattr(tap, "tap_config", {})
+            self.config: t.ContainerValueMapping = getattr(tap, "tap_config", {})
             self._ldif_api = ldif()
             self._logger_instance: p.Logger | None = None
             self.schema: t.ContainerMapping = {
@@ -247,8 +247,8 @@ class FlextTapLdapLdifStreams:
             ldif_directory = self.config.get("ldif_directory")
             try:
                 total_entries = 0
-                entry_types: MutableMapping[str, int] = {}
-                object_classes: MutableMapping[str, int] = {}
+                entry_types: t.MutableIntMapping = {}
+                object_classes: t.MutableIntMapping = {}
                 if ldif_files:
                     for ldif_file_map in ldif_files:
                         ldif_file_value = str(
@@ -328,8 +328,8 @@ class FlextTapLdapLdifStreams:
                 content = Path(ldif_file).read_text(encoding="utf-8")
                 result = self._ldif_api.parse_ldif(content)
                 if result.is_success and result.value:
-                    entry_types: MutableMapping[str, int] = {}
-                    object_classes: MutableMapping[str, int] = {}
+                    entry_types: t.MutableIntMapping = {}
+                    object_classes: t.MutableIntMapping = {}
                     for entry in result.value:
                         if entry.attributes is None:
                             continue
@@ -349,7 +349,7 @@ class FlextTapLdapLdifStreams:
                 self.logger.error(
                     f"Failed to analyze LDIF file {ldif_file}: {result.error}",
                 )
-                empty: Mapping[str, int] = {}
+                empty: t.IntMapping = {}
                 return {
                     "total_entries": 0,
                     "entry_types": empty,
@@ -357,7 +357,7 @@ class FlextTapLdapLdifStreams:
                 }
             except c.Meltano.Singer.SAFE_EXCEPTIONS:
                 self.logger.exception("Error analyzing LDIF file %s", ldif_file)
-                empty_dict: Mapping[str, int] = {}
+                empty_dict: t.IntMapping = {}
                 return {
                     "total_entries": 0,
                     "entry_types": empty_dict,
