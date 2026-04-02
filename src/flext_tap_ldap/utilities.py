@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import ClassVar
 
-from flext_core import FlextContainer, FlextLogger, e, r
+from flext_core import e, r
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 
-from flext_tap_ldap import FlextTapLdapUtilitiesProcessorMixin, c, p, t
+from flext_tap_ldap import FlextTapLdapUtilitiesProcessorMixin, c, t
 
 
 class FlextTapLdapUtilities(
@@ -21,37 +20,6 @@ class FlextTapLdapUtilities(
 
     class TapLdap(FlextTapLdapUtilitiesProcessorMixin.TapLdap):
         """Tap LDAP namespace for cross-project access."""
-
-        def __init__(self) -> None:
-            """Initialize TapLdap with global container and logger."""
-            super().__init__()
-            self._container = FlextContainer.get_global()
-            self._logger = FlextLogger(__name__)
-
-        @property
-        def container(self) -> p.Container:
-            """Return the global container instance."""
-            return self._container
-
-        @property
-        def logger(self) -> FlextLogger:
-            """Return the logger instance."""
-            return self._logger
-
-        def execute(self) -> r[Mapping[str, str | t.StrSequence]]:
-            """Execute tap LDAP utilities and return operational status."""
-            return r[Mapping[str, str | t.StrSequence]].ok({
-                "status": "operational",
-                "service": "flext-tap-ldap-utilities",
-                "capabilities": [
-                    "error_handling",
-                    "stream_management",
-                    "discovery_operations",
-                    "configuration_validation",
-                    "performance_optimization",
-                    "data_extraction",
-                ],
-            })
 
         class ErrorHandling:
             """LDAP tap error handling utilities with enhanced context."""
@@ -161,13 +129,6 @@ class FlextTapLdapUtilities(
                         )
                     config_map["port"] = port
                 return r[t.ContainerMapping].ok(config_map)
-
-        class PerformanceOptimization:
-            """LDAP tap performance optimization utilities."""
-
-            DEFAULT_PAGE_SIZE: ClassVar[int] = c.TapLdap.DEFAULT_PAGE_SIZE
-            MAX_PARALLEL_SEARCHES: ClassVar[int] = 5
-            MEMORY_THRESHOLD_MB: ClassVar[int] = 256
 
 
 u = FlextTapLdapUtilities

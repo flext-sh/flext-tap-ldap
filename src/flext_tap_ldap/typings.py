@@ -10,8 +10,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-
 from flext_ldap import FlextLdapTypes
 from flext_meltano import FlextMeltanoTypes
 from pydantic import ConfigDict, TypeAdapter
@@ -24,14 +22,14 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
     and all core ``t.*`` types via MRO inheritance.
     """
 
-    CONFIG_MAP_ADAPTER: TypeAdapter[Mapping[str, FlextMeltanoTypes.ContainerValue]] = (
+    CONFIG_MAP_ADAPTER: TypeAdapter[FlextMeltanoTypes.ContainerValueMapping] = (
         TypeAdapter(
-            Mapping[str, FlextMeltanoTypes.ContainerValue],
+            FlextMeltanoTypes.ContainerValueMapping,
             config=ConfigDict(strict=False),
         )
     )
-    STRICT_STR_ADAPTER: TypeAdapter[str] = TypeAdapter(
-        str,
+    STRICT_STR_ADAPTER: TypeAdapter[FlextMeltanoTypes.TextValue] = TypeAdapter(
+        FlextMeltanoTypes.TextValue,
         config=ConfigDict(strict=True),
     )
 

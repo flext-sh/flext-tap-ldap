@@ -44,12 +44,6 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
 
             MAX_PORT: Final[int] = 65535
 
-        class Singer:
-            """Singer tap configuration constants."""
-
-            DEFAULT_BATCH_SIZE: Final[int] = FlextMeltanoConstants.DEFAULT_BATCH_SIZE
-            MAX_BATCH_SIZE: Final[int] = FlextMeltanoConstants.MAX_BATCH_SIZE
-
         class Replication:
             """LDAP replication method constants."""
 
@@ -83,27 +77,6 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             """LDAP search configuration."""
 
             DEFAULT_SCOPE: Final[str] = "SUBTREE"
-
-        @unique
-        class ProjectType(StrEnum):
-            """Project-type identifiers for LDAP tap packages."""
-
-            LIBRARY = "library"
-            APPLICATION = "application"
-            SERVICE = "service"
-            TAP_LDAP = "tap-ldap"
-            LDAP_EXTRACTOR = "ldap-extractor"
-            LDAP_TAP = "ldap-tap"
-            LDAP_CONNECTOR = "ldap-connector"
-            SINGER_LDAP_TAP = "singer-ldap-tap"
-            LDAP_DATA_SOURCE = "ldap-data-source"
-            LDAP_EXTRACTION = "ldap-extraction"
-            LDIF_PROCESSOR = "ldif-processor"
-            LDAP_DIRECTORY_TAP = "ldap-directory-tap"
-            ENTERPRISE_LDAP_TAP = "enterprise-ldap-tap"
-            LDAP_SINGER_TAP = "ldap-singer-tap"
-            DIRECTORY_EXTRACTOR = "directory-extractor"
-            LDAP_INTEGRATION = "ldap-integration"
 
 
 c = FlextTapLdapConstants
