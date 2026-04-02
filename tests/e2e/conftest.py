@@ -13,10 +13,9 @@ from pathlib import Path
 
 import pytest
 from flext_core import FlextLogger, d
-from flext_ldap import p
 from flext_tests import tk
 
-from tests import c, t, u
+from tests import c, p, t, u
 
 logger = FlextLogger(__name__)
 

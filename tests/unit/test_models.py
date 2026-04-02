@@ -10,7 +10,7 @@ from __future__ import annotations
 import math
 from datetime import UTC, datetime
 
-from flext_tap_ldap import m
+from tests import m
 
 
 class TestTapExecutionStartedEvent:

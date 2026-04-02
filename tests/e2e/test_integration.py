@@ -18,7 +18,8 @@ import pytest
 from click.core import BaseCommand
 from click.testing import CliRunner
 
-from flext_tap_ldap import CLI_COMMAND, t
+from flext_tap_ldap import CLI_COMMAND
+from tests import t
 
 
 def _extract_json_from_output(output: str) -> t.NormalizedValue:

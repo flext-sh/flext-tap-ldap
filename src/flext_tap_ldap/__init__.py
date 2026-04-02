@@ -34,6 +34,7 @@ if _TYPE_CHECKING:
 
     from flext_tap_ldap import (
         _utilities,
+        api,
         client,
         constants,
         ldif_streams,
@@ -48,6 +49,7 @@ if _TYPE_CHECKING:
         utilities,
     )
     from flext_tap_ldap._utilities import FlextTapLdapUtilitiesProcessorMixin
+    from flext_tap_ldap.api import FlextTapLdapService
     from flext_tap_ldap.client import FlextTapLdapClient
     from flext_tap_ldap.constants import (
         FlextTapLdapConstants,
@@ -88,6 +90,7 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = merge_lazy_imports(
         "FlextTapLdapModels": "flext_tap_ldap.models",
         "FlextTapLdapProcessor": "flext_tap_ldap.processor",
         "FlextTapLdapProtocols": "flext_tap_ldap.protocols",
+        "FlextTapLdapService": "flext_tap_ldap.api",
         "FlextTapLdapServices": "flext_tap_ldap.services",
         "FlextTapLdapSettings": "flext_tap_ldap.settings",
         "FlextTapLdapStreams": "flext_tap_ldap.streams",
@@ -97,6 +100,7 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = merge_lazy_imports(
         "FlextTapLdapUtilities": "flext_tap_ldap.utilities",
         "FlextTapLdapValidator": "flext_tap_ldap.processor",
         "_utilities": "flext_tap_ldap._utilities",
+        "api": "flext_tap_ldap.api",
         "c": ("flext_tap_ldap.constants", "FlextTapLdapConstants"),
         "client": "flext_tap_ldap.client",
         "constants": "flext_tap_ldap.constants",
