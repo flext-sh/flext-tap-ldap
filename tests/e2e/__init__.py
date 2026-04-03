@@ -23,8 +23,8 @@ if _TYPE_CHECKING:
     from flext_core.service import FlextService as s
     from flext_core.typings import FlextTypes as t
     from flext_core.utilities import FlextUtilities as u
-    from flext_tap_ldap import conftest, test_integration
-    from flext_tap_ldap.conftest import (
+    from tests.e2e import conftest, test_integration
+    from tests.e2e.conftest import (
         catalog_file,
         ldap_connection,
         ldap_container,
@@ -33,26 +33,28 @@ if _TYPE_CHECKING:
         sample_catalog,
         tap_config_file,
     )
+    from tests.e2e.test_integration import TestFlextTapLdapIntegration
 
 _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
+    "TestFlextTapLdapIntegration": "tests.e2e.test_integration",
     "c": ("flext_core.constants", "FlextConstants"),
-    "catalog_file": "flext_tap_ldap.conftest",
-    "conftest": "flext_tap_ldap.conftest",
+    "catalog_file": "tests.e2e.conftest",
+    "conftest": "tests.e2e.conftest",
     "d": ("flext_core.decorators", "FlextDecorators"),
     "e": ("flext_core.exceptions", "FlextExceptions"),
     "h": ("flext_core.handlers", "FlextHandlers"),
-    "ldap_connection": "flext_tap_ldap.conftest",
-    "ldap_container": "flext_tap_ldap.conftest",
-    "logger": "flext_tap_ldap.conftest",
+    "ldap_connection": "tests.e2e.conftest",
+    "ldap_container": "tests.e2e.conftest",
+    "logger": "tests.e2e.conftest",
     "m": ("flext_core.models", "FlextModels"),
     "p": ("flext_core.protocols", "FlextProtocols"),
-    "project_root": "flext_tap_ldap.conftest",
+    "project_root": "tests.e2e.conftest",
     "r": ("flext_core.result", "FlextResult"),
     "s": ("flext_core.service", "FlextService"),
-    "sample_catalog": "flext_tap_ldap.conftest",
+    "sample_catalog": "tests.e2e.conftest",
     "t": ("flext_core.typings", "FlextTypes"),
-    "tap_config_file": "flext_tap_ldap.conftest",
-    "test_integration": "flext_tap_ldap.test_integration",
+    "tap_config_file": "tests.e2e.conftest",
+    "test_integration": "tests.e2e.test_integration",
     "u": ("flext_core.utilities", "FlextUtilities"),
     "x": ("flext_core.mixins", "FlextMixins"),
 }
