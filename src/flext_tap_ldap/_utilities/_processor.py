@@ -159,9 +159,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                         ldif_content
                     )
                     if result.is_success and result.value and (result.value):
-                        parsed_entry = FlextTapLdapUtilitiesProcessorMixin.TapLdap.Processor._to_ldif_entry(
-                            result.value[0].model_dump()
-                        )
+                        parsed_entry = self._to_ldif_entry(result.value[0].model_dump())
                         if parsed_entry is not None:
                             return parsed_entry
                     return self._fallback_entry()
