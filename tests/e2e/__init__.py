@@ -5,37 +5,63 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING as _TYPE_CHECKING
+import typing as _t
 
+from flext_core.constants import FlextConstants as c
+from flext_core.decorators import FlextDecorators as d
+from flext_core.exceptions import FlextExceptions as e
+from flext_core.handlers import FlextHandlers as h
 from flext_core.lazy import install_lazy_exports
+from flext_core.mixins import FlextMixins as x
+from flext_core.models import FlextModels as m
+from flext_core.protocols import FlextProtocols as p
+from flext_core.result import FlextResult as r
+from flext_core.service import FlextService as s
+from flext_core.typings import FlextTypes as t
+from flext_core.utilities import FlextUtilities as u
+from tests.e2e.conftest import (
+    catalog_file,
+    ldap_connection,
+    ldap_container,
+    logger,
+    project_root,
+    sample_catalog,
+    tap_config_file,
+)
+from tests.e2e.test_integration import TestFlextTapLdapIntegration
 
-if _TYPE_CHECKING:
-    from flext_core import FlextTypes
-    from flext_core.constants import FlextConstants as c
-    from flext_core.decorators import FlextDecorators as d
-    from flext_core.exceptions import FlextExceptions as e
-    from flext_core.handlers import FlextHandlers as h
-    from flext_core.mixins import FlextMixins as x
-    from flext_core.models import FlextModels as m
-    from flext_core.protocols import FlextProtocols as p
-    from flext_core.result import FlextResult as r
-    from flext_core.service import FlextService as s
-    from flext_core.typings import FlextTypes as t
-    from flext_core.utilities import FlextUtilities as u
-    from tests.e2e import conftest, test_integration
-    from tests.e2e.conftest import (
+if _t.TYPE_CHECKING:
+    import tests.e2e.conftest as _tests_e2e_conftest
+
+    conftest = _tests_e2e_conftest
+    import tests.e2e.test_integration as _tests_e2e_test_integration
+
+    test_integration = _tests_e2e_test_integration
+
+    _ = (
+        TestFlextTapLdapIntegration,
+        c,
         catalog_file,
+        conftest,
+        d,
+        e,
+        h,
         ldap_connection,
         ldap_container,
         logger,
+        m,
+        p,
         project_root,
+        r,
+        s,
         sample_catalog,
+        t,
         tap_config_file,
+        test_integration,
+        u,
+        x,
     )
-    from tests.e2e.test_integration import TestFlextTapLdapIntegration
-
-_LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
+_LAZY_IMPORTS = {
     "TestFlextTapLdapIntegration": "tests.e2e.test_integration",
     "c": ("flext_core.constants", "FlextConstants"),
     "catalog_file": "tests.e2e.conftest",
@@ -58,6 +84,30 @@ _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
     "u": ("flext_core.utilities", "FlextUtilities"),
     "x": ("flext_core.mixins", "FlextMixins"),
 }
+
+__all__ = [
+    "TestFlextTapLdapIntegration",
+    "c",
+    "catalog_file",
+    "conftest",
+    "d",
+    "e",
+    "h",
+    "ldap_connection",
+    "ldap_container",
+    "logger",
+    "m",
+    "p",
+    "project_root",
+    "r",
+    "s",
+    "sample_catalog",
+    "t",
+    "tap_config_file",
+    "test_integration",
+    "u",
+    "x",
+]
 
 
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)

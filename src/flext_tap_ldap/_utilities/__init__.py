@@ -5,24 +5,31 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING as _TYPE_CHECKING
+import typing as _t
 
 from flext_core.lazy import install_lazy_exports
 
-if _TYPE_CHECKING:
-    from flext_core import FlextTypes
-    from flext_tap_ldap._utilities import _processor
-    from flext_tap_ldap._utilities._processor import (
+if _t.TYPE_CHECKING:
+    import flext_tap_ldap._utilities._processor as _flext_tap_ldap__utilities__processor
+
+    _processor = _flext_tap_ldap__utilities__processor
+
+    _ = (
         FlextTapLdapUtilitiesProcessorMixin,
+        _processor,
         logger,
     )
-
-_LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
+_LAZY_IMPORTS = {
     "FlextTapLdapUtilitiesProcessorMixin": "flext_tap_ldap._utilities._processor",
     "_processor": "flext_tap_ldap._utilities._processor",
     "logger": "flext_tap_ldap._utilities._processor",
 }
+
+__all__ = [
+    "FlextTapLdapUtilitiesProcessorMixin",
+    "_processor",
+    "logger",
+]
 
 
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)

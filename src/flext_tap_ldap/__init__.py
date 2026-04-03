@@ -5,37 +5,90 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING as _TYPE_CHECKING
+import typing as _t
 
+from flext_core.decorators import FlextDecorators as d
+from flext_core.exceptions import FlextExceptions as e
+from flext_core.handlers import FlextHandlers as h
 from flext_core.lazy import install_lazy_exports, merge_lazy_imports
+from flext_core.mixins import FlextMixins as x
+from flext_core.result import FlextResult as r
 from flext_tap_ldap.__version__ import *
+from flext_tap_ldap.__version__ import (
+    __author__,
+    __author_email__,
+    __description__,
+    __license__,
+    __title__,
+    __url__,
+    __version__,
+    __version_info__,
+)
 
-if _TYPE_CHECKING:
-    from flext_core import FlextTypes
-    from flext_core.decorators import FlextDecorators as d
-    from flext_core.exceptions import FlextExceptions as e
-    from flext_core.handlers import FlextHandlers as h
-    from flext_core.mixins import FlextMixins as x
-    from flext_core.result import FlextResult as r
-    from flext_core.service import FlextService as s
-    from flext_tap_ldap import (
-        _utilities,
-        api,
-        client,
-        constants,
-        ldif_streams,
-        models,
-        processor,
-        protocols,
-        services,
-        settings,
-        streams,
-        tap,
-        typings,
-        utilities,
-    )
-    from flext_tap_ldap.__version__ import (
+if _t.TYPE_CHECKING:
+    import flext_tap_ldap._utilities as _flext_tap_ldap__utilities
+
+    _utilities = _flext_tap_ldap__utilities
+    import flext_tap_ldap.api as _flext_tap_ldap_api
+
+    api = _flext_tap_ldap_api
+    import flext_tap_ldap.client as _flext_tap_ldap_client
+
+    client = _flext_tap_ldap_client
+    import flext_tap_ldap.constants as _flext_tap_ldap_constants
+
+    constants = _flext_tap_ldap_constants
+    import flext_tap_ldap.ldif_streams as _flext_tap_ldap_ldif_streams
+
+    ldif_streams = _flext_tap_ldap_ldif_streams
+    import flext_tap_ldap.models as _flext_tap_ldap_models
+
+    models = _flext_tap_ldap_models
+    import flext_tap_ldap.processor as _flext_tap_ldap_processor
+
+    processor = _flext_tap_ldap_processor
+    import flext_tap_ldap.protocols as _flext_tap_ldap_protocols
+
+    protocols = _flext_tap_ldap_protocols
+    import flext_tap_ldap.services as _flext_tap_ldap_services
+
+    services = _flext_tap_ldap_services
+    import flext_tap_ldap.settings as _flext_tap_ldap_settings
+
+    settings = _flext_tap_ldap_settings
+    import flext_tap_ldap.streams as _flext_tap_ldap_streams
+
+    streams = _flext_tap_ldap_streams
+    import flext_tap_ldap.tap as _flext_tap_ldap_tap
+
+    tap = _flext_tap_ldap_tap
+    import flext_tap_ldap.typings as _flext_tap_ldap_typings
+
+    typings = _flext_tap_ldap_typings
+    import flext_tap_ldap.utilities as _flext_tap_ldap_utilities
+
+    utilities = _flext_tap_ldap_utilities
+
+    _ = (
+        CLI_COMMAND,
+        FlextLdifDistinguishedName,
+        FlextTapLdapClient,
+        FlextTapLdapConstants,
+        FlextTapLdapEntry,
+        FlextTapLdapLdifStreams,
+        FlextTapLdapModels,
+        FlextTapLdapProcessor,
+        FlextTapLdapProtocols,
+        FlextTapLdapService,
+        FlextTapLdapServices,
+        FlextTapLdapSettings,
+        FlextTapLdapStreams,
+        FlextTapLdapTap,
+        FlextTapLdapTransformer,
+        FlextTapLdapTypes,
+        FlextTapLdapUtilities,
+        FlextTapLdapUtilitiesProcessorMixin,
+        FlextTapLdapValidator,
         __author__,
         __author_email__,
         __description__,
@@ -44,38 +97,35 @@ if _TYPE_CHECKING:
         __url__,
         __version__,
         __version_info__,
+        _utilities,
+        api,
+        c,
+        client,
+        constants,
+        d,
+        e,
+        h,
+        ldif_streams,
+        logger,
+        m,
+        main,
+        models,
+        p,
+        processor,
+        protocols,
+        r,
+        s,
+        services,
+        settings,
+        streams,
+        t,
+        tap,
+        typings,
+        u,
+        utilities,
+        x,
     )
-    from flext_tap_ldap._utilities import FlextTapLdapUtilitiesProcessorMixin
-    from flext_tap_ldap.api import FlextTapLdapService
-    from flext_tap_ldap.client import FlextTapLdapClient
-    from flext_tap_ldap.constants import (
-        FlextTapLdapConstants,
-        FlextTapLdapConstants as c,
-    )
-    from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
-    from flext_tap_ldap.models import FlextTapLdapModels, FlextTapLdapModels as m
-    from flext_tap_ldap.processor import (
-        FlextLdifDistinguishedName,
-        FlextTapLdapEntry,
-        FlextTapLdapProcessor,
-        FlextTapLdapTransformer,
-        FlextTapLdapValidator,
-    )
-    from flext_tap_ldap.protocols import (
-        FlextTapLdapProtocols,
-        FlextTapLdapProtocols as p,
-    )
-    from flext_tap_ldap.services import FlextTapLdapServices
-    from flext_tap_ldap.settings import FlextTapLdapSettings
-    from flext_tap_ldap.streams import FlextTapLdapStreams
-    from flext_tap_ldap.tap import CLI_COMMAND, FlextTapLdapTap, logger, main
-    from flext_tap_ldap.typings import FlextTapLdapTypes, FlextTapLdapTypes as t
-    from flext_tap_ldap.utilities import (
-        FlextTapLdapUtilities,
-        FlextTapLdapUtilities as u,
-    )
-
-_LAZY_IMPORTS: FlextTypes.LazyImportIndex = merge_lazy_imports(
+_LAZY_IMPORTS = merge_lazy_imports(
     ("flext_tap_ldap._utilities",),
     {
         "CLI_COMMAND": "flext_tap_ldap.tap",
@@ -121,7 +171,7 @@ _LAZY_IMPORTS: FlextTypes.LazyImportIndex = merge_lazy_imports(
         "processor": "flext_tap_ldap.processor",
         "protocols": "flext_tap_ldap.protocols",
         "r": ("flext_core.result", "FlextResult"),
-        "s": ("flext_core.service", "FlextService"),
+        "s": ("flext_tap_ldap.api", "FlextTapLdapService"),
         "services": "flext_tap_ldap.services",
         "settings": "flext_tap_ldap.settings",
         "streams": "flext_tap_ldap.streams",
@@ -133,6 +183,63 @@ _LAZY_IMPORTS: FlextTypes.LazyImportIndex = merge_lazy_imports(
         "x": ("flext_core.mixins", "FlextMixins"),
     },
 )
+
+__all__ = [
+    "CLI_COMMAND",
+    "FlextLdifDistinguishedName",
+    "FlextTapLdapClient",
+    "FlextTapLdapConstants",
+    "FlextTapLdapEntry",
+    "FlextTapLdapLdifStreams",
+    "FlextTapLdapModels",
+    "FlextTapLdapProcessor",
+    "FlextTapLdapProtocols",
+    "FlextTapLdapService",
+    "FlextTapLdapServices",
+    "FlextTapLdapSettings",
+    "FlextTapLdapStreams",
+    "FlextTapLdapTap",
+    "FlextTapLdapTransformer",
+    "FlextTapLdapTypes",
+    "FlextTapLdapUtilities",
+    "FlextTapLdapUtilitiesProcessorMixin",
+    "FlextTapLdapValidator",
+    "__author__",
+    "__author_email__",
+    "__description__",
+    "__license__",
+    "__title__",
+    "__url__",
+    "__version__",
+    "__version_info__",
+    "_utilities",
+    "api",
+    "c",
+    "client",
+    "constants",
+    "d",
+    "e",
+    "h",
+    "ldif_streams",
+    "logger",
+    "m",
+    "main",
+    "models",
+    "p",
+    "processor",
+    "protocols",
+    "r",
+    "s",
+    "services",
+    "settings",
+    "streams",
+    "t",
+    "tap",
+    "typings",
+    "u",
+    "utilities",
+    "x",
+]
 
 
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)
