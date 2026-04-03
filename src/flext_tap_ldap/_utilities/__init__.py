@@ -13,10 +13,8 @@ if _t.TYPE_CHECKING:
     import flext_tap_ldap._utilities._processor as _flext_tap_ldap__utilities__processor
 
     _processor = _flext_tap_ldap__utilities__processor
-
-    _ = (
+    from flext_tap_ldap._utilities._processor import (
         FlextTapLdapUtilitiesProcessorMixin,
-        _processor,
         logger,
     )
 _LAZY_IMPORTS = {
