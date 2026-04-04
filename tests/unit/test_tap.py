@@ -142,13 +142,11 @@ class TestFlextTapLdapTapUnit:
 
         tap = FlextTapLdapTap()
         tap.tap_config = {
-            "connection": {
-                "host": "test.ldap.com",
-                "port": 389,
-                "base_dn": "dc=test,dc=com",
-                "bind_dn": "cn=REDACTED,dc=test,dc=com",
-                "bind_password": "test_password",
-            },
+            "host": "test.ldap.com",
+            "port": 389,
+            "base_dn": "dc=test,dc=com",
+            "bind_dn": "cn=REDACTED,dc=test,dc=com",
+            "bind_password": "test_password",
         }
         users_stream = FlextTapLdapStreams.UsersStream(tap)
         raw_records = list(users_stream.get_records(None))
