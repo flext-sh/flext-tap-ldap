@@ -57,11 +57,13 @@ class TestLDAPBaseStream:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLdapTap)
         tap.tap_config = {
-            "ldap_host": "test.ldap.com",
-            "ldap_port": 389,
-            "base_dn": "dc=test,dc=com",
-            "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            "bind_password": "test_password",
+            "connection": {
+                "host": "test.ldap.com",
+                "port": 389,
+                "base_dn": "dc=test,dc=com",
+                "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
+                "bind_password": "test_password",
+            },
         }
         tap.metrics_logger = Mock()
         tap.logger = Mock()
@@ -84,11 +86,13 @@ class TestUsersStream:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLdapTap)
         tap.tap_config = {
-            "ldap_host": "test.ldap.com",
-            "ldap_port": 389,
-            "base_dn": "dc=test,dc=com",
-            "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            "bind_password": "test_password",
+            "connection": {
+                "host": "test.ldap.com",
+                "port": 389,
+                "base_dn": "dc=test,dc=com",
+                "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
+                "bind_password": "test_password",
+            },
             "user_filter": "(objectClass=inetOrgPerson)",
         }
         tap.metrics_logger = Mock()
@@ -167,8 +171,14 @@ class TestUsersStream:
         """Test groups stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        empty_search_results: Sequence[t.StrMapping] = []
-        mock_client.search.return_value = empty_search_results
+        mock_client.search.return_value = [
+            {
+                "dn": "cn=developers,ou=groups,dc=test,dc=com",
+                "cn": "developers",
+                "objectClass": ["groupOfNames"],
+                "modifyTimestamp": "2024-01-01T12:00:00Z",
+            },
+        ]
         stream = FlextTapLdapStreams.GroupsStream(mock_tap)
         records = list(stream.get_records(context=None))
         assert len(records) == 1
@@ -187,8 +197,14 @@ class TestUsersStream:
         """Test organizational units stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        empty_search_results: Sequence[t.StrMapping] = []
-        mock_client.search.return_value = empty_search_results
+        mock_client.search.return_value = [
+            {
+                "dn": "ou=users,dc=test,dc=com",
+                "ou": "users",
+                "objectClass": ["organizationalUnit"],
+                "modifyTimestamp": "2024-01-01T12:00:00Z",
+            },
+        ]
         stream = FlextTapLdapStreams.OrganizationalUnitsStream(mock_tap)
         records = list(stream.get_records(context=None))
         assert len(records) == 1
@@ -207,8 +223,14 @@ class TestUsersStream:
         """Test schema stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        empty_search_results: Sequence[t.StrMapping] = []
-        mock_client.search.return_value = empty_search_results
+        mock_client.search.return_value = [
+            {
+                "dn": "cn=schema",
+                "cn": "schema",
+                "objectClass": ["subschema"],
+                "objectClasses": ["person", "inetOrgPerson"],
+            },
+        ]
         stream = FlextTapLdapStreams.SchemaStream(mock_tap)
         records = list(stream.get_records(context=None))
         assert len(records) == 1
@@ -227,11 +249,13 @@ class TestGroupsStream:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLdapTap)
         tap.tap_config = {
-            "ldap_host": "test.ldap.com",
-            "ldap_port": 389,
-            "base_dn": "dc=test,dc=com",
-            "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            "bind_password": "test_password",
+            "connection": {
+                "host": "test.ldap.com",
+                "port": 389,
+                "base_dn": "dc=test,dc=com",
+                "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
+                "bind_password": "test_password",
+            },
             "group_filter": "(objectClass=groupOfNames)",
         }
         tap.metrics_logger = Mock()
@@ -265,11 +289,13 @@ class TestOrganizationalUnitsStream:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLdapTap)
         tap.tap_config = {
-            "ldap_host": "test.ldap.com",
-            "ldap_port": 389,
-            "base_dn": "dc=test,dc=com",
-            "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            "bind_password": "test_password",
+            "connection": {
+                "host": "test.ldap.com",
+                "port": 389,
+                "base_dn": "dc=test,dc=com",
+                "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
+                "bind_password": "test_password",
+            },
         }
         tap.metrics_logger = Mock()
         tap.logger = Mock()
@@ -305,11 +331,13 @@ class TestSchemaStream:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLdapTap)
         tap.tap_config = {
-            "ldap_host": "test.ldap.com",
-            "ldap_port": 389,
-            "base_dn": "dc=test,dc=com",
-            "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            "bind_password": "test_password",
+            "connection": {
+                "host": "test.ldap.com",
+                "port": 389,
+                "base_dn": "dc=test,dc=com",
+                "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
+                "bind_password": "test_password",
+            },
         }
         tap.metrics_logger = Mock()
         tap.logger = Mock()
@@ -394,11 +422,13 @@ class TestCustomStream:
         """Create mock tap instance."""
         tap = Mock(spec=FlextTapLdapTap)
         tap.tap_config = {
-            "ldap_host": "test.ldap.com",
-            "ldap_port": 389,
-            "base_dn": "dc=test,dc=com",
-            "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            "bind_password": "test_password",
+            "connection": {
+                "host": "test.ldap.com",
+                "port": 389,
+                "base_dn": "dc=test,dc=com",
+                "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
+                "bind_password": "test_password",
+            },
         }
         tap.metrics_logger = Mock()
         tap.logger = Mock()
@@ -467,8 +497,13 @@ class TestCustomStream:
         """Test custom stream record retrieval."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        empty_search_results: Sequence[t.StrMapping] = []
-        mock_client.search.return_value = empty_search_results
+        mock_client.search.return_value = [
+            {
+                "dn": "cn=test-custom_test,dc=test,dc=com",
+                "testAttribute": "value1",
+                "objectClass": ["testObject"],
+            },
+        ]
         params = _CustomStreamParams(
             name="custom_test",
             search_filter="(objectClass=testObject)",
@@ -617,9 +652,11 @@ class TestStreamExceptionHandling:
         """Create mock tap that will cause exceptions."""
         tap = Mock(spec=FlextTapLdapTap)
         tap.tap_config = {
-            "ldap_host": "failing.ldap.com",
-            "ldap_port": 389,
-            "base_dn": "dc=test,dc=com",
+            "connection": {
+                "host": "failing.ldap.com",
+                "port": 389,
+                "base_dn": "dc=test,dc=com",
+            },
         }
         tap.metrics_logger = Mock()
         tap.logger = Mock()
@@ -631,16 +668,13 @@ class TestStreamExceptionHandling:
         mock_client_class: Mock,
         mock_tap_failing: Mock,
     ) -> None:
-        """Test users stream exception handling fallback (covers lines 168-171)."""
+        """Test users stream raises RuntimeError on LDAP search failure."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
         mock_client.search.side_effect = RuntimeError("Connection failed")
         stream = FlextTapLdapStreams.UsersStream(mock_tap_failing)
-        records = list(stream.get_records(context=None))
-        assert len(records) == 1
-        first_record = records[0]
-        assert isinstance(first_record, dict)
-        assert first_record["dn"] == "uid=jdoe,ou=users,dc=test,dc=com"
+        with pytest.raises(RuntimeError, match="LDAP search failed"):
+            list(stream.get_records(context=None))
 
     @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_groups_stream_exception_fallback(
@@ -648,16 +682,13 @@ class TestStreamExceptionHandling:
         mock_client_class: Mock,
         mock_tap_failing: Mock,
     ) -> None:
-        """Test groups stream exception handling fallback."""
+        """Test groups stream raises RuntimeError on LDAP search failure."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
         mock_client.search.side_effect = RuntimeError("Connection failed")
         stream = FlextTapLdapStreams.GroupsStream(mock_tap_failing)
-        records = list(stream.get_records(context=None))
-        assert len(records) == 1
-        first_record = records[0]
-        assert isinstance(first_record, dict)
-        assert first_record["dn"] == "cn=developers,ou=groups,dc=test,dc=com"
+        with pytest.raises(RuntimeError, match="LDAP search failed"):
+            list(stream.get_records(context=None))
 
     @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_organizational_units_stream_exception_fallback(
@@ -665,16 +696,13 @@ class TestStreamExceptionHandling:
         mock_client_class: Mock,
         mock_tap_failing: Mock,
     ) -> None:
-        """Test organizational units stream exception handling fallback."""
+        """Test organizational units stream raises RuntimeError on LDAP search failure."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
         mock_client.search.side_effect = RuntimeError("Connection failed")
         stream = FlextTapLdapStreams.OrganizationalUnitsStream(mock_tap_failing)
-        records = list(stream.get_records(context=None))
-        assert len(records) == 1
-        first_record = records[0]
-        assert isinstance(first_record, dict)
-        assert first_record["dn"] == "ou=users,dc=test,dc=com"
+        with pytest.raises(RuntimeError, match="LDAP search failed"):
+            list(stream.get_records(context=None))
 
     @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_schema_stream_exception_fallback(
@@ -682,16 +710,13 @@ class TestStreamExceptionHandling:
         mock_client_class: Mock,
         mock_tap_failing: Mock,
     ) -> None:
-        """Test schema stream exception handling fallback."""
+        """Test schema stream raises RuntimeError on LDAP search failure."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
         mock_client.search.side_effect = RuntimeError("Connection failed")
         stream = FlextTapLdapStreams.SchemaStream(mock_tap_failing)
-        records = list(stream.get_records(context=None))
-        assert len(records) == 1
-        first_record = records[0]
-        assert isinstance(first_record, dict)
-        assert first_record["dn"] == "cn=schema"
+        with pytest.raises(RuntimeError, match="LDAP search failed"):
+            list(stream.get_records(context=None))
 
     @patch("flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient")
     def test_custom_stream_exception_fallback(
@@ -699,7 +724,7 @@ class TestStreamExceptionHandling:
         mock_client_class: Mock,
         mock_tap_failing: Mock,
     ) -> None:
-        """Test custom stream exception handling fallback."""
+        """Test custom stream raises RuntimeError on LDAP search failure."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
         mock_client.search.side_effect = RuntimeError("Connection failed")
@@ -710,8 +735,5 @@ class TestStreamExceptionHandling:
             primary_keys=["dn"],
         )
         stream = FlextTapLdapStreams.CustomStream(tap=mock_tap_failing, params=params)
-        records = list(stream.get_records(context=None))
-        assert len(records) == 1
-        first_record = records[0]
-        assert isinstance(first_record, dict)
-        assert "cn=test-failing_custom,dc=test,dc=com" in str(first_record["dn"])
+        with pytest.raises(RuntimeError, match="LDAP search failed"):
+            list(stream.get_records(context=None))

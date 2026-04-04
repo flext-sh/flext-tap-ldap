@@ -161,11 +161,11 @@ class TestLDAPClientQuick:
         self,
         client: FlextTapLdapClient.LDAPClient,
     ) -> None:
-        """Test connection test returns True on expected errors (fallback)."""
+        """Test connection test returns False on expected errors."""
         api_cls = type(client._flext_api)
         with patch.object(api_cls, "search", side_effect=RuntimeError("test error")):
             result = client.test_connection()
-        assert result is True
+        assert result is False
 
     def test_health_check_functionality(
         self,

@@ -151,7 +151,7 @@ class FlextTapLdapClient:
             """Test the connection to the LDAP server."""
             try:
                 test_search_options = m.Ldap.SearchOptions(
-                    base_dn="",
+                    base_dn="dc=test",
                     filter_str="(objectClass=*)",
                     scope=c.Ldap.SearchScope.BASE,
                     attributes=None,
@@ -162,7 +162,7 @@ class FlextTapLdapClient:
                     test_search_options,
                 )
                 return result.is_success
-            except (RuntimeError, ValueError, TypeError) as e:
+            except (RuntimeError, ValueError, TypeError, ValidationError) as e:
                 err_msg = str(e)
                 logger.warning("LDAP connection test failed: %s", err_msg)
                 return False
