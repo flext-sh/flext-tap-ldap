@@ -25,7 +25,7 @@ if _t.TYPE_CHECKING:
 
     _utilities = _flext_tap_ldap__utilities
     import flext_tap_ldap.api as _flext_tap_ldap_api
-    from flext_tap_ldap._utilities._processor import FlextTapLdapUtilitiesProcessorMixin
+    from flext_tap_ldap._utilities import FlextTapLdapUtilitiesProcessorMixin
 
     api = _flext_tap_ldap_api
     import flext_tap_ldap.client as _flext_tap_ldap_client

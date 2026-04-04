@@ -24,8 +24,9 @@ if _t.TYPE_CHECKING:
     )
 
     e2e = _tests_e2e
-    import tests.e2e.test_integration as _tests_e2e_test_integration
-    from tests.e2e.conftest import (
+    import tests.models as _tests_models
+    from tests.e2e import (
+        TestFlextTapLdapIntegration,
         catalog_file,
         ldap_connection,
         ldap_container,
@@ -33,11 +34,8 @@ if _t.TYPE_CHECKING:
         project_root,
         sample_catalog,
         tap_config_file,
+        test_integration,
     )
-
-    test_integration = _tests_e2e_test_integration
-    import tests.models as _tests_models
-    from tests.e2e.test_integration import TestFlextTapLdapIntegration
 
     models = _tests_models
     import tests.protocols as _tests_protocols
@@ -55,52 +53,36 @@ if _t.TYPE_CHECKING:
     from tests.typings import FlextTapLdapTestTypes, FlextTapLdapTestTypes as t
 
     unit = _tests_unit
-    import tests.unit.test_client as _tests_unit_test_client
-
-    test_client = _tests_unit_test_client
-    import tests.unit.test_client_quick as _tests_unit_test_client_quick
-    from tests.unit.test_client import TestLDAPClientCoverageBoost
-
-    test_client_quick = _tests_unit_test_client_quick
-    import tests.unit.test_ldif_processor as _tests_unit_test_ldif_processor
-    from tests.unit.test_client_quick import TestLDAPClientQuick
-
-    test_ldif_processor = _tests_unit_test_ldif_processor
-    import tests.unit.test_ldif_stream as _tests_unit_test_ldif_stream
-    from tests.unit.test_ldif_processor import TestLdifProcessor
-
-    test_ldif_stream = _tests_unit_test_ldif_stream
-    import tests.unit.test_models as _tests_unit_test_models
-    from tests.unit.test_ldif_stream import TestLDIFStreamBasic
-
-    test_models = _tests_unit_test_models
-    import tests.unit.test_streams as _tests_unit_test_streams
-    from tests.unit.test_models import (
+    import tests.utilities as _tests_utilities
+    from tests.unit import (
         TestConnectionTestedEvent,
-        TestRecordExtractedEvent,
-        TestStreamDiscoveredEvent,
-        TestTapExecutionCompletedEvent,
-        TestTapExecutionStartedEvent,
-    )
-
-    test_streams = _tests_unit_test_streams
-    import tests.unit.test_tap as _tests_unit_test_tap
-    from tests.unit.test_streams import (
         TestCustomStream,
         TestCustomStreamParams,
+        TestFlextTapLdapTapUnit,
         TestGroupsStream,
         TestLDAPBaseStream,
         TestLDAPBaseStreamDirectUsage,
+        TestLDAPClientCoverageBoost,
+        TestLDAPClientQuick,
+        TestLdifProcessor,
+        TestLDIFStreamBasic,
         TestOrganizationalUnitsStream,
+        TestRecordExtractedEvent,
         TestSchemaStream,
+        TestStreamDiscoveredEvent,
         TestStreamExceptionHandling,
         TestStreamIntegration,
+        TestTapExecutionCompletedEvent,
+        TestTapExecutionStartedEvent,
         TestUsersStream,
+        test_client,
+        test_client_quick,
+        test_ldif_processor,
+        test_ldif_stream,
+        test_models,
+        test_streams,
+        test_tap,
     )
-
-    test_tap = _tests_unit_test_tap
-    import tests.utilities as _tests_utilities
-    from tests.unit.test_tap import TestFlextTapLdapTapUnit
 
     utilities = _tests_utilities
     from flext_core.decorators import FlextDecorators as d
