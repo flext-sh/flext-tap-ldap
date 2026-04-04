@@ -12,16 +12,6 @@ from flext_tap_ldap.__version__ import *
 
 if _t.TYPE_CHECKING:
     import flext_tap_ldap._utilities as _flext_tap_ldap__utilities
-    from flext_tap_ldap.__version__ import (
-        __author__,
-        __author_email__,
-        __description__,
-        __license__,
-        __title__,
-        __url__,
-        __version__,
-        __version_info__,
-    )
 
     _utilities = _flext_tap_ldap__utilities
     import flext_tap_ldap.api as _flext_tap_ldap_api
