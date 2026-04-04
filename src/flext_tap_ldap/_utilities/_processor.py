@@ -12,10 +12,10 @@ from __future__ import annotations
 
 from collections.abc import Iterator, Mapping, MutableSequence, Sequence
 from pathlib import Path
-from typing import ClassVar, override
+from typing import override
 
 from flext_ldif import ldif
-from pydantic import TypeAdapter, ValidationError
+from pydantic import ValidationError
 
 from flext_core import FlextLogger, r
 from flext_tap_ldap import c, m, t
@@ -197,10 +197,6 @@ class FlextTapLdapUtilitiesProcessorMixin:
             Provides testing convenience while delegating
             all LDIF processing to the flext-ldif library.
             """
-
-            _ldif_entry_adapter: ClassVar[TypeAdapter[m.Ldif.Entry]] = TypeAdapter(
-                m.Ldif.Entry
-            )
 
             @staticmethod
             def _to_ldif_entry(raw_value: t.ContainerMapping) -> m.Ldif.Entry | None:
