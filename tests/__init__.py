@@ -14,7 +14,13 @@ if _t.TYPE_CHECKING:
 
     conftest = _tests_conftest
     import tests.constants as _tests_constants
-    from tests.conftest import pytest_configure, shared_ldap_container, test_data_dir
+    from tests.conftest import (
+        pytest_configure,
+        pytest_plugins,
+        shared_ldap_container,
+        tap_ldap_settings,
+        test_data_dir,
+    )
 
     constants = _tests_constants
     import tests.e2e as _tests_e2e
@@ -118,10 +124,12 @@ _LAZY_IMPORTS = merge_lazy_imports(
         "p": ("tests.protocols", "FlextTapLdapTestProtocols"),
         "protocols": "tests.protocols",
         "pytest_configure": "tests.conftest",
+        "pytest_plugins": "tests.conftest",
         "r": ("flext_core.result", "FlextResult"),
         "s": ("flext_core.service", "FlextService"),
         "shared_ldap_container": "tests.conftest",
         "t": ("tests.typings", "FlextTapLdapTestTypes"),
+        "tap_ldap_settings": "tests.conftest",
         "test_data_dir": "tests.conftest",
         "typings": "tests.typings",
         "u": ("tests.utilities", "FlextTapLdapTestUtilities"),
@@ -175,12 +183,14 @@ __all__ = [
     "project_root",
     "protocols",
     "pytest_configure",
+    "pytest_plugins",
     "r",
     "s",
     "sample_catalog",
     "shared_ldap_container",
     "t",
     "tap_config_file",
+    "tap_ldap_settings",
     "test_client",
     "test_client_quick",
     "test_data_dir",

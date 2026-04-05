@@ -12,6 +12,16 @@ from pathlib import Path
 import pytest
 from flext_tests import tk
 
+from flext_tap_ldap import FlextTapLdapSettings
+
+pytest_plugins = ["flext_tests.conftest_plugin"]
+
+
+@pytest.fixture
+def tap_ldap_settings() -> FlextTapLdapSettings:
+    """Provide clean FlextTapLdapSettings for tap-ldap tests."""
+    return FlextTapLdapSettings(debug=True)
+
 
 @pytest.fixture(scope="session")
 def shared_ldap_container(flext_docker: tk) -> str:
