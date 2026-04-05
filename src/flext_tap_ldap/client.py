@@ -357,7 +357,7 @@ class FlextTapLdapClient:
                 )
                 result: r[m.Ldap.SearchResult] = self._flext_api.search(search_options)
                 return self._process_search_results(result, size_limit)
-            except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+            except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                 err_msg = f"LDAP search failed: {e}"
                 logger.exception("LDAP search failed: %s", err_msg)
                 raise RuntimeError(err_msg) from e
@@ -438,9 +438,7 @@ class FlextTapLdapClient:
                         str(key): value for key, value in entry.items()
                     }
                 else:
-                    convert_result = self._convert_entry_to_dict(
-                        entry if isinstance(entry, (m.Ldif.Entry, Mapping)) else None
-                    )
+                    convert_result = self._convert_entry_to_dict(entry)
                     if convert_result.is_failure:
                         logger.warning(
                             "Skipping Oracle entry %d: %s",

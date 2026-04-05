@@ -156,7 +156,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             streams.extend(ldif_stream_list)
 
         empty_schema: Mapping[str, t.Scalar | None] = {}
-        streams_list: MutableSequence[t.Meltano.Singer.CatalogEntry] = [
+        streams_list: MutableSequence[t.Meltano.SingerCatalogEntry] = [
             {
                 "stream": str(stream.name),
                 "tap_stream_id": str(stream.name),
@@ -164,7 +164,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             }
             for stream in streams
         ]
-        stream_catalog: t.Meltano.Singer.StreamCatalog = {"streams": streams_list}
+        stream_catalog: t.Meltano.SingerStreamCatalog = {"streams": streams_list}
         return r[t.ContainerMapping].ok(stream_catalog)
 
     @override
@@ -178,9 +178,9 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             }),
         )
         status = (
-            c.Meltano.Enums.StreamStatus.COMPLETED
+            c.Meltano.StreamStatus.COMPLETED
             if discover_result.is_success
-            else c.Meltano.Enums.StreamStatus.FAILED
+            else c.Meltano.StreamStatus.FAILED
         )
         return r[t.ContainerMapping].ok({
             "status": status,
@@ -272,7 +272,7 @@ def _build_cli_command() -> click.Command:
                         cs_dict = FlextTapLdapTap.validate_custom_stream(cs_item)
                         if cs_dict is not None:
                             cs_schema: Mapping[str, t.Scalar | None] = {}
-                            cs_entry: t.Meltano.Singer.CatalogEntry = {
+                            cs_entry: t.Meltano.SingerCatalogEntry = {
                                 "stream": cs_dict["name"],
                                 "tap_stream_id": cs_dict["name"],
                                 "schema": cs_schema,

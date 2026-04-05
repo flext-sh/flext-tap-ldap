@@ -187,7 +187,7 @@ class FlextTapLdapLdifStreams:
                     self.logger.error(
                         f"Failed to parse LDIF file {ldif_file}: {result.error}",
                     )
-            except c.Meltano.Singer.SAFE_EXCEPTIONS:
+            except c.Meltano.SINGER_SAFE_EXCEPTIONS:
                 self.logger.exception("Error processing LDIF file %s", ldif_file)
 
     class LdifAnalysisStream:
@@ -312,7 +312,7 @@ class FlextTapLdapLdifStreams:
                     "entry_types": entry_types,
                     "object_classes": object_classes,
                 }
-            except c.Meltano.Singer.SAFE_EXCEPTIONS:
+            except c.Meltano.SINGER_SAFE_EXCEPTIONS:
                 self.logger.exception("LDIF analysis error")
                 yield {
                     "analysis_id": "ldif_summary_error",
@@ -355,7 +355,7 @@ class FlextTapLdapLdifStreams:
                     "entry_types": empty,
                     "object_classes": dict(empty),
                 }
-            except c.Meltano.Singer.SAFE_EXCEPTIONS:
+            except c.Meltano.SINGER_SAFE_EXCEPTIONS:
                 self.logger.exception("Error analyzing LDIF file %s", ldif_file)
                 empty_dict: t.IntMapping = {}
                 return {

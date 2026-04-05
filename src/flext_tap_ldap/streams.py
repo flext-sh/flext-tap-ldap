@@ -187,7 +187,7 @@ class FlextTapLdapStreams:
                         timeout=connection_config.timeout_seconds,
                         page_size=page_size,
                     )
-            except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+            except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                 err_msg = str(e)
                 logger.warning("Failed to create LDAP client: %s", err_msg)
                 self.client = None
@@ -224,7 +224,7 @@ class FlextTapLdapStreams:
                     logger.info("No results found for filter: %s", search_filter)
                     return []
                 return results
-            except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+            except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                 msg = f"LDAP search failed: {e}"
                 raise RuntimeError(msg) from e
 
@@ -492,7 +492,7 @@ class FlextTapLdapStreams:
                     if results:
                         yield from results
                         return
-                except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+                except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                     err_msg = str(e)
                     last_error = err_msg
                     logger.debug(
