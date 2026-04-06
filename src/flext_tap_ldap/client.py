@@ -423,7 +423,7 @@ class FlextTapLdapClient:
 
         def _process_oracle_search_results(
             self,
-            search_result: Sequence[m.Ldif.Entry] | Sequence[t.ContainerMapping],
+            search_result: Sequence[m.Ldif.Entry | t.ContainerMapping],
             *,
             oracle_oid_mode: bool,
         ) -> MutableSequence[t.MutableContainerMapping]:
