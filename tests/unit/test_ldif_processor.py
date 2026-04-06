@@ -13,12 +13,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from flext_tap_ldap import (
-    FlextTapLdapEntry,
-    FlextTapLdapLdifStreams,
-    FlextTapLdapProcessor,
-    FlextTapLdapTransformer,
-)
+from flext_tap_ldap import FlextTapLdapLdifStreams, u
 from tests import t
 
 
@@ -27,7 +22,7 @@ class TestLdifProcessor:
 
     def test_placeholder(self) -> None:
         """Placeholder test to satisfy pytest collection."""
-        assert FlextTapLdapProcessor is not None
+        assert u.TapLdap.Processor is not None
 
     def test_ldif_directory_processing_traverses_ldif_files(
         self,
@@ -62,7 +57,7 @@ class TestLdifProcessor:
         assert set(seen) == {str(file_a), str(file_b)}
 
     def test_transform_entry_applies_rules(self) -> None:
-        transformer = FlextTapLdapTransformer(
+        transformer = u.TapLdap.Transformer(
             transformation_rules={
                 "attribute_mappings": {"CN": "cn", "sn": "surname"},
                 "attribute_value_mappings": {
@@ -72,7 +67,7 @@ class TestLdifProcessor:
                 "add_attributes": {"status": "active"},
             },
         )
-        entry = FlextTapLdapEntry(
+        entry = u.TapLdap.Entry(
             "cn=alice,dc=example,dc=com",
             {"CN": ["Alice"], "sn": ["Smith"], "department": ["IT"], "obsolete": ["x"]},
         )
@@ -102,7 +97,7 @@ class TestLdifProcessor:
         assert not records
 
     def test_transform_entry_applies_schema_mappings(self) -> None:
-        transformer = FlextTapLdapTransformer(
+        transformer = u.TapLdap.Transformer(
             transformation_rules={
                 "schema_mappings": {
                     "uid": "employeeId",
@@ -110,7 +105,7 @@ class TestLdifProcessor:
                 },
             },
         )
-        entry = FlextTapLdapEntry(
+        entry = u.TapLdap.Entry(
             "cn=alice,dc=example,dc=com",
             {"employeeId": ["1001"]},
         )
