@@ -58,7 +58,7 @@ class FlextTapLdapLdifStreams:
             self.tap = tap
             self.config: t.ContainerValueMapping = getattr(tap, "tap_config", {})
             self._ldif_api = ldif()
-            self._logger_instance: FlextLogger | None = None
+            self._logger_instance: p.Logger | None = None
             self.schema = {
                 "type": "object",
                 "properties": {
@@ -80,7 +80,7 @@ class FlextTapLdapLdifStreams:
             }
 
         @property
-        def logger(self) -> FlextLogger:
+        def logger(self) -> p.Logger:
             """Lazy logger."""
             if self._logger_instance is None:
                 self._logger_instance = FlextLogger.create_module_logger(__name__)
