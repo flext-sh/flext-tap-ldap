@@ -18,9 +18,12 @@ if _t.TYPE_CHECKING:
         logger,
     )
 _LAZY_IMPORTS = {
-    "FlextTapLdapUtilitiesProcessorMixin": "flext_tap_ldap._utilities._processor",
+    "FlextTapLdapUtilitiesProcessorMixin": (
+        "flext_tap_ldap._utilities._processor",
+        "FlextTapLdapUtilitiesProcessorMixin",
+    ),
     "_processor": "flext_tap_ldap._utilities._processor",
-    "logger": "flext_tap_ldap._utilities._processor",
+    "logger": ("flext_tap_ldap._utilities._processor", "logger"),
 }
 
 __all__ = [
