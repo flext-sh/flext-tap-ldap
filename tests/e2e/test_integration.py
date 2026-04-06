@@ -17,10 +17,9 @@ from unittest.mock import Mock, patch
 import pytest
 from click.core import BaseCommand
 from click.testing import CliRunner
-from flext_cli import u as cli_u
 
 from flext_tap_ldap import CLI_COMMAND
-from tests import t
+from tests import t, u
 
 
 def _extract_json_from_output(output: str) -> t.NormalizedValue:
@@ -79,21 +78,21 @@ class TestFlextTapLdapIntegration:
     def config_file(self, tmp_path: Path, mock_ldap_config: t.ContainerMapping) -> Path:
         """Create temporary config file."""
         config_path = tmp_path / "config.json"
-        cli_u.Cli.json_write(config_path, mock_ldap_config)
+        u.Cli.json_write(config_path, mock_ldap_config)
         return config_path
 
     @pytest.fixture
     def catalog_file(self, tmp_path: Path, sample_catalog: t.ContainerMapping) -> Path:
         """Create temporary catalog file."""
         catalog_path = tmp_path / "catalog.json"
-        cli_u.Cli.json_write(catalog_path, sample_catalog)
+        u.Cli.json_write(catalog_path, sample_catalog)
         return catalog_path
 
     @pytest.fixture
     def state_file(self, tmp_path: Path, sample_state: t.ContainerMapping) -> Path:
         """Create a state file fixture for testing."""
         state_path = tmp_path / "state.json"
-        cli_u.Cli.json_write(state_path, sample_state)
+        u.Cli.json_write(state_path, sample_state)
         return state_path
 
     @patch("flext_tap_ldap.client.FlextTapLdapClient.LDAPClient")
@@ -230,7 +229,7 @@ class TestFlextTapLdapIntegration:
             ],
         }
         config_file = tmp_path / "config.json"
-        cli_u.Cli.json_write(config_file, config)
+        u.Cli.json_write(config_file, config)
         with patch(
             "flext_tap_ldap.client.FlextTapLdapClient.LDAPClient",
         ) as mock_ldap_client:
@@ -269,7 +268,7 @@ class TestFlextTapLdapIntegration:
     ) -> None:
         """Test error handling functionality."""
         config_file = tmp_path / "bad_config.json"
-        cli_u.Cli.json_write(config_file, {"invalid": "config"})
+        u.Cli.json_write(config_file, {"invalid": "config"})
         result = runner.invoke(
             self._cli_command(),
             ["--config", str(config_file), "--discover"],

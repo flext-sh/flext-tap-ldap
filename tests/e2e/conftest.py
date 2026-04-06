@@ -11,7 +11,6 @@ from collections.abc import Generator, Iterator
 from pathlib import Path
 
 import pytest
-from flext_cli import u as cli_u
 from flext_tests import tk
 
 from flext_core import FlextLogger, d
@@ -111,7 +110,7 @@ def tap_config_file(tmp_path: Path, _ldap_container: None) -> Path:
         "page_size": 1000,
     }
     config_file = tmp_path / "tap_config.json"
-    cli_u.Cli.json_write(config_file, config)
+    u.Cli.json_write(config_file, config)
     return config_file
 
 
@@ -119,5 +118,5 @@ def tap_config_file(tmp_path: Path, _ldap_container: None) -> Path:
 def catalog_file(tmp_path: Path, sample_catalog: t.ContainerMapping) -> Path:
     """Create catalog file for testing."""
     catalog_file = tmp_path / "catalog.json"
-    cli_u.Cli.json_write(catalog_file, sample_catalog)
+    u.Cli.json_write(catalog_file, sample_catalog)
     return catalog_file
