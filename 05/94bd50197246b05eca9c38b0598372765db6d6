@@ -1,0 +1,23 @@
+src/flext_tap_ldap/ldif_streams.py
+  d3ada1e5d497edb1 61,83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "0594bd50197246b05eca9c38b0598372765db6d6",
+  "prompts": {
+    "d3ada1e5d497edb1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7a3e077c-5cc8-4cbe-b4df-b55506e62047",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "FLEXT Bot",
+      "messages": [],
+      "total_additions": 30,
+      "total_deletions": 30,
+      "accepted_lines": 15,
+      "overriden_lines": 0
+    }
+  }
+}
