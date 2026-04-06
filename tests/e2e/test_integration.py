@@ -17,6 +17,7 @@ from unittest.mock import Mock, patch
 import pytest
 from click.core import BaseCommand
 from click.testing import CliRunner
+from flext_cli import u as cli_u
 
 from flext_tap_ldap import CLI_COMMAND
 from tests import t
@@ -78,24 +79,21 @@ class TestFlextTapLdapIntegration:
     def config_file(self, tmp_path: Path, mock_ldap_config: t.ContainerMapping) -> Path:
         """Create temporary config file."""
         config_path = tmp_path / "config.json"
-        with Path(config_path).open("w", encoding="utf-8") as f:
-            json.dump(mock_ldap_config, f)
+        cli_u.Cli.json_write(config_path, mock_ldap_config)
         return config_path
 
     @pytest.fixture
     def catalog_file(self, tmp_path: Path, sample_catalog: t.ContainerMapping) -> Path:
         """Create temporary catalog file."""
         catalog_path = tmp_path / "catalog.json"
-        with Path(catalog_path).open("w", encoding="utf-8") as f:
-            json.dump(sample_catalog, f)
+        cli_u.Cli.json_write(catalog_path, sample_catalog)
         return catalog_path
 
     @pytest.fixture
     def state_file(self, tmp_path: Path, sample_state: t.ContainerMapping) -> Path:
         """Create a state file fixture for testing."""
         state_path = tmp_path / "state.json"
-        with Path(state_path).open("w", encoding="utf-8") as f:
-            json.dump(sample_state, f)
+        cli_u.Cli.json_write(state_path, sample_state)
         return state_path
 
     @patch("flext_tap_ldap.client.FlextTapLdapClient.LDAPClient")
@@ -232,8 +230,7 @@ class TestFlextTapLdapIntegration:
             ],
         }
         config_file = tmp_path / "config.json"
-        with Path(config_file).open("w", encoding="utf-8") as f:
-            json.dump(config, f)
+        cli_u.Cli.json_write(config_file, config)
         with patch(
             "flext_tap_ldap.client.FlextTapLdapClient.LDAPClient",
         ) as mock_ldap_client:
@@ -272,8 +269,7 @@ class TestFlextTapLdapIntegration:
     ) -> None:
         """Test error handling functionality."""
         config_file = tmp_path / "bad_config.json"
-        with Path(config_file).open("w", encoding="utf-8") as f:
-            json.dump({"invalid": "config"}, f)
+        cli_u.Cli.json_write(config_file, {"invalid": "config"})
         result = runner.invoke(
             self._cli_command(),
             ["--config", str(config_file), "--discover"],
