@@ -442,14 +442,14 @@ class FlextTapLdapServices:
             """Process LDIF file using flext-ldif library."""
             try:
                 logger.info("Processing LDIF file: %s", file_path)
-                result: r[MutableSequence[m.Ldif.Entry]] = self._ldif_api.parse_ldif(
+                result: r[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
                     Path(file_path),
                 )
                 if not result.is_success:
                     return r[Sequence[t.ContainerMapping]].fail(
                         f"Failed to parse LDIF file: {result.error}",
                     )
-                entries: MutableSequence[m.Ldif.Entry] = result.value or []
+                entries: MutableSequence[m.Ldif.Entry] = result.value.entries
                 entry_count = len(entries)
                 logger.info(
                     "Successfully processed %s entries from %s",
@@ -482,14 +482,14 @@ class FlextTapLdapServices:
             """Validate LDIF file using flext-ldif library."""
             try:
                 logger.info("Validating LDIF file: %s", file_path)
-                result: r[MutableSequence[m.Ldif.Entry]] = self._ldif_api.parse_ldif(
+                result: r[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
                     Path(file_path),
                 )
                 if not result.is_success:
                     return r[t.ContainerMapping].fail(
                         f"Validation failed: {result.error}",
                     )
-                entries: MutableSequence[m.Ldif.Entry] = result.value or []
+                entries: MutableSequence[m.Ldif.Entry] = result.value.entries
                 total_entries = len(entries)
                 validation_data: t.ContainerMapping = {
                     "total_entries": total_entries,

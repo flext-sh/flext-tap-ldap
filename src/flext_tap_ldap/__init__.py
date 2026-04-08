@@ -37,11 +37,8 @@ if _t.TYPE_CHECKING:
     from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
 
     models = _flext_tap_ldap_models
-    import flext_tap_ldap.processor as _flext_tap_ldap_processor
-    from flext_tap_ldap.models import FlextTapLdapModels, FlextTapLdapModels as m
-
-    processor = _flext_tap_ldap_processor
     import flext_tap_ldap.protocols as _flext_tap_ldap_protocols
+    from flext_tap_ldap.models import FlextTapLdapModels, FlextTapLdapModels as m
 
     protocols = _flext_tap_ldap_protocols
     import flext_tap_ldap.services as _flext_tap_ldap_services
@@ -121,7 +118,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
         "main": ("flext_tap_ldap.tap", "main"),
         "models": "flext_tap_ldap.models",
         "p": ("flext_tap_ldap.protocols", "FlextTapLdapProtocols"),
-        "processor": "flext_tap_ldap.processor",
         "protocols": "flext_tap_ldap.protocols",
         "r": ("flext_core.result", "FlextResult"),
         "s": ("flext_tap_ldap.api", "FlextTapLdapService"),
@@ -180,7 +176,6 @@ __all__ = [
     "main",
     "models",
     "p",
-    "processor",
     "protocols",
     "r",
     "s",
