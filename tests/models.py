@@ -2,7 +2,7 @@
 
 This module provides test-specific models that extend the main flext-tap-ldap models.
 Uses the unified namespace pattern m.TapLdap.Tests.* for test-only objects.
-Combines FlextTestsModels functionality with project-specific test models.
+Combines TestsFlextModels functionality with project-specific test models.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -16,8 +16,8 @@ from flext_tests import FlextTestsModels
 from flext_tap_ldap import FlextTapLdapModels, t
 
 
-class FlextTapLdapTestModels(FlextTestsModels, FlextTapLdapModels):
-    """Test models combining FlextTestsModels with flext-tap-ldap models."""
+class TestsFlextTapLdapModels(FlextTestsModels, FlextTapLdapModels):
+    """Test models combining TestsFlextModels with flext-tap-ldap models."""
 
     class TapLdap(FlextTapLdapModels.TapLdap):
         """TapLdap domain models extending project models."""
@@ -77,6 +77,6 @@ class FlextTapLdapTestModels(FlextTestsModels, FlextTapLdapModels):
                     return len(self.attributes)
 
 
-m = FlextTapLdapTestModels
+m = TestsFlextTapLdapModels
 
-__all__ = ["FlextTapLdapTestModels", "m"]
+__all__ = ["TestsFlextTapLdapModels", "m"]

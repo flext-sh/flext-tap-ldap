@@ -11,9 +11,9 @@ from flext_tests import FlextTestsTypes
 from flext_tap_ldap import FlextTapLdapTypes
 
 
-class FlextTapLdapTestTypes(FlextTestsTypes, FlextTapLdapTypes):
-    """Test types combining FlextTestsTypes with flext-tap-ldap types."""
+class TestsFlextTapLdapTypes(FlextTestsTypes, FlextTapLdapTypes):
+    """Test types combining TestsFlextTypes with flext-tap-ldap types."""
 
 
-t = FlextTapLdapTestTypes
-__all__ = ["FlextTapLdapTestTypes", "t"]
+t = TestsFlextTapLdapTypes
+__all__ = ["TestsFlextTapLdapTypes", "t"]

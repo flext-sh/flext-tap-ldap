@@ -25,8 +25,8 @@ from flext_tap_ldap import FlextTapLdapUtilities
 from tests import c
 
 
-class FlextTapLdapTestUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
-    """Test utilities combining FlextTestsUtilities with flext-tap-ldap utilities."""
+class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
+    """Test utilities combining TestsFlextUtilities with flext-tap-ldap utilities."""
 
     class TapLdap(FlextTapLdapUtilities.TapLdap):
         """TapLdap test utilities namespace."""
@@ -77,7 +77,7 @@ class FlextTapLdapTestUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
             @staticmethod
             def get_admin_credentials() -> tuple[str, str]:
                 """Resolve LDAP admin credentials, trying env vars then known defaults."""
-                parent = FlextTapLdapTestUtilities.Ldap
+                parent = TestsFlextTapLdapUtilities.Ldap
                 if parent._resolved_admin_credentials[0] is not None:
                     return parent._resolved_admin_credentials[0]
                 d = c.Ldap.Tests.Docker
@@ -90,7 +90,7 @@ class FlextTapLdapTestUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
                     (d.ADMIN_DN, d.ADMIN_PASSWORD),
                     (d.LEGACY_ADMIN_DN, d.LEGACY_ADMIN_PASSWORD),
                 ])
-                u_ldap = FlextTapLdapTestUtilities.Ldap
+                u_ldap = TestsFlextTapLdapUtilities.Ldap
                 for candidate_dn, candidate_password in candidates:
                     try:
                         server = u_ldap.create_bare_server("localhost", port=d.PORT)
@@ -117,5 +117,5 @@ class FlextTapLdapTestUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
                 return (d.ADMIN_DN, d.ADMIN_PASSWORD)
 
 
-u = FlextTapLdapTestUtilities
-__all__ = ["FlextTapLdapTestUtilities", "u"]
+u = TestsFlextTapLdapUtilities
+__all__ = ["TestsFlextTapLdapUtilities", "u"]

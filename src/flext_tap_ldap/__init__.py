@@ -61,7 +61,7 @@ if _t.TYPE_CHECKING:
 
     tap = _flext_tap_ldap_tap
     import flext_tap_ldap.typings as _flext_tap_ldap_typings
-    from flext_tap_ldap.tap import CLI_COMMAND, FlextTapLdapTap, logger, main
+    from flext_tap_ldap.tap import CLI_COMMAND, FlextTapLdapTap
 
     typings = _flext_tap_ldap_typings
     import flext_tap_ldap.utilities as _flext_tap_ldap_utilities
@@ -113,9 +113,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
         "e": ("flext_core.exceptions", "FlextExceptions"),
         "h": ("flext_core.handlers", "FlextHandlers"),
         "ldif_streams": "flext_tap_ldap.ldif_streams",
-        "logger": ("flext_tap_ldap.tap", "logger"),
         "m": ("flext_tap_ldap.models", "FlextTapLdapModels"),
-        "main": ("flext_tap_ldap.tap", "main"),
         "models": "flext_tap_ldap.models",
         "p": ("flext_tap_ldap.protocols", "FlextTapLdapProtocols"),
         "protocols": "flext_tap_ldap.protocols",
@@ -135,6 +133,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
 _ = _LAZY_IMPORTS.pop("cleanup_submodule_namespace", None)
 _ = _LAZY_IMPORTS.pop("install_lazy_exports", None)
 _ = _LAZY_IMPORTS.pop("lazy_getattr", None)
+_ = _LAZY_IMPORTS.pop("logger", None)
 _ = _LAZY_IMPORTS.pop("merge_lazy_imports", None)
 _ = _LAZY_IMPORTS.pop("output", None)
 _ = _LAZY_IMPORTS.pop("output_reporting", None)
@@ -171,9 +170,7 @@ __all__ = [
     "e",
     "h",
     "ldif_streams",
-    "logger",
     "m",
-    "main",
     "models",
     "p",
     "protocols",

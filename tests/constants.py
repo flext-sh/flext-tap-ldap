@@ -16,7 +16,7 @@ from flext_tests import FlextTestsConstants
 from flext_tap_ldap import FlextTapLdapConstants
 
 
-class FlextTapLdapTestConstants(FlextTestsConstants, FlextTapLdapConstants):
+class TestsFlextTapLdapConstants(FlextTestsConstants, FlextTapLdapConstants):
     """Test constants for flext-tap-ldap.
 
     Mirrors flext-ldap's c.Ldap.Tests.Docker for shared LDAP test infrastructure.
@@ -31,7 +31,7 @@ class FlextTapLdapTestConstants(FlextTestsConstants, FlextTapLdapConstants):
             class Docker:
                 """Docker container infrastructure constants for integration tests.
 
-                Mirrors flext-ldap/tests/constants.py FlextLdapTestConstants.Ldap.Tests.Docker.
+                Mirrors flext-ldap/tests/constants.py TestsFlextLdapConstants.Ldap.Tests.Docker.
                 """
 
                 CONTAINER_NAME: Final[str] = "flext-openldap-test"
@@ -47,5 +47,5 @@ class FlextTapLdapTestConstants(FlextTestsConstants, FlextTapLdapConstants):
                 LEGACY_ADMIN_PASSWORD: Final[str] = "REDACTED_LDAP_BIND_PASSWORD123"
 
 
-c = FlextTapLdapTestConstants
-__all__ = ["FlextTapLdapTestConstants", "c"]
+c = TestsFlextTapLdapConstants
+__all__ = ["TestsFlextTapLdapConstants", "c"]

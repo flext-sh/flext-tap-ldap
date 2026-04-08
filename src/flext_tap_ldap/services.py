@@ -13,6 +13,7 @@ from __future__ import annotations
 from collections.abc import MutableMapping, MutableSequence, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import ClassVar
 from uuid import uuid4
 
 from flext_ldif import ldif
@@ -20,8 +21,6 @@ from pydantic import ValidationError
 
 from flext_core import FlextLogger, r
 from flext_tap_ldap import FlextTapLdapSettings, c, m, t
-
-logger = FlextLogger(__name__)
 
 
 class FlextTapLdapServices:
@@ -35,6 +34,8 @@ class FlextTapLdapServices:
     to maintain single responsibility while providing complete LDAP/LDIF
     data extraction and processing capabilities.
     """
+
+    _logger: ClassVar = FlextLogger(__name__)
 
     @staticmethod
     def _as_map(value: t.NormalizedValue) -> t.ContainerValueMapping | None:
@@ -430,7 +431,10 @@ class FlextTapLdapServices:
                 }
                 return r[t.ContainerMapping].ok(file_stats)
             except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-                logger.exception("Error getting LDIF statistics for %s", file_path)
+                FlextTapLdapServices._logger.exception(
+                    "Error getting LDIF statistics for %s",
+                    file_path,
+                )
                 return r[t.ContainerMapping].fail(
                     f"LDIF statistics failed: {e}",
                 )
@@ -441,7 +445,7 @@ class FlextTapLdapServices:
         ) -> r[Sequence[t.ContainerMapping]]:
             """Process LDIF file using flext-ldif library."""
             try:
-                logger.info("Processing LDIF file: %s", file_path)
+                FlextTapLdapServices._logger.info("Processing LDIF file: %s", file_path)
                 result: r[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
                     Path(file_path),
                 )
@@ -451,7 +455,7 @@ class FlextTapLdapServices:
                     )
                 entries: MutableSequence[m.Ldif.Entry] = result.value.entries
                 entry_count = len(entries)
-                logger.info(
+                FlextTapLdapServices._logger.info(
                     "Successfully processed %s entries from %s",
                     entry_count,
                     file_path,
@@ -470,7 +474,10 @@ class FlextTapLdapServices:
                 ]
                 return r[Sequence[t.ContainerMapping]].ok(normalized)
             except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-                logger.exception("Error processing LDIF file %s", file_path)
+                FlextTapLdapServices._logger.exception(
+                    "Error processing LDIF file %s",
+                    file_path,
+                )
                 return r[Sequence[t.ContainerMapping]].fail(
                     f"LDIF processing failed: {e}",
                 )
@@ -481,7 +488,7 @@ class FlextTapLdapServices:
         ) -> r[t.ContainerMapping]:
             """Validate LDIF file using flext-ldif library."""
             try:
-                logger.info("Validating LDIF file: %s", file_path)
+                FlextTapLdapServices._logger.info("Validating LDIF file: %s", file_path)
                 result: r[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
                     Path(file_path),
                 )
@@ -497,10 +504,16 @@ class FlextTapLdapServices:
                     "invalid_entries": 0,
                     "errors": list[str](),
                 }
-                logger.info("LDIF file validation completed: %s", file_path)
+                FlextTapLdapServices._logger.info(
+                    "LDIF file validation completed: %s",
+                    file_path,
+                )
                 return r[t.ContainerMapping].ok(validation_data)
             except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-                logger.exception("Error validating LDIF file %s", file_path)
+                FlextTapLdapServices._logger.exception(
+                    "Error validating LDIF file %s",
+                    file_path,
+                )
                 return r[t.ContainerMapping].fail(
                     f"LDIF validation failed: {e}",
                 )
