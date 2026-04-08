@@ -65,7 +65,7 @@ if _t.TYPE_CHECKING:
     from flext_core.service import FlextService as s
     from flext_core.typings import FlextTypes as t
     from flext_core.utilities import FlextUtilities as u
-    from tests.unit.test_tap import TestFlextTapLdapTapUnit
+    from tests.unit.test_tap import config, test_streams_discovery_and_records
 _LAZY_IMPORTS = {
     "TestConnectionTestedEvent": (
         "tests.unit.test_models",
@@ -73,7 +73,6 @@ _LAZY_IMPORTS = {
     ),
     "TestCustomStream": ("tests.unit.test_streams", "TestCustomStream"),
     "TestCustomStreamParams": ("tests.unit.test_streams", "TestCustomStreamParams"),
-    "TestFlextTapLdapTapUnit": ("tests.unit.test_tap", "TestFlextTapLdapTapUnit"),
     "TestGroupsStream": ("tests.unit.test_streams", "TestGroupsStream"),
     "TestLDAPBaseStream": ("tests.unit.test_streams", "TestLDAPBaseStream"),
     "TestLDAPBaseStreamDirectUsage": (
@@ -112,6 +111,7 @@ _LAZY_IMPORTS = {
     ),
     "TestUsersStream": ("tests.unit.test_streams", "TestUsersStream"),
     "c": ("flext_core.constants", "FlextConstants"),
+    "config": ("tests.unit.test_tap", "config"),
     "d": ("flext_core.decorators", "FlextDecorators"),
     "e": ("flext_core.exceptions", "FlextExceptions"),
     "h": ("flext_core.handlers", "FlextHandlers"),
@@ -126,6 +126,10 @@ _LAZY_IMPORTS = {
     "test_ldif_stream": "tests.unit.test_ldif_stream",
     "test_models": "tests.unit.test_models",
     "test_streams": "tests.unit.test_streams",
+    "test_streams_discovery_and_records": (
+        "tests.unit.test_tap",
+        "test_streams_discovery_and_records",
+    ),
     "test_tap": "tests.unit.test_tap",
     "u": ("flext_core.utilities", "FlextUtilities"),
     "x": ("flext_core.mixins", "FlextMixins"),
@@ -135,7 +139,6 @@ __all__ = [
     "TestConnectionTestedEvent",
     "TestCustomStream",
     "TestCustomStreamParams",
-    "TestFlextTapLdapTapUnit",
     "TestGroupsStream",
     "TestLDAPBaseStream",
     "TestLDAPBaseStreamDirectUsage",
@@ -153,6 +156,7 @@ __all__ = [
     "TestTapExecutionStartedEvent",
     "TestUsersStream",
     "c",
+    "config",
     "d",
     "e",
     "h",
@@ -167,6 +171,7 @@ __all__ = [
     "test_ldif_stream",
     "test_models",
     "test_streams",
+    "test_streams_discovery_and_records",
     "test_tap",
     "u",
     "x",
