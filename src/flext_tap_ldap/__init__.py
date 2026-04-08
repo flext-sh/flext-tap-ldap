@@ -5,7 +5,11 @@ from __future__ import annotations
 
 import typing as _t
 
-from flext_core.lazy import install_lazy_exports, merge_lazy_imports
+from flext_core.lazy import (
+    build_lazy_import_map,
+    install_lazy_exports,
+    merge_lazy_imports,
+)
 from flext_tap_ldap.__version__ import *
 
 if _t.TYPE_CHECKING:
@@ -38,40 +42,48 @@ if _t.TYPE_CHECKING:
     )
 _LAZY_IMPORTS = merge_lazy_imports(
     ("._utilities",),
-    {
-        "CLI_COMMAND": ".tap",
-        "FlextTapLdapClient": ".client",
-        "FlextTapLdapConstants": ".constants",
-        "FlextTapLdapLdifStreams": ".ldif_streams",
-        "FlextTapLdapModels": ".models",
-        "FlextTapLdapProtocols": ".protocols",
-        "FlextTapLdapService": ".api",
-        "FlextTapLdapServices": ".services",
-        "FlextTapLdapSettings": ".settings",
-        "FlextTapLdapStreams": ".streams",
-        "FlextTapLdapTap": ".tap",
-        "FlextTapLdapTypes": ".typings",
-        "FlextTapLdapUtilities": ".utilities",
-        "__author__": ".__version__",
-        "__author_email__": ".__version__",
-        "__description__": ".__version__",
-        "__license__": ".__version__",
-        "__title__": ".__version__",
-        "__url__": ".__version__",
-        "__version__": ".__version__",
-        "__version_info__": ".__version__",
-        "c": (".constants", "FlextTapLdapConstants"),
-        "d": ("flext_core.decorators", "FlextDecorators"),
-        "e": ("flext_core.exceptions", "FlextExceptions"),
-        "h": ("flext_core.handlers", "FlextHandlers"),
-        "m": (".models", "FlextTapLdapModels"),
-        "p": (".protocols", "FlextTapLdapProtocols"),
-        "r": ("flext_core.result", "FlextResult"),
-        "s": (".api", "FlextTapLdapService"),
-        "t": (".typings", "FlextTapLdapTypes"),
-        "u": (".utilities", "FlextTapLdapUtilities"),
-        "x": ("flext_core.mixins", "FlextMixins"),
-    },
+    build_lazy_import_map(
+        {
+            ".__version__": (
+                "__author__",
+                "__author_email__",
+                "__description__",
+                "__license__",
+                "__title__",
+                "__url__",
+                "__version__",
+                "__version_info__",
+            ),
+            ".api": ("FlextTapLdapService",),
+            ".client": ("FlextTapLdapClient",),
+            ".constants": ("FlextTapLdapConstants",),
+            ".ldif_streams": ("FlextTapLdapLdifStreams",),
+            ".models": ("FlextTapLdapModels",),
+            ".protocols": ("FlextTapLdapProtocols",),
+            ".services": ("FlextTapLdapServices",),
+            ".settings": ("FlextTapLdapSettings",),
+            ".streams": ("FlextTapLdapStreams",),
+            ".tap": (
+                "CLI_COMMAND",
+                "FlextTapLdapTap",
+            ),
+            ".typings": ("FlextTapLdapTypes",),
+            ".utilities": ("FlextTapLdapUtilities",),
+        },
+        alias_groups={
+            ".api": (("s", "FlextTapLdapService"),),
+            ".constants": (("c", "FlextTapLdapConstants"),),
+            ".models": (("m", "FlextTapLdapModels"),),
+            ".protocols": (("p", "FlextTapLdapProtocols"),),
+            ".typings": (("t", "FlextTapLdapTypes"),),
+            ".utilities": (("u", "FlextTapLdapUtilities"),),
+            "flext_core.decorators": (("d", "FlextDecorators"),),
+            "flext_core.exceptions": (("e", "FlextExceptions"),),
+            "flext_core.handlers": (("h", "FlextHandlers"),),
+            "flext_core.mixins": (("x", "FlextMixins"),),
+            "flext_core.result": (("r", "FlextResult"),),
+        },
+    ),
     exclude_names=(
         "cleanup_submodule_namespace",
         "install_lazy_exports",
