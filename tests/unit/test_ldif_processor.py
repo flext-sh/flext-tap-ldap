@@ -51,7 +51,6 @@ class TestLdifProcessor:
             seen.append(ldif_file)
             return [{"dn": ldif_file}]
 
-        monkeypatch.setattr(stream, "_process_ldif_file", _process)
         records = list(stream.get_records())
         assert len(records) == 2
         assert set(seen) == {str(file_a), str(file_b)}
