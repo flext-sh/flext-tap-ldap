@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, MutableMapping
 from typing import cast
 
 import pytest
 
 from flext_tap_ldap import FlextTapLdapClient, FlextTapLdapStreams, FlextTapLdapTap
-from tests import c, m
+from tests import c, m, t
 
 
 class TestFlextTapLdapTap:
@@ -41,7 +41,7 @@ class TestFlextTapLdapTap:
     ) -> FlextTapLdapStreams.UsersStream:
         tap = FlextTapLdapTap()
         tap.tap_config = cast(
-            "dict[str, object]",
+            "MutableMapping[str, t.Scalar]",
             {"connection": ldap_connection_config},
         )
 
@@ -74,6 +74,8 @@ class TestFlextTapLdapTap:
 
         assert len(records) == 1
         assert records[0][field] == expected
+        assert users_stream.tap.tap_config is not None
+        assert users_stream.tap.tap_config["connection"] is not None
         assert (
-            users_stream.tap._config["connection"]["host"] == c.Ldap.Tests.Fake.HOST
+            users_stream.tap.tap_config["connection"]["host"] == c.Ldap.Tests.Fake.HOST
         )
