@@ -1,65 +1,79 @@
-"""Tests for tap-ldap.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-"""
+"""Tests for tap-ldap using canonical test namespace patterns."""
 
 from __future__ import annotations
 
-from flext_tap_ldap import FlextTapLdapStreams, FlextTapLdapTap
+from collections.abc import Mapping
+from typing import cast
+
+import pytest
+
+from flext_tap_ldap import FlextTapLdapClient, FlextTapLdapStreams, FlextTapLdapTap
+from tests import c, m
 
 
-def config() -> dict:
-    return {
-        "ldap_host": "test.ldap.com",
-        "ldap_port": 389,
-        "base_dn": "dc=test,dc=com",
-        "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-        "bind_password": "test_password",
-        "use_tls": False,
-        "page_size": 1000,
-    }
+class TestFlextTapLdapTap:
+    def test_discover_streams_returns_expected_names(
+        self,
+        ldap_source_config: m.Meltano.DataSourceConfig,
+    ) -> None:
+        tap = FlextTapLdapTap()
+        result = tap.discover_streams(tap_instance=ldap_source_config)
 
+        assert result.is_success
+        assert result.value is not None
+        raw_streams = result.value["streams"]
+        assert isinstance(raw_streams, list)
+        stream_names = {
+            stream["stream"]
+            for stream in raw_streams
+            if isinstance(stream, Mapping) and "stream" in stream
+        }
+        assert {"users", "groups", "organizational_units", "schema"}.issubset(
+            stream_names,
+        )
 
-def test_streams_discovery_and_records(monkeypatch) -> None:
-    tap = FlextTapLdapTap()
-    # Descoberta de streams via API pública
-    result = tap.discover_streams(tap_instance=config())
-    assert result.is_success and result.value and "streams" in result.value
-    streams = result.value["streams"]
-    names = {s["stream"] for s in streams}
-    assert {"users", "groups", "organizational_units", "schema"}.issubset(names)
-    # Mock para simular retorno de registros
+    @pytest.fixture
+    def users_stream(
+        self,
+        ldap_connection_config: dict[str, object],
+        ldap_record_entries: list[dict[str, object]],
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> FlextTapLdapStreams.UsersStream:
+        tap = FlextTapLdapTap()
+        tap.tap_config = cast(
+            "dict[str, object]",
+            {"connection": ldap_connection_config},
+        )
 
-    class DummyClient:
-        def search(self, *_a, **_k):
-            return [
-                {
-                    "dn": "uid=jdoe,ou=users,dc=test,dc=com",
-                    "uid": "jdoe",
-                    "cn": "John Doe",
-                    "mail": "jdoe@test.com",
-                    "objectClass": ["inetOrgPerson", "person"],
-                }
-            ]
+        class DummyClient:
+            def __init__(self, *args: object, **kwargs: object) -> None:
+                return None
 
-    monkeypatch.setattr(
-        "flext_tap_ldap.streams.FlextTapLdapClient.LDAPClient", DummyClient
+            def search(self, *_a: object, **_k: object) -> list[dict[str, object]]:
+                return ldap_record_entries
+
+        monkeypatch.setattr(FlextTapLdapClient, "LDAPClient", DummyClient)
+        return FlextTapLdapStreams.UsersStream(tap)
+
+    @pytest.mark.parametrize(
+        ("field", "expected"),
+        [
+            ("dn", "uid=jdoe,ou=users,dc=test,dc=com"),
+            ("uid", "jdoe"),
+            ("cn", "John Doe"),
+            ("mail", "jdoe@test.com"),
+        ],
     )
-    tap.tap_config = {
-        "connection": {
-            "host": "test.ldap.com",
-            "port": 389,
-            "base_dn": "dc=test,dc=com",
-            "bind_dn": "cn=REDACTED,dc=test,dc=com",
-            "bind_password": "test_password",
-        },
-    }
-    users_stream = FlextTapLdapStreams.UsersStream(tap)
-    records = list(users_stream.get_records(None))
-    assert len(records) == 1
-    rec = records[0]
-    assert rec["dn"] == "uid=jdoe,ou=users,dc=test,dc=com"
-    assert rec["uid"] == "jdoe"
-    assert tap.tap_config["connection"]["host"] == "test.ldap.com"
+    def test_users_stream_get_records_maps_expected_fields(
+        self,
+        users_stream: FlextTapLdapStreams.UsersStream,
+        field: str,
+        expected: str,
+    ) -> None:
+        records = list(users_stream.get_records(None))
+
+        assert len(records) == 1
+        assert records[0][field] == expected
+        assert (
+            users_stream.tap._config["connection"]["host"] == c.Ldap.Tests.Fake.HOST
+        )

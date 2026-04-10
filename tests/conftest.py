@@ -13,6 +13,7 @@ import pytest
 from flext_tests import tk
 
 from flext_tap_ldap import FlextTapLdapSettings
+from tests import c, m, t
 
 pytest_plugins = ["flext_tests.conftest_plugin"]
 
@@ -31,6 +32,44 @@ def shared_ldap_container(flext_docker: tk) -> str:
     if start_result.is_failure:
         pytest.skip(f"OpenLDAP container failed to start: {start_result.error}")
     return "flext-openldap-test"
+
+
+@pytest.fixture
+def ldap_connection_config() -> dict[str, object]:
+    return {
+        "host": c.Ldap.Tests.Fake.HOST,
+        "port": c.Ldap.Tests.Fake.PORT,
+        "base_dn": c.Ldap.Tests.Fake.BASE_DN,
+        "bind_dn": c.Ldap.Tests.Fake.BIND_DN,
+        "bind_password": c.Ldap.Tests.Fake.BIND_PASSWORD,
+        "use_tls": c.Ldap.Tests.Fake.USE_TLS,
+        "page_size": c.Ldap.Tests.Fake.PAGE_SIZE,
+    }
+
+
+@pytest.fixture
+def ldap_source_config(
+    ldap_connection_config: dict[str, t.NormalizedValue],
+) -> m.Meltano.DataSourceConfig:
+    return m.Meltano.DataSourceConfig(
+        source_type="ldap",
+        connection_config=ldap_connection_config,
+        stream_config={},
+        source_version="latest",
+    )
+
+
+@pytest.fixture
+def ldap_record_entries() -> list[dict[str, object]]:
+    return [
+        {
+            "dn": "uid=jdoe,ou=users,dc=test,dc=com",
+            "uid": "jdoe",
+            "cn": "John Doe",
+            "mail": "jdoe@test.com",
+            "objectClass": ["inetOrgPerson", "person"],
+        }
+    ]
 
 
 def pytest_configure(config: pytest.Config) -> None:

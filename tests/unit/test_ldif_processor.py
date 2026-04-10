@@ -13,8 +13,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from flext_tap_ldap import FlextTapLdapLdifStreams, u
-from tests import t
+from flext_tap_ldap import FlextTapLdapLdifStreams
+from tests import t, u
 
 
 class TestLdifProcessor:
@@ -34,8 +34,14 @@ class TestLdifProcessor:
         file_a = tmp_path / "a.ldif"
         file_b = nested / "b.ldif"
         ignored = nested / "ignore.txt"
-        file_a.write_text("dn: cn=a,dc=example,dc=com\n", encoding="utf-8")
-        file_b.write_text("dn: cn=b,dc=example,dc=com\n", encoding="utf-8")
+        file_a.write_text(
+            "dn: cn=a,dc=example,dc=com\nobjectClass: person\ncn: a\n\n",
+            encoding="utf-8",
+        )
+        file_b.write_text(
+            "dn: cn=b,dc=example,dc=com\nobjectClass: person\ncn: b\n\n",
+            encoding="utf-8",
+        )
         ignored.write_text("not-ldif", encoding="utf-8")
         stream = object.__new__(FlextTapLdapLdifStreams.LdifStream)
         stream.tap = Mock()
@@ -43,13 +49,15 @@ class TestLdifProcessor:
             "ldif_directory": str(tmp_path),
             "ldif_file_pattern": "*.ldif",
         }
-        stream._ldif_api = Mock()
         stream._logger_instance = None
+
         seen: list[str] = []
 
         def _process(ldif_file: str) -> Sequence[t.ContainerMapping]:
             seen.append(ldif_file)
             return [{"dn": ldif_file}]
+
+        monkeypatch.setattr(stream, "_process_ldif_file", _process)
 
         records = list(stream.get_records())
         assert len(records) == 2

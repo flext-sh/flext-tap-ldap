@@ -46,6 +46,17 @@ class TestsFlextTapLdapConstants(FlextTestsConstants, FlextTapLdapConstants):
                 )
                 LEGACY_ADMIN_PASSWORD: Final[str] = "REDACTED_LDAP_BIND_PASSWORD123"
 
+            class Fake:
+                """Fake LDAP constants used by unit tests."""
+
+                HOST: Final[str] = "test.ldap.com"
+                PORT: Final[int] = 389
+                BASE_DN: Final[str] = "dc=test,dc=com"
+                BIND_DN: Final[str] = "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com"
+                BIND_PASSWORD: Final[str] = "test_password"
+                USE_TLS: Final[bool] = False
+                PAGE_SIZE: Final[int] = 1000
+
 
 c = TestsFlextTapLdapConstants
 __all__ = ["TestsFlextTapLdapConstants", "c"]

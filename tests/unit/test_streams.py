@@ -12,13 +12,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from flext_tap_ldap import (
-    FlextTapLdapModels,
-    FlextTapLdapStreams,
-    FlextTapLdapTap,
-    m,
-    t,
-)
+from flext_tap_ldap import FlextTapLdapModels, FlextTapLdapStreams, FlextTapLdapTap
+from tests import m, t
 
 
 def _build_source_config(

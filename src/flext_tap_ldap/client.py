@@ -16,7 +16,7 @@ from collections.abc import Mapping, MutableSequence, Sequence
 from pydantic import BaseModel, ValidationError
 
 from flext_core import FlextLogger, r
-from flext_ldap import ldap
+from flext_ldap import FlextLdap, ldap
 from flext_tap_ldap import c, m, t
 
 logger = FlextLogger(__name__)
@@ -54,7 +54,7 @@ class FlextTapLdapClient:
                     host="ldap.example.com", port=389
                 )
             """
-            self._flext_api: ldap
+            self._flext_api: FlextLdap
             self._config: m.Ldap.ConnectionConfig
             self.host: str
             self.port: int
@@ -321,7 +321,7 @@ class FlextTapLdapClient:
                 bind_password=client_config.password,
                 timeout=int(client_config.timeout),
             )
-            self._flext_api = ldap()
+            self._flext_api = ldap
             self._config = flext_connection_config
             self.host = client_config.host
             self.port = client_config.port
