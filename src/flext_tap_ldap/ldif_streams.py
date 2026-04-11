@@ -6,10 +6,10 @@ from collections.abc import Iterable, Iterator, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
-from flext_ldif import ldif
+from flext_ldif.ldif import ldif
 from pydantic import ValidationError
 
-from flext_tap_ldap import c, m, p, t
+from flext_tap_ldap import c, m, p, t, u
 
 if TYPE_CHECKING:
     from flext_meltano import FlextMeltanoAbstractions

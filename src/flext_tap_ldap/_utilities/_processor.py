@@ -14,11 +14,11 @@ from collections.abc import Iterator, Mapping, MutableSequence, Sequence
 from pathlib import Path
 from typing import override
 
-from flext_ldif import ldif
+from flext_ldif.ldif import ldif
 from pydantic import ValidationError
 
-from flext_core import r
-from flext_tap_ldap import c, m, t
+from flext_core import u
+from flext_tap_ldap import c, m, r, t
 
 
 class FlextTapLdapUtilitiesProcessorMixin:
@@ -79,7 +79,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     case _:
                         self.attributes[name].extend(list(value))
 
-            def get_attribute(self, name: str) -> t.StrSequence:
+            def resolve_attribute_values(self, name: str) -> t.StrSequence:
                 """Get attribute values by name (case-insensitive)."""
                 for attr_name, values in self.attributes.items():
                     if attr_name.lower() == name.lower():
@@ -88,7 +88,9 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             def has_object_class(self, object_class: str) -> bool:
                 """Check if entry has specific object class."""
-                object_classes: t.StrSequence = self.get_attribute("objectClass") or []
+                object_classes: t.StrSequence = (
+                    self.resolve_attribute_values("objectClass") or []
+                )
                 return any(oc.lower() == object_class.lower() for oc in object_classes)
 
             def valid(self) -> bool:
@@ -227,7 +229,9 @@ class FlextTapLdapUtilitiesProcessorMixin:
             ) -> Sequence[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
                 """Filter entries that have a specific attribute."""
                 return [
-                    entry for entry in self.entries if entry.get_attribute(attr_name)
+                    entry
+                    for entry in self.entries
+                    if entry.resolve_attribute_values(attr_name)
                 ]
 
             def filter_by_dn_contains(
@@ -259,7 +263,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     if entry.has_object_class(object_class)
                 ]
 
-            def get_statistics(self) -> t.ContainerMapping:
+            def statistics(self) -> t.ContainerMapping:
                 """Get parsing statistics."""
                 return {
                     "processed_entries": self.processed_entries,
@@ -471,7 +475,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 self.warnings: MutableSequence[str] = []
                 self._api = ldif()
 
-            def get_validation_results(self) -> t.ContainerMapping:
+            def validation_results(self) -> t.ContainerMapping:
                 """Get validation results."""
                 return {
                     "errors": list(self.validation_errors),

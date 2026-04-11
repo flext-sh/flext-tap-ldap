@@ -61,7 +61,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
 
     @d.retry(max_attempts=30, delay_seconds=2.0, backoff_strategy="linear")
     def _check_ldap_ready() -> None:
-        admin_dn, admin_password = u.Ldap.Tests.get_admin_credentials()
+        admin_dn, admin_password = u.Ldap.Tests.admin_credentials()
         server = u.Ldap.create_server(host="localhost", port=dc.PORT, get_info="ALL")
         conn = u.Ldap.create_connection(
             server,
@@ -84,7 +84,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
 def ldap_connection(_ldap_container: None) -> Generator[p.Ldap.Ldap3Connection]:
     """Create LDAP connection for testing."""
     dc = c.Ldap.Tests.Docker
-    admin_dn, admin_password = u.Ldap.Tests.get_admin_credentials()
+    admin_dn, admin_password = u.Ldap.Tests.admin_credentials()
     server = u.Ldap.create_server(host="localhost", port=dc.PORT, get_info="ALL")
     conn = u.Ldap.create_connection(
         server,
@@ -100,7 +100,7 @@ def ldap_connection(_ldap_container: None) -> Generator[p.Ldap.Ldap3Connection]:
 def tap_config_file(tmp_path: Path, _ldap_container: None) -> Path:
     """Create tap configuration file for testing."""
     dc = c.Ldap.Tests.Docker
-    admin_dn, admin_password = u.Ldap.Tests.get_admin_credentials()
+    admin_dn, admin_password = u.Ldap.Tests.admin_credentials()
     config = {
         "ldap_host": "localhost",
         "ldap_port": dc.PORT,

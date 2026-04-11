@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, ClassVar, override
 
 from pydantic import ValidationError
 
-from flext_tap_ldap import FlextTapLdapClient, c, m, t
+from flext_tap_ldap import FlextTapLdapClient, c, m, t, u
 
 if TYPE_CHECKING:
     from flext_meltano import FlextMeltanoAbstractions as Tap

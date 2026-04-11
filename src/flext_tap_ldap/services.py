@@ -16,11 +16,10 @@ from pathlib import Path
 from typing import ClassVar
 from uuid import uuid4
 
-from flext_ldif import ldif
+from flext_ldif.ldif import ldif
 from pydantic import ValidationError
 
-from flext_core import r
-from flext_tap_ldap import FlextTapLdapSettings, c, m, t
+from flext_tap_ldap import FlextTapLdapSettings, c, m, r, t, u
 
 
 class FlextTapLdapServices:
@@ -86,7 +85,7 @@ class FlextTapLdapServices:
                     f"Failed to create connection: {e}",
                 )
 
-        def get_connection(
+        def fetch_connection(
             self,
             connection_id: str,
         ) -> r[m.TapLdap.LdapConnection]:
@@ -207,7 +206,7 @@ class FlextTapLdapServices:
                     f"Failed to discover schema: {e}",
                 )
 
-        def get_stream(
+        def fetch_stream(
             self,
             stream_id: str,
         ) -> r[m.TapLdap.LdapStream]:
@@ -321,7 +320,7 @@ class FlextTapLdapServices:
                     f"Failed to create execution: {e}",
                 )
 
-        def get_execution(
+        def fetch_execution(
             self,
             execution_id: str,
         ) -> r[m.TapLdap.TapExecution]:
@@ -408,7 +407,7 @@ class FlextTapLdapServices:
             """Initialize LDIF processing service."""
             self._ldif_api = ldif()
 
-        def get_ldif_statistics(
+        def fetch_ldif_statistics(
             self,
             file_path: str,
         ) -> r[t.ContainerMapping]:

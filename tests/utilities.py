@@ -1,7 +1,7 @@
 """Test utilities for flext-tap-ldap - uses u.TapLdap.* namespace pattern.
 
 Provides test-specific utilities that extend the main flext-tap-ldap utilities.
-Includes u.Ldap.Tests.FileLock and u.Ldap.Tests.get_admin_credentials() for
+Includes u.Ldap.Tests.FileLock and u.Ldap.Tests.admin_credentials() for
 shared LDAP Docker test infrastructure.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -19,10 +19,10 @@ from typing import ClassVar, TextIO
 
 from flext_tests import FlextTestsUtilities
 
-from flext_core import FlextLogger
+from flext_core import u as core_u
 from flext_ldap import FlextLdapLdap3Wrappers
 from flext_tap_ldap import FlextTapLdapUtilities
-from tests import c
+from tests import c, p
 
 
 class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
@@ -37,11 +37,11 @@ class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
     class Ldap(FlextTapLdapUtilities.Ldap):
         """LDAP test utilities with Docker infra helpers."""
 
-        _logger: ClassVar[FlextLogger] = u.fetch_logger(__name__)
+        _logger: ClassVar[p.Logger] = core_u.fetch_logger(__name__)
         _resolved_admin_credentials: ClassVar[list[tuple[str, str] | None]] = [None]
 
         class Tests:
-            """LDAP test infra utilities: FileLock, get_admin_credentials.
+            """LDAP test infra utilities: FileLock, admin_credentials.
 
             Mirrors flext-ldap/tests/_utilities/docker_infra.py pattern.
             """
@@ -75,7 +75,7 @@ class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
                     self.lock_file.unlink(missing_ok=True)
 
             @staticmethod
-            def get_admin_credentials() -> tuple[str, str]:
+            def admin_credentials() -> tuple[str, str]:
                 """Resolve LDAP admin credentials, trying env vars then known defaults."""
                 parent = TestsFlextTapLdapUtilities.Ldap
                 if parent._resolved_admin_credentials[0] is not None:
