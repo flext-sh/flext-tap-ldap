@@ -43,7 +43,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
     _tap_config: t.MutableConfigurationMapping
 
     def __init__(self) -> None:
-        """Initialize tap with empty config."""
+        """Initialize tap with empty settings."""
         self._tap_config = {}
 
     @property
@@ -219,7 +219,7 @@ def _build_cli_command() -> click.Command:
 
     @click.command("tap-ldap")
     @click.option(
-        "--config",
+        "--settings",
         "config_path",
         type=click.Path(exists=True),
         required=True,

@@ -37,16 +37,16 @@ class FlextTapLdapClient:
 
         def __init__(
             self,
-            config: m.TapLdap.LdapClientConfig | None = None,
+            settings: m.TapLdap.LdapClientConfig | None = None,
             **convenience_kwargs: t.Scalar,
         ) -> None:
             """Initialize with Parameter Object Pattern (preferred).
 
             Preferred Usage (Parameter Object Pattern):
-                config = m.TapLdap.LdapClientConfig(
+                settings = m.TapLdap.LdapClientConfig(
                     host="ldap.example.com", port=389
                 )
-                client = FlextTapLdapClient.LDAPClient(config=config)
+                client = FlextTapLdapClient.LDAPClient(settings=settings)
 
             Testing convenience Usage:
                 client = FlextTapLdapClient.LDAPClient(
@@ -65,8 +65,8 @@ class FlextTapLdapClient:
             self._bind_dn: str | None
             self._password: str | None
             client_config = (
-                config
-                if config is not None
+                settings
+                if settings is not None
                 else self._create_config_from_kwargs(**convenience_kwargs)
             )
             self._initialize_flext_api(client_config)
@@ -234,7 +234,7 @@ class FlextTapLdapClient:
             self,
             **convenience_kwargs: t.Scalar,
         ) -> m.TapLdap.LdapClientConfig:
-            """Create config from convenience keyword arguments."""
+            """Create settings from convenience keyword arguments."""
             try:
                 config_dict = {
                     "host": convenience_kwargs.get("host", ""),
@@ -255,7 +255,7 @@ class FlextTapLdapClient:
             except ValidationError as e:
                 host_val = convenience_kwargs.get("host")
                 if not host_val or not isinstance(host_val, str):
-                    msg = "Either 'config' or valid string 'host' must be provided"
+                    msg = "Either 'settings' or valid string 'host' must be provided"
                     raise ValueError(msg) from e
                 msg = f"Invalid configuration: {e}"
                 raise ValueError(msg) from e

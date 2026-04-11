@@ -14,7 +14,7 @@ from collections.abc import Iterator, Mapping, MutableSequence, Sequence
 from pathlib import Path
 from typing import override
 
-from flext_ldif.ldif import ldif
+from flext_ldif import ldif
 from pydantic import ValidationError
 
 from flext_core import u

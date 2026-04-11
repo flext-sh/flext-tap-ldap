@@ -41,7 +41,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
             def connect(
                 self,
-                config: t.ConfigMap,
+                settings: t.ConfigMap,
             ) -> FlextMeltanoProtocols.Result[t.ConfigMap]:
                 """Connect to LDAP database with provided configuration."""
                 ...
@@ -52,7 +52,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
             def test_connection(
                 self,
-                config: t.ConfigMap,
+                settings: t.ConfigMap,
             ) -> FlextMeltanoProtocols.Result[bool]:
                 """Test LDAP database connection with validation."""
                 ...
@@ -63,7 +63,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
             def discover_base_dns(
                 self,
-                config: t.ConfigMap,
+                settings: t.ConfigMap,
             ) -> FlextMeltanoProtocols.Result[t.StrSequence]:
                 """Discover available base DNs in LDAP directory."""
                 ...
@@ -129,7 +129,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
             def generate_streams_from_ldap(
                 self,
                 base_dn: str,
-                config: t.ConfigMap,
+                settings: t.ConfigMap,
             ) -> FlextMeltanoProtocols.Result[m.Meltano.SingerCatalog]:
                 """Generate Singer streams from LDAP directory structure."""
                 ...
@@ -173,7 +173,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
             """
 
             @property
-            def config(self) -> FlextTapLdapProtocols.TapLdap.TapConfig:
+            def settings(self) -> FlextTapLdapProtocols.TapLdap.TapConfig:
                 """Get tap configuration.
 
                 Returns:

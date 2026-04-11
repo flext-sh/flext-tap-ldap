@@ -101,11 +101,11 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def validate_ldap_config(
-                config: t.ContainerMapping,
+                settings: t.ContainerMapping,
             ) -> r[t.ContainerMapping]:
                 """Validate LDAP configuration."""
                 config_map: t.MutableContainerMapping = {
-                    str(key): value for key, value in config.items()
+                    str(key): value for key, value in settings.items()
                 }
                 required_fields = ["host", "base_dn"]
                 for field in required_fields:

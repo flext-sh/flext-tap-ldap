@@ -13,7 +13,7 @@ from flext_core.lazy import (
 from flext_tap_ldap.__version__ import *
 
 if _t.TYPE_CHECKING:
-    from flext_meltano import d, e, h, r, s, x
+    from flext_ldap import d, e, h, r, s, x
     from flext_tap_ldap._utilities._processor import FlextTapLdapUtilitiesProcessorMixin
     from flext_tap_ldap.api import FlextTapLdapService, tap_ldap
     from flext_tap_ldap.client import FlextTapLdapClient
@@ -71,7 +71,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "FlextTapLdapUtilities",
                 "u",
             ),
-            "flext_meltano": (
+            "flext_ldap": (
                 "d",
                 "e",
                 "h",

@@ -76,8 +76,8 @@ class TestFlextTapLdapIntegration:
 
     @pytest.fixture
     def config_file(self, tmp_path: Path, mock_ldap_config: t.ContainerMapping) -> Path:
-        """Create temporary config file."""
-        config_path = tmp_path / "config.json"
+        """Create temporary settings file."""
+        config_path = tmp_path / "settings.json"
         u.Cli.json_write(config_path, mock_ldap_config)
         return config_path
 
@@ -108,7 +108,7 @@ class TestFlextTapLdapIntegration:
         mock_client_instance.search.return_value.__aenter__.return_value = empty_records
         result = runner.invoke(
             self._cli_command(),
-            ["--config", str(config_file), "--discover"],
+            ["--settings", str(config_file), "--discover"],
             catch_exceptions=False,
         )
         if result.exit_code != 0:
@@ -151,7 +151,7 @@ class TestFlextTapLdapIntegration:
         ]
         result = runner.invoke(
             self._cli_command(),
-            ["--config", str(config_file), "--catalog", str(catalog_file)],
+            ["--settings", str(config_file), "--catalog", str(catalog_file)],
             catch_exceptions=False,
         )
         if result.exit_code != 0:
@@ -187,7 +187,7 @@ class TestFlextTapLdapIntegration:
         result = runner.invoke(
             self._cli_command(),
             [
-                "--config",
+                "--settings",
                 str(config_file),
                 "--catalog",
                 str(catalog_file),
@@ -211,7 +211,7 @@ class TestFlextTapLdapIntegration:
 
     def test_self(self, runner: CliRunner, tmp_path: Path) -> None:
         """Test method."""
-        config = {
+        settings = {
             "ldap_host": "test.ldap.com",
             "base_dn": "dc=test,dc=com",
             "custom_streams": [
@@ -228,8 +228,8 @@ class TestFlextTapLdapIntegration:
                 },
             ],
         }
-        config_file = tmp_path / "config.json"
-        u.Cli.json_write(config_file, config)
+        config_file = tmp_path / "settings.json"
+        u.Cli.json_write(config_file, settings)
         with patch(
             "flext_tap_ldap.client.FlextTapLdapClient.LDAPClient",
         ) as mock_ldap_client:
@@ -240,7 +240,7 @@ class TestFlextTapLdapIntegration:
             )
             result = runner.invoke(
                 self._cli_command(),
-                ["--config", str(config_file), "--discover"],
+                ["--settings", str(config_file), "--discover"],
                 catch_exceptions=False,
             )
         if result.exit_code != 0:
@@ -268,10 +268,10 @@ class TestFlextTapLdapIntegration:
     ) -> None:
         """Test error handling functionality."""
         config_file = tmp_path / "bad_config.json"
-        u.Cli.json_write(config_file, {"invalid": "config"})
+        u.Cli.json_write(config_file, {"invalid": "settings"})
         result = runner.invoke(
             self._cli_command(),
-            ["--config", str(config_file), "--discover"],
+            ["--settings", str(config_file), "--discover"],
         )
         all_logs = " ".join(record.message for record in caplog.records)
         all_output = (
@@ -283,7 +283,7 @@ class TestFlextTapLdapIntegration:
             or result.exit_code != 0
         )
         assert has_validation_failure, (
-            f"Expected config validation failure. Logs: {all_logs}, Output: {all_output}, Exit code: {result.exit_code}"
+            f"Expected settings validation failure. Logs: {all_logs}, Output: {all_output}, Exit code: {result.exit_code}"
         )
 
     @patch("flext_tap_ldap.client.FlextTapLdapClient.LDAPClient")
@@ -314,7 +314,7 @@ class TestFlextTapLdapIntegration:
         mock_client_instance.search = mock_search
         result = runner.invoke(
             self._cli_command(),
-            ["--config", str(config_file), "--catalog", str(catalog_file)],
+            ["--settings", str(config_file), "--catalog", str(catalog_file)],
             catch_exceptions=False,
         )
         if result.exit_code != 0:

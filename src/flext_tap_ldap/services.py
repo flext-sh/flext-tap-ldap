@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import ClassVar
 from uuid import uuid4
 
-from flext_ldif.ldif import ldif
+from flext_ldif import ldif
 from pydantic import ValidationError
 
 from flext_tap_ldap import FlextTapLdapSettings, c, m, r, t, u
@@ -293,13 +293,13 @@ class FlextTapLdapServices:
             self,
             connection_id: str,
             command: str,
-            config: t.ContainerMapping | None = None,
+            settings: t.ContainerMapping | None = None,
             catalog: t.ContainerMapping | None = None,
             state: t.ContainerMapping | None = None,
         ) -> r[m.TapLdap.TapExecution]:
             """Create tap execution."""
             try:
-                validated_config = FlextTapLdapServices._as_map(config or {}) or {}
+                validated_config = FlextTapLdapServices._as_map(settings or {}) or {}
                 validated_catalog = FlextTapLdapServices._as_map(catalog or {}) or {}
                 validated_state = FlextTapLdapServices._as_map(state or {}) or {}
                 execution = m.TapLdap.TapExecution(
@@ -308,7 +308,7 @@ class FlextTapLdapServices:
                     connection_id=connection_id,
                     command=command,
                     tap_status="created",
-                    config={str(k): v for k, v in validated_config.items()},
+                    settings={str(k): v for k, v in validated_config.items()},
                     catalog={str(k): v for k, v in validated_catalog.items()},
                     state={str(k): v for k, v in validated_state.items()},
                     domain_events=[],
@@ -531,11 +531,11 @@ class FlextTapLdapServices:
 
         """
         try:
-            config = FlextTapLdapSettings.model_validate(overrides)
-            return r[FlextTapLdapSettings].ok(config)
+            settings = FlextTapLdapSettings.model_validate(overrides)
+            return r[FlextTapLdapSettings].ok(settings)
         except (RuntimeError, ValueError, TypeError) as e:
             return r[FlextTapLdapSettings].fail(
-                f"Failed to create development config: {e}",
+                f"Failed to create development settings: {e}",
             )
 
     @staticmethod
@@ -552,7 +552,7 @@ class FlextTapLdapServices:
 
         """
         try:
-            config: t.ContainerMapping = {
+            settings: t.ContainerMapping = {
                 "host": params.host,
                 "port": params.port,
                 "bind_dn": params.bind_dn,
@@ -563,10 +563,10 @@ class FlextTapLdapServices:
                 "page_size": params.page_size,
                 "max_retries": params.max_retries,
             }
-            return r[t.ContainerMapping].ok(config)
+            return r[t.ContainerMapping].ok(settings)
         except (RuntimeError, ValueError, TypeError) as e:
             return r[t.ContainerMapping].fail(
-                f"Failed to create LDAP connection config: {e}",
+                f"Failed to create LDAP connection settings: {e}",
             )
 
     @staticmethod
@@ -609,51 +609,51 @@ class FlextTapLdapServices:
         """
         try:
             production_overrides = {"use_ssl": True, **overrides}
-            config = FlextTapLdapSettings.model_validate(production_overrides)
-            return r[FlextTapLdapSettings].ok(config)
+            settings = FlextTapLdapSettings.model_validate(production_overrides)
+            return r[FlextTapLdapSettings].ok(settings)
         except (RuntimeError, ValueError, TypeError) as e:
             return r[FlextTapLdapSettings].fail(
-                f"Failed to create production config: {e}",
+                f"Failed to create production settings: {e}",
             )
 
     @staticmethod
     def setup_ldap_tap(
-        config: FlextTapLdapSettings | None = None,
+        settings: FlextTapLdapSettings | None = None,
     ) -> r[FlextTapLdapSettings]:
         """Set up the LDAP tap with configuration.
 
         Args:
-        config: Optional configuration. If None, creates defaults.
+        settings: Optional configuration. If None, creates defaults.
 
         Returns:
         r with FlextTapLdapSettings or error message.
 
         """
         try:
-            if config is None:
-                config = FlextTapLdapSettings.model_validate({})
-            validation_result = FlextTapLdapServices.validate_ldap_config(config)
+            if settings is None:
+                settings = FlextTapLdapSettings.model_validate({})
+            validation_result = FlextTapLdapServices.validate_ldap_config(settings)
             if not validation_result.success or not validation_result.value:
                 return r[FlextTapLdapSettings].fail(
                     validation_result.error or "Configuration validation failed",
                 )
-            return r[FlextTapLdapSettings].ok(config)
+            return r[FlextTapLdapSettings].ok(settings)
         except (RuntimeError, ValueError, TypeError) as e:
             return r[FlextTapLdapSettings].fail(f"Failed to setup LDAP tap: {e}")
 
     @staticmethod
-    def validate_ldap_config(config: FlextTapLdapSettings) -> r[bool]:
+    def validate_ldap_config(settings: FlextTapLdapSettings) -> r[bool]:
         """Validate LDAP tap configuration.
 
         Args:
-        config: Configuration to validate
+        settings: Configuration to validate
 
         Returns:
         r with validation success or error message.
 
         """
         try:
-            valid = bool(config.host and config.port > 0 and config.page_size > 0)
+            valid = bool(settings.host and settings.port > 0 and settings.page_size > 0)
             return r[bool].ok(valid)
         except (RuntimeError, ValueError, TypeError) as e:
             return r[bool].fail(f"Configuration validation failed: {e}")

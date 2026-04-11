@@ -6,7 +6,7 @@ from collections.abc import Iterable, Iterator, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
-from flext_ldif.ldif import ldif
+from flext_ldif import ldif
 from pydantic import ValidationError
 
 from flext_tap_ldap import c, m, p, t, u
@@ -55,7 +55,7 @@ class FlextTapLdapLdifStreams:
             self.name = "ldif_entries"
             self.tap_stream_id = "ldif_entries"
             self.tap = tap
-            self.config: t.ContainerValueMapping = getattr(tap, "tap_config", {})
+            self.settings: t.ContainerValueMapping = getattr(tap, "tap_config", {})
             self._ldif_api = ldif()
             self._logger_instance: p.Logger | None = None
             self.schema = {
@@ -92,9 +92,9 @@ class FlextTapLdapLdifStreams:
             """Get LDIF records using flext-ldif processing."""
             _ = context
             self.logger.info("Processing LDIF files using flext-ldif library")
-            raw_files = self.config.get("ldif_files", [])
+            raw_files = self.settings.get("ldif_files", [])
             ldif_files = _as_object_list(raw_files)
-            ldif_directory = self.config.get("ldif_directory")
+            ldif_directory = self.settings.get("ldif_directory")
             if ldif_files:
                 for ldif_file in ldif_files:
                     yield from self._process_ldif_file(str(ldif_file))
@@ -141,7 +141,7 @@ class FlextTapLdapLdifStreams:
             if not directory.exists() or not directory.is_dir():
                 self.logger.warning("LDIF directory not found: %s", ldif_directory)
                 return []
-            pattern_raw = self.config.get("ldif_file_pattern", "*.ldif")
+            pattern_raw = self.settings.get("ldif_file_pattern", "*.ldif")
             pattern = str(pattern_raw) if isinstance(pattern_raw, str) else "*.ldif"
             files = [path for path in directory.rglob(pattern) if path.is_file()]
             files.sort()
@@ -159,8 +159,8 @@ class FlextTapLdapLdifStreams:
             return []
 
         def _process_ldap_directory(self) -> Iterator[t.ContainerMapping]:
-            host_raw = self.config.get("ldap_host")
-            base_dn_raw = self.config.get("ldap_base_dn")
+            host_raw = self.settings.get("ldap_host")
+            base_dn_raw = self.settings.get("ldap_base_dn")
             if not isinstance(host_raw, str) or not host_raw:
                 return iter(())
             if not isinstance(base_dn_raw, str) or not base_dn_raw:
@@ -202,7 +202,7 @@ class FlextTapLdapLdifStreams:
             self.name = "ldif_analysis"
             self.tap_stream_id = "ldif_analysis"
             self.tap = tap
-            self.config: t.ContainerValueMapping = getattr(tap, "tap_config", {})
+            self.settings: t.ContainerValueMapping = getattr(tap, "tap_config", {})
             self._ldif_api = ldif()
             self._logger_instance: p.Logger | None = None
             self.schema: t.ContainerMapping = {
@@ -241,9 +241,9 @@ class FlextTapLdapLdifStreams:
             """Get analysis records using flext-ldif analysis capabilities."""
             _ = context
             self.logger.info("Generating LDIF analysis using flext-ldif library")
-            raw_files = self.config.get("ldif_files", [])
+            raw_files = self.settings.get("ldif_files", [])
             ldif_files = _as_object_list(raw_files)
-            ldif_directory = self.config.get("ldif_directory")
+            ldif_directory = self.settings.get("ldif_directory")
             try:
                 total_entries = 0
                 entry_types: t.MutableIntMapping = {}
@@ -379,7 +379,7 @@ class FlextTapLdapLdifStreams:
             if not directory.exists() or not directory.is_dir():
                 self.logger.warning("LDIF directory not found: %s", ldif_directory)
                 return []
-            pattern_raw = self.config.get("ldif_file_pattern", "*.ldif")
+            pattern_raw = self.settings.get("ldif_file_pattern", "*.ldif")
             pattern = str(pattern_raw) if isinstance(pattern_raw, str) else "*.ldif"
             files = [path for path in directory.rglob(pattern) if path.is_file()]
             files.sort()

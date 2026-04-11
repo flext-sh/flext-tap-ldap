@@ -45,7 +45,7 @@ class TestLdifProcessor:
         ignored.write_text("not-ldif", encoding="utf-8")
         stream = object.__new__(FlextTapLdapLdifStreams.LdifStream)
         stream.tap = Mock()
-        stream.config = {
+        stream.settings = {
             "ldif_directory": str(tmp_path),
             "ldif_file_pattern": "*.ldif",
         }
@@ -94,7 +94,7 @@ class TestLdifProcessor:
         """Test that _process_ldap_directory returns empty when disabled."""
         stream = object.__new__(FlextTapLdapLdifStreams.LdifStream)
         stream.tap = Mock()
-        stream.config = {
+        stream.settings = {
             "ldap_host": "ldap.example.com",
             "ldap_base_dn": "dc=example,dc=com",
         }

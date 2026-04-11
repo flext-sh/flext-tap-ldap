@@ -197,7 +197,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 default="created",
                 description="Current status of the tap execution",
             )
-            config: t.ContainerMapping = Field(
+            settings: t.ContainerMapping = Field(
                 default_factory=dict,
                 description="Execution configuration object",
             )
@@ -317,7 +317,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
         # ── Config Parameter Objects ─────────────────────────────────────────
 
         class LdapConnectionConfig(BaseModel):
-            """LDAP connection configuration extracted from tap config."""
+            """LDAP connection configuration extracted from tap settings."""
 
             host: str = Field(
                 default="",

@@ -72,13 +72,13 @@ def ldap_record_entries() -> list[dict[str, object]]:
     ]
 
 
-def pytest_configure(config: pytest.Config) -> None:
+def pytest_configure(settings: pytest.Config) -> None:
     """Configura pytest com marcadores customizados."""
-    config.addinivalue_line("markers", "unit: Unit tests")
-    config.addinivalue_line("markers", "integration: Integration tests")
-    config.addinivalue_line("markers", "slow: Slow tests")
-    config.addinivalue_line("markers", "smoke: Smoke tests")
-    config.addinivalue_line("markers", "e2e: End-to-end tests")
+    settings.addinivalue_line("markers", "unit: Unit tests")
+    settings.addinivalue_line("markers", "integration: Integration tests")
+    settings.addinivalue_line("markers", "slow: Slow tests")
+    settings.addinivalue_line("markers", "smoke: Smoke tests")
+    settings.addinivalue_line("markers", "e2e: End-to-end tests")
 
 
 @pytest.fixture(scope="session")

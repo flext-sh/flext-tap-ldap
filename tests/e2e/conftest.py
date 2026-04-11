@@ -101,7 +101,7 @@ def tap_config_file(tmp_path: Path, _ldap_container: None) -> Path:
     """Create tap configuration file for testing."""
     dc = c.Ldap.Tests.Docker
     admin_dn, admin_password = u.Ldap.Tests.admin_credentials()
-    config = {
+    settings = {
         "ldap_host": "localhost",
         "ldap_port": dc.PORT,
         "bind_dn": admin_dn,
@@ -110,7 +110,7 @@ def tap_config_file(tmp_path: Path, _ldap_container: None) -> Path:
         "page_size": 1000,
     }
     config_file = tmp_path / "tap_config.json"
-    u.Cli.json_write(config_file, config)
+    u.Cli.json_write(config_file, settings)
     return config_file
 
 

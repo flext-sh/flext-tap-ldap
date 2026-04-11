@@ -117,7 +117,7 @@ class FlextTapLdapStreams:
             self.name = name
             self.tap_stream_id = name or "ldap_stream"
             self.schema = schema or {}
-            self.config: t.ContainerMapping = getattr(tap, "tap_config", {})
+            self.settings: t.ContainerMapping = getattr(tap, "tap_config", {})
             self.client: FlextTapLdapClient.LDAPClient | None = None
             self.tap = tap
             self._create_ldap_client()
@@ -133,7 +133,7 @@ class FlextTapLdapStreams:
         def _create_ldap_client(self) -> None:
             """Create LDAP client from tap configuration."""
             try:
-                raw_connection = self.config.get("connection", {})
+                raw_connection = self.settings.get("connection", {})
                 connection_config = (
                     FlextTapLdapStreams.LDAPBaseStream.parse_connection_config(
                         raw_connection,
@@ -142,7 +142,7 @@ class FlextTapLdapStreams:
                 if not connection_config.host:
                     msg = "LDAP connection host is required"
                     raise ValueError(msg)
-                page_size_raw = self.config.get("page_size", 1000)
+                page_size_raw = self.settings.get("page_size", 1000)
                 page_size = FlextTapLdapStreams.LDAPBaseStream.coerce_positive_int(
                     page_size_raw,
                     c.TapLdap.DEFAULT_PAGE_SIZE,
@@ -203,7 +203,7 @@ class FlextTapLdapStreams:
                 raise RuntimeError(msg)
             try:
                 if base_dn is None:
-                    raw_conn = self.config.get("connection", {})
+                    raw_conn = self.settings.get("connection", {})
                     connection_config = (
                         FlextTapLdapStreams.LDAPBaseStream.parse_connection_config(
                             raw_conn,
@@ -268,7 +268,7 @@ class FlextTapLdapStreams:
             """Get user records from LDAP."""
             _context = context
             logger.info("Extracting LDAP users")
-            raw_filter = self.config.get("user_filter", "(objectClass=inetOrgPerson)")
+            raw_filter = self.settings.get("user_filter", "(objectClass=inetOrgPerson)")
             user_filter = (
                 FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(raw_filter)
                 or "(objectClass=inetOrgPerson)"
@@ -347,7 +347,7 @@ class FlextTapLdapStreams:
             """Get group records from LDAP."""
             _context = context
             logger.info("Extracting LDAP groups")
-            raw_group_filter = self.config.get(
+            raw_group_filter = self.settings.get(
                 "group_filter",
                 "(objectClass=groupOfNames)",
             )

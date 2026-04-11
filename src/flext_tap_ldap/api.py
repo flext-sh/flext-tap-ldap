@@ -23,7 +23,7 @@ class FlextTapLdapService(FlextMeltanoTapServiceBase):
     @override
     def create_tap_instance(
         self,
-        config: t.ContainerMapping | None = None,
+        settings: t.ContainerMapping | None = None,
     ) -> Never:
         """Not supported — use FlextTapLdapTap directly."""
         msg = "tap-ldap uses CLI dispatch, not singer_sdk.Tap"
