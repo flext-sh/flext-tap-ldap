@@ -20,13 +20,12 @@ from pydantic import ValidationError
 from flext_core import FlextLogger, r
 from flext_tap_ldap import c, m, t
 
-_DEFAULT_ENTRY_METADATA = m.Ldif.EntryMetadata()
-
-logger = FlextLogger(__name__)
-
 
 class FlextTapLdapUtilitiesProcessorMixin:
     """Mixin providing LDIF processing utilities for u.TapLdap namespace."""
+
+    _DEFAULT_ENTRY_METADATA = m.Ldif.EntryMetadata()
+    _logger = FlextLogger(__name__)
 
     class TapLdap:
         """Tap LDAP namespace — processor inner classes."""
@@ -106,11 +105,9 @@ class FlextTapLdapUtilitiesProcessorMixin:
             def parse_dn(self) -> t.ContainerMapping:
                 """Parse DN into components using flext-ldif DN parsing."""
                 try:
-                    dn_obj = (
-                        FlextTapLdapUtilitiesProcessorMixin.TapLdap.DistinguishedName(
-                            value=self.dn,
-                            metadata=_DEFAULT_ENTRY_METADATA,
-                        )
+                    dn_obj = FlextTapLdapUtilitiesProcessorMixin.TapLdap.DistinguishedName(
+                        value=self.dn,
+                        metadata=FlextTapLdapUtilitiesProcessorMixin._DEFAULT_ENTRY_METADATA,
                     )
                     return {"dn": self.dn, "components": dn_obj.value}
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS:
@@ -174,14 +171,14 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 return m.Ldif.Entry(
                     dn=FlextTapLdapUtilitiesProcessorMixin.TapLdap.DistinguishedName(
                         value=self.dn,
-                        metadata=_DEFAULT_ENTRY_METADATA,
+                        metadata=FlextTapLdapUtilitiesProcessorMixin._DEFAULT_ENTRY_METADATA,
                     ),
                     attributes=m.Ldif.Attributes(
                         attributes={
                             str(k): list(v) for k, v in self.attributes.items()
                         },
                         attribute_metadata={},
-                        metadata=_DEFAULT_ENTRY_METADATA,
+                        metadata=FlextTapLdapUtilitiesProcessorMixin._DEFAULT_ENTRY_METADATA,
                     ),
                     changetype=None,
                     metadata=None,
@@ -301,13 +298,16 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 source_name: str = "content",
             ) -> Iterator[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
                 """Parse LDIF content using flext-ldif and yield entries."""
-                logger.info("Parsing LDIF content with flext-ldif from %s", source_name)
+                FlextTapLdapUtilitiesProcessorMixin._logger.info(
+                    "Parsing LDIF content with flext-ldif from %s",
+                    source_name,
+                )
                 try:
                     result: r[m.Ldif.ParseResponse] = self._api.parse_ldif(content)
                     if not result.is_success:
                         error_msg = f"Failed to parse LDIF content from {source_name}: {result.error}"
                         if self.ignore_errors:
-                            logger.error(error_msg)
+                            FlextTapLdapUtilitiesProcessorMixin._logger.error(error_msg)
                             self.errors.append(error_msg)
                             return
                         else:
@@ -322,7 +322,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                     error_msg = f"Failed to parse LDIF content from {source_name}: {e}"
                     if self.ignore_errors:
-                        logger.exception(error_msg)
+                        FlextTapLdapUtilitiesProcessorMixin._logger.exception(error_msg)
                         self.errors.append(error_msg)
                     else:
                         raise ValueError(error_msg) from e
@@ -333,13 +333,16 @@ class FlextTapLdapUtilitiesProcessorMixin:
             ) -> Iterator[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
                 """Parse LDIF file using flext-ldif and yield entries."""
                 self._validate_file_exists(file_path)
-                logger.info("Starting LDIF parsing with flext-ldif: %s", file_path)
+                FlextTapLdapUtilitiesProcessorMixin._logger.info(
+                    "Starting LDIF parsing with flext-ldif: %s",
+                    file_path,
+                )
                 try:
                     content = self._read_file_content(file_path, "utf-8")
                     result = self._parse_ldif_content(content, file_path)
                     yield from self._yield_entries_from_result(result)
                 except UnicodeDecodeError:
-                    logger.warning(
+                    FlextTapLdapUtilitiesProcessorMixin._logger.warning(
                         "UTF-8 decoding failed, trying latin-1 for: %s",
                         file_path,
                     )
@@ -392,7 +395,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 """Handle parsing errors based on ignore_errors setting."""
                 error_msg = f"Failed to parse LDIF file {file_path}: {error}"
                 if self.ignore_errors:
-                    logger.error(error_msg)
+                    FlextTapLdapUtilitiesProcessorMixin._logger.error(error_msg)
                     self.errors.append(error_msg)
                 else:
                     raise ValueError(error_msg) from error
@@ -407,7 +410,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 if not result.is_success:
                     error_msg = f"Failed to parse LDIF file {file_path}: {result.error}"
                     if self.ignore_errors:
-                        logger.error(error_msg)
+                        FlextTapLdapUtilitiesProcessorMixin._logger.error(error_msg)
                         self.errors.append(error_msg)
                     else:
                         raise ValueError(error_msg)

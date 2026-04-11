@@ -13,33 +13,26 @@ from flext_core.lazy import (
 from flext_tap_ldap.__version__ import *
 
 if _t.TYPE_CHECKING:
+    from flext_cli.base import s
+
     from flext_core.decorators import d
     from flext_core.exceptions import e
     from flext_core.handlers import h
     from flext_core.mixins import x
     from flext_core.result import r
     from flext_tap_ldap._utilities._processor import FlextTapLdapUtilitiesProcessorMixin
-    from flext_tap_ldap.api import FlextTapLdapService, FlextTapLdapService as s
+    from flext_tap_ldap.api import FlextTapLdapService
     from flext_tap_ldap.client import FlextTapLdapClient
-    from flext_tap_ldap.constants import (
-        FlextTapLdapConstants,
-        FlextTapLdapConstants as c,
-    )
+    from flext_tap_ldap.constants import FlextTapLdapConstants, c
     from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
-    from flext_tap_ldap.models import FlextTapLdapModels, FlextTapLdapModels as m
-    from flext_tap_ldap.protocols import (
-        FlextTapLdapProtocols,
-        FlextTapLdapProtocols as p,
-    )
+    from flext_tap_ldap.models import FlextTapLdapModels, m
+    from flext_tap_ldap.protocols import FlextTapLdapProtocols, p
     from flext_tap_ldap.services import FlextTapLdapServices
     from flext_tap_ldap.settings import FlextTapLdapSettings
     from flext_tap_ldap.streams import FlextTapLdapStreams
     from flext_tap_ldap.tap import CLI_COMMAND, FlextTapLdapTap
-    from flext_tap_ldap.typings import FlextTapLdapTypes, FlextTapLdapTypes as t
-    from flext_tap_ldap.utilities import (
-        FlextTapLdapUtilities,
-        FlextTapLdapUtilities as u,
-    )
+    from flext_tap_ldap.typings import FlextTapLdapTypes, t
+    from flext_tap_ldap.utilities import FlextTapLdapUtilities, u
 _LAZY_IMPORTS = merge_lazy_imports(
     ("._utilities",),
     build_lazy_import_map(
@@ -56,10 +49,19 @@ _LAZY_IMPORTS = merge_lazy_imports(
             ),
             ".api": ("FlextTapLdapService",),
             ".client": ("FlextTapLdapClient",),
-            ".constants": ("FlextTapLdapConstants",),
+            ".constants": (
+                "FlextTapLdapConstants",
+                "c",
+            ),
             ".ldif_streams": ("FlextTapLdapLdifStreams",),
-            ".models": ("FlextTapLdapModels",),
-            ".protocols": ("FlextTapLdapProtocols",),
+            ".models": (
+                "FlextTapLdapModels",
+                "m",
+            ),
+            ".protocols": (
+                "FlextTapLdapProtocols",
+                "p",
+            ),
             ".services": ("FlextTapLdapServices",),
             ".settings": ("FlextTapLdapSettings",),
             ".streams": ("FlextTapLdapStreams",),
@@ -67,21 +69,20 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "CLI_COMMAND",
                 "FlextTapLdapTap",
             ),
-            ".typings": ("FlextTapLdapTypes",),
-            ".utilities": ("FlextTapLdapUtilities",),
+            ".typings": (
+                "FlextTapLdapTypes",
+                "t",
+            ),
+            ".utilities": (
+                "FlextTapLdapUtilities",
+                "u",
+            ),
+            "flext_cli.base": ("s",),
             "flext_core.decorators": ("d",),
             "flext_core.exceptions": ("e",),
             "flext_core.handlers": ("h",),
             "flext_core.mixins": ("x",),
             "flext_core.result": ("r",),
-        },
-        alias_groups={
-            ".api": (("s", "FlextTapLdapService"),),
-            ".constants": (("c", "FlextTapLdapConstants"),),
-            ".models": (("m", "FlextTapLdapModels"),),
-            ".protocols": (("p", "FlextTapLdapProtocols"),),
-            ".typings": (("t", "FlextTapLdapTypes"),),
-            ".utilities": (("u", "FlextTapLdapUtilities"),),
         },
     ),
     exclude_names=(
@@ -95,6 +96,9 @@ _LAZY_IMPORTS = merge_lazy_imports(
     ),
     module_name=__name__,
 )
+
+
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)
 
 __all__ = [
     "CLI_COMMAND",
@@ -131,6 +135,3 @@ __all__ = [
     "u",
     "x",
 ]
-
-
-install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)

@@ -1,21 +1,21 @@
-# AUTO-GENERATED FILE — DO NOT EDIT MANUALLY.
-# Regenerate with: make gen
-#
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """Unit package."""
 
 from __future__ import annotations
 
-from flext_core.lazy import install_lazy_exports
+from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
-_LAZY_IMPORTS = {
-    "test_client": "tests.unit.test_client",
-    "test_client_quick": "tests.unit.test_client_quick",
-    "test_ldif_processor": "tests.unit.test_ldif_processor",
-    "test_ldif_stream": "tests.unit.test_ldif_stream",
-    "test_models": "tests.unit.test_models",
-    "test_streams": "tests.unit.test_streams",
-    "test_tap": "tests.unit.test_tap",
-}
+_LAZY_IMPORTS = build_lazy_import_map(
+    {
+        ".test_client": ("test_client",),
+        ".test_client_quick": ("test_client_quick",),
+        ".test_ldif_processor": ("test_ldif_processor",),
+        ".test_ldif_stream": ("test_ldif_stream",),
+        ".test_models": ("test_models",),
+        ".test_streams": ("test_streams",),
+        ".test_tap": ("test_tap",),
+    },
+)
 
 
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, publish_all=False)
