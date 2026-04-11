@@ -13,13 +13,7 @@ from flext_core.lazy import (
 from flext_tap_ldap.__version__ import *
 
 if _t.TYPE_CHECKING:
-    from flext_cli.base import s
-
-    from flext_core.decorators import d
-    from flext_core.exceptions import e
-    from flext_core.handlers import h
-    from flext_core.mixins import x
-    from flext_core.result import r
+    from flext_meltano import d, e, h, r, s, x
     from flext_tap_ldap._utilities._processor import FlextTapLdapUtilitiesProcessorMixin
     from flext_tap_ldap.api import FlextTapLdapService
     from flext_tap_ldap.client import FlextTapLdapClient
@@ -30,7 +24,7 @@ if _t.TYPE_CHECKING:
     from flext_tap_ldap.services import FlextTapLdapServices
     from flext_tap_ldap.settings import FlextTapLdapSettings
     from flext_tap_ldap.streams import FlextTapLdapStreams
-    from flext_tap_ldap.tap import CLI_COMMAND, FlextTapLdapTap
+    from flext_tap_ldap.tap import FlextTapLdapTap
     from flext_tap_ldap.typings import FlextTapLdapTypes, t
     from flext_tap_ldap.utilities import FlextTapLdapUtilities, u
 _LAZY_IMPORTS = merge_lazy_imports(
@@ -65,10 +59,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
             ".services": ("FlextTapLdapServices",),
             ".settings": ("FlextTapLdapSettings",),
             ".streams": ("FlextTapLdapStreams",),
-            ".tap": (
-                "CLI_COMMAND",
-                "FlextTapLdapTap",
-            ),
+            ".tap": ("FlextTapLdapTap",),
             ".typings": (
                 "FlextTapLdapTypes",
                 "t",
@@ -77,12 +68,14 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "FlextTapLdapUtilities",
                 "u",
             ),
-            "flext_cli.base": ("s",),
-            "flext_core.decorators": ("d",),
-            "flext_core.exceptions": ("e",),
-            "flext_core.handlers": ("h",),
-            "flext_core.mixins": ("x",),
-            "flext_core.result": ("r",),
+            "flext_meltano": (
+                "d",
+                "e",
+                "h",
+                "r",
+                "s",
+                "x",
+            ),
         },
     ),
     exclude_names=(
@@ -101,7 +94,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)
 
 __all__ = [
-    "CLI_COMMAND",
     "FlextTapLdapClient",
     "FlextTapLdapConstants",
     "FlextTapLdapLdifStreams",

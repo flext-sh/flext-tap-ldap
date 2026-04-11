@@ -29,7 +29,7 @@ def shared_ldap_container(flext_docker: tk) -> str:
     """Managed LDAP container using centralized tk with docker-compose."""
     compose_file = Path("~/flext/docker/docker-compose.openldap.yml").expanduser()
     start_result = flext_docker.start_compose_stack(str(compose_file))
-    if start_result.is_failure:
+    if start_result.failure:
         pytest.skip(f"OpenLDAP container failed to start: {start_result.error}")
     return "flext-openldap-test"
 

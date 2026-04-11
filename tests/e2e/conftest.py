@@ -53,7 +53,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
     docker = tk()
     logger.info("Starting OpenLDAP container...")
     start_result = docker.compose_up(compose_file=str(compose_file))
-    if start_result.is_failure:
+    if start_result.failure:
         logger.error(f"Failed to start OpenLDAP container: {start_result.error}")
         raise RuntimeError(f"Container startup failed: {start_result.error}")
 
@@ -76,7 +76,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
     yield
     logger.info("Stopping OpenLDAP container...")
     stop_result = docker.compose_down(compose_file=str(compose_file))
-    if stop_result.is_failure:
+    if stop_result.failure:
         logger.warning(f"Failed to stop container cleanly: {stop_result.error}")
 
 

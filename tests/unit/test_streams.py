@@ -32,7 +32,7 @@ def _discover_stream_names(
     connection_config: t.ScalarMapping,
 ) -> tuple[t.StrSequence, int]:
     result = tap.discover_streams(tap_instance=_build_source_config(connection_config))
-    assert result.is_success
+    assert result.success
     assert result.value is not None
     raw_entries = result.value["streams"]
     assert isinstance(raw_entries, Sequence)

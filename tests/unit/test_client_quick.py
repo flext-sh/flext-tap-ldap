@@ -70,11 +70,11 @@ class TestLDAPClientQuick:
             "attributes": {"mail": mail_values},
         }
         result = client._convert_entry_to_dict(dict_entry)
-        assert result.is_success
+        assert result.success
         assert result.value["dn"] == "uid=dict,dc=example,dc=com"
         # Test with None
         none_result = client._convert_entry_to_dict(None)
-        assert none_result.is_failure
+        assert none_result.failure
         # Test with a dict that has string values
         simple_entry: t.ContainerMapping = {
             "dn": "uid=test,dc=example,dc=com",
@@ -82,7 +82,7 @@ class TestLDAPClientQuick:
             "cn": ["Test", "T. User"],
         }
         result = client._convert_entry_to_dict(simple_entry)
-        assert result.is_success
+        assert result.success
         assert result.value["dn"] == "uid=test,dc=example,dc=com"
         assert result.value["uid"] == "test"
         assert result.value["cn"] == ["Test", "T. User"]
@@ -98,7 +98,7 @@ class TestLDAPClientQuick:
             {"dn": "uid=user2,dc=test,dc=com", "uid": ["user2"]},
         ]
         mock_result = Mock()
-        mock_result.is_success = True
+        mock_result.success = True
         mock_result.value = mock_search_result
         results = client._process_search_results(mock_result, size_limit=0)
         assert len(results) == 2
@@ -106,11 +106,11 @@ class TestLDAPClientQuick:
         results = client._process_search_results(mock_result, size_limit=1)
         assert len(results) == 1
         # Test with failure
-        mock_result.is_success = False
+        mock_result.success = False
         results = client._process_search_results(mock_result, size_limit=0)
         assert not results
         # Test with no value
-        mock_result.is_success = True
+        mock_result.success = True
         mock_result.value = None
         results = client._process_search_results(mock_result, size_limit=0)
         assert not results
@@ -151,7 +151,7 @@ class TestLDAPClientQuick:
     ) -> None:
         """Test connection test succeeds via flext_api.search."""
         mock_result = Mock()
-        mock_result.is_success = True
+        mock_result.success = True
         api_cls = type(client._flext_api)
         with patch.object(api_cls, "search", return_value=mock_result):
             result = client.test_connection()

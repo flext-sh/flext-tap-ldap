@@ -19,7 +19,7 @@ class TestFlextTapLdapTap:
         tap = FlextTapLdapTap()
         result = tap.discover_streams(tap_instance=ldap_source_config)
 
-        assert result.is_success
+        assert result.success
         assert result.value is not None
         raw_streams = result.value["streams"]
         assert isinstance(raw_streams, list)

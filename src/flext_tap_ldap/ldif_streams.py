@@ -180,7 +180,7 @@ class FlextTapLdapLdifStreams:
             try:
                 content = Path(ldif_file).read_text(encoding="utf-8")
                 result = self._ldif_api.parse_ldif(content)
-                if result.is_success and result.value.entries:
+                if result.success and result.value.entries:
                     for entry in result.value.entries:
                         yield self._convert_entry_to_record(entry)
                 else:
@@ -327,7 +327,7 @@ class FlextTapLdapLdifStreams:
             try:
                 content = Path(ldif_file).read_text(encoding="utf-8")
                 result = self._ldif_api.parse_ldif(content)
-                if result.is_success and result.value.entries:
+                if result.success and result.value.entries:
                     entry_types: t.MutableIntMapping = {}
                     object_classes: t.MutableIntMapping = {}
                     for entry in result.value.entries:

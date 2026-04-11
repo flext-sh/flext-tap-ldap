@@ -417,7 +417,7 @@ class FlextTapLdapServices:
                 validation_result: r[t.ContainerMapping] = self.validate_ldif_file(
                     file_path,
                 )
-                if not validation_result.is_success:
+                if not validation_result.success:
                     return validation_result
                 validation_data: t.ContainerMapping = (
                     FlextTapLdapServices._as_map(validation_result.value) or {}
@@ -449,7 +449,7 @@ class FlextTapLdapServices:
                 result: r[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
                     Path(file_path),
                 )
-                if not result.is_success:
+                if not result.success:
                     return r[Sequence[t.ContainerMapping]].fail(
                         f"Failed to parse LDIF file: {result.error}",
                     )
@@ -492,7 +492,7 @@ class FlextTapLdapServices:
                 result: r[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
                     Path(file_path),
                 )
-                if not result.is_success:
+                if not result.success:
                     return r[t.ContainerMapping].fail(
                         f"Validation failed: {result.error}",
                     )
@@ -634,7 +634,7 @@ class FlextTapLdapServices:
             if config is None:
                 config = FlextTapLdapSettings.model_validate({})
             validation_result = FlextTapLdapServices.validate_ldap_config(config)
-            if not validation_result.is_success or not validation_result.value:
+            if not validation_result.success or not validation_result.value:
                 return r[FlextTapLdapSettings].fail(
                     validation_result.error or "Configuration validation failed",
                 )
@@ -654,8 +654,8 @@ class FlextTapLdapServices:
 
         """
         try:
-            is_valid = bool(config.host and config.port > 0 and config.page_size > 0)
-            return r[bool].ok(is_valid)
+            valid = bool(config.host and config.port > 0 and config.page_size > 0)
+            return r[bool].ok(valid)
         except (RuntimeError, ValueError, TypeError) as e:
             return r[bool].fail(f"Configuration validation failed: {e}")
 

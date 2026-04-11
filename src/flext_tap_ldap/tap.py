@@ -179,13 +179,13 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         )
         status = (
             c.Meltano.StreamStatus.COMPLETED
-            if discover_result.is_success
+            if discover_result.success
             else c.Meltano.StreamStatus.FAILED
         )
         return r[t.ContainerMapping].ok({
             "status": status,
             "tap_name": self.name,
-            "streams_discovered": discover_result.is_success,
+            "streams_discovered": discover_result.success,
         })
 
     @staticmethod
@@ -206,7 +206,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
 def main() -> None:
     """Run the main entry point for the FlextMeltanoTapAbstractions."""
     execute_result = FlextTapLdapTap().execute()
-    if execute_result.is_failure:
+    if execute_result.failure:
         logger.error(
             "FlextMeltanoTapAbstractions execution failed",
             error=execute_result.error or "",
@@ -258,7 +258,7 @@ def _build_cli_command() -> click.Command:
                 source_version="latest",
             )
             result = tap.discover_streams(tap_instance=source_config)
-            if result.is_success and result.value:
+            if result.success and result.value:
                 catalog = result.value
                 raw_streams = catalog.get("streams", [])
                 catalog_streams: MutableSequence[t.ContainerMapping] = []
@@ -297,7 +297,7 @@ def _build_cli_command() -> click.Command:
             source_version="latest",
         )
         result = tap.discover_streams(tap_instance=source_config)
-        if result.is_success and result.value:
+        if result.success and result.value:
             raw_streams_val = result.value.get("streams", [])
             stream_entries: list[t.ContainerMapping] = []
             if isinstance(raw_streams_val, Sequence):

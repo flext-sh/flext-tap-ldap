@@ -161,7 +161,7 @@ class FlextTapLdapClient:
                 result: r[m.Ldap.SearchResult] = self._flext_api.search(
                     test_search_options,
                 )
-                return result.is_success
+                return result.success
             except (RuntimeError, ValueError, TypeError, ValidationError) as e:
                 err_msg = str(e)
                 logger.warning("LDAP connection test failed: %s", err_msg)
@@ -403,7 +403,7 @@ class FlextTapLdapClient:
             Single Responsibility: Handle only result processing logic.
             """
             entries: MutableSequence[t.MutableContainerMapping] = []
-            if not (result.is_success and result.value):
+            if not (result.success and result.value):
                 return entries
             search_result = result.value
             data_entries = search_result.entries
@@ -411,7 +411,7 @@ class FlextTapLdapClient:
                 if size_limit > 0 and entries_returned >= size_limit:
                     break
                 convert_result = self._convert_entry_to_dict(entry_data)
-                if convert_result.is_failure:
+                if convert_result.failure:
                     logger.warning(
                         "Skipping entry %d: %s",
                         entries_returned,
@@ -439,7 +439,7 @@ class FlextTapLdapClient:
                     }
                 else:
                     convert_result = self._convert_entry_to_dict(entry)
-                    if convert_result.is_failure:
+                    if convert_result.failure:
                         logger.warning(
                             "Skipping Oracle entry %d: %s",
                             idx,
