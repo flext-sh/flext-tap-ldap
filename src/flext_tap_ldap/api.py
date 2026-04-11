@@ -30,4 +30,6 @@ class FlextTapLdapService(FlextMeltanoTapServiceBase):
         raise TypeError(msg)
 
 
-__all__ = ["FlextTapLdapService"]
+tap_ldap = FlextTapLdapService
+
+__all__ = ["FlextTapLdapService", "tap_ldap"]

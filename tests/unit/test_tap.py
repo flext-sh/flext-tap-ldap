@@ -74,8 +74,9 @@ class TestFlextTapLdapTap:
 
         assert len(records) == 1
         assert records[0][field] == expected
-        assert users_stream.tap.tap_config is not None
-        assert users_stream.tap.tap_config["connection"] is not None
-        assert (
-            users_stream.tap.tap_config["connection"]["host"] == c.Ldap.Tests.Fake.HOST
-        )
+        tap = users_stream.tap
+        assert isinstance(tap, FlextTapLdapTap)
+        assert tap.tap_config is not None
+        connection = tap.tap_config["connection"]
+        assert isinstance(connection, Mapping)
+        assert connection["host"] == c.Ldap.Tests.Fake.HOST
