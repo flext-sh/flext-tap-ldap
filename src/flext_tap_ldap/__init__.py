@@ -13,6 +13,7 @@ from flext_core.lazy import (
 from flext_tap_ldap.__version__ import *
 
 if _t.TYPE_CHECKING:
+    from _utilities._processor import FlextTapLdapUtilitiesProcessorMixin
     from flext_cli.base import s
 
     from flext_core.decorators import d
@@ -20,7 +21,6 @@ if _t.TYPE_CHECKING:
     from flext_core.handlers import h
     from flext_core.mixins import x
     from flext_core.result import r
-    from flext_tap_ldap._utilities._processor import FlextTapLdapUtilitiesProcessorMixin
     from flext_tap_ldap.api import FlextTapLdapService
     from flext_tap_ldap.client import FlextTapLdapClient
     from flext_tap_ldap.constants import FlextTapLdapConstants, c
@@ -77,6 +77,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "FlextTapLdapUtilities",
                 "u",
             ),
+            "_utilities._processor": ("FlextTapLdapUtilitiesProcessorMixin",),
             "flext_cli.base": ("s",),
             "flext_core.decorators": ("d",),
             "flext_core.exceptions": ("e",),
