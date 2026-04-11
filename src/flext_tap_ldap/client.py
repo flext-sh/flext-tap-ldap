@@ -15,11 +15,11 @@ from collections.abc import Mapping, MutableSequence, Sequence
 
 from pydantic import BaseModel, ValidationError
 
-from flext_core import FlextLogger, r
+from flext_core import r
 from flext_ldap import FlextLdap, ldap
 from flext_tap_ldap import c, m, t
 
-logger = FlextLogger(__name__)
+logger = u.fetch_logger(__name__)
 
 
 class FlextTapLdapClient:

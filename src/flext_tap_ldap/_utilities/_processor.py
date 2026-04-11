@@ -17,7 +17,7 @@ from typing import override
 from flext_ldif import ldif
 from pydantic import ValidationError
 
-from flext_core import FlextLogger, r
+from flext_core import r
 from flext_tap_ldap import c, m, t
 
 
@@ -25,7 +25,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
     """Mixin providing LDIF processing utilities for u.TapLdap namespace."""
 
     _DEFAULT_ENTRY_METADATA = m.Ldif.EntryMetadata()
-    _logger = FlextLogger(__name__)
+    _logger = u.fetch_logger(__name__)
 
     class TapLdap:
         """Tap LDAP namespace — processor inner classes."""

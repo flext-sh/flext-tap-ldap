@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, ClassVar
 from flext_ldif import ldif
 from pydantic import ValidationError
 
-from flext_core import FlextLogger
 from flext_tap_ldap import c, m, p, t
 
 if TYPE_CHECKING:
@@ -83,7 +82,7 @@ class FlextTapLdapLdifStreams:
         def logger(self) -> p.Logger:
             """Lazy logger."""
             if self._logger_instance is None:
-                self._logger_instance = FlextLogger.create_module_logger(__name__)
+                self._logger_instance = u.fetch_logger(__name__)
             return self._logger_instance
 
         def get_records(
@@ -232,7 +231,7 @@ class FlextTapLdapLdifStreams:
         def logger(self) -> p.Logger:
             """Lazy logger."""
             if self._logger_instance is None:
-                self._logger_instance = FlextLogger.create_module_logger(__name__)
+                self._logger_instance = u.fetch_logger(__name__)
             return self._logger_instance
 
         def get_records(

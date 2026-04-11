@@ -13,10 +13,10 @@ from pathlib import Path
 import pytest
 from flext_tests import tk
 
-from flext_core import FlextLogger, d
+from flext_core import d
 from tests import c, p, t, u
 
-logger = FlextLogger(__name__)
+logger = u.fetch_logger(__name__)
 
 
 @pytest.fixture(scope="session")

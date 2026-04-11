@@ -16,7 +16,7 @@ from typing import ClassVar, override
 import click
 from pydantic import ValidationError
 
-from flext_core import FlextLogger, r
+from flext_core import r
 from flext_meltano import FlextMeltanoAbstractions
 from flext_tap_ldap import (
     FlextTapLdapLdifStreams,
@@ -27,7 +27,7 @@ from flext_tap_ldap import (
     t,
 )
 
-logger = FlextLogger(__name__)
+logger = u.fetch_logger(__name__)
 
 
 class FlextTapLdapTap(FlextMeltanoAbstractions):

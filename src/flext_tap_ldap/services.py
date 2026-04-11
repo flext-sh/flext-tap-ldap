@@ -19,7 +19,7 @@ from uuid import uuid4
 from flext_ldif import ldif
 from pydantic import ValidationError
 
-from flext_core import FlextLogger, r
+from flext_core import r
 from flext_tap_ldap import FlextTapLdapSettings, c, m, t
 
 
@@ -35,7 +35,7 @@ class FlextTapLdapServices:
     data extraction and processing capabilities.
     """
 
-    _logger: ClassVar = FlextLogger(__name__)
+    _logger: ClassVar = u.fetch_logger(__name__)
 
     @staticmethod
     def _as_map(value: t.NormalizedValue) -> t.ContainerValueMapping | None:

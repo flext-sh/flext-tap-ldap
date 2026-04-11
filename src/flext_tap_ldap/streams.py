@@ -15,13 +15,12 @@ from typing import TYPE_CHECKING, ClassVar, override
 
 from pydantic import ValidationError
 
-from flext_core import FlextLogger
 from flext_tap_ldap import FlextTapLdapClient, c, m, t
 
 if TYPE_CHECKING:
     from flext_meltano import FlextMeltanoAbstractions as Tap
 
-logger = FlextLogger(__name__)
+logger = u.fetch_logger(__name__)
 
 
 class FlextTapLdapStreams:

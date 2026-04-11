@@ -15,7 +15,7 @@ from flext_tap_ldap.__version__ import *
 if _t.TYPE_CHECKING:
     from flext_meltano import d, e, h, r, s, x
     from flext_tap_ldap._utilities._processor import FlextTapLdapUtilitiesProcessorMixin
-    from flext_tap_ldap.api import FlextTapLdapService
+    from flext_tap_ldap.api import FlextTapLdapService, tap_ldap
     from flext_tap_ldap.client import FlextTapLdapClient
     from flext_tap_ldap.constants import FlextTapLdapConstants, c
     from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
@@ -41,7 +41,10 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "__version__",
                 "__version_info__",
             ),
-            ".api": ("FlextTapLdapService",),
+            ".api": (
+                "FlextTapLdapService",
+                "tap_ldap",
+            ),
             ".client": ("FlextTapLdapClient",),
             ".constants": (
                 "FlextTapLdapConstants",
@@ -124,6 +127,7 @@ __all__ = [
     "r",
     "s",
     "t",
+    "tap_ldap",
     "u",
     "x",
 ]
