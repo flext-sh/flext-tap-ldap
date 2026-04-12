@@ -15,8 +15,6 @@ from flext_tests import tk
 from flext_tap_ldap import FlextTapLdapSettings
 from tests import c, m, t
 
-pytest_plugins = ["flext_tests.conftest_plugin"]
-
 
 @pytest.fixture
 def tap_ldap_settings() -> FlextTapLdapSettings:
