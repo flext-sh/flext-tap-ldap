@@ -108,7 +108,7 @@ class TestFlextTapLdapIntegration:
         mock_client_instance.search.return_value.__aenter__.return_value = empty_records
         result = runner.invoke(
             self._cli_command(),
-            ["--settings", str(config_file), "--discover"],
+            ["--config", str(config_file), "--discover"],
             catch_exceptions=False,
         )
         if result.exit_code != 0:
@@ -151,7 +151,7 @@ class TestFlextTapLdapIntegration:
         ]
         result = runner.invoke(
             self._cli_command(),
-            ["--settings", str(config_file), "--catalog", str(catalog_file)],
+            ["--config", str(config_file), "--catalog", str(catalog_file)],
             catch_exceptions=False,
         )
         if result.exit_code != 0:
@@ -187,7 +187,7 @@ class TestFlextTapLdapIntegration:
         result = runner.invoke(
             self._cli_command(),
             [
-                "--settings",
+                "--config",
                 str(config_file),
                 "--catalog",
                 str(catalog_file),
@@ -240,7 +240,7 @@ class TestFlextTapLdapIntegration:
             )
             result = runner.invoke(
                 self._cli_command(),
-                ["--settings", str(config_file), "--discover"],
+                ["--config", str(config_file), "--discover"],
                 catch_exceptions=False,
             )
         if result.exit_code != 0:
@@ -271,7 +271,7 @@ class TestFlextTapLdapIntegration:
         u.Cli.json_write(config_file, {"invalid": "settings"})
         result = runner.invoke(
             self._cli_command(),
-            ["--settings", str(config_file), "--discover"],
+            ["--config", str(config_file), "--discover"],
         )
         all_logs = " ".join(record.message for record in caplog.records)
         all_output = (
@@ -314,7 +314,7 @@ class TestFlextTapLdapIntegration:
         mock_client_instance.search = mock_search
         result = runner.invoke(
             self._cli_command(),
-            ["--settings", str(config_file), "--catalog", str(catalog_file)],
+            ["--config", str(config_file), "--catalog", str(catalog_file)],
             catch_exceptions=False,
         )
         if result.exit_code != 0:

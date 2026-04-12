@@ -219,7 +219,7 @@ def _build_cli_command() -> click.Command:
 
     @click.command("tap-ldap")
     @click.option(
-        "--settings",
+        "--config",
         "config_path",
         type=click.Path(exists=True),
         required=True,
