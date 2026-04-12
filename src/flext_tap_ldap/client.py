@@ -69,7 +69,7 @@ class FlextTapLdapClient:
             )
             self._initialize_flext_api(client_config)
 
-        def __getattr__(self, name: str) -> t.ContainerMapping:
+        def __getattr__(self, name: str) -> t.RecursiveContainerMapping:
             """Delegate unknown attributes to the real API."""
             return getattr(self._flext_api, name)
 
@@ -99,7 +99,7 @@ class FlextTapLdapClient:
             attributes: t.StrSequence | None = None,
             scope: str = "SUBTREE",
             size_limit: int = 0,
-        ) -> Sequence[t.ContainerMapping]:
+        ) -> Sequence[t.RecursiveContainerMapping]:
             """Search for entries using flext-ldap infrastructure (synchronous).
 
             Returns a list of entries for testing convenience with Singer streams.
@@ -122,7 +122,7 @@ class FlextTapLdapClient:
             attributes: t.StrSequence | None = None,
             *,
             oracle_oid_mode: bool = False,
-        ) -> Sequence[t.ContainerMapping]:
+        ) -> Sequence[t.RecursiveContainerMapping]:
             """Search with Oracle OID support for testing convenience.
 
             Refactored using Single Responsibility Principle to reduce complexity.
@@ -174,45 +174,47 @@ class FlextTapLdapClient:
 
         def _convert_entry_to_dict(
             self,
-            entry_data: t.RuntimeData | t.ContainerMapping | None,
-        ) -> r[t.MutableContainerMapping]:
+            entry_data: t.RuntimeData | t.RecursiveContainerMapping | None,
+        ) -> r[t.MutableRecursiveContainerMapping]:
             """Convert FlextLdapModels.Entry to dict format for testing.
 
             Single Responsibility: Handle only entry format conversion.
             """
             if entry_data is None:
-                return r[t.MutableContainerMapping].fail(
+                return r[t.MutableRecursiveContainerMapping].fail(
                     "Cannot convert None entry data",
                 )
             if isinstance(entry_data, m.BaseModel):
                 dn_value: str = str(getattr(entry_data, "dn", ""))
-                model_data: t.MutableContainerMapping = dict(entry_data.model_dump())
-                attrs_val: t.NormalizedValue = model_data.get("attributes", {})
-                attrs_dict: t.MutableContainerMapping
+                model_data: t.MutableRecursiveContainerMapping = dict(
+                    entry_data.model_dump()
+                )
+                attrs_val: t.RecursiveContainer = model_data.get("attributes", {})
+                attrs_dict: t.MutableRecursiveContainerMapping
                 if isinstance(attrs_val, dict):
                     attrs_dict = attrs_val
                 else:
-                    return r[t.MutableContainerMapping].ok({"dn": dn_value})
-                entry_dict: t.MutableContainerMapping = {"dn": dn_value}
+                    return r[t.MutableRecursiveContainerMapping].ok({"dn": dn_value})
+                entry_dict: t.MutableRecursiveContainerMapping = {"dn": dn_value}
                 for key_str, val in attrs_dict.items():
-                    typed_list: t.MutableContainerList = (
+                    typed_list: t.MutableRecursiveContainerList = (
                         val if isinstance(val, list) else []
                     )
                     if isinstance(val, list) and len(typed_list) == 1:
                         entry_dict[key_str] = typed_list[0]
                     else:
                         entry_dict[key_str] = val
-                return r[t.MutableContainerMapping].ok(entry_dict)
+                return r[t.MutableRecursiveContainerMapping].ok(entry_dict)
             if isinstance(entry_data, Mapping):
-                result: t.MutableContainerMapping = {}
+                result: t.MutableRecursiveContainerMapping = {}
                 for key, value in entry_data.items():
                     if isinstance(
                         value,
                         (str, int, float, bool, list, dict, type(None)),
                     ):
                         result[str(key)] = value
-                return r[t.MutableContainerMapping].ok(result)
-            return r[t.MutableContainerMapping].fail(
+                return r[t.MutableRecursiveContainerMapping].ok(result)
+            return r[t.MutableRecursiveContainerMapping].fail(
                 f"Unsupported entry data type: {type(entry_data).__name__}",
             )
 
@@ -265,7 +267,7 @@ class FlextTapLdapClient:
             attributes: t.StrSequence | None,
             *,
             oracle_oid_mode: bool,
-        ) -> Sequence[t.ContainerMapping]:
+        ) -> Sequence[t.RecursiveContainerMapping]:
             """Execute Oracle search in new event loop.
 
             Single Responsibility: Handle only event loop management for Oracle search.
@@ -273,7 +275,7 @@ class FlextTapLdapClient:
             loop = new_event_loop()
             set_event_loop(loop)
             try:
-                search_result: Sequence[t.ContainerMapping] = self.search(
+                search_result: Sequence[t.RecursiveContainerMapping] = self.search(
                     base_dn,
                     search_filter,
                     attributes,
@@ -337,7 +339,7 @@ class FlextTapLdapClient:
             attributes: t.StrSequence | None,
             ldap_scope: str,
             size_limit: int,
-        ) -> MutableSequence[t.MutableContainerMapping]:
+        ) -> MutableSequence[t.MutableRecursiveContainerMapping]:
             """Perform actual LDAP search.
 
             Single Responsibility: Handle only search execution.
@@ -361,11 +363,11 @@ class FlextTapLdapClient:
 
         def _process_oracle_entry(
             self,
-            entry: t.MutableContainerMapping,
-        ) -> t.MutableContainerMapping:
+            entry: t.MutableRecursiveContainerMapping,
+        ) -> t.MutableRecursiveContainerMapping:
             """Process Oracle-specific LDAP entries for testing convenience."""
-            raw_attrs: t.NormalizedValue = entry.get("attributes", {})
-            attributes: t.MutableContainerMapping = {}
+            raw_attrs: t.RecursiveContainer = entry.get("attributes", {})
+            attributes: t.MutableRecursiveContainerMapping = {}
             if isinstance(raw_attrs, dict):
                 attributes.update(raw_attrs)
             else:
@@ -394,12 +396,12 @@ class FlextTapLdapClient:
             self,
             result: r[m.Ldap.SearchResult],
             size_limit: int,
-        ) -> MutableSequence[t.MutableContainerMapping]:
+        ) -> MutableSequence[t.MutableRecursiveContainerMapping]:
             """Process LDAP search results with size limiting.
 
             Single Responsibility: Handle only result processing logic.
             """
-            entries: MutableSequence[t.MutableContainerMapping] = []
+            entries: MutableSequence[t.MutableRecursiveContainerMapping] = []
             if not (result.success and result.value):
                 return entries
             search_result = result.value
@@ -420,18 +422,18 @@ class FlextTapLdapClient:
 
         def _process_oracle_search_results(
             self,
-            search_result: Sequence[m.Ldif.Entry | t.ContainerMapping],
+            search_result: Sequence[m.Ldif.Entry | t.RecursiveContainerMapping],
             *,
             oracle_oid_mode: bool,
-        ) -> MutableSequence[t.MutableContainerMapping]:
+        ) -> MutableSequence[t.MutableRecursiveContainerMapping]:
             """Process search results with Oracle OID support.
 
             Single Responsibility: Handle only result processing logic.
             """
-            results: MutableSequence[t.MutableContainerMapping] = []
+            results: MutableSequence[t.MutableRecursiveContainerMapping] = []
             for idx, entry in enumerate(search_result):
                 if isinstance(entry, Mapping):
-                    entry_dict: t.MutableContainerMapping = {
+                    entry_dict: t.MutableRecursiveContainerMapping = {
                         str(key): value for key, value in entry.items()
                     }
                 else:

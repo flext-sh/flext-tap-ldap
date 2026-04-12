@@ -99,35 +99,35 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def validate_ldap_config(
-                settings: t.ContainerMapping,
-            ) -> r[t.ContainerMapping]:
+                settings: t.RecursiveContainerMapping,
+            ) -> r[t.RecursiveContainerMapping]:
                 """Validate LDAP configuration."""
-                config_map: t.MutableContainerMapping = {
+                config_map: t.MutableRecursiveContainerMapping = {
                     str(key): value for key, value in settings.items()
                 }
                 required_fields = ["host", "base_dn"]
                 for field in required_fields:
                     if field not in config_map:
-                        return r[t.ContainerMapping].fail(
+                        return r[t.RecursiveContainerMapping].fail(
                             f"Missing required LDAP field: {field}",
                         )
                     if not str(config_map[field]).strip():
-                        return r[t.ContainerMapping].fail(
+                        return r[t.RecursiveContainerMapping].fail(
                             f"Empty LDAP field: {field}",
                         )
                 if "port" in config_map:
                     try:
                         port = t.INTEGER_ADAPTER.validate_python(config_map["port"])
                     except c.ValidationError:
-                        return r[t.ContainerMapping].fail(
+                        return r[t.RecursiveContainerMapping].fail(
                             "LDAP port must be numeric",
                         )
                     if port <= 0 or port > c.TapLdap.Ldap.MAX_PORT:
-                        return r[t.ContainerMapping].fail(
+                        return r[t.RecursiveContainerMapping].fail(
                             f"LDAP port must be between 1 and {c.TapLdap.Ldap.MAX_PORT}",
                         )
                     config_map["port"] = port
-                return r[t.ContainerMapping].ok(config_map)
+                return r[t.RecursiveContainerMapping].ok(config_map)
 
 
 u = FlextTapLdapUtilities

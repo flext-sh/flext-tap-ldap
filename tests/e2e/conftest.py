@@ -26,7 +26,7 @@ def project_root() -> Path:
 
 
 @pytest.fixture(scope="session")
-def sample_catalog() -> t.ContainerMapping:
+def sample_catalog() -> t.RecursiveContainerMapping:
     """Create a sample Singer catalog for testing."""
     return {
         "streams": [
@@ -115,7 +115,7 @@ def tap_config_file(tmp_path: Path, _ldap_container: None) -> Path:
 
 
 @pytest.fixture
-def catalog_file(tmp_path: Path, sample_catalog: t.ContainerMapping) -> Path:
+def catalog_file(tmp_path: Path, sample_catalog: t.RecursiveContainerMapping) -> Path:
     """Create catalog file for testing."""
     catalog_file = tmp_path / "catalog.json"
     u.Cli.json_write(catalog_file, sample_catalog)

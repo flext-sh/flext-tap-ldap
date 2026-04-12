@@ -22,8 +22,8 @@ from flext_tap_ldap.tap import CLI_COMMAND
 from tests import t, u
 
 
-def _extract_json_from_output(output: str) -> t.NormalizedValue:
-    """Extract the JSON t.NormalizedValue from CLI output that may contain log lines."""
+def _extract_json_from_output(output: str) -> t.RecursiveContainer:
+    """Extract the JSON t.RecursiveContainer from CLI output that may contain log lines."""
     for line in output.strip().splitlines():
         stripped = line.strip()
         if stripped.startswith("{"):
@@ -46,7 +46,7 @@ class TestFlextTapLdapIntegration:
         return CliRunner()
 
     @pytest.fixture
-    def mock_ldap_config(self) -> t.ContainerMapping:
+    def mock_ldap_config(self) -> t.RecursiveContainerMapping:
         """Mock LDAP configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -57,7 +57,7 @@ class TestFlextTapLdapIntegration:
         }
 
     @pytest.fixture
-    def sample_catalog(self) -> t.ContainerMapping:
+    def sample_catalog(self) -> t.RecursiveContainerMapping:
         """Sample catalog for testing."""
         return {
             "streams": [
@@ -70,26 +70,32 @@ class TestFlextTapLdapIntegration:
         }
 
     @pytest.fixture
-    def sample_state(self) -> t.ContainerMapping:
+    def sample_state(self) -> t.RecursiveContainerMapping:
         """Sample state for testing."""
         return {"bookmarks": {}}
 
     @pytest.fixture
-    def config_file(self, tmp_path: Path, mock_ldap_config: t.ContainerMapping) -> Path:
+    def config_file(
+        self, tmp_path: Path, mock_ldap_config: t.RecursiveContainerMapping
+    ) -> Path:
         """Create temporary settings file."""
         config_path = tmp_path / "settings.json"
         u.Cli.json_write(config_path, mock_ldap_config)
         return config_path
 
     @pytest.fixture
-    def catalog_file(self, tmp_path: Path, sample_catalog: t.ContainerMapping) -> Path:
+    def catalog_file(
+        self, tmp_path: Path, sample_catalog: t.RecursiveContainerMapping
+    ) -> Path:
         """Create temporary catalog file."""
         catalog_path = tmp_path / "catalog.json"
         u.Cli.json_write(catalog_path, sample_catalog)
         return catalog_path
 
     @pytest.fixture
-    def state_file(self, tmp_path: Path, sample_state: t.ContainerMapping) -> Path:
+    def state_file(
+        self, tmp_path: Path, sample_state: t.RecursiveContainerMapping
+    ) -> Path:
         """Create a state file fixture for testing."""
         state_path = tmp_path / "state.json"
         u.Cli.json_write(state_path, sample_state)
@@ -119,11 +125,11 @@ class TestFlextTapLdapIntegration:
         if "streams" not in catalog:
             catalog_error: str = f"Expected {'streams'} in {catalog}"
             raise AssertionError(catalog_error)
-        streams: Sequence[t.ContainerMapping] = cast(
-            "Sequence[t.ContainerMapping]",
+        streams: Sequence[t.RecursiveContainerMapping] = cast(
+            "Sequence[t.RecursiveContainerMapping]",
             catalog["streams"],
         )
-        stream_names: t.ContainerList = [s["tap_stream_id"] for s in streams]
+        stream_names: t.RecursiveContainerList = [s["tap_stream_id"] for s in streams]
         if "users" not in stream_names:
             stream_error: str = f"Expected {'users'} in {stream_names}"
             raise AssertionError(stream_error)
@@ -158,7 +164,7 @@ class TestFlextTapLdapIntegration:
             exit_error: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(exit_error)
         lines = result.output.strip().split("\n")
-        messages: list[t.ContainerMapping] = []
+        messages: list[t.RecursiveContainerMapping] = []
         for line in lines:
             if not line:
                 continue
@@ -248,11 +254,11 @@ class TestFlextTapLdapIntegration:
             raise AssertionError(exit_error)
         catalog = _extract_json_from_output(result.output)
         assert isinstance(catalog, dict)
-        cat_streams: Sequence[t.ContainerMapping] = cast(
-            "Sequence[t.ContainerMapping]",
+        cat_streams: Sequence[t.RecursiveContainerMapping] = cast(
+            "Sequence[t.RecursiveContainerMapping]",
             catalog["streams"],
         )
-        stream_names: t.ContainerList = [
+        stream_names: t.RecursiveContainerList = [
             s.get("tap_stream_id", s.get("stream")) for s in cat_streams
         ]
         if "service_accounts" not in stream_names:

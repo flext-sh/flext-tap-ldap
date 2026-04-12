@@ -72,7 +72,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 self,
                 base_dn: str,
             ) -> FlextMeltanoProtocols.Result[t.StrSequence]:
-                """Discover t.NormalizedValue classes in LDAP directory."""
+                """Discover t.RecursiveContainer classes in LDAP directory."""
                 ...
 
             def fetch_directory_metadata(
@@ -177,7 +177,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 """Get tap configuration.
 
                 Returns:
-                    Tap configuration t.NormalizedValue.
+                    Tap configuration t.RecursiveContainer.
 
                 """
                 ...

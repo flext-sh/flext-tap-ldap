@@ -26,7 +26,7 @@ def _as_object_list(
         return []
 
 
-def _as_counter_map(value: t.NormalizedValue) -> t.HeaderMapping:
+def _as_counter_map(value: t.RecursiveContainer) -> t.HeaderMapping:
     try:
         if not isinstance(value, dict):
             return {}
@@ -86,8 +86,8 @@ class FlextTapLdapLdifStreams:
 
         def get_records(
             self,
-            context: t.ContainerMapping | None = None,
-        ) -> Iterator[t.ContainerMapping]:
+            context: t.RecursiveContainerMapping | None = None,
+        ) -> Iterator[t.RecursiveContainerMapping]:
             """Get LDIF records using flext-ldif processing."""
             _ = context
             self.logger.info("Processing LDIF files using flext-ldif library")
@@ -117,13 +117,13 @@ class FlextTapLdapLdifStreams:
         def _convert_entry_to_record(
             self,
             flext_entry: m.Ldif.Entry,
-        ) -> t.ContainerMapping:
+        ) -> t.RecursiveContainerMapping:
             """Convert flext-ldif entry to Singer record."""
             dn_value = flext_entry.dn.value if flext_entry.dn is not None else ""
             attrs = flext_entry.attributes
             object_classes: t.StrSequence = []
             entry_type = "other"
-            entry_attrs: t.ContainerMapping = {}
+            entry_attrs: t.RecursiveContainerMapping = {}
             if attrs is not None:
                 object_classes = attrs.get_values("objectClass")
                 entry_type = self._classify_entry_type(object_classes)
@@ -157,7 +157,7 @@ class FlextTapLdapLdifStreams:
                 return [str(value) for value in object_values]
             return []
 
-        def _process_ldap_directory(self) -> Iterator[t.ContainerMapping]:
+        def _process_ldap_directory(self) -> Iterator[t.RecursiveContainerMapping]:
             host_raw = self.settings.get("ldap_host")
             base_dn_raw = self.settings.get("ldap_base_dn")
             if not isinstance(host_raw, str) or not host_raw:
@@ -172,7 +172,7 @@ class FlextTapLdapLdifStreams:
         def _process_ldif_file(
             self,
             ldif_file: str,
-        ) -> Iterable[t.ContainerMapping]:
+        ) -> Iterable[t.RecursiveContainerMapping]:
             """Process single LDIF file using flext-ldif."""
             self.logger.info("Processing LDIF file: %s", ldif_file)
             try:
@@ -204,7 +204,7 @@ class FlextTapLdapLdifStreams:
             self.settings: t.ContainerValueMapping = getattr(tap, "tap_config", {})
             self._ldif_api = ldif()
             self._logger_instance: p.Logger | None = None
-            self.schema: t.ContainerMapping = {
+            self.schema: t.RecursiveContainerMapping = {
                 "type": "object",
                 "properties": {
                     "analysis_id": {
@@ -221,7 +221,7 @@ class FlextTapLdapLdifStreams:
                     },
                     "object_classes": {
                         "type": "object",
-                        "description": "Count by t.NormalizedValue class",
+                        "description": "Count by t.RecursiveContainer class",
                     },
                 },
             }
@@ -235,8 +235,8 @@ class FlextTapLdapLdifStreams:
 
         def get_records(
             self,
-            context: t.ContainerMapping | None = None,
-        ) -> Iterator[t.ContainerMapping]:
+            context: t.RecursiveContainerMapping | None = None,
+        ) -> Iterator[t.RecursiveContainerMapping]:
             """Get analysis records using flext-ldif analysis capabilities."""
             _ = context
             self.logger.info("Generating LDIF analysis using flext-ldif library")
@@ -319,7 +319,7 @@ class FlextTapLdapLdifStreams:
                     "object_classes": {},
                 }
 
-        def _analyze_ldif_file(self, ldif_file: str) -> t.ContainerMapping:
+        def _analyze_ldif_file(self, ldif_file: str) -> t.RecursiveContainerMapping:
             """Analyze single LDIF file using flext-ldif."""
             self.logger.info("Analyzing LDIF file: %s", ldif_file)
             try:

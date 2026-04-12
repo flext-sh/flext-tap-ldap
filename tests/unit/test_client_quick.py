@@ -65,7 +65,7 @@ class TestLDAPClientQuick:
         """Test entry conversion with different scenarios."""
         # Test with a Mapping (dict) entry
         mail_values: t.StrSequence = ["test@example.com"]
-        dict_entry: t.ContainerMapping = {
+        dict_entry: t.RecursiveContainerMapping = {
             "dn": "uid=dict,dc=example,dc=com",
             "attributes": {"mail": mail_values},
         }
@@ -76,7 +76,7 @@ class TestLDAPClientQuick:
         none_result = client._convert_entry_to_dict(None)
         assert none_result.failure
         # Test with a dict that has string values
-        simple_entry: t.ContainerMapping = {
+        simple_entry: t.RecursiveContainerMapping = {
             "dn": "uid=test,dc=example,dc=com",
             "uid": "test",
             "cn": ["Test", "T. User"],
@@ -191,7 +191,7 @@ class TestLDAPClientQuick:
         uid_values: t.StrSequence = ["test"]
         oracle_password_values: t.StrSequence = ["hashed_password"]
         object_classes: t.StrSequence = ["inetOrgPerson"]
-        entry: t.MutableContainerMapping = {
+        entry: t.MutableRecursiveContainerMapping = {
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": {
                 "uid": uid_values,
@@ -202,42 +202,44 @@ class TestLDAPClientQuick:
         result = client._process_oracle_entry(entry)
         attributes_raw = result.get("attributes")
         assert isinstance(attributes_raw, dict)
-        attributes: t.ContainerMapping = cast("t.ContainerMapping", attributes_raw)
+        attributes: t.RecursiveContainerMapping = cast(
+            "t.RecursiveContainerMapping", attributes_raw
+        )
         assert "userPassword" in attributes
-        user_password: t.NormalizedValue = attributes.get("userPassword")
+        user_password: t.RecursiveContainer = attributes.get("userPassword")
         assert isinstance(user_password, list)
         assert isinstance(user_password, list)
         assert "hashed_password" in user_password
 
         ou_values: t.StrSequence = ["test"]
         container_classes: t.StrSequence = ["orclContainer"]
-        entry_with_container: t.MutableContainerMapping = {
+        entry_with_container: t.MutableRecursiveContainerMapping = {
             "dn": "ou=test,dc=oracle,dc=com",
             "attributes": {"ou": ou_values, "objectClass": container_classes},
         }
         result = client._process_oracle_entry(entry_with_container)
         attrs_raw2 = result.get("attributes")
         assert isinstance(attrs_raw2, dict)
-        attributes = cast("t.ContainerMapping", attrs_raw2)
-        object_class: t.NormalizedValue = attributes.get("objectClass")
+        attributes = cast("t.RecursiveContainerMapping", attrs_raw2)
+        object_class: t.RecursiveContainer = attributes.get("objectClass")
         assert isinstance(object_class, list)
         assert isinstance(object_class, list)
         assert "organizationalUnit" in object_class
 
-        entry_string_oc: t.MutableContainerMapping = {
+        entry_string_oc: t.MutableRecursiveContainerMapping = {
             "dn": "ou=test,dc=oracle,dc=com",
             "attributes": {"objectClass": "orclContainer"},
         }
         result = client._process_oracle_entry(entry_string_oc)
         attrs_raw3 = result.get("attributes")
         assert isinstance(attrs_raw3, dict)
-        attributes = cast("t.ContainerMapping", attrs_raw3)
-        obj_classes: t.NormalizedValue = attributes.get("objectClass")
+        attributes = cast("t.RecursiveContainerMapping", attrs_raw3)
+        obj_classes: t.RecursiveContainer = attributes.get("objectClass")
         assert isinstance(obj_classes, list)
         assert isinstance(obj_classes, list)
         assert "organizationalUnit" in obj_classes
 
-        entry_bad_attrs: t.MutableContainerMapping = {
+        entry_bad_attrs: t.MutableRecursiveContainerMapping = {
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": "not_a_dict",
         }
@@ -278,7 +280,7 @@ class TestLDAPClientQuick:
         """Test Oracle search result processing."""
         first_passwords: t.StrSequence = ["pass1"]
         second_uids: t.StrSequence = ["test2"]
-        search_results: Sequence[t.ContainerMapping] = [
+        search_results: Sequence[t.RecursiveContainerMapping] = [
             {
                 "dn": "uid=test1,dc=oracle,dc=com",
                 "attributes": {"orclPassword": first_passwords},

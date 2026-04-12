@@ -53,7 +53,7 @@ class TestLdifProcessor:
 
         seen: list[str] = []
 
-        def _process(ldif_file: str) -> Sequence[t.ContainerMapping]:
+        def _process(ldif_file: str) -> Sequence[t.RecursiveContainerMapping]:
             seen.append(ldif_file)
             return [{"dn": ldif_file}]
 

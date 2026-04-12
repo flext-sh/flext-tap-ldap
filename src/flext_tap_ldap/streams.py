@@ -38,7 +38,7 @@ class FlextTapLdapStreams:
         """
 
         @staticmethod
-        def coerce_positive_int(raw_value: t.NormalizedValue, default: int) -> int:
+        def coerce_positive_int(raw_value: t.RecursiveContainer, default: int) -> int:
             """Coerce value to positive integer with safe fallback."""
             try:
                 parsed = t.INTEGER_ADAPTER.validate_python(raw_value)
@@ -47,7 +47,7 @@ class FlextTapLdapStreams:
             return parsed if parsed > 0 else default
 
         @staticmethod
-        def coerce_optional_string(raw_value: t.NormalizedValue) -> str | None:
+        def coerce_optional_string(raw_value: t.RecursiveContainer) -> str | None:
             """Coerce value to string only when source is already string-like."""
             if raw_value is None:
                 return None
@@ -61,7 +61,7 @@ class FlextTapLdapStreams:
 
         @staticmethod
         def parse_connection_config(
-            raw_value: t.NormalizedValue,
+            raw_value: t.RecursiveContainer,
         ) -> m.TapLdap.LdapConnectionConfig:
             """Validate LDAP connection payload through Pydantic."""
             try:
@@ -94,7 +94,7 @@ class FlextTapLdapStreams:
 
         @staticmethod
         def parse_property_definition(
-            raw_value: t.NormalizedValue,
+            raw_value: t.RecursiveContainer,
         ) -> m.TapLdap.CustomPropertyDefinition:
             """Validate custom stream property definition through Pydantic."""
             try:
@@ -109,21 +109,21 @@ class FlextTapLdapStreams:
             self,
             tap: Tap,
             name: str | None = None,
-            schema: t.ContainerMapping | None = None,
+            schema: t.RecursiveContainerMapping | None = None,
         ) -> None:
             """Initialize the LDAP stream."""
             self.name = name
             self.tap_stream_id = name or "ldap_stream"
             self.schema = schema or {}
-            self.settings: t.ContainerMapping = getattr(tap, "tap_config", {})
+            self.settings: t.RecursiveContainerMapping = getattr(tap, "tap_config", {})
             self.client: FlextTapLdapClient.LDAPClient | None = None
             self.tap = tap
             self._create_ldap_client()
 
         def get_records(
             self,
-            context: t.ContainerMapping | None = None,
-        ) -> Iterable[t.ContainerMapping]:
+            context: t.RecursiveContainerMapping | None = None,
+        ) -> Iterable[t.RecursiveContainerMapping]:
             """Get records from LDAP - base implementation."""
             _context = context
             return []
@@ -194,7 +194,7 @@ class FlextTapLdapStreams:
             search_filter: str,
             base_dn: str | None = None,
             attributes: t.StrSequence | None = None,
-        ) -> Sequence[t.ContainerMapping]:
+        ) -> Sequence[t.RecursiveContainerMapping]:
             """Search LDAP directory with error handling."""
             if not self.client:
                 msg = "LDAP client is not available"
@@ -208,7 +208,7 @@ class FlextTapLdapStreams:
                         )
                     )
                     base_dn = connection_config.base_dn
-                results: Sequence[t.ContainerMapping] = [
+                results: Sequence[t.RecursiveContainerMapping] = [
                     dict(entry)
                     for entry in self.client.search(
                         base_dn=base_dn or "",
@@ -235,7 +235,7 @@ class FlextTapLdapStreams:
         def __init__(self, tap: Tap) -> None:
             """Initialize users stream."""
             name = "users"
-            schema: t.ContainerMapping = {
+            schema: t.RecursiveContainerMapping = {
                 "type": "object",
                 "properties": {
                     "dn": {"type": "string", "description": "Distinguished Name"},
@@ -261,8 +261,8 @@ class FlextTapLdapStreams:
         @override
         def get_records(
             self,
-            context: t.ContainerMapping | None = None,
-        ) -> Iterable[t.ContainerMapping]:
+            context: t.RecursiveContainerMapping | None = None,
+        ) -> Iterable[t.RecursiveContainerMapping]:
             """Get user records from LDAP."""
             _context = context
             logger.info("Extracting LDAP users")
@@ -293,7 +293,7 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-            results: Sequence[t.ContainerMapping] = self._search_ldap(
+            results: Sequence[t.RecursiveContainerMapping] = self._search_ldap(
                 user_filter,
                 attributes=user_attributes,
             )
@@ -309,7 +309,7 @@ class FlextTapLdapStreams:
         def __init__(self, tap: Tap) -> None:
             """Initialize groups stream."""
             name = "groups"
-            schema: t.ContainerMapping = {
+            schema: t.RecursiveContainerMapping = {
                 "type": "object",
                 "properties": {
                     "dn": {"type": "string", "description": "Distinguished Name"},
@@ -340,8 +340,8 @@ class FlextTapLdapStreams:
         @override
         def get_records(
             self,
-            context: t.ContainerMapping | None = None,
-        ) -> Iterable[t.ContainerMapping]:
+            context: t.RecursiveContainerMapping | None = None,
+        ) -> Iterable[t.RecursiveContainerMapping]:
             """Get group records from LDAP."""
             _context = context
             logger.info("Extracting LDAP groups")
@@ -366,7 +366,7 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-            results: Sequence[t.ContainerMapping] = self._search_ldap(
+            results: Sequence[t.RecursiveContainerMapping] = self._search_ldap(
                 group_filter,
                 attributes=group_attributes,
             )
@@ -381,7 +381,7 @@ class FlextTapLdapStreams:
         def __init__(self, tap: Tap) -> None:
             """Initialize organizational units stream."""
             name = "organizational_units"
-            schema: t.ContainerMapping = {
+            schema: t.RecursiveContainerMapping = {
                 "type": "object",
                 "properties": {
                     "dn": {"type": "string", "description": "Distinguished Name"},
@@ -401,8 +401,8 @@ class FlextTapLdapStreams:
         @override
         def get_records(
             self,
-            context: t.ContainerMapping | None = None,
-        ) -> Iterable[t.ContainerMapping]:
+            context: t.RecursiveContainerMapping | None = None,
+        ) -> Iterable[t.RecursiveContainerMapping]:
             """Get organizational unit records from LDAP."""
             _context = context
             logger.info("Extracting LDAP organizational units")
@@ -414,7 +414,7 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-            results: Sequence[t.ContainerMapping] = self._search_ldap(
+            results: Sequence[t.RecursiveContainerMapping] = self._search_ldap(
                 ou_filter,
                 attributes=ou_attributes,
             )
@@ -429,7 +429,7 @@ class FlextTapLdapStreams:
         def __init__(self, tap: Tap) -> None:
             """Initialize schema stream."""
             name = "schema"
-            schema: t.ContainerMapping = {
+            schema: t.RecursiveContainerMapping = {
                 "type": "object",
                 "properties": {
                     "objectClass": {
@@ -463,8 +463,8 @@ class FlextTapLdapStreams:
         @override
         def get_records(
             self,
-            context: t.ContainerMapping | None = None,
-        ) -> Iterable[t.ContainerMapping]:
+            context: t.RecursiveContainerMapping | None = None,
+        ) -> Iterable[t.RecursiveContainerMapping]:
             """Get schema records from LDAP."""
             _context = context
             logger.info("Extracting LDAP schema")
@@ -519,8 +519,8 @@ class FlextTapLdapStreams:
 
             def _map_prop(
                 name: str,
-                definition: t.NormalizedValue,
-            ) -> t.ContainerMapping:
+                definition: t.RecursiveContainer,
+            ) -> t.RecursiveContainerMapping:
                 parsed_definition = (
                     FlextTapLdapStreams.LDAPBaseStream.parse_property_definition(
                         definition,
@@ -543,11 +543,11 @@ class FlextTapLdapStreams:
                 return {"type": "string", "description": prop_desc}
 
             if params.schema_properties:
-                dynamic_properties: Mapping[str, t.ContainerMapping] = {
+                dynamic_properties: Mapping[str, t.RecursiveContainerMapping] = {
                     key: _map_prop(key, value)
                     for key, value in params.schema_properties.items()
                 }
-                schema: t.ContainerMapping = {
+                schema: t.RecursiveContainerMapping = {
                     "type": "object",
                     "properties": {
                         "dn": {
@@ -591,14 +591,14 @@ class FlextTapLdapStreams:
         @override
         def get_records(
             self,
-            context: t.ContainerMapping | None = None,
-        ) -> Iterable[t.ContainerMapping]:
+            context: t.RecursiveContainerMapping | None = None,
+        ) -> Iterable[t.RecursiveContainerMapping]:
             """Get records using custom filter."""
             _context = context
             logger.info(
                 f"Extracting LDAP records for custom stream: {self.params.name}",
             )
-            results: Sequence[t.ContainerMapping] = self._search_ldap(
+            results: Sequence[t.RecursiveContainerMapping] = self._search_ldap(
                 self.params.search_filter,
             )
             yield from results

@@ -121,8 +121,8 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             @classmethod
             def populate_aggregate_id(
                 cls,
-                data: t.ContainerMapping,
-            ) -> t.ContainerMapping:
+                data: t.RecursiveContainerMapping,
+            ) -> t.RecursiveContainerMapping:
                 """Set aggregate_id from stream_name if not provided."""
                 if (
                     isinstance(data, dict)
@@ -166,8 +166,8 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             @classmethod
             def populate_aggregate_id(
                 cls,
-                data: t.ContainerMapping,
-            ) -> t.ContainerMapping:
+                data: t.RecursiveContainerMapping,
+            ) -> t.RecursiveContainerMapping:
                 """Set aggregate_id from stream_name if not provided."""
                 if (
                     isinstance(data, dict)
@@ -197,15 +197,15 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 default="created",
                 description="Current status of the tap execution",
             )
-            settings: t.ContainerMapping = Field(
+            settings: t.RecursiveContainerMapping = Field(
                 default_factory=dict,
                 description="Execution configuration object",
             )
-            catalog: t.ContainerMapping = Field(
+            catalog: t.RecursiveContainerMapping = Field(
                 default_factory=dict,
                 description="Catalog data associated with the execution",
             )
-            state: t.ContainerMapping = Field(
+            state: t.RecursiveContainerMapping = Field(
                 default_factory=dict,
                 description="State data for the execution",
             )
@@ -303,8 +303,8 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             @classmethod
             def populate_aggregate_id(
                 cls,
-                data: t.ContainerMapping,
-            ) -> t.ContainerMapping:
+                data: t.RecursiveContainerMapping,
+            ) -> t.RecursiveContainerMapping:
                 """Set aggregate_id from server_uri if not provided."""
                 if (
                     isinstance(data, dict)
@@ -369,7 +369,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
             search_filter: str = Field(
                 description="LDAP filter expression for the custom stream",
             )
-            schema_properties: t.ContainerMapping = Field(
+            schema_properties: t.RecursiveContainerMapping = Field(
                 default_factory=dict,
                 description="Custom schema properties for the stream",
             )
@@ -397,7 +397,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 return self
 
         class LdapClientConfig(BaseModel):
-            """Parameter t.NormalizedValue for LDAP client initialization."""
+            """Parameter t.RecursiveContainer for LDAP client initialization."""
 
             host: str = Field(
                 description="LDAP server host name or address",
@@ -589,12 +589,12 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 default=None,
                 description="Optional replication key for incremental replication",
             )
-            stream_schema: t.ContainerMapping = Field(
+            stream_schema: t.RecursiveContainerMapping = Field(
                 default_factory=dict,
                 description="Stream schema mapping for Singer records",
             )
 
-            def update_schema(self, schema: t.ContainerMapping) -> None:
+            def update_schema(self, schema: t.RecursiveContainerMapping) -> None:
                 """Update stream schema from mapping."""
                 self.stream_schema = dict(schema)
 
