@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
 from flext_ldif import ldif
-from pydantic import ValidationError
 
 from flext_tap_ldap import c, m, p, t, u
 
@@ -23,7 +22,7 @@ def _as_object_list(
             return []
         result = t.OBJECT_LIST_ADAPTER.validate_python(value)
         return [dict(item) for item in result]
-    except ValidationError:
+    except c.ValidationError:
         return []
 
 
@@ -32,7 +31,7 @@ def _as_counter_map(value: t.NormalizedValue) -> t.HeaderMapping:
         if not isinstance(value, dict):
             return {}
         return t.COUNTER_MAP_ADAPTER.validate_python(value)
-    except ValidationError:
+    except c.ValidationError:
         return {}
 
 
@@ -386,4 +385,4 @@ class FlextTapLdapLdifStreams:
             return files
 
 
-__all__ = ["FlextTapLdapLdifStreams"]
+__all__: list[str] = ["FlextTapLdapLdifStreams"]

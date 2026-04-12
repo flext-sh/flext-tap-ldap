@@ -79,4 +79,4 @@ class TestsFlextTapLdapModels(FlextTestsModels, FlextTapLdapModels):
 
 m = TestsFlextTapLdapModels
 
-__all__ = ["TestsFlextTapLdapModels", "m"]
+__all__: list[str] = ["TestsFlextTapLdapModels", "m"]

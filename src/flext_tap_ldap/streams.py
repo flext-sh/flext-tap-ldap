@@ -13,8 +13,6 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping, Sequence
 from typing import TYPE_CHECKING, ClassVar, override
 
-from pydantic import ValidationError
-
 from flext_tap_ldap import FlextTapLdapClient, c, m, t, u
 
 if TYPE_CHECKING:
@@ -44,7 +42,7 @@ class FlextTapLdapStreams:
             """Coerce value to positive integer with safe fallback."""
             try:
                 parsed = t.INTEGER_ADAPTER.validate_python(raw_value)
-            except ValidationError:
+            except c.ValidationError:
                 return default
             return parsed if parsed > 0 else default
 
@@ -57,7 +55,7 @@ class FlextTapLdapStreams:
                 validated = t.STRICT_STR_ADAPTER.validate_python(
                     raw_value,
                 )
-            except ValidationError:
+            except c.ValidationError:
                 return None
             return validated or None
 
@@ -71,7 +69,7 @@ class FlextTapLdapStreams:
                     raw_value,
                     strict=True,
                 )
-            except ValidationError as exc:
+            except c.ValidationError as exc:
                 msg = f"Invalid LDAP connection configuration: {exc}"
                 raise ValueError(msg) from exc
             return m.TapLdap.LdapConnectionConfig(
@@ -104,7 +102,7 @@ class FlextTapLdapStreams:
                     raw_value,
                     strict=True,
                 )
-            except ValidationError:
+            except c.ValidationError:
                 return m.TapLdap.CustomPropertyDefinition()
 
         def __init__(
@@ -606,4 +604,4 @@ class FlextTapLdapStreams:
             yield from results
 
 
-__all__ = ["FlextTapLdapStreams"]
+__all__: list[str] = ["FlextTapLdapStreams"]

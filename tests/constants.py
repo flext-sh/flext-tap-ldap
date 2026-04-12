@@ -59,4 +59,4 @@ class TestsFlextTapLdapConstants(FlextTestsConstants, FlextTapLdapConstants):
 
 
 c = TestsFlextTapLdapConstants
-__all__ = ["TestsFlextTapLdapConstants", "c"]
+__all__: list[str] = ["TestsFlextTapLdapConstants", "c"]

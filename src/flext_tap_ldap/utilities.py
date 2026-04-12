@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from pydantic import ValidationError
-
 from flext_core import e, r
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
@@ -120,7 +118,7 @@ class FlextTapLdapUtilities(
                 if "port" in config_map:
                     try:
                         port = t.INTEGER_ADAPTER.validate_python(config_map["port"])
-                    except ValidationError:
+                    except c.ValidationError:
                         return r[t.ContainerMapping].fail(
                             "LDAP port must be numeric",
                         )
@@ -133,4 +131,4 @@ class FlextTapLdapUtilities(
 
 
 u = FlextTapLdapUtilities
-__all__ = ["FlextTapLdapUtilities", "u"]
+__all__: list[str] = ["FlextTapLdapUtilities", "u"]

@@ -13,8 +13,6 @@ import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
 from collections.abc import Mapping, MutableSequence, Sequence
 
-from pydantic import BaseModel, ValidationError
-
 from flext_ldap import FlextLdap, ldap
 from flext_tap_ldap import c, m, r, t, u
 
@@ -161,7 +159,7 @@ class FlextTapLdapClient:
                     test_search_options,
                 )
                 return result.success
-            except (RuntimeError, ValueError, TypeError, ValidationError) as e:
+            except (RuntimeError, ValueError, TypeError, c.ValidationError) as e:
                 err_msg = str(e)
                 logger.warning("LDAP connection test failed: %s", err_msg)
                 return False
@@ -186,7 +184,7 @@ class FlextTapLdapClient:
                 return r[t.MutableContainerMapping].fail(
                     "Cannot convert None entry data",
                 )
-            if isinstance(entry_data, BaseModel):
+            if isinstance(entry_data, m.BaseModel):
                 dn_value: str = str(getattr(entry_data, "dn", ""))
                 model_data: t.MutableContainerMapping = dict(entry_data.model_dump())
                 attrs_val: t.NormalizedValue = model_data.get("attributes", {})
@@ -252,7 +250,7 @@ class FlextTapLdapClient:
                     ),
                 }
                 return m.TapLdap.LdapClientConfig.model_validate(config_dict)
-            except ValidationError as e:
+            except c.ValidationError as e:
                 host_val = convenience_kwargs.get("host")
                 if not host_val or not isinstance(host_val, str):
                     msg = "Either 'settings' or valid string 'host' must be provided"

@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import ClassVar, override
 
 import click
-from pydantic import ValidationError
 
 from flext_meltano import FlextMeltanoAbstractions
 from flext_tap_ldap import (
@@ -132,7 +131,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             config_map = t.CONFIG_STREAM_MAP_ADAPTER.validate_python(
                 raw_connection_config,
             )
-        except ValidationError:
+        except c.ValidationError:
             config_map = {}
 
         ldap_streams: MutableSequence[FlextTapLdapStreams.LDAPBaseStream] = [
@@ -196,7 +195,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             validated: t.ContainerMapping = t.SINGER_OUTPUT_ADAPTER.validate_python(
                 raw_item,
             )
-        except ValidationError:
+        except c.ValidationError:
             return None
         name_val: t.NormalizedValue = validated.get("name")
         if isinstance(name_val, str) and name_val:

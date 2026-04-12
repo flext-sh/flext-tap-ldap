@@ -80,4 +80,4 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
 
 
 c = FlextTapLdapConstants
-__all__ = ["FlextTapLdapConstants", "c"]
+__all__: list[str] = ["FlextTapLdapConstants", "c"]

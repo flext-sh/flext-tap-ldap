@@ -27,4 +27,4 @@ class TestsFlextTapLdapProtocols(FlextTestsProtocols, FlextTapLdapProtocols):
 
 
 p = TestsFlextTapLdapProtocols
-__all__ = ["TestsFlextTapLdapProtocols", "p"]
+__all__: list[str] = ["TestsFlextTapLdapProtocols", "p"]

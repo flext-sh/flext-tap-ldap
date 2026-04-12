@@ -185,4 +185,4 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
 p = FlextTapLdapProtocols
 
-__all__ = ["FlextTapLdapProtocols", "p"]
+__all__: list[str] = ["FlextTapLdapProtocols", "p"]

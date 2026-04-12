@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import override
 
 from flext_ldif import ldif
-from pydantic import ValidationError
 
 from flext_core import u
 from flext_tap_ldap import c, m, r, t
@@ -160,7 +159,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                             parsed_entry = m.Ldif.Entry.model_validate(
                                 result.value.entries[0].model_dump()
                             )
-                        except ValidationError:
+                        except c.ValidationError:
                             parsed_entry = None
                         if parsed_entry is not None:
                             return parsed_entry
@@ -200,7 +199,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 """Validate and coerce value to LDIF entry model."""
                 try:
                     return m.Ldif.Entry.model_validate(raw_value)
-                except ValidationError:
+                except c.ValidationError:
                     return None
 
             @override

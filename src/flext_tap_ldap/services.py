@@ -17,7 +17,6 @@ from typing import ClassVar
 from uuid import uuid4
 
 from flext_ldif import ldif
-from pydantic import ValidationError
 
 from flext_tap_ldap import FlextTapLdapSettings, c, m, r, t, u
 
@@ -40,14 +39,14 @@ class FlextTapLdapServices:
     def _as_map(value: t.NormalizedValue) -> t.ContainerValueMapping | None:
         try:
             return t.CONFIG_MAP_ADAPTER.validate_python(value)
-        except ValidationError:
+        except c.ValidationError:
             return None
 
     @staticmethod
     def _as_str(value: t.NormalizedValue) -> str | None:
         try:
             return t.STRICT_STR_ADAPTER.validate_python(value)
-        except ValidationError:
+        except c.ValidationError:
             return None
 
     EXPECTED_DATA_COUNT = 3
@@ -659,4 +658,4 @@ class FlextTapLdapServices:
             return r[bool].fail(f"Configuration validation failed: {e}")
 
 
-__all__ = ["FlextTapLdapServices"]
+__all__: list[str] = ["FlextTapLdapServices"]
