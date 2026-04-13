@@ -77,7 +77,7 @@ class FlextTapLdapUtilities(
                 attributes: Mapping[str, t.StrSequence],
                 stream_prefix: str = "ldap",
                 replication_method: str = "FULL_TABLE",
-            ) -> r[t.HeaderMapping]:
+            ) -> p.Result[t.HeaderMapping]:
                 """Create stream info from LDAP entry."""
                 object_classes = attributes.get("objectClass", [])
                 if not object_classes:
@@ -100,7 +100,7 @@ class FlextTapLdapUtilities(
             @staticmethod
             def validate_ldap_config(
                 settings: t.RecursiveContainerMapping,
-            ) -> r[t.RecursiveContainerMapping]:
+            ) -> p.Result[t.RecursiveContainerMapping]:
                 """Validate LDAP configuration."""
                 config_map: t.MutableRecursiveContainerMapping = {
                     str(key): value for key, value in settings.items()

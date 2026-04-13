@@ -14,7 +14,7 @@ from asyncio import get_running_loop, new_event_loop, set_event_loop
 from collections.abc import Mapping, MutableSequence, Sequence
 
 from flext_ldap import FlextLdap, ldap
-from flext_tap_ldap import c, m, r, t, u
+from flext_tap_ldap import c, m, p, r, t, u
 
 logger = u.fetch_logger(__name__)
 
@@ -175,7 +175,7 @@ class FlextTapLdapClient:
         def _convert_entry_to_dict(
             self,
             entry_data: t.RuntimeData | t.RecursiveContainerMapping | None,
-        ) -> r[t.MutableRecursiveContainerMapping]:
+        ) -> p.Result[t.MutableRecursiveContainerMapping]:
             """Convert FlextLdapModels.Entry to dict format for testing.
 
             Single Responsibility: Handle only entry format conversion.

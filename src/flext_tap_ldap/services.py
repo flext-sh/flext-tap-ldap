@@ -18,7 +18,7 @@ from uuid import uuid4
 
 from flext_ldif import ldif
 
-from flext_tap_ldap import FlextTapLdapSettings, c, m, r, t, u
+from flext_tap_ldap import FlextTapLdapSettings, c, m, p, r, t, u
 
 
 class FlextTapLdapServices:
@@ -64,7 +64,7 @@ class FlextTapLdapServices:
         def create_connection(
             self,
             params: m.TapLdap.LdapConnectionParams,
-        ) -> r[m.TapLdap.LdapConnection]:
+        ) -> p.Result[m.TapLdap.LdapConnection]:
             """Create LDAP connection using parameter t.RecursiveContainer pattern."""
             try:
                 connection = m.TapLdap.LdapConnection(
@@ -87,7 +87,7 @@ class FlextTapLdapServices:
         def fetch_connection(
             self,
             connection_id: str,
-        ) -> r[m.TapLdap.LdapConnection]:
+        ) -> p.Result[m.TapLdap.LdapConnection]:
             """Get LDAP connection by ID."""
             try:
                 connection = self._connections.get(connection_id)
@@ -103,7 +103,7 @@ class FlextTapLdapServices:
 
         def list_connections(
             self,
-        ) -> r[Sequence[m.TapLdap.LdapConnection]]:
+        ) -> p.Result[Sequence[m.TapLdap.LdapConnection]]:
             """List all LDAP connections."""
             try:
                 connections = list(self._connections.values())
@@ -118,7 +118,7 @@ class FlextTapLdapServices:
         def test_connection(
             self,
             connection_id: str,
-        ) -> r[t.RecursiveContainerMapping]:
+        ) -> p.Result[t.RecursiveContainerMapping]:
             """Test LDAP connection."""
             try:
                 connection = self._connections.get(connection_id)
@@ -156,7 +156,7 @@ class FlextTapLdapServices:
         def create_stream(
             self,
             params: m.TapLdap.StreamCreationParams,
-        ) -> r[m.TapLdap.LdapStream]:
+        ) -> p.Result[m.TapLdap.LdapStream]:
             """Create LDAP stream using parameter t.RecursiveContainer pattern."""
             try:
                 tap_stream_id = params.tap_stream_id
@@ -183,7 +183,9 @@ class FlextTapLdapServices:
                     f"Failed to create stream: {e}",
                 )
 
-        def discover_schema(self, stream_id: str) -> r[t.RecursiveContainerMapping]:
+        def discover_schema(
+            self, stream_id: str
+        ) -> p.Result[t.RecursiveContainerMapping]:
             """Discover schema for LDAP stream."""
             try:
                 stream = self._streams.get(stream_id)
@@ -208,7 +210,7 @@ class FlextTapLdapServices:
         def fetch_stream(
             self,
             stream_id: str,
-        ) -> r[m.TapLdap.LdapStream]:
+        ) -> p.Result[m.TapLdap.LdapStream]:
             """Get LDAP stream by ID."""
             try:
                 stream = self._streams.get(stream_id)
@@ -225,7 +227,7 @@ class FlextTapLdapServices:
         def list_streams(
             self,
             connection_id: str | None = None,
-        ) -> r[Sequence[m.TapLdap.LdapStream]]:
+        ) -> p.Result[Sequence[m.TapLdap.LdapStream]]:
             """List LDAP streams, optionally filtered by connection ID."""
             try:
                 streams = list(self._streams.values())
@@ -250,7 +252,7 @@ class FlextTapLdapServices:
         def cancel_execution(
             self,
             execution_id: str,
-        ) -> r[m.TapLdap.TapExecution]:
+        ) -> p.Result[m.TapLdap.TapExecution]:
             """Cancel tap execution."""
             try:
                 execution = self._executions.get(execution_id)
@@ -272,7 +274,7 @@ class FlextTapLdapServices:
             exit_code: int,
             stdout: str | None = None,
             stderr: str | None = None,
-        ) -> r[m.TapLdap.TapExecution]:
+        ) -> p.Result[m.TapLdap.TapExecution]:
             """Complete tap execution."""
             try:
                 execution = self._executions.get(execution_id)
@@ -295,7 +297,7 @@ class FlextTapLdapServices:
             settings: t.RecursiveContainerMapping | None = None,
             catalog: t.RecursiveContainerMapping | None = None,
             state: t.RecursiveContainerMapping | None = None,
-        ) -> r[m.TapLdap.TapExecution]:
+        ) -> p.Result[m.TapLdap.TapExecution]:
             """Create tap execution."""
             try:
                 validated_config = FlextTapLdapServices._as_map(settings or {}) or {}
@@ -322,7 +324,7 @@ class FlextTapLdapServices:
         def fetch_execution(
             self,
             execution_id: str,
-        ) -> r[m.TapLdap.TapExecution]:
+        ) -> p.Result[m.TapLdap.TapExecution]:
             """Get tap execution by ID."""
             try:
                 execution = self._executions.get(execution_id)
@@ -339,7 +341,7 @@ class FlextTapLdapServices:
         def list_executions(
             self,
             connection_id: str | None = None,
-        ) -> r[Sequence[m.TapLdap.TapExecution]]:
+        ) -> p.Result[Sequence[m.TapLdap.TapExecution]]:
             """List tap executions, optionally filtered by connection ID."""
             try:
                 executions = list(self._executions.values())
@@ -362,7 +364,7 @@ class FlextTapLdapServices:
         def start_execution(
             self,
             execution_id: str,
-        ) -> r[m.TapLdap.TapExecution]:
+        ) -> p.Result[m.TapLdap.TapExecution]:
             """Start tap execution."""
             try:
                 execution = self._executions.get(execution_id)
@@ -383,7 +385,7 @@ class FlextTapLdapServices:
             execution_id: str,
             records_extracted: int,
             streams_processed: int,
-        ) -> r[m.TapLdap.TapExecution]:
+        ) -> p.Result[m.TapLdap.TapExecution]:
             """Update execution metrics."""
             try:
                 execution = self._executions.get(execution_id)
@@ -409,7 +411,7 @@ class FlextTapLdapServices:
         def fetch_ldif_statistics(
             self,
             file_path: str,
-        ) -> r[t.RecursiveContainerMapping]:
+        ) -> p.Result[t.RecursiveContainerMapping]:
             """Get LDIF file statistics using flext-ldif library."""
             try:
                 validation_result: r[t.RecursiveContainerMapping] = (
@@ -442,7 +444,7 @@ class FlextTapLdapServices:
         def process_ldif_file(
             self,
             file_path: str,
-        ) -> r[Sequence[t.RecursiveContainerMapping]]:
+        ) -> p.Result[Sequence[t.RecursiveContainerMapping]]:
             """Process LDIF file using flext-ldif library."""
             try:
                 FlextTapLdapServices._logger.info("Processing LDIF file: %s", file_path)
@@ -485,7 +487,7 @@ class FlextTapLdapServices:
         def validate_ldif_file(
             self,
             file_path: str,
-        ) -> r[t.RecursiveContainerMapping]:
+        ) -> p.Result[t.RecursiveContainerMapping]:
             """Validate LDIF file using flext-ldif library."""
             try:
                 FlextTapLdapServices._logger.info("Validating LDIF file: %s", file_path)
@@ -521,7 +523,7 @@ class FlextTapLdapServices:
     @staticmethod
     def create_development_ldap_config(
         **overrides: t.Scalar,
-    ) -> r[FlextTapLdapSettings]:
+    ) -> p.Result[FlextTapLdapSettings]:
         """Create development LDAP configuration with defaults.
 
         Args:
@@ -542,7 +544,7 @@ class FlextTapLdapServices:
     @staticmethod
     def create_ldap_connection_config(
         params: m.TapLdap.LdapConnectionParams,
-    ) -> r[t.RecursiveContainerMapping]:
+    ) -> p.Result[t.RecursiveContainerMapping]:
         """Create LDAP connection configuration using Parameter Object Pattern.
 
         Args:
@@ -576,7 +578,7 @@ class FlextTapLdapServices:
         base_dn: str,
         port: int = c.Ldap.ConnectionDefaults.PORT,
         **kwargs: t.Scalar,
-    ) -> r[t.RecursiveContainerMapping]:
+    ) -> p.Result[t.RecursiveContainerMapping]:
         """Create LDAP connection configuration (testing convenience interface).
 
         Testing convenience wrapper for the Parameter Object Pattern implementation.
@@ -598,7 +600,7 @@ class FlextTapLdapServices:
     @staticmethod
     def create_production_ldap_config(
         **overrides: t.Scalar,
-    ) -> r[FlextTapLdapSettings]:
+    ) -> p.Result[FlextTapLdapSettings]:
         """Create production LDAP configuration with security defaults.
 
         Args:
@@ -620,7 +622,7 @@ class FlextTapLdapServices:
     @staticmethod
     def setup_ldap_tap(
         settings: FlextTapLdapSettings | None = None,
-    ) -> r[FlextTapLdapSettings]:
+    ) -> p.Result[FlextTapLdapSettings]:
         """Set up the LDAP tap with configuration.
 
         Args:
@@ -643,7 +645,7 @@ class FlextTapLdapServices:
             return r[FlextTapLdapSettings].fail(f"Failed to setup LDAP tap: {e}")
 
     @staticmethod
-    def validate_ldap_config(settings: FlextTapLdapSettings) -> r[bool]:
+    def validate_ldap_config(settings: FlextTapLdapSettings) -> p.Result[bool]:
         """Validate LDAP tap configuration.
 
         Args:

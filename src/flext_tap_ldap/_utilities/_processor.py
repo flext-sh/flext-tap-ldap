@@ -17,7 +17,7 @@ from typing import override
 from flext_ldif import ldif
 
 from flext_core import u
-from flext_tap_ldap import c, m, r, t
+from flext_tap_ldap import c, m, p, r, t
 
 
 class FlextTapLdapUtilitiesProcessorMixin:
@@ -273,7 +273,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     "error_messages": list(self.errors),
                 }
 
-            def load_from_file(self, file_path: Path) -> r[str]:
+            def load_from_file(self, file_path: Path) -> p.Result[str]:
                 """Load LDIF entries from file and return as r."""
                 try:
                     self.entries = list(self.parse_file(file_path))
@@ -286,7 +286,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 self,
                 content: str,
                 source_name: str = "string",
-            ) -> r[str]:
+            ) -> p.Result[str]:
                 """Load LDIF entries from string and return as r."""
                 try:
                     self.entries = list(self.parse_content(content, source_name))
@@ -409,7 +409,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 self,
                 content: str,
                 file_path: Path,
-            ) -> r[m.Ldif.ParseResponse]:
+            ) -> p.Result[m.Ldif.ParseResponse]:
                 """Parse LDIF content using flext-ldif API."""
                 result: r[m.Ldif.ParseResponse] = self._api.parse_ldif(content)
                 if not result.success:

@@ -118,7 +118,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         tap_instance: m.Meltano.DataSourceConfig
         | m.Meltano.TapConfig
         | m.Meltano.TapInstance,
-    ) -> r[t.RecursiveContainerMapping]:
+    ) -> p.Result[t.RecursiveContainerMapping]:
         """Discover available streams.
 
         Discovers standard LDAP streams (users, groups, organizational units, schema)
@@ -168,7 +168,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         return r[t.RecursiveContainerMapping].ok(stream_catalog)
 
     @override
-    def execute(self) -> r[t.RecursiveContainerMapping]:
+    def execute(self) -> p.Result[t.RecursiveContainerMapping]:
         """Execute the tap and return execution state with stream discovery results."""
         discover_result = self.discover_streams(
             m.Meltano.TapConfig.model_validate({
