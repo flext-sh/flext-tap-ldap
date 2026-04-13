@@ -22,6 +22,7 @@ from flext_tap_ldap import (
     FlextTapLdapStreams,
     c,
     m,
+    p,
     r,
     t,
     u,
