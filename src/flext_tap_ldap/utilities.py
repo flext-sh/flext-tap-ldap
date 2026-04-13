@@ -4,15 +4,14 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from flext_core import e, r
 from flext_ldap import FlextLdapUtilities
-from flext_meltano import FlextMeltanoUtilities
-from flext_tap_ldap import FlextTapLdapUtilitiesProcessorMixin, c, t
+from flext_meltano import m
+from flext_tap_ldap import FlextTapLdapUtilitiesProcessorMixin, c, e, p, r, t
 
 
 class FlextTapLdapUtilities(
     FlextTapLdapUtilitiesProcessorMixin,
-    FlextMeltanoUtilities,
+    m,
     FlextLdapUtilities,
 ):
     """Unified LDAP tap utilities class."""
