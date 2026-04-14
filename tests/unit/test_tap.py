@@ -35,8 +35,8 @@ class TestFlextTapLdapTap:
     @pytest.fixture
     def users_stream(
         self,
-        ldap_connection_config: dict[str, object],
-        ldap_record_entries: list[dict[str, object]],
+        ldap_connection_config: dict[str, t.RecursiveContainer],
+        ldap_record_entries: list[dict[str, t.RecursiveContainer]],
         monkeypatch: pytest.MonkeyPatch,
     ) -> FlextTapLdapStreams.UsersStream:
         tap = FlextTapLdapTap()
@@ -46,10 +46,18 @@ class TestFlextTapLdapTap:
         )
 
         class DummyClient:
-            def __init__(self, *args, **kwargs) -> None:
+            def __init__(
+                self,
+                *args: t.RecursiveContainer,
+                **kwargs: t.RecursiveContainer,
+            ) -> None:
                 return None
 
-            def search(self, *_a, **_k) -> list[dict[str, object]]:
+            def search(
+                self,
+                *_a: t.RecursiveContainer,
+                **_k: t.RecursiveContainer,
+            ) -> list[dict[str, t.RecursiveContainer]]:
                 return ldap_record_entries
 
         monkeypatch.setattr(FlextTapLdapClient, "LDAPClient", DummyClient)
