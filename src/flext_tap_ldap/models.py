@@ -243,7 +243,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             def start_execution(self) -> None:
                 """Mark execution as running with current timestamp."""
-                self.tap_status = "running"
+                self.tap_status = c.TapLdap.TapStatus.RUNNING.value
                 self.started_at = datetime.now(UTC)
 
             def complete_execution(
@@ -253,7 +253,11 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 stderr: str | None = None,
             ) -> None:
                 """Mark execution as completed with exit code and output."""
-                self.tap_status = "completed" if exit_code == 0 else "failed"
+                self.tap_status = (
+                    c.TapLdap.TapStatus.COMPLETED.value
+                    if exit_code == 0
+                    else c.TapLdap.TapStatus.FAILED.value
+                )
                 self.completed_at = datetime.now(UTC)
                 self.exit_code = exit_code
                 self.stdout = stdout
@@ -261,7 +265,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             def cancel_execution(self) -> None:
                 """Mark execution as cancelled."""
-                self.tap_status = "cancelled"
+                self.tap_status = c.TapLdap.TapStatus.CANCELLED.value
                 self.completed_at = datetime.now(UTC)
 
             def update_metrics(

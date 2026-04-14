@@ -89,7 +89,9 @@ class FlextTapLdapClient:
             end_time = time.time()
             response_time_ms: float = round((end_time - start_time) * 1000, 2)
             return {
-                "status": "healthy" if connection_ok else "unhealthy",
+                "status": c.HealthStatus.HEALTHY.value
+                if connection_ok
+                else c.HealthStatus.UNHEALTHY.value,
                 "server_uri": self.server_uri,
                 "connection_test": connection_ok,
                 "response_time_ms": response_time_ms,

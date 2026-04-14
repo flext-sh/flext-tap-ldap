@@ -78,6 +78,22 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
 
             DEFAULT_SCOPE: Final[str] = "SUBTREE"
 
+        @unique
+        class TapStatus(StrEnum):
+            """LDAP tap execution status enumeration (single source of truth).
+
+            DRY Pattern:
+                StrEnum is the single source of truth. Use TapStatus.COMPLETED.value
+                or TapStatus.COMPLETED directly - no base strings needed.
+
+            Represents the execution lifecycle states of LDAP tap operations.
+            """
+
+            RUNNING = "running"
+            COMPLETED = "completed"
+            FAILED = "failed"
+            CANCELLED = "cancelled"
+
 
 c = FlextTapLdapConstants
 __all__: list[str] = ["FlextTapLdapConstants", "c"]
