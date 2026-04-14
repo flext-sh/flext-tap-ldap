@@ -12,6 +12,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from flext_tap_ldap import FlextTapLdapClient
+from tests import u
 
 
 class TestLDAPClientCoverageBoost:
@@ -30,28 +31,26 @@ class TestLDAPClientCoverageBoost:
             page_size=1000,
         )
 
-    def test_build_server_uri(self, client: FlextTapLdapClient.LDAPClient) -> None:
-        """Test _build_server_uri method directly."""
-        uri = client._build_server_uri()
-        assert uri == "ldap://test.ldap.com:389"
+    def test_server_uri_property(self, client: FlextTapLdapClient.LDAPClient) -> None:
+        """Server URI is exposed through the public property."""
+        assert client.server_uri == "ldap://test.ldap.com:389"
         ssl_client = FlextTapLdapClient.LDAPClient(
             host="secure.com",
             port=636,
             use_ssl=True,
         )
-        ssl_uri = ssl_client._build_server_uri()
-        assert ssl_uri == "ldaps://secure.com:636"
+        assert ssl_client.server_uri == "ldaps://secure.com:636"
 
     def test_search_method_coverage(
         self,
         client: FlextTapLdapClient.LDAPClient,
     ) -> None:
-        """Test search method delegates to _perform_search."""
-        with patch.object(
-            client,
-            "_perform_search",
-            return_value=[{"test": "data"}],
-        ) as mock_perform:
+        """Search returns normalized public results."""
+        search_result = Mock()
+        search_result.success = True
+        search_result.value = Mock(entries=[{"dn": "uid=test,dc=test,dc=com"}])
+        api_cls = type(client._flext_api)
+        with patch.object(api_cls, "search", return_value=search_result):
             results = client.search(
                 base_dn="dc=test,dc=com",
                 search_filter="(uid=*)",
@@ -59,14 +58,7 @@ class TestLDAPClientCoverageBoost:
                 scope="SUBTREE",
                 size_limit=100,
             )
-            mock_perform.assert_called_once_with(
-                "dc=test,dc=com",
-                "(uid=*)",
-                ["uid", "cn"],
-                "SUBTREE",
-                100,
-            )
-            assert results == [{"test": "data"}]
+        assert results == [{"dn": "uid=test,dc=test,dc=com"}]
 
     def test_health_check_coverage(self, client: FlextTapLdapClient.LDAPClient) -> None:
         """Test health_check method to cover lines 264-270."""
@@ -89,38 +81,45 @@ class TestLDAPClientCoverageBoost:
         mock_get_loop: Mock,
         client: FlextTapLdapClient.LDAPClient,
     ) -> None:
-        """Test oracle support search without event loop."""
+        """Oracle search enriches results when no loop is active."""
         mock_get_loop.side_effect = RuntimeError("no event loop")
         with patch.object(
             client,
-            "_execute_oracle_search_in_new_loop",
-            return_value=iter([{"oracle": "data"}]),
-        ) as mock_exec:
+            "search",
+            return_value=[
+                {
+                    "dn": "uid=test,dc=oracle,dc=com",
+                    "attributes": {"orclPassword": ["secret"]},
+                },
+            ],
+        ):
             results = client.search_with_oracle_support(
                 base_dn="dc=oracle,dc=com",
                 search_filter="(uid=test)",
-                attributes=["uid", "orclPassword"],
+                attributes=["uid"],
                 oracle_oid_mode=True,
             )
-            mock_exec.assert_called_once()
-            assert list(results) == [{"oracle": "data"}]
+        assert isinstance(results[0].get("attributes"), dict)
+        oracle_attributes = results[0].get("attributes")
+        assert isinstance(oracle_attributes, dict)
+        assert "userPassword" in oracle_attributes
 
     def test_execute_oracle_search_in_new_loop_comprehensive(
         self,
         client: FlextTapLdapClient.LDAPClient,
     ) -> None:
-        """Test Oracle search execution to cover lines 350-361."""
+        """Oracle helper loop delegates to canonical utility behavior."""
         with (
             patch.object(
                 client,
                 "search",
-                return_value=[{"test": "entry"}],
+                return_value=[
+                    {
+                        "dn": "uid=test,dc=oracle,dc=com",
+                        "attributes": {"orclPassword": ["secret"]},
+                    },
+                ],
             ) as mock_search,
-            patch.object(
-                client,
-                "_process_oracle_search_results",
-                return_value=[{"processed": "entry"}],
-            ) as mock_process,
         ):
             result = client._execute_oracle_search_in_new_loop(
                 base_dn="dc=oracle,dc=com",
@@ -129,12 +128,16 @@ class TestLDAPClientCoverageBoost:
                 oracle_oid_mode=True,
             )
             mock_search.assert_called_once_with("dc=oracle,dc=com", "(uid=*)", ["uid"])
-            mock_process.assert_called_once_with(
-                [{"test": "entry"}],
+            result_list = list(result)
+            assert result_list == u.TapLdap.ClientSupport.process_oracle_search_results(
+                [
+                    {
+                        "dn": "uid=test,dc=oracle,dc=com",
+                        "attributes": {"orclPassword": ["secret"]},
+                    },
+                ],
                 oracle_oid_mode=True,
             )
-            result_list = list(result)
-            assert result_list == [{"processed": "entry"}]
 
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_search_with_oracle_support_with_loop(

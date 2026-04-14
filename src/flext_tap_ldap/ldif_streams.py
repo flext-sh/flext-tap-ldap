@@ -177,7 +177,9 @@ class FlextTapLdapLdifStreams:
             self.logger.info("Processing LDIF file: %s", ldif_file)
             try:
                 content = Path(ldif_file).read_text(encoding="utf-8")
-                result = self._ldif_api.parse_ldif(content)
+                result: p.Result[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
+                    content
+                )
                 if result.success and result.value.entries:
                     for entry in result.value.entries:
                         yield self._convert_entry_to_record(entry)
@@ -324,7 +326,9 @@ class FlextTapLdapLdifStreams:
             self.logger.info("Analyzing LDIF file: %s", ldif_file)
             try:
                 content = Path(ldif_file).read_text(encoding="utf-8")
-                result = self._ldif_api.parse_ldif(content)
+                result: p.Result[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
+                    content
+                )
                 if result.success and result.value.entries:
                     entry_types: t.MutableIntMapping = {}
                     object_classes: t.MutableIntMapping = {}

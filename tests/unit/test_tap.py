@@ -46,10 +46,10 @@ class TestFlextTapLdapTap:
         )
 
         class DummyClient:
-            def __init__(self, *args: object, **kwargs: object) -> None:
+            def __init__(self, *args, **kwargs) -> None:
                 return None
 
-            def search(self, *_a: object, **_k: object) -> list[dict[str, object]]:
+            def search(self, *_a, **_k) -> list[dict[str, object]]:
                 return ldap_record_entries
 
         monkeypatch.setattr(FlextTapLdapClient, "LDAPClient", DummyClient)

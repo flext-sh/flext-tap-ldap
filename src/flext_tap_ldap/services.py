@@ -35,20 +35,6 @@ class FlextTapLdapServices:
 
     _logger: ClassVar = u.fetch_logger(__name__)
 
-    @staticmethod
-    def _as_map(value: t.RecursiveContainer) -> t.ContainerValueMapping | None:
-        try:
-            return t.CONFIG_MAP_ADAPTER.validate_python(value)
-        except c.ValidationError:
-            return None
-
-    @staticmethod
-    def _as_str(value: t.RecursiveContainer) -> str | None:
-        try:
-            return t.STRICT_STR_ADAPTER.validate_python(value)
-        except c.ValidationError:
-            return None
-
     EXPECTED_DATA_COUNT = 3
 
     class LDAPConnectionService:
@@ -300,9 +286,13 @@ class FlextTapLdapServices:
         ) -> p.Result[m.TapLdap.TapExecution]:
             """Create tap execution."""
             try:
-                validated_config = FlextTapLdapServices._as_map(settings or {}) or {}
-                validated_catalog = FlextTapLdapServices._as_map(catalog or {}) or {}
-                validated_state = FlextTapLdapServices._as_map(state or {}) or {}
+                validated_config = (
+                    u.TapLdap.ValueConversion.to_map(settings or {}) or {}
+                )
+                validated_catalog = (
+                    u.TapLdap.ValueConversion.to_map(catalog or {}) or {}
+                )
+                validated_state = u.TapLdap.ValueConversion.to_map(state or {}) or {}
                 execution = m.TapLdap.TapExecution(
                     id=uuid4().hex,
                     execution_id=f"exec_{uuid4().hex[:8]}",
@@ -414,7 +404,7 @@ class FlextTapLdapServices:
         ) -> p.Result[t.RecursiveContainerMapping]:
             """Get LDIF file statistics using flext-ldif library."""
             try:
-                validation_result: r[t.RecursiveContainerMapping] = (
+                validation_result: p.Result[t.RecursiveContainerMapping] = (
                     self.validate_ldif_file(
                         file_path,
                     )
@@ -422,7 +412,7 @@ class FlextTapLdapServices:
                 if not validation_result.success:
                     return validation_result
                 validation_data: t.RecursiveContainerMapping = (
-                    FlextTapLdapServices._as_map(validation_result.value) or {}
+                    u.TapLdap.ValueConversion.to_map(validation_result.value) or {}
                 )
                 file_stats: t.RecursiveContainerMapping = {
                     "file_path": file_path,
@@ -448,7 +438,7 @@ class FlextTapLdapServices:
             """Process LDIF file using flext-ldif library."""
             try:
                 FlextTapLdapServices._logger.info("Processing LDIF file: %s", file_path)
-                result: r[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
+                result: p.Result[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
                     Path(file_path),
                 )
                 if not result.success:
@@ -465,7 +455,7 @@ class FlextTapLdapServices:
                 normalized: Sequence[t.RecursiveContainerMapping] = [
                     {
                         "dn": entry.dn.value if entry.dn is not None else "",
-                        "attributes": FlextTapLdapServices._as_map(
+                        "attributes": u.TapLdap.ValueConversion.to_map(
                             entry.attributes.attributes
                             if entry.attributes is not None
                             else {}
@@ -491,7 +481,7 @@ class FlextTapLdapServices:
             """Validate LDIF file using flext-ldif library."""
             try:
                 FlextTapLdapServices._logger.info("Validating LDIF file: %s", file_path)
-                result: r[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
+                result: p.Result[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
                     Path(file_path),
                 )
                 if not result.success:
@@ -589,8 +579,8 @@ class FlextTapLdapServices:
             base_dn=base_dn,
             port=port,
             use_ssl=bool(kwargs.get("use_ssl")),
-            bind_dn=FlextTapLdapServices._as_str(kwargs.get("bind_dn")),
-            bind_password=FlextTapLdapServices._as_str(kwargs.get("bind_password")),
+            bind_dn=u.TapLdap.ValueConversion.to_str(kwargs.get("bind_dn")),
+            bind_password=u.TapLdap.ValueConversion.to_str(kwargs.get("bind_password")),
             timeout_seconds=c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
             page_size=c.TapLdap.DEFAULT_PAGE_SIZE,
             max_retries=3,

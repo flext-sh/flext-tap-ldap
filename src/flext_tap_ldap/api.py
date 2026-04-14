@@ -9,10 +9,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Never, override
+from typing import TYPE_CHECKING, Never, override
 
 from flext_meltano import FlextMeltanoTapServiceBase
-from flext_tap_ldap import t
+
+if TYPE_CHECKING:
+    from flext_tap_ldap import t
 
 
 class FlextTapLdapService(FlextMeltanoTapServiceBase):

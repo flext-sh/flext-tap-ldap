@@ -9,13 +9,12 @@ from __future__ import annotations
 
 import contextlib
 from collections.abc import Sequence
-from typing import cast
 from unittest.mock import Mock, patch
 
 import pytest
 
 from flext_tap_ldap import FlextTapLdapClient
-from tests import t
+from tests import t, u
 
 
 class TestLDAPClientQuick:
@@ -50,100 +49,91 @@ class TestLDAPClientQuick:
         )
         assert ldaps_client.server_uri == "ldaps://secure.com:636"
 
-    def test_scope_conversions(self, client: FlextTapLdapClient.LDAPClient) -> None:
-        """Test all scope conversions."""
-        assert client._convert_scope_to_enum("BASE") == "BASE"
-        assert client._convert_scope_to_enum("ONELEVEL") == "ONELEVEL"
-        assert client._convert_scope_to_enum("SUBTREE") == "SUBTREE"
-        assert client._convert_scope_to_enum("base") == "BASE"
-        assert client._convert_scope_to_enum("INVALID") == "SUBTREE"
+    def test_scope_conversions(self) -> None:
+        """Canonical scope normalization is exposed by the utility namespace."""
+        assert u.TapLdap.ClientSupport.normalize_scope("BASE") == "BASE"
+        assert u.TapLdap.ClientSupport.normalize_scope("ONELEVEL") == "ONELEVEL"
+        assert u.TapLdap.ClientSupport.normalize_scope("SUBTREE") == "SUBTREE"
+        assert u.TapLdap.ClientSupport.normalize_scope("base") == "BASE"
+        assert u.TapLdap.ClientSupport.normalize_scope("INVALID") == "SUBTREE"
 
     def test_entry_conversion_scenarios(
         self,
-        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
-        """Test entry conversion with different scenarios."""
-        # Test with a Mapping (dict) entry
+        """Entry normalization uses the shared client support utility."""
         mail_values: t.StrSequence = ["test@example.com"]
         dict_entry: t.RecursiveContainerMapping = {
             "dn": "uid=dict,dc=example,dc=com",
             "attributes": {"mail": mail_values},
         }
-        result = client._convert_entry_to_dict(dict_entry)
+        result = u.TapLdap.ClientSupport.to_entry_mapping(dict_entry)
         assert result.success
         assert result.value["dn"] == "uid=dict,dc=example,dc=com"
-        # Test with None
-        none_result = client._convert_entry_to_dict(None)
+        none_result = u.TapLdap.ClientSupport.to_entry_mapping(None)
         assert none_result.failure
-        # Test with a dict that has string values
         simple_entry: t.RecursiveContainerMapping = {
             "dn": "uid=test,dc=example,dc=com",
             "uid": "test",
             "cn": ["Test", "T. User"],
         }
-        result = client._convert_entry_to_dict(simple_entry)
+        result = u.TapLdap.ClientSupport.to_entry_mapping(simple_entry)
         assert result.success
         assert result.value["dn"] == "uid=test,dc=example,dc=com"
         assert result.value["uid"] == "test"
         assert result.value["cn"] == ["Test", "T. User"]
 
-    def test_search_result_processing(
-        self,
-        client: FlextTapLdapClient.LDAPClient,
-    ) -> None:
-        """Test search result processing with different scenarios."""
-        mock_search_result = Mock()
-        mock_search_result.entries = [
+    def test_search_result_processing(self) -> None:
+        """Search result normalization respects size limits and empty inputs."""
+        search_entries: Sequence[t.RecursiveContainerMapping] = [
             {"dn": "uid=user1,dc=test,dc=com", "uid": ["user1"]},
             {"dn": "uid=user2,dc=test,dc=com", "uid": ["user2"]},
         ]
-        mock_result = Mock()
-        mock_result.success = True
-        mock_result.value = mock_search_result
-        results = client._process_search_results(mock_result, size_limit=0)
+        results = u.TapLdap.ClientSupport.process_search_results(
+            search_entries,
+            size_limit=0,
+        )
         assert len(results) == 2
         assert results[0]["dn"] == "uid=user1,dc=test,dc=com"
-        results = client._process_search_results(mock_result, size_limit=1)
+        results = u.TapLdap.ClientSupport.process_search_results(
+            search_entries,
+            size_limit=1,
+        )
         assert len(results) == 1
-        # Test with failure
-        mock_result.success = False
-        results = client._process_search_results(mock_result, size_limit=0)
-        assert not results
-        # Test with no value
-        mock_result.success = True
-        mock_result.value = None
-        results = client._process_search_results(mock_result, size_limit=0)
+        results = u.TapLdap.ClientSupport.process_search_results([], size_limit=0)
         assert not results
 
     def test_search_delegates_to_perform_search(
         self,
         client: FlextTapLdapClient.LDAPClient,
     ) -> None:
-        """Test search delegates to _perform_search."""
-        with patch.object(
-            client,
-            "_perform_search",
-            return_value=[{"test": "data"}],
-        ) as mock_perform:
+        """Search returns normalized entries through the public method."""
+        search_result = Mock()
+        search_result.success = True
+        search_result.value = Mock(entries=[{"dn": "uid=test,dc=test,dc=com"}])
+        api_cls = type(client._flext_api)
+        with patch.object(api_cls, "search", return_value=search_result):
             results = client.search("dc=test,dc=com")
-            mock_perform.assert_called_once()
-            assert results == [{"test": "data"}]
+        assert results == [{"dn": "uid=test,dc=test,dc=com"}]
 
     def test_search_with_all_parameters(
         self,
         client: FlextTapLdapClient.LDAPClient,
     ) -> None:
-        """Test search passes all parameters to _perform_search."""
-        with patch.object(client, "_perform_search", return_value=[]) as mock_perform:
+        """Search forwards explicit parameters into the normalized query."""
+        search_result = Mock()
+        search_result.success = True
+        search_result.value = Mock(entries=[])
+        api_cls = type(client._flext_api)
+        with patch.object(api_cls, "search", return_value=search_result) as mock_search:
             results = client.search("dc=test,dc=com", "(uid=*)", ["uid"], "BASE", 10)
-            mock_perform.assert_called_once_with(
-                "dc=test,dc=com",
-                "(uid=*)",
-                ["uid"],
-                "BASE",
-                10,
-            )
-            assert results == []
+        assert results == []
+        assert mock_search.call_args is not None
+        search_options = mock_search.call_args.args[0]
+        assert search_options.base_dn == "dc=test,dc=com"
+        assert search_options.filter_str == "(uid=*)"
+        assert search_options.attributes == ["uid"]
+        assert search_options.scope == "BASE"
+        assert search_options.size_limit == 10
 
     def test_test_connection_success(
         self,
@@ -185,9 +175,8 @@ class TestLDAPClientQuick:
 
     def test_oracle_entry_processing(
         self,
-        client: FlextTapLdapClient.LDAPClient,
     ) -> None:
-        """Test Oracle entry processing with all scenarios."""
+        """Oracle-specific entry enrichment lives in the utility namespace."""
         uid_values: t.StrSequence = ["test"]
         oracle_password_values: t.StrSequence = ["hashed_password"]
         object_classes: t.StrSequence = ["inetOrgPerson"]
@@ -199,15 +188,12 @@ class TestLDAPClientQuick:
                 "objectClass": object_classes,
             },
         }
-        result = client._process_oracle_entry(entry)
+        result = u.TapLdap.ClientSupport.normalize_oracle_entry(entry)
         attributes_raw = result.get("attributes")
         assert isinstance(attributes_raw, dict)
-        attributes: t.RecursiveContainerMapping = cast(
-            "t.RecursiveContainerMapping", attributes_raw
-        )
+        attributes = attributes_raw
         assert "userPassword" in attributes
         user_password: t.RecursiveContainer = attributes.get("userPassword")
-        assert isinstance(user_password, list)
         assert isinstance(user_password, list)
         assert "hashed_password" in user_password
 
@@ -217,12 +203,11 @@ class TestLDAPClientQuick:
             "dn": "ou=test,dc=oracle,dc=com",
             "attributes": {"ou": ou_values, "objectClass": container_classes},
         }
-        result = client._process_oracle_entry(entry_with_container)
+        result = u.TapLdap.ClientSupport.normalize_oracle_entry(entry_with_container)
         attrs_raw2 = result.get("attributes")
         assert isinstance(attrs_raw2, dict)
-        attributes = cast("t.RecursiveContainerMapping", attrs_raw2)
+        attributes = attrs_raw2
         object_class: t.RecursiveContainer = attributes.get("objectClass")
-        assert isinstance(object_class, list)
         assert isinstance(object_class, list)
         assert "organizationalUnit" in object_class
 
@@ -230,12 +215,11 @@ class TestLDAPClientQuick:
             "dn": "ou=test,dc=oracle,dc=com",
             "attributes": {"objectClass": "orclContainer"},
         }
-        result = client._process_oracle_entry(entry_string_oc)
+        result = u.TapLdap.ClientSupport.normalize_oracle_entry(entry_string_oc)
         attrs_raw3 = result.get("attributes")
         assert isinstance(attrs_raw3, dict)
-        attributes = cast("t.RecursiveContainerMapping", attrs_raw3)
+        attributes = attrs_raw3
         obj_classes: t.RecursiveContainer = attributes.get("objectClass")
-        assert isinstance(obj_classes, list)
         assert isinstance(obj_classes, list)
         assert "organizationalUnit" in obj_classes
 
@@ -243,40 +227,33 @@ class TestLDAPClientQuick:
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": "not_a_dict",
         }
-        result = client._process_oracle_entry(entry_bad_attrs)
+        result = u.TapLdap.ClientSupport.normalize_oracle_entry(entry_bad_attrs)
         assert result == entry_bad_attrs
 
-    def test_oracle_attribute_extension(
-        self,
-        client: FlextTapLdapClient.LDAPClient,
-    ) -> None:
-        """Test Oracle attribute extension."""
+    def test_oracle_attribute_extension(self) -> None:
+        """Oracle attribute enrichment appends only the canonical extras."""
         base_attrs = ["uid", "cn"]
-        extended = client._extend_attributes_with_oracle_support(
+        extended = u.TapLdap.ClientSupport.extend_attributes_with_oracle_support(
             base_attrs,
             oracle_oid_mode=True,
         )
-        assert extended is not None
         assert extended is not None
         assert "uid" in extended
         assert "cn" in extended
         assert "orclPassword" in extended
         assert "userPassword" in extended
-        result = client._extend_attributes_with_oracle_support(
+        result = u.TapLdap.ClientSupport.extend_attributes_with_oracle_support(
             base_attrs,
             oracle_oid_mode=False,
         )
         assert result == base_attrs
-        result = client._extend_attributes_with_oracle_support(
+        result = u.TapLdap.ClientSupport.extend_attributes_with_oracle_support(
             None,
             oracle_oid_mode=True,
         )
         assert result is None
 
-    def test_process_search_results(
-        self,
-        client: FlextTapLdapClient.LDAPClient,
-    ) -> None:
+    def test_process_search_results(self) -> None:
         """Test Oracle search result processing."""
         first_passwords: t.StrSequence = ["pass1"]
         second_uids: t.StrSequence = ["test2"]
@@ -287,16 +264,15 @@ class TestLDAPClientQuick:
             },
             {"dn": "uid=test2,dc=oracle,dc=com", "attributes": {"uid": second_uids}},
         ]
-        results = client._process_oracle_search_results(
+        results = u.TapLdap.ClientSupport.process_oracle_search_results(
             search_results,
             oracle_oid_mode=True,
         )
         assert len(results) == 2
         attributes = results[0].get("attributes")
         assert isinstance(attributes, dict)
-        assert isinstance(attributes, dict)
         assert "userPassword" in attributes
-        results = client._process_oracle_search_results(
+        results = u.TapLdap.ClientSupport.process_oracle_search_results(
             search_results,
             oracle_oid_mode=False,
         )

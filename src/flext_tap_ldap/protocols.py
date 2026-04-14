@@ -17,8 +17,8 @@ from collections.abc import Sequence
 from typing import Protocol, runtime_checkable
 
 from flext_ldap import FlextLdapProtocols
-from flext_meltano import FlextMeltanoProtocols
-from flext_tap_ldap import m, t
+from flext_meltano import FlextMeltanoProtocols, m
+from flext_tap_ldap import t
 
 
 class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):

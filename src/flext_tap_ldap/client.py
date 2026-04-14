@@ -11,10 +11,10 @@ from __future__ import annotations
 
 import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
-from collections.abc import Mapping, MutableSequence, Sequence
+from collections.abc import Sequence
 
-from flext_ldap import FlextLdap, ldap
-from flext_tap_ldap import c, m, p, r, t, u
+from flext_ldap import FlextLdap
+from flext_tap_ldap import c, m, t, u
 
 logger = u.fetch_logger(__name__)
 
@@ -76,8 +76,11 @@ class FlextTapLdapClient:
         @property
         def server_uri(self) -> str:
             """Get server URI for testing convenience."""
-            protocol = "ldaps" if self.use_ssl else "ldap"
-            return f"{protocol}://{self.host}:{self.port}"
+            return u.TapLdap.ClientSupport.build_server_uri(
+                self.host,
+                self.port,
+                use_ssl=self.use_ssl,
+            )
 
         def health_check(self) -> t.ScalarMapping:
             """Perform health check for testing convenience."""
@@ -106,7 +109,7 @@ class FlextTapLdapClient:
 
             Refactored for lower complexity using Single Responsibility Principle.
             """
-            ldap_scope = self._convert_scope_to_enum(scope)
+            ldap_scope = u.TapLdap.ClientSupport.normalize_scope(scope)
             return self._perform_search(
                 base_dn,
                 search_filter,
@@ -128,14 +131,18 @@ class FlextTapLdapClient:
             Refactored using Single Responsibility Principle to reduce complexity.
             Each step now has its own dedicated method.
             """
-            extended_attributes = self._extend_attributes_with_oracle_support(
-                attributes,
-                oracle_oid_mode=oracle_oid_mode,
+            extended_attributes = (
+                u.TapLdap.ClientSupport.extend_attributes_with_oracle_support(
+                    attributes,
+                    oracle_oid_mode=oracle_oid_mode,
+                )
             )
             try:
                 get_running_loop()
-                msg = "Oracle LDAP search within an existing event loop is not implemented natively."
-                raise NotImplementedError(msg)
+                logger.warning(
+                    "Oracle LDAP search inside an active event loop is not supported",
+                )
+                return []
             except RuntimeError:
                 return self._execute_oracle_search_in_new_loop(
                     base_dn=base_dn,
@@ -155,80 +162,12 @@ class FlextTapLdapClient:
                     size_limit=1,
                     time_limit=5,
                 )
-                result: r[m.Ldap.SearchResult] = self._flext_api.search(
-                    test_search_options,
-                )
+                result = self._flext_api.search(test_search_options)
                 return result.success
             except (RuntimeError, ValueError, TypeError, c.ValidationError) as e:
                 err_msg = str(e)
                 logger.warning("LDAP connection test failed: %s", err_msg)
                 return False
-
-        def _build_server_uri(self) -> str:
-            """Build server URI from connection parameters.
-
-            Single Responsibility: Handle only URI construction.
-            """
-            protocol = "ldaps" if self.use_ssl else "ldap"
-            return f"{protocol}://{self.host}:{self.port}"
-
-        def _convert_entry_to_dict(
-            self,
-            entry_data: t.RuntimeData | t.RecursiveContainerMapping | None,
-        ) -> p.Result[t.MutableRecursiveContainerMapping]:
-            """Convert FlextLdapModels.Entry to dict format for testing.
-
-            Single Responsibility: Handle only entry format conversion.
-            """
-            if entry_data is None:
-                return r[t.MutableRecursiveContainerMapping].fail(
-                    "Cannot convert None entry data",
-                )
-            if isinstance(entry_data, m.BaseModel):
-                dn_value: str = str(getattr(entry_data, "dn", ""))
-                model_data: t.MutableRecursiveContainerMapping = dict(
-                    entry_data.model_dump()
-                )
-                attrs_val: t.RecursiveContainer = model_data.get("attributes", {})
-                attrs_dict: t.MutableRecursiveContainerMapping
-                if isinstance(attrs_val, dict):
-                    attrs_dict = attrs_val
-                else:
-                    return r[t.MutableRecursiveContainerMapping].ok({"dn": dn_value})
-                entry_dict: t.MutableRecursiveContainerMapping = {"dn": dn_value}
-                for key_str, val in attrs_dict.items():
-                    typed_list: t.MutableRecursiveContainerList = (
-                        val if isinstance(val, list) else []
-                    )
-                    if isinstance(val, list) and len(typed_list) == 1:
-                        entry_dict[key_str] = typed_list[0]
-                    else:
-                        entry_dict[key_str] = val
-                return r[t.MutableRecursiveContainerMapping].ok(entry_dict)
-            if isinstance(entry_data, Mapping):
-                result: t.MutableRecursiveContainerMapping = {}
-                for key, value in entry_data.items():
-                    if isinstance(
-                        value,
-                        (str, int, float, bool, list, dict, type(None)),
-                    ):
-                        result[str(key)] = value
-                return r[t.MutableRecursiveContainerMapping].ok(result)
-            return r[t.MutableRecursiveContainerMapping].fail(
-                f"Unsupported entry data type: {type(entry_data).__name__}",
-            )
-
-        def _convert_scope_to_enum(self, scope: str) -> str:
-            """Convert scope string to flext-ldap scope string.
-
-            Single Responsibility: Handle only scope conversion logic.
-            """
-            scope_map: t.StrMapping = {
-                "SUBTREE": "SUBTREE",
-                "ONELEVEL": "ONELEVEL",
-                "BASE": "BASE",
-            }
-            return scope_map.get(scope.upper(), "SUBTREE")
 
         def _create_config_from_kwargs(
             self,
@@ -280,32 +219,13 @@ class FlextTapLdapClient:
                     search_filter,
                     attributes,
                 )
-                return self._process_oracle_search_results(
+                return u.TapLdap.ClientSupport.process_oracle_search_results(
                     search_result,
                     oracle_oid_mode=oracle_oid_mode,
                 )
             finally:
                 loop.close()
                 set_event_loop(None)
-
-        def _extend_attributes_with_oracle_support(
-            self,
-            attributes: t.StrSequence | None,
-            *,
-            oracle_oid_mode: bool,
-        ) -> MutableSequence[str] | None:
-            """Extend attributes list with Oracle-specific attributes.
-
-            Single Responsibility: Handle only Oracle attribute extension logic.
-            """
-            if not oracle_oid_mode or not attributes:
-                return list(attributes) if attributes else None
-            oracle_attrs = ["orclPassword", "orclPasswordAttribute", "userPassword"]
-            extended_attributes = list(attributes)
-            for oracle_attr in oracle_attrs:
-                if oracle_attr not in extended_attributes:
-                    extended_attributes.append(oracle_attr)
-            return extended_attributes
 
         def _initialize_flext_api(
             self,
@@ -320,17 +240,17 @@ class FlextTapLdapClient:
                 bind_password=client_config.password,
                 timeout=int(client_config.timeout),
             )
-            self._flext_api = ldap
             self._config = flext_connection_config
+            self._flext_api = FlextLdap()
             self.host = client_config.host
-            self.port = client_config.port
-            self.bind_dn = client_config.bind_dn
-            self.password = client_config.password
-            self.use_ssl = client_config.use_ssl
-            self.timeout = client_config.timeout
-            self.page_size = client_config.page_size
+            self.port = int(client_config.port)
             self._bind_dn = client_config.bind_dn
+            self.bind_dn = client_config.bind_dn
             self._password = client_config.password
+            self.password = client_config.password
+            self.use_ssl = bool(client_config.use_ssl)
+            self.timeout = int(client_config.timeout)
+            self.page_size = int(client_config.page_size)
 
         def _perform_search(
             self,
@@ -339,119 +259,34 @@ class FlextTapLdapClient:
             attributes: t.StrSequence | None,
             ldap_scope: str,
             size_limit: int,
-        ) -> MutableSequence[t.MutableRecursiveContainerMapping]:
+        ) -> Sequence[t.RecursiveContainerMapping]:
             """Perform actual LDAP search.
 
             Single Responsibility: Handle only search execution.
             """
-            self._build_server_uri()
             try:
-                search_options = m.Ldap.SearchOptions(
-                    base_dn=base_dn,
-                    filter_str=search_filter,
+                normalized_config = m.Ldap.NormalizedConfig(
                     scope=ldap_scope,
-                    attributes=attributes,
+                    filter_str=search_filter,
                     size_limit=size_limit,
                     time_limit=c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
+                    attributes=attributes,
                 )
-                result: r[m.Ldap.SearchResult] = self._flext_api.search(search_options)
-                return self._process_search_results(result, size_limit)
+                search_options = m.Ldap.SearchOptions.normalized(
+                    base_dn,
+                    settings=normalized_config,
+                )
+                result = self._flext_api.search(search_options)
+                if not (result.success and result.value):
+                    return []
+                return u.TapLdap.ClientSupport.process_search_results(
+                    result.value.entries,
+                    size_limit=size_limit,
+                )
             except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                 err_msg = f"LDAP search failed: {e}"
                 logger.exception("LDAP search failed: %s", err_msg)
                 raise RuntimeError(err_msg) from e
-
-        def _process_oracle_entry(
-            self,
-            entry: t.MutableRecursiveContainerMapping,
-        ) -> t.MutableRecursiveContainerMapping:
-            """Process Oracle-specific LDAP entries for testing convenience."""
-            raw_attrs: t.RecursiveContainer = entry.get("attributes", {})
-            attributes: t.MutableRecursiveContainerMapping = {}
-            if isinstance(raw_attrs, dict):
-                attributes.update(raw_attrs)
-            else:
-                return entry
-            if "orclPassword" in attributes:
-                pwd_val = attributes.get("orclPassword")
-                if pwd_val is not None:
-                    attributes["userPassword"] = pwd_val
-            if "objectClass" in attributes:
-                raw_obj_classes = attributes["objectClass"]
-                obj_classes: MutableSequence[str] = []
-                if isinstance(raw_obj_classes, str):
-                    obj_classes = [raw_obj_classes]
-                elif isinstance(raw_obj_classes, list):
-                    obj_classes = [str(item) for item in raw_obj_classes]
-                if (
-                    "orclContainer" in obj_classes
-                    and "organizationalUnit" not in obj_classes
-                ):
-                    obj_classes.append("organizationalUnit")
-                    attributes["objectClass"] = obj_classes
-            entry["attributes"] = attributes
-            return entry
-
-        def _process_search_results(
-            self,
-            result: r[m.Ldap.SearchResult],
-            size_limit: int,
-        ) -> MutableSequence[t.MutableRecursiveContainerMapping]:
-            """Process LDAP search results with size limiting.
-
-            Single Responsibility: Handle only result processing logic.
-            """
-            entries: MutableSequence[t.MutableRecursiveContainerMapping] = []
-            if not (result.success and result.value):
-                return entries
-            search_result = result.value
-            data_entries = search_result.entries
-            for entries_returned, entry_data in enumerate(data_entries):
-                if size_limit > 0 and entries_returned >= size_limit:
-                    break
-                convert_result = self._convert_entry_to_dict(entry_data)
-                if convert_result.failure:
-                    logger.warning(
-                        "Skipping entry %d: %s",
-                        entries_returned,
-                        convert_result.error or "conversion failed",
-                    )
-                    continue
-                entries.append(convert_result.value)
-            return entries
-
-        def _process_oracle_search_results(
-            self,
-            search_result: Sequence[m.Ldif.Entry | t.RecursiveContainerMapping],
-            *,
-            oracle_oid_mode: bool,
-        ) -> MutableSequence[t.MutableRecursiveContainerMapping]:
-            """Process search results with Oracle OID support.
-
-            Single Responsibility: Handle only result processing logic.
-            """
-            results: MutableSequence[t.MutableRecursiveContainerMapping] = []
-            for idx, entry in enumerate(search_result):
-                if isinstance(entry, Mapping):
-                    entry_dict: t.MutableRecursiveContainerMapping = {
-                        str(key): value for key, value in entry.items()
-                    }
-                else:
-                    convert_result = self._convert_entry_to_dict(entry)
-                    if convert_result.failure:
-                        logger.warning(
-                            "Skipping Oracle entry %d: %s",
-                            idx,
-                            convert_result.error or "conversion failed",
-                        )
-                        continue
-                    entry_dict = convert_result.value
-                if oracle_oid_mode:
-                    processed_entry = self._process_oracle_entry(entry_dict)
-                    results.append(processed_entry)
-                else:
-                    results.append(entry_dict)
-            return results
 
 
 __all__: t.StrSequence = [

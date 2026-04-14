@@ -11,14 +11,17 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Annotated, Self
+from typing import TYPE_CHECKING, Annotated, Self
 from uuid import uuid4
 
 from pydantic import BaseModel, Field, model_validator
 
 from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
-from flext_tap_ldap import c, t
+from flext_tap_ldap import c
+
+if TYPE_CHECKING:
+    from flext_tap_ldap import t
 
 
 class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):

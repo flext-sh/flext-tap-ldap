@@ -83,7 +83,8 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 for attr_name, values in self.attributes.items():
                     if attr_name.lower() == name.lower():
                         return values
-                return []
+                empty_values: MutableSequence[str] = []
+                return empty_values
 
             def has_object_class(self, object_class: str) -> bool:
                 """Check if entry has specific object class."""
@@ -153,7 +154,9 @@ class FlextTapLdapUtilitiesProcessorMixin:
                         for value in attr_values:
                             ldif_content += f"{attr_name}: {value}\n"
                     ldif_content += "\n"
-                    result: r[m.Ldif.ParseResponse] = api.parse_ldif(ldif_content)
+                    result: p.Result[m.Ldif.ParseResponse] = api.parse_ldif(
+                        ldif_content
+                    )
                     if result.success and result.value.entries:
                         try:
                             parsed_entry = m.Ldif.Entry.model_validate(
@@ -308,7 +311,9 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     source_name,
                 )
                 try:
-                    result: r[m.Ldif.ParseResponse] = self._api.parse_ldif(content)
+                    result: p.Result[m.Ldif.ParseResponse] = self._api.parse_ldif(
+                        content
+                    )
                     if not result.success:
                         error_msg = f"Failed to parse LDIF content from {source_name}: {result.error}"
                         if self.ignore_errors:
@@ -411,7 +416,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 file_path: Path,
             ) -> p.Result[m.Ldif.ParseResponse]:
                 """Parse LDIF content using flext-ldif API."""
-                result: r[m.Ldif.ParseResponse] = self._api.parse_ldif(content)
+                result: p.Result[m.Ldif.ParseResponse] = self._api.parse_ldif(content)
                 if not result.success:
                     error_msg = f"Failed to parse LDIF file {file_path}: {result.error}"
                     if self.ignore_errors:
@@ -455,7 +460,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             def _yield_entries_from_result(
                 self,
-                result: r[m.Ldif.ParseResponse],
+                result: p.Result[m.Ldif.ParseResponse],
             ) -> Iterator[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
                 """Yield testing convenience entries from parse result."""
                 if result.value.entries:
