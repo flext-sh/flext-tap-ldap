@@ -18,7 +18,7 @@ import pytest
 from click.core import BaseCommand
 from click.testing import CliRunner
 
-from flext_tap_ldap.tap import CLI_COMMAND
+from flext_tap_ldap import CLI_COMMAND
 from tests import t, u
 
 
