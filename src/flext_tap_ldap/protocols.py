@@ -72,7 +72,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 self,
                 base_dn: str,
             ) -> FlextMeltanoProtocols.Result[t.StrSequence]:
-                """Discover t.RecursiveContainer classes in LDAP directory."""
+                """Discover object classes in LDAP directory."""
                 ...
 
             def fetch_directory_metadata(

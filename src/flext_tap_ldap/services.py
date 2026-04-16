@@ -51,7 +51,7 @@ class FlextTapLdapServices:
             self,
             params: m.TapLdap.LdapConnectionParams,
         ) -> p.Result[m.TapLdap.LdapConnection]:
-            """Create LDAP connection using parameter t.RecursiveContainer pattern."""
+            """Create LDAP connection using parameter object pattern."""
             try:
                 connection = m.TapLdap.LdapConnection(
                     id=uuid4().hex,
@@ -143,7 +143,7 @@ class FlextTapLdapServices:
             self,
             params: m.TapLdap.StreamCreationParams,
         ) -> p.Result[m.TapLdap.LdapStream]:
-            """Create LDAP stream using parameter t.RecursiveContainer pattern."""
+            """Create LDAP stream using parameter object pattern."""
             try:
                 tap_stream_id = params.tap_stream_id
                 if not tap_stream_id:

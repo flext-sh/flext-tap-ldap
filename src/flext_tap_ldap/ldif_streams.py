@@ -223,7 +223,7 @@ class FlextTapLdapLdifStreams:
                     },
                     "object_classes": {
                         "type": "object",
-                        "description": "Count by t.RecursiveContainer class",
+                        "description": "Count by object class",
                     },
                 },
             }

@@ -41,6 +41,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "__version__",
                 "__version_info__",
             ),
+            "._utilities._processor": ("FlextTapLdapUtilitiesProcessorMixin",),
             ".api": (
                 "FlextTapLdapService",
                 "tap_ldap",

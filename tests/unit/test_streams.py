@@ -356,7 +356,7 @@ class TestSchemaStream:
 
 
 class TestCustomStreamParams:
-    """Test CustomStreamParams parameter t.RecursiveContainer."""
+    """Test CustomStreamParams parameter object."""
 
     def test_custom_stream_params_creation(self) -> None:
         """Test method."""
