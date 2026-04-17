@@ -14,18 +14,16 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Annotated, Self
 from uuid import uuid4
 
-from pydantic import model_validator
-
-from flext_ldap import FlextLdapModels
-from flext_meltano import FlextMeltanoModels
-from flext_tap_ldap import c, m
+from flext_ldap import m
+from flext_meltano import FlextMeltanoModels, u
+from flext_tap_ldap import c
 
 if TYPE_CHECKING:
     from flext_tap_ldap import t
 
 
-class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
-    """Complete models for LDAP tap operations extending FlextLdapModels.
+class FlextTapLdapModels(FlextMeltanoModels, m):
+    """Complete models for LDAP tap operations extending m.
 
     Provides standardized models for all LDAP tap domain entities including:
     - Singer stream metadata and configuration
@@ -34,7 +32,7 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
     - Performance monitoring and metrics
     - Singer protocol compliance models
 
-    All nested classes inherit FlextLdapModels validation and patterns.
+    All nested classes inherit m validation and patterns.
     """
 
     class TapLdap:
@@ -42,101 +40,101 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
         # ── Domain Events ────────────────────────────────────────────────────
 
-        class TapExecutionStartedEvent(FlextLdapModels.Event):
+        class TapExecutionStartedEvent(m.Event):
             """Event raised when tap execution starts."""
 
-            timestamp: datetime = m.Field(
+            timestamp: datetime = u.Field(
                 default_factory=lambda: datetime.now(UTC),
                 description="Timestamp when tap execution started",
             )
             tap_name: Annotated[
                 str,
-                m.Field(
+                u.Field(
                     description="Name of the LDAP tap",
                 ),
             ] = "tap-ldap"
             execution_id: Annotated[
                 str,
-                m.Field(
+                u.Field(
                     description="Unique execution identifier",
                 ),
             ] = ""
             config_hash: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Hash of the effective execution configuration",
                 ),
             ] = None
 
-        class TapExecutionCompletedEvent(FlextLdapModels.Event):
+        class TapExecutionCompletedEvent(m.Event):
             """Event raised when tap execution completes."""
 
-            timestamp: datetime = m.Field(
+            timestamp: datetime = u.Field(
                 default_factory=lambda: datetime.now(UTC),
                 description="Timestamp when tap execution completed",
             )
             tap_name: Annotated[
                 str,
-                m.Field(
+                u.Field(
                     description="Name of the LDAP tap",
                 ),
             ] = "tap-ldap"
             execution_id: Annotated[
                 str,
-                m.Field(
+                u.Field(
                     description="Unique execution identifier",
                 ),
             ] = ""
             records_processed: Annotated[
                 int,
-                m.Field(
+                u.Field(
                     description="Total records processed during tap execution",
                 ),
             ] = 0
             streams_discovered: Annotated[
                 int,
-                m.Field(
+                u.Field(
                     description="Number of streams discovered during execution",
                 ),
             ] = 0
             duration_seconds: Annotated[
                 float,
-                m.Field(
+                u.Field(
                     description="Execution duration in seconds",
                 ),
             ] = 0.0
 
-        class StreamDiscoveredEvent(FlextLdapModels.Event):
+        class StreamDiscoveredEvent(m.Event):
             """Event raised when a stream is discovered."""
 
             event_type: Annotated[
                 str,
-                m.Field(
+                u.Field(
                     frozen=True,
                     description="Event type for discovered streams",
                 ),
             ] = "stream_discovered"
             aggregate_id: Annotated[
                 str,
-                m.Field(
+                u.Field(
                     description="Stream aggregate identifier derived from stream_name",
                 ),
             ] = ""
-            stream_name: str = m.Field(
+            stream_name: str = u.Field(
                 description="Name of the discovered stream",
             )
-            stream_key_properties: t.StrSequence = m.Field(
+            stream_key_properties: t.StrSequence = u.Field(
                 default_factory=list,
                 description="Primary key properties for the discovered stream",
             )
             bookmark_key: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Optional bookmark key used for incremental sync",
                 ),
             ] = None
 
-            @model_validator(mode="before")
+            @u.model_validator(mode="before")
             @classmethod
             def populate_aggregate_id(
                 cls,
@@ -151,39 +149,39 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                     data["aggregate_id"] = data["stream_name"]
                 return data
 
-        class RecordExtractedEvent(FlextLdapModels.Event):
+        class RecordExtractedEvent(m.Event):
             """Event raised when a record is extracted."""
 
             event_type: Annotated[
                 str,
-                m.Field(
+                u.Field(
                     frozen=True,
                     description="Event type for record extraction",
                 ),
             ] = "record_extracted"
             aggregate_id: Annotated[
                 str,
-                m.Field(
+                u.Field(
                     description="Stream name as aggregate identifier",
                 ),
             ] = ""
-            stream_name: str = m.Field(
+            stream_name: str = u.Field(
                 description="Name of the stream associated with the extracted record",
             )
             record_id: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Identifier of the extracted record",
                 ),
             ] = None
             record_size_bytes: Annotated[
                 int,
-                m.Field(
+                u.Field(
                     description="Extracted record size in bytes",
                 ),
             ] = 0
 
-            @model_validator(mode="before")
+            @u.model_validator(mode="before")
             @classmethod
             def populate_aggregate_id(
                 cls,
@@ -198,79 +196,79 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                     data["aggregate_id"] = data["stream_name"]
                 return data
 
-        class TapExecution(FlextLdapModels.Entity):
+        class TapExecution(m.Entity):
             """Execution state and metrics for a tap run."""
 
-            id: str = m.Field(
+            id: str = u.Field(
                 default_factory=lambda: uuid4().hex,
                 description="Unique execution entity identifier",
             )
-            execution_id: str = m.Field(
+            execution_id: str = u.Field(
                 description="Identifier for the associated tap execution",
             )
-            connection_id: str = m.Field(
+            connection_id: str = u.Field(
                 description="Identifier for the associated LDAP connection",
             )
-            command: str = m.Field(
+            command: str = u.Field(
                 description="Command executed by the tap",
             )
             tap_status: Annotated[
                 str,
-                m.Field(
+                u.Field(
                     description="Current status of the tap execution",
                 ),
             ] = "created"
-            settings: t.RecursiveContainerMapping = m.Field(
+            settings: t.RecursiveContainerMapping = u.Field(
                 default_factory=dict,
                 description="Execution configuration object",
             )
-            catalog: t.RecursiveContainerMapping = m.Field(
+            catalog: t.RecursiveContainerMapping = u.Field(
                 default_factory=dict,
                 description="Catalog data associated with the execution",
             )
-            state: t.RecursiveContainerMapping = m.Field(
+            state: t.RecursiveContainerMapping = u.Field(
                 default_factory=dict,
                 description="State data for the execution",
             )
             started_at: Annotated[
                 datetime | None,
-                m.Field(
+                u.Field(
                     description="UTC timestamp when execution started",
                 ),
             ] = None
             completed_at: Annotated[
                 datetime | None,
-                m.Field(
+                u.Field(
                     description="UTC timestamp when execution completed",
                 ),
             ] = None
             records_extracted: Annotated[
                 int,
-                m.Field(
+                u.Field(
                     description="Number of records extracted during execution",
                 ),
             ] = 0
             streams_processed: Annotated[
                 int,
-                m.Field(
+                u.Field(
                     description="Number of streams processed during execution",
                 ),
             ] = 0
             exit_code: Annotated[
                 int | None,
-                m.Field(
+                u.Field(
                     description="Exit code returned by the execution",
                 ),
             ] = None
             stdout: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Standard output captured during execution",
                 ),
             ] = None
             stderr: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Standard error captured during execution",
                 ),
             ] = None
@@ -311,36 +309,36 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
                 self.records_extracted = records_extracted
                 self.streams_processed = streams_processed
 
-        class ConnectionTestedEvent(FlextLdapModels.Event):
+        class ConnectionTestedEvent(m.Event):
             """Event raised after connection test."""
 
             event_type: Annotated[
                 str,
-                m.Field(
+                u.Field(
                     frozen=True,
                     description="Event type for connection test results",
                 ),
             ] = "connection_tested"
             aggregate_id: Annotated[
                 str,
-                m.Field(
+                u.Field(
                     description="Server URI used as aggregate identifier",
                 ),
             ] = ""
-            success: bool = m.Field(
+            success: bool = u.Field(
                 description="Whether the connection test succeeded",
             )
-            server_uri: str = m.Field(
+            server_uri: str = u.Field(
                 description="LDAP server URI used for the connection test",
             )
             error_message: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Optional error message when connection test fails",
                 ),
             ] = None
 
-            @model_validator(mode="before")
+            @u.model_validator(mode="before")
             @classmethod
             def populate_aggregate_id(
                 cls,
@@ -362,43 +360,43 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             host: Annotated[
                 str,
-                m.Field(
+                u.Field(
                     description="LDAP server host name or address",
                 ),
             ] = ""
             port: Annotated[
                 int,
-                m.Field(
+                u.Field(
                     description="LDAP server port",
                 ),
             ] = c.Ldap.ConnectionDefaults.PORT
             bind_dn: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Distinguished Name used to bind to LDAP",
                 ),
             ] = None
             bind_password: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Password used to bind to LDAP",
                 ),
             ] = None
             use_ssl: Annotated[
                 bool,
-                m.Field(
+                u.Field(
                     description="Whether to use LDAPS for the connection",
                 ),
             ] = False
             timeout_seconds: Annotated[
                 int,
-                m.Field(
+                u.Field(
                     description="Timeout for LDAP operations in seconds",
                 ),
             ] = c.TapLdap.DEFAULT_SEARCH_TIMEOUT
             base_dn: Annotated[
                 str,
-                m.Field(
+                u.Field(
                     description="Base DN for LDAP searches",
                 ),
             ] = ""
@@ -408,13 +406,13 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             type: Annotated[
                 str,
-                m.Field(
+                u.Field(
                     description="Data type for the custom stream property",
                 ),
             ] = "string"
             description: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Optional description of the custom property",
                 ),
             ] = None
@@ -422,28 +420,28 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
         class CustomStreamParams(m.BaseModel):
             """Parameters for creating a custom LDAP stream."""
 
-            name: str = m.Field(
+            name: str = u.Field(
                 description="Name of the custom LDAP stream",
             )
-            search_filter: str = m.Field(
+            search_filter: str = u.Field(
                 description="LDAP filter expression for the custom stream",
             )
-            schema_properties: t.RecursiveContainerMapping = m.Field(
+            schema_properties: t.RecursiveContainerMapping = u.Field(
                 default_factory=dict,
                 description="Custom schema properties for the stream",
             )
-            primary_keys: t.StrSequence = m.Field(
+            primary_keys: t.StrSequence = u.Field(
                 default_factory=lambda: ["dn"],
                 description="Primary key attributes for the custom stream",
             )
             replication_key: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Optional replication key for incremental processing",
                 ),
             ] = None
 
-            @model_validator(mode="after")
+            @u.model_validator(mode="after")
             def validate_required_fields(self) -> Self:
                 """Validate stream name, filter, and primary keys."""
                 if not self.name:
@@ -460,235 +458,235 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
         class LdapClientConfig(m.BaseModel):
             """Parameter t.RecursiveContainer for LDAP client initialization."""
 
-            host: str = m.Field(
+            host: str = u.Field(
                 description="LDAP server host name or address",
             )
             port: Annotated[
                 int,
-                m.Field(
+                u.Field(
                     description="LDAP server port",
                 ),
             ] = c.Ldap.ConnectionDefaults.PORT
             bind_dn: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Bind Distinguished Name for LDAP operations",
                 ),
             ] = None
             password: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Password used for LDAP bind operations",
                 ),
             ] = None
             use_ssl: Annotated[
                 bool,
-                m.Field(
+                u.Field(
                     description="Whether to use SSL/TLS for the LDAP connection",
                 ),
             ] = False
             timeout: Annotated[
                 int,
-                m.Field(
+                u.Field(
                     description="Timeout for LDAP client operations in seconds",
                 ),
             ] = c.TapLdap.DEFAULT_SEARCH_TIMEOUT
             page_size: Annotated[
                 int,
-                m.Field(
+                u.Field(
                     description="LDAP page size for search results",
                 ),
             ] = c.TapLdap.DEFAULT_PAGE_SIZE
 
         # ── Value Objects ────────────────────────────────────────────────────
 
-        class LdapConnectionParams(FlextLdapModels.Value):
+        class LdapConnectionParams(m.Value):
             """Parameters for establishing an LDAP connection."""
 
-            host: t.NonEmptyStr = m.Field(
+            host: t.NonEmptyStr = u.Field(
                 description="LDAP host to connect to",
             )
-            base_dn: t.NonEmptyStr = m.Field(
+            base_dn: t.NonEmptyStr = u.Field(
                 description="Base distinguished name for LDAP searches",
             )
             port: Annotated[
                 t.PortNumber,
-                m.Field(
+                u.Field(
                     description="LDAP port number",
                 ),
             ] = c.Ldap.ConnectionDefaults.PORT
             bind_dn: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Bind DN for LDAP connection",
                 ),
             ] = None
             bind_password: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Bind password for LDAP connection",
                 ),
             ] = None
             use_ssl: Annotated[
                 bool,
-                m.Field(
+                u.Field(
                     description="Whether to use SSL/TLS for the LDAP connection",
                 ),
             ] = False
             timeout_seconds: Annotated[
                 t.PositiveInt,
-                m.Field(
+                u.Field(
                     description="Timeout in seconds for LDAP operations",
                 ),
             ] = c.TapLdap.DEFAULT_SEARCH_TIMEOUT
             page_size: Annotated[
                 t.PositiveInt,
-                m.Field(
+                u.Field(
                     description="Page size used for LDAP searches",
                 ),
             ] = c.TapLdap.DEFAULT_PAGE_SIZE
             max_retries: Annotated[
                 t.RetryCount,
-                m.Field(
+                u.Field(
                     description="Maximum retry attempts for LDAP operations",
                 ),
             ] = 3
 
-        class StreamCreationParams(FlextLdapModels.Value):
+        class StreamCreationParams(m.Value):
             """Parameters for creating an LDAP data stream."""
 
-            stream_type: t.NonEmptyStr = m.Field(
+            stream_type: t.NonEmptyStr = u.Field(
                 description="Type of stream to create",
             )
-            connection_id: t.NonEmptyStr = m.Field(
+            connection_id: t.NonEmptyStr = u.Field(
                 description="Reference LDAP connection identifier",
             )
-            search_filter: t.NonEmptyStr = m.Field(
+            search_filter: t.NonEmptyStr = u.Field(
                 description="LDAP search filter for the stream",
             )
             attributes: Annotated[
                 t.StrSequence | None,
-                m.Field(
+                u.Field(
                     description="Attributes returned by the stream",
                 ),
             ] = None
             tap_stream_id: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Optional tap stream identifier",
                 ),
             ] = None
             key_properties: Annotated[
                 t.StrSequence | None,
-                m.Field(
+                u.Field(
                     description="Primary key properties for the stream",
                 ),
             ] = None
             replication_method: Annotated[
                 str,
-                m.Field(
+                u.Field(
                     description="Replication method for the stream",
                 ),
             ] = "FULL_TABLE"
             replication_key: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Optional replication key for incremental streams",
                 ),
             ] = None
 
         # ── Entities ─────────────────────────────────────────────────────────
 
-        class LdapConnection(FlextLdapModels.Entity):
+        class LdapConnection(m.Entity):
             """LDAP connection entity with test status and error tracking."""
 
-            host: t.NonEmptyStr = m.Field(
+            host: t.NonEmptyStr = u.Field(
                 description="LDAP host address for this connection",
             )
-            port: t.PortNumber = m.Field(
+            port: t.PortNumber = u.Field(
                 description="LDAP port for this connection",
             )
             bind_dn: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Bind DN used by the connection",
                 ),
             ] = None
             password: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Bind password used by the connection",
                 ),
             ] = None
             use_ssl: Annotated[
                 bool,
-                m.Field(
+                u.Field(
                     description="Whether the connection uses SSL/TLS",
                 ),
             ] = False
-            timeout: t.PositiveInt = m.Field(
+            timeout: t.PositiveInt = u.Field(
                 description="Timeout in seconds for this LDAP connection",
             )
-            id: str = m.Field(
+            id: str = u.Field(
                 default_factory=lambda: uuid4().hex,
                 description="Unique identifier for this LDAP connection",
             )
             last_tested: Annotated[
                 datetime | None,
-                m.Field(
+                u.Field(
                     description="Timestamp when the connection was last tested",
                 ),
             ] = None
             last_error: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Latest error message from connection testing",
                 ),
             ] = None
 
-        class LdapStream(FlextLdapModels.Entity):
+        class LdapStream(m.Entity):
             """LDAP data stream with schema and replication configuration."""
 
-            id: str = m.Field(
+            id: str = u.Field(
                 default_factory=lambda: uuid4().hex,
                 description="Unique identifier for this stream",
             )
-            name: t.NonEmptyStr = m.Field(
+            name: t.NonEmptyStr = u.Field(
                 description="Name of the LDAP stream",
             )
-            connection_id: t.NonEmptyStr = m.Field(
+            connection_id: t.NonEmptyStr = u.Field(
                 description="Identifier of the connection used by the stream",
             )
-            stream_type: t.NonEmptyStr = m.Field(
+            stream_type: t.NonEmptyStr = u.Field(
                 description="LDAP stream type",
             )
-            search_filter: t.NonEmptyStr = m.Field(
+            search_filter: t.NonEmptyStr = u.Field(
                 description="Search filter used by the stream",
             )
-            attributes: t.StrSequence = m.Field(
+            attributes: t.StrSequence = u.Field(
                 default_factory=list,
                 description="Attributes included in the stream",
             )
-            tap_stream_id: t.NonEmptyStr = m.Field(
+            tap_stream_id: t.NonEmptyStr = u.Field(
                 description="Identifier assigned to the tap stream",
             )
-            key_properties: t.StrSequence = m.Field(
+            key_properties: t.StrSequence = u.Field(
                 default_factory=lambda: ["dn"],
                 description="Primary key properties for the stream",
             )
             replication_method: Annotated[
                 str,
-                m.Field(
+                u.Field(
                     description="Replication method for the stream",
                 ),
             ] = "FULL_TABLE"
             replication_key: Annotated[
                 str | None,
-                m.Field(
+                u.Field(
                     description="Optional replication key for incremental replication",
                 ),
             ] = None
-            stream_schema: t.RecursiveContainerMapping = m.Field(
+            stream_schema: t.RecursiveContainerMapping = u.Field(
                 default_factory=dict,
                 description="Stream schema mapping for Singer records",
             )

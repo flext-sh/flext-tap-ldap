@@ -514,11 +514,11 @@ class TestCustomStream:
     def test_custom_stream_schema_type_mappings(self, mock_tap: Mock) -> None:
         """Test custom stream schema type mappings."""
         custom_properties: t.RecursiveContainerMapping = {
-            "stringField": {"type": "string"},
-            "arrayField": {"type": "array"},
-            "booleanField": {"type": "boolean"},
-            "integerField": {"type": "integer"},
-            "datetimeField": {"type": "datetime"},
+            "StringField": {"type": "string"},
+            "arrayu.Field": {"type": "array"},
+            "booleanu.Field": {"type": "boolean"},
+            "integeru.Field": {"type": "integer"},
+            "datetimeu.Field": {"type": "datetime"},
         }
         params = FlextTapLdapModels.TapLdap.CustomStreamParams(
             name="type_test",
@@ -530,11 +530,11 @@ class TestCustomStream:
         schema = stream.schema
         properties = schema["properties"]
         if isinstance(properties, dict):
-            assert "stringField" in properties
-            assert "arrayField" in properties
-            assert "booleanField" in properties
-            assert "integerField" in properties
-            assert "datetimeField" in properties
+            assert "StringField" in properties
+            assert "arrayu.Field" in properties
+            assert "booleanu.Field" in properties
+            assert "integeru.Field" in properties
+            assert "datetimeu.Field" in properties
 
 
 class TestStreamIntegration:

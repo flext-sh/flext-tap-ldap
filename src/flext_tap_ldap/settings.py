@@ -6,7 +6,7 @@ from typing import Annotated, ClassVar
 
 from flext_core import FlextSettings
 from flext_ldap import FlextLdapSettings
-from flext_tap_ldap import c, m, t
+from flext_tap_ldap import c, m, t, u
 
 
 @FlextSettings.auto_register("tap-ldap")
@@ -17,11 +17,11 @@ class FlextTapLdapSettings(FlextLdapSettings):
         env_prefix="FLEXT_TAP_LDAP_", extra="ignore"
     )
 
-    host: Annotated[str, m.Field(default=c.LOCALHOST)]
-    port: Annotated[t.PortNumber, m.Field(ge=1)] = c.Ldap.ConnectionDefaults.PORT
-    use_ssl: Annotated[bool, m.Field(default=c.Ldap.ConnectionDefaults.DEFAULT_USE_SSL)]
-    timeout: Annotated[t.PositiveInt, m.Field(ge=1)] = c.Ldap.ConnectionDefaults.TIMEOUT
-    page_size: Annotated[t.PositiveInt, m.Field(ge=1)] = c.DEFAULT_BATCH_SIZE
+    host: Annotated[str, u.Field(default=c.LOCALHOST)]
+    port: Annotated[t.PortNumber, u.Field(ge=1)] = c.Ldap.ConnectionDefaults.PORT
+    use_ssl: Annotated[bool, u.Field(default=c.Ldap.ConnectionDefaults.DEFAULT_USE_SSL)]
+    timeout: Annotated[t.PositiveInt, u.Field(ge=1)] = c.Ldap.ConnectionDefaults.TIMEOUT
+    page_size: Annotated[t.PositiveInt, u.Field(ge=1)] = c.DEFAULT_BATCH_SIZE
 
 
 __all__: list[str] = ["FlextTapLdapSettings"]
