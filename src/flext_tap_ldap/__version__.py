@@ -1,7 +1,9 @@
-"""Version and package metadata using importlib.metadata.
+# AUTO-GENERATED FILE — Regenerate with: make gen
+"""Package version and metadata for flext-tap-ldap.
 
-Single source of truth pattern following flext-core standards.
-All metadata comes from pyproject.toml via importlib.metadata.
+Subclass of ``FlextVersion`` — overrides only ``_metadata``.
+All derived attributes (``__version__``, ``__title__``, etc.) are
+computed automatically via ``FlextVersion.__init_subclass__``.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -9,20 +11,27 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from importlib.metadata import metadata
+from importlib.metadata import PackageMetadata, metadata
 
-_metadata = metadata("flext-tap-ldap")
-__version__ = _metadata["Version"]
-__version_info__ = tuple(
-    int(part) if part.isdigit() else part for part in __version__.split(".")
-)
-__title__ = _metadata["Name"]
-__description__ = _metadata.get("Summary", "")
-__author__ = _metadata.get("Author", "")
-__author_email__ = _metadata.get("Author-Email", "")
-__license__ = _metadata.get("License", "")
-__url__ = _metadata.get("Home-Page", "")
+from flext_core import FlextVersion
+
+
+class FlextTapLdapVersion(FlextVersion):
+    """flext-tap-ldap version — MRO-derived from FlextVersion."""
+
+    _metadata: PackageMetadata = metadata("flext-tap-ldap")
+
+
+__version__ = FlextTapLdapVersion.__version__
+__version_info__ = FlextTapLdapVersion.__version_info__
+__title__ = FlextTapLdapVersion.__title__
+__description__ = FlextTapLdapVersion.__description__
+__author__ = FlextTapLdapVersion.__author__
+__author_email__ = FlextTapLdapVersion.__author_email__
+__license__ = FlextTapLdapVersion.__license__
+__url__ = FlextTapLdapVersion.__url__
 __all__: list[str] = [
+    "FlextTapLdapVersion",
     "__author__",
     "__author_email__",
     "__description__",
