@@ -44,15 +44,15 @@ class FlextTapLdapTypes(t, FlextLdapTypes):
         t.HeaderMapping,
         config=m.ConfigDict(strict=False),
     )
-    SINGER_OUTPUT_ADAPTER: u.TypeAdapter[t.ContainerMapping] = u.TypeAdapter(
-        t.ContainerMapping,
+    SINGER_OUTPUT_ADAPTER: u.TypeAdapter[t.RecursiveContainerMapping] = u.TypeAdapter(
+        t.RecursiveContainerMapping,
         config=m.ConfigDict(strict=False),
     )
-    CONFIG_STREAM_MAP_ADAPTER: u.TypeAdapter[Mapping[str, t.ContainerMapping]] = (
-        u.TypeAdapter(
-            Mapping[str, t.ContainerMapping],
-            config=m.ConfigDict(strict=False),
-        )
+    CONFIG_STREAM_MAP_ADAPTER: u.TypeAdapter[
+        Mapping[str, t.RecursiveContainerMapping]
+    ] = u.TypeAdapter(
+        Mapping[str, t.RecursiveContainerMapping],
+        config=m.ConfigDict(strict=False),
     )
 
 
