@@ -9,8 +9,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Never, override
+from typing import TYPE_CHECKING, Annotated, Never, override
 
+from flext_core import u
 from flext_meltano import FlextMeltanoTapServiceBase
 
 if TYPE_CHECKING:
@@ -20,7 +21,10 @@ if TYPE_CHECKING:
 class FlextTapLdapService(FlextMeltanoTapServiceBase):
     """Orchestrator for tap-ldap. CLI dispatch, not Singer SDK."""
 
-    tap_name: t.NonEmptyStr = "tap-ldap"
+    tap_name: Annotated[
+        t.NonEmptyStr,
+        u.Field(description="Canonical Singer tap identifier."),
+    ] = "tap-ldap"
 
     @override
     def create_tap_instance(
