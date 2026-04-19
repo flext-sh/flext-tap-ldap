@@ -1,0 +1,54 @@
+tests/e2e/test_integration.py
+  h_9db9d35f50cf33 25-26,49,60,73,79,88,97,128-129,167,257-258
+tests/unit/test_client_quick.py
+  h_9db9d35f50cf33 11,65,74,87,196,210,222,260
+tests/unit/test_tap.py
+  h_9db9d35f50cf33 38-39,51-52,58-60
+src/flext_tap_ldap/client.py
+  h_9db9d35f50cf33 14,72,107,130,211,219,264
+src/flext_tap_ldap/utilities.py
+  h_9db9d35f50cf33 46,102,129,150,183,192,278-279,287,291,298,302,306
+src/flext_tap_ldap/typings.py
+  h_9db9d35f50cf33 47-48,52,54
+tests/unit/test_streams.py
+  h_9db9d35f50cf33 39,463,516,544,558
+docs/guides/troubleshooting.md
+  h_9db9d35f50cf33 141,155
+src/flext_tap_ldap/models.py
+  h_9db9d35f50cf33 141-142,188-189,221,225,229,345-346,429,459,689,694
+src/flext_tap_ldap/protocols.py
+  h_9db9d35f50cf33 39,44-45,55,61,66,81,94,102,126,132,141,182
+src/flext_tap_ldap/services.py
+  h_9db9d35f50cf33 13,107,112,118,128,174,179-180,190,192,283-285,404,407,414,417,424,430,437,445,455,467,473,480,488,493,503,509,537,541,548,559,561,571
+tests/e2e/conftest.py
+  h_9db9d35f50cf33 28,117
+src/flext_tap_ldap/_utilities/_processor.py
+  h_9db9d35f50cf33 107,202,270,369,371,484,495,536,563,579,582,585,613,619,638
+tests/conftest.py
+  h_9db9d35f50cf33 50
+src/flext_tap_ldap/tap.py
+  h_9db9d35f50cf33 60,122,130,169,172,186,193,196,203,245,267,272,284,305
+tests/unit/test_ldif_processor.py
+  h_9db9d35f50cf33 10,56
+docs/guides/testing.md
+  h_9db9d35f50cf33 528
+docs/guides/development.md
+  h_9db9d35f50cf33 154,193,196,202,353,356,405
+src/flext_tap_ldap/ldif_streams.py
+  h_9db9d35f50cf33 36,89-90,120,126,160,175,209,240-241,328
+src/flext_tap_ldap/api.py
+  h_9db9d35f50cf33 32
+src/flext_tap_ldap/streams.py
+  h_9db9d35f50cf33 41,50,64,97,112,118,125-126,197,211,238,264-265,296,312,343-344,369,384,404-405,417,432,466-467,522-523,546,550,594-595,601
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "f5df567e577f17cc41640beac9d685ec618e2649",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
