@@ -47,7 +47,7 @@ def ldap_connection_config() -> dict[str, object]:
 
 @pytest.fixture
 def ldap_source_config(
-    ldap_connection_config: dict[str, t.RecursiveContainer],
+    ldap_connection_config: dict[str, t.Container],
 ) -> m.Meltano.DataSourceConfig:
     return m.Meltano.DataSourceConfig(
         source_type="ldap",

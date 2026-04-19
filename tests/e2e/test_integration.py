@@ -22,8 +22,8 @@ from flext_tap_ldap.tap import CLI_COMMAND
 from tests import t, u
 
 
-def _extract_json_from_output(output: str) -> t.RecursiveContainer:
-    """Extract the JSON t.RecursiveContainer from CLI output that may contain log lines."""
+def _extract_json_from_output(output: str) -> t.Container:
+    """Extract the JSON t.Container from CLI output that may contain log lines."""
     for line in output.strip().splitlines():
         stripped = line.strip()
         if stripped.startswith("{"):
@@ -46,7 +46,7 @@ class TestFlextTapLdapIntegration:
         return CliRunner()
 
     @pytest.fixture
-    def mock_ldap_config(self) -> t.RecursiveContainerMapping:
+    def mock_ldap_config(self) -> Mapping[str, t.Container]:
         """Mock LDAP configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -57,7 +57,7 @@ class TestFlextTapLdapIntegration:
         }
 
     @pytest.fixture
-    def sample_catalog(self) -> t.RecursiveContainerMapping:
+    def sample_catalog(self) -> Mapping[str, t.Container]:
         """Sample catalog for testing."""
         return {
             "streams": [
@@ -70,13 +70,13 @@ class TestFlextTapLdapIntegration:
         }
 
     @pytest.fixture
-    def sample_state(self) -> t.RecursiveContainerMapping:
+    def sample_state(self) -> Mapping[str, t.Container]:
         """Sample state for testing."""
         return {"bookmarks": {}}
 
     @pytest.fixture
     def config_file(
-        self, tmp_path: Path, mock_ldap_config: t.RecursiveContainerMapping
+        self, tmp_path: Path, mock_ldap_config: Mapping[str, t.Container]
     ) -> Path:
         """Create temporary settings file."""
         config_path = tmp_path / "settings.json"
@@ -85,7 +85,7 @@ class TestFlextTapLdapIntegration:
 
     @pytest.fixture
     def catalog_file(
-        self, tmp_path: Path, sample_catalog: t.RecursiveContainerMapping
+        self, tmp_path: Path, sample_catalog: Mapping[str, t.Container]
     ) -> Path:
         """Create temporary catalog file."""
         catalog_path = tmp_path / "catalog.json"
@@ -94,7 +94,7 @@ class TestFlextTapLdapIntegration:
 
     @pytest.fixture
     def state_file(
-        self, tmp_path: Path, sample_state: t.RecursiveContainerMapping
+        self, tmp_path: Path, sample_state: Mapping[str, t.Container]
     ) -> Path:
         """Create a state file fixture for testing."""
         state_path = tmp_path / "state.json"
@@ -125,8 +125,8 @@ class TestFlextTapLdapIntegration:
         if "streams" not in catalog:
             catalog_error: str = f"Expected {'streams'} in {catalog}"
             raise AssertionError(catalog_error)
-        streams: Sequence[t.RecursiveContainerMapping] = cast(
-            "Sequence[t.RecursiveContainerMapping]",
+        streams: Sequence[Mapping[str, t.Container]] = cast(
+            "Sequence[Mapping[str, t.Container]]",
             catalog["streams"],
         )
         stream_names: t.RecursiveContainerList = [s["tap_stream_id"] for s in streams]
@@ -164,7 +164,7 @@ class TestFlextTapLdapIntegration:
             exit_error: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(exit_error)
         lines = result.output.strip().split("\n")
-        messages: list[t.RecursiveContainerMapping] = []
+        messages: list[Mapping[str, t.Container]] = []
         for line in lines:
             if not line:
                 continue
@@ -254,8 +254,8 @@ class TestFlextTapLdapIntegration:
             raise AssertionError(exit_error)
         catalog = _extract_json_from_output(result.output)
         assert isinstance(catalog, dict)
-        cat_streams: Sequence[t.RecursiveContainerMapping] = cast(
-            "Sequence[t.RecursiveContainerMapping]",
+        cat_streams: Sequence[Mapping[str, t.Container]] = cast(
+            "Sequence[Mapping[str, t.Container]]",
             catalog["streams"],
         )
         stream_names: t.RecursiveContainerList = [

@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import MutableMapping, MutableSequence, Sequence
+from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import ClassVar
@@ -104,18 +104,18 @@ class FlextTapLdapServices:
         def test_connection(
             self,
             connection_id: str,
-        ) -> p.Result[t.RecursiveContainerMapping]:
+        ) -> p.Result[Mapping[str, t.Container]]:
             """Test LDAP connection."""
             try:
                 connection = self._connections.get(connection_id)
                 if not connection:
-                    return r[t.RecursiveContainerMapping].fail(
+                    return r[Mapping[str, t.Container]].fail(
                         "Connection not found",
                     )
                 connection.last_tested = datetime.now(UTC)
                 connection.last_error = None
                 self._connections[connection_id] = connection
-                return r[t.RecursiveContainerMapping].ok({
+                return r[Mapping[str, t.Container]].ok({
                     "success": True,
                     "connection": connection.id,
                 })
@@ -125,7 +125,7 @@ class FlextTapLdapServices:
                     connection.last_tested = datetime.now(UTC)
                     connection.last_error = str(e)
                     self._connections[connection_id] = connection
-                return r[t.RecursiveContainerMapping].fail(
+                return r[Mapping[str, t.Container]].fail(
                     f"Failed to test connection: {e}",
                 )
 
@@ -171,13 +171,13 @@ class FlextTapLdapServices:
 
         def discover_schema(
             self, stream_id: str
-        ) -> p.Result[t.RecursiveContainerMapping]:
+        ) -> p.Result[Mapping[str, t.Container]]:
             """Discover schema for LDAP stream."""
             try:
                 stream = self._streams.get(stream_id)
                 if not stream:
-                    return r[t.RecursiveContainerMapping].fail("Stream not found")
-                schema: t.RecursiveContainerMapping = {
+                    return r[Mapping[str, t.Container]].fail("Stream not found")
+                schema: Mapping[str, t.Container] = {
                     "type": "object",
                     "properties": {
                         "dn": {"type": "string"},
@@ -187,9 +187,9 @@ class FlextTapLdapServices:
                 }
                 stream.update_schema(schema)
                 self._streams[stream_id] = stream
-                return r[t.RecursiveContainerMapping].ok(schema)
+                return r[Mapping[str, t.Container]].ok(schema)
             except (RuntimeError, ValueError, TypeError) as e:
-                return r[t.RecursiveContainerMapping].fail(
+                return r[Mapping[str, t.Container]].fail(
                     f"Failed to discover schema: {e}",
                 )
 
@@ -280,9 +280,9 @@ class FlextTapLdapServices:
             self,
             connection_id: str,
             command: str,
-            settings: t.RecursiveContainerMapping | None = None,
-            catalog: t.RecursiveContainerMapping | None = None,
-            state: t.RecursiveContainerMapping | None = None,
+            settings: Mapping[str, t.Container] | None = None,
+            catalog: Mapping[str, t.Container] | None = None,
+            state: Mapping[str, t.Container] | None = None,
         ) -> p.Result[m.TapLdap.TapExecution]:
             """Create tap execution."""
             try:
@@ -401,40 +401,40 @@ class FlextTapLdapServices:
         def fetch_ldif_statistics(
             self,
             file_path: str,
-        ) -> p.Result[t.RecursiveContainerMapping]:
+        ) -> p.Result[Mapping[str, t.Container]]:
             """Get LDIF file statistics using flext-ldif library."""
             try:
-                validation_result: p.Result[t.RecursiveContainerMapping] = (
+                validation_result: p.Result[Mapping[str, t.Container]] = (
                     self.validate_ldif_file(
                         file_path,
                     )
                 )
                 if not validation_result.success:
                     return validation_result
-                validation_data: t.RecursiveContainerMapping = (
+                validation_data: Mapping[str, t.Container] = (
                     u.TapLdap.ValueConversion.to_map(validation_result.value) or {}
                 )
-                file_stats: t.RecursiveContainerMapping = {
+                file_stats: Mapping[str, t.Container] = {
                     "file_path": file_path,
                     "file_size_bytes": Path(file_path).stat().st_size
                     if Path(file_path).exists()
                     else 0,
                     **validation_data,
                 }
-                return r[t.RecursiveContainerMapping].ok(file_stats)
+                return r[Mapping[str, t.Container]].ok(file_stats)
             except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                 FlextTapLdapServices._logger.exception(
                     "Error getting LDIF statistics for %s",
                     file_path,
                 )
-                return r[t.RecursiveContainerMapping].fail(
+                return r[Mapping[str, t.Container]].fail(
                     f"LDIF statistics failed: {e}",
                 )
 
         def process_ldif_file(
             self,
             file_path: str,
-        ) -> p.Result[Sequence[t.RecursiveContainerMapping]]:
+        ) -> p.Result[Sequence[Mapping[str, t.Container]]]:
             """Process LDIF file using flext-ldif library."""
             try:
                 FlextTapLdapServices._logger.info("Processing LDIF file: %s", file_path)
@@ -442,7 +442,7 @@ class FlextTapLdapServices:
                     Path(file_path),
                 )
                 if not result.success:
-                    return r[Sequence[t.RecursiveContainerMapping]].fail(
+                    return r[Sequence[Mapping[str, t.Container]]].fail(
                         f"Failed to parse LDIF file: {result.error}",
                     )
                 entries: MutableSequence[m.Ldif.Entry] = result.value.entries
@@ -452,7 +452,7 @@ class FlextTapLdapServices:
                     entry_count,
                     file_path,
                 )
-                normalized: Sequence[t.RecursiveContainerMapping] = [
+                normalized: Sequence[Mapping[str, t.Container]] = [
                     {
                         "dn": entry.dn.value if entry.dn is not None else "",
                         "attributes": u.TapLdap.ValueConversion.to_map(
@@ -464,20 +464,20 @@ class FlextTapLdapServices:
                     }
                     for entry in entries
                 ]
-                return r[Sequence[t.RecursiveContainerMapping]].ok(normalized)
+                return r[Sequence[Mapping[str, t.Container]]].ok(normalized)
             except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                 FlextTapLdapServices._logger.exception(
                     "Error processing LDIF file %s",
                     file_path,
                 )
-                return r[Sequence[t.RecursiveContainerMapping]].fail(
+                return r[Sequence[Mapping[str, t.Container]]].fail(
                     f"LDIF processing failed: {e}",
                 )
 
         def validate_ldif_file(
             self,
             file_path: str,
-        ) -> p.Result[t.RecursiveContainerMapping]:
+        ) -> p.Result[Mapping[str, t.Container]]:
             """Validate LDIF file using flext-ldif library."""
             try:
                 FlextTapLdapServices._logger.info("Validating LDIF file: %s", file_path)
@@ -485,12 +485,12 @@ class FlextTapLdapServices:
                     Path(file_path),
                 )
                 if not result.success:
-                    return r[t.RecursiveContainerMapping].fail(
+                    return r[Mapping[str, t.Container]].fail(
                         f"Validation failed: {result.error}",
                     )
                 entries: MutableSequence[m.Ldif.Entry] = result.value.entries
                 total_entries = len(entries)
-                validation_data: t.RecursiveContainerMapping = {
+                validation_data: Mapping[str, t.Container] = {
                     "total_entries": total_entries,
                     "valid_entries": total_entries,
                     "invalid_entries": 0,
@@ -500,13 +500,13 @@ class FlextTapLdapServices:
                     "LDIF file validation completed: %s",
                     file_path,
                 )
-                return r[t.RecursiveContainerMapping].ok(validation_data)
+                return r[Mapping[str, t.Container]].ok(validation_data)
             except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                 FlextTapLdapServices._logger.exception(
                     "Error validating LDIF file %s",
                     file_path,
                 )
-                return r[t.RecursiveContainerMapping].fail(
+                return r[Mapping[str, t.Container]].fail(
                     f"LDIF validation failed: {e}",
                 )
 
@@ -534,18 +534,18 @@ class FlextTapLdapServices:
     @staticmethod
     def create_ldap_connection_config(
         params: m.TapLdap.LdapConnectionParams,
-    ) -> p.Result[t.RecursiveContainerMapping]:
+    ) -> p.Result[Mapping[str, t.Container]]:
         """Create LDAP connection configuration using Parameter Object Pattern.
 
         Args:
-        params: LDAP connection parameters t.RecursiveContainer
+        params: LDAP connection parameters t.Container
 
         Returns:
         r with connection configuration or error message.
 
         """
         try:
-            settings: t.RecursiveContainerMapping = {
+            settings: Mapping[str, t.Container] = {
                 "host": params.host,
                 "port": params.port,
                 "bind_dn": params.bind_dn,
@@ -556,9 +556,9 @@ class FlextTapLdapServices:
                 "page_size": params.page_size,
                 "max_retries": params.max_retries,
             }
-            return r[t.RecursiveContainerMapping].ok(settings)
+            return r[Mapping[str, t.Container]].ok(settings)
         except (RuntimeError, ValueError, TypeError) as e:
-            return r[t.RecursiveContainerMapping].fail(
+            return r[Mapping[str, t.Container]].fail(
                 f"Failed to create LDAP connection settings: {e}",
             )
 
@@ -568,7 +568,7 @@ class FlextTapLdapServices:
         base_dn: str,
         port: int = c.Ldap.ConnectionDefaults.PORT,
         **kwargs: t.Scalar,
-    ) -> p.Result[t.RecursiveContainerMapping]:
+    ) -> p.Result[Mapping[str, t.Container]]:
         """Create LDAP connection configuration (testing convenience interface).
 
         Testing convenience wrapper for the Parameter Object Pattern implementation.

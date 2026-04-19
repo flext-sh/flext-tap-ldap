@@ -43,7 +43,7 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def to_entry_mapping(
-                entry_data: p.Ldif.Entry | t.RecursiveContainerMapping | None,
+                entry_data: p.Ldif.Entry | Mapping[str, t.Container] | None,
             ) -> p.Result[t.MutableRecursiveContainerMapping]:
                 """Normalize LDAP entry payloads into the canonical mutable mapping contract."""
                 if entry_data is None:
@@ -99,7 +99,7 @@ class FlextTapLdapUtilities(
                 entry: t.MutableRecursiveContainerMapping,
             ) -> t.MutableRecursiveContainerMapping:
                 """Normalize Oracle-specific LDAP entry attributes for downstream consumers."""
-                raw_attributes: t.RecursiveContainer = entry.get("attributes", {})
+                raw_attributes: t.Container = entry.get("attributes", {})
                 attributes: t.MutableRecursiveContainerMapping = {}
                 if not isinstance(raw_attributes, dict):
                     return entry
@@ -126,7 +126,7 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def process_search_results(
-                search_result: Sequence[p.Ldif.Entry | t.RecursiveContainerMapping],
+                search_result: Sequence[p.Ldif.Entry | Mapping[str, t.Container]],
                 *,
                 size_limit: int,
             ) -> MutableSequence[t.MutableRecursiveContainerMapping]:
@@ -147,7 +147,7 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def process_oracle_search_results(
-                search_result: Sequence[p.Ldif.Entry | t.RecursiveContainerMapping],
+                search_result: Sequence[p.Ldif.Entry | Mapping[str, t.Container]],
                 *,
                 oracle_oid_mode: bool,
             ) -> MutableSequence[t.MutableRecursiveContainerMapping]:
@@ -180,7 +180,7 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def to_map(
-                value: t.RecursiveContainer,
+                value: t.Container,
             ) -> t.ContainerValueMapping | None:
                 """Convert a recursive container to the canonical mapping contract."""
                 try:
@@ -189,7 +189,7 @@ class FlextTapLdapUtilities(
                     return None
 
             @staticmethod
-            def to_str(value: t.RecursiveContainer) -> str | None:
+            def to_str(value: t.Container) -> str | None:
                 """Convert a recursive container to a strict string contract."""
                 try:
                     return t.STRICT_STR_ADAPTER.validate_python(value)
@@ -275,8 +275,8 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def validate_ldap_config(
-                settings: t.RecursiveContainerMapping,
-            ) -> p.Result[t.RecursiveContainerMapping]:
+                settings: Mapping[str, t.Container],
+            ) -> p.Result[Mapping[str, t.Container]]:
                 """Validate LDAP configuration."""
                 config_map: t.MutableRecursiveContainerMapping = {
                     str(key): value for key, value in settings.items()
@@ -284,26 +284,26 @@ class FlextTapLdapUtilities(
                 required_fields = ["host", "base_dn"]
                 for field in required_fields:
                     if field not in config_map:
-                        return r[t.RecursiveContainerMapping].fail(
+                        return r[Mapping[str, t.Container]].fail(
                             f"Missing required LDAP field: {field}",
                         )
                     if not str(config_map[field]).strip():
-                        return r[t.RecursiveContainerMapping].fail(
+                        return r[Mapping[str, t.Container]].fail(
                             f"Empty LDAP field: {field}",
                         )
                 if "port" in config_map:
                     try:
                         port = t.INTEGER_ADAPTER.validate_python(config_map["port"])
                     except c.ValidationError:
-                        return r[t.RecursiveContainerMapping].fail(
+                        return r[Mapping[str, t.Container]].fail(
                             "LDAP port must be numeric",
                         )
                     if port <= 0 or port > c.TapLdap.Ldap.MAX_PORT:
-                        return r[t.RecursiveContainerMapping].fail(
+                        return r[Mapping[str, t.Container]].fail(
                             f"LDAP port must be between 1 and {c.TapLdap.Ldap.MAX_PORT}",
                         )
                     config_map["port"] = port
-                return r[t.RecursiveContainerMapping].ok(config_map)
+                return r[Mapping[str, t.Container]].ok(config_map)
 
 
 u = FlextTapLdapUtilities

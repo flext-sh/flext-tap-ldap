@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 
 from flext_ldap import FlextLdap
 from flext_tap_ldap import c, m, t, u
@@ -69,7 +69,7 @@ class FlextTapLdapClient:
             )
             self._initialize_flext_api(client_config)
 
-        def __getattr__(self, name: str) -> t.RecursiveContainerMapping:
+        def __getattr__(self, name: str) -> Mapping[str, t.Container]:
             """Delegate unknown attributes to the real API."""
             return getattr(self._flext_api, name)
 
@@ -104,7 +104,7 @@ class FlextTapLdapClient:
             attributes: t.StrSequence | None = None,
             scope: str = "SUBTREE",
             size_limit: int = 0,
-        ) -> Sequence[t.RecursiveContainerMapping]:
+        ) -> Sequence[Mapping[str, t.Container]]:
             """Search for entries using flext-ldap infrastructure (synchronous).
 
             Returns a list of entries for testing convenience with Singer streams.
@@ -127,7 +127,7 @@ class FlextTapLdapClient:
             attributes: t.StrSequence | None = None,
             *,
             oracle_oid_mode: bool = False,
-        ) -> Sequence[t.RecursiveContainerMapping]:
+        ) -> Sequence[Mapping[str, t.Container]]:
             """Search with Oracle OID support for testing convenience.
 
             Refactored using Single Responsibility Principle to reduce complexity.
@@ -208,7 +208,7 @@ class FlextTapLdapClient:
             attributes: t.StrSequence | None,
             *,
             oracle_oid_mode: bool,
-        ) -> Sequence[t.RecursiveContainerMapping]:
+        ) -> Sequence[Mapping[str, t.Container]]:
             """Execute Oracle search in new event loop.
 
             Single Responsibility: Handle only event loop management for Oracle search.
@@ -216,7 +216,7 @@ class FlextTapLdapClient:
             loop = new_event_loop()
             set_event_loop(loop)
             try:
-                search_result: Sequence[t.RecursiveContainerMapping] = self.search(
+                search_result: Sequence[Mapping[str, t.Container]] = self.search(
                     base_dn,
                     search_filter,
                     attributes,
@@ -261,7 +261,7 @@ class FlextTapLdapClient:
             attributes: t.StrSequence | None,
             ldap_scope: str,
             size_limit: int,
-        ) -> Sequence[t.RecursiveContainerMapping]:
+        ) -> Sequence[Mapping[str, t.Container]]:
             """Perform actual LDAP search.
 
             Single Responsibility: Handle only search execution.

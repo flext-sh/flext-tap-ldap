@@ -104,7 +104,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS:
                     return bool(self.dn and self.dn.strip())
 
-            def parse_dn(self) -> t.RecursiveContainerMapping:
+            def parse_dn(self) -> Mapping[str, t.Container]:
                 """Parse DN into components using flext-ldif DN parsing."""
                 try:
                     dn_obj = FlextTapLdapUtilitiesProcessorMixin.TapLdap.DistinguishedName(
@@ -199,7 +199,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             @staticmethod
             def _to_ldif_entry(
-                raw_value: t.RecursiveContainerMapping,
+                raw_value: Mapping[str, t.Container],
             ) -> m.Ldif.Entry | None:
                 """Validate and coerce value to LDIF entry model."""
                 try:
@@ -267,7 +267,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     if entry.has_object_class(object_class)
                 ]
 
-            def statistics(self) -> t.RecursiveContainerMapping:
+            def statistics(self) -> Mapping[str, t.Container]:
                 """Get parsing statistics."""
                 return {
                     "processed_entries": self.processed_entries,
@@ -366,9 +366,9 @@ class FlextTapLdapUtilitiesProcessorMixin:
             def to_singer_format(
                 self,
                 _stream_name: str,
-            ) -> Sequence[t.RecursiveContainerMapping]:
+            ) -> Sequence[Mapping[str, t.Container]]:
                 """Convert LDIF entries to Singer record format."""
-                records: Sequence[t.RecursiveContainerMapping] = [
+                records: Sequence[Mapping[str, t.Container]] = [
                     {
                         "type": "RECORD",
                         "stream": _stream_name,
@@ -481,7 +481,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 self.warnings: MutableSequence[str] = []
                 self._api = ldif()
 
-            def validation_results(self) -> t.RecursiveContainerMapping:
+            def validation_results(self) -> Mapping[str, t.Container]:
                 """Get validation results."""
                 return {
                     "errors": list(self.validation_errors),
@@ -492,7 +492,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
             def validate_entries(
                 self,
                 entries: Sequence[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry],
-            ) -> t.RecursiveContainerMapping:
+            ) -> Mapping[str, t.Container]:
                 """Validate a list of LDIF entries using flext-ldif."""
                 valid_count = 0
                 invalid_count = 0
@@ -533,7 +533,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
             @override
             def __init__(
                 self,
-                transformation_rules: t.RecursiveContainerMapping | None = None,
+                transformation_rules: Mapping[str, t.Container] | None = None,
             ) -> None:
                 """Initialize transformer with optional transformation rules."""
                 self.transformation_rules = dict(transformation_rules or {})
@@ -560,7 +560,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
             def apply_schema_mappings(
                 self,
                 entry: FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry,
-                schema_mappings: t.RecursiveContainerMapping,
+                schema_mappings: Mapping[str, t.Container],
             ) -> FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry:
                 """Apply schema mappings to normalize output attributes."""
                 transformed_entry = FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry(
@@ -576,13 +576,13 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     if isinstance(mapping, str):
                         source_attr = mapping
                     else:
-                        mapping_dict: t.RecursiveContainerMapping = (
+                        mapping_dict: Mapping[str, t.Container] = (
                             dict(mapping) if isinstance(mapping, Mapping) else {}
                         )
-                        source_raw: t.RecursiveContainer = mapping_dict.get("source")
+                        source_raw: t.Container = mapping_dict.get("source")
                         if isinstance(source_raw, str):
                             source_attr = source_raw
-                        default_raw: t.RecursiveContainer = mapping_dict.get("default")
+                        default_raw: t.Container = mapping_dict.get("default")
                         if isinstance(default_raw, list):
                             default_values = [str(value) for value in default_raw]
                         elif default_raw is not None:
@@ -610,36 +610,32 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 )
                 transformed.change_type = entry.change_type
                 transformed.controls = list(entry.controls)
-                raw_schema_mappings: t.RecursiveContainer = (
-                    self.transformation_rules.get(
-                        "schema_mappings",
-                    )
+                raw_schema_mappings: t.Container = self.transformation_rules.get(
+                    "schema_mappings",
                 )
                 if isinstance(raw_schema_mappings, dict):
-                    schema_map: t.RecursiveContainerMapping = raw_schema_mappings
+                    schema_map: Mapping[str, t.Container] = raw_schema_mappings
                     transformed = self.apply_schema_mappings(transformed, schema_map)
-                raw_mappings: t.RecursiveContainer = self.transformation_rules.get(
+                raw_mappings: t.Container = self.transformation_rules.get(
                     "attribute_mappings",
                 )
                 mappings: t.MutableStrMapping = {}
                 if isinstance(raw_mappings, dict):
-                    attr_map: t.RecursiveContainerMapping = raw_mappings
+                    attr_map: Mapping[str, t.Container] = raw_mappings
                     mappings.update({
                         k: str(v) for k, v in attr_map.items() if isinstance(v, str)
                     })
                 if mappings:
                     transformed = self.apply_attribute_mappings(transformed, mappings)
-                raw_value_mappings: t.RecursiveContainer = (
-                    self.transformation_rules.get(
-                        "attribute_value_mappings",
-                    )
+                raw_value_mappings: t.Container = self.transformation_rules.get(
+                    "attribute_value_mappings",
                 )
                 if isinstance(raw_value_mappings, dict):
-                    vm_dict: t.RecursiveContainerMapping = raw_value_mappings
+                    vm_dict: Mapping[str, t.Container] = raw_value_mappings
                     for vm_key, vm_val in vm_dict.items():
                         if not isinstance(vm_val, dict):
                             continue
-                        val_map: t.RecursiveContainerMapping = vm_val
+                        val_map: Mapping[str, t.Container] = vm_val
                         existing_values = transformed.attributes.get(vm_key)
                         if existing_values is None:
                             continue
@@ -647,22 +643,18 @@ class FlextTapLdapUtilitiesProcessorMixin:
                             str(val_map.get(value, value)) for value in existing_values
                         ]
                         transformed.attributes[vm_key] = mapped_values
-                raw_remove_attributes: t.RecursiveContainer = (
-                    self.transformation_rules.get(
-                        "remove_attributes",
-                    )
+                raw_remove_attributes: t.Container = self.transformation_rules.get(
+                    "remove_attributes",
                 )
                 if isinstance(raw_remove_attributes, list):
                     remove_list: t.RecursiveContainerList = raw_remove_attributes
                     for rm_item in remove_list:
                         transformed.attributes.pop(str(rm_item), None)
-                raw_add_attributes: t.RecursiveContainer = (
-                    self.transformation_rules.get(
-                        "add_attributes",
-                    )
+                raw_add_attributes: t.Container = self.transformation_rules.get(
+                    "add_attributes",
                 )
                 if isinstance(raw_add_attributes, dict):
-                    add_dict: t.RecursiveContainerMapping = raw_add_attributes
+                    add_dict: Mapping[str, t.Container] = raw_add_attributes
                     for add_key, add_val in add_dict.items():
                         if isinstance(add_val, list):
                             transformed.add_attribute(

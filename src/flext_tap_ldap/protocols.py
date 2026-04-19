@@ -36,13 +36,13 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
         """
 
         @runtime_checkable
-        class LdapConnection(FlextLdapProtocols.Service[t.ConfigMap], Protocol):
+        class LdapConnection(FlextLdapProtocols.Service[m.ConfigMap], Protocol):
             """Protocol for LDAP database connection management."""
 
             def connect(
                 self,
-                settings: t.ConfigMap,
-            ) -> FlextMeltanoProtocols.Result[t.ConfigMap]:
+                settings: m.ConfigMap,
+            ) -> FlextMeltanoProtocols.Result[m.ConfigMap]:
                 """Connect to LDAP database with provided configuration."""
                 ...
 
@@ -52,18 +52,18 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
             def test_connection(
                 self,
-                settings: t.ConfigMap,
+                settings: m.ConfigMap,
             ) -> FlextMeltanoProtocols.Result[bool]:
                 """Test LDAP database connection with validation."""
                 ...
 
         @runtime_checkable
-        class DirectoryDiscovery(FlextLdapProtocols.Service[t.ConfigMap], Protocol):
+        class DirectoryDiscovery(FlextLdapProtocols.Service[m.ConfigMap], Protocol):
             """Protocol for LDAP directory discovery."""
 
             def discover_base_dns(
                 self,
-                settings: t.ConfigMap,
+                settings: m.ConfigMap,
             ) -> FlextMeltanoProtocols.Result[t.StrSequence]:
                 """Discover available base DNs in LDAP directory."""
                 ...
@@ -78,7 +78,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
             def fetch_directory_metadata(
                 self,
                 base_dn: str,
-            ) -> FlextMeltanoProtocols.Result[t.ConfigMap]:
+            ) -> FlextMeltanoProtocols.Result[m.ConfigMap]:
                 """Get LDAP directory metadata and schema information."""
                 ...
 
@@ -91,7 +91,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 base_dn: str,
                 filter_str: str,
                 attributes: t.StrSequence | None = None,
-            ) -> FlextMeltanoProtocols.Result[Sequence[t.ConfigMap]]:
+            ) -> FlextMeltanoProtocols.Result[Sequence[m.ConfigMap]]:
                 """Extract LDAP entries matching filter."""
                 ...
 
@@ -99,7 +99,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 self,
                 dn: str,
                 attributes: t.StrSequence | None = None,
-            ) -> FlextMeltanoProtocols.Result[t.ConfigMap]:
+            ) -> FlextMeltanoProtocols.Result[m.ConfigMap]:
                 """Extract single LDAP entry by DN."""
                 ...
 
@@ -123,13 +123,13 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 ...
 
         @runtime_checkable
-        class StreamGeneration(FlextLdapProtocols.Service[t.ConfigMap], Protocol):
+        class StreamGeneration(FlextLdapProtocols.Service[m.ConfigMap], Protocol):
             """Protocol for Singer stream generation from LDAP."""
 
             def generate_streams_from_ldap(
                 self,
                 base_dn: str,
-                settings: t.ConfigMap,
+                settings: m.ConfigMap,
             ) -> FlextMeltanoProtocols.Result[m.Meltano.SingerCatalog]:
                 """Generate Singer streams from LDAP directory structure."""
                 ...
@@ -138,7 +138,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 self,
                 stream_name: str,
                 base_dn: str,
-                state: t.ConfigMap,
+                state: m.ConfigMap,
             ) -> FlextMeltanoProtocols.Result[m.Meltano.SingerStateMessage]:
                 """Sync Singer stream from LDAP entries."""
                 ...
@@ -179,7 +179,7 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 """Get tap configuration.
 
                 Returns:
-                    Tap configuration t.RecursiveContainer.
+                    Tap configuration t.Container.
 
                 """
                 ...

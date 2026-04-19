@@ -36,7 +36,7 @@ def _discover_stream_names(
     assert result.value is not None
     raw_entries = result.value["streams"]
     assert isinstance(raw_entries, Sequence)
-    stream_entries: Sequence[t.RecursiveContainerMapping] = [
+    stream_entries: Sequence[Mapping[str, t.Container]] = [
         entry for entry in raw_entries if isinstance(entry, Mapping)
     ]
     return [str(stream["stream"]) for stream in stream_entries], len(stream_entries)
@@ -460,7 +460,7 @@ class TestCustomStream:
 
     def test_custom_stream_schema_properties(self, mock_tap: Mock) -> None:
         """Test custom stream schema properties."""
-        custom_properties: t.RecursiveContainerMapping = {
+        custom_properties: Mapping[str, t.Container] = {
             "employeeNumber": {"type": "string"},
             "department": {"type": "string"},
             "manager": {"type": "string"},
@@ -513,7 +513,7 @@ class TestCustomStream:
 
     def test_custom_stream_schema_type_mappings(self, mock_tap: Mock) -> None:
         """Test custom stream schema type mappings."""
-        custom_properties: t.RecursiveContainerMapping = {
+        custom_properties: Mapping[str, t.Container] = {
             "StringField": {"type": "string"},
             "arrayu.Field": {"type": "array"},
             "booleanu.Field": {"type": "boolean"},
@@ -541,7 +541,7 @@ class TestStreamIntegration:
     """Integration tests for stream functionality."""
 
     @pytest.fixture
-    def tap_config(self) -> t.RecursiveContainerMapping:
+    def tap_config(self) -> Mapping[str, t.Container]:
         """Standard tap configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -555,7 +555,7 @@ class TestStreamIntegration:
         }
 
     def test_all_default_streams_creation(
-        self, tap_config: t.RecursiveContainerMapping
+        self, tap_config: Mapping[str, t.Container]
     ) -> None:
         """Test that all default streams can be created."""
         connection_config: dict[str, t.Scalar] = {}

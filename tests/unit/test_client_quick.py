@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import contextlib
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from unittest.mock import Mock, patch
 
 import pytest
@@ -62,7 +62,7 @@ class TestLDAPClientQuick:
     ) -> None:
         """Entry normalization uses the shared client support utility."""
         mail_values: t.StrSequence = ["test@example.com"]
-        dict_entry: t.RecursiveContainerMapping = {
+        dict_entry: Mapping[str, t.Container] = {
             "dn": "uid=dict,dc=example,dc=com",
             "attributes": {"mail": mail_values},
         }
@@ -71,7 +71,7 @@ class TestLDAPClientQuick:
         assert result.value["dn"] == "uid=dict,dc=example,dc=com"
         none_result = u.TapLdap.ClientSupport.to_entry_mapping(None)
         assert none_result.failure
-        simple_entry: t.RecursiveContainerMapping = {
+        simple_entry: Mapping[str, t.Container] = {
             "dn": "uid=test,dc=example,dc=com",
             "uid": "test",
             "cn": ["Test", "T. User"],
@@ -84,7 +84,7 @@ class TestLDAPClientQuick:
 
     def test_search_result_processing(self) -> None:
         """Search result normalization respects size limits and empty inputs."""
-        search_entries: Sequence[t.RecursiveContainerMapping] = [
+        search_entries: Sequence[Mapping[str, t.Container]] = [
             {"dn": "uid=user1,dc=test,dc=com", "uid": ["user1"]},
             {"dn": "uid=user2,dc=test,dc=com", "uid": ["user2"]},
         ]
@@ -193,7 +193,7 @@ class TestLDAPClientQuick:
         assert isinstance(attributes_raw, dict)
         attributes = attributes_raw
         assert "userPassword" in attributes
-        user_password: t.RecursiveContainer = attributes.get("userPassword")
+        user_password: t.Container = attributes.get("userPassword")
         assert isinstance(user_password, list)
         assert "hashed_password" in user_password
 
@@ -207,7 +207,7 @@ class TestLDAPClientQuick:
         attrs_raw2 = result.get("attributes")
         assert isinstance(attrs_raw2, dict)
         attributes = attrs_raw2
-        object_class: t.RecursiveContainer = attributes.get("objectClass")
+        object_class: t.Container = attributes.get("objectClass")
         assert isinstance(object_class, list)
         assert "organizationalUnit" in object_class
 
@@ -219,7 +219,7 @@ class TestLDAPClientQuick:
         attrs_raw3 = result.get("attributes")
         assert isinstance(attrs_raw3, dict)
         attributes = attrs_raw3
-        obj_classes: t.RecursiveContainer = attributes.get("objectClass")
+        obj_classes: t.Container = attributes.get("objectClass")
         assert isinstance(obj_classes, list)
         assert "organizationalUnit" in obj_classes
 
@@ -257,7 +257,7 @@ class TestLDAPClientQuick:
         """Test Oracle search result processing."""
         first_passwords: t.StrSequence = ["pass1"]
         second_uids: t.StrSequence = ["test2"]
-        search_results: Sequence[t.RecursiveContainerMapping] = [
+        search_results: Sequence[Mapping[str, t.Container]] = [
             {
                 "dn": "uid=test1,dc=oracle,dc=com",
                 "attributes": {"orclPassword": first_passwords},

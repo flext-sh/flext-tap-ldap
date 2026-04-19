@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -53,7 +53,7 @@ class TestLdifProcessor:
 
         seen: list[str] = []
 
-        def _process(ldif_file: str) -> Sequence[t.RecursiveContainerMapping]:
+        def _process(ldif_file: str) -> Sequence[Mapping[str, t.Container]]:
             seen.append(ldif_file)
             return [{"dn": ldif_file}]
 

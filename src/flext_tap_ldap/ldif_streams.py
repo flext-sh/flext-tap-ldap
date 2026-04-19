@@ -33,7 +33,7 @@ class FlextTapLdapLdifStreams:
             return []
 
     @staticmethod
-    def _as_counter_map(value: t.RecursiveContainer) -> t.HeaderMapping:
+    def _as_counter_map(value: t.Container) -> t.HeaderMapping:
         try:
             if not isinstance(value, dict):
                 return {}
@@ -86,8 +86,8 @@ class FlextTapLdapLdifStreams:
 
         def get_records(
             self,
-            context: t.RecursiveContainerMapping | None = None,
-        ) -> Iterator[t.RecursiveContainerMapping]:
+            context: Mapping[str, t.Container] | None = None,
+        ) -> Iterator[Mapping[str, t.Container]]:
             """Get LDIF records using flext-ldif processing."""
             _ = context
             self.logger.info("Processing LDIF files using flext-ldif library")
@@ -117,13 +117,13 @@ class FlextTapLdapLdifStreams:
         def _convert_entry_to_record(
             self,
             flext_entry: m.Ldif.Entry,
-        ) -> t.RecursiveContainerMapping:
+        ) -> Mapping[str, t.Container]:
             """Convert flext-ldif entry to Singer record."""
             dn_value = flext_entry.dn.value if flext_entry.dn is not None else ""
             attrs = flext_entry.attributes
             object_classes: t.StrSequence = []
             entry_type = "other"
-            entry_attrs: t.RecursiveContainerMapping = {}
+            entry_attrs: Mapping[str, t.Container] = {}
             if attrs is not None:
                 object_classes = attrs.get_values("objectClass")
                 entry_type = self._classify_entry_type(object_classes)
@@ -157,7 +157,7 @@ class FlextTapLdapLdifStreams:
                 return [str(value) for value in object_values]
             return []
 
-        def _process_ldap_directory(self) -> Iterator[t.RecursiveContainerMapping]:
+        def _process_ldap_directory(self) -> Iterator[Mapping[str, t.Container]]:
             host_raw = self.settings.get("ldap_host")
             base_dn_raw = self.settings.get("ldap_base_dn")
             if not isinstance(host_raw, str) or not host_raw:
@@ -172,7 +172,7 @@ class FlextTapLdapLdifStreams:
         def _process_ldif_file(
             self,
             ldif_file: str,
-        ) -> Iterable[t.RecursiveContainerMapping]:
+        ) -> Iterable[Mapping[str, t.Container]]:
             """Process single LDIF file using flext-ldif."""
             self.logger.info("Processing LDIF file: %s", ldif_file)
             try:
@@ -206,7 +206,7 @@ class FlextTapLdapLdifStreams:
             self.settings: t.ContainerValueMapping = getattr(tap, "tap_config", {})
             self._ldif_api = ldif()
             self._logger_instance: p.Logger | None = None
-            self.schema: t.RecursiveContainerMapping = {
+            self.schema: Mapping[str, t.Container] = {
                 "type": "object",
                 "properties": {
                     "analysis_id": {
@@ -237,8 +237,8 @@ class FlextTapLdapLdifStreams:
 
         def get_records(
             self,
-            context: t.RecursiveContainerMapping | None = None,
-        ) -> Iterator[t.RecursiveContainerMapping]:
+            context: Mapping[str, t.Container] | None = None,
+        ) -> Iterator[Mapping[str, t.Container]]:
             """Get analysis records using flext-ldif analysis capabilities."""
             _ = context
             self.logger.info("Generating LDIF analysis using flext-ldif library")
@@ -325,7 +325,7 @@ class FlextTapLdapLdifStreams:
                     "object_classes": {},
                 }
 
-        def _analyze_ldif_file(self, ldif_file: str) -> t.RecursiveContainerMapping:
+        def _analyze_ldif_file(self, ldif_file: str) -> Mapping[str, t.Container]:
             """Analyze single LDIF file using flext-ldif."""
             self.logger.info("Analyzing LDIF file: %s", ldif_file)
             try:
