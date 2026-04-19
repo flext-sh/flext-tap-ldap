@@ -13,8 +13,7 @@ from pathlib import Path
 import pytest
 from flext_tests import tk
 
-from flext_core import d
-from tests import c, p, t, u
+from tests import c, d, p, t, u
 
 logger = u.fetch_logger(__name__)
 

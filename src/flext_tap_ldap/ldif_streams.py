@@ -14,32 +14,32 @@ if TYPE_CHECKING:
     from flext_meltano import FlextMeltanoAbstractions
 
 
-def _as_object_list(
-    value: t.ContainerValue,
-) -> Sequence[t.ContainerValueMapping]:
-    try:
-        if not isinstance(value, (dict, list)):
-            return []
-        result = t.OBJECT_LIST_ADAPTER.validate_python(value)
-        return [dict(item) for item in result]
-    except c.ValidationError:
-        return []
-
-
-def _as_counter_map(value: t.RecursiveContainer) -> t.HeaderMapping:
-    try:
-        if not isinstance(value, dict):
-            return {}
-        return t.COUNTER_MAP_ADAPTER.validate_python(value)
-    except c.ValidationError:
-        return {}
-
-
 class FlextTapLdapLdifStreams:
     """LDIF stream processing container with nested stream classes.
 
     Consolidates all LDIF stream functionality following FlextTapLdap[Module] pattern.
     """
+
+    @staticmethod
+    def _as_object_list(
+        value: t.ContainerValue,
+    ) -> Sequence[t.ContainerValueMapping]:
+        try:
+            if not isinstance(value, (dict, list)):
+                return []
+            result = t.OBJECT_LIST_ADAPTER.validate_python(value)
+            return [dict(item) for item in result]
+        except c.ValidationError:
+            return []
+
+    @staticmethod
+    def _as_counter_map(value: t.RecursiveContainer) -> t.HeaderMapping:
+        try:
+            if not isinstance(value, dict):
+                return {}
+            return t.COUNTER_MAP_ADAPTER.validate_python(value)
+        except c.ValidationError:
+            return {}
 
     class LdifStream:
         """LDIF stream using flext-ldif for ALL processing.
@@ -92,7 +92,7 @@ class FlextTapLdapLdifStreams:
             _ = context
             self.logger.info("Processing LDIF files using flext-ldif library")
             raw_files = self.settings.get("ldif_files", [])
-            ldif_files = _as_object_list(raw_files)
+            ldif_files = FlextTapLdapLdifStreams._as_object_list(raw_files)
             ldif_directory = self.settings.get("ldif_directory")
             if ldif_files:
                 for ldif_file in ldif_files:
@@ -152,7 +152,7 @@ class FlextTapLdapLdifStreams:
         ) -> t.StrSequence:
             if isinstance(object_classes, str):
                 return [object_classes]
-            object_values = _as_object_list(object_classes)
+            object_values = FlextTapLdapLdifStreams._as_object_list(object_classes)
             if object_values:
                 return [str(value) for value in object_values]
             return []
@@ -243,7 +243,7 @@ class FlextTapLdapLdifStreams:
             _ = context
             self.logger.info("Generating LDIF analysis using flext-ldif library")
             raw_files = self.settings.get("ldif_files", [])
-            ldif_files = _as_object_list(raw_files)
+            ldif_files = FlextTapLdapLdifStreams._as_object_list(raw_files)
             ldif_directory = self.settings.get("ldif_directory")
             try:
                 total_entries = 0
@@ -263,7 +263,7 @@ class FlextTapLdapLdifStreams:
                                 total_entries += total_count_value
                             case _:
                                 pass
-                        validated_entry_types = _as_counter_map(
+                        validated_entry_types = FlextTapLdapLdifStreams._as_counter_map(
                             stats.get("entry_types", {}),
                         )
                         for entry_type, count in validated_entry_types.items():
@@ -271,8 +271,10 @@ class FlextTapLdapLdifStreams:
                             entry_types[entry_type] = (
                                 entry_types.get(entry_type, 0) + object_count
                             )
-                        validated_object_classes = _as_counter_map(
-                            stats.get("object_classes", {}),
+                        validated_object_classes = (
+                            FlextTapLdapLdifStreams._as_counter_map(
+                                stats.get("object_classes", {}),
+                            )
                         )
                         for obj_class, count in validated_object_classes.items():
                             object_count = int(count)
@@ -290,7 +292,7 @@ class FlextTapLdapLdifStreams:
                                 total_entries += total_count_value
                             case _:
                                 pass
-                        validated_entry_types = _as_counter_map(
+                        validated_entry_types = FlextTapLdapLdifStreams._as_counter_map(
                             stats.get("entry_types", {}),
                         )
                         for entry_type, count in validated_entry_types.items():
@@ -298,8 +300,10 @@ class FlextTapLdapLdifStreams:
                             entry_types[entry_type] = (
                                 entry_types.get(entry_type, 0) + object_count
                             )
-                        validated_object_classes = _as_counter_map(
-                            stats.get("object_classes", {}),
+                        validated_object_classes = (
+                            FlextTapLdapLdifStreams._as_counter_map(
+                                stats.get("object_classes", {}),
+                            )
                         )
                         for obj_class, count in validated_object_classes.items():
                             object_count = int(count)
