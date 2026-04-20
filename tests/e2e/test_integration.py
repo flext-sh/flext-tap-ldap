@@ -9,7 +9,11 @@ from __future__ import annotations
 
 import json
 import time
-from collections.abc import Generator, Mapping, Sequence
+from collections.abc import (
+    Generator,
+    Mapping,
+    Sequence,
+)
 from pathlib import Path
 from typing import cast
 from unittest.mock import Mock, patch

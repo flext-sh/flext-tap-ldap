@@ -11,7 +11,10 @@ from __future__ import annotations
 
 import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
-from collections.abc import Mapping, Sequence
+from collections.abc import (
+    Mapping,
+    Sequence,
+)
 
 from flext_ldap import FlextLdap
 from flext_tap_ldap import c, m, t, u
