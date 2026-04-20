@@ -17,6 +17,7 @@ from collections.abc import (
 )
 
 from flext_ldap import FlextLdap
+
 from flext_tap_ldap import c, m, t, u
 
 logger = u.fetch_logger(__name__)

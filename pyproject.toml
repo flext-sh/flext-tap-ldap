@@ -145,7 +145,14 @@ omit = [ "*/dependency_injector/providers.pyx" ]
 
 # [MANAGED] deptry
 [tool.deptry]
-known_first_party = [ "flext_core", "flext_ldap", "flext_meltano", "flext_tap_ldap" ]
+known_first_party = [
+  "flext-core",
+  "flext-ldap",
+  "flext-meltano",
+  "flext_tap_ldap",
+  "pydantic",
+  "pydantic-core",
+]
 pep621_dev_dependency_groups = [ "dev" ]
 
 [tool.hatch.metadata]
@@ -467,7 +474,14 @@ select = [ "ALL" ]
 [tool.ruff.lint.isort]
 combine-as-imports = true
 force-single-line = false
-known-first-party = [ "flext_core", "flext_ldap", "flext_meltano", "flext_tap_ldap" ]
+known-first-party = [
+  "flext-core",
+  "flext-ldap",
+  "flext-meltano",
+  "flext_tap_ldap",
+  "pydantic",
+  "pydantic-core",
+]
 split-on-trailing-comma = true
 
 [tool.ruff.lint.per-file-ignores]

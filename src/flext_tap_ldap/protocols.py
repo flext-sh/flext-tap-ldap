@@ -20,6 +20,7 @@ from typing import ClassVar, Protocol, runtime_checkable
 
 from flext_ldap import FlextLdapProtocols
 from flext_meltano import FlextMeltanoProtocols, m
+
 from flext_tap_ldap import t
 
 

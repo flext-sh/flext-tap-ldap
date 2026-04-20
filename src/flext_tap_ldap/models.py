@@ -19,6 +19,7 @@ from uuid import uuid4
 
 from flext_ldap import m
 from flext_meltano import FlextMeltanoModels, u
+
 from flext_tap_ldap import c
 
 if TYPE_CHECKING:

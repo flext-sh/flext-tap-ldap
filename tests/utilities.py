@@ -17,10 +17,10 @@ import types
 from pathlib import Path
 from typing import ClassVar, TextIO
 
-from flext_tests import FlextTestsUtilities
-
 from flext_core import FlextUtilities
 from flext_ldap import FlextLdapLdap3Wrappers
+from flext_tests import FlextTestsUtilities
+
 from flext_tap_ldap import FlextTapLdapUtilities
 from tests import c, p
 

@@ -18,8 +18,8 @@ from pathlib import Path
 from typing import ClassVar, override
 
 import click
-
 from flext_meltano import FlextMeltanoAbstractions
+
 from flext_tap_ldap import (
     FlextTapLdapLdifStreams,
     FlextTapLdapSettings,

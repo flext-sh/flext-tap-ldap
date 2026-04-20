@@ -19,9 +19,9 @@ from collections.abc import (
 from pathlib import Path
 from typing import override
 
+from flext_core import u
 from flext_ldif import ldif
 
-from flext_core import u
 from flext_tap_ldap import c, m, p, r, t
 
 
