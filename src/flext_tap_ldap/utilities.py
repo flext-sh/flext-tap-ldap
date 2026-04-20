@@ -48,10 +48,10 @@ class FlextTapLdapUtilities(
             @staticmethod
             def to_entry_mapping(
                 entry_data: p.Ldif.Entry | Mapping[str, t.Container] | None,
-            ) -> p.Result[t.MutableRecursiveContainerMapping]:
+            ) -> p.Result[t.MutableFlatContainerMapping]:
                 """Normalize LDAP entry payloads into the canonical mutable mapping contract."""
                 if entry_data is None:
-                    return r[t.MutableRecursiveContainerMapping].fail(
+                    return r[t.MutableFlatContainerMapping].fail(
                         "Cannot convert None entry data",
                     )
                 if isinstance(entry_data, p.Ldif.Entry):
@@ -62,21 +62,21 @@ class FlextTapLdapUtilities(
                         if entry_data.attributes is not None
                         else empty_attributes
                     )
-                    entry_mapping: t.MutableRecursiveContainerMapping = {"dn": dn_value}
+                    entry_mapping: t.MutableFlatContainerMapping = {"dn": dn_value}
                     for key_str, value in raw_attributes.items():
                         if len(value) == 1:
                             entry_mapping[str(key_str)] = value[0]
                         else:
                             entry_mapping[str(key_str)] = list(value)
-                    return r[t.MutableRecursiveContainerMapping].ok(entry_mapping)
-                normalized_mapping: t.MutableRecursiveContainerMapping = {}
+                    return r[t.MutableFlatContainerMapping].ok(entry_mapping)
+                normalized_mapping: t.MutableFlatContainerMapping = {}
                 for key, value in entry_data.items():
                     if isinstance(
                         value,
                         (str, int, float, bool, list, dict, type(None)),
                     ):
                         normalized_mapping[str(key)] = value
-                return r[t.MutableRecursiveContainerMapping].ok(normalized_mapping)
+                return r[t.MutableFlatContainerMapping].ok(normalized_mapping)
 
             @staticmethod
             def extend_attributes_with_oracle_support(
@@ -100,11 +100,11 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def normalize_oracle_entry(
-                entry: t.MutableRecursiveContainerMapping,
-            ) -> t.MutableRecursiveContainerMapping:
+                entry: t.MutableFlatContainerMapping,
+            ) -> t.MutableFlatContainerMapping:
                 """Normalize Oracle-specific LDAP entry attributes for downstream consumers."""
                 raw_attributes: t.Container = entry.get("attributes", {})
-                attributes: t.MutableRecursiveContainerMapping = {}
+                attributes: t.MutableFlatContainerMapping = {}
                 if not isinstance(raw_attributes, dict):
                     return entry
                 attributes.update(raw_attributes)
@@ -133,9 +133,9 @@ class FlextTapLdapUtilities(
                 search_result: Sequence[p.Ldif.Entry | Mapping[str, t.Container]],
                 *,
                 size_limit: int,
-            ) -> MutableSequence[t.MutableRecursiveContainerMapping]:
+            ) -> MutableSequence[t.MutableFlatContainerMapping]:
                 """Normalize LDAP search results into mutable mappings with optional size limiting."""
-                entries: MutableSequence[t.MutableRecursiveContainerMapping] = []
+                entries: MutableSequence[t.MutableFlatContainerMapping] = []
                 for index, entry_data in enumerate(search_result):
                     if size_limit > 0 and index >= size_limit:
                         break
@@ -154,12 +154,12 @@ class FlextTapLdapUtilities(
                 search_result: Sequence[p.Ldif.Entry | Mapping[str, t.Container]],
                 *,
                 oracle_oid_mode: bool,
-            ) -> MutableSequence[t.MutableRecursiveContainerMapping]:
+            ) -> MutableSequence[t.MutableFlatContainerMapping]:
                 """Normalize LDAP search results and apply Oracle-specific enrichment when requested."""
-                results: MutableSequence[t.MutableRecursiveContainerMapping] = []
+                results: MutableSequence[t.MutableFlatContainerMapping] = []
                 for entry in search_result:
                     if isinstance(entry, Mapping):
-                        entry_mapping: t.MutableRecursiveContainerMapping = {
+                        entry_mapping: t.MutableFlatContainerMapping = {
                             str(key): value for key, value in entry.items()
                         }
                     else:
@@ -282,7 +282,7 @@ class FlextTapLdapUtilities(
                 settings: Mapping[str, t.Container],
             ) -> p.Result[Mapping[str, t.Container]]:
                 """Validate LDAP configuration."""
-                config_map: t.MutableRecursiveContainerMapping = {
+                config_map: t.MutableFlatContainerMapping = {
                     str(key): value for key, value in settings.items()
                 }
                 required_fields = ["host", "base_dn"]

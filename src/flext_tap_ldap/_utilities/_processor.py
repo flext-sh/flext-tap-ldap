@@ -126,9 +126,9 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     empty_attrs: MutableSequence[str] = []
                     self.attributes[name] = empty_attrs
 
-            def to_dict(self) -> t.MutableRecursiveContainerMapping:
+            def to_dict(self) -> t.MutableFlatContainerMapping:
                 """Convert entry to dictionary format."""
-                entry_dict: t.MutableRecursiveContainerMapping = {
+                entry_dict: t.MutableFlatContainerMapping = {
                     "dn": self.dn,
                     "attributes": dict(self.attributes),
                 }
@@ -652,7 +652,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     "remove_attributes",
                 )
                 if isinstance(raw_remove_attributes, list):
-                    remove_list: t.RecursiveContainerList = raw_remove_attributes
+                    remove_list: t.FlatContainerList = raw_remove_attributes
                     for rm_item in remove_list:
                         transformed.attributes.pop(str(rm_item), None)
                 raw_add_attributes: t.Container = self.transformation_rules.get(

@@ -27,7 +27,7 @@ class FlextTapLdapLdifStreams:
 
     @staticmethod
     def _as_object_list(
-        value: t.ContainerValue,
+        value: t.Container,
     ) -> Sequence[t.ContainerValueMapping]:
         try:
             if not isinstance(value, (dict, list)):

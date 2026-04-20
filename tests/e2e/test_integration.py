@@ -133,7 +133,7 @@ class TestFlextTapLdapIntegration:
             "Sequence[Mapping[str, t.Container]]",
             catalog["streams"],
         )
-        stream_names: t.RecursiveContainerList = [s["tap_stream_id"] for s in streams]
+        stream_names: t.FlatContainerList = [s["tap_stream_id"] for s in streams]
         if "users" not in stream_names:
             stream_error: str = f"Expected {'users'} in {stream_names}"
             raise AssertionError(stream_error)
@@ -262,7 +262,7 @@ class TestFlextTapLdapIntegration:
             "Sequence[Mapping[str, t.Container]]",
             catalog["streams"],
         )
-        stream_names: t.RecursiveContainerList = [
+        stream_names: t.FlatContainerList = [
             s.get("tap_stream_id", s.get("stream")) for s in cat_streams
         ]
         if "service_accounts" not in stream_names:

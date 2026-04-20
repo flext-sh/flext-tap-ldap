@@ -575,7 +575,7 @@ class TestStreamIntegration:
 
     def test_streams_with_custom_configuration(
         self,
-        tap_config: t.MutableRecursiveContainerMapping,
+        tap_config: t.MutableFlatContainerMapping,
     ) -> None:
         """Test streams with custom configuration."""
         tap_config["custom_streams"] = [
@@ -596,7 +596,7 @@ class TestStreamIntegration:
         assert stream_count >= 4
         assert "users" in stream_names
 
-    def test_self(self, tap_config: t.MutableRecursiveContainerMapping) -> None:
+    def test_self(self, tap_config: t.MutableFlatContainerMapping) -> None:
         """Test method."""
         "Test LDIF streams are included when enabled."
         tap_config["enable_ldif_streams"] = True

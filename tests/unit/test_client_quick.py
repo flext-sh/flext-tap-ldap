@@ -183,7 +183,7 @@ class TestLDAPClientQuick:
         uid_values: t.StrSequence = ["test"]
         oracle_password_values: t.StrSequence = ["hashed_password"]
         object_classes: t.StrSequence = ["inetOrgPerson"]
-        entry: t.MutableRecursiveContainerMapping = {
+        entry: t.MutableFlatContainerMapping = {
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": {
                 "uid": uid_values,
@@ -202,7 +202,7 @@ class TestLDAPClientQuick:
 
         ou_values: t.StrSequence = ["test"]
         container_classes: t.StrSequence = ["orclContainer"]
-        entry_with_container: t.MutableRecursiveContainerMapping = {
+        entry_with_container: t.MutableFlatContainerMapping = {
             "dn": "ou=test,dc=oracle,dc=com",
             "attributes": {"ou": ou_values, "objectClass": container_classes},
         }
@@ -214,7 +214,7 @@ class TestLDAPClientQuick:
         assert isinstance(object_class, list)
         assert "organizationalUnit" in object_class
 
-        entry_string_oc: t.MutableRecursiveContainerMapping = {
+        entry_string_oc: t.MutableFlatContainerMapping = {
             "dn": "ou=test,dc=oracle,dc=com",
             "attributes": {"objectClass": "orclContainer"},
         }
@@ -226,7 +226,7 @@ class TestLDAPClientQuick:
         assert isinstance(obj_classes, list)
         assert "organizationalUnit" in obj_classes
 
-        entry_bad_attrs: t.MutableRecursiveContainerMapping = {
+        entry_bad_attrs: t.MutableFlatContainerMapping = {
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": "not_a_dict",
         }
