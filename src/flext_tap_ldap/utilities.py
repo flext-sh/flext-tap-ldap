@@ -9,14 +9,14 @@ from collections.abc import (
 )
 
 from flext_ldap import FlextLdapUtilities
-from flext_meltano import FlextMeltanoUtilities
+from flext_meltano import u
 
 from flext_tap_ldap import FlextTapLdapUtilitiesProcessorMixin, c, e, p, r, t
 
 
 class FlextTapLdapUtilities(
     FlextTapLdapUtilitiesProcessorMixin,
-    FlextMeltanoUtilities,
+    u,
     FlextLdapUtilities,
 ):
     """Unified LDAP tap utilities class."""

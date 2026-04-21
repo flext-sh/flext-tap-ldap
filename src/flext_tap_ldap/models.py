@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Annotated, Self
 from uuid import uuid4
 
 from flext_ldap import m
-from flext_meltano import FlextMeltanoModels, u
+from flext_meltano import m as meltano_m, u
 
 from flext_tap_ldap import c
 
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from flext_tap_ldap import t
 
 
-class FlextTapLdapModels(FlextMeltanoModels, m):
+class FlextTapLdapModels(meltano_m, m):
     """Complete models for LDAP tap operations extending m.
 
     Provides standardized models for all LDAP tap domain entities including:

@@ -10,11 +10,11 @@ from __future__ import annotations
 from enum import StrEnum, unique
 from typing import Final
 
-from flext_ldap import FlextLdapConstants
-from flext_meltano import FlextMeltanoConstants
+from flext_ldap import c as ldap_c
+from flext_meltano import c
 
 
-class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
+class FlextTapLdapConstants(c, ldap_c):
     """LDAP tap extraction-specific constants following FLEXT unified pattern.
 
     Inherits from FlextMeltanoConstants for universal constants, defines only
@@ -34,10 +34,8 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
         - c.DEFAULT_BATCH_SIZE (page size)
         """
 
-        DEFAULT_PAGE_SIZE: Final[int] = FlextMeltanoConstants.DEFAULT_BATCH_SIZE
-        DEFAULT_SEARCH_TIMEOUT: Final[int] = (
-            FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
-        )
+        DEFAULT_PAGE_SIZE: Final[int] = c.DEFAULT_BATCH_SIZE
+        DEFAULT_SEARCH_TIMEOUT: Final[int] = ldap_c.Ldap.ConnectionDefaults.TIMEOUT
 
         class Ldap:
             """LDAP tap-specific connection constants."""
@@ -70,7 +68,7 @@ class FlextTapLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
         class Connection:
             """LDAP tap connection configuration."""
 
-            DEFAULT_HOST: Final[str] = FlextLdapConstants.LOCALHOST
+            DEFAULT_HOST: Final[str] = ldap_c.LOCALHOST
             DEFAULT_BASE_DN: Final[str] = ""
 
         class Search:
