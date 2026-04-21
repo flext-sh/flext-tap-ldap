@@ -38,7 +38,7 @@ class FlextTapLdapStreams:
     class LDAPBaseStream:
         """Base class for LDAP streams with flext-ldap integration.
 
-        Implements FlextMeltanoProtocols.Singer.Stream protocol.
+        Implements the inherited Singer stream protocol.
         """
 
         @staticmethod

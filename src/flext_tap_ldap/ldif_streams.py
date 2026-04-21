@@ -49,7 +49,7 @@ class FlextTapLdapLdifStreams:
     class LdifStream:
         """LDIF stream using flext-ldif for ALL processing.
 
-        Implements FlextMeltanoProtocols.Singer.Stream protocol.
+        Implements the inherited Singer stream protocol.
         """
 
         primary_keys: ClassVar[t.StrSequence] = ["dn"]
@@ -198,7 +198,7 @@ class FlextTapLdapLdifStreams:
     class LdifAnalysisStream:
         """LDIF analysis stream using flext-ldif for ALL analysis.
 
-        Implements FlextMeltanoProtocols.Singer.Stream protocol.
+        Implements the inherited Singer stream protocol.
         """
 
         primary_keys: ClassVar[t.StrSequence] = ["analysis_id"]
