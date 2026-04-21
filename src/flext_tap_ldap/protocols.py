@@ -16,7 +16,7 @@ from __future__ import annotations
 from collections.abc import (
     Sequence,
 )
-from typing import ClassVar, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 from flext_ldap import FlextLdapProtocols
 from flext_meltano import m, p
@@ -149,8 +149,6 @@ class FlextTapLdapProtocols(p, FlextLdapProtocols):
         @runtime_checkable
         class TapConfig(Protocol):
             """Protocol for tap configuration interface."""
-
-            _flext_enforcement_exempt: ClassVar[bool] = True
 
             def resolve_config_value(
                 self,
