@@ -126,16 +126,19 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     empty_attrs: MutableSequence[str] = []
                     self.attributes[name] = empty_attrs
 
-            def to_dict(self) -> t.MutableFlatContainerMapping:
+            def to_dict(self) -> t.JsonMapping:
                 """Convert entry to dictionary format."""
-                entry_dict: t.MutableFlatContainerMapping = {
+                entry_dict: dict[str, t.JsonValue] = {
                     "dn": self.dn,
-                    "attributes": dict(self.attributes),
+                    "attributes": {
+                        key: [str(value) for value in values]
+                        for key, values in self.attributes.items()
+                    },
                 }
                 if self.change_type:
                     entry_dict["change_type"] = self.change_type
                 if self.controls:
-                    entry_dict["controls"] = self.controls
+                    entry_dict["controls"] = [str(control) for control in self.controls]
                 return entry_dict
 
             def update_attribute(
@@ -272,7 +275,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     if entry.has_object_class(object_class)
                 ]
 
-            def statistics(self) -> Mapping[str, t.Container]:
+            def statistics(self) -> t.JsonMapping:
                 """Get parsing statistics."""
                 return {
                     "processed_entries": self.processed_entries,
@@ -371,14 +374,20 @@ class FlextTapLdapUtilitiesProcessorMixin:
             def to_singer_format(
                 self,
                 _stream_name: str,
-            ) -> Sequence[Mapping[str, t.Container]]:
+            ) -> Sequence[t.JsonMapping]:
                 """Convert LDIF entries to Singer record format."""
-                records: Sequence[Mapping[str, t.Container]] = [
-                    {
+                records: Sequence[t.JsonMapping] = [
+                    t.Cli.JSON_MAPPING_ADAPTER.validate_python({
                         "type": "RECORD",
                         "stream": _stream_name,
-                        "record": {"dn": entry.dn, **dict(entry.attributes)},
-                    }
+                        "record": {
+                            "dn": entry.dn,
+                            **{
+                                key: [str(value) for value in values]
+                                for key, values in entry.attributes.items()
+                            },
+                        },
+                    })
                     for entry in self.entries
                 ]
                 return records
@@ -486,7 +495,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 self.warnings: MutableSequence[str] = []
                 self._api = ldif()
 
-            def validation_results(self) -> Mapping[str, t.Container]:
+            def validation_results(self) -> t.JsonMapping:
                 """Get validation results."""
                 return {
                     "errors": list(self.validation_errors),
@@ -497,7 +506,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
             def validate_entries(
                 self,
                 entries: Sequence[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry],
-            ) -> Mapping[str, t.Container]:
+            ) -> t.JsonMapping:
                 """Validate a list of LDIF entries using flext-ldif."""
                 valid_count = 0
                 invalid_count = 0
@@ -512,12 +521,12 @@ class FlextTapLdapUtilitiesProcessorMixin:
                         else:
                             invalid_count += 1
                     errors.extend(self.validation_errors)
-                return {
+                return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
                     "total_entries": len(entries),
                     "valid_entries": valid_count,
                     "invalid_entries": invalid_count,
                     "errors": errors,
-                }
+                })
 
             def validate_entry(
                 self,
@@ -538,10 +547,12 @@ class FlextTapLdapUtilitiesProcessorMixin:
             @override
             def __init__(
                 self,
-                transformation_rules: Mapping[str, t.Container] | None = None,
+                transformation_rules: t.JsonMapping | None = None,
             ) -> None:
                 """Initialize transformer with optional transformation rules."""
-                self.transformation_rules = dict(transformation_rules or {})
+                self.transformation_rules: dict[str, t.JsonValue] = dict(
+                    transformation_rules or {},
+                )
                 self._api = ldif()
 
             def apply_attribute_mappings(
@@ -565,7 +576,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
             def apply_schema_mappings(
                 self,
                 entry: FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry,
-                schema_mappings: Mapping[str, t.Container],
+                schema_mappings: t.JsonMapping,
             ) -> FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry:
                 """Apply schema mappings to normalize output attributes."""
                 transformed_entry = FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry(
@@ -581,13 +592,13 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     if isinstance(mapping, str):
                         source_attr = mapping
                     else:
-                        mapping_dict: Mapping[str, t.Container] = (
+                        mapping_dict: t.JsonMapping = (
                             dict(mapping) if isinstance(mapping, Mapping) else {}
                         )
-                        source_raw: t.Container = mapping_dict.get("source")
+                        source_raw: t.JsonValue | None = mapping_dict.get("source")
                         if isinstance(source_raw, str):
                             source_attr = source_raw
-                        default_raw: t.Container = mapping_dict.get("default")
+                        default_raw: t.JsonValue | None = mapping_dict.get("default")
                         if isinstance(default_raw, list):
                             default_values = [str(value) for value in default_raw]
                         elif default_raw is not None:
@@ -615,32 +626,32 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 )
                 transformed.change_type = entry.change_type
                 transformed.controls = list(entry.controls)
-                raw_schema_mappings: t.Container = self.transformation_rules.get(
+                raw_schema_mappings: t.JsonValue | None = self.transformation_rules.get(
                     "schema_mappings",
                 )
                 if isinstance(raw_schema_mappings, dict):
-                    schema_map: Mapping[str, t.Container] = raw_schema_mappings
+                    schema_map: t.JsonMapping = raw_schema_mappings
                     transformed = self.apply_schema_mappings(transformed, schema_map)
-                raw_mappings: t.Container = self.transformation_rules.get(
+                raw_mappings: t.JsonValue | None = self.transformation_rules.get(
                     "attribute_mappings",
                 )
                 mappings: t.MutableStrMapping = {}
                 if isinstance(raw_mappings, dict):
-                    attr_map: Mapping[str, t.Container] = raw_mappings
+                    attr_map: t.JsonMapping = raw_mappings
                     mappings.update({
                         k: str(v) for k, v in attr_map.items() if isinstance(v, str)
                     })
                 if mappings:
                     transformed = self.apply_attribute_mappings(transformed, mappings)
-                raw_value_mappings: t.Container = self.transformation_rules.get(
+                raw_value_mappings: t.JsonValue | None = self.transformation_rules.get(
                     "attribute_value_mappings",
                 )
                 if isinstance(raw_value_mappings, dict):
-                    vm_dict: Mapping[str, t.Container] = raw_value_mappings
+                    vm_dict: t.JsonMapping = raw_value_mappings
                     for vm_key, vm_val in vm_dict.items():
                         if not isinstance(vm_val, dict):
                             continue
-                        val_map: Mapping[str, t.Container] = vm_val
+                        val_map: t.JsonMapping = vm_val
                         existing_values = transformed.attributes.get(vm_key)
                         if existing_values is None:
                             continue
@@ -648,18 +659,20 @@ class FlextTapLdapUtilitiesProcessorMixin:
                             str(val_map.get(value, value)) for value in existing_values
                         ]
                         transformed.attributes[vm_key] = mapped_values
-                raw_remove_attributes: t.Container = self.transformation_rules.get(
-                    "remove_attributes",
+                raw_remove_attributes: t.JsonValue | None = (
+                    self.transformation_rules.get(
+                        "remove_attributes",
+                    )
                 )
                 if isinstance(raw_remove_attributes, list):
-                    remove_list: t.FlatContainerList = raw_remove_attributes
+                    remove_list: Sequence[t.JsonValue] = raw_remove_attributes
                     for rm_item in remove_list:
                         transformed.attributes.pop(str(rm_item), None)
-                raw_add_attributes: t.Container = self.transformation_rules.get(
+                raw_add_attributes: t.JsonValue | None = self.transformation_rules.get(
                     "add_attributes",
                 )
                 if isinstance(raw_add_attributes, dict):
-                    add_dict: Mapping[str, t.Container] = raw_add_attributes
+                    add_dict: t.JsonMapping = raw_add_attributes
                     for add_key, add_val in add_dict.items():
                         if isinstance(add_val, list):
                             transformed.add_attribute(

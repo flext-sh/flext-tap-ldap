@@ -48,11 +48,13 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def to_entry_mapping(
-                entry_data: p.Ldif.Entry | Mapping[str, t.Container] | None,
-            ) -> p.Result[t.MutableFlatContainerMapping]:
+                entry_data: p.Ldif.Entry
+                | Mapping[str, t.Container | t.StrSequence]
+                | None,
+            ) -> p.Result[t.Cli.JsonMapping]:
                 """Normalize LDAP entry payloads into the canonical mutable mapping contract."""
                 if entry_data is None:
-                    return r[t.MutableFlatContainerMapping].fail(
+                    return r[t.Cli.JsonMapping].fail(
                         "Cannot convert None entry data",
                     )
                 if isinstance(entry_data, p.Ldif.Entry):
@@ -63,21 +65,20 @@ class FlextTapLdapUtilities(
                         if entry_data.attributes is not None
                         else empty_attributes
                     )
-                    entry_mapping: t.MutableFlatContainerMapping = {"dn": dn_value}
+                    entry_mapping: dict[str, t.Cli.JsonValue] = {"dn": dn_value}
                     for key_str, value in raw_attributes.items():
                         if len(value) == 1:
                             entry_mapping[str(key_str)] = value[0]
                         else:
                             entry_mapping[str(key_str)] = list(value)
-                    return r[t.MutableFlatContainerMapping].ok(entry_mapping)
-                normalized_mapping: t.MutableFlatContainerMapping = {}
-                for key, value in entry_data.items():
-                    if isinstance(
-                        value,
-                        (str, int, float, bool, list, dict, type(None)),
-                    ):
-                        normalized_mapping[str(key)] = value
-                return r[t.MutableFlatContainerMapping].ok(normalized_mapping)
+                    return r[t.Cli.JsonMapping].ok(entry_mapping)
+                normalized_mapping = t.Cli.JSON_MAPPING_ADAPTER.validate_python(
+                    {
+                        str(key): u.Cli.normalize_json_value(value)
+                        for key, value in entry_data.items()
+                    },
+                )
+                return r[t.Cli.JsonMapping].ok(normalized_mapping)
 
             @staticmethod
             def extend_attributes_with_oracle_support(
@@ -101,13 +102,17 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def normalize_oracle_entry(
-                entry: t.MutableFlatContainerMapping,
-            ) -> t.MutableFlatContainerMapping:
+                entry: t.Cli.JsonMapping,
+            ) -> t.Cli.JsonMapping:
                 """Normalize Oracle-specific LDAP entry attributes for downstream consumers."""
-                raw_attributes: t.Container = entry.get("attributes", {})
-                attributes: t.MutableFlatContainerMapping = {}
+                normalized_entry: dict[str, t.Cli.JsonValue] = {
+                    str(key): u.Cli.normalize_json_value(value)
+                    for key, value in entry.items()
+                }
+                raw_attributes: t.Cli.JsonValue = normalized_entry.get("attributes", {})
+                attributes: dict[str, t.Cli.JsonValue] = {}
                 if not isinstance(raw_attributes, dict):
-                    return entry
+                    return normalized_entry
                 attributes.update(raw_attributes)
                 if "orclPassword" in attributes:
                     password_value = attributes.get("orclPassword")
@@ -125,18 +130,22 @@ class FlextTapLdapUtilities(
                         and "organizationalUnit" not in object_classes
                     ):
                         object_classes.append("organizationalUnit")
-                        attributes["objectClass"] = object_classes
-                entry["attributes"] = attributes
-                return entry
+                        attributes["objectClass"] = u.Cli.normalize_json_value(
+                            object_classes,
+                        )
+                normalized_entry["attributes"] = attributes
+                return normalized_entry
 
             @staticmethod
             def process_search_results(
-                search_result: Sequence[p.Ldif.Entry | Mapping[str, t.Container]],
+                search_result: Sequence[
+                    p.Ldif.Entry | Mapping[str, t.Container | t.StrSequence]
+                ],
                 *,
                 size_limit: int,
-            ) -> MutableSequence[t.MutableFlatContainerMapping]:
+            ) -> MutableSequence[t.Cli.JsonMapping]:
                 """Normalize LDAP search results into mutable mappings with optional size limiting."""
-                entries: MutableSequence[t.MutableFlatContainerMapping] = []
+                entries: MutableSequence[t.Cli.JsonMapping] = []
                 for index, entry_data in enumerate(search_result):
                     if size_limit > 0 and index >= size_limit:
                         break
@@ -152,17 +161,26 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def process_oracle_search_results(
-                search_result: Sequence[p.Ldif.Entry | Mapping[str, t.Container]],
+                search_result: Sequence[
+                    p.Ldif.Entry
+                    | t.Cli.JsonMapping
+                    | Mapping[str, t.Container | t.StrSequence]
+                ],
                 *,
                 oracle_oid_mode: bool,
-            ) -> MutableSequence[t.MutableFlatContainerMapping]:
+            ) -> MutableSequence[t.Cli.JsonMapping]:
                 """Normalize LDAP search results and apply Oracle-specific enrichment when requested."""
-                results: MutableSequence[t.MutableFlatContainerMapping] = []
+                results: MutableSequence[t.Cli.JsonMapping] = []
                 for entry in search_result:
                     if isinstance(entry, Mapping):
-                        entry_mapping: t.MutableFlatContainerMapping = {
-                            str(key): value for key, value in entry.items()
-                        }
+                        entry_mapping: t.Cli.JsonMapping = (
+                            t.Cli.JSON_MAPPING_ADAPTER.validate_python(
+                                {
+                                    str(key): u.Cli.normalize_json_value(value)
+                                    for key, value in entry.items()
+                                },
+                            )
+                        )
                     else:
                         convert_result = FlextTapLdapUtilities.TapLdap.ClientSupport.to_entry_mapping(
                             entry,
