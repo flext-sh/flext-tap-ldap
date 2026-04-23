@@ -12,7 +12,6 @@ from __future__ import annotations
 import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
 from collections.abc import (
-    Mapping,
     Sequence,
 )
 
@@ -73,7 +72,7 @@ class FlextTapLdapClient:
             )
             self._initialize_flext_api(client_config)
 
-        def __getattr__(self, name: str) -> Mapping[str, t.Container]:
+        def __getattr__(self, name: str) -> t.JsonMapping:
             """Delegate unknown attributes to the real API."""
             return getattr(self._flext_api, name)
 
@@ -108,7 +107,7 @@ class FlextTapLdapClient:
             attributes: t.StrSequence | None = None,
             scope: str = "SUBTREE",
             size_limit: int = 0,
-        ) -> Sequence[t.Cli.JsonMapping]:
+        ) -> Sequence[t.JsonMapping]:
             """Search for entries using flext-ldap infrastructure (synchronous).
 
             Returns a list of entries for testing convenience with Singer streams.
@@ -131,7 +130,7 @@ class FlextTapLdapClient:
             attributes: t.StrSequence | None = None,
             *,
             oracle_oid_mode: bool = False,
-        ) -> Sequence[t.Cli.JsonMapping]:
+        ) -> Sequence[t.JsonMapping]:
             """Search with Oracle OID support for testing convenience.
 
             Refactored using Single Responsibility Principle to reduce complexity.
@@ -212,7 +211,7 @@ class FlextTapLdapClient:
             attributes: t.StrSequence | None,
             *,
             oracle_oid_mode: bool,
-        ) -> Sequence[t.Cli.JsonMapping]:
+        ) -> Sequence[t.JsonMapping]:
             """Execute Oracle search in new event loop.
 
             Single Responsibility: Handle only event loop management for Oracle search.
@@ -220,7 +219,7 @@ class FlextTapLdapClient:
             loop = new_event_loop()
             set_event_loop(loop)
             try:
-                search_result: Sequence[t.Cli.JsonMapping] = self.search(
+                search_result: Sequence[t.JsonMapping] = self.search(
                     base_dn,
                     search_filter,
                     attributes,
@@ -265,7 +264,7 @@ class FlextTapLdapClient:
             attributes: t.StrSequence | None,
             ldap_scope: str,
             size_limit: int,
-        ) -> Sequence[t.Cli.JsonMapping]:
+        ) -> Sequence[t.JsonMapping]:
             """Perform actual LDAP search.
 
             Single Responsibility: Handle only search execution.

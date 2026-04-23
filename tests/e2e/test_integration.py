@@ -26,8 +26,8 @@ from flext_tap_ldap import CLI_COMMAND
 from tests import t, u
 
 
-def _extract_json_from_output(output: str) -> t.Container:
-    """Extract the JSON t.Container from CLI output that may contain log lines."""
+def _extract_json_from_output(output: str) -> t.JsonValue:
+    """Extract the JSON t.JsonValue from CLI output that may contain log lines."""
     for line in output.strip().splitlines():
         stripped = line.strip()
         if stripped.startswith("{"):
@@ -50,7 +50,7 @@ class TestFlextTapLdapIntegration:
         return CliRunner()
 
     @pytest.fixture
-    def mock_ldap_config(self) -> Mapping[str, t.Container]:
+    def mock_ldap_config(self) -> t.JsonMapping:
         """Mock LDAP configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -61,7 +61,7 @@ class TestFlextTapLdapIntegration:
         }
 
     @pytest.fixture
-    def sample_catalog(self) -> Mapping[str, t.Container]:
+    def sample_catalog(self) -> t.JsonMapping:
         """Sample catalog for testing."""
         return {
             "streams": [
@@ -74,32 +74,26 @@ class TestFlextTapLdapIntegration:
         }
 
     @pytest.fixture
-    def sample_state(self) -> Mapping[str, t.Container]:
+    def sample_state(self) -> t.JsonMapping:
         """Sample state for testing."""
         return {"bookmarks": {}}
 
     @pytest.fixture
-    def config_file(
-        self, tmp_path: Path, mock_ldap_config: Mapping[str, t.Container]
-    ) -> Path:
+    def config_file(self, tmp_path: Path, mock_ldap_config: t.JsonMapping) -> Path:
         """Create temporary settings file."""
         config_path = tmp_path / "settings.json"
         u.Cli.json_write(config_path, mock_ldap_config)
         return config_path
 
     @pytest.fixture
-    def catalog_file(
-        self, tmp_path: Path, sample_catalog: Mapping[str, t.Container]
-    ) -> Path:
+    def catalog_file(self, tmp_path: Path, sample_catalog: t.JsonMapping) -> Path:
         """Create temporary catalog file."""
         catalog_path = tmp_path / "catalog.json"
         u.Cli.json_write(catalog_path, sample_catalog)
         return catalog_path
 
     @pytest.fixture
-    def state_file(
-        self, tmp_path: Path, sample_state: Mapping[str, t.Container]
-    ) -> Path:
+    def state_file(self, tmp_path: Path, sample_state: t.JsonMapping) -> Path:
         """Create a state file fixture for testing."""
         state_path = tmp_path / "state.json"
         u.Cli.json_write(state_path, sample_state)
@@ -129,11 +123,11 @@ class TestFlextTapLdapIntegration:
         if "streams" not in catalog:
             catalog_error: str = f"Expected {'streams'} in {catalog}"
             raise AssertionError(catalog_error)
-        streams: Sequence[Mapping[str, t.Container]] = cast(
-            "Sequence[Mapping[str, t.Container]]",
+        streams: Sequence[t.JsonMapping] = cast(
+            "Sequence[t.JsonMapping]",
             catalog["streams"],
         )
-        stream_names: t.FlatContainerList = [s["tap_stream_id"] for s in streams]
+        stream_names: t.JsonList = [s["tap_stream_id"] for s in streams]
         if "users" not in stream_names:
             stream_error: str = f"Expected {'users'} in {stream_names}"
             raise AssertionError(stream_error)
@@ -168,7 +162,7 @@ class TestFlextTapLdapIntegration:
             exit_error: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(exit_error)
         lines = result.output.strip().split("\n")
-        messages: list[Mapping[str, t.Container]] = []
+        messages: list[t.JsonMapping] = []
         for line in lines:
             if not line:
                 continue
@@ -258,11 +252,11 @@ class TestFlextTapLdapIntegration:
             raise AssertionError(exit_error)
         catalog = _extract_json_from_output(result.output)
         assert isinstance(catalog, dict)
-        cat_streams: Sequence[Mapping[str, t.Container]] = cast(
-            "Sequence[Mapping[str, t.Container]]",
+        cat_streams: Sequence[t.JsonMapping] = cast(
+            "Sequence[t.JsonMapping]",
             catalog["streams"],
         )
-        stream_names: t.FlatContainerList = [
+        stream_names: t.JsonList = [
             s.get("tap_stream_id", s.get("stream")) for s in cat_streams
         ]
         if "service_accounts" not in stream_names:

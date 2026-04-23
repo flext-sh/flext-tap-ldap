@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import (
     Iterable,
     Iterator,
-    Mapping,
     Sequence,
 )
 from pathlib import Path
@@ -27,8 +26,8 @@ class FlextTapLdapLdifStreams:
 
     @staticmethod
     def _as_object_list(
-        value: t.Container,
-    ) -> Sequence[t.ContainerValueMapping]:
+        value: t.JsonValue,
+    ) -> Sequence[t.JsonMapping]:
         try:
             if not isinstance(value, (dict, list)):
                 return []
@@ -38,7 +37,7 @@ class FlextTapLdapLdifStreams:
             return []
 
     @staticmethod
-    def _as_counter_map(value: t.Container) -> t.HeaderMapping:
+    def _as_counter_map(value: t.JsonValue) -> t.HeaderMapping:
         try:
             if not isinstance(value, dict):
                 return {}
@@ -59,10 +58,12 @@ class FlextTapLdapLdifStreams:
             self.name = "ldif_entries"
             self.tap_stream_id = "ldif_entries"
             self.tap = tap
-            self.settings: t.ContainerValueMapping = getattr(tap, "tap_config", {})
+            self.settings: t.JsonMapping = t.Cli.JSON_MAPPING_ADAPTER.validate_python(
+                getattr(tap, "tap_config", {})
+            )
             self._ldif_api = ldif()
             self._logger_instance: p.Logger | None = None
-            self.schema = {
+            self.schema: t.JsonMapping = {
                 "type": "object",
                 "properties": {
                     "dn": {"type": "string", "description": "Distinguished Name"},
@@ -91,8 +92,8 @@ class FlextTapLdapLdifStreams:
 
         def get_records(
             self,
-            context: Mapping[str, t.Container] | None = None,
-        ) -> Iterator[Mapping[str, t.Container]]:
+            context: t.JsonMapping | None = None,
+        ) -> Iterator[t.JsonMapping]:
             """Get LDIF records using flext-ldif processing."""
             _ = context
             self.logger.info("Processing LDIF files using flext-ldif library")
@@ -122,17 +123,20 @@ class FlextTapLdapLdifStreams:
         def _convert_entry_to_record(
             self,
             flext_entry: m.Ldif.Entry,
-        ) -> Mapping[str, t.Container]:
+        ) -> t.JsonMapping:
             """Convert flext-ldif entry to Singer record."""
             dn_value = flext_entry.dn.value if flext_entry.dn is not None else ""
             attrs = flext_entry.attributes
             object_classes: t.StrSequence = []
             entry_type = "other"
-            entry_attrs: Mapping[str, t.Container] = {}
+            entry_attrs: t.JsonMapping = {}
             if attrs is not None:
                 object_classes = attrs.get_values("objectClass")
                 entry_type = self._classify_entry_type(object_classes)
-                entry_attrs = dict(attrs.attributes)
+                entry_attrs = {
+                    attr_name: [str(value) for value in attr_values]
+                    for attr_name, attr_values in attrs.attributes.items()
+                }
             return {
                 "dn": dn_value,
                 "entry_type": entry_type,
@@ -153,7 +157,7 @@ class FlextTapLdapLdifStreams:
 
         def _normalize_object_classes(
             self,
-            object_classes: t.ContainerValueMapping,
+            object_classes: t.JsonValue,
         ) -> t.StrSequence:
             if isinstance(object_classes, str):
                 return [object_classes]
@@ -162,7 +166,7 @@ class FlextTapLdapLdifStreams:
                 return [str(value) for value in object_values]
             return []
 
-        def _process_ldap_directory(self) -> Iterator[Mapping[str, t.Container]]:
+        def _process_ldap_directory(self) -> Iterator[t.JsonMapping]:
             host_raw = self.settings.get("ldap_host")
             base_dn_raw = self.settings.get("ldap_base_dn")
             if not isinstance(host_raw, str) or not host_raw:
@@ -177,7 +181,7 @@ class FlextTapLdapLdifStreams:
         def _process_ldif_file(
             self,
             ldif_file: str,
-        ) -> Iterable[Mapping[str, t.Container]]:
+        ) -> Iterable[t.JsonMapping]:
             """Process single LDIF file using flext-ldif."""
             self.logger.info("Processing LDIF file: %s", ldif_file)
             try:
@@ -208,10 +212,12 @@ class FlextTapLdapLdifStreams:
             self.name = "ldif_analysis"
             self.tap_stream_id = "ldif_analysis"
             self.tap = tap
-            self.settings: t.ContainerValueMapping = getattr(tap, "tap_config", {})
+            self.settings: t.JsonMapping = t.Cli.JSON_MAPPING_ADAPTER.validate_python(
+                getattr(tap, "tap_config", {})
+            )
             self._ldif_api = ldif()
             self._logger_instance: p.Logger | None = None
-            self.schema: Mapping[str, t.Container] = {
+            self.schema: t.JsonMapping = {
                 "type": "object",
                 "properties": {
                     "analysis_id": {
@@ -242,8 +248,8 @@ class FlextTapLdapLdifStreams:
 
         def get_records(
             self,
-            context: Mapping[str, t.Container] | None = None,
-        ) -> Iterator[Mapping[str, t.Container]]:
+            context: t.JsonMapping | None = None,
+        ) -> Iterator[t.JsonMapping]:
             """Get analysis records using flext-ldif analysis capabilities."""
             _ = context
             self.logger.info("Generating LDIF analysis using flext-ldif library")
@@ -330,7 +336,7 @@ class FlextTapLdapLdifStreams:
                     "object_classes": {},
                 }
 
-        def _analyze_ldif_file(self, ldif_file: str) -> Mapping[str, t.Container]:
+        def _analyze_ldif_file(self, ldif_file: str) -> t.JsonMapping:
             """Analyze single LDIF file using flext-ldif."""
             self.logger.info("Analyzing LDIF file: %s", ldif_file)
             try:

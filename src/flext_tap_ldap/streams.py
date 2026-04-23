@@ -42,7 +42,7 @@ class FlextTapLdapStreams:
         """
 
         @staticmethod
-        def coerce_positive_int(raw_value: t.Container, default: int) -> int:
+        def coerce_positive_int(raw_value: t.JsonValue, default: int) -> int:
             """Coerce value to positive integer with safe fallback."""
             try:
                 parsed = t.INTEGER_ADAPTER.validate_python(raw_value)
@@ -51,7 +51,7 @@ class FlextTapLdapStreams:
             return parsed if parsed > 0 else default
 
         @staticmethod
-        def coerce_optional_string(raw_value: t.Container) -> str | None:
+        def coerce_optional_string(raw_value: t.JsonValue) -> str | None:
             """Coerce value to string only when source is already string-like."""
             if raw_value is None:
                 return None
@@ -65,7 +65,7 @@ class FlextTapLdapStreams:
 
         @staticmethod
         def parse_connection_config(
-            raw_value: t.Container,
+            raw_value: t.JsonValue,
         ) -> m.TapLdap.LdapConnectionConfig:
             """Validate LDAP connection payload through Pydantic."""
             try:
@@ -98,7 +98,7 @@ class FlextTapLdapStreams:
 
         @staticmethod
         def parse_property_definition(
-            raw_value: t.Container,
+            raw_value: t.JsonValue,
         ) -> m.TapLdap.CustomPropertyDefinition:
             """Validate custom stream property definition through Pydantic."""
             try:
@@ -113,21 +113,21 @@ class FlextTapLdapStreams:
             self,
             tap: Tap,
             name: str | None = None,
-            schema: Mapping[str, t.Container] | None = None,
+            schema: t.JsonMapping | None = None,
         ) -> None:
             """Initialize the LDAP stream."""
             self.name = name
             self.tap_stream_id = name or "ldap_stream"
             self.schema = schema or {}
-            self.settings: Mapping[str, t.Container] = getattr(tap, "tap_config", {})
+            self.settings: t.JsonMapping = getattr(tap, "tap_config", {})
             self.client: FlextTapLdapClient.LDAPClient | None = None
             self.tap = tap
             self._create_ldap_client()
 
         def get_records(
             self,
-            context: Mapping[str, t.Container] | None = None,
-        ) -> Iterable[Mapping[str, t.Container]]:
+            context: t.JsonMapping | None = None,
+        ) -> Iterable[t.JsonMapping]:
             """Get records from LDAP - base implementation."""
             _context = context
             return []
@@ -198,7 +198,7 @@ class FlextTapLdapStreams:
             search_filter: str,
             base_dn: str | None = None,
             attributes: t.StrSequence | None = None,
-        ) -> Sequence[Mapping[str, t.Container]]:
+        ) -> Sequence[t.JsonMapping]:
             """Search LDAP directory with error handling."""
             if not self.client:
                 msg = "LDAP client is not available"
@@ -212,7 +212,7 @@ class FlextTapLdapStreams:
                         )
                     )
                     base_dn = connection_config.base_dn
-                results: Sequence[Mapping[str, t.Container]] = [
+                results: Sequence[t.JsonMapping] = [
                     dict(entry)
                     for entry in self.client.search(
                         base_dn=base_dn or "",
@@ -239,7 +239,7 @@ class FlextTapLdapStreams:
         def __init__(self, tap: Tap) -> None:
             """Initialize users stream."""
             name = "users"
-            schema: Mapping[str, t.Container] = {
+            schema = {
                 "type": "object",
                 "properties": {
                     "dn": {"type": "string", "description": "Distinguished Name"},
@@ -265,8 +265,8 @@ class FlextTapLdapStreams:
         @override
         def get_records(
             self,
-            context: Mapping[str, t.Container] | None = None,
-        ) -> Iterable[Mapping[str, t.Container]]:
+            context: t.JsonMapping | None = None,
+        ) -> Iterable[t.JsonMapping]:
             """Get user records from LDAP."""
             _context = context
             logger.info("Extracting LDAP users")
@@ -297,7 +297,7 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-            results: Sequence[Mapping[str, t.Container]] = self._search_ldap(
+            results: Sequence[t.JsonMapping] = self._search_ldap(
                 user_filter,
                 attributes=user_attributes,
             )
@@ -313,7 +313,7 @@ class FlextTapLdapStreams:
         def __init__(self, tap: Tap) -> None:
             """Initialize groups stream."""
             name = "groups"
-            schema: Mapping[str, t.Container] = {
+            schema = {
                 "type": "object",
                 "properties": {
                     "dn": {"type": "string", "description": "Distinguished Name"},
@@ -344,8 +344,8 @@ class FlextTapLdapStreams:
         @override
         def get_records(
             self,
-            context: Mapping[str, t.Container] | None = None,
-        ) -> Iterable[Mapping[str, t.Container]]:
+            context: t.JsonMapping | None = None,
+        ) -> Iterable[t.JsonMapping]:
             """Get group records from LDAP."""
             _context = context
             logger.info("Extracting LDAP groups")
@@ -370,7 +370,7 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-            results: Sequence[Mapping[str, t.Container]] = self._search_ldap(
+            results: Sequence[t.JsonMapping] = self._search_ldap(
                 group_filter,
                 attributes=group_attributes,
             )
@@ -385,7 +385,7 @@ class FlextTapLdapStreams:
         def __init__(self, tap: Tap) -> None:
             """Initialize organizational units stream."""
             name = "organizational_units"
-            schema: Mapping[str, t.Container] = {
+            schema = {
                 "type": "object",
                 "properties": {
                     "dn": {"type": "string", "description": "Distinguished Name"},
@@ -405,8 +405,8 @@ class FlextTapLdapStreams:
         @override
         def get_records(
             self,
-            context: Mapping[str, t.Container] | None = None,
-        ) -> Iterable[Mapping[str, t.Container]]:
+            context: t.JsonMapping | None = None,
+        ) -> Iterable[t.JsonMapping]:
             """Get organizational unit records from LDAP."""
             _context = context
             logger.info("Extracting LDAP organizational units")
@@ -418,7 +418,7 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-            results: Sequence[Mapping[str, t.Container]] = self._search_ldap(
+            results: Sequence[t.JsonMapping] = self._search_ldap(
                 ou_filter,
                 attributes=ou_attributes,
             )
@@ -433,7 +433,7 @@ class FlextTapLdapStreams:
         def __init__(self, tap: Tap) -> None:
             """Initialize schema stream."""
             name = "schema"
-            schema: Mapping[str, t.Container] = {
+            schema = {
                 "type": "object",
                 "properties": {
                     "objectClass": {
@@ -467,8 +467,8 @@ class FlextTapLdapStreams:
         @override
         def get_records(
             self,
-            context: Mapping[str, t.Container] | None = None,
-        ) -> Iterable[Mapping[str, t.Container]]:
+            context: t.JsonMapping | None = None,
+        ) -> Iterable[t.JsonMapping]:
             """Get schema records from LDAP."""
             _context = context
             logger.info("Extracting LDAP schema")
@@ -523,8 +523,8 @@ class FlextTapLdapStreams:
 
             def _map_prop(
                 name: str,
-                definition: t.Container,
-            ) -> Mapping[str, t.Container]:
+                definition: t.JsonValue,
+            ) -> t.JsonMapping:
                 parsed_definition = (
                     FlextTapLdapStreams.LDAPBaseStream.parse_property_definition(
                         definition,
@@ -547,11 +547,11 @@ class FlextTapLdapStreams:
                 return {"type": "string", "description": prop_desc}
 
             if params.schema_properties:
-                dynamic_properties: Mapping[str, Mapping[str, t.Container]] = {
+                dynamic_properties: Mapping[str, t.JsonMapping] = {
                     key: _map_prop(key, value)
                     for key, value in params.schema_properties.items()
                 }
-                schema: Mapping[str, t.Container] = {
+                schema = {
                     "type": "object",
                     "properties": {
                         "dn": {
@@ -595,14 +595,14 @@ class FlextTapLdapStreams:
         @override
         def get_records(
             self,
-            context: Mapping[str, t.Container] | None = None,
-        ) -> Iterable[Mapping[str, t.Container]]:
+            context: t.JsonMapping | None = None,
+        ) -> Iterable[t.JsonMapping]:
             """Get records using custom filter."""
             _context = context
             logger.info(
                 f"Extracting LDAP records for custom stream: {self.params.name}",
             )
-            results: Sequence[Mapping[str, t.Container]] = self._search_ldap(
+            results: Sequence[t.JsonMapping] = self._search_ldap(
                 self.params.search_filter,
             )
             yield from results

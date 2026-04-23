@@ -10,9 +10,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import (
-    Mapping,
-)
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Annotated, Self
 from uuid import uuid4
@@ -142,8 +139,8 @@ class FlextTapLdapModels(meltano_m, m):
             @classmethod
             def populate_aggregate_id(
                 cls,
-                data: Mapping[str, t.Container],
-            ) -> Mapping[str, t.Container]:
+                data: t.JsonMapping,
+            ) -> t.JsonMapping:
                 """Set aggregate_id from stream_name if not provided."""
                 if (
                     isinstance(data, dict)
@@ -189,8 +186,8 @@ class FlextTapLdapModels(meltano_m, m):
             @classmethod
             def populate_aggregate_id(
                 cls,
-                data: Mapping[str, t.Container],
-            ) -> Mapping[str, t.Container]:
+                data: t.JsonMapping,
+            ) -> t.JsonMapping:
                 """Set aggregate_id from stream_name if not provided."""
                 if (
                     isinstance(data, dict)
@@ -222,15 +219,15 @@ class FlextTapLdapModels(meltano_m, m):
                     description="Current status of the tap execution",
                 ),
             ] = "created"
-            settings: Mapping[str, t.Container] = u.Field(
+            settings: t.JsonMapping = u.Field(
                 default_factory=dict,
                 description="Execution configuration object",
             )
-            catalog: Mapping[str, t.Container] = u.Field(
+            catalog: t.JsonMapping = u.Field(
                 default_factory=dict,
                 description="Catalog data associated with the execution",
             )
-            state: Mapping[str, t.Container] = u.Field(
+            state: t.JsonMapping = u.Field(
                 default_factory=dict,
                 description="State data for the execution",
             )
@@ -346,8 +343,8 @@ class FlextTapLdapModels(meltano_m, m):
             @classmethod
             def populate_aggregate_id(
                 cls,
-                data: Mapping[str, t.Container],
-            ) -> Mapping[str, t.Container]:
+                data: t.JsonMapping,
+            ) -> t.JsonMapping:
                 """Set aggregate_id from server_uri if not provided."""
                 if (
                     isinstance(data, dict)
@@ -430,7 +427,7 @@ class FlextTapLdapModels(meltano_m, m):
             search_filter: str = u.Field(
                 description="LDAP filter expression for the custom stream",
             )
-            schema_properties: Mapping[str, t.Container] = u.Field(
+            schema_properties: t.JsonMapping = u.Field(
                 default_factory=dict,
                 description="Custom schema properties for the stream",
             )
@@ -460,7 +457,7 @@ class FlextTapLdapModels(meltano_m, m):
                 return self
 
         class LdapClientConfig(m.BaseModel):
-            """Parameter t.Container for LDAP client initialization."""
+            """Parameter t.JsonValue for LDAP client initialization."""
 
             host: str = u.Field(
                 description="LDAP server host name or address",
@@ -690,12 +687,12 @@ class FlextTapLdapModels(meltano_m, m):
                     description="Optional replication key for incremental replication",
                 ),
             ] = None
-            stream_schema: Mapping[str, t.Container] = u.Field(
+            stream_schema: t.JsonMapping = u.Field(
                 default_factory=dict,
                 description="Stream schema mapping for Singer records",
             )
 
-            def update_schema(self, schema: Mapping[str, t.Container]) -> None:
+            def update_schema(self, schema: t.JsonMapping) -> None:
                 """Update stream schema from mapping."""
                 self.stream_schema = dict(schema)
 

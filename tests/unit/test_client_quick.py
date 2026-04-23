@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import contextlib
 from collections.abc import (
-    Mapping,
     Sequence,
 )
 from unittest.mock import Mock, patch
@@ -65,7 +64,7 @@ class TestLDAPClientQuick:
     ) -> None:
         """Entry normalization uses the shared client support utility."""
         mail_values: t.StrSequence = ["test@example.com"]
-        dict_entry: Mapping[str, t.Container] = {
+        dict_entry = {
             "dn": "uid=dict,dc=example,dc=com",
             "attributes": {"mail": mail_values},
         }
@@ -74,7 +73,7 @@ class TestLDAPClientQuick:
         assert result.value["dn"] == "uid=dict,dc=example,dc=com"
         none_result = u.TapLdap.ClientSupport.to_entry_mapping(None)
         assert none_result.failure
-        simple_entry: Mapping[str, t.Container] = {
+        simple_entry = {
             "dn": "uid=test,dc=example,dc=com",
             "uid": "test",
             "cn": ["Test", "T. User"],
@@ -87,7 +86,7 @@ class TestLDAPClientQuick:
 
     def test_search_result_processing(self) -> None:
         """Search result normalization respects size limits and empty inputs."""
-        search_entries: Sequence[Mapping[str, t.Container]] = [
+        search_entries: Sequence[t.JsonMapping] = [
             {"dn": "uid=user1,dc=test,dc=com", "uid": ["user1"]},
             {"dn": "uid=user2,dc=test,dc=com", "uid": ["user2"]},
         ]
@@ -183,7 +182,7 @@ class TestLDAPClientQuick:
         uid_values: t.StrSequence = ["test"]
         oracle_password_values: t.StrSequence = ["hashed_password"]
         object_classes: t.StrSequence = ["inetOrgPerson"]
-        entry: t.MutableFlatContainerMapping = {
+        entry: t.MutableJsonMapping = {
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": {
                 "uid": uid_values,
@@ -196,13 +195,13 @@ class TestLDAPClientQuick:
         assert isinstance(attributes_raw, dict)
         attributes = attributes_raw
         assert "userPassword" in attributes
-        user_password: t.Container = attributes.get("userPassword")
+        user_password: t.JsonValue = attributes.get("userPassword")
         assert isinstance(user_password, list)
         assert "hashed_password" in user_password
 
         ou_values: t.StrSequence = ["test"]
         container_classes: t.StrSequence = ["orclContainer"]
-        entry_with_container: t.MutableFlatContainerMapping = {
+        entry_with_container: t.MutableJsonMapping = {
             "dn": "ou=test,dc=oracle,dc=com",
             "attributes": {"ou": ou_values, "objectClass": container_classes},
         }
@@ -210,11 +209,11 @@ class TestLDAPClientQuick:
         attrs_raw2 = result.get("attributes")
         assert isinstance(attrs_raw2, dict)
         attributes = attrs_raw2
-        object_class: t.Container = attributes.get("objectClass")
+        object_class: t.JsonValue = attributes.get("objectClass")
         assert isinstance(object_class, list)
         assert "organizationalUnit" in object_class
 
-        entry_string_oc: t.MutableFlatContainerMapping = {
+        entry_string_oc: t.MutableJsonMapping = {
             "dn": "ou=test,dc=oracle,dc=com",
             "attributes": {"objectClass": "orclContainer"},
         }
@@ -222,11 +221,11 @@ class TestLDAPClientQuick:
         attrs_raw3 = result.get("attributes")
         assert isinstance(attrs_raw3, dict)
         attributes = attrs_raw3
-        obj_classes: t.Container = attributes.get("objectClass")
+        obj_classes: t.JsonValue = attributes.get("objectClass")
         assert isinstance(obj_classes, list)
         assert "organizationalUnit" in obj_classes
 
-        entry_bad_attrs: t.MutableFlatContainerMapping = {
+        entry_bad_attrs: t.MutableJsonMapping = {
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": "not_a_dict",
         }
@@ -260,7 +259,7 @@ class TestLDAPClientQuick:
         """Test Oracle search result processing."""
         first_passwords: t.StrSequence = ["pass1"]
         second_uids: t.StrSequence = ["test2"]
-        search_results: Sequence[Mapping[str, t.Container]] = [
+        search_results: Sequence[t.JsonMapping] = [
             {
                 "dn": "uid=test1,dc=oracle,dc=com",
                 "attributes": {"orclPassword": first_passwords},

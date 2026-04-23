@@ -10,7 +10,6 @@ from __future__ import annotations
 from collections.abc import (
     Generator,
     Iterator,
-    Mapping,
 )
 from pathlib import Path
 
@@ -29,7 +28,7 @@ def project_root() -> Path:
 
 
 @pytest.fixture(scope="session")
-def sample_catalog() -> Mapping[str, t.Container]:
+def sample_catalog() -> t.JsonMapping:
     """Create a sample Singer catalog for testing."""
     return {
         "streams": [
@@ -118,7 +117,7 @@ def tap_config_file(tmp_path: Path, _ldap_container: None) -> Path:
 
 
 @pytest.fixture
-def catalog_file(tmp_path: Path, sample_catalog: Mapping[str, t.Container]) -> Path:
+def catalog_file(tmp_path: Path, sample_catalog: t.JsonMapping) -> Path:
     """Create catalog file for testing."""
     catalog_file = tmp_path / "catalog.json"
     u.Cli.json_write(catalog_file, sample_catalog)

@@ -109,7 +109,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS:
                     return bool(self.dn and self.dn.strip())
 
-            def parse_dn(self) -> Mapping[str, t.Container]:
+            def parse_dn(self) -> t.JsonMapping:
                 """Parse DN into components using flext-ldif DN parsing."""
                 try:
                     dn_obj = FlextTapLdapUtilitiesProcessorMixin.TapLdap.DistinguishedName(
@@ -128,7 +128,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             def to_dict(self) -> t.JsonMapping:
                 """Convert entry to dictionary format."""
-                entry_dict: dict[str, t.JsonValue] = {
+                entry_dict: t.JsonMapping = {
                     "dn": self.dn,
                     "attributes": {
                         key: [str(value) for value in values]
@@ -207,7 +207,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             @staticmethod
             def _to_ldif_entry(
-                raw_value: Mapping[str, t.Container],
+                raw_value: t.JsonMapping,
             ) -> m.Ldif.Entry | None:
                 """Validate and coerce value to LDIF entry model."""
                 try:
@@ -277,12 +277,13 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             def statistics(self) -> t.JsonMapping:
                 """Get parsing statistics."""
-                return {
+                result: t.JsonMapping = {
                     "processed_entries": self.processed_entries,
                     "skipped_entries": self.skipped_entries,
                     "errors": len(self.errors),
                     "error_messages": list(self.errors),
                 }
+                return result
 
             def load_from_file(self, file_path: Path) -> p.Result[str]:
                 """Load LDIF entries from file and return as r."""
@@ -497,11 +498,12 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             def validation_results(self) -> t.JsonMapping:
                 """Get validation results."""
-                return {
+                result: t.JsonMapping = {
                     "errors": list(self.validation_errors),
                     "warnings": list(self.warnings),
                     "valid": not self.validation_errors,
                 }
+                return result
 
             def validate_entries(
                 self,
@@ -550,7 +552,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 transformation_rules: t.JsonMapping | None = None,
             ) -> None:
                 """Initialize transformer with optional transformation rules."""
-                self.transformation_rules: dict[str, t.JsonValue] = dict(
+                self.transformation_rules: t.JsonMapping = dict(
                     transformation_rules or {},
                 )
                 self._api = ldif()
@@ -665,7 +667,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     )
                 )
                 if isinstance(raw_remove_attributes, list):
-                    remove_list: Sequence[t.JsonValue] = raw_remove_attributes
+                    remove_list: t.JsonList = raw_remove_attributes
                     for rm_item in remove_list:
                         transformed.attributes.pop(str(rm_item), None)
                 raw_add_attributes: t.JsonValue | None = self.transformation_rules.get(

@@ -9,9 +9,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import (
-    Mapping,
-)
 from typing import TYPE_CHECKING, Annotated, Never, override
 
 from flext_core import u
@@ -32,7 +29,7 @@ class FlextTapLdapService(FlextMeltanoTapServiceBase):
     @override
     def create_tap_instance(
         self,
-        settings: Mapping[str, t.Container] | None = None,
+        settings: t.JsonMapping | None = None,
     ) -> Never:
         """Not supported — use FlextTapLdapTap directly."""
         msg = "tap-ldap uses CLI dispatch, not singer_sdk.Tap"

@@ -26,36 +26,34 @@ class FlextTapLdapTypes(t, FlextLdapTypes):
     and all core ``t.*`` types via MRO inheritance.
     """
 
-    CONFIG_MAP_ADAPTER: u.TypeAdapter[t.ContainerValueMapping] = u.TypeAdapter(
-        t.ContainerValueMapping,
+    CONFIG_MAP_ADAPTER: u.TypeAdapter[t.JsonMapping] = u.TypeAdapter(
+        t.JsonMapping,
         config=m.ConfigDict(strict=False),
     )
-    STRICT_STR_ADAPTER: u.TypeAdapter[t.TextValue] = u.TypeAdapter(
-        t.TextValue,
+    STRICT_STR_ADAPTER: u.TypeAdapter[t.StrictStr] = u.TypeAdapter(
+        t.StrictStr,
         config=m.ConfigDict(strict=True),
     )
-    INTEGER_ADAPTER: u.TypeAdapter[t.IntegerValue] = u.TypeAdapter(
-        t.IntegerValue,
+    INTEGER_ADAPTER: u.TypeAdapter[t.StrictInt] = u.TypeAdapter(
+        t.StrictInt,
     )
-    OBJECT_LIST_ADAPTER: u.TypeAdapter[Sequence[t.ContainerValueMapping]] = (
-        u.TypeAdapter(
-            Sequence[t.ContainerValueMapping],
-            config=m.ConfigDict(strict=False),
-        )
+    OBJECT_LIST_ADAPTER: u.TypeAdapter[Sequence[t.JsonMapping]] = u.TypeAdapter(
+        Sequence[t.JsonMapping],
+        config=m.ConfigDict(strict=False),
     )
     COUNTER_MAP_ADAPTER: u.TypeAdapter[t.HeaderMapping] = u.TypeAdapter(
         t.HeaderMapping,
         config=m.ConfigDict(strict=False),
     )
-    SINGER_OUTPUT_ADAPTER: u.TypeAdapter[Mapping[str, t.Container]] = u.TypeAdapter(
-        Mapping[str, t.Container],
+    SINGER_OUTPUT_ADAPTER: u.TypeAdapter[t.JsonMapping] = u.TypeAdapter(
+        t.JsonMapping,
         config=m.ConfigDict(strict=False),
     )
-    CONFIG_STREAM_MAP_ADAPTER: u.TypeAdapter[
-        Mapping[str, Mapping[str, t.Container]]
-    ] = u.TypeAdapter(
-        Mapping[str, Mapping[str, t.Container]],
-        config=m.ConfigDict(strict=False),
+    CONFIG_STREAM_MAP_ADAPTER: u.TypeAdapter[Mapping[str, t.JsonMapping]] = (
+        u.TypeAdapter(
+            Mapping[str, t.JsonMapping],
+            config=m.ConfigDict(strict=False),
+        )
     )
 
 

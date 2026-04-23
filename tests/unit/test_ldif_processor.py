@@ -8,7 +8,6 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import (
-    Mapping,
     Sequence,
 )
 from pathlib import Path
@@ -56,7 +55,7 @@ class TestLdifProcessor:
 
         seen: list[str] = []
 
-        def _process(ldif_file: str) -> Sequence[Mapping[str, t.Container]]:
+        def _process(ldif_file: str) -> Sequence[t.JsonMapping]:
             seen.append(ldif_file)
             return [{"dn": ldif_file}]
 

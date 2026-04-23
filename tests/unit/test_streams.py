@@ -39,7 +39,7 @@ def _discover_stream_names(
     assert result.value is not None
     raw_entries = result.value["streams"]
     assert isinstance(raw_entries, Sequence)
-    stream_entries: Sequence[Mapping[str, t.Container]] = [
+    stream_entries: Sequence[t.JsonMapping] = [
         entry for entry in raw_entries if isinstance(entry, Mapping)
     ]
     return [str(stream["stream"]) for stream in stream_entries], len(stream_entries)
@@ -463,7 +463,7 @@ class TestCustomStream:
 
     def test_custom_stream_schema_properties(self, mock_tap: Mock) -> None:
         """Test custom stream schema properties."""
-        custom_properties: Mapping[str, t.Container] = {
+        custom_properties = {
             "employeeNumber": {"type": "string"},
             "department": {"type": "string"},
             "manager": {"type": "string"},
@@ -516,7 +516,7 @@ class TestCustomStream:
 
     def test_custom_stream_schema_type_mappings(self, mock_tap: Mock) -> None:
         """Test custom stream schema type mappings."""
-        custom_properties: Mapping[str, t.Container] = {
+        custom_properties = {
             "StringField": {"type": "string"},
             "arrayu.Field": {"type": "array"},
             "booleanu.Field": {"type": "boolean"},
@@ -544,7 +544,7 @@ class TestStreamIntegration:
     """Integration tests for stream functionality."""
 
     @pytest.fixture
-    def tap_config(self) -> Mapping[str, t.Container]:
+    def tap_config(self) -> t.JsonMapping:
         """Standard tap configuration."""
         return {
             "ldap_host": "test.ldap.com",
@@ -557,9 +557,7 @@ class TestStreamIntegration:
             "page_size": 1000,
         }
 
-    def test_all_default_streams_creation(
-        self, tap_config: Mapping[str, t.Container]
-    ) -> None:
+    def test_all_default_streams_creation(self, tap_config: t.JsonMapping) -> None:
         """Test that all default streams can be created."""
         connection_config: dict[str, t.Scalar] = {}
         for key, value in tap_config.items():
@@ -575,7 +573,7 @@ class TestStreamIntegration:
 
     def test_streams_with_custom_configuration(
         self,
-        tap_config: t.MutableFlatContainerMapping,
+        tap_config: t.MutableJsonMapping,
     ) -> None:
         """Test streams with custom configuration."""
         tap_config["custom_streams"] = [
@@ -596,7 +594,7 @@ class TestStreamIntegration:
         assert stream_count >= 4
         assert "users" in stream_names
 
-    def test_self(self, tap_config: t.MutableFlatContainerMapping) -> None:
+    def test_self(self, tap_config: t.MutableJsonMapping) -> None:
         """Test method."""
         "Test LDIF streams are included when enabled."
         tap_config["enable_ldif_streams"] = True

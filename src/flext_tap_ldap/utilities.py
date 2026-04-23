@@ -49,12 +49,12 @@ class FlextTapLdapUtilities(
             @staticmethod
             def to_entry_mapping(
                 entry_data: p.Ldif.Entry
-                | Mapping[str, t.Container | t.StrSequence]
+                | Mapping[str, t.JsonValue | t.StrSequence]
                 | None,
-            ) -> p.Result[t.Cli.JsonMapping]:
+            ) -> p.Result[t.JsonMapping]:
                 """Normalize LDAP entry payloads into the canonical mutable mapping contract."""
                 if entry_data is None:
-                    return r[t.Cli.JsonMapping].fail(
+                    return r[t.JsonMapping].fail(
                         "Cannot convert None entry data",
                     )
                 if isinstance(entry_data, p.Ldif.Entry):
@@ -65,20 +65,20 @@ class FlextTapLdapUtilities(
                         if entry_data.attributes is not None
                         else empty_attributes
                     )
-                    entry_mapping: dict[str, t.Cli.JsonValue] = {"dn": dn_value}
+                    entry_mapping: dict[str, t.JsonValue] = {"dn": dn_value}
                     for key_str, value in raw_attributes.items():
                         if len(value) == 1:
                             entry_mapping[str(key_str)] = value[0]
                         else:
                             entry_mapping[str(key_str)] = list(value)
-                    return r[t.Cli.JsonMapping].ok(entry_mapping)
+                    return r[t.JsonMapping].ok(entry_mapping)
                 normalized_mapping = t.Cli.JSON_MAPPING_ADAPTER.validate_python(
                     {
                         str(key): u.Cli.normalize_json_value(value)
                         for key, value in entry_data.items()
                     },
                 )
-                return r[t.Cli.JsonMapping].ok(normalized_mapping)
+                return r[t.JsonMapping].ok(normalized_mapping)
 
             @staticmethod
             def extend_attributes_with_oracle_support(
@@ -102,15 +102,15 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def normalize_oracle_entry(
-                entry: t.Cli.JsonMapping,
-            ) -> t.Cli.JsonMapping:
+                entry: t.JsonMapping,
+            ) -> t.JsonMapping:
                 """Normalize Oracle-specific LDAP entry attributes for downstream consumers."""
-                normalized_entry: dict[str, t.Cli.JsonValue] = {
+                normalized_entry: dict[str, t.JsonValue] = {
                     str(key): u.Cli.normalize_json_value(value)
                     for key, value in entry.items()
                 }
-                raw_attributes: t.Cli.JsonValue = normalized_entry.get("attributes", {})
-                attributes: dict[str, t.Cli.JsonValue] = {}
+                raw_attributes: t.JsonValue = normalized_entry.get("attributes", {})
+                attributes: dict[str, t.JsonValue] = {}
                 if not isinstance(raw_attributes, dict):
                     return normalized_entry
                 attributes.update(raw_attributes)
@@ -139,13 +139,13 @@ class FlextTapLdapUtilities(
             @staticmethod
             def process_search_results(
                 search_result: Sequence[
-                    p.Ldif.Entry | Mapping[str, t.Container | t.StrSequence]
+                    p.Ldif.Entry | Mapping[str, t.JsonValue | t.StrSequence]
                 ],
                 *,
                 size_limit: int,
-            ) -> MutableSequence[t.Cli.JsonMapping]:
+            ) -> MutableSequence[t.JsonMapping]:
                 """Normalize LDAP search results into mutable mappings with optional size limiting."""
-                entries: MutableSequence[t.Cli.JsonMapping] = []
+                entries: MutableSequence[t.JsonMapping] = []
                 for index, entry_data in enumerate(search_result):
                     if size_limit > 0 and index >= size_limit:
                         break
@@ -163,17 +163,17 @@ class FlextTapLdapUtilities(
             def process_oracle_search_results(
                 search_result: Sequence[
                     p.Ldif.Entry
-                    | t.Cli.JsonMapping
-                    | Mapping[str, t.Container | t.StrSequence]
+                    | t.JsonMapping
+                    | Mapping[str, t.JsonValue | t.StrSequence]
                 ],
                 *,
                 oracle_oid_mode: bool,
-            ) -> MutableSequence[t.Cli.JsonMapping]:
+            ) -> MutableSequence[t.JsonMapping]:
                 """Normalize LDAP search results and apply Oracle-specific enrichment when requested."""
-                results: MutableSequence[t.Cli.JsonMapping] = []
+                results: MutableSequence[t.JsonMapping] = []
                 for entry in search_result:
                     if isinstance(entry, Mapping):
-                        entry_mapping: t.Cli.JsonMapping = (
+                        entry_mapping: t.JsonMapping = (
                             t.Cli.JSON_MAPPING_ADAPTER.validate_python(
                                 {
                                     str(key): u.Cli.normalize_json_value(value)
@@ -203,8 +203,8 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def to_map(
-                value: t.Container,
-            ) -> t.ContainerValueMapping | None:
+                value: t.JsonValue,
+            ) -> t.JsonMapping | None:
                 """Convert a recursive container to the canonical mapping contract."""
                 try:
                     return t.CONFIG_MAP_ADAPTER.validate_python(value)
@@ -212,7 +212,7 @@ class FlextTapLdapUtilities(
                     return None
 
             @staticmethod
-            def to_str(value: t.Container) -> str | None:
+            def to_str(value: t.JsonValue) -> str | None:
                 """Convert a recursive container to a strict string contract."""
                 try:
                     return t.STRICT_STR_ADAPTER.validate_python(value)
@@ -298,35 +298,35 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def validate_ldap_config(
-                settings: Mapping[str, t.Container],
-            ) -> p.Result[Mapping[str, t.Container]]:
+                settings: t.JsonMapping,
+            ) -> p.Result[t.JsonMapping]:
                 """Validate LDAP configuration."""
-                config_map: t.MutableFlatContainerMapping = {
+                config_map: t.MutableJsonMapping = {
                     str(key): value for key, value in settings.items()
                 }
                 required_fields = ["host", "base_dn"]
                 for field in required_fields:
                     if field not in config_map:
-                        return r[Mapping[str, t.Container]].fail(
+                        return r[t.JsonMapping].fail(
                             f"Missing required LDAP field: {field}",
                         )
                     if not str(config_map[field]).strip():
-                        return r[Mapping[str, t.Container]].fail(
+                        return r[t.JsonMapping].fail(
                             f"Empty LDAP field: {field}",
                         )
                 if "port" in config_map:
                     try:
                         port = t.INTEGER_ADAPTER.validate_python(config_map["port"])
                     except c.ValidationError:
-                        return r[Mapping[str, t.Container]].fail(
+                        return r[t.JsonMapping].fail(
                             "LDAP port must be numeric",
                         )
                     if port <= 0 or port > c.TapLdap.Ldap.MAX_PORT:
-                        return r[Mapping[str, t.Container]].fail(
+                        return r[t.JsonMapping].fail(
                             f"LDAP port must be between 1 and {c.TapLdap.Ldap.MAX_PORT}",
                         )
                     config_map["port"] = port
-                return r[Mapping[str, t.Container]].ok(config_map)
+                return r[t.JsonMapping].ok(config_map)
 
 
 u = FlextTapLdapUtilities

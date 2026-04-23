@@ -86,7 +86,7 @@ class FlextTapLdapProtocols(p, FlextLdapProtocols):
                 ...
 
         @runtime_checkable
-        class LdapExtraction(FlextLdapProtocols.Service[t.Container], Protocol):
+        class LdapExtraction(FlextLdapProtocols.Service[t.JsonValue], Protocol):
             """Protocol for LDAP data extraction."""
 
             def extract_entries(
@@ -107,7 +107,7 @@ class FlextTapLdapProtocols(p, FlextLdapProtocols):
                 ...
 
         @runtime_checkable
-        class AttributeMapping(FlextLdapProtocols.Service[t.Container], Protocol):
+        class AttributeMapping(FlextLdapProtocols.Service[t.JsonValue], Protocol):
             """Protocol for LDAP to Singer attribute mapping."""
 
             def convert_attribute_value(
@@ -180,7 +180,7 @@ class FlextTapLdapProtocols(p, FlextLdapProtocols):
                 """Get tap configuration.
 
                 Returns:
-                    Tap configuration t.Container.
+                    Tap configuration t.JsonValue.
 
                 """
                 ...

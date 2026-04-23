@@ -61,7 +61,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         self._tap_config = value
 
     config_class: ClassVar[type[FlextTapLdapSettings]] = FlextTapLdapSettings
-    config_jsonschema: ClassVar[Mapping[str, t.Container]] = {
+    config_jsonschema: ClassVar[t.JsonValue] = {
         "type": "object",
         "properties": {
             "host": {"type": "string", "description": "LDAP server host"},
@@ -123,7 +123,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         tap_instance: m.Meltano.DataSourceConfig
         | m.Meltano.TapConfig
         | m.Meltano.TapInstance,
-    ) -> p.Result[Mapping[str, t.Container]]:
+    ) -> p.Result[t.JsonMapping]:
         """Discover available streams.
 
         Discovers standard LDAP streams (users, groups, organizational units, schema)
@@ -131,7 +131,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         """
         source_payload = tap_instance.model_dump(mode="python")
         raw_connection_config = source_payload.get("connection_config", {})
-        config_map: Mapping[str, Mapping[str, t.Container]] | t.ConfigurationMapping
+        config_map: Mapping[str, t.JsonMapping] | t.ConfigurationMapping
         try:
             config_map = t.CONFIG_STREAM_MAP_ADAPTER.validate_python(
                 raw_connection_config,
@@ -170,10 +170,10 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             for stream in streams
         ]
         stream_catalog: t.Meltano.SingerStreamCatalog = {"streams": streams_list}
-        return r[Mapping[str, t.Container]].ok(stream_catalog)
+        return r[t.JsonMapping].ok(stream_catalog)
 
     @override
-    def execute(self) -> p.Result[Mapping[str, t.Container]]:
+    def execute(self) -> p.Result[t.JsonMapping]:
         """Execute the tap and return execution state with stream discovery results."""
         discover_result = self.discover_streams(
             m.Meltano.TapConfig.model_validate({
@@ -187,24 +187,22 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             if discover_result.success
             else c.Meltano.StreamStatus.FAILED
         )
-        return r[Mapping[str, t.Container]].ok({
+        return r[t.JsonMapping].ok({
             "status": status,
             "tap_name": self.name,
             "streams_discovered": discover_result.success,
         })
 
     @staticmethod
-    def validate_custom_stream(raw_item: t.Container) -> t.StrMapping | None:
+    def validate_custom_stream(raw_item: t.JsonValue) -> t.StrMapping | None:
         """Validate a custom stream definition, returning name if valid."""
         try:
-            validated: Mapping[str, t.Container] = (
-                t.SINGER_OUTPUT_ADAPTER.validate_python(
-                    raw_item,
-                )
+            validated: t.JsonMapping = t.SINGER_OUTPUT_ADAPTER.validate_python(
+                raw_item,
             )
         except c.ValidationError:
             return None
-        name_val: t.Container = validated.get("name")
+        name_val: t.JsonValue = validated.get("name")
         if isinstance(name_val, str) and name_val:
             return {"name": name_val}
         return None
@@ -246,7 +244,7 @@ def _build_cli_command() -> click.Command:
         state_path: str | None,
     ) -> None:
         """Singer-compatible CLI for LDAP data extraction."""
-        raw_config: Mapping[str, t.Container] = t.SINGER_OUTPUT_ADAPTER.validate_json(
+        raw_config: t.JsonMapping = t.SINGER_OUTPUT_ADAPTER.validate_json(
             Path(config_path).read_bytes(),
         )
         config_data: t.MutableConfigurationMapping = {
@@ -268,12 +266,12 @@ def _build_cli_command() -> click.Command:
             if result.success and result.value:
                 catalog = result.value
                 raw_streams = catalog.get("streams", [])
-                catalog_streams: MutableSequence[Mapping[str, t.Container]] = []
+                catalog_streams: MutableSequence[t.JsonMapping] = []
                 if isinstance(raw_streams, Sequence):
                     for rs_item in raw_streams:
                         if isinstance(rs_item, Mapping):
                             catalog_streams.append(rs_item)
-                raw_custom: t.Container = raw_config.get("custom_streams")
+                raw_custom: t.JsonValue = raw_config.get("custom_streams")
                 if isinstance(raw_custom, list):
                     for cs_item in raw_custom:
                         cs_dict = FlextTapLdapTap.validate_custom_stream(cs_item)
@@ -285,7 +283,7 @@ def _build_cli_command() -> click.Command:
                                 "schema": cs_schema,
                             }
                             catalog_streams.append(cs_entry)
-                output_catalog: Mapping[str, t.Container] = {
+                output_catalog = {
                     "streams": catalog_streams,
                 }
                 click.echo(t.SINGER_OUTPUT_ADAPTER.dump_json(output_catalog).decode())
@@ -306,7 +304,7 @@ def _build_cli_command() -> click.Command:
         result = tap.discover_streams(tap_instance=source_config)
         if result.success and result.value:
             raw_streams_val = result.value.get("streams", [])
-            stream_entries: list[Mapping[str, t.Container]] = []
+            stream_entries: list[t.JsonMapping] = []
             if isinstance(raw_streams_val, Sequence):
                 stream_entries.extend(
                     se_item
