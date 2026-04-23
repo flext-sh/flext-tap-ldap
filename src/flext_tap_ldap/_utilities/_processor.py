@@ -29,7 +29,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
     """Mixin providing LDIF processing utilities for u.TapLdap namespace."""
 
     _DEFAULT_ENTRY_METADATA = m.Ldif.EntryMetadata()
-    _logger = u.fetch_logger(__name__)
+    logger = u.fetch_logger(__name__)
 
     class TapLdap:
         """Tap LDAP namespace — processor inner classes."""
@@ -315,7 +315,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 source_name: str = "content",
             ) -> Iterator[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
                 """Parse LDIF content using flext-ldif and yield entries."""
-                FlextTapLdapUtilitiesProcessorMixin._logger.info(
+                FlextTapLdapUtilitiesProcessorMixin.logger.info(
                     "Parsing LDIF content with flext-ldif from %s",
                     source_name,
                 )
@@ -326,7 +326,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     if not result.success:
                         error_msg = f"Failed to parse LDIF content from {source_name}: {result.error}"
                         if self.ignore_errors:
-                            FlextTapLdapUtilitiesProcessorMixin._logger.error(error_msg)
+                            FlextTapLdapUtilitiesProcessorMixin.logger.error(error_msg)
                             self.errors.append(error_msg)
                             return
                         else:
@@ -341,7 +341,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                     error_msg = f"Failed to parse LDIF content from {source_name}: {e}"
                     if self.ignore_errors:
-                        FlextTapLdapUtilitiesProcessorMixin._logger.exception(error_msg)
+                        FlextTapLdapUtilitiesProcessorMixin.logger.exception(error_msg)
                         self.errors.append(error_msg)
                     else:
                         raise ValueError(error_msg) from e
@@ -352,7 +352,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
             ) -> Iterator[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
                 """Parse LDIF file using flext-ldif and yield entries."""
                 self._validate_file_exists(file_path)
-                FlextTapLdapUtilitiesProcessorMixin._logger.info(
+                FlextTapLdapUtilitiesProcessorMixin.logger.info(
                     "Starting LDIF parsing with flext-ldif: %s",
                     str(file_path),
                 )
@@ -361,7 +361,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     result = self._parse_ldif_content(content, file_path)
                     yield from self._yield_entries_from_result(result)
                 except UnicodeDecodeError:
-                    FlextTapLdapUtilitiesProcessorMixin._logger.warning(
+                    FlextTapLdapUtilitiesProcessorMixin.logger.warning(
                         "UTF-8 decoding failed, trying latin-1 for: %s",
                         str(file_path),
                     )
@@ -420,7 +420,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 """Handle parsing errors based on ignore_errors setting."""
                 error_msg = f"Failed to parse LDIF file {file_path}: {error}"
                 if self.ignore_errors:
-                    FlextTapLdapUtilitiesProcessorMixin._logger.error(error_msg)
+                    FlextTapLdapUtilitiesProcessorMixin.logger.error(error_msg)
                     self.errors.append(error_msg)
                 else:
                     raise ValueError(error_msg) from error
@@ -435,7 +435,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 if not result.success:
                     error_msg = f"Failed to parse LDIF file {file_path}: {result.error}"
                     if self.ignore_errors:
-                        FlextTapLdapUtilitiesProcessorMixin._logger.error(error_msg)
+                        FlextTapLdapUtilitiesProcessorMixin.logger.error(error_msg)
                         self.errors.append(error_msg)
                     else:
                         raise ValueError(error_msg)

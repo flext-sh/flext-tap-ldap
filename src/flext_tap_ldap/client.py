@@ -55,7 +55,7 @@ class FlextTapLdapClient:
                 )
             """
             self._flext_api: FlextLdap
-            self._config: m.Ldap.ConnectionConfig
+            self.config: m.Ldap.ConnectionConfig
             self.host: str
             self.port: int
             self.bind_dn: str | None
@@ -245,7 +245,7 @@ class FlextTapLdapClient:
                 bind_password=client_config.password,
                 timeout=int(client_config.timeout),
             )
-            self._config = flext_connection_config
+            self.config = flext_connection_config
             self._flext_api = FlextLdap()
             self.host = client_config.host
             self.port = int(client_config.port)

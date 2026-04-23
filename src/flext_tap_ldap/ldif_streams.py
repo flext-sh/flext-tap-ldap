@@ -131,7 +131,7 @@ class FlextTapLdapLdifStreams:
             entry_type = "other"
             entry_attrs: t.JsonMapping = {}
             if attrs is not None:
-                object_classes = attrs.get_values("objectClass")
+                object_classes = attrs.get("objectClass")
                 entry_type = self._classify_entry_type(object_classes)
                 entry_attrs = {
                     attr_name: [str(value) for value in attr_values]
@@ -350,7 +350,7 @@ class FlextTapLdapLdifStreams:
                     for entry in result.value.entries:
                         if entry.attributes is None:
                             continue
-                        oc_list: t.StrSequence = entry.attributes.get_values(
+                        oc_list: t.StrSequence = entry.attributes.get(
                             "objectClass",
                         )
                         oc_strs = [str(oc_val) for oc_val in oc_list]

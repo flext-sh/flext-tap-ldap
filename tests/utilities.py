@@ -37,7 +37,7 @@ class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
     class Ldap(FlextTapLdapUtilities.Ldap):
         """LDAP test utilities with Docker infra helpers."""
 
-        _logger: ClassVar[p.Logger] = FlextUtilities.fetch_logger(__name__)
+        logger: ClassVar[p.Logger] = FlextUtilities.fetch_logger(__name__)
         _resolved_admin_credentials: ClassVar[list[tuple[str, str] | None]] = [None]
 
         class Tests:

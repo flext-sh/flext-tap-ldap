@@ -129,7 +129,15 @@ class FlextTapLdapStreams:
             context: t.JsonMapping | None = None,
         ) -> Iterable[t.JsonMapping]:
             """Get records from LDAP - base implementation."""
-            _context = context
+            base_dn = (
+                FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
+                    context.get("base_dn"),
+                )
+                if context is not None
+                else None
+            )
+            if base_dn is not None:
+                logger.debug("LDAP base stream received context base DN: %s", base_dn)
             return []
 
         def _create_ldap_client(self) -> None:
@@ -272,7 +280,13 @@ class FlextTapLdapStreams:
             context: t.JsonMapping | None = None,
         ) -> Iterable[t.JsonMapping]:
             """Get user records from LDAP."""
-            _context = context
+            base_dn = (
+                FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
+                    context.get("base_dn"),
+                )
+                if context is not None
+                else None
+            )
             logger.info("Extracting LDAP users")
             raw_filter = self.settings.get("user_filter", "(objectClass=inetOrgPerson)")
             user_filter = (
@@ -303,6 +317,7 @@ class FlextTapLdapStreams:
             ]
             results: Sequence[t.JsonMapping] = self._search_ldap(
                 user_filter,
+                base_dn=base_dn,
                 attributes=user_attributes,
             )
             yield from results
@@ -355,7 +370,13 @@ class FlextTapLdapStreams:
             context: t.JsonMapping | None = None,
         ) -> Iterable[t.JsonMapping]:
             """Get group records from LDAP."""
-            _context = context
+            base_dn = (
+                FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
+                    context.get("base_dn"),
+                )
+                if context is not None
+                else None
+            )
             logger.info("Extracting LDAP groups")
             raw_group_filter = self.settings.get(
                 "group_filter",
@@ -380,6 +401,7 @@ class FlextTapLdapStreams:
             ]
             results: Sequence[t.JsonMapping] = self._search_ldap(
                 group_filter,
+                base_dn=base_dn,
                 attributes=group_attributes,
             )
             yield from results
@@ -420,7 +442,13 @@ class FlextTapLdapStreams:
             context: t.JsonMapping | None = None,
         ) -> Iterable[t.JsonMapping]:
             """Get organizational unit records from LDAP."""
-            _context = context
+            base_dn = (
+                FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
+                    context.get("base_dn"),
+                )
+                if context is not None
+                else None
+            )
             logger.info("Extracting LDAP organizational units")
             ou_filter = "(objectClass=organizationalUnit)"
             ou_attributes = [
@@ -432,6 +460,7 @@ class FlextTapLdapStreams:
             ]
             results: Sequence[t.JsonMapping] = self._search_ldap(
                 ou_filter,
+                base_dn=base_dn,
                 attributes=ou_attributes,
             )
             yield from results
@@ -486,7 +515,13 @@ class FlextTapLdapStreams:
             context: t.JsonMapping | None = None,
         ) -> Iterable[t.JsonMapping]:
             """Get schema records from LDAP."""
-            _context = context
+            context_base_dn = (
+                FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
+                    context.get("base_dn"),
+                )
+                if context is not None
+                else None
+            )
             logger.info("Extracting LDAP schema")
             schema_filter = "(objectClass=schema)"
             schema_attributes = [
@@ -497,7 +532,11 @@ class FlextTapLdapStreams:
                 "ldapSyntaxes",
                 "modifyTimestamp",
             ]
-            base_dns = ["", "cn=schema"]
+            base_dns = [
+                base_dn
+                for base_dn in [context_base_dn, "", "cn=schema"]
+                if base_dn is not None
+            ]
             last_error: str | None = None
             for base_dn in base_dns:
                 try:
@@ -618,12 +657,19 @@ class FlextTapLdapStreams:
             context: t.JsonMapping | None = None,
         ) -> Iterable[t.JsonMapping]:
             """Get records using custom filter."""
-            _context = context
+            base_dn = (
+                FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
+                    context.get("base_dn"),
+                )
+                if context is not None
+                else None
+            )
             logger.info(
                 f"Extracting LDAP records for custom stream: {self.params.name}",
             )
             results: Sequence[t.JsonMapping] = self._search_ldap(
                 self.params.search_filter,
+                base_dn=base_dn,
             )
             yield from results
 

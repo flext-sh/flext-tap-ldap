@@ -37,7 +37,7 @@ class FlextTapLdapServices:
     data extraction and processing capabilities.
     """
 
-    _logger: ClassVar = u.fetch_logger(__name__)
+    logger: ClassVar = u.fetch_logger(__name__)
 
     EXPECTED_DATA_COUNT = 3
 
@@ -423,7 +423,7 @@ class FlextTapLdapServices:
                 }
                 return r[t.JsonMapping].ok(file_stats)
             except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-                FlextTapLdapServices._logger.exception(
+                FlextTapLdapServices.logger.exception(
                     "Error getting LDIF statistics for %s",
                     file_path,
                 )
@@ -437,7 +437,7 @@ class FlextTapLdapServices:
         ) -> p.Result[Sequence[t.JsonMapping]]:
             """Process LDIF file using flext-ldif library."""
             try:
-                FlextTapLdapServices._logger.info("Processing LDIF file: %s", file_path)
+                FlextTapLdapServices.logger.info("Processing LDIF file: %s", file_path)
                 result: p.Result[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
                     Path(file_path),
                 )
@@ -447,7 +447,7 @@ class FlextTapLdapServices:
                     )
                 entries: MutableSequence[m.Ldif.Entry] = result.value.entries
                 entry_count = len(entries)
-                FlextTapLdapServices._logger.info(
+                FlextTapLdapServices.logger.info(
                     "Successfully processed %s entries from %s",
                     entry_count,
                     file_path,
@@ -470,7 +470,7 @@ class FlextTapLdapServices:
                 ]
                 return r[Sequence[t.JsonMapping]].ok(normalized)
             except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-                FlextTapLdapServices._logger.exception(
+                FlextTapLdapServices.logger.exception(
                     "Error processing LDIF file %s",
                     file_path,
                 )
@@ -484,7 +484,7 @@ class FlextTapLdapServices:
         ) -> p.Result[t.JsonMapping]:
             """Validate LDIF file using flext-ldif library."""
             try:
-                FlextTapLdapServices._logger.info("Validating LDIF file: %s", file_path)
+                FlextTapLdapServices.logger.info("Validating LDIF file: %s", file_path)
                 result: p.Result[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
                     Path(file_path),
                 )
@@ -502,13 +502,13 @@ class FlextTapLdapServices:
                         "errors": list[t.JsonValue](),
                     })
                 )
-                FlextTapLdapServices._logger.info(
+                FlextTapLdapServices.logger.info(
                     "LDIF file validation completed: %s",
                     file_path,
                 )
                 return r[t.JsonMapping].ok(validation_data)
             except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-                FlextTapLdapServices._logger.exception(
+                FlextTapLdapServices.logger.exception(
                     "Error validating LDIF file %s",
                     file_path,
                 )

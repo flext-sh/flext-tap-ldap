@@ -302,8 +302,8 @@ class TestFlextTapLdapIntegration:
         mock_client_instance = mock_ldap_client.return_value
 
         def mock_search(
-            *_args: t.Scalar,
-            **_kwargs: t.Scalar,
+            *args: t.Scalar,
+            **kwargs: t.Scalar,
         ) -> Generator[Mapping[str, t.Scalar | t.ScalarMapping]]:
             time.sleep(0)
             yield {
