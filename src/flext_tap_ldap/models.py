@@ -11,16 +11,14 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Annotated, Self
+from typing import Annotated, Self
 from uuid import uuid4
 
 from flext_ldap import m
 from flext_meltano import m as meltano_m, u
 
-from flext_tap_ldap import c
-
-if TYPE_CHECKING:
-    from flext_tap_ldap import t
+from flext_tap_ldap.constants import c
+from flext_tap_ldap.typings import t
 
 
 class FlextTapLdapModels(meltano_m, m):
