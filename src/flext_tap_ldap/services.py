@@ -453,15 +453,19 @@ class FlextTapLdapServices:
                     file_path,
                 )
                 normalized: Sequence[t.JsonMapping] = [
-                    {
+                    t.Cli.JSON_MAPPING_ADAPTER.validate_python({
                         "dn": entry.dn.value if entry.dn is not None else "",
-                        "attributes": u.TapLdap.ValueConversion.to_map(
-                            entry.attributes.attributes
-                            if entry.attributes is not None
-                            else {}
-                        )
-                        or {},
-                    }
+                        "attributes": dict(
+                            (
+                                u.TapLdap.ValueConversion.to_map(
+                                    entry.attributes.attributes
+                                    if entry.attributes is not None
+                                    else {}
+                                )
+                                or {}
+                            ).items()
+                        ),
+                    })
                     for entry in entries
                 ]
                 return r[Sequence[t.JsonMapping]].ok(normalized)
@@ -490,12 +494,14 @@ class FlextTapLdapServices:
                     )
                 entries: MutableSequence[m.Ldif.Entry] = result.value.entries
                 total_entries = len(entries)
-                validation_data = {
-                    "total_entries": total_entries,
-                    "valid_entries": total_entries,
-                    "invalid_entries": 0,
-                    "errors": list[str](),
-                }
+                validation_data: t.JsonMapping = (
+                    t.Cli.JSON_MAPPING_ADAPTER.validate_python({
+                        "total_entries": total_entries,
+                        "valid_entries": total_entries,
+                        "invalid_entries": 0,
+                        "errors": list[t.JsonValue](),
+                    })
+                )
                 FlextTapLdapServices._logger.info(
                     "LDIF file validation completed: %s",
                     file_path,

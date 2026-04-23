@@ -259,7 +259,11 @@ class FlextTapLdapStreams:
                     },
                 },
             }
-            super().__init__(tap, name=name, schema=schema)
+            super().__init__(
+                tap,
+                name=name,
+                schema=t.Cli.JSON_MAPPING_ADAPTER.validate_python(schema),
+            )
             self.forced_replication_method = "INCREMENTAL"
 
         @override
@@ -338,7 +342,11 @@ class FlextTapLdapStreams:
                     },
                 },
             }
-            super().__init__(tap, name=name, schema=schema)
+            super().__init__(
+                tap,
+                name=name,
+                schema=t.Cli.JSON_MAPPING_ADAPTER.validate_python(schema),
+            )
             self.forced_replication_method = "INCREMENTAL"
 
         @override
@@ -400,7 +408,11 @@ class FlextTapLdapStreams:
                     },
                 },
             }
-            super().__init__(tap, name=name, schema=schema)
+            super().__init__(
+                tap,
+                name=name,
+                schema=t.Cli.JSON_MAPPING_ADAPTER.validate_python(schema),
+            )
 
         @override
         def get_records(
@@ -462,7 +474,11 @@ class FlextTapLdapStreams:
                     },
                 },
             }
-            super().__init__(tap, name=name, schema=schema)
+            super().__init__(
+                tap,
+                name=name,
+                schema=t.Cli.JSON_MAPPING_ADAPTER.validate_python(schema),
+            )
 
         @override
         def get_records(
@@ -580,7 +596,11 @@ class FlextTapLdapStreams:
                         },
                     },
                 }
-            super().__init__(tap, name=params.name, schema=schema)
+            super().__init__(
+                tap,
+                name=params.name,
+                schema=t.Cli.JSON_MAPPING_ADAPTER.validate_python(schema),
+            )
 
         @property
         def primary_keys(self) -> t.StrSequence:

@@ -128,7 +128,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             def to_dict(self) -> t.JsonMapping:
                 """Convert entry to dictionary format."""
-                entry_dict: t.JsonMapping = {
+                entry_dict: t.MutableJsonMapping = {
                     "dn": self.dn,
                     "attributes": {
                         key: [str(value) for value in values]
@@ -354,7 +354,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 self._validate_file_exists(file_path)
                 FlextTapLdapUtilitiesProcessorMixin._logger.info(
                     "Starting LDIF parsing with flext-ldif: %s",
-                    file_path,
+                    str(file_path),
                 )
                 try:
                     content = self._read_file_content(file_path, "utf-8")
@@ -363,7 +363,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 except UnicodeDecodeError:
                     FlextTapLdapUtilitiesProcessorMixin._logger.warning(
                         "UTF-8 decoding failed, trying latin-1 for: %s",
-                        file_path,
+                        str(file_path),
                     )
                     try:
                         content = self._read_file_content(file_path, "latin-1")

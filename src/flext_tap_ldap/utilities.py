@@ -203,7 +203,7 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def to_map(
-                value: t.JsonValue,
+                value: t.JsonPayload,
             ) -> t.JsonMapping | None:
                 """Convert a recursive container to the canonical mapping contract."""
                 try:
@@ -212,7 +212,7 @@ class FlextTapLdapUtilities(
                     return None
 
             @staticmethod
-            def to_str(value: t.JsonValue) -> str | None:
+            def to_str(value: t.JsonPayload) -> str | None:
                 """Convert a recursive container to a strict string contract."""
                 try:
                     return t.STRICT_STR_ADAPTER.validate_python(value)

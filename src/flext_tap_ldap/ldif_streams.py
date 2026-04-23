@@ -137,12 +137,12 @@ class FlextTapLdapLdifStreams:
                     attr_name: [str(value) for value in attr_values]
                     for attr_name, attr_values in attrs.attributes.items()
                 }
-            return {
+            return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
                 "dn": dn_value,
                 "entry_type": entry_type,
-                "object_classes": object_classes,
+                "object_classes": list(object_classes),
                 "attributes": entry_attrs,
-            }
+            })
 
         def _discover_ldif_files(self, ldif_directory: str) -> Sequence[Path]:
             directory = Path(ldif_directory)
@@ -321,20 +321,20 @@ class FlextTapLdapLdifStreams:
                             object_classes[obj_class] = (
                                 object_classes.get(obj_class, 0) + object_count
                             )
-                yield {
+                yield t.Cli.JSON_MAPPING_ADAPTER.validate_python({
                     "analysis_id": "ldif_summary",
                     "total_entries": total_entries,
-                    "entry_types": entry_types,
-                    "object_classes": object_classes,
-                }
+                    "entry_types": dict(entry_types),
+                    "object_classes": dict(object_classes),
+                })
             except c.Meltano.SINGER_SAFE_EXCEPTIONS:
                 self.logger.exception("LDIF analysis error")
-                yield {
+                yield t.Cli.JSON_MAPPING_ADAPTER.validate_python({
                     "analysis_id": "ldif_summary_error",
                     "total_entries": 0,
                     "entry_types": {},
                     "object_classes": {},
-                }
+                })
 
         def _analyze_ldif_file(self, ldif_file: str) -> t.JsonMapping:
             """Analyze single LDIF file using flext-ldif."""
@@ -358,28 +358,28 @@ class FlextTapLdapLdifStreams:
                         entry_types[entry_type] = entry_types.get(entry_type, 0) + 1
                         for oc in oc_strs:
                             object_classes[oc] = object_classes.get(oc, 0) + 1
-                    return {
+                    return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
                         "total_entries": len(result.value.entries),
-                        "entry_types": entry_types,
-                        "object_classes": object_classes,
-                    }
+                        "entry_types": dict(entry_types),
+                        "object_classes": dict(object_classes),
+                    })
                 self.logger.error(
                     f"Failed to analyze LDIF file {ldif_file}: {result.error}",
                 )
                 empty: t.IntMapping = {}
-                return {
+                return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
                     "total_entries": 0,
-                    "entry_types": empty,
+                    "entry_types": dict(empty),
                     "object_classes": dict(empty),
-                }
+                })
             except c.Meltano.SINGER_SAFE_EXCEPTIONS:
                 self.logger.exception("Error analyzing LDIF file %s", ldif_file)
                 empty_dict: t.IntMapping = {}
-                return {
+                return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
                     "total_entries": 0,
-                    "entry_types": empty_dict,
+                    "entry_types": dict(empty_dict),
                     "object_classes": dict(empty_dict),
-                }
+                })
 
         def _classify_entry_type(self, object_classes: t.StrSequence) -> str:
             """Classify entry type by simple objectClass heuristics."""

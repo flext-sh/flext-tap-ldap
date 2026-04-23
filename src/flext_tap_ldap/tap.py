@@ -170,7 +170,10 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             for stream in streams
         ]
         stream_catalog: t.Meltano.SingerStreamCatalog = {"streams": streams_list}
-        return r[t.JsonMapping].ok(stream_catalog)
+        stream_catalog_payload: t.JsonMapping = t.SINGER_OUTPUT_ADAPTER.validate_python(
+            stream_catalog,
+        )
+        return r[t.JsonMapping].ok(stream_catalog_payload)
 
     @override
     def execute(self) -> p.Result[t.JsonMapping]:
@@ -252,13 +255,18 @@ def _build_cli_command() -> click.Command:
             for k, v in raw_config.items()
             if isinstance(v, (str, int, float, bool))
         }
+        connection_config_payload: t.JsonMapping = (
+            t.SINGER_OUTPUT_ADAPTER.validate_python(
+                config_data,
+            )
+        )
         tap = FlextTapLdapTap()
         tap.tap_config = config_data
 
         if discover:
             source_config = m.Meltano.DataSourceConfig(
                 source_type="ldap",
-                connection_config={str(k): v for k, v in config_data.items()},
+                connection_config=connection_config_payload,
                 stream_config={},
                 source_version="latest",
             )
@@ -270,7 +278,9 @@ def _build_cli_command() -> click.Command:
                 if isinstance(raw_streams, Sequence):
                     for rs_item in raw_streams:
                         if isinstance(rs_item, Mapping):
-                            catalog_streams.append(rs_item)
+                            catalog_streams.append(
+                                t.SINGER_OUTPUT_ADAPTER.validate_python(rs_item),
+                            )
                 raw_custom: t.JsonValue = raw_config.get("custom_streams")
                 if isinstance(raw_custom, list):
                     for cs_item in raw_custom:
@@ -282,10 +292,12 @@ def _build_cli_command() -> click.Command:
                                 "tap_stream_id": cs_dict["name"],
                                 "schema": cs_schema,
                             }
-                            catalog_streams.append(cs_entry)
-                output_catalog = {
+                            catalog_streams.append(
+                                t.SINGER_OUTPUT_ADAPTER.validate_python(cs_entry),
+                            )
+                output_catalog: t.JsonMapping = t.SINGER_OUTPUT_ADAPTER.validate_python({
                     "streams": catalog_streams,
-                }
+                })
                 click.echo(t.SINGER_OUTPUT_ADAPTER.dump_json(output_catalog).decode())
             return
 
@@ -297,27 +309,27 @@ def _build_cli_command() -> click.Command:
 
         source_config = m.Meltano.DataSourceConfig(
             source_type="ldap",
-            connection_config={str(k): v for k, v in config_data.items()},
+            connection_config=connection_config_payload,
             stream_config={},
             source_version="latest",
         )
         result = tap.discover_streams(tap_instance=source_config)
         if result.success and result.value:
             raw_streams_val = result.value.get("streams", [])
-            stream_entries: list[t.JsonMapping] = []
+            stream_entries: MutableSequence[t.JsonMapping] = []
             if isinstance(raw_streams_val, Sequence):
                 stream_entries.extend(
-                    se_item
+                    t.SINGER_OUTPUT_ADAPTER.validate_python(se_item)
                     for se_item in raw_streams_val
                     if isinstance(se_item, Mapping)
                 )
             for stream_entry in stream_entries:
-                schema_msg = {
+                schema_msg: t.JsonMapping = t.SINGER_OUTPUT_ADAPTER.validate_python({
                     "type": "SCHEMA",
                     "stream": stream_entry["stream"],
                     "schema": stream_entry.get("schema", {}),
                     "key_properties": ["dn"],
-                }
+                })
                 click.echo(t.SINGER_OUTPUT_ADAPTER.dump_json(schema_msg).decode())
 
     return _cli
