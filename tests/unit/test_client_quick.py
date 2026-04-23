@@ -63,10 +63,11 @@ class TestLDAPClientQuick:
         self,
     ) -> None:
         """Entry normalization uses the shared client support utility."""
-        mail_values: t.StrSequence = ["test@example.com"]
-        dict_entry = {
+        mail_values: list[t.JsonValue] = ["test@example.com"]
+        mail_attrs: dict[str, t.JsonValue] = {"mail": mail_values}
+        dict_entry: dict[str, t.JsonValue] = {
             "dn": "uid=dict,dc=example,dc=com",
-            "attributes": {"mail": mail_values},
+            "attributes": mail_attrs,
         }
         result = u.TapLdap.ClientSupport.to_entry_mapping(dict_entry)
         assert result.success
@@ -179,16 +180,17 @@ class TestLDAPClientQuick:
         self,
     ) -> None:
         """Oracle-specific entry enrichment lives in the utility namespace."""
-        uid_values: t.StrSequence = ["test"]
-        oracle_password_values: t.StrSequence = ["hashed_password"]
-        object_classes: t.StrSequence = ["inetOrgPerson"]
+        uid_values: list[t.JsonValue] = ["test"]
+        oracle_password_values: list[t.JsonValue] = ["hashed_password"]
+        object_classes: list[t.JsonValue] = ["inetOrgPerson"]
+        attributes_payload: dict[str, t.JsonValue] = {
+            "uid": uid_values,
+            "orclPassword": oracle_password_values,
+            "objectClass": object_classes,
+        }
         entry: t.MutableJsonMapping = {
             "dn": "uid=test,dc=oracle,dc=com",
-            "attributes": {
-                "uid": uid_values,
-                "orclPassword": oracle_password_values,
-                "objectClass": object_classes,
-            },
+            "attributes": attributes_payload,
         }
         result = u.TapLdap.ClientSupport.normalize_oracle_entry(entry)
         attributes_raw = result.get("attributes")
@@ -199,11 +201,15 @@ class TestLDAPClientQuick:
         assert isinstance(user_password, list)
         assert "hashed_password" in user_password
 
-        ou_values: t.StrSequence = ["test"]
-        container_classes: t.StrSequence = ["orclContainer"]
+        ou_values: list[t.JsonValue] = ["test"]
+        container_classes: list[t.JsonValue] = ["orclContainer"]
+        container_attributes: dict[str, t.JsonValue] = {
+            "ou": ou_values,
+            "objectClass": container_classes,
+        }
         entry_with_container: t.MutableJsonMapping = {
             "dn": "ou=test,dc=oracle,dc=com",
-            "attributes": {"ou": ou_values, "objectClass": container_classes},
+            "attributes": container_attributes,
         }
         result = u.TapLdap.ClientSupport.normalize_oracle_entry(entry_with_container)
         attrs_raw2 = result.get("attributes")
@@ -257,14 +263,16 @@ class TestLDAPClientQuick:
 
     def test_process_search_results(self) -> None:
         """Test Oracle search result processing."""
-        first_passwords: t.StrSequence = ["pass1"]
-        second_uids: t.StrSequence = ["test2"]
+        first_passwords: list[t.JsonValue] = ["pass1"]
+        second_uids: list[t.JsonValue] = ["test2"]
+        first_attrs: dict[str, t.JsonValue] = {"orclPassword": first_passwords}
+        second_attrs: dict[str, t.JsonValue] = {"uid": second_uids}
         search_results: Sequence[t.JsonMapping] = [
             {
                 "dn": "uid=test1,dc=oracle,dc=com",
-                "attributes": {"orclPassword": first_passwords},
+                "attributes": first_attrs,
             },
-            {"dn": "uid=test2,dc=oracle,dc=com", "attributes": {"uid": second_uids}},
+            {"dn": "uid=test2,dc=oracle,dc=com", "attributes": second_attrs},
         ]
         results = u.TapLdap.ClientSupport.process_oracle_search_results(
             search_results,

@@ -22,7 +22,7 @@ import pytest
 from click.core import BaseCommand
 from click.testing import CliRunner
 
-from flext_tap_ldap import CLI_COMMAND
+from flext_tap_ldap.tap import CLI_COMMAND
 from tests import t, u
 
 
@@ -215,7 +215,7 @@ class TestFlextTapLdapIntegration:
 
     def test_self(self, runner: CliRunner, tmp_path: Path) -> None:
         """Test method."""
-        settings = {
+        settings: dict[str, t.JsonValue] = {
             "ldap_host": "test.ldap.com",
             "base_dn": "dc=test,dc=com",
             "custom_streams": [

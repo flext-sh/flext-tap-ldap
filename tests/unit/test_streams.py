@@ -22,9 +22,14 @@ from tests import m, t
 def _build_source_config(
     connection_config: t.ScalarMapping,
 ) -> m.Meltano.DataSourceConfig:
+    config_payload: dict[str, t.JsonValue] = {
+        str(k): v
+        for k, v in connection_config.items()
+        if isinstance(v, (str, int, float, bool)) or v is None
+    }
     return m.Meltano.DataSourceConfig(
         source_type="ldap",
-        connection_config=connection_config,
+        connection_config=config_payload,
         stream_config={},
         source_version="latest",
     )
