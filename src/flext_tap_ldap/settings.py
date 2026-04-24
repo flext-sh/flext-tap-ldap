@@ -22,7 +22,7 @@ class FlextTapLdapSettings(FlextLdapSettings):
     port: Annotated[t.PortNumber, u.Field(ge=1)] = c.Ldap.ConnectionDefaults.PORT
     use_ssl: Annotated[bool, u.Field()] = c.Ldap.ConnectionDefaults.DEFAULT_USE_SSL
     timeout: Annotated[t.PositiveInt, u.Field(ge=1)] = c.Ldap.ConnectionDefaults.TIMEOUT
-    page_size: Annotated[t.PositiveInt, u.Field(ge=1)] = c.DEFAULT_BATCH_SIZE
+    page_size: Annotated[t.PositiveInt, u.Field(ge=1)] = 1000
 
 
 __all__: list[str] = ["FlextTapLdapSettings"]

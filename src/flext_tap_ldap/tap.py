@@ -160,18 +160,24 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             ]
             streams.extend(ldif_stream_list)
 
-        empty_schema: Mapping[str, t.Scalar | None] = {}
-        streams_list: MutableSequence[t.Meltano.SingerCatalogEntry] = [
-            {
+        streams_list: MutableSequence[m.Meltano.SingerCatalogEntry] = [
+            m.Meltano.SingerCatalogEntry.model_validate({
                 "stream": str(stream.name),
                 "tap_stream_id": str(stream.name),
-                "schema": empty_schema,
-            }
+                "schema": {},
+            })
             for stream in streams
         ]
-        stream_catalog: t.Meltano.SingerStreamCatalog = {"streams": streams_list}
+        stream_catalog: t.JsonMapping = t.SINGER_OUTPUT_ADAPTER.validate_python(
+            m.Meltano.SingerCatalog(streams=streams_list).model_dump(
+                by_alias=True,
+                exclude_defaults=True,
+                exclude_none=True,
+                mode="json",
+            )
+        )
         stream_catalog_payload: t.JsonMapping = t.SINGER_OUTPUT_ADAPTER.validate_python(
-            stream_catalog,
+            {"streams": stream_catalog.get("streams", [])},
         )
         return r[t.JsonMapping].ok(stream_catalog_payload)
 
@@ -286,14 +292,20 @@ def _build_cli_command() -> click.Command:
                     for cs_item in raw_custom:
                         cs_dict = FlextTapLdapTap.validate_custom_stream(cs_item)
                         if cs_dict is not None:
-                            cs_schema: Mapping[str, t.Scalar | None] = {}
-                            cs_entry: t.Meltano.SingerCatalogEntry = {
+                            cs_entry = m.Meltano.SingerCatalogEntry.model_validate({
                                 "stream": cs_dict["name"],
                                 "tap_stream_id": cs_dict["name"],
-                                "schema": cs_schema,
-                            }
+                                "schema": {},
+                            })
                             catalog_streams.append(
-                                t.SINGER_OUTPUT_ADAPTER.validate_python(cs_entry),
+                                t.SINGER_OUTPUT_ADAPTER.validate_python(
+                                    cs_entry.model_dump(
+                                        by_alias=True,
+                                        exclude_defaults=True,
+                                        exclude_none=True,
+                                        mode="json",
+                                    )
+                                ),
                             )
                 output_catalog: t.JsonMapping = t.SINGER_OUTPUT_ADAPTER.validate_python({
                     "streams": catalog_streams,

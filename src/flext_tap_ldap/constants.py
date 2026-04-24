@@ -34,7 +34,7 @@ class FlextTapLdapConstants(c, ldap_c):
         - c.DEFAULT_BATCH_SIZE (page size)
         """
 
-        DEFAULT_PAGE_SIZE: Final[int] = c.DEFAULT_BATCH_SIZE
+        DEFAULT_PAGE_SIZE: Final[int] = 1000
         DEFAULT_SEARCH_TIMEOUT: Final[int] = ldap_c.Ldap.ConnectionDefaults.TIMEOUT
 
         class Ldap:
