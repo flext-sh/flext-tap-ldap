@@ -20,30 +20,13 @@ if _t.TYPE_CHECKING:
     from tests.models import TestsFlextTapLdapModels, m
     from tests.protocols import TestsFlextTapLdapProtocols, p
     from tests.typings import TestsFlextTapLdapTypes, t
-    from tests.unit.test_client import TestLDAPClientCoverageBoost
-    from tests.unit.test_client_quick import TestLDAPClientQuick
-    from tests.unit.test_ldif_processor import TestLdifProcessor
-    from tests.unit.test_ldif_stream import TestLDIFStreamBasic
-    from tests.unit.test_models import (
-        TestConnectionTestedEvent,
-        TestRecordExtractedEvent,
-        TestStreamDiscoveredEvent,
-        TestTapExecutionCompletedEvent,
-        TestTapExecutionStartedEvent,
-    )
-    from tests.unit.test_streams import (
-        TestCustomStream,
-        TestCustomStreamParams,
-        TestGroupsStream,
-        TestLDAPBaseStream,
-        TestLDAPBaseStreamDirectUsage,
-        TestOrganizationalUnitsStream,
-        TestSchemaStream,
-        TestStreamExceptionHandling,
-        TestStreamIntegration,
-        TestUsersStream,
-    )
-    from tests.unit.test_tap import TestFlextTapLdapTap
+    from tests.unit.test_client import TestsFlextTapLdapClient
+    from tests.unit.test_client_quick import TestsFlextTapLdapClientQuick
+    from tests.unit.test_ldif_processor import TestsFlextTapLdapLdifProcessor
+    from tests.unit.test_ldif_stream import TestsFlextTapLdapLdifStream
+    from tests.unit.test_models import TestsFlextTapLdapModelsUnit
+    from tests.unit.test_streams import TestsFlextTapLdapStreams
+    from tests.unit.test_tap import TestsFlextTapLdapTap
     from tests.utilities import TestsFlextTapLdapUtilities, u
 _LAZY_IMPORTS = merge_lazy_imports(
     (
@@ -69,30 +52,13 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "TestsFlextTapLdapTypes",
                 "t",
             ),
-            ".unit.test_client": ("TestLDAPClientCoverageBoost",),
-            ".unit.test_client_quick": ("TestLDAPClientQuick",),
-            ".unit.test_ldif_processor": ("TestLdifProcessor",),
-            ".unit.test_ldif_stream": ("TestLDIFStreamBasic",),
-            ".unit.test_models": (
-                "TestConnectionTestedEvent",
-                "TestRecordExtractedEvent",
-                "TestStreamDiscoveredEvent",
-                "TestTapExecutionCompletedEvent",
-                "TestTapExecutionStartedEvent",
-            ),
-            ".unit.test_streams": (
-                "TestCustomStream",
-                "TestCustomStreamParams",
-                "TestGroupsStream",
-                "TestLDAPBaseStream",
-                "TestLDAPBaseStreamDirectUsage",
-                "TestOrganizationalUnitsStream",
-                "TestSchemaStream",
-                "TestStreamExceptionHandling",
-                "TestStreamIntegration",
-                "TestUsersStream",
-            ),
-            ".unit.test_tap": ("TestFlextTapLdapTap",),
+            ".unit.test_client": ("TestsFlextTapLdapClient",),
+            ".unit.test_client_quick": ("TestsFlextTapLdapClientQuick",),
+            ".unit.test_ldif_processor": ("TestsFlextTapLdapLdifProcessor",),
+            ".unit.test_ldif_stream": ("TestsFlextTapLdapLdifStream",),
+            ".unit.test_models": ("TestsFlextTapLdapModelsUnit",),
+            ".unit.test_streams": ("TestsFlextTapLdapStreams",),
+            ".unit.test_tap": ("TestsFlextTapLdapTap",),
             ".utilities": (
                 "TestsFlextTapLdapUtilities",
                 "u",
@@ -130,30 +96,16 @@ _LAZY_IMPORTS = merge_lazy_imports(
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)
 
 __all__: list[str] = [
-    "TestConnectionTestedEvent",
-    "TestCustomStream",
-    "TestCustomStreamParams",
-    "TestFlextTapLdapIntegration",
-    "TestFlextTapLdapTap",
-    "TestGroupsStream",
-    "TestLDAPBaseStream",
-    "TestLDAPBaseStreamDirectUsage",
-    "TestLDAPClientCoverageBoost",
-    "TestLDAPClientQuick",
-    "TestLDIFStreamBasic",
-    "TestLdifProcessor",
-    "TestOrganizationalUnitsStream",
-    "TestRecordExtractedEvent",
-    "TestSchemaStream",
-    "TestStreamDiscoveredEvent",
-    "TestStreamExceptionHandling",
-    "TestStreamIntegration",
-    "TestTapExecutionCompletedEvent",
-    "TestTapExecutionStartedEvent",
-    "TestUsersStream",
+    "TestsFlextTapLdapClient",
+    "TestsFlextTapLdapClientQuick",
     "TestsFlextTapLdapConstants",
+    "TestsFlextTapLdapLdifProcessor",
+    "TestsFlextTapLdapLdifStream",
     "TestsFlextTapLdapModels",
+    "TestsFlextTapLdapModelsUnit",
     "TestsFlextTapLdapProtocols",
+    "TestsFlextTapLdapStreams",
+    "TestsFlextTapLdapTap",
     "TestsFlextTapLdapTypes",
     "TestsFlextTapLdapUtilities",
     "c",

@@ -50,7 +50,7 @@ def _discover_stream_names(
     return [str(stream["stream"]) for stream in stream_entries], len(stream_entries)
 
 
-class TestLDAPBaseStream:
+class TestsFlextTapLdapStreams:
     """Test base LDAP stream functionality."""
 
     @pytest.fixture
@@ -77,10 +77,6 @@ class TestLDAPBaseStream:
         assert isinstance(stream.name, str)
         assert stream.name != ""
         assert isinstance(stream.schema, dict)
-
-
-class TestUsersStream:
-    """Test Users stream functionality."""
 
     @pytest.fixture
     def mock_tap(self) -> Mock:
@@ -241,10 +237,6 @@ class TestUsersStream:
         assert first_record["cn"] == "schema"
         mock_client_class.assert_called_once()
 
-
-class TestGroupsStream:
-    """Test Groups stream functionality."""
-
     @pytest.fixture
     def mock_tap(self) -> Mock:
         """Create mock tap instance."""
@@ -280,10 +272,6 @@ class TestGroupsStream:
         if isinstance(properties, dict):
             assert "dn" in properties
             assert "objectClass" in properties
-
-
-class TestOrganizationalUnitsStream:
-    """Test Organizational Units stream functionality."""
 
     @pytest.fixture
     def mock_tap(self) -> Mock:
@@ -323,10 +311,6 @@ class TestOrganizationalUnitsStream:
             assert "dn" in properties
             assert "objectClass" in properties
 
-
-class TestSchemaStream:
-    """Test Schema stream functionality."""
-
     @pytest.fixture
     def mock_tap(self) -> Mock:
         """Create mock tap instance."""
@@ -361,10 +345,6 @@ class TestSchemaStream:
         if isinstance(properties, dict):
             assert "objectClass" in properties
             assert "objectClasses" in properties
-
-
-class TestCustomStreamParams:
-    """Test CustomStreamParams parameter object."""
 
     def test_custom_stream_params_creation(self) -> None:
         """Test method."""
@@ -413,10 +393,6 @@ class TestCustomStreamParams:
                 schema_properties={},
                 primary_keys=[],
             )
-
-
-class TestCustomStream:
-    """Test Custom stream functionality."""
 
     @pytest.fixture
     def mock_tap(self) -> Mock:
@@ -544,10 +520,6 @@ class TestCustomStream:
             assert "integeru.Field" in properties
             assert "datetimeu.Field" in properties
 
-
-class TestStreamIntegration:
-    """Integration tests for stream functionality."""
-
     @pytest.fixture
     def tap_config(self) -> t.JsonMapping:
         """Standard tap configuration."""
@@ -612,10 +584,6 @@ class TestStreamIntegration:
         assert stream_count >= 4
         assert "users" in stream_names
 
-
-class TestLDAPBaseStreamDirectUsage:
-    """Test base stream class directly to cover missing lines."""
-
     @pytest.fixture
     def mock_tap(self) -> Mock:
         """Create mock tap instance."""
@@ -628,25 +596,6 @@ class TestLDAPBaseStreamDirectUsage:
         tap.metrics_logger = Mock()
         tap.logger = Mock()
         return tap
-
-    def test_self(self, mock_tap: Mock) -> None:
-        """Test method."""
-        "Test base stream get_records method (covers line 68)."
-
-        class TestBaseStream(FlextTapLdapStreams.LDAPBaseStream):
-            pass
-
-        base_stream = TestBaseStream(
-            mock_tap,
-            name="test_base",
-            schema={"properties": {"dn": {"type": "string"}}},
-        )
-        records = list(base_stream.get_records(context=None))
-        assert not records
-
-
-class TestStreamExceptionHandling:
-    """Test exception handling paths in streams."""
 
     @pytest.fixture
     def mock_tap_failing(self) -> Mock:

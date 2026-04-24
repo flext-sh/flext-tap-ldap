@@ -10,7 +10,7 @@ from __future__ import annotations
 from flext_tap_ldap import FlextTapLdapLdifStreams, FlextTapLdapTap
 
 
-class TestLDIFStreamBasic:
+class TestsFlextTapLdapLdifStream:
     """Basic tests for LDIF stream functionality."""
 
     def test_imports(self) -> None:

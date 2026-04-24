@@ -14,7 +14,7 @@ from flext_tap_ldap import FlextTapLdapClient, FlextTapLdapStreams, FlextTapLdap
 from tests import c, m, t
 
 
-class TestFlextTapLdapTap:
+class TestsFlextTapLdapTap:
     def test_discover_streams_returns_expected_names(
         self,
         ldap_source_config: m.Meltano.DataSourceConfig,

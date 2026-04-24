@@ -19,7 +19,7 @@ from flext_tap_ldap import FlextTapLdapClient
 from tests import t, u
 
 
-class TestLDAPClientQuick:
+class TestsFlextTapLdapClientQuick:
     """Quick tests to maximize client.py coverage efficiently."""
 
     @pytest.fixture

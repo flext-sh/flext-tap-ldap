@@ -15,7 +15,7 @@ from flext_tap_ldap import FlextTapLdapClient
 from tests import u
 
 
-class TestLDAPClientCoverageBoost:
+class TestsFlextTapLdapClient:
     """Tests designed to cover remaining gaps in client.py."""
 
     @pytest.fixture

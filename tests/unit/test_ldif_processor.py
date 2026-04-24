@@ -19,7 +19,7 @@ from flext_tap_ldap import FlextTapLdapLdifStreams
 from tests import t, u
 
 
-class TestLdifProcessor:
+class TestsFlextTapLdapLdifProcessor:
     """Placeholder tests pending refactoring with proper FlextTapLdapProcessor API."""
 
     def test_placeholder(self) -> None:
