@@ -59,7 +59,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
         logger.error(f"Failed to start OpenLDAP container: {start_result.error}")
         raise RuntimeError(f"Container startup failed: {start_result.error}")
 
-    dc = c.Ldap.Tests.Docker
+    dc = c.Ldap.Tests
 
     @d.retry(max_attempts=30, delay_seconds=2.0, backoff_strategy="linear")
     def _check_ldap_ready() -> None:
@@ -85,7 +85,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
 @pytest.fixture
 def ldap_connection(_ldap_container: None) -> Generator[p.Ldap.Ldap3Connection]:
     """Create LDAP connection for testing."""
-    dc = c.Ldap.Tests.Docker
+    dc = c.Ldap.Tests
     admin_dn, admin_password = u.Ldap.Tests.admin_credentials()
     server = u.Ldap.create_server(host="localhost", port=dc.PORT, get_info="ALL")
     conn = u.Ldap.create_connection(
@@ -101,7 +101,7 @@ def ldap_connection(_ldap_container: None) -> Generator[p.Ldap.Ldap3Connection]:
 @pytest.fixture
 def tap_config_file(tmp_path: Path, _ldap_container: None) -> Path:
     """Create tap configuration file for testing."""
-    dc = c.Ldap.Tests.Docker
+    dc = c.Ldap.Tests
     admin_dn, admin_password = u.Ldap.Tests.admin_credentials()
     settings = {
         "ldap_host": "localhost",

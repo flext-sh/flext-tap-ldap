@@ -35,13 +35,13 @@ def shared_ldap_container(flext_docker: tk) -> str:
 @pytest.fixture
 def ldap_connection_config() -> dict[str, object]:
     return {
-        "host": c.Ldap.Tests.Fake.HOST,
-        "port": c.Ldap.Tests.Fake.PORT,
-        "base_dn": c.Ldap.Tests.Fake.BASE_DN,
-        "bind_dn": c.Ldap.Tests.Fake.BIND_DN,
-        "bind_password": c.Ldap.Tests.Fake.BIND_PASSWORD,
-        "use_tls": c.Ldap.Tests.Fake.USE_TLS,
-        "page_size": c.Ldap.Tests.Fake.PAGE_SIZE,
+        "host": c.Ldap.Tests.HOST,
+        "port": c.Ldap.Tests.PORT,
+        "base_dn": c.Ldap.Tests.BASE_DN,
+        "bind_dn": c.Ldap.Tests.BIND_DN,
+        "bind_password": c.Ldap.Tests.BIND_PASSWORD,
+        "use_tls": c.Ldap.Tests.USE_TLS,
+        "page_size": c.Ldap.Tests.PAGE_SIZE,
     }
 
 

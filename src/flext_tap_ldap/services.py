@@ -445,7 +445,7 @@ class FlextTapLdapServices:
                     return r[Sequence[t.JsonMapping]].fail(
                         f"Failed to parse LDIF file: {result.error}",
                     )
-                entries: MutableSequence[m.Entry] = result.value.entries
+                entries: MutableSequence[m.Ldif.Entry] = result.value.entries
                 entry_count = len(entries)
                 FlextTapLdapServices.logger.info(
                     "Successfully processed %s entries from %s",
@@ -492,7 +492,7 @@ class FlextTapLdapServices:
                     return r[t.JsonMapping].fail(
                         f"Validation failed: {result.error}",
                     )
-                entries: MutableSequence[m.Entry] = result.value.entries
+                entries: MutableSequence[m.Ldif.Entry] = result.value.entries
                 total_entries = len(entries)
                 validation_data: t.JsonMapping = (
                     t.Cli.JSON_MAPPING_ADAPTER.validate_python({

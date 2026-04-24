@@ -48,14 +48,16 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def to_entry_mapping(
-                entry_data: p.Entry | Mapping[str, t.JsonValue | t.StrSequence] | None,
+                entry_data: p.Ldif.Entry
+                | Mapping[str, t.JsonValue | t.StrSequence]
+                | None,
             ) -> p.Result[t.JsonMapping]:
                 """Normalize LDAP entry payloads into the canonical mutable mapping contract."""
                 if entry_data is None:
                     return r[t.JsonMapping].fail(
                         "Cannot convert None entry data",
                     )
-                if isinstance(entry_data, p.Entry):
+                if isinstance(entry_data, p.Ldif.Entry):
                     dn_value = entry_data.dn.value if entry_data.dn is not None else ""
                     empty_attributes: t.MutableStrSequenceMapping = {}
                     raw_attributes: Mapping[str, MutableSequence[str]] = (
@@ -138,7 +140,7 @@ class FlextTapLdapUtilities(
             @staticmethod
             def process_search_results(
                 search_result: Sequence[
-                    p.Entry | Mapping[str, t.JsonValue | t.StrSequence]
+                    p.Ldif.Entry | Mapping[str, t.JsonValue | t.StrSequence]
                 ],
                 *,
                 size_limit: int,
@@ -161,7 +163,9 @@ class FlextTapLdapUtilities(
             @staticmethod
             def process_oracle_search_results(
                 search_result: Sequence[
-                    p.Entry | t.JsonMapping | Mapping[str, t.JsonValue | t.StrSequence]
+                    p.Ldif.Entry
+                    | t.JsonMapping
+                    | Mapping[str, t.JsonValue | t.StrSequence]
                 ],
                 *,
                 oracle_oid_mode: bool,
@@ -204,7 +208,7 @@ class FlextTapLdapUtilities(
             ) -> t.JsonMapping | None:
                 """Convert a recursive container to the canonical mapping contract."""
                 try:
-                    return t.CONFIG_MAP_ADAPTER.validate_python(value)
+                    return t.TapLdap.CONFIG_MAP_ADAPTER.validate_python(value)
                 except c.ValidationError:
                     return None
 
@@ -212,7 +216,7 @@ class FlextTapLdapUtilities(
             def to_str(value: t.JsonPayload) -> str | None:
                 """Convert a recursive container to a strict string contract."""
                 try:
-                    return t.STRICT_STR_ADAPTER.validate_python(value)
+                    return t.TapLdap.STRICT_STR_ADAPTER.validate_python(value)
                 except c.ValidationError:
                     return None
 
@@ -313,7 +317,9 @@ class FlextTapLdapUtilities(
                         )
                 if "port" in config_map:
                     try:
-                        port = t.INTEGER_ADAPTER.validate_python(config_map["port"])
+                        port = t.TapLdap.INTEGER_ADAPTER.validate_python(
+                            config_map["port"]
+                        )
                     except c.ValidationError:
                         return r[t.JsonMapping].fail(
                             "LDAP port must be numeric",

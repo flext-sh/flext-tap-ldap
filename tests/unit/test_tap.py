@@ -90,4 +90,4 @@ class TestFlextTapLdapTap:
         assert tap.tap_config is not None
         connection = tap.tap_config["connection"]
         assert isinstance(connection, Mapping)
-        assert connection["host"] == c.Ldap.Tests.Fake.HOST
+        assert connection["host"] == c.Ldap.Tests.HOST

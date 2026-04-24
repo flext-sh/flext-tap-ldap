@@ -80,7 +80,7 @@ class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
                 parent = TestsFlextTapLdapUtilities.Ldap
                 if parent._resolved_admin_credentials[0] is not None:
                     return parent._resolved_admin_credentials[0]
-                d = c.Ldap.Tests.Docker
+                d = c.Ldap.Tests
                 env_dn = os.getenv("FLEXT_LDAP_BIND_DN")
                 env_password = os.getenv("FLEXT_LDAP_BIND_PASSWORD")
                 candidates: list[tuple[str, str]] = []
@@ -93,7 +93,10 @@ class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
                 u_ldap = TestsFlextTapLdapUtilities.Ldap
                 for candidate_dn, candidate_password in candidates:
                     try:
-                        server = u_ldap.create_bare_server("localhost", port=d.PORT)
+                        server = u_ldap.create_bare_server(
+                            "localhost",
+                            port=d.CONTAINER_PORT,
+                        )
                         test_conn = u_ldap.create_connection(
                             server,
                             user=candidate_dn,

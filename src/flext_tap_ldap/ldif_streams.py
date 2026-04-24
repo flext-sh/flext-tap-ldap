@@ -122,7 +122,7 @@ class FlextTapLdapLdifStreams:
 
         def _convert_entry_to_record(
             self,
-            flext_entry: m.Entry,
+            flext_entry: m.Ldif.Entry,
         ) -> t.JsonMapping:
             """Convert flext-ldif entry to Singer record."""
             dn_value = flext_entry.dn.value if flext_entry.dn is not None else ""
