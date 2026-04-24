@@ -1,0 +1,14 @@
+src/flext_tap_ldap/tap.py
+  h_9db9d35f50cf33 163-172,174-175,304-308,310
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "0ba36e38c4a80e4acb4fba14050d67bd8046111d",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
