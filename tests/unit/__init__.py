@@ -7,30 +7,13 @@ from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 _LAZY_IMPORTS = build_lazy_import_map(
     {
-        ".test_client": ("TestLDAPClientCoverageBoost",),
-        ".test_client_quick": ("TestLDAPClientQuick",),
-        ".test_ldif_processor": ("TestLdifProcessor",),
-        ".test_ldif_stream": ("TestLDIFStreamBasic",),
-        ".test_models": (
-            "TestConnectionTestedEvent",
-            "TestRecordExtractedEvent",
-            "TestStreamDiscoveredEvent",
-            "TestTapExecutionCompletedEvent",
-            "TestTapExecutionStartedEvent",
-        ),
-        ".test_streams": (
-            "TestCustomStream",
-            "TestCustomStreamParams",
-            "TestGroupsStream",
-            "TestLDAPBaseStream",
-            "TestLDAPBaseStreamDirectUsage",
-            "TestOrganizationalUnitsStream",
-            "TestSchemaStream",
-            "TestStreamExceptionHandling",
-            "TestStreamIntegration",
-            "TestUsersStream",
-        ),
-        ".test_tap": ("TestFlextTapLdapTap",),
+        ".test_client": ("TestsFlextTapLdapClient",),
+        ".test_client_quick": ("TestsFlextTapLdapClientQuick",),
+        ".test_ldif_processor": ("TestsFlextTapLdapLdifProcessor",),
+        ".test_ldif_stream": ("TestsFlextTapLdapLdifStream",),
+        ".test_models": ("TestsFlextTapLdapModelsUnit",),
+        ".test_streams": ("TestsFlextTapLdapStreams",),
+        ".test_tap": ("TestsFlextTapLdapTap",),
     },
 )
 
