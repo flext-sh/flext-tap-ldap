@@ -78,24 +78,6 @@ class TestsFlextTapLdapStreams:
         assert stream.name != ""
         assert isinstance(stream.schema, dict)
 
-    @pytest.fixture
-    def mock_tap(self) -> Mock:
-        """Create mock tap instance."""
-        tap = Mock(spec=FlextTapLdapTap)
-        tap.tap_config = {
-            "connection": {
-                "host": "test.ldap.com",
-                "port": 389,
-                "base_dn": "dc=test,dc=com",
-                "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-                "bind_password": "test_password",
-            },
-            "user_filter": "(objectClass=inetOrgPerson)",
-        }
-        tap.metrics_logger = Mock()
-        tap.logger = Mock()
-        return tap
-
     def test_users_stream_creation(self, mock_tap: Mock) -> None:
         """Test users stream creation."""
         stream = FlextTapLdapStreams.UsersStream(mock_tap)
@@ -237,24 +219,6 @@ class TestsFlextTapLdapStreams:
         assert first_record["cn"] == "schema"
         mock_client_class.assert_called_once()
 
-    @pytest.fixture
-    def mock_tap(self) -> Mock:
-        """Create mock tap instance."""
-        tap = Mock(spec=FlextTapLdapTap)
-        tap.tap_config = {
-            "connection": {
-                "host": "test.ldap.com",
-                "port": 389,
-                "base_dn": "dc=test,dc=com",
-                "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-                "bind_password": "test_password",
-            },
-            "group_filter": "(objectClass=groupOfNames)",
-        }
-        tap.metrics_logger = Mock()
-        tap.logger = Mock()
-        return tap
-
     def test_groups_stream_creation(self, mock_tap: Mock) -> None:
         """Test groups stream creation."""
         stream = FlextTapLdapStreams.GroupsStream(mock_tap)
@@ -272,23 +236,6 @@ class TestsFlextTapLdapStreams:
         if isinstance(properties, dict):
             assert "dn" in properties
             assert "objectClass" in properties
-
-    @pytest.fixture
-    def mock_tap(self) -> Mock:
-        """Create mock tap instance."""
-        tap = Mock(spec=FlextTapLdapTap)
-        tap.tap_config = {
-            "connection": {
-                "host": "test.ldap.com",
-                "port": 389,
-                "base_dn": "dc=test,dc=com",
-                "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-                "bind_password": "test_password",
-            },
-        }
-        tap.metrics_logger = Mock()
-        tap.logger = Mock()
-        return tap
 
     def test_organizational_units_stream_creation(self, mock_tap: Mock) -> None:
         """Test organizational units stream creation."""
@@ -310,23 +257,6 @@ class TestsFlextTapLdapStreams:
         if isinstance(properties, dict):
             assert "dn" in properties
             assert "objectClass" in properties
-
-    @pytest.fixture
-    def mock_tap(self) -> Mock:
-        """Create mock tap instance."""
-        tap = Mock(spec=FlextTapLdapTap)
-        tap.tap_config = {
-            "connection": {
-                "host": "test.ldap.com",
-                "port": 389,
-                "base_dn": "dc=test,dc=com",
-                "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-                "bind_password": "test_password",
-            },
-        }
-        tap.metrics_logger = Mock()
-        tap.logger = Mock()
-        return tap
 
     def test_schema_stream_creation(self, mock_tap: Mock) -> None:
         """Test schema stream creation."""
@@ -393,23 +323,6 @@ class TestsFlextTapLdapStreams:
                 schema_properties={},
                 primary_keys=[],
             )
-
-    @pytest.fixture
-    def mock_tap(self) -> Mock:
-        """Create mock tap instance."""
-        tap = Mock(spec=FlextTapLdapTap)
-        tap.tap_config = {
-            "connection": {
-                "host": "test.ldap.com",
-                "port": 389,
-                "base_dn": "dc=test,dc=com",
-                "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-                "bind_password": "test_password",
-            },
-        }
-        tap.metrics_logger = Mock()
-        tap.logger = Mock()
-        return tap
 
     def test_custom_stream_creation(self, mock_tap: Mock) -> None:
         """Test custom stream creation."""
@@ -583,19 +496,6 @@ class TestsFlextTapLdapStreams:
         stream_names, stream_count = _discover_stream_names(tap, connection_config)
         assert stream_count >= 4
         assert "users" in stream_names
-
-    @pytest.fixture
-    def mock_tap(self) -> Mock:
-        """Create mock tap instance."""
-        tap = Mock(spec=FlextTapLdapTap)
-        tap.tap_config = {
-            "ldap_host": "test.ldap.com",
-            "ldap_port": 389,
-            "base_dn": "dc=test,dc=com",
-        }
-        tap.metrics_logger = Mock()
-        tap.logger = Mock()
-        return tap
 
     @pytest.fixture
     def mock_tap_failing(self) -> Mock:
