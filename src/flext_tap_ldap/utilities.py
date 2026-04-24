@@ -48,16 +48,14 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def to_entry_mapping(
-                entry_data: p.Ldif.Entry
-                | Mapping[str, t.JsonValue | t.StrSequence]
-                | None,
+                entry_data: p.Entry | Mapping[str, t.JsonValue | t.StrSequence] | None,
             ) -> p.Result[t.JsonMapping]:
                 """Normalize LDAP entry payloads into the canonical mutable mapping contract."""
                 if entry_data is None:
                     return r[t.JsonMapping].fail(
                         "Cannot convert None entry data",
                     )
-                if isinstance(entry_data, p.Ldif.Entry):
+                if isinstance(entry_data, p.Entry):
                     dn_value = entry_data.dn.value if entry_data.dn is not None else ""
                     empty_attributes: t.MutableStrSequenceMapping = {}
                     raw_attributes: Mapping[str, MutableSequence[str]] = (
@@ -140,7 +138,7 @@ class FlextTapLdapUtilities(
             @staticmethod
             def process_search_results(
                 search_result: Sequence[
-                    p.Ldif.Entry | Mapping[str, t.JsonValue | t.StrSequence]
+                    p.Entry | Mapping[str, t.JsonValue | t.StrSequence]
                 ],
                 *,
                 size_limit: int,
@@ -163,9 +161,7 @@ class FlextTapLdapUtilities(
             @staticmethod
             def process_oracle_search_results(
                 search_result: Sequence[
-                    p.Ldif.Entry
-                    | t.JsonMapping
-                    | Mapping[str, t.JsonValue | t.StrSequence]
+                    p.Entry | t.JsonMapping | Mapping[str, t.JsonValue | t.StrSequence]
                 ],
                 *,
                 oracle_oid_mode: bool,

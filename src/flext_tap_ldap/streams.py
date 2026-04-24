@@ -45,7 +45,7 @@ class FlextTapLdapStreams:
         def coerce_positive_int(raw_value: t.JsonValue, default: int) -> int:
             """Coerce value to positive integer with safe fallback."""
             try:
-                parsed = t.INTEGER_ADAPTER.validate_python(raw_value)
+                parsed = t.TapLdap.INTEGER_ADAPTER.validate_python(raw_value)
             except c.ValidationError:
                 return default
             return parsed if parsed > 0 else default
@@ -56,7 +56,7 @@ class FlextTapLdapStreams:
             if raw_value is None:
                 return None
             try:
-                validated = t.STRICT_STR_ADAPTER.validate_python(
+                validated = t.TapLdap.STRICT_STR_ADAPTER.validate_python(
                     raw_value,
                 )
             except c.ValidationError:

@@ -31,7 +31,7 @@ class FlextTapLdapLdifStreams:
         try:
             if not isinstance(value, (dict, list)):
                 return []
-            result = t.OBJECT_LIST_ADAPTER.validate_python(value)
+            result = t.TapLdap.OBJECT_LIST_ADAPTER.validate_python(value)
             return [dict(item) for item in result]
         except c.ValidationError:
             return []
@@ -41,7 +41,7 @@ class FlextTapLdapLdifStreams:
         try:
             if not isinstance(value, dict):
                 return {}
-            return t.COUNTER_MAP_ADAPTER.validate_python(value)
+            return t.TapLdap.COUNTER_MAP_ADAPTER.validate_python(value)
         except c.ValidationError:
             return {}
 
@@ -122,7 +122,7 @@ class FlextTapLdapLdifStreams:
 
         def _convert_entry_to_record(
             self,
-            flext_entry: m.Ldif.Entry,
+            flext_entry: m.Entry,
         ) -> t.JsonMapping:
             """Convert flext-ldif entry to Singer record."""
             dn_value = flext_entry.dn.value if flext_entry.dn is not None else ""

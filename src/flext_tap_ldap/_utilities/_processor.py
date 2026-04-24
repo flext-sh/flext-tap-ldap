@@ -38,7 +38,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
             """Distinguished name — real inheritance from m.Ldif.DN."""
 
         class Entry:
-            """Testing convenience wrapper for m.Ldif.Entry.
+            """Testing convenience wrapper for m.Entry.
 
             Maintains the existing interface while delegating
             all operations to the flext-ldif library implementation.
@@ -153,7 +153,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     case _:
                         self.attributes[name] = list(value)
 
-            def _create_flext_entry(self) -> m.Ldif.Entry:
+            def _create_flext_entry(self) -> m.Entry:
                 """Create m.Entry from current data."""
                 try:
                     api = ldif()
@@ -167,7 +167,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     )
                     if result.success and result.value.entries:
                         try:
-                            parsed_entry = m.Ldif.Entry.model_validate(
+                            parsed_entry = m.Entry.model_validate(
                                 result.value.entries[0].model_dump()
                             )
                         except c.ValidationError:
@@ -178,9 +178,9 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS:
                     return self._fallback_entry()
 
-            def _fallback_entry(self) -> m.Ldif.Entry:
+            def _fallback_entry(self) -> m.Entry:
                 """Create fallback entry from current data."""
-                return m.Ldif.Entry(
+                return m.Entry(
                     dn=FlextTapLdapUtilitiesProcessorMixin.TapLdap.DistinguishedName(
                         value=self.dn,
                         metadata=FlextTapLdapUtilitiesProcessorMixin._DEFAULT_ENTRY_METADATA,
@@ -208,10 +208,10 @@ class FlextTapLdapUtilitiesProcessorMixin:
             @staticmethod
             def _to_ldif_entry(
                 raw_value: t.JsonMapping,
-            ) -> m.Ldif.Entry | None:
+            ) -> m.Entry | None:
                 """Validate and coerce value to LDIF entry model."""
                 try:
-                    return m.Ldif.Entry.model_validate(raw_value)
+                    return m.Entry.model_validate(raw_value)
                 except c.ValidationError:
                     return None
 
@@ -396,9 +396,9 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             def _convert_from_flext_entry(
                 self,
-                flext_entry: m.Ldif.Entry,
+                flext_entry: m.Entry,
             ) -> FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry:
-                """Convert m.Ldif.Entry to testing convenience Entry."""
+                """Convert m.Entry to testing convenience Entry."""
                 dn = flext_entry.dn.value if flext_entry.dn else ""
                 attributes: t.MutableStrSequenceMapping = {}
                 if flext_entry.attributes and flext_entry.attributes.attributes:

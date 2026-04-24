@@ -133,7 +133,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         raw_connection_config = source_payload.get("connection_config", {})
         config_map: Mapping[str, t.JsonMapping] | t.ConfigurationMapping
         try:
-            config_map = t.CONFIG_STREAM_MAP_ADAPTER.validate_python(
+            config_map = t.TapLdap.CONFIG_STREAM_MAP_ADAPTER.validate_python(
                 raw_connection_config,
             )
         except c.ValidationError:
@@ -160,15 +160,20 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             ]
             streams.extend(ldif_stream_list)
 
-        streams_list: MutableSequence[m.Meltano.SingerCatalogEntry] = [
-            m.Meltano.SingerCatalogEntry.model_validate({
-                "stream": str(stream.name),
-                "tap_stream_id": str(stream.name),
-                "schema": {},
-            })
-            for stream in streams
-        ]
-        stream_catalog: t.JsonMapping = t.SINGER_OUTPUT_ADAPTER.validate_python(
+        streams_list: MutableSequence[m.Meltano.SingerCatalogEntry] = []
+        for stream in streams:
+            entry_result = u.Meltano.build_catalog_entry(
+                stream_name=str(stream.name),
+                schema={},
+                key_properties=(),
+            )
+            if entry_result.failure:
+                return r[t.JsonMapping].fail(
+                    entry_result.error or "Failed to build LDAP Singer catalog entry",
+                )
+            if entry_result.value is not None:
+                streams_list.append(entry_result.value)
+        stream_catalog: t.JsonMapping = t.TapLdap.SINGER_OUTPUT_ADAPTER.validate_python(
             m.Meltano.SingerCatalog(streams=streams_list).model_dump(
                 by_alias=True,
                 exclude_defaults=True,
@@ -176,8 +181,10 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
                 mode="json",
             )
         )
-        stream_catalog_payload: t.JsonMapping = t.SINGER_OUTPUT_ADAPTER.validate_python(
-            {"streams": stream_catalog.get("streams", [])},
+        stream_catalog_payload: t.JsonMapping = (
+            t.TapLdap.SINGER_OUTPUT_ADAPTER.validate_python(
+                {"streams": stream_catalog.get("streams", [])},
+            )
         )
         return r[t.JsonMapping].ok(stream_catalog_payload)
 
@@ -206,7 +213,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
     def validate_custom_stream(raw_item: t.JsonValue) -> t.StrMapping | None:
         """Validate a custom stream definition, returning name if valid."""
         try:
-            validated: t.JsonMapping = t.SINGER_OUTPUT_ADAPTER.validate_python(
+            validated: t.JsonMapping = t.TapLdap.SINGER_OUTPUT_ADAPTER.validate_python(
                 raw_item,
             )
         except c.ValidationError:
@@ -253,7 +260,7 @@ def _build_cli_command() -> click.Command:
         state_path: str | None,
     ) -> None:
         """Singer-compatible CLI for LDAP data extraction."""
-        raw_config: t.JsonMapping = t.SINGER_OUTPUT_ADAPTER.validate_json(
+        raw_config: t.JsonMapping = t.TapLdap.SINGER_OUTPUT_ADAPTER.validate_json(
             Path(config_path).read_bytes(),
         )
         config_data: t.MutableConfigurationMapping = {
@@ -262,7 +269,7 @@ def _build_cli_command() -> click.Command:
             if isinstance(v, (str, int, float, bool))
         }
         connection_config_payload: t.JsonMapping = (
-            t.SINGER_OUTPUT_ADAPTER.validate_python(
+            t.TapLdap.SINGER_OUTPUT_ADAPTER.validate_python(
                 config_data,
             )
         )
@@ -285,20 +292,28 @@ def _build_cli_command() -> click.Command:
                     for rs_item in raw_streams:
                         if isinstance(rs_item, Mapping):
                             catalog_streams.append(
-                                t.SINGER_OUTPUT_ADAPTER.validate_python(rs_item),
+                                t.TapLdap.SINGER_OUTPUT_ADAPTER.validate_python(
+                                    rs_item
+                                ),
                             )
                 raw_custom: t.JsonValue = raw_config.get("custom_streams")
                 if isinstance(raw_custom, list):
                     for cs_item in raw_custom:
                         cs_dict = FlextTapLdapTap.validate_custom_stream(cs_item)
                         if cs_dict is not None:
-                            cs_entry = m.Meltano.SingerCatalogEntry.model_validate({
-                                "stream": cs_dict["name"],
-                                "tap_stream_id": cs_dict["name"],
-                                "schema": {},
-                            })
+                            entry_result = u.Meltano.build_catalog_entry(
+                                stream_name=cs_dict["name"],
+                                schema={},
+                                key_properties=(),
+                            )
+                            if entry_result.failure or entry_result.value is None:
+                                raise click.ClickException(
+                                    entry_result.error
+                                    or "Failed to build custom Singer catalog entry"
+                                )
+                            cs_entry = entry_result.value
                             catalog_streams.append(
-                                t.SINGER_OUTPUT_ADAPTER.validate_python(
+                                t.TapLdap.SINGER_OUTPUT_ADAPTER.validate_python(
                                     cs_entry.model_dump(
                                         by_alias=True,
                                         exclude_defaults=True,
@@ -307,17 +322,23 @@ def _build_cli_command() -> click.Command:
                                     )
                                 ),
                             )
-                output_catalog: t.JsonMapping = t.SINGER_OUTPUT_ADAPTER.validate_python({
-                    "streams": catalog_streams,
-                })
-                click.echo(t.SINGER_OUTPUT_ADAPTER.dump_json(output_catalog).decode())
+                output_catalog: t.JsonMapping = (
+                    t.TapLdap.SINGER_OUTPUT_ADAPTER.validate_python({
+                        "streams": catalog_streams,
+                    })
+                )
+                click.echo(
+                    t.TapLdap.SINGER_OUTPUT_ADAPTER.dump_json(output_catalog).decode()
+                )
             return
 
         if catalog_path:
-            t.SINGER_OUTPUT_ADAPTER.validate_json(Path(catalog_path).read_bytes())
+            t.TapLdap.SINGER_OUTPUT_ADAPTER.validate_json(
+                Path(catalog_path).read_bytes()
+            )
 
         if state_path:
-            t.SINGER_OUTPUT_ADAPTER.validate_json(Path(state_path).read_bytes())
+            t.TapLdap.SINGER_OUTPUT_ADAPTER.validate_json(Path(state_path).read_bytes())
 
         source_config = m.Meltano.DataSourceConfig(
             source_type="ldap",
@@ -331,18 +352,22 @@ def _build_cli_command() -> click.Command:
             stream_entries: MutableSequence[t.JsonMapping] = []
             if isinstance(raw_streams_val, Sequence):
                 stream_entries.extend(
-                    t.SINGER_OUTPUT_ADAPTER.validate_python(se_item)
+                    t.TapLdap.SINGER_OUTPUT_ADAPTER.validate_python(se_item)
                     for se_item in raw_streams_val
                     if isinstance(se_item, Mapping)
                 )
             for stream_entry in stream_entries:
-                schema_msg: t.JsonMapping = t.SINGER_OUTPUT_ADAPTER.validate_python({
-                    "type": "SCHEMA",
-                    "stream": stream_entry["stream"],
-                    "schema": stream_entry.get("schema", {}),
-                    "key_properties": ["dn"],
-                })
-                click.echo(t.SINGER_OUTPUT_ADAPTER.dump_json(schema_msg).decode())
+                schema_msg: t.JsonMapping = (
+                    t.TapLdap.SINGER_OUTPUT_ADAPTER.validate_python({
+                        "type": "SCHEMA",
+                        "stream": stream_entry["stream"],
+                        "schema": stream_entry.get("schema", {}),
+                        "key_properties": ["dn"],
+                    })
+                )
+                click.echo(
+                    t.TapLdap.SINGER_OUTPUT_ADAPTER.dump_json(schema_msg).decode()
+                )
 
     return _cli
 
