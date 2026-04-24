@@ -358,7 +358,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     str(file_path),
                 )
                 try:
-                    content = self._read_file_content(file_path, "utf-8")
+                    content = self._read_file_content(file_path, c.DEFAULT_ENCODING)
                     result = self._parse_ldif_content(content, file_path)
                     yield from self._yield_entries_from_result(result)
                 except UnicodeDecodeError:
@@ -449,7 +449,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
             def _read_file_content(
                 self,
                 file_path: Path,
-                encoding: str = "utf-8",
+                encoding: str = c.DEFAULT_ENCODING,
             ) -> str:
                 """Read file content with specified encoding."""
                 with file_path.open(encoding=encoding) as f:

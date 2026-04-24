@@ -185,7 +185,7 @@ class FlextTapLdapLdifStreams:
             """Process single LDIF file using flext-ldif."""
             self.logger.info("Processing LDIF file: %s", ldif_file)
             try:
-                content = Path(ldif_file).read_text(encoding="utf-8")
+                content = Path(ldif_file).read_text(encoding=c.DEFAULT_ENCODING)
                 result: p.Result[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
                     content
                 )
@@ -340,7 +340,7 @@ class FlextTapLdapLdifStreams:
             """Analyze single LDIF file using flext-ldif."""
             self.logger.info("Analyzing LDIF file: %s", ldif_file)
             try:
-                content = Path(ldif_file).read_text(encoding="utf-8")
+                content = Path(ldif_file).read_text(encoding=c.DEFAULT_ENCODING)
                 result: p.Result[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
                     content
                 )
