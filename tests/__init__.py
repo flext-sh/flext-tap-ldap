@@ -25,7 +25,6 @@ if _t.TYPE_CHECKING:
     from tests.unit.test_ldif_processor import TestsFlextTapLdapLdifProcessor
     from tests.unit.test_ldif_stream import TestsFlextTapLdapLdifStream
     from tests.unit.test_models import TestsFlextTapLdapModelsUnit
-    from tests.unit.test_streams import TestsFlextTapLdapStreams
     from tests.unit.test_tap import TestsFlextTapLdapTap
     from tests.utilities import TestsFlextTapLdapUtilities, u
 _LAZY_IMPORTS = merge_lazy_imports(
@@ -57,7 +56,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
             ".unit.test_ldif_processor": ("TestsFlextTapLdapLdifProcessor",),
             ".unit.test_ldif_stream": ("TestsFlextTapLdapLdifStream",),
             ".unit.test_models": ("TestsFlextTapLdapModelsUnit",),
-            ".unit.test_streams": ("TestsFlextTapLdapStreams",),
             ".unit.test_tap": ("TestsFlextTapLdapTap",),
             ".utilities": (
                 "TestsFlextTapLdapUtilities",
@@ -115,7 +113,6 @@ __all__: list[str] = [
     "TestsFlextTapLdapModels",
     "TestsFlextTapLdapModelsUnit",
     "TestsFlextTapLdapProtocols",
-    "TestsFlextTapLdapStreams",
     "TestsFlextTapLdapTap",
     "TestsFlextTapLdapTypes",
     "TestsFlextTapLdapUtilities",

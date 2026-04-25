@@ -12,7 +12,6 @@ _LAZY_IMPORTS = build_lazy_import_map(
         ".test_ldif_processor": ("TestsFlextTapLdapLdifProcessor",),
         ".test_ldif_stream": ("TestsFlextTapLdapLdifStream",),
         ".test_models": ("TestsFlextTapLdapModelsUnit",),
-        ".test_streams": ("TestsFlextTapLdapStreams",),
         ".test_tap": ("TestsFlextTapLdapTap",),
     },
 )
