@@ -15,13 +15,13 @@ from typing import Annotated, Self
 from uuid import uuid4
 
 from flext_ldap import m
-from flext_meltano import m as meltano_m, u
+from flext_meltano import FlextMeltanoModels, u
 
 from flext_tap_ldap.constants import c
 from flext_tap_ldap.typings import t
 
 
-class FlextTapLdapModels(meltano_m, m):
+class FlextTapLdapModels(FlextMeltanoModels, m):
     """Complete models for LDAP tap operations extending m.
 
     Provides standardized models for all LDAP tap domain entities including:
