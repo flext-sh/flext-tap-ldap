@@ -35,7 +35,9 @@ class FlextTapLdapConstants(c, FlextLdapConstants):
         """
 
         DEFAULT_PAGE_SIZE: Final[int] = 1000
-        DEFAULT_SEARCH_TIMEOUT: Final[int] = FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
+        DEFAULT_SEARCH_TIMEOUT: Final[int] = (
+            FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
+        )
 
         class Ldap:
             """LDAP tap-specific connection constants."""
