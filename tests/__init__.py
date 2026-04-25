@@ -16,7 +16,7 @@ if _t.TYPE_CHECKING:
 
     from flext_tap_ldap import d, e, h, r, s, x
     from tests.constants import TestsFlextTapLdapConstants, c
-    from tests.e2e.test_integration import TestFlextTapLdapIntegration
+    from tests.e2e.test_integration import TestsFlextTapLdapIntegration
     from tests.models import TestsFlextTapLdapModels, m
     from tests.protocols import TestsFlextTapLdapProtocols, p
     from tests.typings import TestsFlextTapLdapTypes, t
@@ -39,7 +39,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "TestsFlextTapLdapConstants",
                 "c",
             ),
-            ".e2e.test_integration": ("TestFlextTapLdapIntegration",),
+            ".e2e.test_integration": ("TestsFlextTapLdapIntegration",),
             ".models": (
                 "TestsFlextTapLdapModels",
                 "m",
@@ -106,10 +106,10 @@ _LAZY_IMPORTS = merge_lazy_imports(
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)
 
 __all__: list[str] = [
-    "TestFlextTapLdapIntegration",
     "TestsFlextTapLdapClient",
     "TestsFlextTapLdapClientQuick",
     "TestsFlextTapLdapConstants",
+    "TestsFlextTapLdapIntegration",
     "TestsFlextTapLdapLdifProcessor",
     "TestsFlextTapLdapLdifStream",
     "TestsFlextTapLdapModels",

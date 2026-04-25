@@ -36,7 +36,7 @@ def _extract_json_from_output(output: str) -> t.JsonValue:
     raise ValueError(msg)
 
 
-class TestFlextTapLdapIntegration:
+class TestsFlextTapLdapIntegration:
     """Integration tests for tap-ldap."""
 
     @staticmethod
