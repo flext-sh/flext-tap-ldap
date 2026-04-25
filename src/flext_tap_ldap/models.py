@@ -11,6 +11,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from types import MappingProxyType
 from typing import Annotated, Self
 from uuid import uuid4
 
@@ -218,15 +219,15 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
                 ),
             ] = "created"
             settings: t.JsonMapping = u.Field(
-                default_factory=dict,
+                default_factory=lambda: MappingProxyType({}),
                 description="Execution configuration object",
             )
             catalog: t.JsonMapping = u.Field(
-                default_factory=dict,
+                default_factory=lambda: MappingProxyType({}),
                 description="Catalog data associated with the execution",
             )
             state: t.JsonMapping = u.Field(
-                default_factory=dict,
+                default_factory=lambda: MappingProxyType({}),
                 description="State data for the execution",
             )
             started_at: Annotated[
@@ -426,7 +427,7 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
                 description="LDAP filter expression for the custom stream",
             )
             schema_properties: t.JsonMapping = u.Field(
-                default_factory=dict,
+                default_factory=lambda: MappingProxyType({}),
                 description="Custom schema properties for the stream",
             )
             primary_keys: t.StrSequence = u.Field(
@@ -686,7 +687,7 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
                 ),
             ] = None
             stream_schema: t.JsonMapping = u.Field(
-                default_factory=dict,
+                default_factory=lambda: MappingProxyType({}),
                 description="Stream schema mapping for Singer records",
             )
 
