@@ -6,7 +6,6 @@ from typing import Annotated, ClassVar
 
 from flext_core import FlextSettings
 from flext_ldap import FlextLdapSettings
-
 from flext_tap_ldap import c, m, t, u
 
 

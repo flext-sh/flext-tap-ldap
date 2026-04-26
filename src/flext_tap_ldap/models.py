@@ -17,7 +17,6 @@ from uuid import uuid4
 
 from flext_ldap import m
 from flext_meltano import FlextMeltanoModels, u
-
 from flext_tap_ldap.constants import c
 from flext_tap_ldap.typings import t
 
