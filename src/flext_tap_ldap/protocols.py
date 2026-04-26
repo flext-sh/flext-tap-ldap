@@ -1,188 +1,23 @@
-"""FLEXT Tap LDAP Protocols - Domain-specific LDAP tap protocol definitions.
+"""FLEXT Tap LDAP Protocols — domain-specific LDAP tap protocol facade.
 
-This module provides LDAP tap-specific protocol definitions extending p.
-Follows FLEXT standards:
-- Domain-specific protocols extending parent protocols
-- Protocol composition with multiple inheritance
-- Runtime-checkable protocols where applicable
+The 5 inner ``TapLdap.*`` Protocol classes that previously lived here had
+**zero workspace consumers**. Per AGENTS.md §3.5 + STRICT YAGNI they were
+deleted; the canonical ``FlextTapLdapProtocols`` facade remains intact
+(re-exported via ``p``) and inherits behaviour from the parent
+``FlextMeltanoProtocols`` (``p``) + ``FlextLdapProtocols`` MRO chain.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
-
 """
 
 from __future__ import annotations
 
-from collections.abc import (
-    Sequence,
-)
-from typing import Protocol, runtime_checkable
-
 from flext_ldap import FlextLdapProtocols
-from flext_meltano import m, p
-from flext_tap_ldap import t
+from flext_meltano import p as meltano_p
 
 
-class FlextTapLdapProtocols(p, FlextLdapProtocols):
-    """LDAP tap-specific protocol definitions extending p.
-
-    Domain-specific protocol system for LDAP data extraction operations.
-    Contains ONLY complex LDAP tap-specific protocols extending parent protocols.
-    """
-
-    class TapLdap:
-        """Tap LDAP namespace for protocol definitions.
-
-        Contains all LDAP tap-specific protocol definitions
-        organized by functional domains.
-        """
-
-        @runtime_checkable
-        class LdapConnection(FlextLdapProtocols.Service[m.ConfigMap], Protocol):
-            """Protocol for LDAP database connection management."""
-
-            def connect(
-                self,
-                settings: m.ConfigMap,
-            ) -> p.Result[m.ConfigMap]:
-                """Connect to LDAP database with provided configuration."""
-                ...
-
-            def disconnect(self) -> p.Result[bool]:
-                """Disconnect from LDAP database."""
-                ...
-
-            def test_connection(
-                self,
-                settings: m.ConfigMap,
-            ) -> p.Result[bool]:
-                """Test LDAP database connection with validation."""
-                ...
-
-        @runtime_checkable
-        class DirectoryDiscovery(FlextLdapProtocols.Service[m.ConfigMap], Protocol):
-            """Protocol for LDAP directory discovery."""
-
-            def discover_base_dns(
-                self,
-                settings: m.ConfigMap,
-            ) -> p.Result[t.StrSequence]:
-                """Discover available base DNs in LDAP directory."""
-                ...
-
-            def discover_object_classes(
-                self,
-                base_dn: str,
-            ) -> p.Result[t.StrSequence]:
-                """Discover object classes in LDAP directory."""
-                ...
-
-            def fetch_directory_metadata(
-                self,
-                base_dn: str,
-            ) -> p.Result[m.ConfigMap]:
-                """Get LDAP directory metadata and schema information."""
-                ...
-
-        @runtime_checkable
-        class LdapExtraction(FlextLdapProtocols.Service[t.JsonValue], Protocol):
-            """Protocol for LDAP data extraction."""
-
-            def extract_entries(
-                self,
-                base_dn: str,
-                filter_str: str,
-                attributes: t.StrSequence | None = None,
-            ) -> p.Result[Sequence[m.ConfigMap]]:
-                """Extract LDAP entries matching filter."""
-                ...
-
-            def extract_single_entry(
-                self,
-                dn: str,
-                attributes: t.StrSequence | None = None,
-            ) -> p.Result[m.ConfigMap]:
-                """Extract single LDAP entry by DN."""
-                ...
-
-        @runtime_checkable
-        class AttributeMapping(FlextLdapProtocols.Service[t.JsonValue], Protocol):
-            """Protocol for LDAP to Singer attribute mapping."""
-
-            def convert_attribute_value(
-                self,
-                value: t.Scalar,
-                ldap_attr: str,
-            ) -> p.Result[t.Scalar]:
-                """Convert LDAP attribute value to Singer-compatible format."""
-                ...
-
-            def map_ldap_attribute(
-                self,
-                ldap_attr: str,
-            ) -> p.Result[str]:
-                """Map LDAP attribute to Singer field name."""
-                ...
-
-        @runtime_checkable
-        class StreamGeneration(FlextLdapProtocols.Service[m.ConfigMap], Protocol):
-            """Protocol for Singer stream generation from LDAP."""
-
-            def generate_streams_from_ldap(
-                self,
-                base_dn: str,
-                settings: m.ConfigMap,
-            ) -> p.Result[m.Meltano.SingerCatalog]:
-                """Generate Singer streams from LDAP directory structure."""
-                ...
-
-            def sync_ldap_stream(
-                self,
-                stream_name: str,
-                base_dn: str,
-                state: m.ConfigMap,
-            ) -> p.Result[m.Meltano.SingerStateMessage]:
-                """Sync Singer stream from LDAP entries."""
-                ...
-
-        @runtime_checkable
-        class TapConfig(Protocol):
-            """Protocol for tap configuration interface."""
-
-            def resolve_config_value(
-                self,
-                key: str,
-                default: t.Scalar | None = None,
-            ) -> t.Scalar | None:
-                """Get configuration value by key.
-
-                Args:
-                    key: Configuration key.
-                    default: Default value if key not found.
-
-                Returns:
-                    Configuration value or default.
-
-                """
-                ...
-
-        @runtime_checkable
-        class Tap(Protocol):
-            """Protocol for tap interface used by streams.
-
-            Defines the minimal interface that streams need from tap instances,
-            avoiding circular dependencies through protocol-based typing.
-            """
-
-            @property
-            def settings(self) -> FlextTapLdapProtocols.TapLdap.TapConfig:
-                """Get tap configuration.
-
-                Returns:
-                    Tap configuration t.JsonValue.
-
-                """
-                ...
+class FlextTapLdapProtocols(meltano_p, FlextLdapProtocols):
+    """Singer Tap LDAP protocols facade — composes Meltano + LDAP."""
 
 
 p = FlextTapLdapProtocols

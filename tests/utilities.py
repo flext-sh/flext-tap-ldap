@@ -11,11 +11,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import fcntl
 import os
-import types
-from pathlib import Path
-from typing import ClassVar, TextIO
+from typing import ClassVar
 
 from flext_tests import FlextTestsUtilities
 
@@ -46,33 +43,7 @@ class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
             Mirrors flext-ldap/tests/_utilities/docker_infra.py pattern.
             """
 
-            class FileLock:
-                """File-based locking for pytest-xdist parallel test isolation."""
-
-                def __init__(self, lock_file: Path) -> None:
-                    self.lock_file = lock_file
-                    self._fd: int | None = None
-                    self._file_obj: TextIO | None = None
-
-                def __enter__(self) -> None:
-                    """Acquire exclusive file lock."""
-                    self.lock_file.parent.mkdir(parents=True, exist_ok=True)
-                    self._file_obj = self.lock_file.open("w")
-                    self._fd = self._file_obj.fileno()
-                    fcntl.flock(self._fd, fcntl.LOCK_EX)
-
-                def __exit__(
-                    self,
-                    exc_type: type[BaseException] | None,
-                    exc_val: BaseException | None,
-                    exc_tb: types.TracebackType | None,
-                ) -> None:
-                    """Release file lock and clean up."""
-                    if self._fd is not None:
-                        fcntl.flock(self._fd, fcntl.LOCK_UN)
-                    if self._file_obj is not None:
-                        self._file_obj.close()
-                    self.lock_file.unlink(missing_ok=True)
+            FileLock = FlextTestsUtilities.Tests.FileLock
 
             @staticmethod
             def admin_credentials() -> tuple[str, str]:
