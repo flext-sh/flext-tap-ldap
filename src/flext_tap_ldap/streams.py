@@ -80,7 +80,7 @@ class FlextTapLdapStreams:
                 host=str(parsed.host),
                 port=FlextTapLdapStreams.LDAPBaseStream.coerce_positive_int(
                     parsed.port,
-                    c.Ldap.ConnectionDefaults.PORT,
+                    c.Ldap.PORT,
                 ),
                 bind_dn=FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
                     parsed.bind_dn,

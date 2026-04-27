@@ -18,9 +18,9 @@ class FlextTapLdapSettings(FlextLdapSettings):
     )
 
     host: Annotated[str, u.Field()] = c.LOCALHOST
-    port: Annotated[t.PortNumber, u.Field(ge=1)] = c.Ldap.ConnectionDefaults.PORT
-    use_ssl: Annotated[bool, u.Field()] = c.Ldap.ConnectionDefaults.DEFAULT_USE_SSL
-    timeout: Annotated[t.PositiveInt, u.Field(ge=1)] = c.Ldap.ConnectionDefaults.TIMEOUT
+    port: Annotated[t.PortNumber, u.Field(ge=1)] = c.Ldap.PORT
+    use_ssl: Annotated[bool, u.Field()] = c.Ldap.DEFAULT_USE_SSL
+    timeout: Annotated[t.PositiveInt, u.Field(ge=1)] = c.Ldap.TIMEOUT
     page_size: Annotated[t.PositiveInt, u.Field(ge=1)] = 1000
 
 

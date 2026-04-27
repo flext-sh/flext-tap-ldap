@@ -572,7 +572,7 @@ class FlextTapLdapServices:
     def create_default_ldap_config(
         host: str,
         base_dn: str,
-        port: int = c.Ldap.ConnectionDefaults.PORT,
+        port: int = c.Ldap.PORT,
         **kwargs: t.Scalar,
     ) -> p.Result[t.JsonMapping]:
         """Create LDAP connection configuration (testing convenience interface).

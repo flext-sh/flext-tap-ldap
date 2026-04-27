@@ -43,7 +43,7 @@ class FlextTapLdapUtilities(
                 }
                 if normalized_scope in valid_scopes:
                     return normalized_scope
-                return c.Ldap.SearchDefaults.DEFAULT_SCOPE
+                return c.Ldap.DEFAULT_SCOPE
 
             @staticmethod
             def to_entry_mapping(

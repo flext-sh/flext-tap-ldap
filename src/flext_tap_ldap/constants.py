@@ -27,17 +27,15 @@ class FlextTapLdapConstants(c, FlextLdapConstants):
         """Tap LDAP namespace for cross-project access.
 
         LDAP-generic constants are inherited from c.Ldap via MRO:
-        - c.Ldap.ConnectionDefaults.PORT (389)
-        - c.Ldap.ConnectionDefaults.TIMEOUT (30)
+        - c.Ldap.PORT (389)
+        - c.Ldap.TIMEOUT (30)
 
         Meltano-generic constants are inherited from c.Meltano via MRO:
         - c.DEFAULT_BATCH_SIZE (page size)
         """
 
         DEFAULT_PAGE_SIZE: Final[int] = 1000
-        DEFAULT_SEARCH_TIMEOUT: Final[int] = (
-            FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
-        )
+        DEFAULT_SEARCH_TIMEOUT: Final[int] = FlextLdapConstants.Ldap.TIMEOUT
 
         class Ldap:
             """LDAP tap-specific connection constants."""

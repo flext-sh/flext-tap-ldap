@@ -368,7 +368,7 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
                 u.Field(
                     description="LDAP server port",
                 ),
-            ] = c.Ldap.ConnectionDefaults.PORT
+            ] = c.Ldap.PORT
             bind_dn: Annotated[
                 str | None,
                 u.Field(
@@ -465,7 +465,7 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
                 u.Field(
                     description="LDAP server port",
                 ),
-            ] = c.Ldap.ConnectionDefaults.PORT
+            ] = c.Ldap.PORT
             bind_dn: Annotated[
                 str | None,
                 u.Field(
@@ -513,7 +513,7 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
                 u.Field(
                     description="LDAP port number",
                 ),
-            ] = c.Ldap.ConnectionDefaults.PORT
+            ] = c.Ldap.PORT
             bind_dn: Annotated[
                 str | None,
                 u.Field(
