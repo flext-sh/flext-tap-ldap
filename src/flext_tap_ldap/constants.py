@@ -94,4 +94,4 @@ class FlextTapLdapConstants(c, FlextLdapConstants):
 
 
 c = FlextTapLdapConstants
-__all__: list[str] = ["FlextTapLdapConstants", "c"]
+__all__: tuple[str, ...] = ("FlextTapLdapConstants", "c")
