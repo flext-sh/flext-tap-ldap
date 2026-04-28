@@ -1,0 +1,22 @@
+tests/e2e/test_integration.py
+  h_9db9d35f50cf33 21,28-29,33,127-129,255-261
+src/flext_tap_ldap/client.py
+  h_9db9d35f50cf33 81,86,225-227,231,288-290,294
+tests/e2e/conftest.py
+  h_9db9d35f50cf33 16,69,90-91,96
+src/flext_tap_ldap/utilities.py
+  h_9db9d35f50cf33 46-47,78,110,134,180
+src/flext_tap_ldap/_utilities/_processor.py
+  h_9db9d35f50cf33 25,97-99,171,175-176,214-215
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "964017f4ca08b8fa050bed0c88c0145b00f18b03",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
