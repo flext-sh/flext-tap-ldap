@@ -13,10 +13,11 @@ from collections.abc import (
 )
 from pathlib import Path
 
+import ldap3
 import pytest
 from flext_tests import tk
 
-from tests import c, d, p, t, u
+from tests import c, d, t, u
 
 logger = u.fetch_logger(__name__)
 
@@ -64,7 +65,9 @@ def ldap_container(project_root: Path) -> Iterator[None]:
     @d.retry(max_attempts=30, delay_seconds=2.0, backoff_strategy="linear")
     def _check_ldap_ready() -> None:
         admin_dn, admin_password = u.Ldap.Tests.admin_credentials()
-        server = u.Ldap.create_server(host="localhost", port=dc.PORT, get_info="ALL")
+        server = u.Ldap.create_server(
+            host="localhost", port=dc.PORT, get_info=c.Ldap.Ldap3GetInfo.ALL
+        )
         conn = u.Ldap.create_connection(
             server,
             user=admin_dn,
@@ -83,11 +86,15 @@ def ldap_container(project_root: Path) -> Iterator[None]:
 
 
 @pytest.fixture
-def ldap_connection(_ldap_container: None) -> Generator[p.Ldap.Ldap3Connection]:
+def ldap_connection(
+    _ldap_container: None,
+) -> Generator[ldap3.Connection]:
     """Create LDAP connection for testing."""
     dc = c.Ldap.Tests
     admin_dn, admin_password = u.Ldap.Tests.admin_credentials()
-    server = u.Ldap.create_server(host="localhost", port=dc.PORT, get_info="ALL")
+    server = u.Ldap.create_server(
+        host="localhost", port=dc.PORT, get_info=c.Ldap.Ldap3GetInfo.ALL
+    )
     conn = u.Ldap.create_connection(
         server,
         user=admin_dn,

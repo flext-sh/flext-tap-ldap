@@ -43,7 +43,8 @@ class FlextTapLdapUtilities(
                 }
                 if normalized_scope in valid_scopes:
                     return normalized_scope
-                return c.Ldap.DEFAULT_SCOPE
+                default_scope: str = str(c.Ldap.DEFAULT_SCOPE)
+                return default_scope
 
             @staticmethod
             def to_entry_mapping(
@@ -74,7 +75,7 @@ class FlextTapLdapUtilities(
                     return r[t.JsonMapping].ok(entry_mapping)
                 normalized_mapping = t.Cli.JSON_MAPPING_ADAPTER.validate_python(
                     {
-                        str(key): u.Cli.normalize_json_value(value)
+                        str(key): u.normalize_to_json_value(value)
                         for key, value in entry_data.items()
                     },
                 )
@@ -106,7 +107,7 @@ class FlextTapLdapUtilities(
             ) -> t.JsonMapping:
                 """Normalize Oracle-specific LDAP entry attributes for downstream consumers."""
                 normalized_entry: dict[str, t.JsonValue] = {
-                    str(key): u.Cli.normalize_json_value(value)
+                    str(key): u.normalize_to_json_value(value)
                     for key, value in entry.items()
                 }
                 raw_attributes: t.JsonValue = normalized_entry.get("attributes", {})
@@ -130,7 +131,7 @@ class FlextTapLdapUtilities(
                         and "organizationalUnit" not in object_classes
                     ):
                         object_classes.append("organizationalUnit")
-                        attributes["objectClass"] = u.Cli.normalize_json_value(
+                        attributes["objectClass"] = u.normalize_to_json_value(
                             object_classes,
                         )
                 normalized_entry["attributes"] = attributes
@@ -176,7 +177,7 @@ class FlextTapLdapUtilities(
                         entry_mapping: t.JsonMapping = (
                             t.Cli.JSON_MAPPING_ADAPTER.validate_python(
                                 {
-                                    str(key): u.Cli.normalize_json_value(value)
+                                    str(key): u.normalize_to_json_value(value)
                                     for key, value in entry.items()
                                 },
                             )
@@ -208,14 +209,6 @@ class FlextTapLdapUtilities(
                 """Convert a recursive container to the canonical mapping contract."""
                 try:
                     return t.TapLdap.CONFIG_MAP_ADAPTER.validate_python(value)
-                except c.ValidationError:
-                    return None
-
-            @staticmethod
-            def to_str(value: t.JsonPayload) -> str | None:
-                """Convert a recursive container to a strict string contract."""
-                try:
-                    return t.TapLdap.STRICT_STR_ADAPTER.validate_python(value)
                 except c.ValidationError:
                     return None
 

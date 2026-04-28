@@ -78,11 +78,12 @@ class FlextTapLdapClient:
         @property
         def server_uri(self) -> str:
             """Get server URI for testing convenience."""
-            return u.TapLdap.ClientSupport.build_server_uri(
+            server_uri: str = u.TapLdap.ClientSupport.build_server_uri(
                 self.host,
                 self.port,
                 use_ssl=self.use_ssl,
             )
+            return server_uri
 
         def health_check(self) -> t.ScalarMapping:
             """Perform health check for testing convenience."""
@@ -221,10 +222,13 @@ class FlextTapLdapClient:
                     search_filter,
                     attributes,
                 )
-                return u.TapLdap.ClientSupport.process_oracle_search_results(
-                    search_result,
-                    oracle_oid_mode=oracle_oid_mode,
+                processed_results: Sequence[t.JsonMapping] = (
+                    u.TapLdap.ClientSupport.process_oracle_search_results(
+                        search_result,
+                        oracle_oid_mode=oracle_oid_mode,
+                    )
                 )
+                return processed_results
             finally:
                 loop.close()
                 set_event_loop(None)
@@ -281,10 +285,13 @@ class FlextTapLdapClient:
                 result = self._flext_api.search(search_options)
                 if not (result.success and result.value):
                     return []
-                return u.TapLdap.ClientSupport.process_search_results(
-                    result.value.entries,
-                    size_limit=size_limit,
+                processed_entries: Sequence[t.JsonMapping] = (
+                    u.TapLdap.ClientSupport.process_search_results(
+                        result.value.entries,
+                        size_limit=size_limit,
+                    )
                 )
+                return processed_entries
             except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                 err_msg = f"LDAP search failed: {e}"
                 logger.exception("LDAP search failed: %s", err_msg)

@@ -42,28 +42,6 @@ class FlextTapLdapStreams:
         """
 
         @staticmethod
-        def coerce_positive_int(raw_value: t.JsonValue, default: int) -> int:
-            """Coerce value to positive integer with safe fallback."""
-            try:
-                parsed = t.TapLdap.INTEGER_ADAPTER.validate_python(raw_value)
-            except c.ValidationError:
-                return default
-            return parsed if parsed > 0 else default
-
-        @staticmethod
-        def coerce_optional_string(raw_value: t.JsonValue) -> str | None:
-            """Coerce value to string only when source is already string-like."""
-            if raw_value is None:
-                return None
-            try:
-                validated = t.TapLdap.STRICT_STR_ADAPTER.validate_python(
-                    raw_value,
-                )
-            except c.ValidationError:
-                return None
-            return validated or None
-
-        @staticmethod
         def parse_connection_config(
             raw_value: t.JsonValue,
         ) -> m.TapLdap.LdapConnectionConfig:
@@ -78,20 +56,16 @@ class FlextTapLdapStreams:
                 raise ValueError(msg) from exc
             return m.TapLdap.LdapConnectionConfig(
                 host=str(parsed.host),
-                port=FlextTapLdapStreams.LDAPBaseStream.coerce_positive_int(
+                port=u.to_positive_int(
                     parsed.port,
-                    c.Ldap.PORT,
+                    default=c.Ldap.PORT,
                 ),
-                bind_dn=FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
-                    parsed.bind_dn,
-                ),
-                bind_password=FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
-                    parsed.bind_password,
-                ),
+                bind_dn=u.to_optional_str(parsed.bind_dn),
+                bind_password=u.to_optional_str(parsed.bind_password),
                 use_ssl=bool(parsed.use_ssl),
-                timeout_seconds=FlextTapLdapStreams.LDAPBaseStream.coerce_positive_int(
+                timeout_seconds=u.to_positive_int(
                     parsed.timeout_seconds,
-                    c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
+                    default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
                 ),
                 base_dn=str(parsed.base_dn),
             )
@@ -130,7 +104,7 @@ class FlextTapLdapStreams:
         ) -> Iterable[t.JsonMapping]:
             """Get records from LDAP - base implementation."""
             base_dn = (
-                FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
+                u.to_optional_str(
                     context.get("base_dn"),
                 )
                 if context is not None
@@ -153,9 +127,9 @@ class FlextTapLdapStreams:
                     msg = "LDAP connection host is required"
                     raise ValueError(msg)
                 page_size_raw = self.settings.get("page_size", 1000)
-                page_size = FlextTapLdapStreams.LDAPBaseStream.coerce_positive_int(
+                page_size = u.to_positive_int(
                     page_size_raw,
-                    c.TapLdap.DEFAULT_PAGE_SIZE,
+                    default=c.TapLdap.DEFAULT_PAGE_SIZE,
                 )
                 if (
                     connection_config.bind_dn is not None
@@ -281,7 +255,7 @@ class FlextTapLdapStreams:
         ) -> Iterable[t.JsonMapping]:
             """Get user records from LDAP."""
             base_dn = (
-                FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
+                u.to_optional_str(
                     context.get("base_dn"),
                 )
                 if context is not None
@@ -289,10 +263,7 @@ class FlextTapLdapStreams:
             )
             logger.info("Extracting LDAP users")
             raw_filter = self.settings.get("user_filter", "(objectClass=inetOrgPerson)")
-            user_filter = (
-                FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(raw_filter)
-                or "(objectClass=inetOrgPerson)"
-            )
+            user_filter = u.to_optional_str(raw_filter) or "(objectClass=inetOrgPerson)"
             user_attributes = [
                 "uid",
                 "cn",
@@ -371,7 +342,7 @@ class FlextTapLdapStreams:
         ) -> Iterable[t.JsonMapping]:
             """Get group records from LDAP."""
             base_dn = (
-                FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
+                u.to_optional_str(
                     context.get("base_dn"),
                 )
                 if context is not None
@@ -383,7 +354,7 @@ class FlextTapLdapStreams:
                 "(objectClass=groupOfNames)",
             )
             group_filter = (
-                FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
+                u.to_optional_str(
                     raw_group_filter,
                 )
                 or "(objectClass=groupOfNames)"
@@ -443,7 +414,7 @@ class FlextTapLdapStreams:
         ) -> Iterable[t.JsonMapping]:
             """Get organizational unit records from LDAP."""
             base_dn = (
-                FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
+                u.to_optional_str(
                     context.get("base_dn"),
                 )
                 if context is not None
@@ -516,7 +487,7 @@ class FlextTapLdapStreams:
         ) -> Iterable[t.JsonMapping]:
             """Get schema records from LDAP."""
             context_base_dn = (
-                FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
+                u.to_optional_str(
                     context.get("base_dn"),
                 )
                 if context is not None
@@ -649,7 +620,8 @@ class FlextTapLdapStreams:
         @property
         def replication_key(self) -> str | None:
             """Get replication key for incremental sync."""
-            return self.params.replication_key
+            replication_key = self.params.replication_key
+            return None if replication_key is None else str(replication_key)
 
         @override
         def get_records(
@@ -658,7 +630,7 @@ class FlextTapLdapStreams:
         ) -> Iterable[t.JsonMapping]:
             """Get records using custom filter."""
             base_dn = (
-                FlextTapLdapStreams.LDAPBaseStream.coerce_optional_string(
+                u.to_optional_str(
                     context.get("base_dn"),
                 )
                 if context is not None

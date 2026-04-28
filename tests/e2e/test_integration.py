@@ -15,23 +15,23 @@ from collections.abc import (
     Sequence,
 )
 from pathlib import Path
-from typing import cast
 from unittest.mock import Mock, patch
 
 import pytest
-from click.core import BaseCommand
+from click.core import Command
 from click.testing import CliRunner
 
 from flext_tap_ldap.tap import CLI_COMMAND
 from tests import t, u
 
 
-def _extract_json_from_output(output: str) -> t.JsonValue:
-    """Extract the JSON t.JsonValue from CLI output that may contain log lines."""
+def _extract_json_from_output(output: str) -> t.JsonMapping:
+    """Extract the JSON object from CLI output that may contain log lines."""
     for line in output.strip().splitlines():
         stripped = line.strip()
         if stripped.startswith("{"):
-            return json.loads(stripped)
+            payload: t.JsonMapping = t.Cli.JSON_MAPPING_ADAPTER.validate_json(stripped)
+            return payload
     msg = f"No JSON found in output: {output[:200]}"
     raise ValueError(msg)
 
@@ -40,8 +40,8 @@ class TestsFlextTapLdapIntegration:
     """Integration tests for tap-ldap."""
 
     @staticmethod
-    def _cli_command() -> BaseCommand:
-        assert isinstance(CLI_COMMAND, BaseCommand)
+    def _cli_command() -> Command:
+        assert isinstance(CLI_COMMAND, Command)
         return CLI_COMMAND
 
     @pytest.fixture
@@ -119,15 +119,14 @@ class TestsFlextTapLdapIntegration:
             exit_error: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(exit_error)
         catalog = _extract_json_from_output(result.output)
-        assert isinstance(catalog, dict)
         if "streams" not in catalog:
             catalog_error: str = f"Expected {'streams'} in {catalog}"
             raise AssertionError(catalog_error)
-        streams: Sequence[t.JsonMapping] = cast(
-            "Sequence[t.JsonMapping]",
-            catalog["streams"],
-        )
-        stream_names: t.JsonList = [s["tap_stream_id"] for s in streams]
+        streams: Sequence[t.JsonMapping] = [
+            t.Cli.JSON_MAPPING_ADAPTER.validate_python(stream)
+            for stream in t.Cli.JSON_LIST_ADAPTER.validate_python(catalog["streams"])
+        ]
+        stream_names: list[str] = [str(stream["tap_stream_id"]) for stream in streams]
         if "users" not in stream_names:
             stream_error: str = f"Expected {'users'} in {stream_names}"
             raise AssertionError(stream_error)
@@ -251,13 +250,15 @@ class TestsFlextTapLdapIntegration:
             exit_error: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(exit_error)
         catalog = _extract_json_from_output(result.output)
-        assert isinstance(catalog, dict)
-        cat_streams: Sequence[t.JsonMapping] = cast(
-            "Sequence[t.JsonMapping]",
-            catalog["streams"],
-        )
-        stream_names: t.JsonList = [
-            s.get("tap_stream_id", s.get("stream")) for s in cat_streams
+        cat_streams: Sequence[t.JsonMapping] = [
+            t.Cli.JSON_MAPPING_ADAPTER.validate_python(stream)
+            for stream in t.Cli.JSON_LIST_ADAPTER.validate_python(catalog["streams"])
+        ]
+        stream_names: list[str] = [
+            str(stream_id)
+            for stream in cat_streams
+            if (stream_id := stream.get("tap_stream_id", stream.get("stream")))
+            is not None
         ]
         if "service_accounts" not in stream_names:
             stream_error: str = f"Expected {'service_accounts'} in {stream_names}"

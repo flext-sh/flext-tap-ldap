@@ -22,6 +22,7 @@ from typing import override
 from flext_ldif import ldif
 
 from flext_core import u
+from flext_ldap import FlextLdapUtilities as ul
 from flext_tap_ldap import c, m, p, r, t
 
 
@@ -93,10 +94,10 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             def has_object_class(self, object_class: str) -> bool:
                 """Check if entry has specific object class."""
-                object_classes: t.StrSequence = (
-                    self.resolve_attribute_values("objectClass") or []
+                return ul.Ldap.norm_in(
+                    object_class,
+                    self.resolve_attribute_values("objectClass"),
                 )
-                return any(oc.lower() == object_class.lower() for oc in object_classes)
 
             def valid(self) -> bool:
                 """Check if the entry is valid using flext-ldif validation."""
@@ -167,13 +168,12 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     )
                     if result.success and result.value.entries:
                         try:
-                            parsed_entry = m.Ldif.Entry.model_validate(
+                            parsed_entry: m.Ldif.Entry = m.Ldif.Entry.model_validate(
                                 result.value.entries[0].model_dump()
                             )
-                        except c.ValidationError:
-                            parsed_entry = None
-                        if parsed_entry is not None:
                             return parsed_entry
+                        except c.ValidationError:
+                            return self._fallback_entry()
                     return self._fallback_entry()
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS:
                     return self._fallback_entry()
@@ -211,7 +211,8 @@ class FlextTapLdapUtilitiesProcessorMixin:
             ) -> m.Ldif.Entry | None:
                 """Validate and coerce value to LDIF entry model."""
                 try:
-                    return m.Ldif.Entry.model_validate(raw_value)
+                    entry: m.Ldif.Entry = m.Ldif.Entry.model_validate(raw_value)
+                    return entry
                 except c.ValidationError:
                     return None
 
