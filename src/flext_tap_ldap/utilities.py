@@ -68,14 +68,14 @@ class FlextTapLdapUtilities(
                     entry_mapping: dict[str, t.JsonValue] = {"dn": dn_value}
                     for key_str, value in raw_attributes.items():
                         if len(value) == 1:
-                            entry_mapping[str(key_str)] = value[0]
+                            entry_mapping[key_str] = value[0]
                         else:
                             value_payload: list[t.JsonValue] = list(value)
-                            entry_mapping[str(key_str)] = value_payload
+                            entry_mapping[key_str] = value_payload
                     return r[t.JsonMapping].ok(entry_mapping)
                 normalized_mapping = t.Cli.JSON_MAPPING_ADAPTER.validate_python(
                     {
-                        str(key): u.normalize_to_json_value(value)
+                        key: u.normalize_to_json_value(value)
                         for key, value in entry_data.items()
                     },
                 )
@@ -107,7 +107,7 @@ class FlextTapLdapUtilities(
             ) -> t.JsonMapping:
                 """Normalize Oracle-specific LDAP entry attributes for downstream consumers."""
                 normalized_entry: dict[str, t.JsonValue] = {
-                    str(key): u.normalize_to_json_value(value)
+                    key: u.normalize_to_json_value(value)
                     for key, value in entry.items()
                 }
                 raw_attributes: t.JsonValue = normalized_entry.get("attributes", {})
@@ -177,7 +177,7 @@ class FlextTapLdapUtilities(
                         entry_mapping: t.JsonMapping = (
                             t.Cli.JSON_MAPPING_ADAPTER.validate_python(
                                 {
-                                    str(key): u.normalize_to_json_value(value)
+                                    key: u.normalize_to_json_value(value)
                                     for key, value in entry.items()
                                 },
                             )
@@ -294,9 +294,7 @@ class FlextTapLdapUtilities(
                 settings: t.JsonMapping,
             ) -> p.Result[t.JsonMapping]:
                 """Validate LDAP configuration."""
-                config_map: t.MutableJsonMapping = {
-                    str(key): value for key, value in settings.items()
-                }
+                config_map: t.MutableJsonMapping = dict(settings.items())
                 required_fields = ["host", "base_dn"]
                 for field in required_fields:
                     if field not in config_map:

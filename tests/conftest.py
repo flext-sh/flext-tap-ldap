@@ -23,10 +23,18 @@ def tap_ldap_settings() -> FlextTapLdapSettings:
 
 
 @pytest.fixture(scope="session")
-def shared_ldap_container(flext_docker: tk) -> str:
+def shared_ldap_container() -> str:
     """Managed LDAP container using centralized tk with docker-compose."""
     compose_file = Path("~/flext/docker/docker-compose.openldap.yml").expanduser()
-    start_result = flext_docker.start_compose_stack(str(compose_file))
+    docker = tk.stack(
+        compose_file,
+        container_name="flext-openldap-test",
+        service="openldap",
+        host=c.Ldap.Tests.HOST,
+        port=c.Ldap.Tests.PORT,
+        workspace_root=compose_file.parent.parent,
+    )
+    start_result = docker.execute()
     if start_result.failure:
         pytest.skip(f"OpenLDAP container failed to start: {start_result.error}")
     return "flext-openldap-test"

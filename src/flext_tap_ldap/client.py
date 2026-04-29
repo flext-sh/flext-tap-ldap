@@ -240,23 +240,23 @@ class FlextTapLdapClient:
             """Initialize the ldap API with the given configuration."""
             flext_connection_config = m.Ldap.ConnectionConfig(
                 host=client_config.host,
-                port=int(client_config.port),
-                use_ssl=bool(client_config.use_ssl),
+                port=client_config.port,
+                use_ssl=client_config.use_ssl,
                 bind_dn=client_config.bind_dn,
                 bind_password=client_config.password,
-                timeout=int(client_config.timeout),
+                timeout=client_config.timeout,
             )
             self.config = flext_connection_config
             self._flext_api = FlextLdap()
             self.host = client_config.host
-            self.port = int(client_config.port)
+            self.port = client_config.port
             self._bind_dn = client_config.bind_dn
             self.bind_dn = client_config.bind_dn
             self._password = client_config.password
             self.password = client_config.password
-            self.use_ssl = bool(client_config.use_ssl)
-            self.timeout = int(client_config.timeout)
-            self.page_size = int(client_config.page_size)
+            self.use_ssl = client_config.use_ssl
+            self.timeout = client_config.timeout
+            self.page_size = client_config.page_size
 
         def _perform_search(
             self,

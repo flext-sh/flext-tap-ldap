@@ -67,7 +67,7 @@ class FlextTapLdapServices:
                     timeout=params.timeout_seconds,
                     domain_events=[],
                 )
-                self._connections[str(connection.id)] = connection
+                self._connections[connection.id] = connection
                 return r[m.TapLdap.LdapConnection].ok(connection)
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[m.TapLdap.LdapConnection].fail(
@@ -166,7 +166,7 @@ class FlextTapLdapServices:
                     stream_schema={},
                     domain_events=[],
                 )
-                self._streams[str(stream.id)] = stream
+                self._streams[stream.id] = stream
                 return r[m.TapLdap.LdapStream].ok(stream)
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[m.TapLdap.LdapStream].fail(
@@ -301,12 +301,12 @@ class FlextTapLdapServices:
                     connection_id=connection_id,
                     command=command,
                     tap_status="created",
-                    settings={str(k): v for k, v in validated_config.items()},
-                    catalog={str(k): v for k, v in validated_catalog.items()},
-                    state={str(k): v for k, v in validated_state.items()},
+                    settings=dict(validated_config.items()),
+                    catalog=dict(validated_catalog.items()),
+                    state=dict(validated_state.items()),
                     domain_events=[],
                 )
-                self._executions[str(execution.id)] = execution
+                self._executions[execution.id] = execution
                 return r[m.TapLdap.TapExecution].ok(execution)
             except (RuntimeError, ValueError, TypeError) as e:
                 return r[m.TapLdap.TapExecution].fail(

@@ -134,7 +134,7 @@ class FlextTapLdapLdifStreams:
                 object_classes = attrs.get("objectClass")
                 entry_type = self._classify_entry_type(object_classes)
                 entry_attrs = {
-                    attr_name: [str(value) for value in attr_values]
+                    attr_name: u.normalize_to_json_value(list(attr_values))
                     for attr_name, attr_values in attrs.attributes.items()
                 }
             return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
@@ -150,7 +150,7 @@ class FlextTapLdapLdifStreams:
                 self.logger.warning("LDIF directory not found: %s", ldif_directory)
                 return []
             pattern_raw = self.settings.get("ldif_file_pattern", "*.ldif")
-            pattern = str(pattern_raw) if isinstance(pattern_raw, str) else "*.ldif"
+            pattern = pattern_raw if isinstance(pattern_raw, str) else "*.ldif"
             files = [path for path in directory.rglob(pattern) if path.is_file()]
             files.sort()
             return files
@@ -353,7 +353,7 @@ class FlextTapLdapLdifStreams:
                         oc_list: t.StrSequence = entry.attributes.get(
                             "objectClass",
                         )
-                        oc_strs = [str(oc_val) for oc_val in oc_list]
+                        oc_strs = list(oc_list)
                         entry_type = self._classify_entry_type(oc_strs)
                         entry_types[entry_type] = entry_types.get(entry_type, 0) + 1
                         for oc in oc_strs:
@@ -398,7 +398,7 @@ class FlextTapLdapLdifStreams:
                 self.logger.warning("LDIF directory not found: %s", ldif_directory)
                 return []
             pattern_raw = self.settings.get("ldif_file_pattern", "*.ldif")
-            pattern = str(pattern_raw) if isinstance(pattern_raw, str) else "*.ldif"
+            pattern = pattern_raw if isinstance(pattern_raw, str) else "*.ldif"
             files = [path for path in directory.rglob(pattern) if path.is_file()]
             files.sort()
             return files

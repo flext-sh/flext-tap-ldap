@@ -132,14 +132,15 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 entry_dict: t.MutableJsonMapping = {
                     "dn": self.dn,
                     "attributes": {
-                        key: [str(value) for value in values]
-                        for key, values in self.attributes.items()
+                        key: list(values) for key, values in self.attributes.items()
                     },
                 }
                 if self.change_type:
                     entry_dict["change_type"] = self.change_type
                 if self.controls:
-                    entry_dict["controls"] = [str(control) for control in self.controls]
+                    entry_dict["controls"] = u.normalize_to_json_value(
+                        list(self.controls)
+                    )
                 return entry_dict
 
             def update_attribute(
@@ -186,9 +187,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                         metadata=FlextTapLdapUtilitiesProcessorMixin._DEFAULT_ENTRY_METADATA,
                     ),
                     attributes=m.Ldif.Attributes(
-                        attributes={
-                            str(k): list(v) for k, v in self.attributes.items()
-                        },
+                        attributes={k: list(v) for k, v in self.attributes.items()},
                         attribute_metadata={},
                         metadata=FlextTapLdapUtilitiesProcessorMixin._DEFAULT_ENTRY_METADATA,
                     ),
@@ -386,7 +385,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                         "record": {
                             "dn": entry.dn,
                             **{
-                                key: [str(value) for value in values]
+                                key: list(values)
                                 for key, values in entry.attributes.items()
                             },
                         },
@@ -407,7 +406,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                         attr_name,
                         attr_values,
                     ) in flext_entry.attributes.attributes.items():
-                        attributes[attr_name] = [str(v) for v in attr_values]
+                        attributes[attr_name] = list(attr_values)
                 return FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry(
                     dn=dn,
                     attributes=attributes,
@@ -592,7 +591,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 transformed_entry.change_type = entry.change_type
                 transformed_entry.controls = list(entry.controls)
                 for target_attr_key, mapping in schema_mappings.items():
-                    target_attr: str = str(target_attr_key)
+                    target_attr: str = target_attr_key
                     source_attr: str | None = None
                     default_values: MutableSequence[str] | None = None
                     if isinstance(mapping, str):
@@ -613,9 +612,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                         continue
                     source_values = transformed_entry.attributes.get(source_attr)
                     if source_values:
-                        transformed_entry.attributes[target_attr] = [
-                            str(value) for value in source_values
-                        ]
+                        transformed_entry.attributes[target_attr] = list(source_values)
                         continue
                     if default_values is not None:
                         transformed_entry.attributes[target_attr] = default_values
@@ -645,7 +642,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 if isinstance(raw_mappings, dict):
                     attr_map: t.JsonMapping = raw_mappings
                     mappings.update({
-                        k: str(v) for k, v in attr_map.items() if isinstance(v, str)
+                        k: v for k, v in attr_map.items() if isinstance(v, str)
                     })
                 if mappings:
                     transformed = self.apply_attribute_mappings(transformed, mappings)

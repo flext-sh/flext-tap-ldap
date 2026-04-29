@@ -53,14 +53,21 @@ def sample_catalog() -> t.JsonMapping:
 def ldap_container(project_root: Path) -> Iterator[None]:
     """Start and manage LDAP test container using tk."""
     compose_file = project_root / "docker-compose.yml"
-    docker = tk()
+    dc = c.Ldap.Tests
+    docker = tk.compose(
+        compose_file=compose_file,
+        container_name="flext-openldap-test",
+        service="openldap",
+        host="localhost",
+        port=dc.PORT,
+        startup_timeout=60,
+        workspace_root=project_root,
+    )
     logger.info("Starting OpenLDAP container...")
-    start_result = docker.compose_up(compose_file=str(compose_file))
+    start_result = docker.execute()
     if start_result.failure:
         logger.error(f"Failed to start OpenLDAP container: {start_result.error}")
         raise RuntimeError(f"Container startup failed: {start_result.error}")
-
-    dc = c.Ldap.Tests
 
     @d.retry(max_attempts=30, delay_seconds=2.0, backoff_strategy="linear")
     def _check_ldap_ready() -> None:
@@ -80,7 +87,7 @@ def ldap_container(project_root: Path) -> Iterator[None]:
     logger.info("LDAP container is ready")
     yield
     logger.info("Stopping OpenLDAP container...")
-    stop_result = docker.compose_down(compose_file=str(compose_file))
+    stop_result = docker.down()
     if stop_result.failure:
         logger.warning(f"Failed to stop container cleanly: {stop_result.error}")
 

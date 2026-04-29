@@ -55,19 +55,19 @@ class FlextTapLdapStreams:
                 msg = f"Invalid LDAP connection configuration: {exc}"
                 raise ValueError(msg) from exc
             return m.TapLdap.LdapConnectionConfig(
-                host=str(parsed.host),
+                host=parsed.host,
                 port=u.to_positive_int(
                     parsed.port,
                     default=c.Ldap.PORT,
                 ),
                 bind_dn=u.to_optional_str(parsed.bind_dn),
                 bind_password=u.to_optional_str(parsed.bind_password),
-                use_ssl=bool(parsed.use_ssl),
+                use_ssl=parsed.use_ssl,
                 timeout_seconds=u.to_positive_int(
                     parsed.timeout_seconds,
                     default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
                 ),
-                base_dn=str(parsed.base_dn),
+                base_dn=parsed.base_dn,
             )
 
         @staticmethod
@@ -621,7 +621,7 @@ class FlextTapLdapStreams:
         def replication_key(self) -> str | None:
             """Get replication key for incremental sync."""
             replication_key = self.params.replication_key
-            return None if replication_key is None else str(replication_key)
+            return None if replication_key is None else replication_key
 
         @override
         def get_records(

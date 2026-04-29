@@ -279,9 +279,7 @@ class TestsFlextTapLdapIntegration:
             ["--config", str(config_file), "--discover"],
         )
         all_logs = " ".join(record.message for record in caplog.records)
-        all_output = (
-            str(result.output) + str(result.stderr or "") + str(result.stdout or "")
-        )
+        all_output = result.output + result.stderr or "" + result.stdout or ""
         has_validation_failure = (
             "Config validation failed" in all_logs
             or "Config validation failed" in all_output
