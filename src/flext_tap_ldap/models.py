@@ -123,7 +123,7 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
                 description="Name of the discovered stream",
             )
             stream_key_properties: t.StrSequence = u.Field(
-                default_factory=list,
+                default_factory=tuple,
                 description="Primary key properties for the discovered stream",
             )
             bookmark_key: Annotated[
@@ -663,7 +663,7 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
                 description="Search filter used by the stream",
             )
             attributes: t.StrSequence = u.Field(
-                default_factory=list,
+                default_factory=tuple,
                 description="Attributes included in the stream",
             )
             tap_stream_id: t.NonEmptyStr = u.Field(
