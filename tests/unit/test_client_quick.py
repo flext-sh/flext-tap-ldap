@@ -8,9 +8,6 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import contextlib
-from collections.abc import (
-    Sequence,
-)
 from unittest.mock import Mock, patch
 
 import pytest
@@ -29,7 +26,7 @@ class TestsFlextTapLdapClientQuick:
             host="test.ldap.com",
             port=389,
             bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            password="test_password",
+            bind_password="test_password",
             use_ssl=False,
             timeout=30,
             page_size=1000,
@@ -87,7 +84,7 @@ class TestsFlextTapLdapClientQuick:
 
     def test_search_result_processing(self) -> None:
         """Search result normalization respects size limits and empty inputs."""
-        search_entries: Sequence[t.JsonMapping] = [
+        search_entries: t.SequenceOf[t.JsonMapping] = [
             {"dn": "uid=user1,dc=test,dc=com", "uid": ["user1"]},
             {"dn": "uid=user2,dc=test,dc=com", "uid": ["user2"]},
         ]
@@ -267,7 +264,7 @@ class TestsFlextTapLdapClientQuick:
         second_uids: list[t.JsonValue] = ["test2"]
         first_attrs: dict[str, t.JsonValue] = {"orclPassword": first_passwords}
         second_attrs: dict[str, t.JsonValue] = {"uid": second_uids}
-        search_results: Sequence[t.JsonMapping] = [
+        search_results: t.SequenceOf[t.JsonMapping] = [
             {
                 "dn": "uid=test1,dc=oracle,dc=com",
                 "attributes": first_attrs,

@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import (
     Iterable,
     Iterator,
-    Sequence,
 )
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
@@ -27,7 +26,7 @@ class FlextTapLdapLdifStreams:
     @staticmethod
     def _as_object_list(
         value: t.JsonValue,
-    ) -> Sequence[t.JsonMapping]:
+    ) -> t.SequenceOf[t.JsonMapping]:
         try:
             if not isinstance(value, (dict, list)):
                 return []
@@ -144,7 +143,7 @@ class FlextTapLdapLdifStreams:
                 "attributes": entry_attrs,
             })
 
-        def _discover_ldif_files(self, ldif_directory: str) -> Sequence[Path]:
+        def _discover_ldif_files(self, ldif_directory: str) -> t.SequenceOf[Path]:
             directory = Path(ldif_directory)
             if not directory.exists() or not directory.is_dir():
                 self.logger.warning("LDIF directory not found: %s", ldif_directory)
@@ -392,7 +391,7 @@ class FlextTapLdapLdifStreams:
                 return "ou"
             return "other"
 
-        def _discover_ldif_files(self, ldif_directory: str) -> Sequence[Path]:
+        def _discover_ldif_files(self, ldif_directory: str) -> t.SequenceOf[Path]:
             directory = Path(ldif_directory)
             if not directory.exists() or not directory.is_dir():
                 self.logger.warning("LDIF directory not found: %s", ldif_directory)

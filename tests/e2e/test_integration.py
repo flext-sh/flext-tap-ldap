@@ -12,7 +12,6 @@ import time
 from collections.abc import (
     Generator,
     Mapping,
-    Sequence,
 )
 from pathlib import Path
 from unittest.mock import Mock, patch
@@ -108,7 +107,7 @@ class TestsFlextTapLdapIntegration:
     ) -> None:
         """Test discovery mode functionality."""
         mock_client_instance = mock_ldap_client.return_value
-        empty_records: Sequence[Mapping[str, t.Scalar | t.ScalarMapping]] = []
+        empty_records: t.SequenceOf[Mapping[str, t.Scalar | t.ScalarMapping]] = []
         mock_client_instance.search.return_value.__aenter__.return_value = empty_records
         result = runner.invoke(
             self._cli_command(),
@@ -122,7 +121,7 @@ class TestsFlextTapLdapIntegration:
         if "streams" not in catalog:
             catalog_error: str = f"Expected {'streams'} in {catalog}"
             raise AssertionError(catalog_error)
-        streams: Sequence[t.JsonMapping] = [
+        streams: t.SequenceOf[t.JsonMapping] = [
             t.Cli.JSON_MAPPING_ADAPTER.validate_python(stream)
             for stream in t.Cli.JSON_LIST_ADAPTER.validate_python(catalog["streams"])
         ]
@@ -185,7 +184,7 @@ class TestsFlextTapLdapIntegration:
     ) -> None:
         """Test incremental sync functionality."""
         mock_client_instance = mock_ldap_client.return_value
-        empty_records: Sequence[Mapping[str, t.Scalar | t.ScalarMapping]] = []
+        empty_records: t.SequenceOf[Mapping[str, t.Scalar | t.ScalarMapping]] = []
         mock_client_instance.search.return_value.__aenter__.return_value = empty_records
         result = runner.invoke(
             self._cli_command(),
@@ -237,7 +236,7 @@ class TestsFlextTapLdapIntegration:
             "flext_tap_ldap.client.FlextTapLdapClient.LDAPClient",
         ) as mock_ldap_client:
             mock_client_instance = mock_ldap_client.return_value
-            empty_records: Sequence[Mapping[str, t.Scalar | t.ScalarMapping]] = []
+            empty_records: t.SequenceOf[Mapping[str, t.Scalar | t.ScalarMapping]] = []
             mock_client_instance.search.return_value.__aenter__.return_value = (
                 empty_records
             )
@@ -250,7 +249,7 @@ class TestsFlextTapLdapIntegration:
             exit_error: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(exit_error)
         catalog = _extract_json_from_output(result.output)
-        cat_streams: Sequence[t.JsonMapping] = [
+        cat_streams: t.SequenceOf[t.JsonMapping] = [
             t.Cli.JSON_MAPPING_ADAPTER.validate_python(stream)
             for stream in t.Cli.JSON_LIST_ADAPTER.validate_python(catalog["streams"])
         ]

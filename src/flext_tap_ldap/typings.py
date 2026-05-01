@@ -41,7 +41,7 @@ class FlextTapLdapTypes(t, FlextLdapTypes):
             t.StrictInt,
         )
         OBJECT_LIST_ADAPTER: u.TypeAdapter[Sequence[t.JsonMapping]] = u.TypeAdapter(
-            Sequence[t.JsonMapping],
+            t.SequenceOf[t.JsonMapping],
             config=m.ConfigDict(strict=False),
         )
         COUNTER_MAP_ADAPTER: u.TypeAdapter[t.HeaderMapping] = u.TypeAdapter(
@@ -54,7 +54,7 @@ class FlextTapLdapTypes(t, FlextLdapTypes):
         )
         CONFIG_STREAM_MAP_ADAPTER: u.TypeAdapter[Mapping[str, t.JsonMapping]] = (
             u.TypeAdapter(
-                Mapping[str, t.JsonMapping],
+                t.MappingKV[str, t.JsonMapping],
                 config=m.ConfigDict(strict=False),
             )
         )

@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import (
     Mapping,
     MutableSequence,
-    Sequence,
 )
 
 from flext_ldap import FlextLdapUtilities
@@ -49,7 +48,7 @@ class FlextTapLdapUtilities(
             @staticmethod
             def to_entry_mapping(
                 entry_data: p.Ldif.Entry
-                | Mapping[str, t.JsonValue | t.StrSequence]
+                | t.MappingKV[str, t.JsonValue | t.StrSequence]
                 | None,
             ) -> p.Result[t.JsonMapping]:
                 """Normalize LDAP entry payloads into the canonical mutable mapping contract."""
@@ -60,7 +59,7 @@ class FlextTapLdapUtilities(
                 if isinstance(entry_data, p.Ldif.Entry):
                     dn_value = entry_data.dn.value if entry_data.dn is not None else ""
                     empty_attributes: t.MutableStrSequenceMapping = {}
-                    raw_attributes: Mapping[str, MutableSequence[str]] = (
+                    raw_attributes: t.MappingKV[str, MutableSequence[str]] = (
                         entry_data.attributes.attributes
                         if entry_data.attributes is not None
                         else empty_attributes
@@ -139,8 +138,8 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def process_search_results(
-                search_result: Sequence[
-                    p.Ldif.Entry | Mapping[str, t.JsonValue | t.StrSequence]
+                search_result: t.SequenceOf[
+                    p.Ldif.Entry | t.MappingKV[str, t.JsonValue | t.StrSequence]
                 ],
                 *,
                 size_limit: int,
@@ -162,10 +161,10 @@ class FlextTapLdapUtilities(
 
             @staticmethod
             def process_oracle_search_results(
-                search_result: Sequence[
+                search_result: t.SequenceOf[
                     p.Ldif.Entry
                     | t.JsonMapping
-                    | Mapping[str, t.JsonValue | t.StrSequence]
+                    | t.MappingKV[str, t.JsonValue | t.StrSequence]
                 ],
                 *,
                 oracle_oid_mode: bool,
@@ -266,7 +265,7 @@ class FlextTapLdapUtilities(
             @staticmethod
             def create_stream_info_from_ldap_entry(
                 dn: str,
-                attributes: Mapping[str, t.StrSequence],
+                attributes: t.MappingKV[str, t.StrSequence],
                 stream_prefix: str = "ldap",
                 replication_method: str = "FULL_TABLE",
             ) -> p.Result[t.HeaderMapping]:

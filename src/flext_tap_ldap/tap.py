@@ -131,7 +131,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
         """
         source_payload = tap_instance.model_dump(mode="python")
         raw_connection_config = source_payload.get("connection_config", {})
-        config_map: Mapping[str, t.JsonMapping] | t.ConfigurationMapping
+        config_map: t.MappingKV[str, t.JsonMapping] | t.ConfigurationMapping
         try:
             config_map = t.TapLdap.CONFIG_STREAM_MAP_ADAPTER.validate_python(
                 raw_connection_config,

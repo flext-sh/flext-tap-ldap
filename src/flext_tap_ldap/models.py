@@ -354,52 +354,6 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
 
         # ── Config Parameter Objects ─────────────────────────────────────────
 
-        class LdapConnectionConfig(m.BaseModel):
-            """LDAP connection configuration extracted from tap settings."""
-
-            host: Annotated[
-                str,
-                u.Field(
-                    description="LDAP server host name or address",
-                ),
-            ] = ""
-            port: Annotated[
-                int,
-                u.Field(
-                    description="LDAP server port",
-                ),
-            ] = c.Ldap.PORT
-            bind_dn: Annotated[
-                str | None,
-                u.Field(
-                    description="Distinguished Name used to bind to LDAP",
-                ),
-            ] = None
-            bind_password: Annotated[
-                str | None,
-                u.Field(
-                    description="Password used to bind to LDAP",
-                ),
-            ] = None
-            use_ssl: Annotated[
-                bool,
-                u.Field(
-                    description="Whether to use LDAPS for the connection",
-                ),
-            ] = False
-            timeout_seconds: Annotated[
-                int,
-                u.Field(
-                    description="Timeout for LDAP operations in seconds",
-                ),
-            ] = c.TapLdap.DEFAULT_SEARCH_TIMEOUT
-            base_dn: Annotated[
-                str,
-                u.Field(
-                    description="Base DN for LDAP searches",
-                ),
-            ] = ""
-
         class CustomPropertyDefinition(m.BaseModel):
             """Definition of a custom stream property."""
 
@@ -454,103 +408,6 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
                     raise ValueError(msg)
                 return self
 
-        class LdapClientConfig(m.BaseModel):
-            """Parameter t.JsonValue for LDAP client initialization."""
-
-            host: str = u.Field(
-                description="LDAP server host name or address",
-            )
-            port: Annotated[
-                int,
-                u.Field(
-                    description="LDAP server port",
-                ),
-            ] = c.Ldap.PORT
-            bind_dn: Annotated[
-                str | None,
-                u.Field(
-                    description="Bind Distinguished Name for LDAP operations",
-                ),
-            ] = None
-            password: Annotated[
-                str | None,
-                u.Field(
-                    description="Password used for LDAP bind operations",
-                ),
-            ] = None
-            use_ssl: Annotated[
-                bool,
-                u.Field(
-                    description="Whether to use SSL/TLS for the LDAP connection",
-                ),
-            ] = False
-            timeout: Annotated[
-                int,
-                u.Field(
-                    description="Timeout for LDAP client operations in seconds",
-                ),
-            ] = c.TapLdap.DEFAULT_SEARCH_TIMEOUT
-            page_size: Annotated[
-                int,
-                u.Field(
-                    description="LDAP page size for search results",
-                ),
-            ] = c.TapLdap.DEFAULT_PAGE_SIZE
-
-        # ── Value Objects ────────────────────────────────────────────────────
-
-        class LdapConnectionParams(m.Value):
-            """Parameters for establishing an LDAP connection."""
-
-            host: t.NonEmptyStr = u.Field(
-                description="LDAP host to connect to",
-            )
-            base_dn: t.NonEmptyStr = u.Field(
-                description="Base distinguished name for LDAP searches",
-            )
-            port: Annotated[
-                t.PortNumber,
-                u.Field(
-                    description="LDAP port number",
-                ),
-            ] = c.Ldap.PORT
-            bind_dn: Annotated[
-                str | None,
-                u.Field(
-                    description="Bind DN for LDAP connection",
-                ),
-            ] = None
-            bind_password: Annotated[
-                str | None,
-                u.Field(
-                    description="Bind password for LDAP connection",
-                ),
-            ] = None
-            use_ssl: Annotated[
-                bool,
-                u.Field(
-                    description="Whether to use SSL/TLS for the LDAP connection",
-                ),
-            ] = False
-            timeout_seconds: Annotated[
-                t.PositiveInt,
-                u.Field(
-                    description="Timeout in seconds for LDAP operations",
-                ),
-            ] = c.TapLdap.DEFAULT_SEARCH_TIMEOUT
-            page_size: Annotated[
-                t.PositiveInt,
-                u.Field(
-                    description="Page size used for LDAP searches",
-                ),
-            ] = c.TapLdap.DEFAULT_PAGE_SIZE
-            max_retries: Annotated[
-                t.RetryCount,
-                u.Field(
-                    description="Maximum retry attempts for LDAP operations",
-                ),
-            ] = 3
-
         class StreamCreationParams(m.Value):
             """Parameters for creating an LDAP data stream."""
 
@@ -595,6 +452,34 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
             ] = None
 
         # ── Entities ─────────────────────────────────────────────────────────
+
+        class LdapConnectionParams(m.Value):
+            """LDAP connection parameters for tap configuration."""
+
+            host: t.NonEmptyStr = u.Field(description="LDAP server hostname")
+            port: t.PortNumber = u.Field(description="LDAP server port")
+            bind_dn: Annotated[
+                str | None,
+                u.Field(description="Bind DN for authentication"),
+            ] = None
+            bind_password: Annotated[
+                str | None,
+                u.Field(description="Bind password for authentication"),
+            ] = None
+            base_dn: Annotated[
+                str | None,
+                u.Field(description="Base DN for search operations"),
+            ] = None
+            use_ssl: bool = u.Field(description="Enable SSL")
+            timeout_seconds: t.PositiveInt = u.Field(
+                description="Search timeout in seconds",
+            )
+            page_size: t.PositiveInt = u.Field(
+                description="Page size for paged results",
+            )
+            max_retries: t.PositiveInt = u.Field(
+                description="Maximum connection retries",
+            )
 
         class LdapConnection(m.Entity):
             """LDAP connection entity with test status and error tracking."""

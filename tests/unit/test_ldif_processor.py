@@ -7,9 +7,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import (
-    Sequence,
-)
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -55,7 +52,7 @@ class TestsFlextTapLdapLdifProcessor:
 
         seen: list[str] = []
 
-        def _process(ldif_file: str) -> Sequence[t.JsonMapping]:
+        def _process(ldif_file: str) -> t.SequenceOf[t.JsonMapping]:
             seen.append(ldif_file)
             return [{"dn": ldif_file}]
 

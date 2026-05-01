@@ -14,7 +14,6 @@ from collections.abc import (
     Iterator,
     Mapping,
     MutableSequence,
-    Sequence,
 )
 from pathlib import Path
 from typing import override
@@ -49,7 +48,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
             def __init__(
                 self,
                 dn: str,
-                attributes: Mapping[str, t.StrSequence] | None = None,
+                attributes: t.MappingKV[str, t.StrSequence] | None = None,
             ) -> None:
                 """Initialize LDIF entry with testing convenience."""
                 self.dn = dn
@@ -238,7 +237,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
             def filter_by_attribute_exists(
                 self,
                 attr_name: str,
-            ) -> Sequence[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
+            ) -> t.SequenceOf[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
                 """Filter entries that have a specific attribute."""
                 return [
                     entry
@@ -249,14 +248,14 @@ class FlextTapLdapUtilitiesProcessorMixin:
             def filter_by_dn_contains(
                 self,
                 substring: str,
-            ) -> Sequence[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
+            ) -> t.SequenceOf[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
                 """Filter entries by DN containing substring."""
                 return [entry for entry in self.entries if substring in entry.dn]
 
             def filter_by_dn_pattern(
                 self,
                 dn_pattern: str,
-            ) -> Sequence[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
+            ) -> t.SequenceOf[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
                 """Filter entries by DN pattern - entries under the pattern."""
                 return [
                     entry
@@ -267,7 +266,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
             def filter_by_objectclass(
                 self,
                 object_class: str,
-            ) -> Sequence[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
+            ) -> t.SequenceOf[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
                 """Filter entries by object class."""
                 return [
                     entry
@@ -376,9 +375,9 @@ class FlextTapLdapUtilitiesProcessorMixin:
             def to_singer_format(
                 self,
                 _stream_name: str,
-            ) -> Sequence[t.JsonMapping]:
+            ) -> t.SequenceOf[t.JsonMapping]:
                 """Convert LDIF entries to Singer record format."""
-                records: Sequence[t.JsonMapping] = [
+                records: t.SequenceOf[t.JsonMapping] = [
                     t.Cli.JSON_MAPPING_ADAPTER.validate_python({
                         "type": "RECORD",
                         "stream": _stream_name,
@@ -510,7 +509,9 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             def validate_entries(
                 self,
-                entries: Sequence[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry],
+                entries: t.SequenceOf[
+                    FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry
+                ],
             ) -> t.JsonMapping:
                 """Validate a list of LDIF entries using flext-ldif."""
                 valid_count = 0

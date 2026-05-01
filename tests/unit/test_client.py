@@ -25,7 +25,7 @@ class TestsFlextTapLdapClient:
             host="test.ldap.com",
             port=389,
             bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            password="test_password",
+            bind_password="test_password",
             use_ssl=False,
             timeout=30,
             page_size=1000,

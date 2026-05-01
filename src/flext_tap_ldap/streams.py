@@ -12,8 +12,6 @@ from __future__ import annotations
 
 from collections.abc import (
     Iterable,
-    Mapping,
-    Sequence,
 )
 from typing import TYPE_CHECKING, ClassVar, override
 
@@ -180,7 +178,7 @@ class FlextTapLdapStreams:
             search_filter: str,
             base_dn: str | None = None,
             attributes: t.StrSequence | None = None,
-        ) -> Sequence[t.JsonMapping]:
+        ) -> t.SequenceOf[t.JsonMapping]:
             """Search LDAP directory with error handling."""
             if not self.client:
                 msg = "LDAP client is not available"
@@ -194,7 +192,7 @@ class FlextTapLdapStreams:
                         )
                     )
                     base_dn = connection_config.base_dn
-                results: Sequence[t.JsonMapping] = [
+                results: t.SequenceOf[t.JsonMapping] = [
                     dict(entry)
                     for entry in self.client.search(
                         base_dn=base_dn or "",
@@ -286,7 +284,7 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-            results: Sequence[t.JsonMapping] = self._search_ldap(
+            results: t.SequenceOf[t.JsonMapping] = self._search_ldap(
                 user_filter,
                 base_dn=base_dn,
                 attributes=user_attributes,
@@ -370,7 +368,7 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-            results: Sequence[t.JsonMapping] = self._search_ldap(
+            results: t.SequenceOf[t.JsonMapping] = self._search_ldap(
                 group_filter,
                 base_dn=base_dn,
                 attributes=group_attributes,
@@ -429,7 +427,7 @@ class FlextTapLdapStreams:
                 "createTimestamp",
                 "modifyTimestamp",
             ]
-            results: Sequence[t.JsonMapping] = self._search_ldap(
+            results: t.SequenceOf[t.JsonMapping] = self._search_ldap(
                 ou_filter,
                 base_dn=base_dn,
                 attributes=ou_attributes,
@@ -573,7 +571,7 @@ class FlextTapLdapStreams:
                 return {"type": "string", "description": prop_desc}
 
             if params.schema_properties:
-                dynamic_properties: Mapping[str, t.JsonMapping] = {
+                dynamic_properties: t.MappingKV[str, t.JsonMapping] = {
                     key: _map_prop(key, value)
                     for key, value in params.schema_properties.items()
                 }
@@ -639,7 +637,7 @@ class FlextTapLdapStreams:
             logger.info(
                 f"Extracting LDAP records for custom stream: {self.params.name}",
             )
-            results: Sequence[t.JsonMapping] = self._search_ldap(
+            results: t.SequenceOf[t.JsonMapping] = self._search_ldap(
                 self.params.search_filter,
                 base_dn=base_dn,
             )

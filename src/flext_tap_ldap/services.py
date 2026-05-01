@@ -10,11 +10,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import (
-    MutableMapping,
-    MutableSequence,
-    Sequence,
-)
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import ClassVar
@@ -46,7 +41,7 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize the connection service."""
-            self._connections: MutableMapping[
+            self._connections: dict[
                 str,
                 m.TapLdap.LdapConnection,
             ] = {}
@@ -93,15 +88,15 @@ class FlextTapLdapServices:
 
         def list_connections(
             self,
-        ) -> p.Result[Sequence[m.TapLdap.LdapConnection]]:
+        ) -> p.Result[list[m.TapLdap.LdapConnection]]:
             """List all LDAP connections."""
             try:
                 connections = list(self._connections.values())
-                return r[Sequence[m.TapLdap.LdapConnection]].ok(
+                return r[list[m.TapLdap.LdapConnection]].ok(
                     connections,
                 )
             except (RuntimeError, ValueError, TypeError) as e:
-                return r[Sequence[m.TapLdap.LdapConnection]].fail(
+                return r[list[m.TapLdap.LdapConnection]].fail(
                     f"Failed to list connections: {e}",
                 )
 
@@ -138,7 +133,7 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize the stream service."""
-            self._streams: MutableMapping[
+            self._streams: dict[
                 str,
                 m.TapLdap.LdapStream,
             ] = {}
@@ -215,15 +210,15 @@ class FlextTapLdapServices:
         def list_streams(
             self,
             connection_id: str | None = None,
-        ) -> p.Result[Sequence[m.TapLdap.LdapStream]]:
+        ) -> p.Result[list[m.TapLdap.LdapStream]]:
             """List LDAP streams, optionally filtered by connection ID."""
             try:
                 streams = list(self._streams.values())
                 if connection_id:
                     streams = [s for s in streams if s.connection_id == connection_id]
-                return r[Sequence[m.TapLdap.LdapStream]].ok(streams)
+                return r[list[m.TapLdap.LdapStream]].ok(streams)
             except (RuntimeError, ValueError, TypeError) as e:
-                return r[Sequence[m.TapLdap.LdapStream]].fail(
+                return r[list[m.TapLdap.LdapStream]].fail(
                     f"Failed to list streams: {e}",
                 )
 
@@ -232,7 +227,7 @@ class FlextTapLdapServices:
 
         def __init__(self) -> None:
             """Initialize the execution service."""
-            self._executions: MutableMapping[
+            self._executions: dict[
                 str,
                 m.TapLdap.TapExecution,
             ] = {}
@@ -333,7 +328,7 @@ class FlextTapLdapServices:
         def list_executions(
             self,
             connection_id: str | None = None,
-        ) -> p.Result[Sequence[m.TapLdap.TapExecution]]:
+        ) -> p.Result[list[m.TapLdap.TapExecution]]:
             """List tap executions, optionally filtered by connection ID."""
             try:
                 executions = list(self._executions.values())
@@ -345,11 +340,11 @@ class FlextTapLdapServices:
                     key=lambda e: e.started_at or datetime.min.replace(tzinfo=UTC),
                     reverse=True,
                 )
-                return r[Sequence[m.TapLdap.TapExecution]].ok(
+                return r[list[m.TapLdap.TapExecution]].ok(
                     executions,
                 )
             except (RuntimeError, ValueError, TypeError) as e:
-                return r[Sequence[m.TapLdap.TapExecution]].fail(
+                return r[list[m.TapLdap.TapExecution]].fail(
                     f"Failed to list executions: {e}",
                 )
 
@@ -434,7 +429,7 @@ class FlextTapLdapServices:
         def process_ldif_file(
             self,
             file_path: str,
-        ) -> p.Result[Sequence[t.JsonMapping]]:
+        ) -> p.Result[list[t.JsonMapping]]:
             """Process LDIF file using flext-ldif library."""
             try:
                 FlextTapLdapServices.logger.info("Processing LDIF file: %s", file_path)
@@ -442,17 +437,17 @@ class FlextTapLdapServices:
                     Path(file_path),
                 )
                 if not result.success:
-                    return r[Sequence[t.JsonMapping]].fail(
+                    return r[list[t.JsonMapping]].fail(
                         f"Failed to parse LDIF file: {result.error}",
                     )
-                entries: MutableSequence[m.Ldif.Entry] = result.value.entries
+                entries = result.value.entries
                 entry_count = len(entries)
                 FlextTapLdapServices.logger.info(
                     "Successfully processed %s entries from %s",
                     entry_count,
                     file_path,
                 )
-                normalized: Sequence[t.JsonMapping] = [
+                normalized: list[t.JsonMapping] = [
                     t.Cli.JSON_MAPPING_ADAPTER.validate_python({
                         "dn": entry.dn.value if entry.dn is not None else "",
                         "attributes": dict(
@@ -468,13 +463,13 @@ class FlextTapLdapServices:
                     })
                     for entry in entries
                 ]
-                return r[Sequence[t.JsonMapping]].ok(normalized)
+                return r[list[t.JsonMapping]].ok(normalized)
             except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                 FlextTapLdapServices.logger.exception(
                     "Error processing LDIF file %s",
                     file_path,
                 )
-                return r[Sequence[t.JsonMapping]].fail(
+                return r[list[t.JsonMapping]].fail(
                     f"LDIF processing failed: {e}",
                 )
 
@@ -492,7 +487,7 @@ class FlextTapLdapServices:
                     return r[t.JsonMapping].fail(
                         f"Validation failed: {result.error}",
                     )
-                entries: MutableSequence[m.Ldif.Entry] = result.value.entries
+                entries = result.value.entries
                 total_entries = len(entries)
                 validation_data: t.JsonMapping = (
                     t.Cli.JSON_MAPPING_ADAPTER.validate_python({
