@@ -42,17 +42,17 @@ class FlextTapLdapStreams:
         @staticmethod
         def parse_connection_config(
             raw_value: t.JsonValue,
-        ) -> m.TapLdap.LdapConnectionConfig:
+        ) -> m.TapLdap.LdapConnectionParams:
             """Validate LDAP connection payload through Pydantic."""
             try:
-                parsed = m.TapLdap.LdapConnectionConfig.model_validate(
+                parsed = m.TapLdap.LdapConnectionParams.model_validate(
                     raw_value,
                     strict=True,
                 )
             except c.ValidationError as exc:
                 msg = f"Invalid LDAP connection configuration: {exc}"
                 raise ValueError(msg) from exc
-            return m.TapLdap.LdapConnectionConfig(
+            return m.TapLdap.LdapConnectionParams(
                 host=parsed.host,
                 port=u.to_positive_int(
                     parsed.port,

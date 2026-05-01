@@ -13,7 +13,7 @@ import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
 
 from flext_ldap import FlextLdap
-from flext_tap_ldap import c, m, t, u
+from flext_tap_ldap import c, m, p, t, u
 
 logger = u.fetch_logger(__name__)
 
@@ -52,7 +52,7 @@ class FlextTapLdapClient:
                     host="ldap.example.com", port=389
                 )
             """
-            self._flext_api: FlextLdap
+            self._flext_api: p.Ldap.LdapClient
             self.config: m.Ldap.ConnectionConfig
             self.host: str
             self.port: int
@@ -180,20 +180,31 @@ class FlextTapLdapClient:
             """Create settings from convenience keyword arguments."""
             try:
                 config_dict: t.MutableJsonMapping = {
-                    "host": convenience_kwargs.get("host", ""),
-                    "port": convenience_kwargs.get("port", c.Ldap.PORT),
-                    "bind_dn": convenience_kwargs.get("bind_dn") or None,
-                    "use_ssl": bool(convenience_kwargs.get("use_ssl")),
-                    "timeout": convenience_kwargs.get(
-                        "timeout", c.TapLdap.DEFAULT_SEARCH_TIMEOUT
+                    "host": u.to_str(
+                        convenience_kwargs.get("host"),
+                        default="",
+                    ),
+                    "port": u.to_int(
+                        convenience_kwargs.get("port"),
+                        default=c.Ldap.PORT,
+                    ),
+                    "bind_dn": u.to_optional_str(
+                        convenience_kwargs.get("bind_dn"),
+                    ),
+                    "use_ssl": u.to_bool(
+                        convenience_kwargs.get("use_ssl"),
+                    ),
+                    "timeout": u.to_int(
+                        convenience_kwargs.get("timeout"),
+                        default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
                     ),
                 }
-                if convenience_kwargs.get("password") is not None:
-                    config_dict["bind_password"] = convenience_kwargs.get("password")
-                if convenience_kwargs.get("bind_password") is not None:
-                    config_dict["bind_password"] = convenience_kwargs.get(
-                        "bind_password"
-                    )
+                password_val = convenience_kwargs.get("password")
+                if password_val is not None:
+                    config_dict["bind_password"] = u.to_str(password_val)
+                bind_password_val = convenience_kwargs.get("bind_password")
+                if bind_password_val is not None:
+                    config_dict["bind_password"] = u.to_str(bind_password_val)
                 return m.Ldap.ConnectionConfig.model_validate(config_dict)
             except c.ValidationError as e:
                 host_val = convenience_kwargs.get("host")
