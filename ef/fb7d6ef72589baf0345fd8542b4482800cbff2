@@ -1,0 +1,18 @@
+docs/guides/troubleshooting.md
+  h_9db9d35f50cf33 370,604
+src/flext_tap_ldap/client.py
+  h_9db9d35f50cf33 16,55,183-185,187-199,202-207
+src/flext_tap_ldap/streams.py
+  h_9db9d35f50cf33 45,48,55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "effb7d6ef72589baf0345fd8542b4482800cbff2",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
