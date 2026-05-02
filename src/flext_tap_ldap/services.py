@@ -64,7 +64,7 @@ class FlextTapLdapServices:
                 )
                 self._connections[connection.id] = connection
                 return r[m.TapLdap.LdapConnection].ok(connection)
-            except (RuntimeError, ValueError, TypeError) as e:
+            except c.EXC_RUNTIME_TYPE as e:
                 return r[m.TapLdap.LdapConnection].fail(
                     f"Failed to create connection: {e}",
                 )

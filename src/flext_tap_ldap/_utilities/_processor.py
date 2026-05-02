@@ -291,7 +291,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     self.entries = list(self.parse_file(file_path))
                     self._update_stats()
                     return r[str].ok("LDIF file loaded successfully using flext-ldif")
-                except (RuntimeError, ValueError, TypeError) as e:
+                except c.EXC_RUNTIME_TYPE as e:
                     return r[str].fail(f"Failed to load LDIF file: {e}")
 
             def load_from_string(
