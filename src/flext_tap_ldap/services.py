@@ -650,7 +650,7 @@ class FlextTapLdapServices:
             valid = bool(settings.host and settings.port > 0 and settings.page_size > 0)
             return r[bool].ok(valid)
         except (RuntimeError, ValueError, TypeError) as e:
-            return r[bool].fail(f"Configuration validation failed: {e}")
+            return r[bool].fail_op("Configuration validation", e)
 
 
 __all__: list[str] = ["FlextTapLdapServices"]
