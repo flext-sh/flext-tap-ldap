@@ -17,7 +17,7 @@ from uuid import uuid4
 
 from flext_ldif import ldif
 
-from flext_tap_ldap import FlextTapLdapSettings, c, m, p, r, t, u
+from flext_tap_ldap import FlextTapLdapSettings, c, e, m, p, r, t, u
 
 
 class FlextTapLdapServices:
@@ -64,9 +64,9 @@ class FlextTapLdapServices:
                 )
                 self._connections[connection.id] = connection
                 return r[m.TapLdap.LdapConnection].ok(connection)
-            except c.EXC_RUNTIME_TYPE as e:
+            except c.EXC_RUNTIME_TYPE as exc:
                 return r[m.TapLdap.LdapConnection].fail(
-                    f"Failed to create connection: {e}",
+                    f"Failed to create connection: {exc}",
                 )
 
         def fetch_connection(
@@ -77,13 +77,11 @@ class FlextTapLdapServices:
             try:
                 connection = self._connections.get(connection_id)
                 if not connection:
-                    return r[m.TapLdap.LdapConnection].fail(
-                        "Connection not found",
-                    )
+                    return e.fail_not_found("Connection", "", result_type=r[m.TapLdap.LdapConnection])
                 return r[m.TapLdap.LdapConnection].ok(connection)
-            except c.EXC_RUNTIME_TYPE as e:
+            except c.EXC_RUNTIME_TYPE as exc:
                 return r[m.TapLdap.LdapConnection].fail(
-                    f"Failed to get connection: {e}",
+                    f"Failed to get connection: {exc}",
                 )
 
         def list_connections(
@@ -95,9 +93,9 @@ class FlextTapLdapServices:
                 return r[list[m.TapLdap.LdapConnection]].ok(
                     connections,
                 )
-            except c.EXC_RUNTIME_TYPE as e:
+            except c.EXC_RUNTIME_TYPE as exc:
                 return r[list[m.TapLdap.LdapConnection]].fail(
-                    f"Failed to list connections: {e}",
+                    f"Failed to list connections: {exc}",
                 )
 
         def test_connection(
@@ -108,9 +106,7 @@ class FlextTapLdapServices:
             try:
                 connection = self._connections.get(connection_id)
                 if not connection:
-                    return r[t.JsonMapping].fail(
-                        "Connection not found",
-                    )
+                    return e.fail_not_found("Connection", "", result_type=r[t.JsonMapping])
                 connection.last_tested = datetime.now(UTC)
                 connection.last_error = None
                 self._connections[connection_id] = connection
@@ -118,14 +114,14 @@ class FlextTapLdapServices:
                     "success": True,
                     "connection": connection.id,
                 })
-            except c.EXC_RUNTIME_TYPE as e:
+            except c.EXC_RUNTIME_TYPE as exc:
                 connection = self._connections.get(connection_id)
                 if connection:
                     connection.last_tested = datetime.now(UTC)
-                    connection.last_error = str(e)
+                    connection.last_error = str(exc)
                     self._connections[connection_id] = connection
                 return r[t.JsonMapping].fail(
-                    f"Failed to test connection: {e}",
+                    f"Failed to test connection: {exc}",
                 )
 
     class LDAPStreamService:
@@ -163,9 +159,9 @@ class FlextTapLdapServices:
                 )
                 self._streams[stream.id] = stream
                 return r[m.TapLdap.LdapStream].ok(stream)
-            except c.EXC_RUNTIME_TYPE as e:
+            except c.EXC_RUNTIME_TYPE as exc:
                 return r[m.TapLdap.LdapStream].fail(
-                    f"Failed to create stream: {e}",
+                    f"Failed to create stream: {exc}",
                 )
 
         def discover_schema(self, stream_id: str) -> p.Result[t.JsonMapping]:
@@ -173,7 +169,7 @@ class FlextTapLdapServices:
             try:
                 stream = self._streams.get(stream_id)
                 if not stream:
-                    return r[t.JsonMapping].fail("Stream not found")
+                    return e.fail_not_found("Stream", "", result_type=r[t.JsonMapping])
                 schema: t.JsonMapping = {
                     "type": "object",
                     "properties": {
@@ -185,9 +181,9 @@ class FlextTapLdapServices:
                 stream.update_schema(schema)
                 self._streams[stream_id] = stream
                 return r[t.JsonMapping].ok(schema)
-            except c.EXC_RUNTIME_TYPE as e:
+            except c.EXC_RUNTIME_TYPE as exc:
                 return r[t.JsonMapping].fail(
-                    f"Failed to discover schema: {e}",
+                    f"Failed to discover schema: {exc}",
                 )
 
         def fetch_stream(
@@ -198,13 +194,11 @@ class FlextTapLdapServices:
             try:
                 stream = self._streams.get(stream_id)
                 if not stream:
-                    return r[m.TapLdap.LdapStream].fail(
-                        "Stream not found",
-                    )
+                    return e.fail_not_found("Stream", "", result_type=r[m.TapLdap.LdapStream])
                 return r[m.TapLdap.LdapStream].ok(stream)
-            except c.EXC_RUNTIME_TYPE as e:
+            except c.EXC_RUNTIME_TYPE as exc:
                 return r[m.TapLdap.LdapStream].fail(
-                    f"Failed to get stream: {e}",
+                    f"Failed to get stream: {exc}",
                 )
 
         def list_streams(
@@ -217,9 +211,9 @@ class FlextTapLdapServices:
                 if connection_id:
                     streams = [s for s in streams if s.connection_id == connection_id]
                 return r[list[m.TapLdap.LdapStream]].ok(streams)
-            except c.EXC_RUNTIME_TYPE as e:
+            except c.EXC_RUNTIME_TYPE as exc:
                 return r[list[m.TapLdap.LdapStream]].fail(
-                    f"Failed to list streams: {e}",
+                    f"Failed to list streams: {exc}",
                 )
 
     class TapExecutionService:
@@ -240,15 +234,13 @@ class FlextTapLdapServices:
             try:
                 execution = self._executions.get(execution_id)
                 if not execution:
-                    return r[m.TapLdap.TapExecution].fail(
-                        "Execution not found",
-                    )
+                    return e.fail_not_found("Execution", "", result_type=r[m.TapLdap.TapExecution])
                 execution.cancel_execution()
                 self._executions[execution_id] = execution
                 return r[m.TapLdap.TapExecution].ok(execution)
-            except c.EXC_RUNTIME_TYPE as e:
+            except c.EXC_RUNTIME_TYPE as exc:
                 return r[m.TapLdap.TapExecution].fail(
-                    f"Failed to cancel execution: {e}",
+                    f"Failed to cancel execution: {exc}",
                 )
 
         def complete_execution(
@@ -262,15 +254,13 @@ class FlextTapLdapServices:
             try:
                 execution = self._executions.get(execution_id)
                 if not execution:
-                    return r[m.TapLdap.TapExecution].fail(
-                        "Execution not found",
-                    )
+                    return e.fail_not_found("Execution", "", result_type=r[m.TapLdap.TapExecution])
                 execution.complete_execution(exit_code, stdout, stderr)
                 self._executions[execution_id] = execution
                 return r[m.TapLdap.TapExecution].ok(execution)
-            except c.EXC_RUNTIME_TYPE as e:
+            except c.EXC_RUNTIME_TYPE as exc:
                 return r[m.TapLdap.TapExecution].fail(
-                    f"Failed to complete execution: {e}",
+                    f"Failed to complete execution: {exc}",
                 )
 
         def create_execution(
@@ -303,9 +293,9 @@ class FlextTapLdapServices:
                 )
                 self._executions[execution.id] = execution
                 return r[m.TapLdap.TapExecution].ok(execution)
-            except c.EXC_RUNTIME_TYPE as e:
+            except c.EXC_RUNTIME_TYPE as exc:
                 return r[m.TapLdap.TapExecution].fail(
-                    f"Failed to create execution: {e}",
+                    f"Failed to create execution: {exc}",
                 )
 
         def fetch_execution(
@@ -316,13 +306,11 @@ class FlextTapLdapServices:
             try:
                 execution = self._executions.get(execution_id)
                 if not execution:
-                    return r[m.TapLdap.TapExecution].fail(
-                        "Execution not found",
-                    )
+                    return e.fail_not_found("Execution", "", result_type=r[m.TapLdap.TapExecution])
                 return r[m.TapLdap.TapExecution].ok(execution)
-            except c.EXC_RUNTIME_TYPE as e:
+            except c.EXC_RUNTIME_TYPE as exc:
                 return r[m.TapLdap.TapExecution].fail(
-                    f"Failed to get execution: {e}",
+                    f"Failed to get execution: {exc}",
                 )
 
         def list_executions(
@@ -343,9 +331,9 @@ class FlextTapLdapServices:
                 return r[list[m.TapLdap.TapExecution]].ok(
                     executions,
                 )
-            except c.EXC_RUNTIME_TYPE as e:
+            except c.EXC_RUNTIME_TYPE as exc:
                 return r[list[m.TapLdap.TapExecution]].fail(
-                    f"Failed to list executions: {e}",
+                    f"Failed to list executions: {exc}",
                 )
 
         def start_execution(
@@ -356,15 +344,13 @@ class FlextTapLdapServices:
             try:
                 execution = self._executions.get(execution_id)
                 if not execution:
-                    return r[m.TapLdap.TapExecution].fail(
-                        "Execution not found",
-                    )
+                    return e.fail_not_found("Execution", "", result_type=r[m.TapLdap.TapExecution])
                 execution.start_execution()
                 self._executions[execution_id] = execution
                 return r[m.TapLdap.TapExecution].ok(execution)
-            except c.EXC_RUNTIME_TYPE as e:
+            except c.EXC_RUNTIME_TYPE as exc:
                 return r[m.TapLdap.TapExecution].fail(
-                    f"Failed to start execution: {e}",
+                    f"Failed to start execution: {exc}",
                 )
 
         def update_metrics(
@@ -377,15 +363,13 @@ class FlextTapLdapServices:
             try:
                 execution = self._executions.get(execution_id)
                 if not execution:
-                    return r[m.TapLdap.TapExecution].fail(
-                        "Execution not found",
-                    )
+                    return e.fail_not_found("Execution", "", result_type=r[m.TapLdap.TapExecution])
                 execution.update_metrics(records_extracted, streams_processed)
                 self._executions[execution_id] = execution
                 return r[m.TapLdap.TapExecution].ok(execution)
-            except c.EXC_RUNTIME_TYPE as e:
+            except c.EXC_RUNTIME_TYPE as exc:
                 return r[m.TapLdap.TapExecution].fail(
-                    f"Failed to update metrics: {e}",
+                    f"Failed to update metrics: {exc}",
                 )
 
     class LDIFProcessingService:
@@ -417,12 +401,12 @@ class FlextTapLdapServices:
                     **validation_data,
                 }
                 return r[t.JsonMapping].ok(file_stats)
-            except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+            except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
                 FlextTapLdapServices.logger.exception(
                     "Error getting LDIF statistics for %s",
                     file_path,
                 )
-                return r[t.JsonMapping].fail_op("LDIF statistics", e)
+                return r[t.JsonMapping].fail_op("LDIF statistics", exc)
 
         def process_ldif_file(
             self,
@@ -462,12 +446,12 @@ class FlextTapLdapServices:
                     for entry in entries
                 ]
                 return r[list[t.JsonMapping]].ok(normalized)
-            except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+            except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
                 FlextTapLdapServices.logger.exception(
                     "Error processing LDIF file %s",
                     file_path,
                 )
-                return r[list[t.JsonMapping]].fail_op("LDIF processing", e)
+                return r[list[t.JsonMapping]].fail_op("LDIF processing", exc)
 
         def validate_ldif_file(
             self,
@@ -496,12 +480,12 @@ class FlextTapLdapServices:
                     file_path,
                 )
                 return r[t.JsonMapping].ok(validation_data)
-            except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+            except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
                 FlextTapLdapServices.logger.exception(
                     "Error validating LDIF file %s",
                     file_path,
                 )
-                return r[t.JsonMapping].fail_op("LDIF validation", e)
+                return r[t.JsonMapping].fail_op("LDIF validation", exc)
 
     @staticmethod
     def create_development_ldap_config(
@@ -519,9 +503,9 @@ class FlextTapLdapServices:
         try:
             settings = FlextTapLdapSettings.model_validate(overrides)
             return r[FlextTapLdapSettings].ok(settings)
-        except c.EXC_RUNTIME_TYPE as e:
+        except c.EXC_RUNTIME_TYPE as exc:
             return r[FlextTapLdapSettings].fail(
-                f"Failed to create development settings: {e}",
+                f"Failed to create development settings: {exc}",
             )
 
     @staticmethod
@@ -550,9 +534,9 @@ class FlextTapLdapServices:
                 "max_retries": params.max_retries,
             }
             return r[t.JsonMapping].ok(settings)
-        except c.EXC_RUNTIME_TYPE as e:
+        except c.EXC_RUNTIME_TYPE as exc:
             return r[t.JsonMapping].fail(
-                f"Failed to create LDAP connection settings: {e}",
+                f"Failed to create LDAP connection settings: {exc}",
             )
 
     @staticmethod
@@ -597,9 +581,9 @@ class FlextTapLdapServices:
             production_overrides = {"use_ssl": True, **overrides}
             settings = FlextTapLdapSettings.model_validate(production_overrides)
             return r[FlextTapLdapSettings].ok(settings)
-        except c.EXC_RUNTIME_TYPE as e:
+        except c.EXC_RUNTIME_TYPE as exc:
             return r[FlextTapLdapSettings].fail(
-                f"Failed to create production settings: {e}",
+                f"Failed to create production settings: {exc}",
             )
 
     @staticmethod
@@ -624,8 +608,8 @@ class FlextTapLdapServices:
                     validation_result.error or "Configuration validation failed",
                 )
             return r[FlextTapLdapSettings].ok(settings)
-        except c.EXC_RUNTIME_TYPE as e:
-            return r[FlextTapLdapSettings].fail(f"Failed to setup LDAP tap: {e}")
+        except c.EXC_RUNTIME_TYPE as exc:
+            return r[FlextTapLdapSettings].fail(f"Failed to setup LDAP tap: {exc}")
 
     @staticmethod
     def validate_ldap_config(settings: FlextTapLdapSettings) -> p.Result[bool]:
@@ -641,8 +625,8 @@ class FlextTapLdapServices:
         try:
             valid = bool(settings.host and settings.port > 0 and settings.page_size > 0)
             return r[bool].ok(valid)
-        except c.EXC_RUNTIME_TYPE as e:
-            return r[bool].fail_op("Configuration validation", e)
+        except c.EXC_RUNTIME_TYPE as exc:
+            return r[bool].fail_op("Configuration validation", exc)
 
 
 __all__: list[str] = ["FlextTapLdapServices"]
