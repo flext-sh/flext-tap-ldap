@@ -95,7 +95,7 @@ class FlextTapLdapServices:
                 return r[list[m.TapLdap.LdapConnection]].ok(
                     connections,
                 )
-            except (RuntimeError, ValueError, TypeError) as e:
+            except c.EXC_RUNTIME_TYPE as e:
                 return r[list[m.TapLdap.LdapConnection]].fail(
                     f"Failed to list connections: {e}",
                 )
