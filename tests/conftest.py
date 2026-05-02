@@ -48,7 +48,8 @@ def ldap_connection_config() -> dict[str, object]:
         "base_dn": c.Ldap.Tests.BASE_DN,
         "bind_dn": c.Ldap.Tests.BIND_DN,
         "bind_password": c.Ldap.Tests.BIND_PASSWORD,
-        "use_tls": c.Ldap.Tests.USE_TLS,
+        "use_ssl": c.Ldap.Tests.USE_TLS,
+        "timeout_seconds": c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
         "page_size": c.Ldap.Tests.PAGE_SIZE,
     }
 

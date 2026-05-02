@@ -163,7 +163,7 @@ class FlextTapLdapServices:
                 )
                 self._streams[stream.id] = stream
                 return r[m.TapLdap.LdapStream].ok(stream)
-            except (RuntimeError, ValueError, TypeError) as e:
+            except c.EXC_RUNTIME_TYPE as e:
                 return r[m.TapLdap.LdapStream].fail(
                     f"Failed to create stream: {e}",
                 )
