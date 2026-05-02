@@ -1,0 +1,31 @@
+src/flext_tap_ldap/services.py
+  473c59be621cc5d5 80-82,111-113,201-203,243-245,265-267,319-321,359-361,380-382
+pyproject.toml
+  473c59be621cc5d5 22,29,120,165,212,231,342,408,411,422,448,517,549,574,651,667
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "88ce3ab113149a967b79a03ce68cb16c1dcc6c59",
+  "prompts": {
+    "473c59be621cc5d5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f6001f8b-afdd-4757-8812-9bff0bfd46d9",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "FLEXT Bot",
+      "messages": [],
+      "total_additions": 40,
+      "total_deletions": 24,
+      "accepted_lines": 468,
+      "overriden_lines": 0,
+      "messages_url": "https://usegitai.com/cas/2abdead3336eec5cc45dbecefec55f699ba62dff7e6361607cdb67c5721a1ec1"
+    }
+  },
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
