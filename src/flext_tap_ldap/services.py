@@ -77,7 +77,9 @@ class FlextTapLdapServices:
             try:
                 connection = self._connections.get(connection_id)
                 if not connection:
-                    return e.fail_not_found("Connection", "", result_type=r[m.TapLdap.LdapConnection])
+                    return e.fail_not_found(
+                        "Connection", "", result_type=r[m.TapLdap.LdapConnection]
+                    )
                 return r[m.TapLdap.LdapConnection].ok(connection)
             except c.EXC_RUNTIME_TYPE as exc:
                 return r[m.TapLdap.LdapConnection].fail(
@@ -106,7 +108,9 @@ class FlextTapLdapServices:
             try:
                 connection = self._connections.get(connection_id)
                 if not connection:
-                    return e.fail_not_found("Connection", "", result_type=r[t.JsonMapping])
+                    return e.fail_not_found(
+                        "Connection", "", result_type=r[t.JsonMapping]
+                    )
                 connection.last_tested = datetime.now(UTC)
                 connection.last_error = None
                 self._connections[connection_id] = connection
@@ -194,7 +198,9 @@ class FlextTapLdapServices:
             try:
                 stream = self._streams.get(stream_id)
                 if not stream:
-                    return e.fail_not_found("Stream", "", result_type=r[m.TapLdap.LdapStream])
+                    return e.fail_not_found(
+                        "Stream", "", result_type=r[m.TapLdap.LdapStream]
+                    )
                 return r[m.TapLdap.LdapStream].ok(stream)
             except c.EXC_RUNTIME_TYPE as exc:
                 return r[m.TapLdap.LdapStream].fail(
@@ -234,7 +240,9 @@ class FlextTapLdapServices:
             try:
                 execution = self._executions.get(execution_id)
                 if not execution:
-                    return e.fail_not_found("Execution", "", result_type=r[m.TapLdap.TapExecution])
+                    return e.fail_not_found(
+                        "Execution", "", result_type=r[m.TapLdap.TapExecution]
+                    )
                 execution.cancel_execution()
                 self._executions[execution_id] = execution
                 return r[m.TapLdap.TapExecution].ok(execution)
@@ -254,7 +262,9 @@ class FlextTapLdapServices:
             try:
                 execution = self._executions.get(execution_id)
                 if not execution:
-                    return e.fail_not_found("Execution", "", result_type=r[m.TapLdap.TapExecution])
+                    return e.fail_not_found(
+                        "Execution", "", result_type=r[m.TapLdap.TapExecution]
+                    )
                 execution.complete_execution(exit_code, stdout, stderr)
                 self._executions[execution_id] = execution
                 return r[m.TapLdap.TapExecution].ok(execution)
@@ -306,7 +316,9 @@ class FlextTapLdapServices:
             try:
                 execution = self._executions.get(execution_id)
                 if not execution:
-                    return e.fail_not_found("Execution", "", result_type=r[m.TapLdap.TapExecution])
+                    return e.fail_not_found(
+                        "Execution", "", result_type=r[m.TapLdap.TapExecution]
+                    )
                 return r[m.TapLdap.TapExecution].ok(execution)
             except c.EXC_RUNTIME_TYPE as exc:
                 return r[m.TapLdap.TapExecution].fail(
@@ -344,7 +356,9 @@ class FlextTapLdapServices:
             try:
                 execution = self._executions.get(execution_id)
                 if not execution:
-                    return e.fail_not_found("Execution", "", result_type=r[m.TapLdap.TapExecution])
+                    return e.fail_not_found(
+                        "Execution", "", result_type=r[m.TapLdap.TapExecution]
+                    )
                 execution.start_execution()
                 self._executions[execution_id] = execution
                 return r[m.TapLdap.TapExecution].ok(execution)
@@ -363,7 +377,9 @@ class FlextTapLdapServices:
             try:
                 execution = self._executions.get(execution_id)
                 if not execution:
-                    return e.fail_not_found("Execution", "", result_type=r[m.TapLdap.TapExecution])
+                    return e.fail_not_found(
+                        "Execution", "", result_type=r[m.TapLdap.TapExecution]
+                    )
                 execution.update_metrics(records_extracted, streams_processed)
                 self._executions[execution_id] = execution
                 return r[m.TapLdap.TapExecution].ok(execution)
