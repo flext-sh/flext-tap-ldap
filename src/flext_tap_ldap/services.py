@@ -202,7 +202,7 @@ class FlextTapLdapServices:
                         "Stream not found",
                     )
                 return r[m.TapLdap.LdapStream].ok(stream)
-            except (RuntimeError, ValueError, TypeError) as e:
+            except c.EXC_RUNTIME_TYPE as e:
                 return r[m.TapLdap.LdapStream].fail(
                     f"Failed to get stream: {e}",
                 )
@@ -217,7 +217,7 @@ class FlextTapLdapServices:
                 if connection_id:
                     streams = [s for s in streams if s.connection_id == connection_id]
                 return r[list[m.TapLdap.LdapStream]].ok(streams)
-            except (RuntimeError, ValueError, TypeError) as e:
+            except c.EXC_RUNTIME_TYPE as e:
                 return r[list[m.TapLdap.LdapStream]].fail(
                     f"Failed to list streams: {e}",
                 )
@@ -246,7 +246,7 @@ class FlextTapLdapServices:
                 execution.cancel_execution()
                 self._executions[execution_id] = execution
                 return r[m.TapLdap.TapExecution].ok(execution)
-            except (RuntimeError, ValueError, TypeError) as e:
+            except c.EXC_RUNTIME_TYPE as e:
                 return r[m.TapLdap.TapExecution].fail(
                     f"Failed to cancel execution: {e}",
                 )
@@ -268,7 +268,7 @@ class FlextTapLdapServices:
                 execution.complete_execution(exit_code, stdout, stderr)
                 self._executions[execution_id] = execution
                 return r[m.TapLdap.TapExecution].ok(execution)
-            except (RuntimeError, ValueError, TypeError) as e:
+            except c.EXC_RUNTIME_TYPE as e:
                 return r[m.TapLdap.TapExecution].fail(
                     f"Failed to complete execution: {e}",
                 )
@@ -303,7 +303,7 @@ class FlextTapLdapServices:
                 )
                 self._executions[execution.id] = execution
                 return r[m.TapLdap.TapExecution].ok(execution)
-            except (RuntimeError, ValueError, TypeError) as e:
+            except c.EXC_RUNTIME_TYPE as e:
                 return r[m.TapLdap.TapExecution].fail(
                     f"Failed to create execution: {e}",
                 )
@@ -320,7 +320,7 @@ class FlextTapLdapServices:
                         "Execution not found",
                     )
                 return r[m.TapLdap.TapExecution].ok(execution)
-            except (RuntimeError, ValueError, TypeError) as e:
+            except c.EXC_RUNTIME_TYPE as e:
                 return r[m.TapLdap.TapExecution].fail(
                     f"Failed to get execution: {e}",
                 )
@@ -343,7 +343,7 @@ class FlextTapLdapServices:
                 return r[list[m.TapLdap.TapExecution]].ok(
                     executions,
                 )
-            except (RuntimeError, ValueError, TypeError) as e:
+            except c.EXC_RUNTIME_TYPE as e:
                 return r[list[m.TapLdap.TapExecution]].fail(
                     f"Failed to list executions: {e}",
                 )
@@ -362,7 +362,7 @@ class FlextTapLdapServices:
                 execution.start_execution()
                 self._executions[execution_id] = execution
                 return r[m.TapLdap.TapExecution].ok(execution)
-            except (RuntimeError, ValueError, TypeError) as e:
+            except c.EXC_RUNTIME_TYPE as e:
                 return r[m.TapLdap.TapExecution].fail(
                     f"Failed to start execution: {e}",
                 )
@@ -383,7 +383,7 @@ class FlextTapLdapServices:
                 execution.update_metrics(records_extracted, streams_processed)
                 self._executions[execution_id] = execution
                 return r[m.TapLdap.TapExecution].ok(execution)
-            except (RuntimeError, ValueError, TypeError) as e:
+            except c.EXC_RUNTIME_TYPE as e:
                 return r[m.TapLdap.TapExecution].fail(
                     f"Failed to update metrics: {e}",
                 )
@@ -519,7 +519,7 @@ class FlextTapLdapServices:
         try:
             settings = FlextTapLdapSettings.model_validate(overrides)
             return r[FlextTapLdapSettings].ok(settings)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             return r[FlextTapLdapSettings].fail(
                 f"Failed to create development settings: {e}",
             )
@@ -550,7 +550,7 @@ class FlextTapLdapServices:
                 "max_retries": params.max_retries,
             }
             return r[t.JsonMapping].ok(settings)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             return r[t.JsonMapping].fail(
                 f"Failed to create LDAP connection settings: {e}",
             )
@@ -597,7 +597,7 @@ class FlextTapLdapServices:
             production_overrides = {"use_ssl": True, **overrides}
             settings = FlextTapLdapSettings.model_validate(production_overrides)
             return r[FlextTapLdapSettings].ok(settings)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             return r[FlextTapLdapSettings].fail(
                 f"Failed to create production settings: {e}",
             )
@@ -624,7 +624,7 @@ class FlextTapLdapServices:
                     validation_result.error or "Configuration validation failed",
                 )
             return r[FlextTapLdapSettings].ok(settings)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             return r[FlextTapLdapSettings].fail(f"Failed to setup LDAP tap: {e}")
 
     @staticmethod
@@ -641,7 +641,7 @@ class FlextTapLdapServices:
         try:
             valid = bool(settings.host and settings.port > 0 and settings.page_size > 0)
             return r[bool].ok(valid)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             return r[bool].fail_op("Configuration validation", e)
 
 
