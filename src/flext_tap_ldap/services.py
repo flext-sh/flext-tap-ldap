@@ -422,9 +422,7 @@ class FlextTapLdapServices:
                     "Error getting LDIF statistics for %s",
                     file_path,
                 )
-                return r[t.JsonMapping].fail(
-                    f"LDIF statistics failed: {e}",
-                )
+                return r[t.JsonMapping].fail_op("LDIF statistics", e)
 
         def process_ldif_file(
             self,
@@ -469,9 +467,7 @@ class FlextTapLdapServices:
                     "Error processing LDIF file %s",
                     file_path,
                 )
-                return r[list[t.JsonMapping]].fail(
-                    f"LDIF processing failed: {e}",
-                )
+                return r[list[t.JsonMapping]].fail_op("LDIF processing", e)
 
         def validate_ldif_file(
             self,
@@ -484,9 +480,7 @@ class FlextTapLdapServices:
                     Path(file_path),
                 )
                 if not result.success:
-                    return r[t.JsonMapping].fail(
-                        f"Validation failed: {result.error}",
-                    )
+                    return r[t.JsonMapping].fail_op("Validation", result.error)
                 entries = result.value.entries
                 total_entries = len(entries)
                 validation_data: t.JsonMapping = (
@@ -507,9 +501,7 @@ class FlextTapLdapServices:
                     "Error validating LDIF file %s",
                     file_path,
                 )
-                return r[t.JsonMapping].fail(
-                    f"LDIF validation failed: {e}",
-                )
+                return r[t.JsonMapping].fail_op("LDIF validation", e)
 
     @staticmethod
     def create_development_ldap_config(
