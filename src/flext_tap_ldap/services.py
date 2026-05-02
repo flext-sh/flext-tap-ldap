@@ -185,7 +185,7 @@ class FlextTapLdapServices:
                 stream.update_schema(schema)
                 self._streams[stream_id] = stream
                 return r[t.JsonMapping].ok(schema)
-            except (RuntimeError, ValueError, TypeError) as e:
+            except c.EXC_RUNTIME_TYPE as e:
                 return r[t.JsonMapping].fail(
                     f"Failed to discover schema: {e}",
                 )
