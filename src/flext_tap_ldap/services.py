@@ -118,7 +118,7 @@ class FlextTapLdapServices:
                     "success": True,
                     "connection": connection.id,
                 })
-            except (RuntimeError, ValueError, TypeError) as e:
+            except c.EXC_RUNTIME_TYPE as e:
                 connection = self._connections.get(connection_id)
                 if connection:
                     connection.last_tested = datetime.now(UTC)
