@@ -259,67 +259,6 @@ class FlextTapLdapUtilities(
                     context["filter"] = filter_str[:100]
                 return e.OperationError(message, context=context)
 
-        class StreamManagement:
-            """LDAP tap stream management utilities."""
-
-            @staticmethod
-            def create_stream_info_from_ldap_entry(
-                dn: str,
-                attributes: t.MappingKV[str, t.StrSequence],
-                stream_prefix: str = "ldap",
-                replication_method: str = "FULL_TABLE",
-            ) -> p.Result[t.HeaderMapping]:
-                """Create stream info from LDAP entry."""
-                object_classes = attributes.get("objectClass", [])
-                if not object_classes:
-                    return r[t.HeaderMapping].fail("Entry has no objectClass")
-                primary_class = object_classes[0].lower()
-                stream_name = f"{stream_prefix}_{primary_class}"
-                stream_info: t.HeaderMapping = {
-                    "stream_name": stream_name,
-                    "table_name": primary_class,
-                    "dn": dn,
-                    "replication_method": replication_method,
-                    "attribute_count": len(attributes),
-                    "object_class": primary_class,
-                }
-                return r[t.HeaderMapping].ok(stream_info)
-
-        class ConfigurationValidation:
-            """LDAP tap configuration validation utilities."""
-
-            @staticmethod
-            def validate_ldap_config(
-                settings: t.JsonMapping,
-            ) -> p.Result[t.JsonMapping]:
-                """Validate LDAP configuration."""
-                config_map: t.MutableJsonMapping = dict(settings.items())
-                required_fields = ["host", "base_dn"]
-                for field in required_fields:
-                    if field not in config_map:
-                        return r[t.JsonMapping].fail(
-                            f"Missing required LDAP field: {field}",
-                        )
-                    if not str(config_map[field]).strip():
-                        return r[t.JsonMapping].fail(
-                            f"Empty LDAP field: {field}",
-                        )
-                if "port" in config_map:
-                    try:
-                        port = t.TapLdap.INTEGER_ADAPTER.validate_python(
-                            config_map["port"]
-                        )
-                    except c.ValidationError:
-                        return r[t.JsonMapping].fail(
-                            "LDAP port must be numeric",
-                        )
-                    if port <= 0 or port > c.TapLdap.Ldap.MAX_PORT:
-                        return r[t.JsonMapping].fail(
-                            f"LDAP port must be between 1 and {c.TapLdap.Ldap.MAX_PORT}",
-                        )
-                    config_map["port"] = port
-                return r[t.JsonMapping].ok(config_map)
-
 
 u = FlextTapLdapUtilities
 __all__: list[str] = ["FlextTapLdapUtilities", "u"]

@@ -57,14 +57,6 @@ class FlextTapLdapConstants(c, FlextLdapConstants):
                 FULL_TABLE = "FULL_TABLE"
                 INCREMENTAL = "INCREMENTAL"
 
-        class TapValidation:
-            """LDAP tap validation constants.
-
-            Note: Does not override parent Validation class to avoid inheritance conflicts.
-            """
-
-            MAX_ATTRIBUTE_NAME_LENGTH: Final[int] = 255
-
         class Connection:
             """LDAP tap connection configuration."""
 
