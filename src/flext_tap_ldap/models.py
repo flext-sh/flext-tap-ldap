@@ -10,8 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
-from types import MappingProxyType
+from datetime import datetime
 from typing import Annotated
 from uuid import uuid4
 
@@ -38,119 +37,6 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
         """Tap LDAP namespace for cross-project access."""
 
         # ── Domain Events ────────────────────────────────────────────────────
-
-        class TapExecution(m.Entity):
-            """Execution state and metrics for a tap run."""
-
-            id: str = u.Field(
-                default_factory=lambda: uuid4().hex,
-                description="Unique execution entity identifier",
-            )
-            execution_id: str = u.Field(
-                description="Identifier for the associated tap execution",
-            )
-            connection_id: str = u.Field(
-                description="Identifier for the associated LDAP connection",
-            )
-            command: str = u.Field(
-                description="Command executed by the tap",
-            )
-            tap_status: Annotated[
-                str,
-                u.Field(
-                    description="Current status of the tap execution",
-                ),
-            ] = "created"
-            settings: t.JsonMapping = u.Field(
-                default_factory=lambda: MappingProxyType({}),
-                description="Execution configuration object",
-            )
-            catalog: t.JsonMapping = u.Field(
-                default_factory=lambda: MappingProxyType({}),
-                description="Catalog data associated with the execution",
-            )
-            state: t.JsonMapping = u.Field(
-                default_factory=lambda: MappingProxyType({}),
-                description="State data for the execution",
-            )
-            started_at: Annotated[
-                datetime | None,
-                u.Field(
-                    description="UTC timestamp when execution started",
-                ),
-            ] = None
-            completed_at: Annotated[
-                datetime | None,
-                u.Field(
-                    description="UTC timestamp when execution completed",
-                ),
-            ] = None
-            records_extracted: Annotated[
-                int,
-                u.Field(
-                    description="Number of records extracted during execution",
-                ),
-            ] = 0
-            streams_processed: Annotated[
-                int,
-                u.Field(
-                    description="Number of streams processed during execution",
-                ),
-            ] = 0
-            exit_code: Annotated[
-                int | None,
-                u.Field(
-                    description="Exit code returned by the execution",
-                ),
-            ] = None
-            stdout: Annotated[
-                str | None,
-                u.Field(
-                    description="Standard output captured during execution",
-                ),
-            ] = None
-            stderr: Annotated[
-                str | None,
-                u.Field(
-                    description="Standard error captured during execution",
-                ),
-            ] = None
-
-            def start_execution(self) -> None:
-                """Mark execution as running with current timestamp."""
-                self.tap_status = c.TapLdap.TapStatus.RUNNING.value
-                self.started_at = datetime.now(UTC)
-
-            def complete_execution(
-                self,
-                exit_code: int,
-                stdout: str | None = None,
-                stderr: str | None = None,
-            ) -> None:
-                """Mark execution as completed with exit code and output."""
-                self.tap_status = (
-                    c.TapLdap.TapStatus.COMPLETED.value
-                    if exit_code == 0
-                    else c.TapLdap.TapStatus.FAILED.value
-                )
-                self.completed_at = datetime.now(UTC)
-                self.exit_code = exit_code
-                self.stdout = stdout
-                self.stderr = stderr
-
-            def cancel_execution(self) -> None:
-                """Mark execution as cancelled."""
-                self.tap_status = c.TapLdap.TapStatus.CANCELLED.value
-                self.completed_at = datetime.now(UTC)
-
-            def update_metrics(
-                self,
-                records_extracted: int,
-                streams_processed: int,
-            ) -> None:
-                """Update extraction metrics with record and stream counts."""
-                self.records_extracted = records_extracted
-                self.streams_processed = streams_processed
 
         # ── Config Parameter Objects ─────────────────────────────────────────
 
