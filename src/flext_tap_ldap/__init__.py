@@ -30,7 +30,6 @@ if _t.TYPE_CHECKING:
     from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
     from flext_tap_ldap.models import FlextTapLdapModels, m
     from flext_tap_ldap.protocols import FlextTapLdapProtocols, p
-    from flext_tap_ldap.services import FlextTapLdapServices
     from flext_tap_ldap.settings import FlextTapLdapSettings
     from flext_tap_ldap.streams import FlextTapLdapStreams
     from flext_tap_ldap.tap import FlextTapLdapTap
@@ -69,7 +68,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "FlextTapLdapProtocols",
                 "p",
             ),
-            ".services": ("FlextTapLdapServices",),
             ".settings": ("FlextTapLdapSettings",),
             ".streams": ("FlextTapLdapStreams",),
             ".tap": ("FlextTapLdapTap",),
@@ -123,7 +121,6 @@ __all__: list[str] = [
     "FlextTapLdapModels",
     "FlextTapLdapProtocols",
     "FlextTapLdapService",
-    "FlextTapLdapServices",
     "FlextTapLdapSettings",
     "FlextTapLdapStreams",
     "FlextTapLdapTap",
