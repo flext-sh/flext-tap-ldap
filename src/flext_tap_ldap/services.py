@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from flext_tap_ldap import FlextTapLdapSettings, c, m, p, r, t, u
+from flext_tap_ldap import FlextTapLdapSettings, c, e, m, p, r, t, u
 
 
 class FlextTapLdapServices:
@@ -48,8 +48,8 @@ class FlextTapLdapServices:
             settings = FlextTapLdapSettings.model_validate(overrides)
             return r[FlextTapLdapSettings].ok(settings)
         except c.EXC_RUNTIME_TYPE as exc:
-            return r[FlextTapLdapSettings].fail(
-                f"Failed to create development settings: {exc}",
+            return e.fail_operation(
+                "create development settings", exc, result_type=r[FlextTapLdapSettings]
             )
 
     @staticmethod
@@ -79,8 +79,8 @@ class FlextTapLdapServices:
             }
             return r[t.JsonMapping].ok(settings)
         except c.EXC_RUNTIME_TYPE as exc:
-            return r[t.JsonMapping].fail(
-                f"Failed to create LDAP connection settings: {exc}",
+            return e.fail_operation(
+                "create LDAP connection settings", exc, result_type=r[t.JsonMapping]
             )
 
     @staticmethod
@@ -126,8 +126,8 @@ class FlextTapLdapServices:
             settings = FlextTapLdapSettings.model_validate(production_overrides)
             return r[FlextTapLdapSettings].ok(settings)
         except c.EXC_RUNTIME_TYPE as exc:
-            return r[FlextTapLdapSettings].fail(
-                f"Failed to create production settings: {exc}",
+            return e.fail_operation(
+                "create production settings", exc, result_type=r[FlextTapLdapSettings]
             )
 
     @staticmethod
@@ -148,12 +148,15 @@ class FlextTapLdapServices:
                 settings = FlextTapLdapSettings.model_validate({})
             validation_result = FlextTapLdapServices.validate_ldap_config(settings)
             if not validation_result.success or not validation_result.value:
-                return r[FlextTapLdapSettings].fail(
+                return e.fail_validation(
                     validation_result.error or "Configuration validation failed",
+                    result_type=r[FlextTapLdapSettings],
                 )
             return r[FlextTapLdapSettings].ok(settings)
         except c.EXC_RUNTIME_TYPE as exc:
-            return r[FlextTapLdapSettings].fail(f"Failed to setup LDAP tap: {exc}")
+            return e.fail_operation(
+                "setup LDAP tap", exc, result_type=r[FlextTapLdapSettings]
+            )
 
     @staticmethod
     def validate_ldap_config(settings: FlextTapLdapSettings) -> p.Result[bool]:
@@ -170,7 +173,9 @@ class FlextTapLdapServices:
             valid = bool(settings.host and settings.port > 0 and settings.page_size > 0)
             return r[bool].ok(valid)
         except c.EXC_RUNTIME_TYPE as exc:
-            return r[bool].fail_op("Configuration validation", exc)
+            return e.fail_operation(
+                "Configuration validation", exc, result_type=r[bool]
+            )
 
 
 __all__: list[str] = ["FlextTapLdapServices"]
