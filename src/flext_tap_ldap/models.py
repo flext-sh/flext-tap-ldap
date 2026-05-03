@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from types import MappingProxyType
-from typing import Annotated, Self
+from typing import Annotated
 from uuid import uuid4
 
 from flext_ldap import m
@@ -170,87 +170,6 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
                 ),
             ] = None
 
-        class CustomStreamParams(m.BaseModel):
-            """Parameters for creating a custom LDAP stream."""
-
-            name: str = u.Field(
-                description="Name of the custom LDAP stream",
-            )
-            search_filter: str = u.Field(
-                description="LDAP filter expression for the custom stream",
-            )
-            schema_properties: t.JsonMapping = u.Field(
-                default_factory=lambda: MappingProxyType({}),
-                description="Custom schema properties for the stream",
-            )
-            primary_keys: t.StrSequence = u.Field(
-                default_factory=lambda: ["dn"],
-                description="Primary key attributes for the custom stream",
-            )
-            replication_key: Annotated[
-                str | None,
-                u.Field(
-                    description="Optional replication key for incremental processing",
-                ),
-            ] = None
-
-            @u.model_validator(mode="after")
-            def validate_required_fields(self) -> Self:
-                """Validate stream name, filter, and primary keys."""
-                if not self.name:
-                    msg = "Stream name is required"
-                    raise ValueError(msg)
-                if not self.search_filter:
-                    msg = "Search filter is required"
-                    raise ValueError(msg)
-                if self.primary_keys == []:
-                    msg = "Primary keys cannot be empty list"
-                    raise ValueError(msg)
-                return self
-
-        class StreamCreationParams(m.Value):
-            """Parameters for creating an LDAP data stream."""
-
-            stream_type: t.NonEmptyStr = u.Field(
-                description="Type of stream to create",
-            )
-            connection_id: t.NonEmptyStr = u.Field(
-                description="Reference LDAP connection identifier",
-            )
-            search_filter: t.NonEmptyStr = u.Field(
-                description="LDAP search filter for the stream",
-            )
-            attributes: Annotated[
-                t.StrSequence | None,
-                u.Field(
-                    description="Attributes returned by the stream",
-                ),
-            ] = None
-            tap_stream_id: Annotated[
-                str | None,
-                u.Field(
-                    description="Optional tap stream identifier",
-                ),
-            ] = None
-            key_properties: Annotated[
-                t.StrSequence | None,
-                u.Field(
-                    description="Primary key properties for the stream",
-                ),
-            ] = None
-            replication_method: Annotated[
-                str,
-                u.Field(
-                    description="Replication method for the stream",
-                ),
-            ] = "FULL_TABLE"
-            replication_key: Annotated[
-                str | None,
-                u.Field(
-                    description="Optional replication key for incremental streams",
-                ),
-            ] = None
-
         # ── Entities ─────────────────────────────────────────────────────────
 
         class LdapConnectionParams(m.Value):
@@ -335,57 +254,6 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
                     description="Latest error message from connection testing",
                 ),
             ] = None
-
-        class LdapStream(m.Entity):
-            """LDAP data stream with schema and replication configuration."""
-
-            id: str = u.Field(
-                default_factory=lambda: uuid4().hex,
-                description="Unique identifier for this stream",
-            )
-            name: t.NonEmptyStr = u.Field(
-                description="Name of the LDAP stream",
-            )
-            connection_id: t.NonEmptyStr = u.Field(
-                description="Identifier of the connection used by the stream",
-            )
-            stream_type: t.NonEmptyStr = u.Field(
-                description="LDAP stream type",
-            )
-            search_filter: t.NonEmptyStr = u.Field(
-                description="Search filter used by the stream",
-            )
-            attributes: t.StrSequence = u.Field(
-                default_factory=tuple,
-                description="Attributes included in the stream",
-            )
-            tap_stream_id: t.NonEmptyStr = u.Field(
-                description="Identifier assigned to the tap stream",
-            )
-            key_properties: t.StrSequence = u.Field(
-                default_factory=lambda: ["dn"],
-                description="Primary key properties for the stream",
-            )
-            replication_method: Annotated[
-                str,
-                u.Field(
-                    description="Replication method for the stream",
-                ),
-            ] = "FULL_TABLE"
-            replication_key: Annotated[
-                str | None,
-                u.Field(
-                    description="Optional replication key for incremental replication",
-                ),
-            ] = None
-            stream_schema: t.JsonMapping = u.Field(
-                default_factory=lambda: MappingProxyType({}),
-                description="Stream schema mapping for Singer records",
-            )
-
-            def update_schema(self, schema: t.JsonMapping) -> None:
-                """Update stream schema from mapping."""
-                self.stream_schema = dict(schema)
 
 
 # Runtime alias for simplified usage

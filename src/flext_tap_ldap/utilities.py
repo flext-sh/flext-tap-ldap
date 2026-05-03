@@ -198,19 +198,6 @@ class FlextTapLdapUtilities(
                         results.append(entry_mapping)
                 return results
 
-        class ValueConversion:
-            """Strict adapter-based value conversion helpers for tap LDAP flows."""
-
-            @staticmethod
-            def to_map(
-                value: t.JsonPayload,
-            ) -> t.JsonMapping | None:
-                """Convert a recursive container to the canonical mapping contract."""
-                try:
-                    return t.TapLdap.CONFIG_MAP_ADAPTER.validate_python(value)
-                except c.ValidationError:
-                    return None
-
         class ErrorHandling:
             """LDAP tap error handling utilities with enhanced context."""
 
