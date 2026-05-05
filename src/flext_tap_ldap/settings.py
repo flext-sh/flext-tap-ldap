@@ -4,12 +4,10 @@ from __future__ import annotations
 
 from typing import Annotated, ClassVar
 
-from flext_core import FlextSettings
 from flext_ldap import FlextLdapSettings
 from flext_tap_ldap import c, m, t, u
 
 
-@FlextSettings.auto_register("tap-ldap")
 class FlextTapLdapSettings(FlextLdapSettings):
     """Tap LDAP runtime settings."""
 

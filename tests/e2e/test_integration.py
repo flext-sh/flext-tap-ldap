@@ -7,7 +7,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import json
 import time
 from collections.abc import (
     Generator,
@@ -19,6 +18,7 @@ from unittest.mock import Mock, patch
 import pytest
 from click.core import Command
 from click.testing import CliRunner
+from flext_cli import u as cli_u
 
 from flext_tap_ldap.tap import CLI_COMMAND
 from tests import t, u
@@ -165,9 +165,11 @@ class TestsFlextTapLdapIntegration:
             if not line:
                 continue
             try:
-                messages.append(json.loads(line))
-            except json.JSONDecodeError:
+                parsed = cli_u.Cli.json_loads(line).unwrap()
+            except ValueError:
                 continue
+            if isinstance(parsed, Mapping):
+                messages.append(parsed)
         message_types = {str(msg["type"]) for msg in messages}
         if "SCHEMA" not in message_types:
             schema_error: str = f"Expected {'SCHEMA'} in {message_types}"
