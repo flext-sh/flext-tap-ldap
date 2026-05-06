@@ -266,7 +266,7 @@ def _build_cli_command() -> click.Command:
         config_data: t.MutableConfigurationMapping = {
             k: v
             for k, v in raw_config.items()
-            if isinstance(v, (str, int, float, bool))
+            if isinstance(v, t.PRIMITIVES_TYPES)
         }
         connection_config_payload: t.JsonMapping = (
             t.TapLdap.SINGER_OUTPUT_ADAPTER.validate_python(

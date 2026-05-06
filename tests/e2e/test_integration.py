@@ -18,8 +18,8 @@ from unittest.mock import Mock, patch
 import pytest
 from click.core import Command
 from click.testing import CliRunner
-from flext_cli import u as cli_u
 
+from flext_cli import u as cli_u
 from flext_tap_ldap.tap import CLI_COMMAND
 from tests import t, u
 

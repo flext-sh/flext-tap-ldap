@@ -301,6 +301,4 @@ class FlextTapLdapClient:
                 raise RuntimeError(err_msg) from e
 
 
-__all__: t.StrSequence = [
-    "FlextTapLdapClient",
-]
+__all__: t.StrSequence = ("FlextTapLdapClient",)

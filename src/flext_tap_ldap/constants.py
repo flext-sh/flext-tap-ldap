@@ -11,7 +11,7 @@ from enum import StrEnum, unique
 from typing import Final
 
 from flext_ldap import FlextLdapConstants
-from flext_meltano import c
+from flext_meltano import c, t
 
 
 class FlextTapLdapConstants(c, FlextLdapConstants):
@@ -70,4 +70,4 @@ class FlextTapLdapConstants(c, FlextLdapConstants):
 
 
 c = FlextTapLdapConstants
-__all__: tuple[str, ...] = ("FlextTapLdapConstants", "c")
+__all__: t.StrSequence = ("FlextTapLdapConstants", "c")

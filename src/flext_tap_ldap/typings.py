@@ -10,11 +10,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import (
-    Mapping,
-    Sequence,
-)
-
 from flext_ldap import FlextLdapTypes
 from flext_meltano import m, t, u
 
@@ -40,7 +35,7 @@ class FlextTapLdapTypes(t, FlextLdapTypes):
         INTEGER_ADAPTER: u.TypeAdapter[t.StrictInt] = u.TypeAdapter(
             t.StrictInt,
         )
-        OBJECT_LIST_ADAPTER: u.TypeAdapter[Sequence[t.JsonMapping]] = u.TypeAdapter(
+        OBJECT_LIST_ADAPTER: u.TypeAdapter[t.SequenceOf[t.JsonMapping]] = u.TypeAdapter(
             t.SequenceOf[t.JsonMapping],
             config=m.ConfigDict(strict=False),
         )
@@ -52,7 +47,7 @@ class FlextTapLdapTypes(t, FlextLdapTypes):
             t.JsonMapping,
             config=m.ConfigDict(strict=False),
         )
-        CONFIG_STREAM_MAP_ADAPTER: u.TypeAdapter[Mapping[str, t.JsonMapping]] = (
+        CONFIG_STREAM_MAP_ADAPTER: u.TypeAdapter[t.MappingKV[str, t.JsonMapping]] = (
             u.TypeAdapter(
                 t.MappingKV[str, t.JsonMapping],
                 config=m.ConfigDict(strict=False),
