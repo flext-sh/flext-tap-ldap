@@ -1,0 +1,41 @@
+src/flext_tap_ldap/client.py
+  h_5cf852cc46bf92 304
+src/flext_tap_ldap/tap.py
+  s_b15aa8dbf80823::t_da5b5a338d365b 269
+src/flext_tap_ldap/constants.py
+  h_5cf852cc46bf92 14,73
+tests/e2e/test_integration.py
+  s_0290f35b98ef0c::t_922104e51de2b3 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "6558b226482a3240fdd44e5ff6d6ebfc5e721753",
+  "prompts": {},
+  "humans": {
+    "h_5cf852cc46bf92": {
+      "author": "FLEXT Bot <team@flext.sh>"
+    },
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  },
+  "sessions": {
+    "s_0290f35b98ef0c": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "0c4cc853-563f-48ad-a39a-f49b587090b8",
+        "model": "unknown"
+      },
+      "human_author": "FLEXT Bot <team@flext.sh>"
+    },
+    "s_b15aa8dbf80823": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d896ab0f-dd16-4dca-9ad4-b3d924a501e7",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "FLEXT Bot <team@flext.sh>"
+    }
+  }
+}
