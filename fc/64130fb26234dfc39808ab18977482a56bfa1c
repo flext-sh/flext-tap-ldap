@@ -1,0 +1,36 @@
+pyproject.toml
+  s_5a9c2b140a8456::t_9fde9311e9a1a1 149,521-559,563
+src/flext_tap_ldap/_utilities/_processor.py
+  s_552d8e4891a938::t_f4f967208a19f7 280,503
+src/flext_tap_ldap/utilities.py
+  s_552d8e4891a938::t_f4f967208a19f7 67,108,113
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "fc64130fb26234dfc39808ab18977482a56bfa1c",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  },
+  "sessions": {
+    "s_552d8e4891a938": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "35c0040b-2ae9-466e-90aa-7721509e1e19",
+        "model": "unknown"
+      },
+      "human_author": "FLEXT Bot <team@flext.sh>"
+    },
+    "s_5a9c2b140a8456": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dfddc-86ee-79a0-b5bf-0433a8110b6a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "FLEXT Bot <team@flext.sh>"
+    }
+  }
+}
