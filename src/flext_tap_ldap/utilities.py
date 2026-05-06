@@ -64,7 +64,7 @@ class FlextTapLdapUtilities(
                         if entry_data.attributes is not None
                         else empty_attributes
                     )
-                    entry_mapping: dict[str, t.JsonValue] = {"dn": dn_value}
+                    entry_mapping: t.JsonDict = {"dn": dn_value}
                     for key_str, value in raw_attributes.items():
                         if len(value) == 1:
                             entry_mapping[key_str] = value[0]
@@ -105,12 +105,12 @@ class FlextTapLdapUtilities(
                 entry: t.JsonMapping,
             ) -> t.JsonMapping:
                 """Normalize Oracle-specific LDAP entry attributes for downstream consumers."""
-                normalized_entry: dict[str, t.JsonValue] = {
+                normalized_entry: t.JsonDict = {
                     key: u.normalize_to_json_value(value)
                     for key, value in entry.items()
                 }
                 raw_attributes: t.JsonValue = normalized_entry.get("attributes", {})
-                attributes: dict[str, t.JsonValue] = {}
+                attributes: t.JsonDict = {}
                 if not isinstance(raw_attributes, dict):
                     return normalized_entry
                 attributes.update(raw_attributes)
