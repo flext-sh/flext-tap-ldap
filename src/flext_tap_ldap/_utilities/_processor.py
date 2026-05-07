@@ -276,7 +276,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             def statistics(self) -> t.JsonMapping:
                 """Get parsing statistics."""
-                error_messages: list[t.JsonValue] = list(self.errors)
+                error_messages: t.JsonValueList = list(self.errors)
                 result: t.JsonDict = {
                     "processed_entries": self.processed_entries,
                     "skipped_entries": self.skipped_entries,
@@ -498,8 +498,8 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             def validation_results(self) -> t.JsonMapping:
                 """Get validation results."""
-                errors_payload: list[t.JsonValue] = list(self.validation_errors)
-                warnings_payload: list[t.JsonValue] = list(self.warnings)
+                errors_payload: t.JsonValueList = list(self.validation_errors)
+                warnings_payload: t.JsonValueList = list(self.warnings)
                 result: t.JsonDict = {
                     "errors": errors_payload,
                     "warnings": warnings_payload,

@@ -69,7 +69,7 @@ class FlextTapLdapUtilities(
                         if len(value) == 1:
                             entry_mapping[key_str] = value[0]
                         else:
-                            value_payload: list[t.JsonValue] = list(value)
+                            value_payload: t.JsonValueList = list(value)
                             entry_mapping[key_str] = value_payload
                     return r[t.JsonMapping].ok(entry_mapping)
                 normalized_mapping = t.Cli.JSON_MAPPING_ADAPTER.validate_python(

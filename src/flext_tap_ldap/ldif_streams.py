@@ -30,7 +30,7 @@ class FlextTapLdapLdifStreams:
         try:
             if not isinstance(value, (dict, list)):
                 return []
-            result = t.TapLdap.OBJECT_LIST_ADAPTER.validate_python(value)
+            result = t.json_mapping_sequence_adapter().validate_python(value)
             return [dict(item) for item in result]
         except c.ValidationError:
             return []
@@ -40,7 +40,7 @@ class FlextTapLdapLdifStreams:
         try:
             if not isinstance(value, dict):
                 return {}
-            return t.TapLdap.COUNTER_MAP_ADAPTER.validate_python(value)
+            return t.header_mapping_adapter().validate_python(value)
         except c.ValidationError:
             return {}
 
