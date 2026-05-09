@@ -1,0 +1,19 @@
+tests/settings.py
+  h_5cf852cc46bf92 1-14
+tests/base.py
+  h_5cf852cc46bf92 1-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "bba3db0ae2f50c37f36cc00b1281eb04cf3605f8",
+  "prompts": {},
+  "humans": {
+    "h_5cf852cc46bf92": {
+      "author": "FLEXT Bot <team@flext.sh>"
+    },
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
