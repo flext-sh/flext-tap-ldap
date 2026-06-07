@@ -261,7 +261,7 @@ def _build_cli_command() -> click.Command:
     ) -> None:
         """Singer-compatible CLI for LDAP data extraction."""
         raw_config: t.JsonMapping = t.json_mapping_adapter().validate_json(
-            Path(config_path).read_bytes(),
+            u.Cli.files_read_text(Path(config_path)).unwrap(),
         )
         config_data: t.MutableConfigurationMapping = {
             k: v for k, v in raw_config.items() if isinstance(v, t.PRIMITIVES_TYPES)
@@ -327,10 +327,14 @@ def _build_cli_command() -> click.Command:
             return
 
         if catalog_path:
-            t.json_mapping_adapter().validate_json(Path(catalog_path).read_bytes())
+            t.json_mapping_adapter().validate_json(
+                u.Cli.files_read_text(Path(catalog_path)).unwrap()
+            )
 
         if state_path:
-            t.json_mapping_adapter().validate_json(Path(state_path).read_bytes())
+            t.json_mapping_adapter().validate_json(
+                u.Cli.files_read_text(Path(state_path)).unwrap()
+            )
 
         source_config = m.Meltano.DataSourceConfig(
             source_type="ldap",
