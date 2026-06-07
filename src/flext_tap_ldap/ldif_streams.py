@@ -184,7 +184,13 @@ class FlextTapLdapLdifStreams:
             """Process single LDIF file using flext-ldif."""
             self.logger.info("Processing LDIF file: %s", ldif_file)
             try:
-                content = Path(ldif_file).read_text(encoding=c.DEFAULT_ENCODING)
+                read = u.Cli.files_read_text(Path(ldif_file))
+                if read.failure:
+                    self.logger.error(
+                        "Failed to read LDIF file %s: %s", ldif_file, read.error
+                    )
+                    return
+                content = read.value
                 result: p.Result[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
                     content
                 )
@@ -339,7 +345,18 @@ class FlextTapLdapLdifStreams:
             """Analyze single LDIF file using flext-ldif."""
             self.logger.info("Analyzing LDIF file: %s", ldif_file)
             try:
-                content = Path(ldif_file).read_text(encoding=c.DEFAULT_ENCODING)
+                read = u.Cli.files_read_text(Path(ldif_file))
+                if read.failure:
+                    self.logger.error(
+                        "Failed to read LDIF file %s: %s", ldif_file, read.error
+                    )
+                    empty_read: t.IntMapping = {}
+                    return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
+                        "total_entries": 0,
+                        "entry_types": dict(empty_read),
+                        "object_classes": dict(empty_read),
+                    })
+                content = read.value
                 result: p.Result[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
                     content
                 )
