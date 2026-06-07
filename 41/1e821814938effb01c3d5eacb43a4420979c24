@@ -1,0 +1,20 @@
+src/flext_tap_ldap/ldif_streams.py
+  s_9942ef7a89ba9a::t_8f4365a1f5df10 348-359
+  s_9942ef7a89ba9a::t_44e8a92f63d25f 187-193
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "411e821814938effb01c3d5eacb43a4420979c24",
+  "prompts": {},
+  "sessions": {
+    "s_9942ef7a89ba9a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "84fb5cb9-a1bd-4654-9339-7a49b63e96d1",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Zed <hi@zed.dev>"
+    }
+  }
+}
