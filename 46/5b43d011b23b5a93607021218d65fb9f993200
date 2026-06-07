@@ -1,0 +1,89 @@
+docs/guides/testing.md
+  s_73cbfc60e45e37::t_7f9a775d47e270 76
+  s_73cbfc60e45e37::t_a28e2098c4dcd6 219
+  s_73cbfc60e45e37::t_2b97cd1f06af83 517
+  s_73cbfc60e45e37::t_f527af77069452 333
+  s_73cbfc60e45e37::t_8e3c7fa7f06d86 128
+  s_73cbfc60e45e37::t_663d4fa6cbc558 658
+  s_73cbfc60e45e37::t_eacaf94a6106f3 396
+  s_73cbfc60e45e37::t_d939d39aae966b 292
+  s_73cbfc60e45e37::t_5e8bef0c846335 471
+  s_73cbfc60e45e37::t_e46915013d9046 439
+  s_73cbfc60e45e37::t_d4423a13517238 357
+  s_73cbfc60e45e37::t_dd042db592c25c 611
+  s_73cbfc60e45e37::t_e44117c714c3d4 176
+  s_73cbfc60e45e37::t_26dfc134d8eaf8 588
+  s_73cbfc60e45e37::t_1c1d87c8595ba0 638
+  s_73cbfc60e45e37::t_d95b2a36f6d000 700
+docs/guides/configuration.md
+  s_73cbfc60e45e37::t_bf5a8942a8cd62 455
+  s_73cbfc60e45e37::t_fe80e82de6045d 106
+  s_73cbfc60e45e37::t_3004a991853c84 264
+  s_73cbfc60e45e37::t_b089592f89e3a9 308
+  s_73cbfc60e45e37::t_71ea375d76af71 417
+  s_73cbfc60e45e37::t_30c866d1fa9164 178
+  s_73cbfc60e45e37::t_0aa55a31e13db0 380
+  s_73cbfc60e45e37::t_061c03e24828df 344
+  s_73cbfc60e45e37::t_92dc4f4bdfb00c 231
+docs/guides/development.md
+  s_73cbfc60e45e37::t_4adac2ff993a25 228
+  s_73cbfc60e45e37::t_a47ce28ab31983 152
+  s_73cbfc60e45e37::t_7874c11d61fa99 313
+  s_73cbfc60e45e37::t_ffda7b823df055 404
+  s_73cbfc60e45e37::t_0a26c0fea8011d 432
+  s_73cbfc60e45e37::t_ae111ef7f559ef 169
+  s_73cbfc60e45e37::t_77b56b3b422cec 189
+docs/guides/troubleshooting.md
+  s_73cbfc60e45e37::t_f5a0abb5615779 291
+  s_73cbfc60e45e37::t_07b898741e53d1 733
+  s_73cbfc60e45e37::t_8f1a67d8fabbaa 527
+  s_73cbfc60e45e37::t_630c36c0bc70d0 771
+  s_73cbfc60e45e37::t_54765ea69186d0 380
+  s_73cbfc60e45e37::t_7203f598ff1296 88
+  s_73cbfc60e45e37::t_7ba9a95bb1ec01 490
+  s_73cbfc60e45e37::t_6593757dfeece3 196
+  s_73cbfc60e45e37::t_cd1e0ee2aff10c 619
+  s_73cbfc60e45e37::t_ad3dc2b96f6ca4 357
+  s_73cbfc60e45e37::t_1d3a79d9db3d0a 408
+  s_73cbfc60e45e37::t_a02ef1ba89c8fd 558
+  s_73cbfc60e45e37::t_966987818e2a90 795
+  s_73cbfc60e45e37::t_bd1e5f86dc424b 175
+  s_73cbfc60e45e37::t_390f6176336789 148
+  s_73cbfc60e45e37::t_7d997a4deea4b9 453
+  s_73cbfc60e45e37::t_1e5a3d8697e1a5 397
+  s_73cbfc60e45e37::t_b9ba739485a022 430
+  s_73cbfc60e45e37::t_c9a38b762824ec 325
+  s_73cbfc60e45e37::t_99f940181df3fc 255
+  s_73cbfc60e45e37::t_bfc1ee3538689f 372
+  s_73cbfc60e45e37::t_ed14729bfb9a04 642
+  s_73cbfc60e45e37::t_618223f8a9ee93 225
+  s_73cbfc60e45e37::t_d197c374c39a3f 784
+  s_73cbfc60e45e37::t_359b510e745ba4 348
+  s_73cbfc60e45e37::t_32be8c6a595f2e 210
+  s_73cbfc60e45e37::t_4599f9a8ffe429 722
+  s_73cbfc60e45e37::t_d1e4d03c41954d 442
+  s_73cbfc60e45e37::t_ce06644c9d569c 139
+  s_73cbfc60e45e37::t_8d42fba4ee6d79 300
+docs/guides/getting-started.md
+  s_73cbfc60e45e37::t_5f19da31405ae2 133
+  s_73cbfc60e45e37::t_2467f943390b07 278
+  s_73cbfc60e45e37::t_ccc64b54dc189e 207
+  s_73cbfc60e45e37::t_7b9aec9dedd95a 101
+  s_73cbfc60e45e37::t_63fa5817d419ba 154
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "465b43d011b23b5a93607021218d65fb9f993200",
+  "prompts": {},
+  "sessions": {
+    "s_73cbfc60e45e37": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "80f2c44c-f1f2-49a0-8035-ccac60ac602b",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Zed <hi@zed.dev>"
+    }
+  }
+}
