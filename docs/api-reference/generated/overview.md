@@ -3,15 +3,15 @@
 # flext-tap-ldap API Overview
 
 - Package: `flext_tap_ldap`
-- Version: ``
+- Version: `0.12.0-dev`
 - Description: FLEXT Tap LDAP - Singer Tap for LDAP Directory Services
 - Project class: `integration`
 - Keywords: `data-extraction`, `enterprise`, `etl`, `flext`, `singer`, `tap`, `typed`
-- Main facades: `FlextTapLdapTypes`, `FlextTapLdapServices`, `FlextTapLdapClient`, `FlextTapLdapProtocols`, `FlextTapLdapUtilitiesProcessorMixin`, `FlextTapLdapModels`, `FlextTapLdapTap`, `FlextTapLdapConstants` (+5 more)
+- Main facades: _none_
 - Alias exports: `c`, `d`, `e`, `h`, `m`, `p`, `r`, `s`, `t`, `u`, `x`
-- Public symbol exports: `FlextTapLdapTypes`, `FlextTapLdapServices`, `FlextTapLdapClient`, `FlextTapLdapProtocols`, `FlextTapLdapUtilitiesProcessorMixin`, `FlextTapLdapModels`, `FlextTapLdapTap`, `FlextTapLdapConstants`, `FlextTapLdapStreams`, `FlextTapLdapUtilities` (+4 more)
+- Public symbol exports: `FlextTapLdapLdifStreams`, `FlextTapLdapUtilities`, `tap_ldap`, `FlextTapLdapTap`, `FlextTapLdapConstants`, `FlextTapLdapService`, `FlextTapLdapUtilitiesProcessorMixin`, `FlextTapLdapModels`, `FlextTapLdapProtocols`, `FlextTapLdapClient` (+3 more)
 - Exported module shortcuts: _none_
-- Generated module pages: `13`
+- Generated module pages: `11`
 
 ## Next Pages
 
