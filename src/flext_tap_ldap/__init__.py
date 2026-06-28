@@ -22,19 +22,35 @@ from flext_tap_ldap.__version__ import (
 )
 
 if _t.TYPE_CHECKING:
-    from flext_meltano import d, e, h, r, s, x
-    from flext_tap_ldap._utilities._processor import FlextTapLdapUtilitiesProcessorMixin
-    from flext_tap_ldap.api import FlextTapLdapService, tap_ldap
-    from flext_tap_ldap.client import FlextTapLdapClient
-    from flext_tap_ldap.constants import FlextTapLdapConstants, c
-    from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
-    from flext_tap_ldap.models import FlextTapLdapModels, m
-    from flext_tap_ldap.protocols import FlextTapLdapProtocols, p
-    from flext_tap_ldap.settings import FlextTapLdapSettings
-    from flext_tap_ldap.streams import FlextTapLdapStreams
-    from flext_tap_ldap.tap import FlextTapLdapTap
-    from flext_tap_ldap.typings import FlextTapLdapTypes, t
-    from flext_tap_ldap.utilities import FlextTapLdapUtilities, u
+    from flext_meltano import d as d, e as e, h as h, r as r, s as s, x as x
+    from flext_tap_ldap._utilities._processor import (
+        FlextTapLdapUtilitiesProcessorMixin as FlextTapLdapUtilitiesProcessorMixin,
+    )
+    from flext_tap_ldap.api import (
+        FlextTapLdapService as FlextTapLdapService,
+        tap_ldap as tap_ldap,
+    )
+    from flext_tap_ldap.client import FlextTapLdapClient as FlextTapLdapClient
+    from flext_tap_ldap.constants import (
+        FlextTapLdapConstants as FlextTapLdapConstants,
+        c as c,
+    )
+    from flext_tap_ldap.ldif_streams import (
+        FlextTapLdapLdifStreams as FlextTapLdapLdifStreams,
+    )
+    from flext_tap_ldap.models import FlextTapLdapModels as FlextTapLdapModels, m as m
+    from flext_tap_ldap.protocols import (
+        FlextTapLdapProtocols as FlextTapLdapProtocols,
+        p as p,
+    )
+    from flext_tap_ldap.settings import FlextTapLdapSettings as FlextTapLdapSettings
+    from flext_tap_ldap.streams import FlextTapLdapStreams as FlextTapLdapStreams
+    from flext_tap_ldap.tap import FlextTapLdapTap as FlextTapLdapTap
+    from flext_tap_ldap.typings import FlextTapLdapTypes as FlextTapLdapTypes, t as t
+    from flext_tap_ldap.utilities import (
+        FlextTapLdapUtilities as FlextTapLdapUtilities,
+        u as u,
+    )
 _LAZY_IMPORTS = merge_lazy_imports(
     ("._utilities",),
     build_lazy_import_map(
@@ -130,7 +146,6 @@ __all__: list[str] = [
     "FlextTapLdapTap",
     "FlextTapLdapTypes",
     "FlextTapLdapUtilities",
-    "FlextTapLdapUtilitiesProcessorMixin",
     "__author__",
     "__author_email__",
     "__description__",
