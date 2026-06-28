@@ -8,6 +8,8 @@ from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 _LAZY_IMPORTS = build_lazy_import_map(
     {
         "._processor": ("FlextTapLdapUtilitiesProcessorMixin",),
+        ".client_support": ("FlextTapLdapUtilitiesClientSupport",),
+        ".error_handling": ("FlextTapLdapUtilitiesErrorHandling",),
     },
 )
 

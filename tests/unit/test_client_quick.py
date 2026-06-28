@@ -8,16 +8,40 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import contextlib
+from typing import override
 from unittest.mock import Mock, patch
 
 import pytest
 
 from flext_tap_ldap import FlextTapLdapClient
-from tests import t, u
+from tests import p, r, t, u
 
 
 class TestsFlextTapLdapClientQuick:
     """Quick tests to maximize client.py coverage efficiently."""
+
+    class OverrideClientSupport(u.TapLdap.ClientSupport):
+        """Client support subclass used to prove MRO dispatch."""
+
+        @staticmethod
+        @override
+        def to_entry_mapping(
+            entry_data: p.Ldif.Entry
+            | t.MappingKV[str, t.JsonValue | t.StrSequence]
+            | None,
+        ) -> p.Result[t.JsonMapping]:
+            """Force search result conversion through the override."""
+            return r[t.JsonMapping].ok({"dn": "uid=override,dc=example,dc=com"})
+
+        @staticmethod
+        @override
+        def normalize_oracle_entry(
+            entry: t.JsonMapping,
+        ) -> t.JsonMapping:
+            """Force Oracle normalization through the override."""
+            normalized: t.JsonDict = dict(entry)
+            normalized["override"] = True
+            return normalized
 
     @pytest.fixture
     def client(self) -> FlextTapLdapClient.LDAPClient:
@@ -285,6 +309,20 @@ class TestsFlextTapLdapClientQuick:
         )
         assert len(results) == 2
         assert results[0] == search_results[0]
+
+    def test_client_support_composites_dispatch_through_mro(self) -> None:
+        """Composite ClientSupport helpers honor subclass overrides."""
+        entries = self.OverrideClientSupport.process_search_results(
+            [{"dn": "uid=raw,dc=example,dc=com"}],
+            size_limit=0,
+        )
+        oracle_entries = self.OverrideClientSupport.process_oracle_search_results(
+            [{"dn": "uid=raw,dc=example,dc=com"}],
+            oracle_oid_mode=True,
+        )
+
+        assert entries == [{"dn": "uid=override,dc=example,dc=com"}]
+        assert oracle_entries == [{"dn": "uid=raw,dc=example,dc=com", "override": True}]
 
     @patch("flext_tap_ldap.client.get_running_loop")
     def test_execute_oracle_search_in_new_loop(
