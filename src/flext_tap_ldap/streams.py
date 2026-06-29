@@ -15,10 +15,11 @@ from collections.abc import (
 )
 from typing import TYPE_CHECKING, ClassVar, override
 
-from flext_tap_ldap import FlextTapLdapClient, c, m, t, u
+from flext_tap_ldap import c, m, t, u
+from flext_tap_ldap.client import FlextTapLdapClient
 
 if TYPE_CHECKING:
-    from flext_meltano import FlextMeltanoAbstractions as Tap
+    from flext_meltano.services.abstractions import FlextMeltanoAbstractions as Tap
 
 logger = u.fetch_logger(__name__)
 

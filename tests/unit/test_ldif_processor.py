@@ -12,8 +12,9 @@ from unittest.mock import Mock
 
 import pytest
 
-from flext_tap_ldap import FlextTapLdapLdifStreams
-from tests import t, u
+from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
+from tests.typings import t
+from tests.utilities import u
 
 
 class TestsFlextTapLdapLdifProcessor:

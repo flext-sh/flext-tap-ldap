@@ -14,7 +14,7 @@ from flext_ldif import ldif
 from flext_tap_ldap import c, m, p, t, u
 
 if TYPE_CHECKING:
-    from flext_meltano import FlextMeltanoAbstractions
+    from flext_meltano.services.abstractions import FlextMeltanoAbstractions
 
 
 class FlextTapLdapLdifStreams:

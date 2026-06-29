@@ -21,7 +21,8 @@ from click.testing import CliRunner
 
 from flext_cli import u as cli_u
 from flext_tap_ldap.tap import CLI_COMMAND
-from tests import t, u
+from tests.typings import t
+from tests.utilities import u
 
 
 def _extract_json_from_output(output: str) -> t.JsonMapping:

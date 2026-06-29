@@ -17,9 +17,10 @@ from typing import ClassVar
 from flext_tests import FlextTestsUtilities
 
 from flext_core import FlextUtilities
-from flext_ldap import FlextLdapLdap3Wrappers
+from flext_ldap.adapters._ldap3.wrappers import FlextLdapLdap3Wrappers
 from flext_tap_ldap import FlextTapLdapUtilities
-from tests import c, p
+from tests.constants import c
+from tests.protocols import p
 
 
 class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):

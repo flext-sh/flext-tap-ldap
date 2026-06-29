@@ -12,9 +12,12 @@ from typing import override
 from unittest.mock import Mock, patch
 
 import pytest
+from flext_tests import r
 
-from flext_tap_ldap import FlextTapLdapClient
-from tests import p, r, t, u
+from flext_tap_ldap.client import FlextTapLdapClient
+from tests.protocols import p
+from tests.typings import t
+from tests.utilities import u
 
 
 class TestsFlextTapLdapClientQuick:

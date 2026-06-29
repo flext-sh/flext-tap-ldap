@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import pytest
 
-from tests import c, m, t
+from tests.constants import c
+from tests.models import m
+from tests.typings import t
 
 
 @pytest.fixture

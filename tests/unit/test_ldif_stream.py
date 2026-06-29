@@ -7,7 +7,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tap_ldap import FlextTapLdapLdifStreams, FlextTapLdapTap
+from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
+from flext_tap_ldap.tap import FlextTapLdapTap
 
 
 class TestsFlextTapLdapLdifStream:

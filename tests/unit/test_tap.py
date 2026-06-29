@@ -10,8 +10,12 @@ from typing import cast
 
 import pytest
 
-from flext_tap_ldap import FlextTapLdapClient, FlextTapLdapStreams, FlextTapLdapTap
-from tests import c, m, t
+from flext_tap_ldap.client import FlextTapLdapClient
+from flext_tap_ldap.streams import FlextTapLdapStreams
+from flext_tap_ldap.tap import FlextTapLdapTap
+from tests.constants import c
+from tests.models import m
+from tests.typings import t
 
 
 class TestsFlextTapLdapTap:

@@ -19,18 +19,11 @@ from typing import ClassVar, override
 
 import click
 
-from flext_meltano import FlextMeltanoAbstractions
-from flext_tap_ldap import (
-    FlextTapLdapLdifStreams,
-    FlextTapLdapSettings,
-    FlextTapLdapStreams,
-    c,
-    m,
-    p,
-    r,
-    t,
-    u,
-)
+from flext_meltano.services.abstractions import FlextMeltanoAbstractions
+from flext_tap_ldap import c, m, p, r, t, u
+from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
+from flext_tap_ldap.settings import FlextTapLdapSettings
+from flext_tap_ldap.streams import FlextTapLdapStreams
 
 logger = u.fetch_logger(__name__)
 

@@ -11,8 +11,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from flext_tap_ldap import FlextTapLdapClient
-from tests import u
+from flext_tap_ldap.client import FlextTapLdapClient
+from tests.utilities import u
 
 
 class TestsFlextTapLdapClient:
