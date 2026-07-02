@@ -203,15 +203,16 @@ class FlextTapLdapUtilitiesProcessorMixin:
             all LDIF processing to the flext-ldif library.
             """
 
-            @staticmethod
             def _to_ldif_entry(
+                self,
                 raw_value: t.JsonMapping,
             ) -> m.Ldif.Entry | None:
                 """Validate and coerce value to LDIF entry model."""
                 try:
                     entry: m.Ldif.Entry = m.Ldif.Entry.model_validate(raw_value)
                     return entry
-                except c.ValidationError:
+                except c.ValidationError as exc:
+                    self.errors.append(f"Invalid LDIF entry skipped: {exc}")
                     return None
 
             @override

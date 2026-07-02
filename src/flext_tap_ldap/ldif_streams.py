@@ -32,7 +32,10 @@ class FlextTapLdapLdifStreams:
                 return []
             result = t.json_mapping_sequence_adapter().validate_python(value)
             return [dict(item) for item in result]
-        except c.ValidationError:
+        except c.ValidationError as exc:
+            u.fetch_logger(__name__).warning(
+                "Invalid object list value ignored: %s", exc
+            )
             return []
 
     @staticmethod
@@ -41,7 +44,10 @@ class FlextTapLdapLdifStreams:
             if not isinstance(value, dict):
                 return {}
             return t.header_mapping_adapter().validate_python(value)
-        except c.ValidationError:
+        except c.ValidationError as exc:
+            u.fetch_logger(__name__).warning(
+                "Invalid counter map value ignored: %s", exc
+            )
             return {}
 
     class LdifStream:

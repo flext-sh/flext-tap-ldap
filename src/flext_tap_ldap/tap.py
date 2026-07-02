@@ -209,7 +209,8 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             validated: t.JsonMapping = t.json_mapping_adapter().validate_python(
                 raw_item,
             )
-        except c.ValidationError:
+        except c.ValidationError as exc:
+            logger.warning("Invalid custom stream definition ignored: %s", exc)
             return None
         name_val: t.JsonValue = validated.get("name")
         if isinstance(name_val, str) and name_val:
