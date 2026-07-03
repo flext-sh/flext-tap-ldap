@@ -11,22 +11,11 @@ from __future__ import annotations
 
 import time
 from asyncio import get_running_loop, new_event_loop, set_event_loop
-from collections.abc import Mapping, Sequence
 
-from flext_core import FlextLogger, r, u, x
-from flext_ldap import (
-    FlextLdap,
-    FlextLdapConnection,
-    FlextLdapOperations,
-    FlextLdapSettings,
-    m,
-)
-from pydantic import BaseModel
+from flext_ldap import FlextLdap
+from flext_tap_ldap import c, m, p, t, u
 
-from flext_tap_ldap import t
-from flext_tap_ldap.constants import c
-
-logger = FlextLogger(__name__)
+logger = u.fetch_logger(__name__)
 
 
 class FlextTapLdapClient:
@@ -36,75 +25,75 @@ class FlextTapLdapClient:
     with nested LDAPClient and LDAPClientConfig classes.
     """
 
-    class LDAPClientConfig(BaseModel):
-        """Parameter object for LDAP client initialization."""
-
-        host: str
-        port: int = c.TapLdap.DEFAULT_PORT
-        bind_dn: str | None = None
-        password: str | None = None
-        use_ssl: bool = False
-        timeout: int = c.TapLdap.DEFAULT_SEARCH_TIMEOUT
-        page_size: int = c.TapLdap.DEFAULT_PAGE_SIZE
-
     class LDAPClient:
         """Testing convenience LDAP client wrapper.
 
-        Provides the old interface while using FlextLdap internally.
+        Provides the old interface while using ldap internally.
         This eliminates code duplication while maintaining testing convenience.
         """
 
         def __init__(
             self,
-            config: FlextTapLdapClient.LDAPClientConfig | None = None,
+            settings: m.Ldap.ConnectionConfig | None = None,
+            *,
+            page_size: int = c.TapLdap.DEFAULT_PAGE_SIZE,
             **convenience_kwargs: t.Scalar,
         ) -> None:
-            """Initialize with Parameter Object Pattern (preferred) or testing convenience interface.
+            """Initialize with Parameter Object Pattern (preferred).
 
             Preferred Usage (Parameter Object Pattern):
-                config = FlextTapLdapClient.LDAPClientConfig(host="ldap.example.com", port=389)
-                client = FlextTapLdapClient.LDAPClient(config=config)
+                settings = m.Ldap.ConnectionConfig(
+                    host="ldap.example.com", port=389
+                )
+                client = FlextTapLdapClient.LDAPClient(settings=settings)
 
-            Testing convenience Usage (for testing convenience):
-                client = FlextTapLdapClient.LDAPClient(host="ldap.example.com", port=389)
+            Testing convenience Usage:
+                client = FlextTapLdapClient.LDAPClient(
+                    host="ldap.example.com", port=389
+                )
             """
-            self._flext_api: FlextLdap
-            self._config: m.Ldap.ConnectionConfig
+            self._flext_api: p.Ldap.LdapClient
+            self.config: m.Ldap.ConnectionConfig
             self.host: str
             self.port: int
             self.bind_dn: str | None
             self.password: str | None
             self.use_ssl: bool
             self.timeout: int
-            self.page_size: int
-            self.client: t.ContainerValue
+            self.page_size: int = page_size
             self._bind_dn: str | None
             self._password: str | None
             client_config = (
-                config
-                if config is not None
+                settings
+                if settings is not None
                 else self._create_config_from_kwargs(**convenience_kwargs)
             )
             self._initialize_flext_api(client_config)
 
-        def __getattr__(self, name: str) -> t.ContainerValue:
+        def __getattr__(self, name: str) -> t.JsonMapping:
             """Delegate unknown attributes to the real API."""
             return getattr(self._flext_api, name)
 
         @property
         def server_uri(self) -> str:
             """Get server URI for testing convenience."""
-            protocol = "ldaps" if self.use_ssl else "ldap"
-            return f"{protocol}://{self.host}:{self.port}"
+            server_uri: str = u.TapLdap.ClientSupport.build_server_uri(
+                self.host,
+                self.port,
+                use_ssl=self.use_ssl,
+            )
+            return server_uri
 
-        def health_check(self) -> Mapping[str, t.ContainerValue]:
+        def health_check(self) -> t.ScalarMapping:
             """Perform health check for testing convenience."""
             start_time = time.time()
             connection_ok: bool = self.test_connection()
             end_time = time.time()
             response_time_ms: float = round((end_time - start_time) * 1000, 2)
             return {
-                "status": "healthy" if connection_ok else "unhealthy",
+                "status": c.HealthStatus.HEALTHY.value
+                if connection_ok
+                else c.HealthStatus.UNHEALTHY.value,
                 "server_uri": self.server_uri,
                 "connection_test": connection_ok,
                 "response_time_ms": response_time_ms,
@@ -114,39 +103,49 @@ class FlextTapLdapClient:
             self,
             base_dn: str,
             search_filter: str = "(objectClass=*)",
-            attributes: list[str] | None = None,
+            attributes: t.StrSequence | None = None,
             scope: str = "SUBTREE",
             size_limit: int = 0,
-        ) -> Sequence[Mapping[str, t.ContainerValue]]:
+        ) -> t.SequenceOf[t.JsonMapping]:
             """Search for entries using flext-ldap infrastructure (synchronous).
 
             Returns a list of entries for testing convenience with Singer streams.
 
             Refactored for lower complexity using Single Responsibility Principle.
             """
-            ldap_scope = self._convert_scope_to_enum(scope)
+            ldap_scope = u.TapLdap.ClientSupport.normalize_scope(scope)
             return self._perform_search(
-                base_dn, search_filter, attributes, ldap_scope, size_limit
+                base_dn,
+                search_filter,
+                attributes,
+                ldap_scope,
+                size_limit,
             )
 
         def search_with_oracle_support(
             self,
             base_dn: str,
             search_filter: str = "(objectClass=*)",
-            attributes: list[str] | None = None,
+            attributes: t.StrSequence | None = None,
             *,
             oracle_oid_mode: bool = False,
-        ) -> Sequence[Mapping[str, t.ContainerValue]]:
+        ) -> t.SequenceOf[t.JsonMapping]:
             """Search with Oracle OID support for testing convenience.
 
             Refactored using Single Responsibility Principle to reduce complexity.
             Each step now has its own dedicated method.
             """
-            extended_attributes = self._extend_attributes_with_oracle_support(
-                attributes, oracle_oid_mode=oracle_oid_mode
+            extended_attributes = (
+                u.TapLdap.ClientSupport.extend_attributes_with_oracle_support(
+                    attributes,
+                    oracle_oid_mode=oracle_oid_mode,
+                )
             )
             try:
                 get_running_loop()
+                logger.warning(
+                    "Oracle LDAP search inside an active event loop is not supported",
+                )
                 return []
             except RuntimeError:
                 return self._execute_oracle_search_in_new_loop(
@@ -157,138 +156,72 @@ class FlextTapLdapClient:
                 )
 
         def test_connection(self) -> bool:
-            """Test the connection to the LDAP server for testing convenience."""
+            """Test the connection to the LDAP server."""
             try:
                 test_search_options = m.Ldap.SearchOptions(
-                    base_dn="",
+                    base_dn="dc=test",
                     filter_str="(objectClass=*)",
                     scope=c.Ldap.SearchScope.BASE,
                     attributes=None,
                     size_limit=1,
                     time_limit=5,
                 )
-                result: r[m.Ldap.SearchResult] = self._flext_api.search(
-                    test_search_options
-                )
-                return result.is_success
-            except (RuntimeError, ValueError, TypeError) as e:
+                result = self._flext_api.search(test_search_options)
+                return result.success
+            except (RuntimeError, ValueError, TypeError, c.ValidationError) as e:
                 err_msg = str(e)
                 logger.warning("LDAP connection test failed: %s", err_msg)
-                logger.info(
-                    "LDAP connection test fallback - required for Singer streams in test/mock environments"
-                )
-                return True
-
-        def _build_server_uri(self) -> str:
-            """Build server URI from connection parameters.
-
-            Single Responsibility: Handle only URI construction.
-            """
-            protocol = "ldaps" if self.use_ssl else "ldap"
-            return f"{protocol}://{self.host}:{self.port}"
-
-        def _coerce_int(self, value: t.ContainerValue, default: int) -> int:
-            """Coerce value to int using pattern matching for better type safety."""
-            match value:
-                case int() as int_val:
-                    return int_val
-                case str() as str_val:
-                    try:
-                        return int(str_val)
-                    except ValueError:
-                        return default
-                case float() as float_val:
-                    try:
-                        return int(float_val)
-                    except (ValueError, OverflowError):
-                        return default
-                case _:
-                    return default
-
-        def _coerce_str_opt(self, value: t.ContainerValue) -> str | None:
-            """Coerce value to optional string using pattern matching."""
-            match value:
-                case str() as str_val if str_val:
-                    return str_val
-                case _:
-                    return None
-
-        def _convert_entry_to_dict(
-            self, entry_data: t.ContainerValue | None
-        ) -> dict[str, t.ContainerValue]:
-            """Convert FlextLdapModels.Entry to dict[str, t.ContainerValue] format for testing convenience.
-
-            Single Responsibility: Handle only entry format conversion.
-            """
-            if x.is_base_model(entry_data):
-                dn_value: str = str(getattr(entry_data, "dn", ""))
-                attributes: dict[str, t.ContainerValue] = getattr(
-                    entry_data, "attributes", {}
-                )
-                entry_dict: dict[str, t.ContainerValue] = {"dn": dn_value}
-                for attr_name, attr_values in attributes.items():
-                    if u.is_list(attr_values) and len(attr_values) == 1:
-                        entry_dict[attr_name] = attr_values[0]
-                    else:
-                        entry_dict[attr_name] = attr_values
-                return entry_dict
-            if entry_data:
-                if isinstance(entry_data, Mapping):
-                    return {str(key): value for key, value in entry_data.items()}
-                return {}
-            return {}
-
-        def _convert_scope_to_enum(self, scope: str) -> str:
-            """Convert scope string to flext-ldap scope string.
-
-            Single Responsibility: Handle only scope conversion logic.
-            """
-            scope_map: dict[str, str] = {
-                "SUBTREE": "SUBTREE",
-                "ONELEVEL": "ONELEVEL",
-                "BASE": "BASE",
-            }
-            return scope_map.get(scope.upper(), "SUBTREE")
+                return False
 
         def _create_config_from_kwargs(
-            self, **convenience_kwargs: t.Scalar
-        ) -> FlextTapLdapClient.LDAPClientConfig:
-            """Create config from convenience keyword arguments."""
-            raw_host = convenience_kwargs.get("host")
-            host: str
-            match raw_host:
-                case str() as host_value if host_value:
-                    host = host_value
-                case _:
-                    msg = "Either 'config' or valid string 'host' must be provided"
-                    raise ValueError(msg)
-            return FlextTapLdapClient.LDAPClientConfig(
-                host=host,
-                port=self._coerce_int(
-                    convenience_kwargs.get("port", c.TapLdap.DEFAULT_PORT),
-                    c.TapLdap.DEFAULT_PORT,
-                ),
-                bind_dn=self._coerce_str_opt(convenience_kwargs.get("bind_dn")),
-                password=self._coerce_str_opt(convenience_kwargs.get("password")),
-                use_ssl=bool(convenience_kwargs.get("use_ssl")),
-                timeout=self._coerce_int(
-                    convenience_kwargs.get("timeout", c.TapLdap.DEFAULT_SEARCH_TIMEOUT),
-                    c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
-                ),
-                page_size=self._coerce_int(
-                    convenience_kwargs.get("page_size", c.TapLdap.DEFAULT_PAGE_SIZE),
-                    c.TapLdap.DEFAULT_PAGE_SIZE,
-                ),
-            )
+            self,
+            **convenience_kwargs: t.Scalar,
+        ) -> m.Ldap.ConnectionConfig:
+            """Create settings from convenience keyword arguments."""
+            try:
+                config_dict: t.MutableJsonMapping = {
+                    "host": u.to_str(
+                        convenience_kwargs.get("host"),
+                        default="",
+                    ),
+                    "port": u.to_int(
+                        convenience_kwargs.get("port"),
+                        default=c.Ldap.PORT,
+                    ),
+                    "bind_dn": u.to_optional_str(
+                        convenience_kwargs.get("bind_dn"),
+                    ),
+                    "use_ssl": u.to_bool(
+                        convenience_kwargs.get("use_ssl"),
+                    ),
+                    "timeout": u.to_int(
+                        convenience_kwargs.get("timeout"),
+                        default=c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
+                    ),
+                }
+                password_val = convenience_kwargs.get("password")
+                if password_val is not None:
+                    config_dict["bind_password"] = u.to_str(password_val)
+                bind_password_val = convenience_kwargs.get("bind_password")
+                if bind_password_val is not None:
+                    config_dict["bind_password"] = u.to_str(bind_password_val)
+                return m.Ldap.ConnectionConfig.model_validate(config_dict)
+            except c.ValidationError as e:
+                host_val = convenience_kwargs.get("host")
+                if not host_val or not isinstance(host_val, str):
+                    msg = "Either 'settings' or valid string 'host' must be provided"
+                    raise ValueError(msg) from e
+                msg = f"Invalid configuration: {e}"
+                raise ValueError(msg) from e
 
         def _execute_oracle_search_in_new_loop(
             self,
             base_dn: str,
             search_filter: str,
-            attributes: list[str] | None,
+            attributes: t.StrSequence | None,
             *,
             oracle_oid_mode: bool,
-        ) -> Sequence[Mapping[str, t.ContainerValue]]:
+        ) -> t.SequenceOf[t.JsonMapping]:
             """Execute Oracle search in new event loop.
 
             Single Responsibility: Handle only event loop management for Oracle search.
@@ -296,199 +229,76 @@ class FlextTapLdapClient:
             loop = new_event_loop()
             set_event_loop(loop)
             try:
-                search_result: Sequence[Mapping[str, t.ContainerValue]] = self.search(
-                    base_dn, search_filter, attributes
+                search_result: t.SequenceOf[t.JsonMapping] = self.search(
+                    base_dn,
+                    search_filter,
+                    attributes,
                 )
-                return self._process_search_results_with_oracle_support(
-                    search_result, oracle_oid_mode=oracle_oid_mode
+                processed_results: t.SequenceOf[t.JsonMapping] = (
+                    u.TapLdap.ClientSupport.process_oracle_search_results(
+                        search_result,
+                        oracle_oid_mode=oracle_oid_mode,
+                    )
                 )
+                return processed_results
             finally:
                 loop.close()
                 set_event_loop(None)
 
-        def _extend_attributes_with_oracle_support(
-            self, attributes: list[str] | None, *, oracle_oid_mode: bool
-        ) -> list[str] | None:
-            """Extend attributes list with Oracle-specific attributes.
-
-            Single Responsibility: Handle only Oracle attribute extension logic.
-            """
-            if not oracle_oid_mode or not attributes:
-                return attributes
-            oracle_attrs = ["orclPassword", "orclPasswordAttribute", "userPassword"]
-            extended_attributes = attributes.copy()
-            for oracle_attr in oracle_attrs:
-                if oracle_attr not in extended_attributes:
-                    extended_attributes.append(oracle_attr)
-            return extended_attributes
-
         def _initialize_flext_api(
-            self, client_config: FlextTapLdapClient.LDAPClientConfig
+            self,
+            client_config: m.Ldap.ConnectionConfig,
         ) -> None:
-            """Initialize the FlextLdap API with the given configuration."""
-            flext_connection_config = m.Ldap.ConnectionConfig(
-                host=client_config.host,
-                port=int(client_config.port),
-                use_ssl=bool(client_config.use_ssl),
-                bind_dn=client_config.bind_dn,
-                bind_password=client_config.password,
-                timeout=int(client_config.timeout),
-            )
-            settings = FlextLdapSettings(
-                host=flext_connection_config.host,
-                port=flext_connection_config.port,
-                use_ssl=flext_connection_config.use_ssl,
-                bind_dn=flext_connection_config.bind_dn or "",
-                bind_password=flext_connection_config.bind_password or "",
-                timeout=flext_connection_config.timeout,
-            )
-            connection = FlextLdapConnection(config=settings)
-            operations = FlextLdapOperations(connection=connection)
-            self._flext_api = FlextLdap(connection=connection, operations=operations)
-            self._config = flext_connection_config
+            """Initialize the ldap API with the given configuration."""
+            self.config = client_config
+            self._flext_api = FlextLdap()
             self.host = client_config.host
             self.port = client_config.port
+            self._bind_dn = client_config.bind_dn
             self.bind_dn = client_config.bind_dn
-            self.password = client_config.password
+            self._password = client_config.bind_password
+            self.password = client_config.bind_password
             self.use_ssl = client_config.use_ssl
             self.timeout = client_config.timeout
-            self.page_size = client_config.page_size
-            self._bind_dn = client_config.bind_dn
-            self._password = client_config.password
 
         def _perform_search(
             self,
             base_dn: str,
             search_filter: str,
-            attributes: list[str] | None,
+            attributes: t.StrSequence | None,
             ldap_scope: str,
             size_limit: int,
-        ) -> Sequence[Mapping[str, t.ContainerValue]]:
+        ) -> t.SequenceOf[t.JsonMapping]:
             """Perform actual LDAP search.
 
             Single Responsibility: Handle only search execution.
             """
-            self._build_server_uri()
             try:
-                search_options = m.Ldap.SearchOptions(
-                    base_dn=base_dn,
-                    filter_str=search_filter,
+                normalized_config = m.Ldap.NormalizedConfig(
                     scope=ldap_scope,
-                    attributes=attributes,
+                    filter_str=search_filter,
                     size_limit=size_limit,
                     time_limit=c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
+                    attributes=attributes,
                 )
-                result: r[m.Ldap.SearchResult] = self._flext_api.search(search_options)
-                return self._process_search_results(result, size_limit)
-            except (
-                ValueError,
-                TypeError,
-                KeyError,
-                AttributeError,
-                OSError,
-                RuntimeError,
-                ImportError,
-            ) as e:
-                err_msg = str(e)
-                logger.debug("LDAP search failed: %s", err_msg)
-                return []
-
-        def _process_oracle_entry(
-            self, entry: Mapping[str, t.ContainerValue]
-        ) -> Mapping[str, t.ContainerValue]:
-            """Process Oracle-specific LDAP entries for testing convenience."""
-            raw_attrs = entry.get("attributes", {})
-            attributes: dict[str, t.ContainerValue] = {}
-            if isinstance(raw_attrs, Mapping):
-                attributes = {
-                    str(attr_name): attr_value
-                    for attr_name, attr_value in raw_attrs.items()
-                }
-            if "orclPassword" in attributes:
-                attributes["userPassword"] = attributes.get("orclPassword")
-            if "objectClass" in attributes:
-                raw_obj_classes = attributes["objectClass"]
-                obj_classes: list[str]
-                match raw_obj_classes:
-                    case str() as single_class:
-                        obj_classes = [single_class]
-                    case list() as class_list:
-                        obj_classes = [str(c) for c in class_list]
-                    case _:
-                        obj_classes = []
-                if (
-                    "orclContainer" in obj_classes
-                    and "organizationalUnit" not in obj_classes
-                ):
-                    obj_classes.append("organizationalUnit")
-                    attributes["objectClass"] = obj_classes
-            return entry
-
-        def _process_search_results(
-            self, result: r[m.Ldap.SearchResult], size_limit: int
-        ) -> Sequence[Mapping[str, t.ContainerValue]]:
-            """Process LDAP search results with size limiting.
-
-            Single Responsibility: Handle only result processing logic.
-            """
-            entries: list[Mapping[str, t.ContainerValue]] = []
-            if not (result.is_success and result.value):
-                return entries
-            search_result = result.value
-            if not isinstance(search_result, m.Ldap.SearchResult):
-                return entries
-            data_entries: list[dict[str, list[str]]] = search_result.entries
-            for entries_returned, entry_data in enumerate(data_entries):
-                if size_limit > 0 and entries_returned >= size_limit:
-                    break
-                converted = self._convert_entry_to_dict(entry_data)
-                entries.append(converted)
-            return entries
-
-        def _process_search_results_with_oracle_support(
-            self,
-            search_result: Sequence[m.Ldif.Entry]
-            | Sequence[Mapping[str, t.ContainerValue]],
-            *,
-            oracle_oid_mode: bool,
-        ) -> Sequence[Mapping[str, t.ContainerValue]]:
-            """Process search results with Oracle OID support.
-
-            Single Responsibility: Handle only result processing logic.
-            """
-            results: list[Mapping[str, t.ContainerValue]] = []
-            for entry in search_result:
-                if isinstance(entry, Mapping):
-                    entry_dict = {str(key): value for key, value in entry.items()}
-                else:
-                    entry_dict = self._convert_entry_to_dict(entry)
-                if oracle_oid_mode:
-                    processed_entry = self._process_oracle_entry(entry_dict)
-                    results.append(processed_entry)
-                else:
-                    results.append(entry_dict)
-            return results
+                search_options = m.Ldap.SearchOptions.normalized(
+                    base_dn,
+                    settings=normalized_config,
+                )
+                result = self._flext_api.search(search_options)
+                if not (result.success and result.value):
+                    return []
+                processed_entries: t.SequenceOf[t.JsonMapping] = (
+                    u.TapLdap.ClientSupport.process_search_results(
+                        result.value.entries,
+                        size_limit=size_limit,
+                    )
+                )
+                return processed_entries
+            except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+                err_msg = f"LDAP search failed: {e}"
+                logger.exception("LDAP search failed: %s", err_msg)
+                raise RuntimeError(err_msg) from e
 
 
-class LDAPConnectionConfig(m.Ldap.ConnectionConfig):
-    """LDAPConnectionConfig - real inheritance from FlextLdapModels.ConnectionConfig."""
-
-
-class LDAPEntry(m.Ldif.Entry):
-    """LDAPEntry - real inheritance from FlextLdapModels.Entry."""
-
-
-class LDAPClient(FlextTapLdapClient.LDAPClient):
-    """LDAPClient - real inheritance from FlextTapLdapClient.LDAPClient."""
-
-
-LDAPClientConfig = FlextTapLdapClient.LDAPClientConfig
-
-
-__all__: list[str] = [
-    "FlextTapLdapClient",
-    "LDAPClient",
-    "LDAPClientConfig",
-    "LDAPConnectionConfig",
-    "LDAPEntry",
-]
+__all__: t.StrSequence = ("FlextTapLdapClient",)

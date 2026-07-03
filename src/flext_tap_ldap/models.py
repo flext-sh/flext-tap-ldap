@@ -10,18 +10,18 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Annotated
 from uuid import uuid4
 
-from flext_core import FlextModels, t
-from flext_ldap import FlextLdapModels
-from flext_meltano import FlextMeltanoModels
-from pydantic import Field, model_validator
+from flext_ldap import m
+from flext_meltano import FlextMeltanoModels, u
+from flext_tap_ldap.constants import c
+from flext_tap_ldap.typings import t
 
 
-class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
-    """Complete models for LDAP tap operations extending FlextModels.
+class FlextTapLdapModels(FlextMeltanoModels, m):
+    """Complete models for LDAP tap operations extending m.
 
     Provides standardized models for all LDAP tap domain entities including:
     - Singer stream metadata and configuration
@@ -30,225 +30,122 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
     - Performance monitoring and metrics
     - Singer protocol compliance models
 
-    All nested classes inherit FlextModels validation and patterns.
+    All nested classes inherit m validation and patterns.
     """
 
     class TapLdap:
         """Tap LDAP namespace for cross-project access."""
 
-        class TapExecutionStartedEvent(FlextModels.DomainEvent):
-            """Event raised when tap execution starts."""
+        # ── Domain Events ────────────────────────────────────────────────────
 
-            timestamp: Annotated[
-                datetime, Field(default_factory=lambda: datetime.now(UTC))
-            ]
-            tap_name: str = "tap-ldap"
-            execution_id: str = ""
-            config_hash: str | None = None
+        # ── Config Parameter Objects ─────────────────────────────────────────
 
-        class TapExecutionCompletedEvent(FlextModels.DomainEvent):
-            """Event raised when tap execution completes."""
+        class CustomPropertyDefinition(m.BaseModel):
+            """Definition of a custom stream property."""
 
-            timestamp: Annotated[
-                datetime, Field(default_factory=lambda: datetime.now(UTC))
-            ]
-            tap_name: str = "tap-ldap"
-            execution_id: str = ""
-            records_processed: int = 0
-            streams_discovered: int = 0
-            duration_seconds: float = 0.0
-
-        class StreamDiscoveredEvent(FlextModels.DomainEvent):
-            """Event raised when a stream is discovered."""
-
-            event_type: Annotated[str, Field(default="stream_discovered", frozen=True)]
-            aggregate_id: Annotated[
+            type: Annotated[
                 str,
-                Field(
-                    default="",
-                    description="Stream name as aggregate identifier",
+                u.Field(
+                    description="Data type for the custom stream property",
+                ),
+            ] = "string"
+            description: Annotated[
+                str | None,
+                u.Field(
+                    description="Optional description of the custom property",
+                ),
+            ] = None
+
+        # ── Entities ─────────────────────────────────────────────────────────
+
+        class LdapConnectionParams(m.Value):
+            """LDAP connection parameters for tap configuration."""
+
+            host: t.NonEmptyStr = u.Field(description="LDAP server hostname")
+            port: t.PortNumber = u.Field(description="LDAP server port")
+            bind_dn: Annotated[
+                str | None,
+                u.Field(description="Bind DN for authentication"),
+            ] = None
+            bind_password: Annotated[
+                str | None,
+                u.Field(description="Bind password for authentication"),
+            ] = None
+            base_dn: Annotated[
+                str | None,
+                u.Field(description="Base DN for search operations"),
+            ] = None
+            use_ssl: bool = u.Field(description="Enable SSL")
+            timeout_seconds: t.PositiveInt = u.Field(
+                description="Search timeout in seconds",
+            )
+            page_size: Annotated[
+                t.PositiveInt,
+                u.Field(
+                    default=c.TapLdap.DEFAULT_PAGE_SIZE,
+                    description="Page size for paged results",
                 ),
             ]
-            stream_name: str
-            stream_key_properties: Annotated[list[str], Field(default_factory=list)]
-            bookmark_key: str | None = None
-
-            @model_validator(mode="before")
-            @classmethod
-            def set_aggregate_id(cls, data: t.ContainerValue) -> t.ContainerValue:
-                """Set aggregate_id from stream_name if not provided."""
-                if (
-                    isinstance(data, dict)
-                    and "aggregate_id" not in data
-                    and "stream_name" in data
-                ):
-                    data["aggregate_id"] = data["stream_name"]
-                return data
-
-        class RecordExtractedEvent(FlextModels.DomainEvent):
-            """Event raised when a record is extracted."""
-
-            event_type: Annotated[str, Field(default="record_extracted", frozen=True)]
-            aggregate_id: Annotated[
-                str,
-                Field(
-                    default="",
-                    description="Stream name as aggregate identifier",
+            max_retries: Annotated[
+                t.PositiveInt,
+                u.Field(
+                    default=3,
+                    description="Maximum connection retries",
                 ),
             ]
-            stream_name: str
-            record_id: str | None = None
-            record_size_bytes: int = 0
 
-            @model_validator(mode="before")
-            @classmethod
-            def set_aggregate_id(cls, data: t.ContainerValue) -> t.ContainerValue:
-                """Set aggregate_id from stream_name if not provided."""
-                if (
-                    isinstance(data, dict)
-                    and "aggregate_id" not in data
-                    and "stream_name" in data
-                ):
-                    data["aggregate_id"] = data["stream_name"]
-                return data
+        class LdapConnection(m.Entity):
+            """LDAP connection entity with test status and error tracking."""
 
-        class TapExecution(FlextModels.Entity):
-            """Execution state and metrics for a tap run."""
-
-            id: Annotated[str, Field(default_factory=lambda: uuid4().hex)]
-            execution_id: str
-            connection_id: str
-            command: str
-            tap_status: str = "created"
-            config: Annotated[t.ContainerValue, Field(default_factory=dict)]
-            catalog: Annotated[t.ContainerValue, Field(default_factory=dict)]
-            state: Annotated[t.ContainerValue, Field(default_factory=dict)]
-            started_at: datetime | None = None
-            completed_at: datetime | None = None
-            records_extracted: int = 0
-            streams_processed: int = 0
-            exit_code: int | None = None
-            stdout: str | None = None
-            stderr: str | None = None
-
-            def start_execution(self) -> None:
-                """Mark execution as running with current timestamp."""
-                self.tap_status = "running"
-                self.started_at = datetime.now(UTC)
-
-            def complete_execution(
-                self,
-                exit_code: int,
-                stdout: str | None = None,
-                stderr: str | None = None,
-            ) -> None:
-                """Mark execution as completed with exit code and output."""
-                self.tap_status = "completed" if exit_code == 0 else "failed"
-                self.completed_at = datetime.now(UTC)
-                self.exit_code = exit_code
-                self.stdout = stdout
-                self.stderr = stderr
-
-            def cancel_execution(self) -> None:
-                """Mark execution as cancelled."""
-                self.tap_status = "cancelled"
-                self.completed_at = datetime.now(UTC)
-
-            def update_metrics(
-                self, records_extracted: int, streams_processed: int
-            ) -> None:
-                """Update extraction metrics with record and stream counts."""
-                self.records_extracted = records_extracted
-                self.streams_processed = streams_processed
-
-        class ConnectionTestedEvent(FlextModels.DomainEvent):
-            """Event raised after connection test."""
-
-            event_type: Annotated[str, Field(default="connection_tested", frozen=True)]
-            aggregate_id: Annotated[
-                str,
-                Field(
-                    default="",
-                    description="Server URI as aggregate identifier",
+            host: t.NonEmptyStr = u.Field(
+                description="LDAP host address for this connection",
+            )
+            port: t.PortNumber = u.Field(
+                description="LDAP port for this connection",
+            )
+            bind_dn: Annotated[
+                str | None,
+                u.Field(
+                    description="Bind DN used by the connection",
                 ),
-            ]
-            success: bool
-            server_uri: str
-            error_message: str | None = None
-
-            @model_validator(mode="before")
-            @classmethod
-            def set_aggregate_id(cls, data: t.ContainerValue) -> t.ContainerValue:
-                """Set aggregate_id from server_uri if not provided."""
-                if (
-                    isinstance(data, dict)
-                    and "aggregate_id" not in data
-                    and "server_uri" in data
-                ):
-                    data["aggregate_id"] = data["server_uri"]
-                return data
-
-        class Tests:
-            """Test models namespace for flext-tap-ldap tests.
-
-            Contains test-specific models that extend the main models with test-only features.
-            These models are only used in tests and not in production code.
-            """
-
-            class TestLdapConnection(FlextModels.Entity):
-                """Test model for LDAP database connections."""
-
-                host: str
-                port: int
-                base_dn: str
-                bind_dn: str | None = None
-                bind_password: str | None = None
-                use_ssl: bool = False
-
-                @property
-                def connection_string(self) -> str:
-                    """Get LDAP connection string."""
-                    protocol = "ldaps" if self.use_ssl else "ldap"
-                    return f"{protocol}://{self.host}:{self.port}"
-
-            class TestLdapSearch(FlextModels.Entity):
-                """Test model for LDAP search operations."""
-
-                base_dn: str
-                filter_str: str
-                attributes: list[str] | None = None
-                scope: str = "SUBTREE"
-                size_limit: int | None = None
-                time_limit: int | None = None
-
-            class TestLdapStream(FlextModels.Entity):
-                """Test model for LDAP Singer streams."""
-
-                stream_name: str
-                base_dn: str
-                object_class: str
-                replication_method: str = "FULL_TABLE"
-                is_selected: bool = True
-
-            class TestLdapEntry(FlextModels.Entity):
-                """Test model for LDAP directory entries."""
-
-                dn: str
-                attributes: dict[str, list[str]]
-                object_class: str
-
-                @property
-                def attribute_count(self) -> int:
-                    """Get number of attributes."""
-                    return len(self.attributes)
+            ] = None
+            password: Annotated[
+                str | None,
+                u.Field(
+                    description="Bind password used by the connection",
+                ),
+            ] = None
+            use_ssl: Annotated[
+                bool,
+                u.Field(
+                    description="Whether the connection uses SSL/TLS",
+                ),
+            ] = False
+            timeout: t.PositiveInt = u.Field(
+                description="Timeout in seconds for this LDAP connection",
+            )
+            id: str = u.Field(
+                default_factory=lambda: uuid4().hex,
+                description="Unique identifier for this LDAP connection",
+            )
+            last_tested: Annotated[
+                datetime | None,
+                u.Field(
+                    description="Timestamp when the connection was last tested",
+                ),
+            ] = None
+            last_error: Annotated[
+                str | None,
+                u.Field(
+                    description="Latest error message from connection testing",
+                ),
+            ] = None
 
 
 # Runtime alias for simplified usage
-m: type[FlextTapLdapModels] = FlextTapLdapModels
-TapExecution = FlextTapLdapModels.TapLdap.TapExecution
+m = FlextTapLdapModels
 
-__all__ = [
+__all__: list[str] = [
     "FlextTapLdapModels",
-    "TapExecution",
     "m",
 ]

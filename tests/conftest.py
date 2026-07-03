@@ -5,58 +5,49 @@ SPDX-License-Identifier: MIT
 
 """
 
-from collections.abc import Generator
-from pathlib import Path
-from unittest.mock import Mock
+from __future__ import annotations
 
 import pytest
-from flext_tests import FlextTestsDocker
 
-
-@pytest.fixture(scope="session")
-def shared_ldap_container(flext_docker: "FlextTestsDocker") -> str:
-    """Managed LDAP container using centralized FlextTestsDocker with docker-compose."""
-    compose_file = Path("~/flext/docker/docker-compose.openldap.yml").expanduser()
-    start_result = flext_docker.start_compose_stack(str(compose_file))
-    if start_result.is_failure:
-        pytest.skip(f"OpenLDAP container failed to start: {start_result.error}")
-    return "flext-openldap-test"
-
-
-def pytest_configure(config: pytest.Config) -> None:
-    """Configura pytest com marcadores customizados."""
-    config.addinivalue_line("markers", "unit: Unit tests")
-    config.addinivalue_line("markers", "integration: Integration tests")
-    config.addinivalue_line("markers", "slow: Slow tests")
-    config.addinivalue_line("markers", "smoke: Smoke tests")
-    config.addinivalue_line("markers", "e2e: End-to-end tests")
-
-
-@pytest.fixture(scope="session")
-def project_root() -> Path:
-    """Obtém o diretório raiz do projeto."""
-    return Path(__file__).parent.parent
-
-
-@pytest.fixture(scope="session")
-def test_data_dir(project_root: Path) -> Path:
-    """Obtém o diretório de dados de teste."""
-    return project_root / "tests" / "data"
+from tests.constants import c
+from tests.models import m
+from tests.typings import t
 
 
 @pytest.fixture
-def _mock_get_loop() -> Generator[Mock]:
-    """Mock fixture for get_running_loop."""
-    with pytest.MonkeyPatch().context() as m:
-        mock_loop = Mock()
-        m.setattr("get_running_loop", mock_loop)
-        yield mock_loop
+def ldap_connection_config() -> dict[str, object]:
+    return {
+        "host": c.Ldap.Tests.HOST,
+        "port": c.Ldap.Tests.PORT,
+        "base_dn": c.Ldap.Tests.BASE_DN,
+        "bind_dn": c.Ldap.Tests.BIND_DN,
+        "bind_password": c.Ldap.Tests.BIND_PASSWORD,
+        "use_ssl": c.Ldap.Tests.USE_TLS,
+        "timeout_seconds": c.TapLdap.DEFAULT_SEARCH_TIMEOUT,
+        "page_size": c.Ldap.Tests.PAGE_SIZE,
+    }
 
 
 @pytest.fixture
-def _mock_set_loop() -> Generator[Mock]:
-    """Mock fixture for set_event_loop."""
-    with pytest.MonkeyPatch().context() as m:
-        mock_set_loop = Mock()
-        m.setattr("set_event_loop", mock_set_loop)
-        yield mock_set_loop
+def ldap_source_config(
+    ldap_connection_config: dict[str, t.JsonValue],
+) -> m.Meltano.DataSourceConfig:
+    return m.Meltano.DataSourceConfig(
+        source_type="ldap",
+        connection_config=ldap_connection_config,
+        stream_config={},
+        source_version="latest",
+    )
+
+
+@pytest.fixture
+def ldap_record_entries() -> list[dict[str, object]]:
+    return [
+        {
+            "dn": "uid=jdoe,ou=users,dc=test,dc=com",
+            "uid": "jdoe",
+            "cn": "John Doe",
+            "mail": "jdoe@test.com",
+            "objectClass": ["inetOrgPerson", "person"],
+        }
+    ]
