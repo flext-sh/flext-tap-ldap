@@ -90,6 +90,57 @@ class TestsFlextTapLdapLdifProcessor:
         assert transformed.change_type == "modify"
         assert transformed.controls == ["control-a"]
 
+    def test_parse_content_reports_non_empty_content_without_entries(self) -> None:
+        processor = u.TapLdap.Processor()
+
+        records = list(processor.parse_content("not ldif", "broken.ldif"))
+
+        assert not records
+        assert processor.errors == [
+            "LDIF content from broken.ldif produced no entries",
+        ]
+
+    def test_parse_content_raises_for_empty_result_when_strict(self) -> None:
+        processor = u.TapLdap.Processor(ignore_errors=False)
+
+        with pytest.raises(ValueError, match="produced no entries"):
+            list(processor.parse_content("not ldif", "broken.ldif"))
+
+    def test_parse_file_records_decode_errors_without_encoding_fallback(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        ldif_file = tmp_path / "invalid.ldif"
+        ldif_file.write_bytes(b"\xff\xfe")
+        processor = u.TapLdap.Processor()
+
+        records = list(processor.parse_file(ldif_file))
+
+        assert not records
+        assert len(processor.errors) == 1
+        assert str(ldif_file) in processor.errors[0]
+        assert "invalid start byte" in processor.errors[0]
+
+    def test_entry_creation_rejects_unparsed_entry_without_fallback(self) -> None:
+        with pytest.raises(ValueError, match="parsed without entries"):
+            u.TapLdap.Entry("", {})
+
+    def test_validator_uses_real_ldif_validation(self) -> None:
+        validator = u.TapLdap.Validator()
+        entry = u.TapLdap.Entry(
+            "cn=alice,dc=example,dc=com",
+            {"objectClass": ["invalid class"], "cn": ["Alice"]},
+        )
+
+        result = validator.validate_entries([entry])
+
+        assert result["total_entries"] == 1
+        assert result["valid_entries"] == 0
+        assert result["invalid_entries"] == 1
+        assert result["errors"] == [
+            "Entry cn=alice,dc=example,dc=com: Invalid objectClass 'invalid class'",
+        ]
+
     def test_directory_processing_returns_empty_when_no_ldif_files(self) -> None:
         """Test that _process_ldap_directory returns empty when disabled."""
         stream = object.__new__(FlextTapLdapLdifStreams.LdifStream)
