@@ -25,41 +25,51 @@ if TYPE_CHECKING:
         x as x,
     )
 
-    from tests.base import (
+    from flext_tap_ldap.tests.base import (
         TestsFlextTapLdapServiceBase as TestsFlextTapLdapServiceBase,
         s as s,
     )
-    from tests.constants import (
+    from flext_tap_ldap.tests.constants import (
         TestsFlextTapLdapConstants as TestsFlextTapLdapConstants,
         c as c,
     )
-    from tests.e2e.test_integration import (
+    from flext_tap_ldap.tests.e2e.test_integration import (
         TestsFlextTapLdapIntegration as TestsFlextTapLdapIntegration,
     )
-    from tests.models import TestsFlextTapLdapModels as TestsFlextTapLdapModels, m as m
-    from tests.protocols import (
+    from flext_tap_ldap.tests.models import (
+        TestsFlextTapLdapModels as TestsFlextTapLdapModels,
+        m as m,
+    )
+    from flext_tap_ldap.tests.protocols import (
         TestsFlextTapLdapProtocols as TestsFlextTapLdapProtocols,
         p as p,
     )
-    from tests.settings import TestsFlextTapLdapSettings as TestsFlextTapLdapSettings
-    from tests.typings import TestsFlextTapLdapTypes as TestsFlextTapLdapTypes, t as t
-    from tests.unit.test_client import (
+    from flext_tap_ldap.tests.settings import (
+        TestsFlextTapLdapSettings as TestsFlextTapLdapSettings,
+    )
+    from flext_tap_ldap.tests.typings import (
+        TestsFlextTapLdapTypes as TestsFlextTapLdapTypes,
+        t as t,
+    )
+    from flext_tap_ldap.tests.unit.test_client import (
         TestsFlextTapLdapClient as TestsFlextTapLdapClient,
     )
-    from tests.unit.test_client_quick import (
+    from flext_tap_ldap.tests.unit.test_client_quick import (
         TestsFlextTapLdapClientQuick as TestsFlextTapLdapClientQuick,
     )
-    from tests.unit.test_ldif_processor import (
+    from flext_tap_ldap.tests.unit.test_ldif_processor import (
         TestsFlextTapLdapLdifProcessor as TestsFlextTapLdapLdifProcessor,
     )
-    from tests.unit.test_ldif_stream import (
+    from flext_tap_ldap.tests.unit.test_ldif_stream import (
         TestsFlextTapLdapLdifStream as TestsFlextTapLdapLdifStream,
     )
-    from tests.unit.test_models import (
+    from flext_tap_ldap.tests.unit.test_models import (
         TestsFlextTapLdapModelsUnit as TestsFlextTapLdapModelsUnit,
     )
-    from tests.unit.test_tap import TestsFlextTapLdapTap as TestsFlextTapLdapTap
-    from tests.utilities import (
+    from flext_tap_ldap.tests.unit.test_tap import (
+        TestsFlextTapLdapTap as TestsFlextTapLdapTap,
+    )
+    from flext_tap_ldap.tests.utilities import (
         TestsFlextTapLdapUtilities as TestsFlextTapLdapUtilities,
         u as u,
     )
