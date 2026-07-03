@@ -334,28 +334,13 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     result: p.Result[m.Ldif.ParseResponse] = self._api.parse_ldif(
                         content
                     )
-                    if not result.success:
-                        error_msg = f"Failed to parse LDIF content from {source_name}: {result.error}"
-                        if self.ignore_errors:
-                            FlextTapLdapUtilitiesProcessorMixin.logger.error(error_msg)
-                            self.errors.append(error_msg)
-                            return
-                        else:
-                            self._raise_parse_error(error_msg)
-                    if result.value.entries:
-                        for flext_entry in result.value.entries:
-                            parsed_entry = self._to_ldif_entry(flext_entry.model_dump())
-                            if parsed_entry is None:
-                                continue
-                            yield self._convert_from_flext_entry(parsed_entry)
-                            self.processed_entries += 1
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-                    error_msg = f"Failed to parse LDIF content from {source_name}: {e}"
-                    if self.ignore_errors:
-                        FlextTapLdapUtilitiesProcessorMixin.logger.exception(error_msg)
-                        self.errors.append(error_msg)
-                    else:
-                        raise ValueError(error_msg) from e
+                    self._handle_content_parse_exception(source_name, e)
+                    return
+                if not result.success:
+                    self._handle_content_parse_failure(source_name, result.error)
+                    return
+                yield from self._yield_entries_from_result(result)
 
             def parse_file(
                 self,
@@ -435,6 +420,32 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     self.errors.append(error_msg)
                 else:
                     raise ValueError(error_msg) from error
+
+            def _handle_content_parse_failure(
+                self,
+                source_name: str,
+                error: str | None,
+            ) -> None:
+                """Handle parse result failures for in-memory LDIF content."""
+                error_msg = f"Failed to parse LDIF content from {source_name}: {error}"
+                if self.ignore_errors:
+                    FlextTapLdapUtilitiesProcessorMixin.logger.error(error_msg)
+                    self.errors.append(error_msg)
+                    return
+                self._raise_parse_error(error_msg)
+
+            def _handle_content_parse_exception(
+                self,
+                source_name: str,
+                error: Exception,
+            ) -> None:
+                """Handle parse exceptions for in-memory LDIF content."""
+                error_msg = f"Failed to parse LDIF content from {source_name}: {error}"
+                if self.ignore_errors:
+                    FlextTapLdapUtilitiesProcessorMixin.logger.exception(error_msg)
+                    self.errors.append(error_msg)
+                    return
+                raise ValueError(error_msg) from error
 
             def _parse_ldif_content(
                 self,
