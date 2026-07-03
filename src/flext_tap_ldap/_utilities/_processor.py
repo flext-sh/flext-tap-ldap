@@ -1,6 +1,5 @@
 """LDIF processing utilities absorbed into u.TapLdap namespace.
 
-from flext_tap_ldap.utilities import u
 Provides Entry, Processor, Validator, Transformer as inner classes
 of u.TapLdap via MRO mixin composition.
 
@@ -153,29 +152,41 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     case _:
                         self.attributes[name] = list(value)
 
+            def _entry_ldif_content(self) -> str:
+                """Render current entry state as LDIF text."""
+                lines = [f"dn: {self.dn}"]
+                for attr_name, attr_values in self.attributes.items():
+                    lines.extend(f"{attr_name}: {value}" for value in attr_values)
+                return "\n".join(lines) + "\n\n"
+
+            def _parsed_flext_entry(
+                self,
+                content: str,
+            ) -> m.Ldif.Entry | None:
+                """Parse LDIF text into a flext-ldif entry when possible."""
+                api = ldif()
+                result: p.Result[m.Ldif.ParseResponse] = api.parse_ldif(content)
+                if not result.success or not result.value.entries:
+                    return None
+                try:
+                    parsed_entry: m.Ldif.Entry = m.Ldif.Entry.model_validate(
+                        result.value.entries[0].model_dump()
+                    )
+                    return parsed_entry
+                except c.ValidationError:
+                    return None
+
             def _create_flext_entry(self) -> m.Ldif.Entry:
                 """Create m.Ldif.Entry from current data."""
                 try:
-                    api = ldif()
-                    ldif_content = f"dn: {self.dn}\n"
-                    for attr_name, attr_values in self.attributes.items():
-                        for value in attr_values:
-                            ldif_content += f"{attr_name}: {value}\n"
-                    ldif_content += "\n"
-                    result: p.Result[m.Ldif.ParseResponse] = api.parse_ldif(
-                        ldif_content
+                    parsed_entry = self._parsed_flext_entry(
+                        self._entry_ldif_content()
                     )
-                    if result.success and result.value.entries:
-                        try:
-                            parsed_entry: m.Ldif.Entry = m.Ldif.Entry.model_validate(
-                                result.value.entries[0].model_dump()
-                            )
-                            return parsed_entry
-                        except c.ValidationError:
-                            return self._fallback_entry()
-                    return self._fallback_entry()
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS:
                     return self._fallback_entry()
+                if parsed_entry is not None:
+                    return parsed_entry
+                return self._fallback_entry()
 
             def _fallback_entry(self) -> m.Ldif.Entry:
                 """Create fallback entry from current data."""

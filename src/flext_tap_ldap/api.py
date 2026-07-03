@@ -1,6 +1,5 @@
 """FLEXT service orchestrator for tap-ldap.
 
-from flext_tap_ldap.utilities import u
 Thin facade — all infrastructure from ``FlextMeltanoTapServiceBase`` via MRO.
 The tap uses FlextMeltanoAbstractions (CLI dispatch), not singer_sdk.Tap.
 
