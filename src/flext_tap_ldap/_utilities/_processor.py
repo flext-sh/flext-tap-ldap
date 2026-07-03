@@ -1,5 +1,6 @@
 """LDIF processing utilities absorbed into u.TapLdap namespace.
 
+from flext_tap_ldap.utilities import u
 Provides Entry, Processor, Validator, Transformer as inner classes
 of u.TapLdap via MRO mixin composition.
 
@@ -20,9 +21,7 @@ from typing import override
 
 from flext_ldif import ldif
 
-from flext_core import u
-from flext_ldap import FlextLdapUtilities as ul
-from flext_tap_ldap import c, m, p, r, t
+from flext_tap_ldap import c, m, p, r, t, u
 
 
 class FlextTapLdapUtilitiesProcessorMixin:
@@ -93,7 +92,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             def has_object_class(self, object_class: str) -> bool:
                 """Check if entry has specific object class."""
-                return ul.Ldap.norm_in(
+                return u.Ldap.norm_in(
                     object_class,
                     self.resolve_attribute_values("objectClass"),
                 )

@@ -1,5 +1,6 @@
 """FLEXT service orchestrator for tap-ldap.
 
+from flext_tap_ldap.utilities import u
 Thin facade — all infrastructure from ``FlextMeltanoTapServiceBase`` via MRO.
 The tap uses FlextMeltanoAbstractions (CLI dispatch), not singer_sdk.Tap.
 
@@ -9,15 +10,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated, Never, override
+from typing import Annotated, Never, override
 
-from flext_core import u
 from flext_meltano.services.consumer_bases.tap_service_base import (
     FlextMeltanoTapServiceBase,
 )
-
-if TYPE_CHECKING:
-    from flext_tap_ldap import t
+from flext_tap_ldap import t, u
 
 
 class FlextTapLdapService(FlextMeltanoTapServiceBase):
