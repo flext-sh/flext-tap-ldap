@@ -280,7 +280,9 @@ class TestsFlextTapLdapIntegration:
             ["--config", str(config_file), "--discover"],
         )
         all_logs = " ".join(record.message for record in caplog.records)
-        all_output = (result.output or "") + (result.stderr or "") + (result.stdout or "")
+        all_output = (
+            (result.output or "") + (result.stderr or "") + (result.stdout or "")
+        )
         has_validation_log = (
             "Invalid LDAP connection configuration" in all_logs
             or "Invalid LDAP connection configuration" in all_output
