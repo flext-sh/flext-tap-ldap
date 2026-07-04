@@ -266,14 +266,13 @@ class TestsFlextTapLdapIntegration:
             stream_error: str = f"Expected {'service_accounts'} in {stream_names}"
             raise AssertionError(stream_error)
 
-    @pytest.mark.skip(reason="Config validation edge case - tap has fallback behavior")
     def test_error_handling(
         self,
         runner: CliRunner,
         tmp_path: Path,
         caplog: pytest.LogCaptureFixture,
     ) -> None:
-        """Test error handling functionality."""
+        """Test fallback behavior with invalid configuration."""
         config_file = tmp_path / "bad_config.json"
         u.Cli.json_write(config_file, {"invalid": "settings"})
         result = runner.invoke(
@@ -281,14 +280,18 @@ class TestsFlextTapLdapIntegration:
             ["--config", str(config_file), "--discover"],
         )
         all_logs = " ".join(record.message for record in caplog.records)
-        all_output = result.output + result.stderr or "" + result.stdout or ""
-        has_validation_failure = (
-            "Config validation failed" in all_logs
+        all_output = (result.output or "") + (result.stderr or "") + (result.stdout or "")
+        has_validation_log = (
+            "Invalid LDAP connection configuration" in all_logs
+            or "Invalid LDAP connection configuration" in all_output
+            or "Config validation failed" in all_logs
             or "Config validation failed" in all_output
-            or result.exit_code != 0
         )
-        assert has_validation_failure, (
-            f"Expected settings validation failure. Logs: {all_logs}, Output: {all_output}, Exit code: {result.exit_code}"
+        assert result.exit_code == 0, (
+            f"Expected graceful fallback (exit 0). Output: {all_output}, Exit code: {result.exit_code}"
+        )
+        assert has_validation_log, (
+            f"Expected validation failure log. Logs: {all_logs}, Output: {all_output}"
         )
 
     @patch("flext_tap_ldap.client.FlextTapLdapClient.LDAPClient")
