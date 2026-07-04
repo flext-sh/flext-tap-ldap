@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, ClassVar
 
 from flext_ldif import ldif
 
-from flext_tap_ldap import c, m, p, t, u
+from flext_tap_ldap import c, m, p, r, t, u
 
 if TYPE_CHECKING:
     from flext_meltano.services.abstractions import FlextMeltanoAbstractions
@@ -190,25 +190,26 @@ class FlextTapLdapLdifStreams:
             """Process single LDIF file using flext-ldif."""
             self.logger.info("Processing LDIF file: %s", ldif_file)
             try:
-                read = u.Cli.files_read_text(Path(ldif_file))
-                if read.failure:
-                    self.logger.error(
-                        "Failed to read LDIF file %s: %s", ldif_file, read.error
-                    )
-                    return
-                content = read.value
-                result: p.Result[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
-                    content
-                )
-                if result.success and result.value.entries:
-                    for entry in result.value.entries:
-                        yield self._convert_entry_to_record(entry)
-                else:
-                    self.logger.error(
-                        f"Failed to parse LDIF file {ldif_file}: {result.error}",
-                    )
+                result = self._parse_ldif_file(ldif_file)
             except c.Meltano.SINGER_SAFE_EXCEPTIONS:
                 self.logger.exception("Error processing LDIF file %s", ldif_file)
+                return
+            if result.success and result.value.entries:
+                for entry in result.value.entries:
+                    yield self._convert_entry_to_record(entry)
+                return
+            self.logger.error(
+                f"Failed to parse LDIF file {ldif_file}: {result.error}",
+            )
+
+        def _parse_ldif_file(self, ldif_file: str) -> p.Result[m.Ldif.ParseResponse]:
+            """Parse one LDIF file through the LDIF facade."""
+            read = u.Cli.files_read_text(Path(ldif_file))
+            if read.failure:
+                return r[m.Ldif.ParseResponse].fail(
+                    f"Failed to read LDIF file {ldif_file}: {read.error}"
+                )
+            return self._ldif_api.parse_ldif(read.value)
 
     class LdifAnalysisStream:
         """LDIF analysis stream using flext-ldif for ALL analysis.
@@ -268,76 +269,7 @@ class FlextTapLdapLdifStreams:
             ldif_files = FlextTapLdapLdifStreams._as_object_list(raw_files)
             ldif_directory = self.settings.get("ldif_directory")
             try:
-                total_entries = 0
-                entry_types: t.MutableIntMapping = {}
-                object_classes: t.MutableIntMapping = {}
-                if ldif_files:
-                    for ldif_file_map in ldif_files:
-                        ldif_file_value = str(
-                            ldif_file_map.get("path", ldif_file_map.get("file", "")),
-                        )
-                        if not ldif_file_value:
-                            continue
-                        stats = self._analyze_ldif_file(ldif_file_value)
-                        total_count = stats.get("total_entries", 0)
-                        match total_count:
-                            case int() as total_count_value:
-                                total_entries += total_count_value
-                            case _:
-                                pass
-                        validated_entry_types = FlextTapLdapLdifStreams._as_counter_map(
-                            stats.get("entry_types", {}),
-                        )
-                        for entry_type, count in validated_entry_types.items():
-                            object_count = int(count)
-                            entry_types[entry_type] = (
-                                entry_types.get(entry_type, 0) + object_count
-                            )
-                        validated_object_classes = (
-                            FlextTapLdapLdifStreams._as_counter_map(
-                                stats.get("object_classes", {}),
-                            )
-                        )
-                        for obj_class, count in validated_object_classes.items():
-                            object_count = int(count)
-                            object_classes[obj_class] = (
-                                object_classes.get(obj_class, 0) + object_count
-                            )
-                elif ldif_directory:
-                    for discovered_file in self._discover_ldif_files(
-                        str(ldif_directory),
-                    ):
-                        stats = self._analyze_ldif_file(str(discovered_file))
-                        total_count = stats.get("total_entries", 0)
-                        match total_count:
-                            case int() as total_count_value:
-                                total_entries += total_count_value
-                            case _:
-                                pass
-                        validated_entry_types = FlextTapLdapLdifStreams._as_counter_map(
-                            stats.get("entry_types", {}),
-                        )
-                        for entry_type, count in validated_entry_types.items():
-                            object_count = int(count)
-                            entry_types[entry_type] = (
-                                entry_types.get(entry_type, 0) + object_count
-                            )
-                        validated_object_classes = (
-                            FlextTapLdapLdifStreams._as_counter_map(
-                                stats.get("object_classes", {}),
-                            )
-                        )
-                        for obj_class, count in validated_object_classes.items():
-                            object_count = int(count)
-                            object_classes[obj_class] = (
-                                object_classes.get(obj_class, 0) + object_count
-                            )
-                yield t.Cli.JSON_MAPPING_ADAPTER.validate_python({
-                    "analysis_id": "ldif_summary",
-                    "total_entries": total_entries,
-                    "entry_types": dict(entry_types),
-                    "object_classes": dict(object_classes),
-                })
+                summary = self._build_analysis_summary(ldif_files, ldif_directory)
             except c.Meltano.SINGER_SAFE_EXCEPTIONS:
                 self.logger.exception("LDIF analysis error")
                 yield t.Cli.JSON_MAPPING_ADAPTER.validate_python({
@@ -346,54 +278,66 @@ class FlextTapLdapLdifStreams:
                     "entry_types": {},
                     "object_classes": {},
                 })
+                return
+            yield summary
+
+        def _build_analysis_summary(
+            self,
+            ldif_files: t.SequenceOf[t.JsonMapping],
+            ldif_directory: t.JsonValue,
+        ) -> t.JsonMapping:
+            """Build the aggregate LDIF analysis summary."""
+            total_entries = 0
+            entry_types: t.MutableIntMapping = {}
+            object_classes: t.MutableIntMapping = {}
+            if ldif_files:
+                stats_items = (
+                    self._analyze_ldif_file(
+                        str(ldif_file_map.get("path", ldif_file_map.get("file", "")))
+                    )
+                    for ldif_file_map in ldif_files
+                    if str(ldif_file_map.get("path", ldif_file_map.get("file", "")))
+                )
+            elif ldif_directory:
+                stats_items = (
+                    self._analyze_ldif_file(str(discovered_file))
+                    for discovered_file in self._discover_ldif_files(
+                        str(ldif_directory)
+                    )
+                )
+            else:
+                stats_items = iter(())
+            for stats in stats_items:
+                total_count = stats.get("total_entries", 0)
+                if isinstance(total_count, int):
+                    total_entries += total_count
+                self._merge_counter_map(entry_types, stats.get("entry_types", {}))
+                self._merge_counter_map(
+                    object_classes,
+                    stats.get("object_classes", {}),
+                )
+            return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
+                "analysis_id": "ldif_summary",
+                "total_entries": total_entries,
+                "entry_types": dict(entry_types),
+                "object_classes": dict(object_classes),
+            })
+
+        @staticmethod
+        def _merge_counter_map(
+            target: t.MutableIntMapping,
+            raw_counts: t.JsonValue,
+        ) -> None:
+            """Merge one raw counter mapping into an integer counter."""
+            counts = FlextTapLdapLdifStreams._as_counter_map(raw_counts)
+            for key, count in counts.items():
+                target[key] = target.get(key, 0) + int(count)
 
         def _analyze_ldif_file(self, ldif_file: str) -> t.JsonMapping:
             """Analyze single LDIF file using flext-ldif."""
             self.logger.info("Analyzing LDIF file: %s", ldif_file)
             try:
-                read = u.Cli.files_read_text(Path(ldif_file))
-                if read.failure:
-                    self.logger.error(
-                        "Failed to read LDIF file %s: %s", ldif_file, read.error
-                    )
-                    empty_read: t.IntMapping = {}
-                    return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
-                        "total_entries": 0,
-                        "entry_types": dict(empty_read),
-                        "object_classes": dict(empty_read),
-                    })
-                content = read.value
-                result: p.Result[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
-                    content
-                )
-                if result.success and result.value.entries:
-                    entry_types: t.MutableIntMapping = {}
-                    object_classes: t.MutableIntMapping = {}
-                    for entry in result.value.entries:
-                        if entry.attributes is None:
-                            continue
-                        oc_list: t.StrSequence = entry.attributes.get(
-                            "objectClass",
-                        )
-                        oc_strs = list(oc_list)
-                        entry_type = self._classify_entry_type(oc_strs)
-                        entry_types[entry_type] = entry_types.get(entry_type, 0) + 1
-                        for oc in oc_strs:
-                            object_classes[oc] = object_classes.get(oc, 0) + 1
-                    return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
-                        "total_entries": len(result.value.entries),
-                        "entry_types": dict(entry_types),
-                        "object_classes": dict(object_classes),
-                    })
-                self.logger.error(
-                    f"Failed to analyze LDIF file {ldif_file}: {result.error}",
-                )
-                empty: t.IntMapping = {}
-                return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
-                    "total_entries": 0,
-                    "entry_types": dict(empty),
-                    "object_classes": dict(empty),
-                })
+                return self._analyze_ldif_file_payload(ldif_file)
             except c.Meltano.SINGER_SAFE_EXCEPTIONS:
                 self.logger.exception("Error analyzing LDIF file %s", ldif_file)
                 empty_dict: t.IntMapping = {}
@@ -402,6 +346,49 @@ class FlextTapLdapLdifStreams:
                     "entry_types": dict(empty_dict),
                     "object_classes": dict(empty_dict),
                 })
+
+        def _analyze_ldif_file_payload(self, ldif_file: str) -> t.JsonMapping:
+            """Analyze one LDIF file without owning the exception boundary."""
+            read = u.Cli.files_read_text(Path(ldif_file))
+            if read.failure:
+                self.logger.error(
+                    "Failed to read LDIF file %s: %s", ldif_file, read.error
+                )
+                return self._empty_analysis_payload()
+            result: p.Result[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
+                read.value
+            )
+            if result.success and result.value.entries:
+                entry_types: t.MutableIntMapping = {}
+                object_classes: t.MutableIntMapping = {}
+                for entry in result.value.entries:
+                    if entry.attributes is None:
+                        continue
+                    oc_list: t.StrSequence = entry.attributes.get("objectClass")
+                    oc_strs = list(oc_list)
+                    entry_type = self._classify_entry_type(oc_strs)
+                    entry_types[entry_type] = entry_types.get(entry_type, 0) + 1
+                    for oc in oc_strs:
+                        object_classes[oc] = object_classes.get(oc, 0) + 1
+                return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
+                    "total_entries": len(result.value.entries),
+                    "entry_types": dict(entry_types),
+                    "object_classes": dict(object_classes),
+                })
+            self.logger.error(
+                f"Failed to analyze LDIF file {ldif_file}: {result.error}",
+            )
+            return self._empty_analysis_payload()
+
+        @staticmethod
+        def _empty_analysis_payload() -> t.JsonMapping:
+            """Empty LDIF analysis payload."""
+            empty: t.IntMapping = {}
+            return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
+                "total_entries": 0,
+                "entry_types": dict(empty),
+                "object_classes": dict(empty),
+            })
 
         def _classify_entry_type(self, object_classes: t.StrSequence) -> str:
             """Classify entry type by simple objectClass heuristics."""
