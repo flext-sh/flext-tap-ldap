@@ -190,6 +190,7 @@ class FlextTapLdapStreams:
                 raise RuntimeError(msg)
 
             def _run__search_ldap() -> t.SequenceOf[t.JsonMapping]:
+                nonlocal base_dn
                 if base_dn is None:
                     raw_conn = self.settings.get("connection", {})
                     connection_config = (

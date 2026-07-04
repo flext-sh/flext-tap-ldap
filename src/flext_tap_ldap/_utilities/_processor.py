@@ -20,7 +20,8 @@ from typing import override
 
 from flext_ldif import ldif
 
-from flext_tap_ldap import c, m, p, r, t, u
+from flext_core import u
+from flext_tap_ldap import c, m, p, r, t
 
 
 class FlextTapLdapUtilitiesProcessorMixin:
