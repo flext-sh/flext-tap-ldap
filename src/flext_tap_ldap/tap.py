@@ -172,7 +172,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
                 exclude_defaults=True,
                 exclude_none=True,
                 mode="json",
-            )
+            ),
         )
         stream_catalog_payload: t.JsonMapping = (
             t.json_mapping_adapter().validate_python(
@@ -299,7 +299,7 @@ def _build_cli_command() -> click.Command:
                             if entry_result.failure or entry_result.value is None:
                                 raise click.ClickException(
                                     entry_result.error
-                                    or "Failed to build custom Singer catalog entry"
+                                    or "Failed to build custom Singer catalog entry",
                                 )
                             cs_entry = entry_result.value
                             catalog_streams.append(
@@ -309,7 +309,7 @@ def _build_cli_command() -> click.Command:
                                         exclude_defaults=True,
                                         exclude_none=True,
                                         mode="json",
-                                    )
+                                    ),
                                 ),
                             )
                 output_catalog: t.JsonMapping = (
@@ -322,12 +322,12 @@ def _build_cli_command() -> click.Command:
 
         if catalog_path:
             t.json_mapping_adapter().validate_json(
-                u.Cli.files_read_text(Path(catalog_path)).unwrap()
+                u.Cli.files_read_text(Path(catalog_path)).unwrap(),
             )
 
         if state_path:
             t.json_mapping_adapter().validate_json(
-                u.Cli.files_read_text(Path(state_path)).unwrap()
+                u.Cli.files_read_text(Path(state_path)).unwrap(),
             )
 
         source_config = m.Meltano.DataSourceConfig(

@@ -12,7 +12,7 @@ from collections.abc import (
     Generator,
     Mapping,
 )
-from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import Mock, patch
 
 import pytest
@@ -23,6 +23,9 @@ from flext_cli import u as cli_u
 from flext_tap_ldap.tap import CLI_COMMAND
 from tests.typings import t
 from tests.utilities import u
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def _extract_json_from_output(output: str) -> t.JsonMapping:

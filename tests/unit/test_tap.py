@@ -6,7 +6,7 @@ from collections.abc import (
     Mapping,
     MutableMapping,
 )
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import pytest
 
@@ -14,8 +14,10 @@ from flext_tap_ldap.client import FlextTapLdapClient
 from flext_tap_ldap.streams import FlextTapLdapStreams
 from flext_tap_ldap.tap import FlextTapLdapTap
 from tests.constants import c
-from tests.models import m
-from tests.typings import t
+
+if TYPE_CHECKING:
+    from tests.models import m
+    from tests.typings import t
 
 
 class TestsFlextTapLdapTap:

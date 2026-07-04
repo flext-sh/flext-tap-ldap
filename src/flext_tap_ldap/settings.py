@@ -12,7 +12,8 @@ class FlextTapLdapSettings(FlextLdapSettings):
     """Tap LDAP runtime settings."""
 
     model_config: ClassVar[m.SettingsConfigDict] = m.SettingsConfigDict(
-        env_prefix="FLEXT_TAP_LDAP_", extra="ignore"
+        env_prefix="FLEXT_TAP_LDAP_",
+        extra="ignore",
     )
 
     host: Annotated[str, u.Field()] = c.LOCALHOST

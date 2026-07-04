@@ -8,16 +8,18 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import contextlib
-from typing import override
+from typing import TYPE_CHECKING, override
 from unittest.mock import Mock, patch
 
 import pytest
 from flext_tests import r
 
 from flext_tap_ldap.client import FlextTapLdapClient
-from tests.protocols import p
 from tests.typings import t
 from tests.utilities import u
+
+if TYPE_CHECKING:
+    from tests.protocols import p
 
 
 class TestsFlextTapLdapClientQuick:

@@ -7,14 +7,18 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
 import pytest
 
 from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
-from tests.typings import t
 from tests.utilities import u
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from tests.typings import t
 
 
 class TestsFlextTapLdapLdifProcessor:

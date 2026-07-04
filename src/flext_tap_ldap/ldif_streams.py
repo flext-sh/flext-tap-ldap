@@ -2,10 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import (
-    Iterable,
-    Iterator,
-)
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
@@ -14,6 +10,11 @@ from flext_ldif import ldif
 from flext_tap_ldap import c, m, p, r, t, u
 
 if TYPE_CHECKING:
+    from collections.abc import (
+        Iterable,
+        Iterator,
+    )
+
     from flext_meltano.services.abstractions import FlextMeltanoAbstractions
 
 
@@ -34,7 +35,8 @@ class FlextTapLdapLdifStreams:
             return [dict(item) for item in result]
         except c.ValidationError as exc:
             u.fetch_logger(__name__).warning(
-                "Invalid object list value ignored: %s", exc
+                "Invalid object list value ignored: %s",
+                exc,
             )
             return []
 
@@ -46,7 +48,8 @@ class FlextTapLdapLdifStreams:
             return t.header_mapping_adapter().validate_python(value)
         except c.ValidationError as exc:
             u.fetch_logger(__name__).warning(
-                "Invalid counter map value ignored: %s", exc
+                "Invalid counter map value ignored: %s",
+                exc,
             )
             return {}
 
@@ -64,7 +67,7 @@ class FlextTapLdapLdifStreams:
             self.tap_stream_id = "ldif_entries"
             self.tap = tap
             self.settings: t.JsonMapping = t.Cli.JSON_MAPPING_ADAPTER.validate_python(
-                getattr(tap, "tap_config", {})
+                getattr(tap, "tap_config", {}),
             )
             self._ldif_api = ldif()
             self._logger_instance: p.Logger | None = None
@@ -207,7 +210,7 @@ class FlextTapLdapLdifStreams:
             read = u.Cli.files_read_text(Path(ldif_file))
             if read.failure:
                 return r[m.Ldif.ParseResponse].fail(
-                    f"Failed to read LDIF file {ldif_file}: {read.error}"
+                    f"Failed to read LDIF file {ldif_file}: {read.error}",
                 )
             return self._ldif_api.parse_ldif(read.value)
 
@@ -225,7 +228,7 @@ class FlextTapLdapLdifStreams:
             self.tap_stream_id = "ldif_analysis"
             self.tap = tap
             self.settings: t.JsonMapping = t.Cli.JSON_MAPPING_ADAPTER.validate_python(
-                getattr(tap, "tap_config", {})
+                getattr(tap, "tap_config", {}),
             )
             self._ldif_api = ldif()
             self._logger_instance: p.Logger | None = None
@@ -293,7 +296,7 @@ class FlextTapLdapLdifStreams:
             if ldif_files:
                 stats_items = (
                     self._analyze_ldif_file(
-                        str(ldif_file_map.get("path", ldif_file_map.get("file", "")))
+                        str(ldif_file_map.get("path", ldif_file_map.get("file", ""))),
                     )
                     for ldif_file_map in ldif_files
                     if str(ldif_file_map.get("path", ldif_file_map.get("file", "")))
@@ -302,7 +305,7 @@ class FlextTapLdapLdifStreams:
                 stats_items = (
                     self._analyze_ldif_file(str(discovered_file))
                     for discovered_file in self._discover_ldif_files(
-                        str(ldif_directory)
+                        str(ldif_directory),
                     )
                 )
             else:
@@ -352,11 +355,13 @@ class FlextTapLdapLdifStreams:
             read = u.Cli.files_read_text(Path(ldif_file))
             if read.failure:
                 self.logger.error(
-                    "Failed to read LDIF file %s: %s", ldif_file, read.error
+                    "Failed to read LDIF file %s: %s",
+                    ldif_file,
+                    read.error,
                 )
                 return self._empty_analysis_payload()
             result: p.Result[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
-                read.value
+                read.value,
             )
             if result.success and result.value.entries:
                 entry_types: t.MutableIntMapping = {}

@@ -7,11 +7,15 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
 from tests.constants import c
 from tests.models import m
-from tests.typings import t
+
+if TYPE_CHECKING:
+    from tests.typings import t
 
 
 @pytest.fixture
@@ -49,5 +53,5 @@ def ldap_record_entries() -> list[dict[str, object]]:
             "cn": "John Doe",
             "mail": "jdoe@test.com",
             "objectClass": ["inetOrgPerson", "person"],
-        }
+        },
     ]

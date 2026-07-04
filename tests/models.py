@@ -38,16 +38,20 @@ class TestsFlextTapLdapModels(FlextTestsModels, FlextTapLdapModels):
                 host: Annotated[str, u.Field(description="LDAP server hostname")]
                 port: Annotated[int, u.Field(description="LDAP server port")]
                 base_dn: Annotated[
-                    str, u.Field(description="Base DN for LDAP searches")
+                    str,
+                    u.Field(description="Base DN for LDAP searches"),
                 ]
                 bind_dn: Annotated[
-                    str | None, u.Field(description="Bind DN for authentication")
+                    str | None,
+                    u.Field(description="Bind DN for authentication"),
                 ] = None
                 bind_password: Annotated[
-                    str | None, u.Field(description="Password for bind DN")
+                    str | None,
+                    u.Field(description="Password for bind DN"),
                 ] = None
                 use_ssl: Annotated[
-                    bool, u.Field(description="Whether to use SSL/TLS")
+                    bool,
+                    u.Field(description="Whether to use SSL/TLS"),
                 ] = False
 
                 @property
@@ -61,14 +65,16 @@ class TestsFlextTapLdapModels(FlextTestsModels, FlextTapLdapModels):
 
                 base_dn: Annotated[str, u.Field(description="Base DN for the search")]
                 filter_str: Annotated[
-                    str, u.Field(description="LDAP search filter string")
+                    str,
+                    u.Field(description="LDAP search filter string"),
                 ]
                 attributes: Annotated[
                     t.StrSequence | None,
                     u.Field(description="Attributes to retrieve in the search"),
                 ] = None
                 scope: Annotated[
-                    str, u.Field(description="Search scope (BASE, ONELEVEL, SUBTREE)")
+                    str,
+                    u.Field(description="Search scope (BASE, ONELEVEL, SUBTREE)"),
                 ] = "SUBTREE"
                 size_limit: Annotated[
                     int | None,
@@ -77,7 +83,7 @@ class TestsFlextTapLdapModels(FlextTestsModels, FlextTapLdapModels):
                 time_limit: Annotated[
                     int | None,
                     u.Field(
-                        description="Maximum time allowed for the search in seconds"
+                        description="Maximum time allowed for the search in seconds",
                     ),
                 ] = None
 
@@ -85,32 +91,37 @@ class TestsFlextTapLdapModels(FlextTestsModels, FlextTapLdapModels):
                 """Test model for LDAP Singer streams."""
 
                 stream_name: Annotated[
-                    str, u.Field(description="Name of the Singer stream")
+                    str,
+                    u.Field(description="Name of the Singer stream"),
                 ]
                 base_dn: Annotated[str, u.Field(description="Base DN for the stream")]
                 object_class: Annotated[
-                    str, u.Field(description="Object class filtered by the stream")
+                    str,
+                    u.Field(description="Object class filtered by the stream"),
                 ]
                 replication_method: Annotated[
                     str,
                     u.Field(description="Replication method for the stream"),
                 ] = "FULL_TABLE"
                 is_selected: Annotated[
-                    bool, u.Field(description="Whether the stream is selected for sync")
+                    bool,
+                    u.Field(description="Whether the stream is selected for sync"),
                 ] = True
 
             class TestLdapEntry(FlextTapLdapModels.Entity):
                 """Test model for LDAP directory entries."""
 
                 dn: Annotated[
-                    str, u.Field(description="Distinguished name of the entry")
+                    str,
+                    u.Field(description="Distinguished name of the entry"),
                 ]
                 attributes: Annotated[
                     t.StrSequenceMapping,
                     u.Field(description="Attributes mapped to their values"),
                 ]
                 object_class: Annotated[
-                    str, u.Field(description="Object class of the entry")
+                    str,
+                    u.Field(description="Object class of the entry"),
                 ]
 
                 @property

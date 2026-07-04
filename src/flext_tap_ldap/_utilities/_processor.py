@@ -15,14 +15,16 @@ from collections.abc import (
     Mapping,
     MutableSequence,
 )
-from pathlib import Path
-from typing import override
+from typing import TYPE_CHECKING, override
 
 from flext_ldif import ldif
 
 from flext_core import u as core_u
 from flext_ldap import u as ldap_u
 from flext_tap_ldap import c, m, p, r, t
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class FlextTapLdapUtilitiesProcessorMixin:
@@ -71,7 +73,9 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 return errors
 
             def add_attribute(
-                self, name: str, value: str | MutableSequence[str]
+                self,
+                name: str,
+                value: str | MutableSequence[str],
             ) -> None:
                 """Add an attribute to the entry."""
                 self.attributes.setdefault(name, [])
@@ -135,12 +139,14 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     entry_dict["change_type"] = self.change_type
                 if self.controls:
                     entry_dict["controls"] = core_u.normalize_to_json_value(
-                        list(self.controls)
+                        list(self.controls),
                     )
                 return entry_dict
 
             def update_attribute(
-                self, name: str, value: str | MutableSequence[str]
+                self,
+                name: str,
+                value: str | MutableSequence[str],
             ) -> None:
                 """Update an attribute value, replacing existing values."""
                 match value:
@@ -172,7 +178,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     msg = f"LDIF entry parsed without entries: {self.dn}"
                     raise ValueError(msg)
                 parsed_entry: m.Ldif.Entry = m.Ldif.Entry.model_validate(
-                    result.value.entries[0].model_dump()
+                    result.value.entries[0].model_dump(),
                 )
                 return parsed_entry
 
@@ -208,7 +214,10 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             @override
             def __init__(
-                self, *, ignore_errors: bool = True, max_errors: int = 100
+                self,
+                *,
+                ignore_errors: bool = True,
+                max_errors: int = 100,
             ) -> None:
                 """Initialize the processor with a flext-ldif backend."""
                 self.ignore_errors = ignore_errors
@@ -296,7 +305,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     self.entries = list(self.parse_content(content, source_name))
                     self._update_stats()
                     return r[str].ok(
-                        "LDIF content loaded successfully using flext-ldif"
+                        "LDIF content loaded successfully using flext-ldif",
                     )
                 except c.EXC_RUNTIME_TYPE as e:
                     return r[str].fail(f"Failed to load LDIF content: {e}")
@@ -313,7 +322,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 )
                 try:
                     result: p.Result[m.Ldif.ParseResponse] = self._api.parse_ldif(
-                        content
+                        content,
                     )
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                     self._handle_content_parse_exception(source_name, e)
