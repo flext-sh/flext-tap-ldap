@@ -20,7 +20,8 @@ from typing import override
 
 from flext_ldif import ldif
 
-from flext_core import u
+from flext_core import u as core_u
+from flext_ldap import u as ldap_u
 from flext_tap_ldap import c, m, p, r, t
 
 
@@ -28,7 +29,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
     """Mixin providing LDIF processing utilities for u.TapLdap namespace."""
 
     _DEFAULT_ENTRY_METADATA = m.Ldif.EntryMetadata()
-    logger = u.fetch_logger(__name__)
+    logger = core_u.fetch_logger(__name__)
 
     class TapLdap:
         """Tap LDAP namespace — processor inner classes."""
@@ -92,7 +93,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             def has_object_class(self, object_class: str) -> bool:
                 """Check if entry has specific object class."""
-                has_class: bool = u.Ldap.norm_in(
+                has_class: bool = ldap_u.Ldap.norm_in(
                     object_class,
                     self.resolve_attribute_values("objectClass"),
                 )
@@ -133,7 +134,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 if self.change_type:
                     entry_dict["change_type"] = self.change_type
                 if self.controls:
-                    entry_dict["controls"] = u.normalize_to_json_value(
+                    entry_dict["controls"] = core_u.normalize_to_json_value(
                         list(self.controls)
                     )
                 return entry_dict

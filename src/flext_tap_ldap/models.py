@@ -79,20 +79,14 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
             timeout_seconds: t.PositiveInt = u.Field(
                 description="Search timeout in seconds",
             )
-            page_size: Annotated[
-                t.PositiveInt,
-                u.Field(
-                    default=c.TapLdap.DEFAULT_PAGE_SIZE,
-                    description="Page size for paged results",
-                ),
-            ]
-            max_retries: Annotated[
-                t.PositiveInt,
-                u.Field(
-                    default=3,
-                    description="Maximum connection retries",
-                ),
-            ]
+            page_size: t.PositiveInt = u.Field(
+                default=c.TapLdap.DEFAULT_PAGE_SIZE,
+                description="Page size for paged results",
+            )
+            max_retries: t.PositiveInt = u.Field(
+                default=3,
+                description="Maximum connection retries",
+            )
 
         class LdapConnection(m.Entity):
             """LDAP connection entity with test status and error tracking."""

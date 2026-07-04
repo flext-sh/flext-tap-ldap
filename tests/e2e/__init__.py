@@ -9,6 +9,24 @@ _LAZY_IMPORTS = build_lazy_import_map(
     {
         ".conftest": ("conftest",),
         ".test_integration": ("TestsFlextTapLdapIntegration",),
+        "flext_tests": (
+            "c",
+            "d",
+            "e",
+            "h",
+            "m",
+            "p",
+            "r",
+            "s",
+            "t",
+            "td",
+            "tf",
+            "tk",
+            "tm",
+            "tv",
+            "u",
+            "x",
+        ),
     },
 )
 
