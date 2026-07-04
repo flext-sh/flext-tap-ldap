@@ -115,7 +115,8 @@ class FlextTapLdapStreams:
 
         def _create_ldap_client(self) -> None:
             """Create LDAP client from tap configuration."""
-            try:
+
+            def _run__create_ldap_client() -> None:
                 raw_connection = self.settings.get("connection", {})
                 connection_config = (
                     FlextTapLdapStreams.LDAPBaseStream.parse_connection_config(
@@ -169,6 +170,9 @@ class FlextTapLdapStreams:
                         timeout=connection_config.timeout_seconds,
                         page_size=page_size,
                     )
+
+            try:
+                return _run__create_ldap_client()
             except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                 err_msg = str(e)
                 logger.warning("Failed to create LDAP client: %s", err_msg)
@@ -184,7 +188,8 @@ class FlextTapLdapStreams:
             if not self.client:
                 msg = "LDAP client is not available"
                 raise RuntimeError(msg)
-            try:
+
+            def _run__search_ldap() -> t.SequenceOf[t.JsonMapping]:
                 if base_dn is None:
                     raw_conn = self.settings.get("connection", {})
                     connection_config = (
@@ -206,6 +211,9 @@ class FlextTapLdapStreams:
                     logger.info("No results found for filter: %s", search_filter)
                     return []
                 return results
+
+            try:
+                return _run__search_ldap()
             except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                 msg = f"LDAP search failed: {e}"
                 raise RuntimeError(msg) from e
