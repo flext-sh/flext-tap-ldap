@@ -52,7 +52,7 @@ class TestsFlextTapLdapModels(FlextTestsModels, FlextTapLdapModels):
 
                 @property
                 def connection_string(self) -> str:
-                    """Get LDAP connection string."""
+                    """The LDAP connection string."""
                     protocol = "ldaps" if self.use_ssl else "ldap"
                     return f"{protocol}://{self.host}:{self.port}"
 
@@ -115,7 +115,7 @@ class TestsFlextTapLdapModels(FlextTestsModels, FlextTapLdapModels):
 
                 @property
                 def attribute_count(self) -> int:
-                    """Get number of attributes."""
+                    """The number of attributes."""
                     return len(self.attributes)
 
 

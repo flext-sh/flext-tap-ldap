@@ -76,7 +76,7 @@ class FlextTapLdapClient:
 
         @property
         def server_uri(self) -> str:
-            """Get server URI for testing convenience."""
+            """The server URI for testing convenience."""
             server_uri: str = u.TapLdap.ClientSupport.build_server_uri(
                 self.host,
                 self.port,

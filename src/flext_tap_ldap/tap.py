@@ -45,7 +45,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
 
     @property
     def tap_config(self) -> t.MutableConfigurationMapping:
-        """Return mutable tap configuration mapping."""
+        """The mutable tap configuration mapping."""
         return self._tap_config
 
     @tap_config.setter
