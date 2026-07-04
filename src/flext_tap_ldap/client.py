@@ -178,7 +178,8 @@ class FlextTapLdapClient:
             **convenience_kwargs: t.Scalar,
         ) -> m.Ldap.ConnectionConfig:
             """Create settings from convenience keyword arguments."""
-            try:
+
+            def _run__create_config_from_kwargs() -> m.Ldap.ConnectionConfig:
                 config_dict: t.MutableJsonMapping = {
                     "host": u.to_str(
                         convenience_kwargs.get("host"),
@@ -206,6 +207,9 @@ class FlextTapLdapClient:
                 if bind_password_val is not None:
                     config_dict["bind_password"] = u.to_str(bind_password_val)
                 return m.Ldap.ConnectionConfig.model_validate(config_dict)
+
+            try:
+                return _run__create_config_from_kwargs()
             except c.ValidationError as e:
                 host_val = convenience_kwargs.get("host")
                 if not host_val or not isinstance(host_val, str):
