@@ -22,18 +22,10 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 _PERSON_LDIF = (
-    "dn: cn=alice,dc=example,dc=com\n"
-    "objectClass: person\n"
-    "cn: alice\n"
-    "sn: smith\n"
-    "\n"
+    "dn: cn=alice,dc=example,dc=com\nobjectClass: person\ncn: alice\nsn: smith\n\n"
 )
 _SECOND_LDIF = (
-    "dn: cn=bob,dc=example,dc=com\n"
-    "objectClass: person\n"
-    "cn: bob\n"
-    "sn: jones\n"
-    "\n"
+    "dn: cn=bob,dc=example,dc=com\nobjectClass: person\ncn: bob\nsn: jones\n\n"
 )
 
 
