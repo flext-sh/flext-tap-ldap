@@ -164,8 +164,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
                 return r[t.JsonMapping].fail(
                     entry_result.error or "Failed to build LDAP Singer catalog entry",
                 )
-            if entry_result.value is not None:
-                streams_list.append(entry_result.value)
+            streams_list.append(entry_result.value)
         stream_catalog: t.JsonMapping = t.json_mapping_adapter().validate_python(
             m.Meltano.SingerCatalog(streams=streams_list).model_dump(
                 by_alias=True,
@@ -296,7 +295,7 @@ def _build_cli_command() -> click.Command:
                                 schema={},
                                 key_properties=(),
                             )
-                            if entry_result.failure or entry_result.value is None:
+                            if entry_result.failure:
                                 raise click.ClickException(
                                     entry_result.error
                                     or "Failed to build custom Singer catalog entry",

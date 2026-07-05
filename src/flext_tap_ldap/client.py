@@ -166,8 +166,11 @@ class FlextTapLdapClient:
                     size_limit=1,
                     time_limit=5,
                 )
-                result = self._flext_api.search(test_search_options)
-                return result.success
+                result: p.Result[m.Ldap.SearchResult] = self._flext_api.search(
+                    test_search_options,
+                )
+                connection_success: bool = result.success
+                return connection_success
             except (RuntimeError, ValueError, TypeError, c.ValidationError) as e:
                 err_msg = str(e)
                 logger.warning("LDAP connection test failed: %s", err_msg)
