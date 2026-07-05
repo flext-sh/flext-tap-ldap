@@ -513,18 +513,16 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 result: p.Result[m.Ldif.ParseResponse] | None,
             ) -> Iterator[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
                 """Yield testing convenience entries from parse result."""
-                if result is None:
-                    return
-                if not result.success or result.value is None:
-                    msg = f"Cannot yield entries from failed LDIF parse: {result.error}"
-                    raise ValueError(msg)
-                for flext_entry in result.value.entries:
-                    parsed_entry = self._to_ldif_entry(flext_entry.model_dump())
-                    if parsed_entry is None:
-                        self.skipped_entries += 1
-                        continue
-                    yield self._convert_from_flext_entry(parsed_entry)
-                    self.processed_entries += 1
+                if result is not None:
+                    parse_response = result.unwrap_or(None)
+                    if parse_response is not None:
+                        for flext_entry in parse_response.entries:
+                            parsed_entry = self._to_ldif_entry(flext_entry.model_dump())
+                            if parsed_entry is None:
+                                self.skipped_entries += 1
+                                continue
+                            yield self._convert_from_flext_entry(parsed_entry)
+                            self.processed_entries += 1
 
         class Validator:
             """LDIF content validator using flext-ldif validation capabilities."""

@@ -186,11 +186,14 @@ class FlextTapLdapStreams:
             attributes: t.StrSequence | None = None,
         ) -> t.SequenceOf[t.JsonMapping]:
             """Search LDAP directory with error handling."""
-            if not self.client:
+            client = self.client
+            if client is None:
                 msg = "LDAP client is not available"
                 raise RuntimeError(msg)
 
-            def _run__search_ldap() -> t.SequenceOf[t.JsonMapping]:
+            def _run__search_ldap(
+                active_client: FlextTapLdapClient.LDAPClient,
+            ) -> t.SequenceOf[t.JsonMapping]:
                 nonlocal base_dn
                 if base_dn is None:
                     raw_conn = self.settings.get("connection", {})
@@ -202,7 +205,7 @@ class FlextTapLdapStreams:
                     base_dn = connection_config.base_dn
                 results: t.SequenceOf[t.JsonMapping] = [
                     dict(entry)
-                    for entry in self.client.search(
+                    for entry in active_client.search(
                         base_dn=base_dn or "",
                         search_filter=search_filter,
                         attributes=attributes,
@@ -215,7 +218,7 @@ class FlextTapLdapStreams:
                 return results
 
             try:
-                return _run__search_ldap()
+                return _run__search_ldap(client)
             except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                 msg = f"LDAP search failed: {e}"
                 raise RuntimeError(msg) from e
