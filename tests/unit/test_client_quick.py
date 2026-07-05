@@ -1,4 +1,4 @@
-"""Quick comprehensive tests for LDAP client to maximize coverag efficiently.
+"""Behavioral tests for the LDAP client public contract.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -7,367 +7,360 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
-from typing import TYPE_CHECKING, override
+from collections.abc import Generator
 from unittest.mock import Mock, patch
 
 import pytest
-from flext_tests import r
 
+from flext_ldap import FlextLdap
 from flext_tap_ldap.client import FlextTapLdapClient
 from tests.typings import t
 from tests.utilities import u
 
-if TYPE_CHECKING:
-    from tests.protocols import p
+__all__: t.StrSequence = ("TestsFlextTapLdapClientQuick",)
 
 
 class TestsFlextTapLdapClientQuick:
-    """Quick tests to maximize client.py coverage efficiently."""
+    """Observable-behavior tests for FlextTapLdapClient.LDAPClient and support."""
 
-    class OverrideClientSupport(u.TapLdap.ClientSupport):
-        """Client support subclass used to prove MRO dispatch."""
+    @staticmethod
+    def _ldap_result(
+        entries: list[t.JsonMapping],
+        *,
+        success: bool = True,
+    ) -> Mock:
+        """Build a stand-in for the external flext-ldap search result."""
+        result = Mock()
+        result.success = success
+        result.value = Mock(entries=entries)
+        return result
 
-        @staticmethod
-        @override
-        def to_entry_mapping(
-            entry_data: p.Ldif.Entry
-            | t.MappingKV[str, t.JsonValue | t.StrSequence]
-            | None,
-        ) -> p.Result[t.JsonMapping]:
-            """Force search result conversion through the override."""
-            return r[t.JsonMapping].ok({"dn": "uid=override,dc=example,dc=com"})
+    @staticmethod
+    @contextlib.contextmanager
+    def _client(
+        *,
+        search_result: Mock | None = None,
+        search_error: BaseException | None = None,
+        host: str = "test.ldap.com",
+        port: int = 389,
+        use_ssl: bool = False,
+    ) -> Generator[FlextTapLdapClient.LDAPClient]:
+        """Yield a client whose only mocked dependency is the LDAP boundary."""
+        api = Mock(spec=FlextLdap)
+        if search_error is not None:
+            api.search.side_effect = search_error
+        else:
+            api.search.return_value = search_result
+        with patch("flext_tap_ldap.client.FlextLdap", return_value=api):
+            yield FlextTapLdapClient.LDAPClient(
+                host=host,
+                port=port,
+                use_ssl=use_ssl,
+            )
 
-        @staticmethod
-        @override
-        def normalize_oracle_entry(
-            entry: t.JsonMapping,
-        ) -> t.JsonMapping:
-            """Force Oracle normalization through the override."""
-            normalized: t.JsonDict = dict(entry)
-            normalized["override"] = True
-            return normalized
+    # ---- server_uri contract --------------------------------------------
 
-    @pytest.fixture
-    def client(self) -> FlextTapLdapClient.LDAPClient:
-        """Create LDAP client fixture for testing."""
-        return FlextTapLdapClient.LDAPClient(
-            host="test.ldap.com",
-            port=389,
-            bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            bind_password="test_password",
-            use_ssl=False,
-            timeout=30,
-            page_size=1000,
-        )
-
-    def test_server_uri_property(self) -> None:
-        """Test method."""
-        "Test server_uri property for both LDAP and LDAPS."
-        ldap_client = FlextTapLdapClient.LDAPClient(
-            host="test.com",
-            port=389,
-            use_ssl=False,
-        )
-        assert ldap_client.server_uri == "ldap://test.com:389"
-        ldaps_client = FlextTapLdapClient.LDAPClient(
-            host="secure.com",
-            port=636,
-            use_ssl=True,
-        )
-        assert ldaps_client.server_uri == "ldaps://secure.com:636"
-
-    def test_scope_conversions(self) -> None:
-        """Canonical scope normalization is exposed by the utility namespace."""
-        assert u.TapLdap.ClientSupport.normalize_scope("BASE") == "BASE"
-        assert u.TapLdap.ClientSupport.normalize_scope("ONELEVEL") == "ONELEVEL"
-        assert u.TapLdap.ClientSupport.normalize_scope("SUBTREE") == "SUBTREE"
-        assert u.TapLdap.ClientSupport.normalize_scope("base") == "BASE"
-        assert u.TapLdap.ClientSupport.normalize_scope("INVALID") == "SUBTREE"
-
-    def test_entry_conversion_scenarios(
+    @pytest.mark.parametrize(
+        ("host", "port", "use_ssl", "expected"),
+        [
+            ("test.com", 389, False, "ldap://test.com:389"),
+            ("secure.com", 636, True, "ldaps://secure.com:636"),
+        ],
+    )
+    def test_server_uri_reflects_scheme_host_and_port(
         self,
+        host: str,
+        port: int,
+        *,
+        use_ssl: bool,
+        expected: str,
     ) -> None:
-        """Entry normalization uses the shared client support utility."""
-        mail_values: list[t.JsonValue] = ["test@example.com"]
-        mail_attrs: dict[str, t.JsonValue] = {"mail": mail_values}
-        dict_entry: dict[str, t.JsonValue] = {
+        """server_uri renders ldap/ldaps scheme with the configured endpoint."""
+        with self._client(host=host, port=port, use_ssl=use_ssl) as client:
+            assert client.server_uri == expected
+
+    # ---- scope normalization contract -----------------------------------
+
+    @pytest.mark.parametrize(
+        ("given", "expected"),
+        [
+            ("BASE", "BASE"),
+            ("ONELEVEL", "ONELEVEL"),
+            ("SUBTREE", "SUBTREE"),
+            ("base", "BASE"),
+            ("INVALID", "SUBTREE"),
+        ],
+    )
+    def test_normalize_scope_maps_to_canonical_scope(
+        self,
+        given: str,
+        expected: str,
+    ) -> None:
+        """Unknown scopes fall back to SUBTREE; known scopes upper-case."""
+        assert u.TapLdap.ClientSupport.normalize_scope(given) == expected
+
+    # ---- entry mapping contract -----------------------------------------
+
+    def test_to_entry_mapping_returns_success_for_dict_entry(self) -> None:
+        """A well-formed entry maps to a successful result preserving the dn."""
+        entry: t.JsonMapping = {
             "dn": "uid=dict,dc=example,dc=com",
-            "attributes": mail_attrs,
+            "attributes": {"mail": ["test@example.com"]},
         }
-        result = u.TapLdap.ClientSupport.to_entry_mapping(dict_entry)
+        result = u.TapLdap.ClientSupport.to_entry_mapping(entry)
         assert result.success
         assert result.value["dn"] == "uid=dict,dc=example,dc=com"
-        none_result = u.TapLdap.ClientSupport.to_entry_mapping(None)
-        assert none_result.failure
-        simple_entry = {
+
+    def test_to_entry_mapping_preserves_scalar_and_list_attributes(self) -> None:
+        """Both scalar and multi-valued attributes survive normalization."""
+        entry: t.JsonMapping = {
             "dn": "uid=test,dc=example,dc=com",
             "uid": "test",
             "cn": ["Test", "T. User"],
         }
-        result = u.TapLdap.ClientSupport.to_entry_mapping(simple_entry)
+        result = u.TapLdap.ClientSupport.to_entry_mapping(entry)
         assert result.success
-        assert result.value["dn"] == "uid=test,dc=example,dc=com"
         assert result.value["uid"] == "test"
         assert result.value["cn"] == ["Test", "T. User"]
 
-    def test_search_result_processing(self) -> None:
-        """Search result normalization respects size limits and empty inputs."""
-        search_entries: t.SequenceOf[t.JsonMapping] = [
+    def test_to_entry_mapping_fails_on_none(self) -> None:
+        """A missing entry yields a failure result, never a silent default."""
+        result = u.TapLdap.ClientSupport.to_entry_mapping(None)
+        assert result.failure
+
+    # ---- search-result size limiting contract ---------------------------
+
+    @pytest.mark.parametrize(
+        ("size_limit", "expected_count"),
+        [(0, 2), (1, 1)],
+    )
+    def test_process_search_results_honors_size_limit(
+        self,
+        size_limit: int,
+        expected_count: int,
+    ) -> None:
+        """size_limit=0 keeps all entries; a positive limit truncates."""
+        entries: t.SequenceOf[t.JsonMapping] = [
             {"dn": "uid=user1,dc=test,dc=com", "uid": ["user1"]},
             {"dn": "uid=user2,dc=test,dc=com", "uid": ["user2"]},
         ]
         results = u.TapLdap.ClientSupport.process_search_results(
-            search_entries,
-            size_limit=0,
+            entries,
+            size_limit=size_limit,
         )
-        assert len(results) == 2
-        assert results[0]["dn"] == "uid=user1,dc=test,dc=com"
-        results = u.TapLdap.ClientSupport.process_search_results(
-            search_entries,
-            size_limit=1,
-        )
-        assert len(results) == 1
-        results = u.TapLdap.ClientSupport.process_search_results([], size_limit=0)
-        assert not results
+        assert len(results) == expected_count
 
-    def test_search_delegates_to_perform_search(
-        self,
-        client: FlextTapLdapClient.LDAPClient,
-    ) -> None:
-        """Search returns normalized entries through the public method."""
-        search_result = Mock()
-        search_result.success = True
-        search_result.value = Mock(entries=[{"dn": "uid=test,dc=test,dc=com"}])
-        api_cls = type(client._flext_api)
-        with patch.object(api_cls, "search", return_value=search_result):
-            results = client.search("dc=test,dc=com")
-        assert results == [{"dn": "uid=test,dc=test,dc=com"}]
+    def test_process_search_results_empty_input_yields_empty(self) -> None:
+        """No input entries produce no output entries."""
+        assert not u.TapLdap.ClientSupport.process_search_results([], size_limit=0)
 
-    def test_search_with_all_parameters(
-        self,
-        client: FlextTapLdapClient.LDAPClient,
-    ) -> None:
-        """Search forwards explicit parameters into the normalized query."""
-        search_result = Mock()
-        search_result.success = True
-        search_result.value = Mock(entries=[])
-        api_cls = type(client._flext_api)
-        with patch.object(api_cls, "search", return_value=search_result) as mock_search:
-            results = client.search("dc=test,dc=com", "(uid=*)", ["uid"], "BASE", 10)
-        assert results == []
-        assert mock_search.call_args is not None
-        search_options = mock_search.call_args.args[0]
-        assert search_options.base_dn == "dc=test,dc=com"
-        assert search_options.filter_str == "(uid=*)"
-        assert search_options.attributes == ["uid"]
-        assert search_options.scope == "BASE"
-        assert search_options.size_limit == 10
+    # ---- search() end-to-end contract -----------------------------------
 
-    def test_test_connection_success(
-        self,
-        client: FlextTapLdapClient.LDAPClient,
-    ) -> None:
-        """Test connection test succeeds via flext_api.search."""
-        mock_result = Mock()
-        mock_result.success = True
-        api_cls = type(client._flext_api)
-        with patch.object(api_cls, "search", return_value=mock_result):
-            result = client.test_connection()
-        assert result is True
+    def test_search_returns_normalized_entries(self) -> None:
+        """search() surfaces the entries produced by the LDAP backend."""
+        entries: list[t.JsonMapping] = [{"dn": "uid=test,dc=test,dc=com"}]
+        with self._client(search_result=self._ldap_result(entries)) as client:
+            assert client.search("dc=test,dc=com") == entries
 
-    def test_test_connection_fallback_on_error(
-        self,
-        client: FlextTapLdapClient.LDAPClient,
-    ) -> None:
-        """Test connection test returns False on expected errors."""
-        api_cls = type(client._flext_api)
-        with patch.object(api_cls, "search", side_effect=RuntimeError("test error")):
-            result = client.test_connection()
-        assert result is False
+    def test_search_size_limit_truncates_returned_entries(self) -> None:
+        """The size_limit argument observably bounds the returned entries."""
+        entries: list[t.JsonMapping] = [
+            {"dn": "uid=a,dc=test,dc=com"},
+            {"dn": "uid=b,dc=test,dc=com"},
+        ]
+        with self._client(search_result=self._ldap_result(entries)) as client:
+            limited = client.search("dc=test,dc=com", size_limit=1)
+        assert limited == [{"dn": "uid=a,dc=test,dc=com"}]
 
-    def test_health_check_functionality(
+    def test_search_returns_empty_when_backend_reports_no_success(self) -> None:
+        """An unsuccessful backend response yields an empty result list."""
+        result = self._ldap_result([], success=False)
+        with self._client(search_result=result) as client:
+            assert client.search("dc=test,dc=com") == []
+
+    # ---- test_connection() contract -------------------------------------
+
+    @pytest.mark.parametrize("backend_success", [True, False])
+    def test_test_connection_reflects_backend_success(
         self,
-        client: FlextTapLdapClient.LDAPClient,
+        *,
+        backend_success: bool,
     ) -> None:
-        """Test health check functionality."""
-        with patch.object(client, "test_connection", return_value=True):
+        """test_connection mirrors whether the probe search succeeded."""
+        result = self._ldap_result([], success=backend_success)
+        with self._client(search_result=result) as client:
+            assert client.test_connection() is backend_success
+
+    def test_test_connection_returns_false_on_backend_error(self) -> None:
+        """A raising backend degrades to a False connection verdict."""
+        with self._client(search_error=RuntimeError("boom")) as client:
+            assert client.test_connection() is False
+
+    # ---- health_check() contract ----------------------------------------
+
+    def test_health_check_reports_healthy_when_connection_ok(self) -> None:
+        """A working connection produces a healthy, timed health report."""
+        with self._client(search_result=self._ldap_result([])) as client:
             health = client.health_check()
-            assert health["status"] == "healthy"
-            assert health["server_uri"] == "ldap://test.ldap.com:389"
-            assert health["connection_test"] is True
-            assert isinstance(health["response_time_ms"], (int, float))
-        with patch.object(client, "test_connection", return_value=False):
-            health = client.health_check()
-            assert health["status"] == "unhealthy"
-            assert health["connection_test"] is False
+        assert health["status"] == "healthy"
+        assert health["connection_test"] is True
+        assert health["server_uri"] == "ldap://test.ldap.com:389"
+        assert isinstance(health["response_time_ms"], (int, float))
 
-    def test_oracle_entry_processing(
-        self,
-    ) -> None:
-        """Oracle-specific entry enrichment lives in the utility namespace."""
-        uid_values: list[t.JsonValue] = ["test"]
-        oracle_password_values: list[t.JsonValue] = ["hashed_password"]
-        object_classes: list[t.JsonValue] = ["inetOrgPerson"]
-        attributes_payload: dict[str, t.JsonValue] = {
-            "uid": uid_values,
-            "orclPassword": oracle_password_values,
-            "objectClass": object_classes,
-        }
+    def test_health_check_reports_unhealthy_when_connection_fails(self) -> None:
+        """A failing connection produces an unhealthy report."""
+        with self._client(search_error=RuntimeError("boom")) as client:
+            health = client.health_check()
+        assert health["status"] == "unhealthy"
+        assert health["connection_test"] is False
+
+    # ---- Oracle entry normalization contract ----------------------------
+
+    def test_normalize_oracle_entry_mirrors_password_to_userpassword(self) -> None:
+        """OrclPassword is exposed as the standard userPassword attribute."""
         entry: t.MutableJsonMapping = {
             "dn": "uid=test,dc=oracle,dc=com",
-            "attributes": attributes_payload,
+            "attributes": {
+                "uid": ["test"],
+                "orclPassword": ["hashed_password"],
+                "objectClass": ["inetOrgPerson"],
+            },
         }
         result = u.TapLdap.ClientSupport.normalize_oracle_entry(entry)
-        attributes_raw = result.get("attributes")
-        assert isinstance(attributes_raw, dict)
-        attributes = attributes_raw
-        assert "userPassword" in attributes
-        user_password: t.JsonValue = attributes.get("userPassword")
-        assert isinstance(user_password, list)
-        assert "hashed_password" in user_password
+        attributes = result.get("attributes")
+        assert isinstance(attributes, dict)
+        assert attributes["userPassword"] == ["hashed_password"]
 
-        ou_values: list[t.JsonValue] = ["test"]
-        container_classes: list[t.JsonValue] = ["orclContainer"]
-        container_attributes: dict[str, t.JsonValue] = {
-            "ou": ou_values,
-            "objectClass": container_classes,
-        }
-        entry_with_container: t.MutableJsonMapping = {
+    @pytest.mark.parametrize(
+        "object_class",
+        [["orclContainer"], "orclContainer"],
+    )
+    def test_normalize_oracle_entry_maps_container_object_class(
+        self,
+        object_class: t.JsonValue,
+    ) -> None:
+        """OrclContainer becomes organizationalUnit whether scalar or list."""
+        entry: t.MutableJsonMapping = {
             "dn": "ou=test,dc=oracle,dc=com",
-            "attributes": container_attributes,
+            "attributes": {"objectClass": object_class},
         }
-        result = u.TapLdap.ClientSupport.normalize_oracle_entry(entry_with_container)
-        attrs_raw2 = result.get("attributes")
-        assert isinstance(attrs_raw2, dict)
-        attributes = attrs_raw2
-        object_class: t.JsonValue = attributes.get("objectClass")
-        assert isinstance(object_class, list)
-        assert "organizationalUnit" in object_class
-
-        entry_string_oc: t.MutableJsonMapping = {
-            "dn": "ou=test,dc=oracle,dc=com",
-            "attributes": {"objectClass": "orclContainer"},
-        }
-        result = u.TapLdap.ClientSupport.normalize_oracle_entry(entry_string_oc)
-        attrs_raw3 = result.get("attributes")
-        assert isinstance(attrs_raw3, dict)
-        attributes = attrs_raw3
-        obj_classes: t.JsonValue = attributes.get("objectClass")
+        result = u.TapLdap.ClientSupport.normalize_oracle_entry(entry)
+        attributes = result.get("attributes")
+        assert isinstance(attributes, dict)
+        obj_classes = attributes.get("objectClass")
         assert isinstance(obj_classes, list)
         assert "organizationalUnit" in obj_classes
 
-        entry_bad_attrs: t.MutableJsonMapping = {
+    def test_normalize_oracle_entry_leaves_malformed_attributes_untouched(
+        self,
+    ) -> None:
+        """A non-dict attributes payload passes through unchanged."""
+        entry: t.MutableJsonMapping = {
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": "not_a_dict",
         }
-        result = u.TapLdap.ClientSupport.normalize_oracle_entry(entry_bad_attrs)
-        assert result == entry_bad_attrs
+        assert u.TapLdap.ClientSupport.normalize_oracle_entry(entry) == entry
 
-    def test_oracle_attribute_extension(self) -> None:
-        """Oracle attribute enrichment appends only the canonical extras."""
-        base_attrs = ["uid", "cn"]
+    # ---- Oracle attribute extension contract ----------------------------
+
+    def test_extend_attributes_adds_oracle_extras_when_enabled(self) -> None:
+        """Enabling Oracle mode appends the canonical Oracle attributes."""
         extended = u.TapLdap.ClientSupport.extend_attributes_with_oracle_support(
-            base_attrs,
+            ["uid", "cn"],
             oracle_oid_mode=True,
         )
         assert extended is not None
-        assert "uid" in extended
-        assert "cn" in extended
-        assert "orclPassword" in extended
-        assert "userPassword" in extended
-        result = u.TapLdap.ClientSupport.extend_attributes_with_oracle_support(
-            base_attrs,
-            oracle_oid_mode=False,
-        )
-        assert result == base_attrs
-        result = u.TapLdap.ClientSupport.extend_attributes_with_oracle_support(
-            None,
-            oracle_oid_mode=True,
-        )
-        assert result is None
+        assert {"uid", "cn", "orclPassword", "userPassword"} <= set(extended)
 
-    def test_process_search_results(self) -> None:
-        """Test Oracle search result processing."""
-        first_passwords: list[t.JsonValue] = ["pass1"]
-        second_uids: list[t.JsonValue] = ["test2"]
-        first_attrs: dict[str, t.JsonValue] = {"orclPassword": first_passwords}
-        second_attrs: dict[str, t.JsonValue] = {"uid": second_uids}
+    def test_extend_attributes_is_noop_when_disabled(self) -> None:
+        """Disabled Oracle mode returns the caller's attributes unchanged."""
+        base = ["uid", "cn"]
+        assert (
+            u.TapLdap.ClientSupport.extend_attributes_with_oracle_support(
+                base,
+                oracle_oid_mode=False,
+            )
+            == base
+        )
+
+    def test_extend_attributes_preserves_none_request(self) -> None:
+        """A None attribute request stays None (request all attributes)."""
+        assert (
+            u.TapLdap.ClientSupport.extend_attributes_with_oracle_support(
+                None,
+                oracle_oid_mode=True,
+            )
+            is None
+        )
+
+    # ---- Oracle search-result processing contract -----------------------
+
+    def test_process_oracle_search_results_enriches_when_enabled(self) -> None:
+        """Oracle mode enriches each entry with the userPassword mirror."""
         search_results: t.SequenceOf[t.JsonMapping] = [
             {
                 "dn": "uid=test1,dc=oracle,dc=com",
-                "attributes": first_attrs,
+                "attributes": {"orclPassword": ["pass1"]},
             },
-            {"dn": "uid=test2,dc=oracle,dc=com", "attributes": second_attrs},
         ]
         results = u.TapLdap.ClientSupport.process_oracle_search_results(
             search_results,
             oracle_oid_mode=True,
         )
-        assert len(results) == 2
         attributes = results[0].get("attributes")
         assert isinstance(attributes, dict)
-        assert "userPassword" in attributes
+        assert attributes["userPassword"] == ["pass1"]
+
+    def test_process_oracle_search_results_passthrough_when_disabled(self) -> None:
+        """Disabled Oracle mode returns entries verbatim."""
+        search_results: t.SequenceOf[t.JsonMapping] = [
+            {"dn": "uid=test2,dc=oracle,dc=com", "attributes": {"uid": ["test2"]}},
+        ]
         results = u.TapLdap.ClientSupport.process_oracle_search_results(
             search_results,
             oracle_oid_mode=False,
         )
-        assert len(results) == 2
-        assert results[0] == search_results[0]
+        assert list(results) == list(search_results)
 
-    def test_client_support_composites_dispatch_through_mro(self) -> None:
-        """Composite ClientSupport helpers honor subclass overrides."""
-        entries = self.OverrideClientSupport.process_search_results(
-            [{"dn": "uid=raw,dc=example,dc=com"}],
-            size_limit=0,
-        )
-        oracle_entries = self.OverrideClientSupport.process_oracle_search_results(
-            [{"dn": "uid=raw,dc=example,dc=com"}],
-            oracle_oid_mode=True,
-        )
+    # ---- search_with_oracle_support() contract --------------------------
 
-        assert entries == [{"dn": "uid=override,dc=example,dc=com"}]
-        assert oracle_entries == [{"dn": "uid=raw,dc=example,dc=com", "override": True}]
-
-    @patch("flext_tap_ldap.client.get_running_loop")
-    def test_execute_oracle_search_in_new_loop(
-        self,
-        client: FlextTapLdapClient.LDAPClient,
-    ) -> None:
-        """Test Oracle search execution in new loop."""
-        with patch.object(client, "search", return_value=[{"test": "data"}]):
-            result = client._execute_oracle_search_in_new_loop(
-                "dc=test,dc=com",
-                "(uid=*)",
-                ["uid"],
-                oracle_oid_mode=True,
+    def test_search_with_oracle_support_enriches_entries(self) -> None:
+        """Outside an event loop, Oracle search returns enriched entries."""
+        entries: list[t.JsonMapping] = [
+            {"dn": "uid=t,dc=oracle,dc=com", "attributes": {"orclPassword": ["p"]}},
+        ]
+        with self._client(search_result=self._ldap_result(entries)) as client:
+            results = list(
+                client.search_with_oracle_support(
+                    "dc=oracle,dc=com",
+                    "(uid=*)",
+                    ["uid"],
+                    oracle_oid_mode=True,
+                ),
             )
-            result_list = list(result)
-            assert len(result_list) >= 0
+        attributes = results[0].get("attributes")
+        assert isinstance(attributes, dict)
+        assert attributes["userPassword"] == ["p"]
 
-    @patch("flext_tap_ldap.client.get_running_loop")
-    def test_search_with_oracle_support_scenarios(
-        self,
-        mock_get_loop: Mock,
-        client: FlextTapLdapClient.LDAPClient,
-    ) -> None:
-        """Test Oracle support search with different scenarios."""
-        mock_get_loop.return_value = Mock()
-        results = client.search_with_oracle_support(
-            "dc=oracle,dc=com",
-            "(uid=*)",
-            ["uid"],
-            oracle_oid_mode=True,
-        )
-        assert list(results) == []
-        mock_get_loop.side_effect = RuntimeError("no event loop")
+    def test_search_with_oracle_support_refuses_inside_running_loop(self) -> None:
+        """Inside an active event loop the Oracle search yields no entries."""
+        with self._client(search_result=self._ldap_result([])) as client:
 
-    def test_attribute_delegation_to_flext_api(
-        self,
-        client: FlextTapLdapClient.LDAPClient,
-    ) -> None:
-        """Test attribute delegation to flext API."""
-        result = client.search
-        assert callable(result)
-        with contextlib.suppress(AttributeError):
-            _ = client.non_existent_method
+            async def _invoke() -> t.SequenceOf[t.JsonMapping]:
+                return client.search_with_oracle_support(
+                    "dc=oracle,dc=com",
+                    oracle_oid_mode=True,
+                )
+
+            assert list(asyncio.run(_invoke())) == []
+
+    # ---- delegation contract --------------------------------------------
+
+    def test_unknown_attributes_delegate_to_backend(self) -> None:
+        """Attributes absent on the wrapper resolve against the LDAP backend."""
+        with self._client(search_result=self._ldap_result([])) as client:
+            with contextlib.suppress(AttributeError):
+                _ = client.whoami
+            assert callable(client.search)

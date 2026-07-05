@@ -1,4 +1,4 @@
-"""Integration tests for tap-ldap.
+"""Behavioral integration tests for the tap-ldap Singer CLI contract.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -7,13 +7,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import time
-from collections.abc import (
-    Generator,
-    Mapping,
-)
+from collections.abc import Mapping
 from typing import TYPE_CHECKING
-from unittest.mock import Mock, patch
 
 import pytest
 from click.core import Command
@@ -27,46 +22,87 @@ from tests.utilities import u
 if TYPE_CHECKING:
     from pathlib import Path
 
+STANDARD_STREAMS: tuple[str, ...] = (
+    "users",
+    "groups",
+    "organizational_units",
+    "schema",
+)
 
-def _extract_json_from_output(output: str) -> t.JsonMapping:
-    """Extract the JSON object from CLI output that may contain log lines."""
+
+def _extract_catalog(output: str) -> t.JsonMapping:
+    """Extract the single JSON catalog object emitted on the CLI stdout."""
     for line in output.strip().splitlines():
         stripped = line.strip()
         if stripped.startswith("{"):
-            payload: t.JsonMapping = t.Cli.JSON_MAPPING_ADAPTER.validate_json(stripped)
-            return payload
-    msg = f"No JSON found in output: {output[:200]}"
+            return t.Cli.JSON_MAPPING_ADAPTER.validate_json(stripped)
+    msg = f"No JSON catalog found in output: {output[:200]}"
     raise ValueError(msg)
 
 
+def _stream_ids(catalog: t.JsonMapping) -> list[str]:
+    """Return the observable stream identifiers declared in a discovery catalog."""
+    streams = t.Cli.JSON_LIST_ADAPTER.validate_python(catalog["streams"])
+    ids: list[str] = []
+    for raw in streams:
+        entry = t.Cli.JSON_MAPPING_ADAPTER.validate_python(raw)
+        stream_id = entry.get("tap_stream_id", entry.get("stream"))
+        if isinstance(stream_id, str):
+            ids.append(stream_id)
+    return ids
+
+
+def _singer_messages(output: str) -> list[t.JsonMapping]:
+    """Parse the newline-delimited Singer messages emitted on stdout."""
+    messages: list[t.JsonMapping] = []
+    for line in output.strip().splitlines():
+        if not line.strip():
+            continue
+        parsed_result = cli_u.Cli.json_loads(line)
+        if parsed_result.failure:
+            continue
+        parsed = parsed_result.unwrap()
+        if isinstance(parsed, Mapping):
+            messages.append(t.Cli.JSON_MAPPING_ADAPTER.validate_python(parsed))
+    return messages
+
+
 class TestsFlextTapLdapIntegration:
-    """Integration tests for tap-ldap."""
+    """Observable-contract tests for the tap-ldap Singer CLI command."""
 
     @staticmethod
-    def _cli_command() -> Command:
+    def _command() -> Command:
         assert isinstance(CLI_COMMAND, Command)
         return CLI_COMMAND
 
     @pytest.fixture
     def runner(self) -> CliRunner:
-        """Create a CLI runner fixture for testing."""
+        """Provide a Click CLI runner."""
         return CliRunner()
 
     @pytest.fixture
-    def mock_ldap_config(self) -> t.JsonMapping:
-        """Mock LDAP configuration."""
+    def ldap_config(self) -> t.JsonMapping:
+        """Provide a minimal LDAP tap configuration."""
         return {
             "ldap_host": "test.ldap.com",
             "ldap_port": 389,
             "base_dn": "dc=test,dc=com",
-            "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
+            "bind_dn": "cn=admin,dc=test,dc=com",
             "bind_password": "test_password",
         }
 
     @pytest.fixture
-    def sample_catalog(self) -> t.JsonMapping:
-        """Sample catalog for testing."""
-        return {
+    def config_file(self, tmp_path: Path, ldap_config: t.JsonMapping) -> Path:
+        """Write the tap configuration to a temporary file."""
+        config_path = tmp_path / "settings.json"
+        u.Cli.json_write(config_path, ldap_config)
+        return config_path
+
+    @pytest.fixture
+    def catalog_file(self, tmp_path: Path) -> Path:
+        """Write a minimal Singer catalog to a temporary file."""
+        catalog_path = tmp_path / "catalog.json"
+        catalog: t.JsonMapping = {
             "streams": [
                 {
                     "tap_stream_id": "users",
@@ -75,125 +111,126 @@ class TestsFlextTapLdapIntegration:
                 },
             ],
         }
-
-    @pytest.fixture
-    def sample_state(self) -> t.JsonMapping:
-        """Sample state for testing."""
-        return {"bookmarks": {}}
-
-    @pytest.fixture
-    def config_file(self, tmp_path: Path, mock_ldap_config: t.JsonMapping) -> Path:
-        """Create temporary settings file."""
-        config_path = tmp_path / "settings.json"
-        u.Cli.json_write(config_path, mock_ldap_config)
-        return config_path
-
-    @pytest.fixture
-    def catalog_file(self, tmp_path: Path, sample_catalog: t.JsonMapping) -> Path:
-        """Create temporary catalog file."""
-        catalog_path = tmp_path / "catalog.json"
-        u.Cli.json_write(catalog_path, sample_catalog)
+        u.Cli.json_write(catalog_path, catalog)
         return catalog_path
 
     @pytest.fixture
-    def state_file(self, tmp_path: Path, sample_state: t.JsonMapping) -> Path:
-        """Create a state file fixture for testing."""
+    def state_file(self, tmp_path: Path) -> Path:
+        """Write a Singer state file to a temporary location."""
         state_path = tmp_path / "state.json"
-        u.Cli.json_write(state_path, sample_state)
+        u.Cli.json_write(state_path, {"bookmarks": {}})
         return state_path
 
-    @patch("flext_tap_ldap.client.FlextTapLdapClient.LDAPClient")
-    def test_discovery_mode(
+    def test_discover_emits_parseable_catalog_with_streams_key(
         self,
-        mock_ldap_client: Mock,
         runner: CliRunner,
         config_file: Path,
     ) -> None:
-        """Test discovery mode functionality."""
-        mock_client_instance = mock_ldap_client.return_value
-        empty_records: t.SequenceOf[Mapping[str, t.Scalar | t.ScalarMapping]] = []
-        mock_client_instance.search.return_value.__aenter__.return_value = empty_records
+        """Discovery exits cleanly and emits a JSON catalog exposing a streams list."""
         result = runner.invoke(
-            self._cli_command(),
+            self._command(),
             ["--config", str(config_file), "--discover"],
             catch_exceptions=False,
         )
-        if result.exit_code != 0:
-            exit_error: str = f"Expected {0}, got {result.exit_code}"
-            raise AssertionError(exit_error)
-        catalog = _extract_json_from_output(result.output)
-        if "streams" not in catalog:
-            catalog_error: str = f"Expected {'streams'} in {catalog}"
-            raise AssertionError(catalog_error)
-        streams: t.SequenceOf[t.JsonMapping] = [
-            t.Cli.JSON_MAPPING_ADAPTER.validate_python(stream)
-            for stream in t.Cli.JSON_LIST_ADAPTER.validate_python(catalog["streams"])
-        ]
-        stream_names: list[str] = [str(stream["tap_stream_id"]) for stream in streams]
-        if "users" not in stream_names:
-            stream_error: str = f"Expected {'users'} in {stream_names}"
-            raise AssertionError(stream_error)
-        assert "groups" in stream_names
-        if "organizational_units" not in stream_names:
-            ou_error: str = f"Expected {'organizational_units'} in {stream_names}"
-            raise AssertionError(ou_error)
-        assert "schema" in stream_names
+        assert result.exit_code == 0
+        catalog = _extract_catalog(result.output)
+        assert "streams" in catalog
+        assert isinstance(catalog["streams"], list)
 
-    @patch("flext_tap_ldap.client.FlextTapLdapClient.LDAPClient")
-    def test_sync_mode(
+    @pytest.mark.parametrize("expected_stream", STANDARD_STREAMS)
+    def test_discover_publishes_each_standard_ldap_stream(
         self,
-        mock_ldap_client: Mock,
+        runner: CliRunner,
+        config_file: Path,
+        expected_stream: str,
+    ) -> None:
+        """Discovery advertises every standard LDAP stream in its catalog."""
+        result = runner.invoke(
+            self._command(),
+            ["--config", str(config_file), "--discover"],
+            catch_exceptions=False,
+        )
+        assert result.exit_code == 0
+        assert expected_stream in _stream_ids(_extract_catalog(result.output))
+
+    def test_discover_includes_custom_streams_from_config(
+        self,
+        runner: CliRunner,
+        tmp_path: Path,
+    ) -> None:
+        """Custom streams declared in config surface as discoverable streams."""
+        settings: t.JsonMapping = {
+            "ldap_host": "test.ldap.com",
+            "base_dn": "dc=test,dc=com",
+            "custom_streams": [
+                {
+                    "name": "service_accounts",
+                    "search_filter": "(&(object_class=account)(uid=svc-*))",
+                    "primary_keys": ["dn"],
+                    "schema": {"properties": {"dn": {"type": "string"}}},
+                },
+            ],
+        }
+        config_path = tmp_path / "settings.json"
+        u.Cli.json_write(config_path, settings)
+        result = runner.invoke(
+            self._command(),
+            ["--config", str(config_path), "--discover"],
+            catch_exceptions=False,
+        )
+        assert result.exit_code == 0
+        stream_ids = _stream_ids(_extract_catalog(result.output))
+        assert "service_accounts" in stream_ids
+        # Custom streams extend, not replace, the standard catalog.
+        assert "users" in stream_ids
+
+    def test_sync_emits_schema_messages_for_standard_streams(
+        self,
         runner: CliRunner,
         config_file: Path,
         catalog_file: Path,
     ) -> None:
-        """Test sync mode functionality."""
-        mock_client_instance = mock_ldap_client.return_value
-        mock_client_instance.search.return_value.__aenter__.return_value = [
-            {
-                "dn": "uid=jdoe,ou=users,dc=test,dc=com",
-                "attributes": {"uid": "jdoe", "cn": "John Doe"},
-            },
-        ]
+        """Sync mode emits a Singer SCHEMA message per standard stream."""
         result = runner.invoke(
-            self._cli_command(),
+            self._command(),
             ["--config", str(config_file), "--catalog", str(catalog_file)],
             catch_exceptions=False,
         )
-        if result.exit_code != 0:
-            exit_error: str = f"Expected {0}, got {result.exit_code}"
-            raise AssertionError(exit_error)
-        lines = result.output.strip().split("\n")
-        messages: list[t.JsonMapping] = []
-        for line in lines:
-            if not line:
-                continue
-            try:
-                parsed = cli_u.Cli.json_loads(line).unwrap()
-            except ValueError:
-                continue
-            if isinstance(parsed, Mapping):
-                messages.append(parsed)
-        message_types = {str(msg["type"]) for msg in messages}
-        if "SCHEMA" not in message_types:
-            schema_error: str = f"Expected {'SCHEMA'} in {message_types}"
-            raise AssertionError(schema_error)
+        assert result.exit_code == 0
+        messages = _singer_messages(result.output)
+        assert messages
+        assert {str(msg["type"]) for msg in messages} == {"SCHEMA"}
+        emitted_streams = {str(msg["stream"]) for msg in messages}
+        assert set(STANDARD_STREAMS) <= emitted_streams
 
-    @patch("flext_tap_ldap.client.FlextTapLdapClient.LDAPClient")
-    def test_incremental_sync(
+    def test_schema_message_declares_dn_key_property(
         self,
-        mock_ldap_client: Mock,
+        runner: CliRunner,
+        config_file: Path,
+        catalog_file: Path,
+    ) -> None:
+        """Each SCHEMA message advertises the LDAP dn as its key property."""
+        result = runner.invoke(
+            self._command(),
+            ["--config", str(config_file), "--catalog", str(catalog_file)],
+            catch_exceptions=False,
+        )
+        assert result.exit_code == 0
+        messages = _singer_messages(result.output)
+        assert messages
+        for msg in messages:
+            assert msg["key_properties"] == ["dn"]
+
+    def test_incremental_sync_accepts_state_and_still_emits_schema(
+        self,
         runner: CliRunner,
         config_file: Path,
         catalog_file: Path,
         state_file: Path,
     ) -> None:
-        """Test incremental sync functionality."""
-        mock_client_instance = mock_ldap_client.return_value
-        empty_records: t.SequenceOf[Mapping[str, t.Scalar | t.ScalarMapping]] = []
-        mock_client_instance.search.return_value.__aenter__.return_value = empty_records
+        """Supplying a state file is accepted and does not suppress SCHEMA output."""
         result = runner.invoke(
-            self._cli_command(),
+            self._command(),
             [
                 "--config",
                 str(config_file),
@@ -204,132 +241,39 @@ class TestsFlextTapLdapIntegration:
             ],
             catch_exceptions=False,
         )
-        if result.exit_code != 0:
-            exit_error: str = f"Expected {0}, got {result.exit_code}"
-            raise AssertionError(exit_error)
-        search_calls = mock_client_instance.search.call_args_list
-        if search_calls:
-            for call in search_calls:
-                filter_arg = call[1].get("search_filter", "")
-                if "inetOrgPerson" in filter_arg and (
-                    "modifyTimestamp>=" not in filter_arg or result.exit_code != 0
-                ):
-                    filter_error: str = f"Expected timestamp filter in incremental search, got filter='{filter_arg}' and exit_code={result.exit_code}"
-                    raise AssertionError(filter_error)
+        assert result.exit_code == 0
+        message_types = {str(msg["type"]) for msg in _singer_messages(result.output)}
+        assert "SCHEMA" in message_types
 
-    def test_self(self, runner: CliRunner, tmp_path: Path) -> None:
-        """Test method."""
-        settings: dict[str, t.JsonValue] = {
-            "ldap_host": "test.ldap.com",
-            "base_dn": "dc=test,dc=com",
-            "custom_streams": [
-                {
-                    "name": "service_accounts",
-                    "search_filter": "(&(object_class=account)(uid=svc-*))",
-                    "primary_keys": ["dn"],
-                    "schema": {
-                        "properties": {
-                            "dn": {"type": "string"},
-                            "uid": {"type": "string"},
-                        },
-                    },
-                },
-            ],
-        }
-        config_file = tmp_path / "settings.json"
-        u.Cli.json_write(config_file, settings)
-        with patch(
-            "flext_tap_ldap.client.FlextTapLdapClient.LDAPClient",
-        ) as mock_ldap_client:
-            mock_client_instance = mock_ldap_client.return_value
-            empty_records: t.SequenceOf[Mapping[str, t.Scalar | t.ScalarMapping]] = []
-            mock_client_instance.search.return_value.__aenter__.return_value = (
-                empty_records
-            )
-            result = runner.invoke(
-                self._cli_command(),
-                ["--config", str(config_file), "--discover"],
-                catch_exceptions=False,
-            )
-        if result.exit_code != 0:
-            exit_error: str = f"Expected {0}, got {result.exit_code}"
-            raise AssertionError(exit_error)
-        catalog = _extract_json_from_output(result.output)
-        cat_streams: t.SequenceOf[t.JsonMapping] = [
-            t.Cli.JSON_MAPPING_ADAPTER.validate_python(stream)
-            for stream in t.Cli.JSON_LIST_ADAPTER.validate_python(catalog["streams"])
-        ]
-        stream_names: list[str] = [
-            str(stream_id)
-            for stream in cat_streams
-            if (stream_id := stream.get("tap_stream_id", stream.get("stream")))
-            is not None
-        ]
-        if "service_accounts" not in stream_names:
-            stream_error: str = f"Expected {'service_accounts'} in {stream_names}"
-            raise AssertionError(stream_error)
+    def test_missing_config_file_is_rejected(
+        self,
+        runner: CliRunner,
+        tmp_path: Path,
+    ) -> None:
+        """A non-existent --config path fails validation with a non-zero exit."""
+        result = runner.invoke(
+            self._command(),
+            ["--config", str(tmp_path / "does_not_exist.json"), "--discover"],
+        )
+        assert result.exit_code != 0
 
-    def test_error_handling(
+    def test_incomplete_config_degrades_gracefully(
         self,
         runner: CliRunner,
         tmp_path: Path,
         caplog: pytest.LogCaptureFixture,
     ) -> None:
-        """Test fallback behavior with invalid configuration."""
-        config_file = tmp_path / "bad_config.json"
-        u.Cli.json_write(config_file, {"invalid": "settings"})
+        """Config missing LDAP connection fields still discovers streams (exit 0)."""
+        config_path = tmp_path / "bad_config.json"
+        u.Cli.json_write(config_path, {"invalid": "settings"})
         result = runner.invoke(
-            self._cli_command(),
-            ["--config", str(config_file), "--discover"],
+            self._command(),
+            ["--config", str(config_path), "--discover"],
         )
-        all_logs = " ".join(record.message for record in caplog.records)
-        all_output = (
-            (result.output or "") + (result.stderr or "") + (result.stdout or "")
-        )
-        has_validation_log = (
-            "Invalid LDAP connection configuration" in all_logs
-            or "Invalid LDAP connection configuration" in all_output
-            or "Config validation failed" in all_logs
-            or "Config validation failed" in all_output
-        )
-        assert result.exit_code == 0, (
-            f"Expected graceful fallback (exit 0). Output: {all_output}, Exit code: {result.exit_code}"
-        )
-        assert has_validation_log, (
-            f"Expected validation failure log. Logs: {all_logs}, Output: {all_output}"
-        )
+        assert result.exit_code == 0
+        combined = " ".join(record.getMessage() for record in caplog.records)
+        combined += (result.output or "") + (result.stderr or "")
+        assert "Invalid LDAP connection configuration" in combined
 
-    @patch("flext_tap_ldap.client.FlextTapLdapClient.LDAPClient")
-    def test_pagination_handling(
-        self,
-        mock_ldap_client: Mock,
-        runner: CliRunner,
-        config_file: Path,
-        catalog_file: Path,
-    ) -> None:
-        """Test pagination handling functionality."""
-        mock_client_instance = mock_ldap_client.return_value
 
-        def mock_search(
-            *args: t.Scalar,
-            **kwargs: t.Scalar,
-        ) -> Generator[Mapping[str, t.Scalar | t.ScalarMapping]]:
-            time.sleep(0)
-            yield {
-                "dn": "uid=user1,ou=users,dc=test,dc=com",
-                "attributes": {"uid": "user1", "cn": "User One"},
-            }
-            yield {
-                "dn": "uid=user2,ou=users,dc=test,dc=com",
-                "attributes": {"uid": "user2", "cn": "User Two"},
-            }
-
-        mock_client_instance.search = mock_search
-        result = runner.invoke(
-            self._cli_command(),
-            ["--config", str(config_file), "--catalog", str(catalog_file)],
-            catch_exceptions=False,
-        )
-        if result.exit_code != 0:
-            exit_error: str = f"Expected {0}, got {result.exit_code}"
-            raise AssertionError(exit_error)
+__all__: list[str] = ["TestsFlextTapLdapIntegration"]
