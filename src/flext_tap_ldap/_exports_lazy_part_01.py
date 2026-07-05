@@ -34,7 +34,7 @@ FLEXT_TAP_LDAP_LAZY_IMPORTS_PART_01 = build_lazy_import_map(
             "FlextTapLdapUtilities",
             "u",
         ),
-        "flext_ldap": (
+        "flext_core._root_typing_parts": (
             "d",
             "e",
             "h",
