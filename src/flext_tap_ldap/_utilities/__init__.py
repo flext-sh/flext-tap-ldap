@@ -8,12 +8,14 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_tap_ldap._utilities._processor import FlextTapLdapUtilitiesProcessorMixin
+    from flext_tap_ldap._utilities._processor import (
+        FlextTapLdapUtilitiesProcessorMixin as FlextTapLdapUtilitiesProcessorMixin,
+    )
     from flext_tap_ldap._utilities.client_support import (
-        FlextTapLdapUtilitiesClientSupport,
+        FlextTapLdapUtilitiesClientSupport as FlextTapLdapUtilitiesClientSupport,
     )
     from flext_tap_ldap._utilities.error_handling import (
-        FlextTapLdapUtilitiesErrorHandling,
+        FlextTapLdapUtilitiesErrorHandling as FlextTapLdapUtilitiesErrorHandling,
     )
 _LAZY_IMPORTS = build_lazy_import_map(
     {
