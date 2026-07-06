@@ -15,8 +15,6 @@ from asyncio import get_running_loop, new_event_loop, set_event_loop
 from flext_ldap import FlextLdap
 from flext_tap_ldap import c, m, p, t, u
 
-logger = u.fetch_logger(__name__)
-
 
 class FlextTapLdapClient:
     """LDAP client infrastructure container with testing convenience wrapper.
@@ -143,7 +141,7 @@ class FlextTapLdapClient:
             )
             try:
                 get_running_loop()
-                logger.warning(
+                u.fetch_logger(__name__).warning(
                     "Oracle LDAP search inside an active event loop is not supported",
                 )
                 return []
@@ -173,7 +171,10 @@ class FlextTapLdapClient:
                 return connection_success
             except (RuntimeError, ValueError, TypeError, c.ValidationError) as e:
                 err_msg = str(e)
-                logger.warning("LDAP connection test failed: %s", err_msg)
+                u.fetch_logger(__name__).warning(
+                    "LDAP connection test failed: %s",
+                    err_msg,
+                )
                 return False
 
         def _create_config_from_kwargs(
@@ -304,7 +305,10 @@ class FlextTapLdapClient:
                 return processed_entries
             except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                 err_msg = f"LDAP search failed: {e}"
-                logger.exception("LDAP search failed: %s", err_msg)
+                u.fetch_logger(__name__).exception(
+                    "LDAP search failed: %s",
+                    err_msg,
+                )
                 raise RuntimeError(err_msg) from e
 
 
