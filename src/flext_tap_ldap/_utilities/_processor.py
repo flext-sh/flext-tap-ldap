@@ -308,7 +308,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                         "LDIF content loaded successfully using flext-ldif",
                     )
                 except c.EXC_RUNTIME_TYPE as e:
-                    return r[str].fail(f"Failed to load LDIF content: {e}")
+                    return r[str].fail(f"Failed to load LDIF content: {e}")  # type: ignore[no-any-return]
 
             def parse_content(
                 self,
