@@ -15,7 +15,7 @@ from click.core import Command
 from click.testing import CliRunner
 
 from flext_cli import u as cli_u
-from flext_tap_ldap.tap import CLI_COMMAND
+from flext_tap_ldap import c
 from tests.typings import t
 from tests.utilities import u
 
@@ -72,8 +72,8 @@ class TestsFlextTapLdapIntegration:
 
     @staticmethod
     def _command() -> Command:
-        assert isinstance(CLI_COMMAND, Command)
-        return CLI_COMMAND
+        assert isinstance(c.TapLdap.CLI_COMMAND, Command)
+        return c.TapLdap.CLI_COMMAND
 
     @pytest.fixture
     def runner(self) -> CliRunner:

@@ -8,23 +8,21 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable, Sequence
+from collections.abc import Sequence
 from unittest.mock import Mock
 
 import pytest
 
 import flext_tap_ldap.client as client_module
 from flext_ldap import FlextLdap
-from flext_tap_ldap import c, m, t
+from flext_tap_ldap import c, m
 from flext_tap_ldap.client import FlextTapLdapClient
-
-type Entry = dict[str, str | dict[str, list[str]]]
-type ClientFactory = Callable[..., FlextTapLdapClient.LDAPClient]
+from tests.typings import t
 
 __all__: tuple[str, ...] = ("TestsFlextTapLdapClient",)
 
 
-def _backend_result(*, success: bool, entries: Sequence[Entry] | None) -> Mock:
+def _backend_result(*, success: bool, entries: Sequence[t.Entry] | None) -> Mock:
     """Shape a FlextLdap search result (external boundary response)."""
     result = Mock()
     result.success = success
@@ -42,7 +40,7 @@ class TestsFlextTapLdapClient:
     def make_client(
         self,
         monkeypatch: pytest.MonkeyPatch,
-    ) -> ClientFactory:
+    ) -> t.ClientFactory:
         """Build a client whose external FlextLdap boundary returns a fixed result."""
 
         def _make(
@@ -89,7 +87,7 @@ class TestsFlextTapLdapClient:
     )
     def test_server_uri_reflects_host_port_and_ssl(
         self,
-        make_client: ClientFactory,
+        make_client: t.ClientFactory,
         host: str,
         port: int,
         use_ssl: bool,
@@ -102,7 +100,7 @@ class TestsFlextTapLdapClient:
 
     def test_convenience_kwargs_populate_public_connection_fields(
         self,
-        make_client: ClientFactory,
+        make_client: t.ClientFactory,
     ) -> None:
         """Convenience keyword construction exposes connection state publicly."""
         client = make_client(
@@ -151,7 +149,7 @@ class TestsFlextTapLdapClient:
 
     def test_default_construction_uses_default_port_and_page_size(
         self,
-        make_client: ClientFactory,
+        make_client: t.ClientFactory,
     ) -> None:
         """Omitted connection kwargs fall back to documented defaults."""
         client = make_client(host="only-host", port=c.Ldap.PORT)
@@ -161,7 +159,7 @@ class TestsFlextTapLdapClient:
 
     def test_search_returns_normalized_entry_mappings(
         self,
-        make_client: ClientFactory,
+        make_client: t.ClientFactory,
     ) -> None:
         """Search returns the backend entries normalized into JSON mappings."""
         client = make_client(
@@ -188,9 +186,9 @@ class TestsFlextTapLdapClient:
     )
     def test_search_returns_empty_when_backend_has_no_usable_result(
         self,
-        make_client: ClientFactory,
+        make_client: t.ClientFactory,
         success: bool,
-        entries: list[Entry] | None,
+        entries: list[t.Entry] | None,
     ) -> None:
         """Search yields an empty list when the backend reports no data."""
         client = make_client(
@@ -201,7 +199,7 @@ class TestsFlextTapLdapClient:
 
     def test_search_raises_runtime_error_when_backend_search_fails(
         self,
-        make_client: ClientFactory,
+        make_client: t.ClientFactory,
     ) -> None:
         """A backend failure surfaces as a RuntimeError, never a silent value."""
         client = make_client(search_error=ValueError("backend exploded"))
@@ -211,7 +209,7 @@ class TestsFlextTapLdapClient:
 
     def test_health_check_reports_healthy_when_connection_succeeds(
         self,
-        make_client: ClientFactory,
+        make_client: t.ClientFactory,
     ) -> None:
         """health_check reflects a successful backend probe as healthy."""
         client = make_client(
@@ -227,7 +225,7 @@ class TestsFlextTapLdapClient:
 
     def test_health_check_reports_unhealthy_when_connection_fails(
         self,
-        make_client: ClientFactory,
+        make_client: t.ClientFactory,
     ) -> None:
         """health_check reflects a failed backend probe as unhealthy."""
         client = make_client(
@@ -242,7 +240,7 @@ class TestsFlextTapLdapClient:
     @pytest.mark.parametrize("backend_success", [True, False])
     def test_test_connection_returns_backend_success_flag(
         self,
-        make_client: ClientFactory,
+        make_client: t.ClientFactory,
         backend_success: bool,
     ) -> None:
         """test_connection returns the backend probe's success flag."""
@@ -254,7 +252,7 @@ class TestsFlextTapLdapClient:
 
     def test_test_connection_returns_false_when_backend_raises(
         self,
-        make_client: ClientFactory,
+        make_client: t.ClientFactory,
     ) -> None:
         """test_connection degrades a backend exception to False."""
         client = make_client(search_error=RuntimeError("no route to host"))
@@ -263,7 +261,7 @@ class TestsFlextTapLdapClient:
 
     def test_oracle_search_enriches_entries_in_oid_mode(
         self,
-        make_client: ClientFactory,
+        make_client: t.ClientFactory,
     ) -> None:
         """Oracle OID mode maps orclPassword onto userPassword in the results."""
         client = make_client(
@@ -291,7 +289,7 @@ class TestsFlextTapLdapClient:
 
     def test_oracle_search_passthrough_without_oid_mode(
         self,
-        make_client: ClientFactory,
+        make_client: t.ClientFactory,
     ) -> None:
         """Without OID mode the entries are returned without Oracle enrichment."""
         client = make_client(
@@ -319,7 +317,7 @@ class TestsFlextTapLdapClient:
 
     def test_oracle_search_returns_empty_inside_running_event_loop(
         self,
-        make_client: ClientFactory,
+        make_client: t.ClientFactory,
     ) -> None:
         """Oracle search refuses to run inside an active event loop and returns []."""
         client = make_client(

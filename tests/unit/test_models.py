@@ -16,7 +16,7 @@ from collections.abc import Callable
 import pytest
 from pydantic import ValidationError
 
-from flext_tap_ldap.constants import c
+from flext_tap_ldap import c
 from flext_tap_ldap.models import FlextTapLdapModels
 
 _TapLdap = FlextTapLdapModels.TapLdap
@@ -197,7 +197,7 @@ class TestsFlextTapLdapModelsUnit:
         )
 
         with pytest.raises(ValidationError):
-            params.host = "other"
+            setattr(params, "host", "other")
 
     def test_connection_params_round_trip_through_model_dump(self) -> None:
         original = _TapLdap.LdapConnectionParams(

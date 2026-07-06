@@ -22,8 +22,6 @@ if TYPE_CHECKING:
 
     from flext_meltano.services.abstractions import FlextMeltanoAbstractions as Tap
 
-logger = u.fetch_logger(__name__)
-
 
 class FlextTapLdapStreams:
     """Unified streams class for LDAP tap operations with complete stream management.
@@ -111,7 +109,9 @@ class FlextTapLdapStreams:
                 else None
             )
             if base_dn is not None:
-                logger.debug("LDAP base stream received context base DN: %s", base_dn)
+                u.fetch_logger(__name__).debug(
+                    "LDAP base stream received context base DN: %s", base_dn
+                )
             return []
 
         def _create_ldap_client(self) -> None:
@@ -176,7 +176,9 @@ class FlextTapLdapStreams:
                 return _run__create_ldap_client()
             except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                 err_msg = str(e)
-                logger.warning("Failed to create LDAP client: %s", err_msg)
+                u.fetch_logger(__name__).warning(
+                    "Failed to create LDAP client: %s", err_msg
+                )
                 self.client = None
 
         def _search_ldap(
@@ -213,7 +215,9 @@ class FlextTapLdapStreams:
                     )
                 ]
                 if not results:
-                    logger.info("No results found for filter: %s", search_filter)
+                    u.fetch_logger(__name__).info(
+                        "No results found for filter: %s", search_filter
+                    )
                     return []
                 return results
 
@@ -273,7 +277,7 @@ class FlextTapLdapStreams:
                 if context is not None
                 else None
             )
-            logger.info("Extracting LDAP users")
+            u.fetch_logger(__name__).info("Extracting LDAP users")
             raw_filter = self.settings.get("user_filter", "(objectClass=inetOrgPerson)")
             user_filter = u.to_optional_str(raw_filter) or "(objectClass=inetOrgPerson)"
             user_attributes = [
@@ -360,7 +364,7 @@ class FlextTapLdapStreams:
                 if context is not None
                 else None
             )
-            logger.info("Extracting LDAP groups")
+            u.fetch_logger(__name__).info("Extracting LDAP groups")
             raw_group_filter = self.settings.get(
                 "group_filter",
                 "(objectClass=groupOfNames)",
@@ -432,7 +436,7 @@ class FlextTapLdapStreams:
                 if context is not None
                 else None
             )
-            logger.info("Extracting LDAP organizational units")
+            u.fetch_logger(__name__).info("Extracting LDAP organizational units")
             ou_filter = "(objectClass=organizationalUnit)"
             ou_attributes = [
                 "ou",
@@ -505,7 +509,7 @@ class FlextTapLdapStreams:
                 if context is not None
                 else None
             )
-            logger.info("Extracting LDAP schema")
+            u.fetch_logger(__name__).info("Extracting LDAP schema")
             schema_filter = "(objectClass=schema)"
             schema_attributes = [
                 "cn",
@@ -534,7 +538,7 @@ class FlextTapLdapStreams:
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                     err_msg = str(e)
                     last_error = err_msg
-                    logger.debug(
+                    u.fetch_logger(__name__).debug(
                         "Schema search failed for base DN '%s': %s",
                         base_dn,
                         err_msg,
@@ -543,7 +547,7 @@ class FlextTapLdapStreams:
             if last_error is not None:
                 msg = f"LDAP schema search failed: {last_error}"
                 raise RuntimeError(msg)
-            logger.info("No LDAP schema records found")
+            u.fetch_logger(__name__).info("No LDAP schema records found")
 
 
 __all__: list[str] = ["FlextTapLdapStreams"]
