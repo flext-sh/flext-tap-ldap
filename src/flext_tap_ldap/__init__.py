@@ -19,7 +19,7 @@ from flext_tap_ldap.__version__ import (
 
 if TYPE_CHECKING:
     from flext_ldap import d, e, h, r, s, x
-    from flext_tap_ldap.api import FlextTapLdapService
+    from flext_tap_ldap.api import FlextTapLdapService, tap_ldap
     from flext_tap_ldap.constants import FlextTapLdapConstants, c
     from flext_tap_ldap.models import FlextTapLdapModels, m
     from flext_tap_ldap.protocols import FlextTapLdapProtocols, p
