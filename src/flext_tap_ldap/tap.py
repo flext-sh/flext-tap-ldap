@@ -152,7 +152,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
                 key_properties=(),
             )
             if entry_result.failure:
-                return r[t.JsonMapping].fail(  # type: ignore[no-any-return]
+                return r[t.JsonMapping].fail(
                     entry_result.error or "Failed to build LDAP Singer catalog entry",
                 )
             streams_list.append(entry_result.value)
@@ -169,7 +169,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
                 {"streams": stream_catalog.get("streams", [])},
             )
         )
-        return r[t.JsonMapping].ok(stream_catalog_payload)  # type: ignore[no-any-return]
+        return r[t.JsonMapping].ok(stream_catalog_payload)
 
     @override
     def execute(self) -> p.Result[t.JsonMapping]:
@@ -186,7 +186,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             if discover_result.success
             else c.Meltano.StreamStatus.FAILED
         )
-        return r[t.JsonMapping].ok({  # type: ignore[no-any-return]
+        return r[t.JsonMapping].ok({
             "status": status,
             "tap_name": self.name,
             "streams_discovered": discover_result.success,
