@@ -54,7 +54,9 @@ class FlextTapLdapConstants(c, FlextLdapConstants):
                 objtype: type | None = None,
             ) -> click.Command:
                 utilities_module = importlib.import_module("flext_tap_ldap.utilities")
-                return utilities_module.FlextTapLdapUtilities.build_cli_command()
+                utilities_builder = utilities_module.FlextTapLdapUtilities
+                command: click.Command = utilities_builder.build_cli_command()
+                return command
 
         DEFAULT_PAGE_SIZE: Final[int] = 1000
         DEFAULT_SEARCH_TIMEOUT: Final[int] = FlextLdapConstants.Ldap.TIMEOUT
