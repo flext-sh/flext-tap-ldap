@@ -91,7 +91,7 @@ class FlextTapLdapStreams:
             self.name = name
             self.tap_stream_id = name or "ldap_stream"
             self.schema = schema or {}
-            self.settings: t.JsonMapping = getattr(tap, "tap_config", {})
+            getattr(tap, "tap_config", {})
             self.client: FlextTapLdapClient.LDAPClient | None = None
             self.tap = tap
             self._create_ldap_client()
@@ -118,7 +118,7 @@ class FlextTapLdapStreams:
             """Create LDAP client from tap configuration."""
 
             def _run__create_ldap_client() -> None:
-                raw_connection = self.settings.get("connection", {})
+                raw_connection = settings.get("connection", {})
                 connection_config = (
                     FlextTapLdapStreams.LDAPBaseStream.parse_connection_config(
                         raw_connection,
@@ -127,7 +127,7 @@ class FlextTapLdapStreams:
                 if not connection_config.host:
                     msg = "LDAP connection host is required"
                     raise ValueError(msg)
-                page_size_raw = self.settings.get("page_size", 1000)
+                page_size_raw = settings.get("page_size", 1000)
                 page_size = u.to_positive_int(
                     page_size_raw,
                     default=c.TapLdap.DEFAULT_PAGE_SIZE,
@@ -198,7 +198,7 @@ class FlextTapLdapStreams:
             ) -> t.SequenceOf[t.JsonMapping]:
                 nonlocal base_dn
                 if base_dn is None:
-                    raw_conn = self.settings.get("connection", {})
+                    raw_conn = settings.get("connection", {})
                     connection_config = (
                         FlextTapLdapStreams.LDAPBaseStream.parse_connection_config(
                             raw_conn,
@@ -278,7 +278,7 @@ class FlextTapLdapStreams:
                 else None
             )
             u.fetch_logger(__name__).info("Extracting LDAP users")
-            raw_filter = self.settings.get("user_filter", "(objectClass=inetOrgPerson)")
+            raw_filter = settings.get("user_filter", "(objectClass=inetOrgPerson)")
             user_filter = u.to_optional_str(raw_filter) or "(objectClass=inetOrgPerson)"
             user_attributes = [
                 "uid",
@@ -365,7 +365,7 @@ class FlextTapLdapStreams:
                 else None
             )
             u.fetch_logger(__name__).info("Extracting LDAP groups")
-            raw_group_filter = self.settings.get(
+            raw_group_filter = settings.get(
                 "group_filter",
                 "(objectClass=groupOfNames)",
             )

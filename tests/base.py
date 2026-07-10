@@ -17,7 +17,6 @@ class TestsFlextTapLdapServiceBase(tests_s):
     @override
     def fetch_settings(cls) -> TestsFlextTapLdapSettings:
         """Return the typed Tap LDAP+Tests settings singleton."""
-        settings: TestsFlextTapLdapSettings = TestsFlextTapLdapSettings.fetch_global()
         return settings
 
     @classmethod

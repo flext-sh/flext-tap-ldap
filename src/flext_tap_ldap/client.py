@@ -51,7 +51,7 @@ class FlextTapLdapClient:
                 )
             """
             self._flext_api: p.Ldap.LdapClient
-            self.config: m.Ldap.ConnectionConfig
+            config: m.Ldap.ConnectionConfig
             self.host: str
             self.port: int
             self.bind_dn: str | None
@@ -258,7 +258,6 @@ class FlextTapLdapClient:
             client_config: m.Ldap.ConnectionConfig,
         ) -> None:
             """Initialize the ldap API with the given configuration."""
-            self.config = client_config
             self._flext_api = FlextLdap()
             self.host = client_config.host
             self.port = client_config.port

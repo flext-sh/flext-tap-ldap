@@ -14,8 +14,8 @@ from typing import ClassVar, override
 
 from flext_meltano.services.abstractions import FlextMeltanoAbstractions
 from flext_tap_ldap import c, m, p, r, t, u
+from flext_tap_ldap._settings import FlextTapLdapSettings
 from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
-from flext_tap_ldap.settings import FlextTapLdapSettings
 from flext_tap_ldap.streams import FlextTapLdapStreams
 
 
