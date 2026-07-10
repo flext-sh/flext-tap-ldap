@@ -79,12 +79,11 @@ _LAZY_IMPORTS = build_lazy_import_map(
 
 
 __all__: tuple[str, ...] = (
-    "FlextTapLdapSettings",
-    "settings",
     "FlextTapLdapConstants",
     "FlextTapLdapModels",
     "FlextTapLdapProtocols",
     "FlextTapLdapService",
+    "FlextTapLdapSettings",
     "FlextTapLdapTap",
     "FlextTapLdapTypes",
     "FlextTapLdapUtilities",
@@ -104,6 +103,7 @@ __all__: tuple[str, ...] = (
     "p",
     "r",
     "s",
+    "settings",
     "t",
     "tap_ldap",
     "u",
