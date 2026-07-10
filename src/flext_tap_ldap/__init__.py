@@ -19,6 +19,10 @@ from flext_tap_ldap.__version__ import (
 
 if TYPE_CHECKING:
     from flext_ldap import d as d, e as e, h as h, r as r, s as s, x as x
+    from flext_tap_ldap._settings import (
+        FlextTapLdapSettings as FlextTapLdapSettings,
+        settings as settings,
+    )
     from flext_tap_ldap.api import (
         FlextTapLdapService as FlextTapLdapService,
         tap_ldap as tap_ldap,
