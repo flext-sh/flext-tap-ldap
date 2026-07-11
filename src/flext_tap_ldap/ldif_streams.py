@@ -60,13 +60,17 @@ class FlextTapLdapLdifStreams:
         """
 
         primary_keys: ClassVar[t.StrSequence] = ["dn"]
+        # NOTE (multi-agent): mro-rn88 — declare the tap config attribute (set in __init__).
+        _config: t.JsonMapping
 
         def __init__(self, tap: FlextMeltanoAbstractions) -> None:
             """Initialize LDIF stream with library delegation."""
             self.name = "ldif_entries"
             self.tap_stream_id = "ldif_entries"
             self.tap = tap
-            t.Cli.JSON_MAPPING_ADAPTER.validate_python(
+            # NOTE (multi-agent): mro-rn88 — retain the validated tap config; methods read
+            # self._config.get(...) (was an undefined bare `settings`).
+            self._config: t.JsonMapping = t.Cli.JSON_MAPPING_ADAPTER.validate_python(
                 getattr(tap, "tap_config", {}),
             )
             self._ldif_api = ldif()
@@ -105,9 +109,9 @@ class FlextTapLdapLdifStreams:
             """Get LDIF records using flext-ldif processing."""
             _ = context
             self.logger.info("Processing LDIF files using flext-ldif library")
-            raw_files = settings.get("ldif_files", [])
+            raw_files = self._config.get("ldif_files", [])
             ldif_files = FlextTapLdapLdifStreams._as_object_list(raw_files)
-            ldif_directory = settings.get("ldif_directory")
+            ldif_directory = self._config.get("ldif_directory")
             if ldif_files:
                 for ldif_file in ldif_files:
                     yield from self._process_ldif_file(str(ldif_file))
@@ -157,7 +161,7 @@ class FlextTapLdapLdifStreams:
             if not directory.exists() or not directory.is_dir():
                 self.logger.warning("LDIF directory not found: %s", ldif_directory)
                 return []
-            pattern_raw = settings.get("ldif_file_pattern", "*.ldif")
+            pattern_raw = self._config.get("ldif_file_pattern", "*.ldif")
             pattern = pattern_raw if isinstance(pattern_raw, str) else "*.ldif"
             files = [path for path in directory.rglob(pattern) if path.is_file()]
             files.sort()
@@ -175,8 +179,8 @@ class FlextTapLdapLdifStreams:
             return []
 
         def _process_ldap_directory(self) -> Iterator[t.JsonMapping]:
-            host_raw = settings.get("ldap_host")
-            base_dn_raw = settings.get("ldap_base_dn")
+            host_raw = self._config.get("ldap_host")
+            base_dn_raw = self._config.get("ldap_base_dn")
             if not isinstance(host_raw, str) or not host_raw:
                 return iter(())
             if not isinstance(base_dn_raw, str) or not base_dn_raw:
@@ -221,13 +225,16 @@ class FlextTapLdapLdifStreams:
         """
 
         primary_keys: ClassVar[t.StrSequence] = ["analysis_id"]
+        # NOTE (multi-agent): mro-rn88 — declare the tap config attribute (set in __init__).
+        _config: t.JsonMapping
 
         def __init__(self, tap: FlextMeltanoAbstractions) -> None:
             """Initialize LDIF analysis stream with library delegation."""
             self.name = "ldif_analysis"
             self.tap_stream_id = "ldif_analysis"
             self.tap = tap
-            t.Cli.JSON_MAPPING_ADAPTER.validate_python(
+            # NOTE (multi-agent): mro-rn88 — retain the validated tap config (see above).
+            self._config: t.JsonMapping = t.Cli.JSON_MAPPING_ADAPTER.validate_python(
                 getattr(tap, "tap_config", {}),
             )
             self._ldif_api = ldif()
@@ -268,9 +275,9 @@ class FlextTapLdapLdifStreams:
             """Get analysis records using flext-ldif analysis capabilities."""
             _ = context
             self.logger.info("Generating LDIF analysis using flext-ldif library")
-            raw_files = settings.get("ldif_files", [])
+            raw_files = self._config.get("ldif_files", [])
             ldif_files = FlextTapLdapLdifStreams._as_object_list(raw_files)
-            ldif_directory = settings.get("ldif_directory")
+            ldif_directory = self._config.get("ldif_directory")
             try:
                 summary = self._build_analysis_summary(ldif_files, ldif_directory)
             except c.Meltano.SINGER_SAFE_EXCEPTIONS:
@@ -411,7 +418,7 @@ class FlextTapLdapLdifStreams:
             if not directory.exists() or not directory.is_dir():
                 self.logger.warning("LDIF directory not found: %s", ldif_directory)
                 return []
-            pattern_raw = settings.get("ldif_file_pattern", "*.ldif")
+            pattern_raw = self._config.get("ldif_file_pattern", "*.ldif")
             pattern = pattern_raw if isinstance(pattern_raw, str) else "*.ldif"
             files = [path for path in directory.rglob(pattern) if path.is_file()]
             files.sort()

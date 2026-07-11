@@ -51,7 +51,9 @@ class FlextTapLdapClient:
                 )
             """
             self._flext_api: p.Ldap.LdapClient
-            config: m.Ldap.ConnectionConfig
+            # NOTE (multi-agent): mro-rn88 — expose the resolved ConnectionConfig as
+            # self.config (was an unassigned bare annotation); set in _initialize_flext_api.
+            self.config: m.Ldap.ConnectionConfig
             self.host: str
             self.port: int
             self.bind_dn: str | None
@@ -267,6 +269,7 @@ class FlextTapLdapClient:
             self.password = client_config.bind_password
             self.use_ssl = client_config.use_ssl
             self.timeout = client_config.timeout
+            self.config = client_config
 
         def _perform_search(
             self,
