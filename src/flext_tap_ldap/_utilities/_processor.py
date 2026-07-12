@@ -88,7 +88,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                         self.attributes[name].extend(list(value))
 
             def resolve_attribute_values(self, name: str) -> t.StrSequence:
-                """The attribute values by name (case-insensitive)."""
+                """Return the attribute values by name (case-insensitive)."""
                 for attr_name, values in self.attributes.items():
                     if attr_name.lower() == name.lower():
                         return values
@@ -187,7 +187,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 return self._parsed_flext_entry(self._entry_ldif_content())
 
             def flext_entry(self) -> m.Ldif.Entry:
-                """The canonical flext-ldif entry."""
+                """Return the canonical flext-ldif entry."""
                 return self._flext_entry
 
         class Processor:
@@ -276,7 +276,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 ]
 
             def statistics(self) -> t.JsonMapping:
-                """The parsing statistics."""
+                """Return the parsing statistics."""
                 error_messages: t.JsonValueList = list(self.errors)
                 result: t.JsonDict = {
                     "processed_entries": self.processed_entries,
@@ -535,7 +535,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 self._api = ldif()
 
             def validation_results(self) -> t.JsonMapping:
-                """The validation results."""
+                """Return the validation results."""
                 errors_payload: t.JsonValueList = list(self.validation_errors)
                 warnings_payload: t.JsonValueList = list(self.warnings)
                 result: t.JsonDict = {
