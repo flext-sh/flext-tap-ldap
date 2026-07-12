@@ -217,7 +217,7 @@ python-interpreter-path = "../.venv/bin/python"
 python-version = "3.13"
 search-path = [
   ".",
-  "../flext-cli/examples",
+  # mro-f1fe (agent: kimi-sweep): removed stale search-path to migrated examples (legado/)
   "../flext-cli/src",
   "../flext-core/examples",
   "../flext-core/scripts",
@@ -225,9 +225,7 @@ search-path = [
   "../flext-infra/src",
   "../flext-infra/tmp_flow_test",
   "../flext-ldap/src",
-  "../flext-ldif/examples",
   "../flext-ldif/src",
-  "../flext-meltano/examples",
   "../flext-meltano/src",
   "../flext-tests/src",
   "src",
