@@ -16,8 +16,7 @@ from click.testing import CliRunner
 
 from flext_cli import u as cli_u
 from flext_tap_ldap import c
-from tests.typings import t
-from tests.utilities import u
+from tests import t, u
 
 if TYPE_CHECKING:
     from pathlib import Path

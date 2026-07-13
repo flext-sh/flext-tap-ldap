@@ -19,10 +19,10 @@ from flext_tests import FlextTestsUtilities
 from flext_core import FlextUtilities
 from flext_ldap.adapters import FlextLdapLdap3Wrappers
 from flext_tap_ldap import FlextTapLdapUtilities
-from tests.constants import c
+from tests import c
 
 if TYPE_CHECKING:
-    from tests.protocols import p
+    from tests import p
 
 
 class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):

@@ -17,7 +17,7 @@ import flext_tap_ldap.client as client_module
 from flext_ldap import FlextLdap
 from flext_tap_ldap import c, m
 from flext_tap_ldap.client import FlextTapLdapClient
-from tests.typings import t
+from tests import t
 
 __all__: tuple[str, ...] = ("TestsFlextTapLdapClient",)
 

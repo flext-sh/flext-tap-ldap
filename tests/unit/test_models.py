@@ -16,8 +16,7 @@ from collections.abc import Callable
 import pytest
 from pydantic import ValidationError
 
-from flext_tap_ldap import c
-from flext_tap_ldap.models import FlextTapLdapModels
+from flext_tap_ldap import FlextTapLdapModels, c
 
 _TapLdap = FlextTapLdapModels.TapLdap
 _Params = _TapLdap.LdapConnectionParams

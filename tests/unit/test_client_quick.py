@@ -16,8 +16,7 @@ import pytest
 
 from flext_ldap import FlextLdap
 from flext_tap_ldap.client import FlextTapLdapClient
-from tests.typings import t
-from tests.utilities import u
+from tests import t, u
 
 __all__: t.StrSequence = ("TestsFlextTapLdapClientQuick",)
 

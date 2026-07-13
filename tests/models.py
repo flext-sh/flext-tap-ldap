@@ -16,7 +16,7 @@ from typing import Annotated
 from flext_tests import FlextTestsModels
 
 from flext_tap_ldap import FlextTapLdapModels, t
-from tests.utilities import u
+from tests import u
 
 
 class TestsFlextTapLdapModels(FlextTestsModels, FlextTapLdapModels):

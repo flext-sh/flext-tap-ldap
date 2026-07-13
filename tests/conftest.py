@@ -11,11 +11,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from tests.constants import c
-from tests.models import m
+from tests import c, m
 
 if TYPE_CHECKING:
-    from tests.typings import t
+    from tests import t
 
 
 @pytest.fixture
