@@ -30,7 +30,6 @@ if TYPE_CHECKING:
 class FlextTapLdapUtilitiesProcessorMixin:
     """Mixin providing LDIF processing utilities for u.TapLdap namespace."""
 
-    _DEFAULT_ENTRY_METADATA = m.Ldif.EntryMetadata()
     logger = core_u.fetch_logger(__name__)
 
     class TapLdap:
@@ -117,7 +116,6 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 """Parse DN into components using flext-ldif DN parsing."""
                 dn_obj = FlextTapLdapUtilitiesProcessorMixin.TapLdap.DistinguishedName(
                     value=self.dn,
-                    metadata=FlextTapLdapUtilitiesProcessorMixin._DEFAULT_ENTRY_METADATA,
                 )
                 return {"dn": self.dn, "components": dn_obj.value}
 

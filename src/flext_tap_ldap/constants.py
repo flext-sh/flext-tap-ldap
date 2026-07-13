@@ -7,11 +7,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import importlib
 from enum import StrEnum, unique
 from typing import TYPE_CHECKING, Final
-
-import click
 
 from flext_ldap import FlextLdapConstants
 from flext_meltano import c
@@ -39,24 +36,6 @@ class FlextTapLdapConstants(c, FlextLdapConstants):
         Meltano-generic constants are inherited from c.Meltano via MRO:
         - c.DEFAULT_BATCH_SIZE (page size)
         """
-
-        class _CliCommandDescriptor:
-            """Lazy descriptor that builds the tap CLI command on first access.
-
-            Defers construction until first access to avoid an import cycle:
-            ``FlextTapLdapUtilities.build_cli_command`` needs ``FlextTapLdapTap``,
-            while ``tap`` imports the project facades.
-            """
-
-            def __get__(
-                self,
-                obj: object | None,
-                objtype: type | None = None,
-            ) -> click.Command:
-                utilities_module = importlib.import_module("flext_tap_ldap.utilities")
-                utilities_builder = utilities_module.FlextTapLdapUtilities
-                command: click.Command = utilities_builder.build_cli_command()
-                return command
 
         DEFAULT_PAGE_SIZE: Final[int] = 1000
         DEFAULT_SEARCH_TIMEOUT: Final[int] = FlextLdapConstants.Ldap.TIMEOUT
@@ -91,8 +70,6 @@ class FlextTapLdapConstants(c, FlextLdapConstants):
             """LDAP search configuration."""
 
             DEFAULT_SCOPE: Final[str] = "SUBTREE"
-
-        CLI_COMMAND = _CliCommandDescriptor()
 
 
 c = FlextTapLdapConstants

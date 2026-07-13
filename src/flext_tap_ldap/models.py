@@ -37,6 +37,25 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
     class TapLdap:
         """Tap LDAP namespace for cross-project access."""
 
+        class CliRequest(m.Value):
+            """Validated Singer-compatible root command parameters."""
+
+            config_path: Annotated[
+                t.FilePath,
+                u.Field(alias="config", description="Existing tap config file"),
+            ]
+            discover: Annotated[
+                bool, u.Field(description="Emit the discovered Singer catalog")
+            ] = False
+            catalog_path: Annotated[
+                t.FilePath | None,
+                u.Field(None, alias="catalog", description="Existing catalog file"),
+            ] = None
+            state_path: Annotated[
+                t.FilePath | None,
+                u.Field(None, alias="state", description="Existing state file"),
+            ] = None
+
         # ── Domain Events ────────────────────────────────────────────────────
 
         # ── Config Parameter Objects ─────────────────────────────────────────
