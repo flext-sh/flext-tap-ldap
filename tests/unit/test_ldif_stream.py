@@ -11,6 +11,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 import pytest
+from flext_tests import tm
 
 from flext_tap_ldap import t
 from flext_tap_ldap.ldif_streams import FlextTapLdapLdifStreams
@@ -57,10 +58,10 @@ class TestsFlextTapLdapLdifStream:
         """LdifStream advertises its Singer stream identity and primary key."""
         stream = FlextTapLdapLdifStreams.LdifStream(make_tap({}))
 
-        assert stream.name == "ldif_entries"
-        assert stream.tap_stream_id == "ldif_entries"
-        assert stream.primary_keys == ["dn"]
-        assert stream.schema["type"] == "object"
+        tm.that(stream.name, eq="ldif_entries")
+        tm.that(stream.tap_stream_id, eq="ldif_entries")
+        tm.that(stream.primary_keys, eq=["dn"])
+        tm.that(stream.schema["type"], eq="object")
 
     def test_analysis_stream_exposes_singer_identity_contract(
         self,
@@ -69,10 +70,10 @@ class TestsFlextTapLdapLdifStream:
         """LdifAnalysisStream advertises its own identity and primary key."""
         stream = FlextTapLdapLdifStreams.LdifAnalysisStream(make_tap({}))
 
-        assert stream.name == "ldif_analysis"
-        assert stream.tap_stream_id == "ldif_analysis"
-        assert stream.primary_keys == ["analysis_id"]
-        assert stream.schema["type"] == "object"
+        tm.that(stream.name, eq="ldif_analysis")
+        tm.that(stream.tap_stream_id, eq="ldif_analysis")
+        tm.that(stream.primary_keys, eq=["analysis_id"])
+        tm.that(stream.schema["type"], eq="object")
 
     def test_get_records_emits_one_record_per_ldif_entry(
         self,
@@ -87,10 +88,13 @@ class TestsFlextTapLdapLdifStream:
         records = list(stream.get_records())
 
         dns = {record["dn"] for record in records}
-        assert dns == {
-            "uid=jdoe,ou=people,dc=example,dc=com",
-            "cn=admins,ou=groups,dc=example,dc=com",
-        }
+        tm.that(
+            dns,
+            eq={
+                "uid=jdoe,ou=people,dc=example,dc=com",
+                "cn=admins,ou=groups,dc=example,dc=com",
+            },
+        )
 
     def test_get_records_projects_expected_record_fields(
         self,
@@ -108,10 +112,10 @@ class TestsFlextTapLdapLdifStream:
             if record["dn"] == "uid=jdoe,ou=people,dc=example,dc=com"
         )
 
-        assert set(user) == {"dn", "entry_type", "object_classes", "attributes"}
-        assert user["entry_type"] == "user"
-        assert user["object_classes"] == ["inetOrgPerson"]
-        assert isinstance(user["attributes"], dict)
+        tm.that(set(user), eq={"dn", "entry_type", "object_classes", "attributes"})
+        tm.that(user["entry_type"], eq="user")
+        tm.that(user["object_classes"], eq=["inetOrgPerson"])
+        tm.that(user["attributes"], is_=dict)
 
     @pytest.mark.parametrize(
         ("dn", "object_class", "expected_type"),
@@ -141,7 +145,7 @@ class TestsFlextTapLdapLdifStream:
 
         records = list(stream.get_records())
 
-        assert [record["entry_type"] for record in records] == [expected_type]
+        tm.that([record["entry_type"] for record in records], eq=[expected_type])
 
     def test_get_records_is_repeatable(
         self,
@@ -156,7 +160,7 @@ class TestsFlextTapLdapLdifStream:
         first = [record["dn"] for record in stream.get_records()]
         second = [record["dn"] for record in stream.get_records()]
 
-        assert first == second
+        tm.that(first, eq=second)
 
     def test_get_records_yields_nothing_without_ldif_sources(
         self,
@@ -165,7 +169,7 @@ class TestsFlextTapLdapLdifStream:
         """With no LDIF files or directory, no LDIF records are produced."""
         stream = FlextTapLdapLdifStreams.LdifStream(make_tap({}))
 
-        assert list(stream.get_records()) == []
+        tm.that(list(stream.get_records()), eq=[])
 
     def test_get_records_yields_nothing_for_empty_directory(
         self,
@@ -177,7 +181,7 @@ class TestsFlextTapLdapLdifStream:
             make_tap({"ldif_directory": str(tmp_path)}),
         )
 
-        assert list(stream.get_records()) == []
+        tm.that(list(stream.get_records()), eq=[])
 
     def test_analysis_summary_aggregates_entry_counts(
         self,
@@ -191,15 +195,18 @@ class TestsFlextTapLdapLdifStream:
 
         summaries = list(stream.get_records())
 
-        assert len(summaries) == 1
+        tm.that(len(summaries), eq=1)
         summary = summaries[0]
-        assert summary["analysis_id"] == "ldif_summary"
-        assert summary["total_entries"] == 2
-        assert summary["entry_types"] == {"user": 1, "group": 1}
-        assert summary["object_classes"] == {
-            "inetOrgPerson": 1,
-            "groupOfNames": 1,
-        }
+        tm.that(summary["analysis_id"], eq="ldif_summary")
+        tm.that(summary["total_entries"], eq=2)
+        tm.that(summary["entry_types"], eq={"user": 1, "group": 1})
+        tm.that(
+            summary["object_classes"],
+            eq={
+                "inetOrgPerson": 1,
+                "groupOfNames": 1,
+            },
+        )
 
     def test_analysis_summary_reports_zero_without_sources(
         self,
@@ -210,12 +217,12 @@ class TestsFlextTapLdapLdifStream:
 
         summaries = list(stream.get_records())
 
-        assert len(summaries) == 1
+        tm.that(len(summaries), eq=1)
         summary = summaries[0]
-        assert summary["analysis_id"] == "ldif_summary"
-        assert summary["total_entries"] == 0
-        assert summary["entry_types"] == {}
-        assert summary["object_classes"] == {}
+        tm.that(summary["analysis_id"], eq="ldif_summary")
+        tm.that(summary["total_entries"], eq=0)
+        tm.that(summary["entry_types"], eq={})
+        tm.that(summary["object_classes"], eq={})
 
 
 __all__: list[str] = ["TestsFlextTapLdapLdifStream"]

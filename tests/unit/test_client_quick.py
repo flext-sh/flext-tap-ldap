@@ -13,6 +13,7 @@ from collections.abc import Generator
 from unittest.mock import Mock, patch
 
 import pytest
+from flext_tests import tm
 
 from flext_ldap import FlextLdap
 from flext_tap_ldap.client import FlextTapLdapClient
@@ -78,7 +79,7 @@ class TestsFlextTapLdapClientQuick:
     ) -> None:
         """server_uri renders ldap/ldaps scheme with the configured endpoint."""
         with self._client(host=host, port=port, use_ssl=use_ssl) as client:
-            assert client.server_uri == expected
+            tm.that(client.server_uri, eq=expected)
 
     # ---- scope normalization contract -----------------------------------
 
@@ -98,7 +99,7 @@ class TestsFlextTapLdapClientQuick:
         expected: str,
     ) -> None:
         """Unknown scopes fall back to SUBTREE; known scopes upper-case."""
-        assert u.TapLdap.ClientSupport.normalize_scope(given) == expected
+        tm.that(u.TapLdap.ClientSupport.normalize_scope(given), eq=expected)
 
     # ---- entry mapping contract -----------------------------------------
 
@@ -109,8 +110,8 @@ class TestsFlextTapLdapClientQuick:
             "attributes": {"mail": ["test@example.com"]},
         }
         result = u.TapLdap.ClientSupport.to_entry_mapping(entry)
-        assert result.success
-        assert result.value["dn"] == "uid=dict,dc=example,dc=com"
+        tm.ok(result)
+        tm.that(result.value["dn"], eq="uid=dict,dc=example,dc=com")
 
     def test_to_entry_mapping_preserves_scalar_and_list_attributes(self) -> None:
         """Both scalar and multi-valued attributes survive normalization."""
@@ -120,14 +121,14 @@ class TestsFlextTapLdapClientQuick:
             "cn": ["Test", "T. User"],
         }
         result = u.TapLdap.ClientSupport.to_entry_mapping(entry)
-        assert result.success
-        assert result.value["uid"] == "test"
-        assert result.value["cn"] == ["Test", "T. User"]
+        tm.ok(result)
+        tm.that(result.value["uid"], eq="test")
+        tm.that(result.value["cn"], eq=["Test", "T. User"])
 
     def test_to_entry_mapping_fails_on_none(self) -> None:
         """A missing entry yields a failure result, never a silent default."""
         result = u.TapLdap.ClientSupport.to_entry_mapping(None)
-        assert result.failure
+        tm.fail(result)
 
     # ---- search-result size limiting contract ---------------------------
 
@@ -149,7 +150,7 @@ class TestsFlextTapLdapClientQuick:
             entries,
             size_limit=size_limit,
         )
-        assert len(results) == expected_count
+        tm.that(len(results), eq=expected_count)
 
     def test_process_search_results_empty_input_yields_empty(self) -> None:
         """No input entries produce no output entries."""
@@ -161,7 +162,7 @@ class TestsFlextTapLdapClientQuick:
         """search() surfaces the entries produced by the LDAP backend."""
         entries: list[t.JsonMapping] = [{"dn": "uid=test,dc=test,dc=com"}]
         with self._client(search_result=self._ldap_result(entries)) as client:
-            assert client.search("dc=test,dc=com") == entries
+            tm.that(client.search("dc=test,dc=com"), eq=entries)
 
     def test_search_size_limit_truncates_returned_entries(self) -> None:
         """The size_limit argument observably bounds the returned entries."""
@@ -171,13 +172,13 @@ class TestsFlextTapLdapClientQuick:
         ]
         with self._client(search_result=self._ldap_result(entries)) as client:
             limited = client.search("dc=test,dc=com", size_limit=1)
-        assert limited == [{"dn": "uid=a,dc=test,dc=com"}]
+        tm.that(limited, eq=[{"dn": "uid=a,dc=test,dc=com"}])
 
     def test_search_returns_empty_when_backend_reports_no_success(self) -> None:
         """An unsuccessful backend response yields an empty result list."""
         result = self._ldap_result([], success=False)
         with self._client(search_result=result) as client:
-            assert client.search("dc=test,dc=com") == []
+            tm.that(client.search("dc=test,dc=com"), eq=[])
 
     # ---- test_connection() contract -------------------------------------
 
@@ -195,7 +196,7 @@ class TestsFlextTapLdapClientQuick:
     def test_test_connection_returns_false_on_backend_error(self) -> None:
         """A raising backend degrades to a False connection verdict."""
         with self._client(search_error=RuntimeError("boom")) as client:
-            assert client.test_connection() is False
+            tm.that(client.test_connection(), eq=False)
 
     # ---- health_check() contract ----------------------------------------
 
@@ -203,17 +204,17 @@ class TestsFlextTapLdapClientQuick:
         """A working connection produces a healthy, timed health report."""
         with self._client(search_result=self._ldap_result([])) as client:
             health = client.health_check()
-        assert health["status"] == "healthy"
-        assert health["connection_test"] is True
-        assert health["server_uri"] == "ldap://test.ldap.com:389"
-        assert isinstance(health["response_time_ms"], (int, float))
+        tm.that(health["status"], eq="healthy")
+        tm.that(health["connection_test"], eq=True)
+        tm.that(health["server_uri"], eq="ldap://test.ldap.com:389")
+        tm.that(health["response_time_ms"], is_=(int, float))
 
     def test_health_check_reports_unhealthy_when_connection_fails(self) -> None:
         """A failing connection produces an unhealthy report."""
         with self._client(search_error=RuntimeError("boom")) as client:
             health = client.health_check()
-        assert health["status"] == "unhealthy"
-        assert health["connection_test"] is False
+        tm.that(health["status"], eq="unhealthy")
+        tm.that(health["connection_test"], eq=False)
 
     # ---- Oracle entry normalization contract ----------------------------
 
@@ -229,8 +230,8 @@ class TestsFlextTapLdapClientQuick:
         }
         result = u.TapLdap.ClientSupport.normalize_oracle_entry(entry)
         attributes = result.get("attributes")
-        assert isinstance(attributes, dict)
-        assert attributes["userPassword"] == ["hashed_password"]
+        tm.that(attributes, is_=dict)
+        tm.that(attributes["userPassword"], eq=["hashed_password"])
 
     @pytest.mark.parametrize(
         "object_class",
@@ -247,10 +248,10 @@ class TestsFlextTapLdapClientQuick:
         }
         result = u.TapLdap.ClientSupport.normalize_oracle_entry(entry)
         attributes = result.get("attributes")
-        assert isinstance(attributes, dict)
+        tm.that(attributes, is_=dict)
         obj_classes = attributes.get("objectClass")
-        assert isinstance(obj_classes, list)
-        assert "organizationalUnit" in obj_classes
+        tm.that(obj_classes, is_=list)
+        tm.that(obj_classes, has="organizationalUnit")
 
     def test_normalize_oracle_entry_leaves_malformed_attributes_untouched(
         self,
@@ -260,7 +261,7 @@ class TestsFlextTapLdapClientQuick:
             "dn": "uid=test,dc=oracle,dc=com",
             "attributes": "not_a_dict",
         }
-        assert u.TapLdap.ClientSupport.normalize_oracle_entry(entry) == entry
+        tm.that(u.TapLdap.ClientSupport.normalize_oracle_entry(entry), eq=entry)
 
     # ---- Oracle attribute extension contract ----------------------------
 
@@ -270,7 +271,7 @@ class TestsFlextTapLdapClientQuick:
             ["uid", "cn"],
             oracle_oid_mode=True,
         )
-        assert extended is not None
+        tm.that(extended, none=False)
         assert {"uid", "cn", "orclPassword", "userPassword"} <= set(extended)
 
     def test_extend_attributes_is_noop_when_disabled(self) -> None:
@@ -309,8 +310,8 @@ class TestsFlextTapLdapClientQuick:
             oracle_oid_mode=True,
         )
         attributes = results[0].get("attributes")
-        assert isinstance(attributes, dict)
-        assert attributes["userPassword"] == ["pass1"]
+        tm.that(attributes, is_=dict)
+        tm.that(attributes["userPassword"], eq=["pass1"])
 
     def test_process_oracle_search_results_passthrough_when_disabled(self) -> None:
         """Disabled Oracle mode returns entries verbatim."""
@@ -321,7 +322,7 @@ class TestsFlextTapLdapClientQuick:
             search_results,
             oracle_oid_mode=False,
         )
-        assert list(results) == list(search_results)
+        tm.that(list(results), eq=list(search_results))
 
     # ---- search_with_oracle_support() contract --------------------------
 
@@ -340,8 +341,8 @@ class TestsFlextTapLdapClientQuick:
                 ),
             )
         attributes = results[0].get("attributes")
-        assert isinstance(attributes, dict)
-        assert attributes["userPassword"] == ["p"]
+        tm.that(attributes, is_=dict)
+        tm.that(attributes["userPassword"], eq=["p"])
 
     def test_search_with_oracle_support_refuses_inside_running_loop(self) -> None:
         """Inside an active event loop the Oracle search yields no entries."""
@@ -353,7 +354,7 @@ class TestsFlextTapLdapClientQuick:
                     oracle_oid_mode=True,
                 )
 
-            assert list(asyncio.run(_invoke())) == []
+            tm.that(list(asyncio.run(_invoke())), eq=[])
 
     # ---- delegation contract --------------------------------------------
 

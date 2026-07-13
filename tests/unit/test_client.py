@@ -12,6 +12,7 @@ from collections.abc import Sequence
 from unittest.mock import Mock
 
 import pytest
+from flext_tests import tm
 
 import flext_tap_ldap.client as client_module
 from flext_ldap import FlextLdap
@@ -96,7 +97,7 @@ class TestsFlextTapLdapClient:
         """server_uri renders the scheme, host and port from public state."""
         client = make_client(host=host, port=port, use_ssl=use_ssl)
 
-        assert client.server_uri == expected
+        tm.that(client.server_uri, eq=expected)
 
     def test_convenience_kwargs_populate_public_connection_fields(
         self,
@@ -113,13 +114,13 @@ class TestsFlextTapLdapClient:
             page_size=250,
         )
 
-        assert client.host == "h.example.com"
-        assert client.port == 636
-        assert client.use_ssl is True
-        assert client.bind_dn == "cn=admin,dc=t,dc=com"
-        assert client.password == "secret"
-        assert client.timeout == 45
-        assert client.page_size == 250
+        tm.that(client.host, eq="h.example.com")
+        tm.that(client.port, eq=636)
+        tm.that(client.use_ssl, eq=True)
+        tm.that(client.bind_dn, eq="cn=admin,dc=t,dc=com")
+        tm.that(client.password, eq="secret")
+        tm.that(client.timeout, eq=45)
+        tm.that(client.page_size, eq=250)
 
     def test_settings_model_populates_public_connection_fields(
         self,
@@ -138,13 +139,13 @@ class TestsFlextTapLdapClient:
 
         client = FlextTapLdapClient.LDAPClient(settings=settings, page_size=500)
 
-        assert client.host == "model.example.com"
-        assert client.port == 389
-        assert client.bind_dn == "cn=svc"
-        assert client.password == "pw"
-        assert client.use_ssl is False
-        assert client.timeout == 15
-        assert client.page_size == 500
+        tm.that(client.host, eq="model.example.com")
+        tm.that(client.port, eq=389)
+        tm.that(client.bind_dn, eq="cn=svc")
+        tm.that(client.password, eq="pw")
+        tm.that(client.use_ssl, eq=False)
+        tm.that(client.timeout, eq=15)
+        tm.that(client.page_size, eq=500)
         assert client.config is settings
 
     def test_default_construction_uses_default_port_and_page_size(
@@ -154,8 +155,8 @@ class TestsFlextTapLdapClient:
         """Omitted connection kwargs fall back to documented defaults."""
         client = make_client(host="only-host", port=c.Ldap.PORT)
 
-        assert client.port == c.Ldap.PORT
-        assert client.page_size == c.TapLdap.DEFAULT_PAGE_SIZE
+        tm.that(client.port, eq=c.Ldap.PORT)
+        tm.that(client.page_size, eq=c.TapLdap.DEFAULT_PAGE_SIZE)
 
     def test_search_returns_normalized_entry_mappings(
         self,
@@ -175,7 +176,7 @@ class TestsFlextTapLdapClient:
             attributes=["uid", "cn"],
         )
 
-        assert results == [{"dn": "uid=test,dc=test,dc=com", "cn": "test"}]
+        tm.that(results, eq=[{"dn": "uid=test,dc=test,dc=com", "cn": "test"}])
 
     @pytest.mark.parametrize(
         ("success", "entries"),
@@ -195,7 +196,7 @@ class TestsFlextTapLdapClient:
             search_result=_backend_result(success=success, entries=entries),
         )
 
-        assert client.search(base_dn="dc=test,dc=com") == []
+        tm.that(client.search(base_dn="dc=test,dc=com"), eq=[])
 
     def test_search_raises_runtime_error_when_backend_search_fails(
         self,
@@ -218,10 +219,10 @@ class TestsFlextTapLdapClient:
 
         health = client.health_check()
 
-        assert health["status"] == c.HealthStatus.HEALTHY.value
-        assert health["connection_test"] is True
-        assert health["server_uri"] == "ldap://test.ldap.com:389"
-        assert isinstance(health["response_time_ms"], float)
+        tm.that(health["status"], eq=c.HealthStatus.HEALTHY.value)
+        tm.that(health["connection_test"], eq=True)
+        tm.that(health["server_uri"], eq="ldap://test.ldap.com:389")
+        tm.that(health["response_time_ms"], is_=float)
 
     def test_health_check_reports_unhealthy_when_connection_fails(
         self,
@@ -234,8 +235,8 @@ class TestsFlextTapLdapClient:
 
         health = client.health_check()
 
-        assert health["status"] == c.HealthStatus.UNHEALTHY.value
-        assert health["connection_test"] is False
+        tm.that(health["status"], eq=c.HealthStatus.UNHEALTHY.value)
+        tm.that(health["connection_test"], eq=False)
 
     @pytest.mark.parametrize("backend_success", [True, False])
     def test_test_connection_returns_backend_success_flag(
@@ -257,7 +258,7 @@ class TestsFlextTapLdapClient:
         """test_connection degrades a backend exception to False."""
         client = make_client(search_error=RuntimeError("no route to host"))
 
-        assert client.test_connection() is False
+        tm.that(client.test_connection(), eq=False)
 
     def test_oracle_search_enriches_entries_in_oid_mode(
         self,
@@ -284,8 +285,8 @@ class TestsFlextTapLdapClient:
         )
 
         attributes = results[0]["attributes"]
-        assert isinstance(attributes, dict)
-        assert attributes["userPassword"] == ["secret"]
+        tm.that(attributes, is_=dict)
+        tm.that(attributes["userPassword"], eq=["secret"])
 
     def test_oracle_search_passthrough_without_oid_mode(
         self,
@@ -312,8 +313,8 @@ class TestsFlextTapLdapClient:
         )
 
         attributes = results[0]["attributes"]
-        assert isinstance(attributes, dict)
-        assert "userPassword" not in attributes
+        tm.that(attributes, is_=dict)
+        tm.that(attributes, lacks="userPassword")
 
     def test_oracle_search_returns_empty_inside_running_event_loop(
         self,
@@ -334,4 +335,4 @@ class TestsFlextTapLdapClient:
                 oracle_oid_mode=True,
             )
 
-        assert asyncio.run(run()) == []
+        tm.that(asyncio.run(run()), eq=[])

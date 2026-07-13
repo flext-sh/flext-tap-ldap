@@ -9,6 +9,7 @@ from collections.abc import (
 from typing import TYPE_CHECKING, cast
 
 import pytest
+from flext_tests import tm
 
 from flext_tap_ldap.client import FlextTapLdapClient
 from flext_tap_ldap.streams import FlextTapLdapStreams
@@ -28,14 +29,14 @@ class TestsFlextTapLdapTap:
     ) -> None:
         result = FlextTapLdapTap().discover_streams(tap_instance=ldap_source_config)
 
-        assert result.success
-        assert result.value is not None
+        tm.ok(result)
+        tm.that(result.value, none=False)
         raw_streams = result.value["streams"]
-        assert isinstance(raw_streams, list)
+        tm.that(raw_streams, is_=list)
         assert raw_streams
         for entry in raw_streams:
-            assert isinstance(entry, Mapping)
-            assert isinstance(entry["stream"], str)
+            tm.that(entry, is_=Mapping)
+            tm.that(entry["stream"], is_=str)
 
     def test_discover_streams_exposes_standard_ldap_streams(
         self,
@@ -43,10 +44,10 @@ class TestsFlextTapLdapTap:
     ) -> None:
         result = FlextTapLdapTap().discover_streams(tap_instance=ldap_source_config)
 
-        assert result.success
-        assert result.value is not None
+        tm.ok(result)
+        tm.that(result.value, none=False)
         raw_streams = result.value["streams"]
-        assert isinstance(raw_streams, list)
+        tm.that(raw_streams, is_=list)
         stream_names = {
             stream["stream"]
             for stream in raw_streams
@@ -72,7 +73,7 @@ class TestsFlextTapLdapTap:
         raw_item: t.JsonValue,
         expected: dict[str, str] | None,
     ) -> None:
-        assert FlextTapLdapTap.validate_custom_stream(raw_item) == expected
+        tm.that(FlextTapLdapTap.validate_custom_stream(raw_item), eq=expected)
 
     @pytest.fixture
     def users_stream(
@@ -114,7 +115,7 @@ class TestsFlextTapLdapTap:
     ) -> None:
         records = list(users_stream.get_records(None))
 
-        assert len(records) == len(ldap_record_entries)
+        tm.that(len(records), eq=len(ldap_record_entries))
 
     @pytest.mark.parametrize(
         ("field", "expected"),
@@ -133,18 +134,18 @@ class TestsFlextTapLdapTap:
     ) -> None:
         records = list(users_stream.get_records(None))
 
-        assert records[0][field] == expected
+        tm.that(records[0][field], eq=expected)
 
     def test_users_stream_exposes_connection_config_via_tap(
         self,
         users_stream: FlextTapLdapStreams.UsersStream,
     ) -> None:
         tap = users_stream.tap
-        assert isinstance(tap, FlextTapLdapTap)
-        assert tap.tap_config is not None
+        tm.that(tap, is_=FlextTapLdapTap)
+        tm.that(tap.tap_config, none=False)
         connection = tap.tap_config["connection"]
-        assert isinstance(connection, Mapping)
-        assert connection["host"] == c.Ldap.Tests.HOST
+        tm.that(connection, is_=Mapping)
+        tm.that(connection["host"], eq=c.Ldap.Tests.HOST)
 
 
 __all__: list[str] = ["TestsFlextTapLdapTap"]
