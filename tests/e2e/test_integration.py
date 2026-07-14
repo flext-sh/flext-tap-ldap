@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING
+from pathlib import Path
 
 import pytest
 from click.core import Command
@@ -18,9 +18,6 @@ from flext_tests import tm
 from flext_cli import u as cli_u
 from flext_tap_ldap import c
 from tests import t, u
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 STANDARD_STREAMS: tuple[str, ...] = (
     "users",

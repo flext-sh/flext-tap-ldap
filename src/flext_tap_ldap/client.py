@@ -32,10 +32,8 @@ class FlextTapLdapClient:
 
         def __init__(
             self,
-            settings: m.Ldap.ConnectionConfig | None = None,
             *,
             page_size: int = c.TapLdap.DEFAULT_PAGE_SIZE,
-            **convenience_kwargs: t.Scalar,
         ) -> None:
             """Initialize with Parameter Object Pattern (preferred).
 
@@ -52,8 +50,7 @@ class FlextTapLdapClient:
             """
             self._flext_api: p.Ldap.LdapClient
             # NOTE (multi-agent): mro-rn88 — expose the resolved ConnectionConfig as
-            # self.config (was an unassigned bare annotation); set in _initialize_flext_api.
-            self.config: m.Ldap.ConnectionConfig
+            # settings (was an unassigned bare annotation); set in _initialize_flext_api.
             self.host: str
             self.port: int
             self.bind_dn: str | None
@@ -63,12 +60,7 @@ class FlextTapLdapClient:
             self.page_size: int = page_size
             self._bind_dn: str | None
             self._password: str | None
-            client_config = (
-                settings
-                if settings is not None
-                else self._create_config_from_kwargs(**convenience_kwargs)
-            )
-            self._initialize_flext_api(client_config)
+            self._initialize_flext_api()
 
         def __getattr__(self, name: str) -> t.JsonMapping:
             """Delegate unknown attributes to the real API."""
@@ -269,7 +261,6 @@ class FlextTapLdapClient:
             self.password = client_config.bind_password
             self.use_ssl = client_config.use_ssl
             self.timeout = client_config.timeout
-            self.config = client_config
 
         def _perform_search(
             self,

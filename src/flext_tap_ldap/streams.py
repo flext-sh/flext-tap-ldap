@@ -10,17 +10,14 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, override
+from collections.abc import (
+    Iterable,
+)
+from typing import ClassVar, override
 
+from flext_meltano.services.abstractions import FlextMeltanoAbstractions as Tap
 from flext_tap_ldap import c, m, t, u
 from flext_tap_ldap.client import FlextTapLdapClient
-
-if TYPE_CHECKING:
-    from collections.abc import (
-        Iterable,
-    )
-
-    from flext_meltano.services.abstractions import FlextMeltanoAbstractions as Tap
 
 
 class FlextTapLdapStreams:

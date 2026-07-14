@@ -12,17 +12,14 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, ClassVar
+from typing import ClassVar
 
 from flext_tests import FlextTestsUtilities
 
 from flext_core import FlextUtilities
 from flext_ldap.adapters._ldap3.wrappers import FlextLdapLdap3Wrappers
 from flext_tap_ldap import FlextTapLdapUtilities
-from tests import c
-
-if TYPE_CHECKING:
-    from tests import p
+from tests import c, p
 
 
 class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):

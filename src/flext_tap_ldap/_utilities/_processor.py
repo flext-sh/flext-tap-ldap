@@ -15,16 +15,14 @@ from collections.abc import (
     Mapping,
     MutableSequence,
 )
-from typing import TYPE_CHECKING, override
+from pathlib import Path
+from typing import override
 
 from flext_ldif import ldif
 
 from flext_core import u
 from flext_ldap import u as ldap_u
 from flext_tap_ldap import c, m, p, r, t
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 
 class FlextTapLdapUtilitiesProcessorMixin:

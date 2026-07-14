@@ -5,7 +5,6 @@ from __future__ import annotations
 import importlib
 import sys
 from collections.abc import Mapping, MutableSequence, Sequence
-from typing import TYPE_CHECKING
 
 from flext_cli import cli, p as cli_p
 from flext_ldap import FlextLdapUtilities
@@ -18,9 +17,7 @@ from flext_tap_ldap._utilities.client_support import (
 from flext_tap_ldap._utilities.error_handling import (
     FlextTapLdapUtilitiesErrorHandling,
 )
-
-if TYPE_CHECKING:
-    from flext_tap_ldap.tap import FlextTapLdapTap
+from flext_tap_ldap.tap import FlextTapLdapTap
 
 
 class FlextTapLdapUtilities(

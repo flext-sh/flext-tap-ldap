@@ -7,14 +7,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import pytest
 
-from tests import c, m
-
-if TYPE_CHECKING:
-    from tests import t
+from tests import c, m, t
 
 
 @pytest.fixture

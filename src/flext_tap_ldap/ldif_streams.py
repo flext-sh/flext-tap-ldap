@@ -2,20 +2,17 @@
 
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+)
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar
+from typing import ClassVar
 
 from flext_ldif import ldif
 
+from flext_meltano.services.abstractions import FlextMeltanoAbstractions
 from flext_tap_ldap import c, m, p, r, t, u
-
-if TYPE_CHECKING:
-    from collections.abc import (
-        Iterable,
-        Iterator,
-    )
-
-    from flext_meltano.services.abstractions import FlextMeltanoAbstractions
 
 
 class FlextTapLdapLdifStreams:

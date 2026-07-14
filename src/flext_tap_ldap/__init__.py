@@ -18,69 +18,125 @@ from flext_tap_ldap.__version__ import (
 )
 
 if TYPE_CHECKING:
-    from flext_ldap import d as d, e as e, h as h, r as r, s as s, x as x
-    from flext_tap_ldap._settings import (
-        FlextTapLdapSettings as FlextTapLdapSettings,
-        settings as settings,
-    )
-    from flext_tap_ldap.api import (
-        FlextTapLdapService as FlextTapLdapService,
-        tap_ldap as tap_ldap,
-    )
-    from flext_tap_ldap.constants import (
-        FlextTapLdapConstants as FlextTapLdapConstants,
-        c as c,
-    )
-    from flext_tap_ldap.models import FlextTapLdapModels as FlextTapLdapModels, m as m
-    from flext_tap_ldap.protocols import (
-        FlextTapLdapProtocols as FlextTapLdapProtocols,
+    from flext_ldap import d, e, h, r, s, x
+
+    from ._settings import FlextTapLdapSettings, settings
+    from .api import FlextTapLdapService, tap_ldap
+    from .constants import FlextTapLdapConstants, FlextTapLdapConstants as c
+    from .models import FlextTapLdapModels, FlextTapLdapModels as m
+    from .protocols import FlextTapLdapProtocols, FlextTapLdapProtocols as p
+    from .tap import FlextTapLdapTap
+    from .typings import FlextTapLdapTypes, FlextTapLdapTypes as t
+    from .utilities import FlextTapLdapUtilities, FlextTapLdapUtilities as u
+
+    _ = (
+        c,
+        FlextTapLdapConstants,
+        t,
+        FlextTapLdapTypes,
         p,
-    )
-    from flext_tap_ldap.tap import FlextTapLdapTap as FlextTapLdapTap
-    from flext_tap_ldap.typings import FlextTapLdapTypes as FlextTapLdapTypes, t as t
-    from flext_tap_ldap.utilities import (
-        FlextTapLdapUtilities as FlextTapLdapUtilities,
+        FlextTapLdapProtocols,
+        m,
+        FlextTapLdapModels,
         u,
+        FlextTapLdapUtilities,
+        d,
+        e,
+        h,
+        r,
+        s,
+        x,
+        FlextTapLdapSettings,
+        settings,
+        FlextTapLdapService,
+        tap_ldap,
+        FlextTapLdapTap,
     )
+
+
+_LAZY_MODULES: dict[str, tuple[str, ...]] = {
+    "._settings": (
+        "FlextTapLdapSettings",
+        "settings",
+    ),
+    ".api": (
+        "FlextTapLdapService",
+        "tap_ldap",
+    ),
+    ".constants": (
+        "FlextTapLdapConstants",
+        "c",
+    ),
+    ".models": (
+        "FlextTapLdapModels",
+        "m",
+    ),
+    ".protocols": (
+        "FlextTapLdapProtocols",
+        "p",
+    ),
+    ".tap": ("FlextTapLdapTap",),
+    ".typings": (
+        "FlextTapLdapTypes",
+        "t",
+    ),
+    ".utilities": (
+        "FlextTapLdapUtilities",
+        "u",
+    ),
+    "flext_ldap": (
+        "d",
+        "e",
+        "h",
+        "r",
+        "s",
+        "x",
+    ),
+}
+
+
+_LAZY_ALIAS_GROUPS: dict[str, tuple[tuple[str, str], ...]] = {}
+
+
 _LAZY_IMPORTS = build_lazy_import_map(
-    {
-        "._settings": ("FlextTapLdapSettings", "settings"),
-        ".api": (
-            "FlextTapLdapService",
-            "tap_ldap",
-        ),
-        ".constants": (
-            "FlextTapLdapConstants",
-            "c",
-        ),
-        ".models": (
-            "FlextTapLdapModels",
-            "m",
-        ),
-        ".protocols": (
-            "FlextTapLdapProtocols",
-            "p",
-        ),
-        ".tap": ("FlextTapLdapTap",),
-        ".typings": (
-            "FlextTapLdapTypes",
-            "t",
-        ),
-        ".utilities": (
-            "FlextTapLdapUtilities",
-            "u",
-        ),
-        "flext_ldap": (
-            "d",
-            "e",
-            "h",
-            "r",
-            "s",
-            "x",
-        ),
-    },
+    _LAZY_MODULES,
+    alias_groups=_LAZY_ALIAS_GROUPS,
+    sort_keys=False,
 )
 
+_DIRECT_IMPORTS: tuple[str, ...] = (
+    "FlextTapLdapConstants",
+    "FlextTapLdapModels",
+    "FlextTapLdapProtocols",
+    "FlextTapLdapService",
+    "FlextTapLdapSettings",
+    "FlextTapLdapTap",
+    "FlextTapLdapTypes",
+    "FlextTapLdapUtilities",
+    "__author__",
+    "__author_email__",
+    "__description__",
+    "__license__",
+    "__title__",
+    "__url__",
+    "__version__",
+    "__version_info__",
+    "build_lazy_import_map",
+    "c",
+    "d",
+    "e",
+    "h",
+    "install_lazy_exports",
+    "m",
+    "p",
+    "r",
+    "s",
+    "settings",
+    "t",
+    "tap_ldap",
+    "u",
+    "x",
+)
 
 __all__: tuple[str, ...] = (
     "FlextTapLdapConstants",
