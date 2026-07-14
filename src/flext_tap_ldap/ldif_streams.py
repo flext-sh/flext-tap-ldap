@@ -95,13 +95,6 @@ class FlextTapLdapLdifStreams:
                 },
             }
 
-        @property
-        def logger(self) -> p.Logger:
-            """Lazy logger."""
-            if self._logger_instance is None:
-                self._logger_instance = u.fetch_logger(__name__)
-            return self._logger_instance
-
         def get_records(
             self,
             context: t.JsonMapping | None = None,
@@ -260,13 +253,6 @@ class FlextTapLdapLdifStreams:
                     },
                 },
             }
-
-        @property
-        def logger(self) -> p.Logger:
-            """Lazy logger."""
-            if self._logger_instance is None:
-                self._logger_instance = u.fetch_logger(__name__)
-            return self._logger_instance
 
         def get_records(
             self,
