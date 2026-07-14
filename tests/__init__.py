@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from tests.models import TestsFlextTapLdapModels as TestsFlextTapLdapModels, m as m
     from tests.protocols import (
         TestsFlextTapLdapProtocols as TestsFlextTapLdapProtocols,
-        p as p,
+        p,
     )
     from tests.settings import TestsFlextTapLdapSettings as TestsFlextTapLdapSettings
     from tests.typings import TestsFlextTapLdapTypes as TestsFlextTapLdapTypes, t as t
@@ -61,7 +61,7 @@ if TYPE_CHECKING:
     from tests.unit.test_tap import TestsFlextTapLdapTap as TestsFlextTapLdapTap
     from tests.utilities import (
         TestsFlextTapLdapUtilities as TestsFlextTapLdapUtilities,
-        u as u,
+        u,
     )
 _LAZY_IMPORTS = merge_lazy_imports(
     (

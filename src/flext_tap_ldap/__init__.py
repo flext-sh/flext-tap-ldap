@@ -34,13 +34,13 @@ if TYPE_CHECKING:
     from flext_tap_ldap.models import FlextTapLdapModels as FlextTapLdapModels, m as m
     from flext_tap_ldap.protocols import (
         FlextTapLdapProtocols as FlextTapLdapProtocols,
-        p as p,
+        p,
     )
     from flext_tap_ldap.tap import FlextTapLdapTap as FlextTapLdapTap
     from flext_tap_ldap.typings import FlextTapLdapTypes as FlextTapLdapTypes, t as t
     from flext_tap_ldap.utilities import (
         FlextTapLdapUtilities as FlextTapLdapUtilities,
-        u as u,
+        u,
     )
 _LAZY_IMPORTS = build_lazy_import_map(
     {
