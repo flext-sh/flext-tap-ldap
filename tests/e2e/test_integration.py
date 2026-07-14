@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING
 import pytest
 from click.core import Command
 from click.testing import CliRunner
+from flext_tests import tm
 
 from flext_cli import u as cli_u
 from flext_tap_ldap import c
@@ -71,7 +72,7 @@ class TestsFlextTapLdapIntegration:
 
     @staticmethod
     def _command() -> Command:
-        assert isinstance(c.TapLdap.CLI_COMMAND, Command)
+        tm.that(c.TapLdap.CLI_COMMAND, is_=Command)
         return c.TapLdap.CLI_COMMAND
 
     @pytest.fixture
@@ -131,10 +132,10 @@ class TestsFlextTapLdapIntegration:
             ["--config", str(config_file), "--discover"],
             catch_exceptions=False,
         )
-        assert result.exit_code == 0
+        tm.that(result.exit_code, eq=0)
         catalog = _extract_catalog(result.output)
-        assert "streams" in catalog
-        assert isinstance(catalog["streams"], list)
+        tm.that(catalog, has="streams")
+        tm.that(catalog["streams"], is_=list)
 
     @pytest.mark.parametrize("expected_stream", STANDARD_STREAMS)
     def test_discover_publishes_each_standard_ldap_stream(
@@ -149,8 +150,8 @@ class TestsFlextTapLdapIntegration:
             ["--config", str(config_file), "--discover"],
             catch_exceptions=False,
         )
-        assert result.exit_code == 0
-        assert expected_stream in _stream_ids(_extract_catalog(result.output))
+        tm.that(result.exit_code, eq=0)
+        tm.that(_stream_ids(_extract_catalog(result.output)), has=expected_stream)
 
     def test_discover_includes_custom_streams_from_config(
         self,
@@ -177,11 +178,11 @@ class TestsFlextTapLdapIntegration:
             ["--config", str(config_path), "--discover"],
             catch_exceptions=False,
         )
-        assert result.exit_code == 0
+        tm.that(result.exit_code, eq=0)
         stream_ids = _stream_ids(_extract_catalog(result.output))
-        assert "service_accounts" in stream_ids
+        tm.that(stream_ids, has="service_accounts")
         # Custom streams extend, not replace, the standard catalog.
-        assert "users" in stream_ids
+        tm.that(stream_ids, has="users")
 
     def test_sync_emits_schema_messages_for_standard_streams(
         self,
@@ -195,10 +196,10 @@ class TestsFlextTapLdapIntegration:
             ["--config", str(config_file), "--catalog", str(catalog_file)],
             catch_exceptions=False,
         )
-        assert result.exit_code == 0
+        tm.that(result.exit_code, eq=0)
         messages = _singer_messages(result.output)
         assert messages
-        assert {str(msg["type"]) for msg in messages} == {"SCHEMA"}
+        tm.that({str(msg["type"]) for msg in messages}, eq={"SCHEMA"})
         emitted_streams = {str(msg["stream"]) for msg in messages}
         assert set(STANDARD_STREAMS) <= emitted_streams
 
@@ -214,11 +215,11 @@ class TestsFlextTapLdapIntegration:
             ["--config", str(config_file), "--catalog", str(catalog_file)],
             catch_exceptions=False,
         )
-        assert result.exit_code == 0
+        tm.that(result.exit_code, eq=0)
         messages = _singer_messages(result.output)
         assert messages
         for msg in messages:
-            assert msg["key_properties"] == ["dn"]
+            tm.that(msg["key_properties"], eq=["dn"])
 
     def test_incremental_sync_accepts_state_and_still_emits_schema(
         self,
@@ -240,9 +241,9 @@ class TestsFlextTapLdapIntegration:
             ],
             catch_exceptions=False,
         )
-        assert result.exit_code == 0
+        tm.that(result.exit_code, eq=0)
         message_types = {str(msg["type"]) for msg in _singer_messages(result.output)}
-        assert "SCHEMA" in message_types
+        tm.that(message_types, has="SCHEMA")
 
     def test_missing_config_file_is_rejected(
         self,
@@ -254,7 +255,7 @@ class TestsFlextTapLdapIntegration:
             self._command(),
             ["--config", str(tmp_path / "does_not_exist.json"), "--discover"],
         )
-        assert result.exit_code != 0
+        tm.that(result.exit_code, ne=0)
 
     def test_incomplete_config_degrades_gracefully(
         self,
@@ -269,10 +270,10 @@ class TestsFlextTapLdapIntegration:
             self._command(),
             ["--config", str(config_path), "--discover"],
         )
-        assert result.exit_code == 0
+        tm.that(result.exit_code, eq=0)
         combined = " ".join(record.getMessage() for record in caplog.records)
         combined += (result.output or "") + (result.stderr or "")
-        assert "Invalid LDAP connection configuration" in combined
+        tm.that(combined, has="Invalid LDAP connection configuration")
 
 
 __all__: list[str] = ["TestsFlextTapLdapIntegration"]

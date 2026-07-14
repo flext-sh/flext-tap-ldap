@@ -14,6 +14,7 @@ from __future__ import annotations
 from collections.abc import Callable
 
 import pytest
+from flext_tests import tm
 from pydantic import ValidationError
 
 from flext_tap_ldap import FlextTapLdapModels, c
@@ -32,8 +33,8 @@ class TestsFlextTapLdapModelsUnit:
     def test_custom_property_definition_defaults_to_string_type(self) -> None:
         definition = _TapLdap.CustomPropertyDefinition()
 
-        assert definition.type == "string"
-        assert definition.description is None
+        tm.that(definition.type, eq="string")
+        tm.that(definition.description, none=True)
 
     def test_custom_property_definition_accepts_explicit_values(self) -> None:
         definition = _TapLdap.CustomPropertyDefinition(
@@ -41,10 +42,13 @@ class TestsFlextTapLdapModelsUnit:
             description="a numeric property",
         )
 
-        assert definition.model_dump() == {
-            "type": "integer",
-            "description": "a numeric property",
-        }
+        tm.that(
+            definition.model_dump(),
+            eq={
+                "type": "integer",
+                "description": "a numeric property",
+            },
+        )
 
     # ── LdapConnectionParams: valid construction ─────────────────────────
 
@@ -56,17 +60,17 @@ class TestsFlextTapLdapModelsUnit:
             timeout_seconds=30,
         )
 
-        assert params.host == "ldap.example.com"
-        assert params.port == 636
-        assert params.use_ssl is True
-        assert params.timeout_seconds == 30
+        tm.that(params.host, eq="ldap.example.com")
+        tm.that(params.port, eq=636)
+        tm.that(params.use_ssl, eq=True)
+        tm.that(params.timeout_seconds, eq=30)
         # Optional auth/search fields default to None.
-        assert params.bind_dn is None
-        assert params.bind_password is None
-        assert params.base_dn is None
+        tm.that(params.bind_dn, none=True)
+        tm.that(params.bind_password, none=True)
+        tm.that(params.base_dn, none=True)
         # Documented defaults.
-        assert params.page_size == c.TapLdap.DEFAULT_PAGE_SIZE
-        assert params.max_retries == 3
+        tm.that(params.page_size, eq=c.TapLdap.DEFAULT_PAGE_SIZE)
+        tm.that(params.max_retries, eq=3)
 
     @pytest.mark.parametrize("port", [1, 389, 65535])
     def test_connection_params_accept_valid_port_boundaries(
@@ -80,7 +84,7 @@ class TestsFlextTapLdapModelsUnit:
             timeout_seconds=1,
         )
 
-        assert params.port == port
+        tm.that(params.port, eq=port)
 
     # ── LdapConnectionParams: validation contract ────────────────────────
 
@@ -154,7 +158,7 @@ class TestsFlextTapLdapModelsUnit:
             build()
 
         offending = {error["loc"][0] for error in exc_info.value.errors()}
-        assert invalid_field in offending
+        tm.that(offending, has=invalid_field)
 
     def test_connection_params_require_mandatory_fields(self) -> None:
         with pytest.raises(ValidationError) as exc_info:
@@ -185,7 +189,7 @@ class TestsFlextTapLdapModelsUnit:
             timeout_seconds=30,
         )
 
-        assert left == right
+        tm.that(left, eq=right)
 
     def test_connection_params_are_immutable(self) -> None:
         params = _TapLdap.LdapConnectionParams(
@@ -213,4 +217,4 @@ class TestsFlextTapLdapModelsUnit:
             original.model_dump(),
         )
 
-        assert rebuilt == original
+        tm.that(rebuilt, eq=original)
