@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, ClassVar
 from flext_tests import FlextTestsUtilities
 
 from flext_core import FlextUtilities
-from flext_ldap.adapters import FlextLdapLdap3Wrappers
+from flext_ldap.adapters._ldap3.wrappers import FlextLdapLdap3Wrappers
 from flext_tap_ldap import FlextTapLdapUtilities
 from tests import c
 
