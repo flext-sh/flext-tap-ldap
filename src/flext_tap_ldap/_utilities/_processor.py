@@ -167,7 +167,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 """Parse LDIF text into a flext-ldif entry."""
                 api = ldif()
                 result: p.Result[m.Ldif.ParseResponse] = api.parse_ldif(content)
-                if not result.success or result.value is None:
+                if not result.success:
                     msg = f"Failed to parse LDIF entry {self.dn}: {result.error}"
                     raise ValueError(msg)
                 if not result.value.entries:
