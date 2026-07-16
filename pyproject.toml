@@ -21,12 +21,12 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = [
-  "flext-cli",
-  "flext-core",
-  "flext-ldap",
-  "flext-meltano",
-  "pydantic-core>=2.46.3",
-  "pydantic>=2.13.3",
+    "flext-cli @ git+https://github.com/flext-sh/flext-cli.git@0.12.0-dev",
+    "flext-core @ git+https://github.com/flext-sh/flext-core.git@0.12.0-dev",
+    "flext-ldap @ git+https://github.com/flext-sh/flext-ldap.git@0.12.0-dev",
+    "flext-meltano @ git+https://github.com/flext-sh/flext-meltano.git@0.12.0-dev",
+    "pydantic-core>=2.46.3",
+    "pydantic>=2.13.3",
 ]
 description = "FLEXT Tap LDAP - Singer Tap for LDAP Directory Services"
 keywords = [ "data-extraction", "enterprise", "etl", "flext", "singer", "tap", "typed" ]
@@ -739,19 +739,6 @@ all = true
 in_place = true
 sort_first = [ "build-system", "dependency-groups", "project", "tool" ]
 
-[tool.uv.sources.flext-cli]
-workspace = true
-
-[tool.uv.sources.flext-core]
-workspace = true
-
-[tool.uv.sources.flext-ldap]
-workspace = true
-
-[tool.uv.sources.flext-meltano]
-workspace = true
-
-# [MANAGED] yamlfix
 [tool.yamlfix]
 explicit_start = false
 line_length = 88
