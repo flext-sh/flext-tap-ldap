@@ -1,0 +1,91 @@
+TapLdap:
+  name: flext-tap-ldap
+  version: "0.12.0-dev"
+  streams:
+    - name: users
+      filter: "(objectClass=inetOrgPerson)"
+      primary_keys: ["dn"]
+      attributes:
+        - uid
+        - cn
+        - sn
+        - mail
+        - objectClass
+        - memberOf
+        - modifyTimestamp
+      schema:
+        type: object
+        properties:
+          dn:
+            type: string
+          objectClass:
+            type: array
+            items:
+              type: string
+          memberOf:
+            type: array
+            items:
+              type: string
+          modifyTimestamp:
+            type: string
+    - name: groups
+      filter: "(objectClass=groupOfNames)"
+      primary_keys: ["dn"]
+      attributes:
+        - cn
+        - member
+        - uniqueMember
+        - objectClass
+        - modifyTimestamp
+      schema:
+        type: object
+        properties:
+          dn:
+            type: string
+          member:
+            type: array
+            items:
+              type: string
+          objectClass:
+            type: array
+            items:
+              type: string
+          modifyTimestamp:
+            type: string
+    - name: organizational_units
+      filter: "(objectClass=organizationalUnit)"
+      primary_keys: ["dn"]
+      attributes:
+        - ou
+        - description
+        - objectClass
+      schema:
+        type: object
+        properties:
+          dn:
+            type: string
+          ou:
+            type: string
+          objectClass:
+            type: array
+            items:
+              type: string
+    - name: schema
+      filter: "(objectClass=subschema)"
+      primary_keys: ["dn"]
+      attributes:
+        - attributeTypes
+        - objectClasses
+      schema:
+        type: object
+        properties:
+          dn:
+            type: string
+          attributeTypes:
+            type: array
+            items:
+              type: string
+          objectClasses:
+            type: array
+            items:
+              type: string

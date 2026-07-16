@@ -152,6 +152,9 @@ pep621_dev_dependency_groups = [ "dev" ]
 [tool.hatch.build.targets.wheel]
 packages = [ "src/flext_tap_ldap" ]
 
+[tool.hatch.build.targets.wheel.force-include]
+config = "flext_tap_ldap/config"
+
 [tool.hatch.metadata]
 allow-direct-references = true
 
