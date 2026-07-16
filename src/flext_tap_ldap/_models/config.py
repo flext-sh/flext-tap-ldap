@@ -23,13 +23,19 @@ class FlextTapLdapConfigModels:
         class StreamRule(m.FrozenModel):
             """One declarative stream business rule."""
 
-            name: str
-            filter: str
-            primary_keys: t.StrSequence
-            attributes: t.StrSequence
-            stream_schema: t.JsonMapping = u.Field(alias="schema")
+            name: str = u.Field(description="Singer stream name")
+            filter: str = u.Field(description="LDAP search filter")
+            primary_keys: t.StrSequence = u.Field(description="Record primary keys")
+            attributes: t.StrSequence = u.Field(
+                description="LDAP attributes to request"
+            )
+            stream_schema: t.JsonMapping = u.Field(
+                alias="schema", description="Singer stream JSON schema"
+            )
 
-        streams: t.SequenceOf[StreamRule] = ()
+        streams: t.SequenceOf[StreamRule] = u.Field(
+            default=(), description="Declarative stream business rules"
+        )
 
     class Root(m.FrozenModel):
         """Root flext-tap-ldap config validated from ``config/*.yaml``."""

@@ -121,8 +121,8 @@ dev = [
 ]
 
 [project.scripts]
-flext-tap-ldap = "flext_tap_ldap.utilities:FlextTapLdapUtilities.main"
-tap-ldap = "flext_tap_ldap.utilities:FlextTapLdapUtilities.main"
+flext-tap-ldap = "flext_tap_ldap.cli:main"
+tap-ldap = "flext_tap_ldap.cli:main"
 
 [project.urls]
 Documentation = "https://github.com/flext-sh/flext/blob/main/README.md"

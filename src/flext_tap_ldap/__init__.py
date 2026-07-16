@@ -31,6 +31,7 @@ if TYPE_CHECKING:
         FlextTapLdapService as FlextTapLdapService,
         tap_ldap as tap_ldap,
     )
+    from flext_tap_ldap.cli import main as main
     from flext_tap_ldap.constants import (
         FlextTapLdapConstants as FlextTapLdapConstants,
         c as c,
@@ -40,7 +41,6 @@ if TYPE_CHECKING:
         FlextTapLdapProtocols as FlextTapLdapProtocols,
         p,
     )
-    from flext_tap_ldap.tap import FlextTapLdapTap as FlextTapLdapTap
     from flext_tap_ldap.typings import FlextTapLdapTypes as FlextTapLdapTypes, t as t
     from flext_tap_ldap.utilities import (
         FlextTapLdapUtilities as FlextTapLdapUtilities,
@@ -66,7 +66,7 @@ _LAZY_IMPORTS = build_lazy_import_map(
             "FlextTapLdapProtocols",
             "p",
         ),
-        ".tap": ("FlextTapLdapTap",),
+        ".cli": ("main",),
         ".typings": (
             "FlextTapLdapTypes",
             "t",
@@ -94,7 +94,6 @@ __all__: tuple[str, ...] = (
     "FlextTapLdapProtocols",
     "FlextTapLdapService",
     "FlextTapLdapSettings",
-    "FlextTapLdapTap",
     "FlextTapLdapTypes",
     "FlextTapLdapUtilities",
     "__author__",
@@ -111,6 +110,7 @@ __all__: tuple[str, ...] = (
     "e",
     "h",
     "m",
+    "main",
     "p",
     "r",
     "s",
