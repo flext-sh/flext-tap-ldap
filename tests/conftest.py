@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from tests import c, m, t
+from tests import c, m, p, t
 
 
 @pytest.fixture
