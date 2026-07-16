@@ -104,7 +104,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
     @override
     def discover_streams(
         self,
-        tap_instance: m.Meltano.DataSourceConfig
+        tap_instance: p.Meltano.DataSourceConfig
         | m.Meltano.TapConfig
         | m.Meltano.TapInstance,
     ) -> p.Result[t.JsonMapping]:

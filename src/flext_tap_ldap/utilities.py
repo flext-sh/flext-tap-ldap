@@ -66,7 +66,7 @@ class FlextTapLdapUtilities(
         return cli.external_command(app)
 
     @staticmethod
-    def _execute_cli(params: m.TapLdap.CliRequest) -> p.Result[bool]:
+    def _execute_cli(params: p.TapLdap.CliRequest) -> p.Result[bool]:
         """Execute one validated Singer-compatible LDAP request."""
         tap_module = importlib.import_module("flext_tap_ldap.tap")
         tap_class: type[FlextTapLdapTap] = tap_module.FlextTapLdapTap

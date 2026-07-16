@@ -249,7 +249,7 @@ class FlextTapLdapClient:
 
         def _initialize_flext_api(
             self,
-            client_config: m.Ldap.ConnectionConfig,
+            client_config: p.Ldap.ConnectionConfig,
         ) -> None:
             """Initialize the ldap API with the given configuration."""
             self._flext_api = FlextLdap()

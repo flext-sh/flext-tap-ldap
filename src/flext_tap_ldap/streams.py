@@ -16,7 +16,7 @@ from collections.abc import (
 from typing import ClassVar, override
 
 from flext_meltano.services.abstractions import FlextMeltanoAbstractions as Tap
-from flext_tap_ldap import c, m, t, u
+from flext_tap_ldap import c, m, p, t, u
 from flext_tap_ldap.client import FlextTapLdapClient
 
 

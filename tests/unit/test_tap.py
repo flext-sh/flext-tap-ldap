@@ -14,7 +14,7 @@ from flext_tests import tm
 from flext_tap_ldap.client import FlextTapLdapClient
 from flext_tap_ldap.streams import FlextTapLdapStreams
 from flext_tap_ldap.tap import FlextTapLdapTap
-from tests import c, m, t
+from tests import c, p, t
 
 
 class TestsFlextTapLdapTap:
@@ -22,7 +22,7 @@ class TestsFlextTapLdapTap:
 
     def test_discover_streams_succeeds_with_stream_catalog_payload(
         self,
-        ldap_source_config: m.Meltano.DataSourceConfig,
+        ldap_source_config: p.Meltano.DataSourceConfig,
     ) -> None:
         result = FlextTapLdapTap().discover_streams(tap_instance=ldap_source_config)
 
@@ -37,7 +37,7 @@ class TestsFlextTapLdapTap:
 
     def test_discover_streams_exposes_standard_ldap_streams(
         self,
-        ldap_source_config: m.Meltano.DataSourceConfig,
+        ldap_source_config: p.Meltano.DataSourceConfig,
     ) -> None:
         result = FlextTapLdapTap().discover_streams(tap_instance=ldap_source_config)
 
