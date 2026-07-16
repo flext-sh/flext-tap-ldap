@@ -29,7 +29,7 @@ def ldap_connection_config() -> dict[str, object]:
 @pytest.fixture
 def ldap_source_config(
     ldap_connection_config: dict[str, t.JsonValue],
-) -> m.Meltano.DataSourceConfig:
+) -> p.Meltano.DataSourceConfig:
     return m.Meltano.DataSourceConfig(
         source_type="ldap",
         connection_config=ldap_connection_config,

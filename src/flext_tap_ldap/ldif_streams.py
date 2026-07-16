@@ -12,7 +12,7 @@ from typing import ClassVar
 from flext_ldif import ldif
 
 from flext_meltano.services.abstractions import FlextMeltanoAbstractions
-from flext_tap_ldap import c, m, p, r, t, u
+from flext_tap_ldap import c, p, r, t, u
 
 
 class FlextTapLdapLdifStreams:
@@ -124,7 +124,7 @@ class FlextTapLdapLdifStreams:
 
         def _convert_entry_to_record(
             self,
-            flext_entry: m.Ldif.Entry,
+            flext_entry: p.Ldif.Entry,
         ) -> t.JsonMapping:
             """Convert flext-ldif entry to Singer record."""
             dn_value = flext_entry.dn.value if flext_entry.dn is not None else ""
@@ -199,11 +199,11 @@ class FlextTapLdapLdifStreams:
                 f"Failed to parse LDIF file {ldif_file}: {result.error}",
             )
 
-        def _parse_ldif_file(self, ldif_file: str) -> p.Result[m.Ldif.ParseResponse]:
+        def _parse_ldif_file(self, ldif_file: str) -> p.Result[p.Ldif.ParseResponse]:
             """Parse one LDIF file through the LDIF facade."""
             read = u.Cli.files_read_text(Path(ldif_file))
             if read.failure:
-                return r[m.Ldif.ParseResponse].fail(
+                return r[p.Ldif.ParseResponse].fail(
                     f"Failed to read LDIF file {ldif_file}: {read.error}",
                 )
             return self._ldif_api.parse_ldif(read.value)
@@ -350,7 +350,7 @@ class FlextTapLdapLdifStreams:
                     read.error,
                 )
                 return self._empty_analysis_payload()
-            result: p.Result[m.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
+            result: p.Result[p.Ldif.ParseResponse] = self._ldif_api.parse_ldif(
                 read.value,
             )
             if result.success and result.value.entries:

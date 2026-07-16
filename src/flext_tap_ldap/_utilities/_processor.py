@@ -163,26 +163,26 @@ class FlextTapLdapUtilitiesProcessorMixin:
             def _parsed_flext_entry(
                 self,
                 content: str,
-            ) -> m.Ldif.Entry:
+            ) -> p.Ldif.Entry:
                 """Parse LDIF text into a flext-ldif entry."""
                 api = ldif()
-                result: p.Result[m.Ldif.ParseResponse] = api.parse_ldif(content)
+                result: p.Result[p.Ldif.ParseResponse] = api.parse_ldif(content)
                 if not result.success:
                     msg = f"Failed to parse LDIF entry {self.dn}: {result.error}"
                     raise ValueError(msg)
                 if not result.value.entries:
                     msg = f"LDIF entry parsed without entries: {self.dn}"
                     raise ValueError(msg)
-                parsed_entry: m.Ldif.Entry = m.Ldif.Entry.model_validate(
+                parsed_entry: p.Ldif.Entry = m.Ldif.Entry.model_validate(
                     result.value.entries[0].model_dump(),
                 )
                 return parsed_entry
 
-            def _create_flext_entry(self) -> m.Ldif.Entry:
+            def _create_flext_entry(self) -> p.Ldif.Entry:
                 """Create m.Ldif.Entry from current data."""
                 return self._parsed_flext_entry(self._entry_ldif_content())
 
-            def flext_entry(self) -> m.Ldif.Entry:
+            def flext_entry(self) -> p.Ldif.Entry:
                 """Return the canonical flext-ldif entry."""
                 return self._flext_entry
 
@@ -196,10 +196,10 @@ class FlextTapLdapUtilitiesProcessorMixin:
             def _to_ldif_entry(
                 self,
                 raw_value: t.JsonMapping,
-            ) -> m.Ldif.Entry | None:
+            ) -> p.Ldif.Entry | None:
                 """Validate and coerce value to LDIF entry model."""
                 try:
-                    entry: m.Ldif.Entry = m.Ldif.Entry.model_validate(raw_value)
+                    entry: p.Ldif.Entry = m.Ldif.Entry.model_validate(raw_value)
                     return entry
                 except c.ValidationError as exc:
                     error_msg = f"Invalid LDIF entry: {exc}"
@@ -317,7 +317,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
                     source_name,
                 )
                 try:
-                    result: p.Result[m.Ldif.ParseResponse] = self._api.parse_ldif(
+                    result: p.Result[p.Ldif.ParseResponse] = self._api.parse_ldif(
                         content,
                     )
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
@@ -373,7 +373,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             def _convert_from_flext_entry(
                 self,
-                flext_entry: m.Ldif.Entry,
+                flext_entry: p.Ldif.Entry,
             ) -> FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry:
                 """Convert m.Ldif.Entry to testing convenience Entry."""
                 dn = flext_entry.dn.value if flext_entry.dn else ""
@@ -433,9 +433,9 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 self,
                 content: str,
                 file_path: Path,
-            ) -> p.Result[m.Ldif.ParseResponse] | None:
+            ) -> p.Result[p.Ldif.ParseResponse] | None:
                 """Parse LDIF content using flext-ldif API."""
-                result: p.Result[m.Ldif.ParseResponse] = self._api.parse_ldif(content)
+                result: p.Result[p.Ldif.ParseResponse] = self._api.parse_ldif(content)
                 if not result.success:
                     error_msg = f"Failed to parse LDIF file {file_path}: {result.error}"
                     if self.ignore_errors:
@@ -453,8 +453,8 @@ class FlextTapLdapUtilitiesProcessorMixin:
                 self,
                 content: str,
                 source_name: str,
-                result: p.Result[m.Ldif.ParseResponse],
-            ) -> p.Result[m.Ldif.ParseResponse] | None:
+                result: p.Result[p.Ldif.ParseResponse],
+            ) -> p.Result[p.Ldif.ParseResponse] | None:
                 """Reject non-empty LDIF content that parsed into no entries."""
                 if content.strip() and not result.value.entries:
                     error_msg = f"LDIF content from {source_name} produced no entries"
@@ -464,7 +464,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
             def _handle_empty_parse_result(
                 self,
                 error_msg: str,
-            ) -> p.Result[m.Ldif.ParseResponse] | None:
+            ) -> p.Result[p.Ldif.ParseResponse] | None:
                 """Handle parser success responses that carry no usable entries."""
                 if self.ignore_errors:
                     FlextTapLdapUtilitiesProcessorMixin.logger.error(error_msg)
@@ -506,7 +506,7 @@ class FlextTapLdapUtilitiesProcessorMixin:
 
             def _yield_entries_from_result(
                 self,
-                result: p.Result[m.Ldif.ParseResponse] | None,
+                result: p.Result[p.Ldif.ParseResponse] | None,
             ) -> Iterator[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
                 """Yield testing convenience entries from parse result."""
                 if result is not None:

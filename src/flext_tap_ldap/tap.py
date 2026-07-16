@@ -144,7 +144,7 @@ class FlextTapLdapTap(FlextMeltanoAbstractions):
             ]
             streams.extend(ldif_stream_list)
 
-        streams_list: MutableSequence[m.Meltano.SingerCatalogEntry] = []
+        streams_list: MutableSequence[p.Meltano.SingerCatalogEntry] = []
         for stream in streams:
             entry_result = u.Meltano.build_catalog_entry(
                 stream_name=str(stream.name),

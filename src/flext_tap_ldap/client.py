@@ -158,7 +158,7 @@ class FlextTapLdapClient:
                     size_limit=1,
                     time_limit=5,
                 )
-                result: p.Result[m.Ldap.SearchResult] = self._flext_api.search(
+                result: p.Result[p.Ldap.SearchResult] = self._flext_api.search(
                     test_search_options,
                 )
                 connection_success: bool = result.success
@@ -174,10 +174,10 @@ class FlextTapLdapClient:
         def _create_config_from_kwargs(
             self,
             **convenience_kwargs: t.Scalar,
-        ) -> m.Ldap.ConnectionConfig:
+        ) -> p.Ldap.ConnectionConfig:
             """Create settings from convenience keyword arguments."""
 
-            def _run__create_config_from_kwargs() -> m.Ldap.ConnectionConfig:
+            def _run__create_config_from_kwargs() -> p.Ldap.ConnectionConfig:
                 config_dict: t.MutableJsonMapping = {
                     "host": u.to_str(
                         convenience_kwargs.get("host"),

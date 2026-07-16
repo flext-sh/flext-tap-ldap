@@ -43,7 +43,7 @@ class FlextTapLdapStreams:
         @staticmethod
         def parse_connection_config(
             raw_value: t.JsonValue,
-        ) -> m.TapLdap.LdapConnectionParams:
+        ) -> p.TapLdap.LdapConnectionParams:
             """Validate LDAP connection payload through Pydantic."""
             try:
                 parsed = m.TapLdap.LdapConnectionParams.model_validate(
@@ -72,7 +72,7 @@ class FlextTapLdapStreams:
         @staticmethod
         def parse_property_definition(
             raw_value: t.JsonValue,
-        ) -> m.TapLdap.CustomPropertyDefinition:
+        ) -> p.TapLdap.CustomPropertyDefinition:
             """Validate custom stream property definition through Pydantic."""
             try:
                 return m.TapLdap.CustomPropertyDefinition.model_validate(
