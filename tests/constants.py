@@ -42,6 +42,16 @@ class TestsFlextTapLdapConstants(FlextTestsConstants, FlextTapLdapConstants):
                 "cn=REDACTED_LDAP_BIND_PASSWORD,dc=flext,dc=local"
             )
             LEGACY_ADMIN_PASSWORD: Final[str] = "REDACTED_LDAP_BIND_PASSWORD123"
+            STANDARD_STREAMS: Final[tuple[str, ...]] = (
+                "users",
+                "groups",
+                "organizational_units",
+                "schema",
+            )
+            PRIMARY_KEY: Final[tuple[str, ...]] = ("dn",)
+            CONSOLE_SCRIPT: Final[str] = "tap-ldap"
+            FLAG_CONFIG: Final[str] = "--config"
+            FLAG_DISCOVER: Final[str] = "--discover"
 
 
 c = TestsFlextTapLdapConstants
