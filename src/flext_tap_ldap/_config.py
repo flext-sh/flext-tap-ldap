@@ -12,11 +12,11 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from functools import cached_property
 from typing import ClassVar
 
-from pydantic import BaseModel, ConfigDict
-
 from flext_meltano import FlextMeltanoConfig
+from flext_tap_ldap._models.config import FlextTapLdapConfigModels
 
 
 class FlextTapLdapConfig(FlextMeltanoConfig):
@@ -24,17 +24,19 @@ class FlextTapLdapConfig(FlextMeltanoConfig):
 
     ``CONFIG_DIR`` is reset to the relative default so the loader anchors to this
     project's own root ``config/`` instead of inheriting an ancestor's absolute
-    override (which would otherwise load the wrong package's config).
+    override. The model-less YAML slice is validated once into the typed config
+    models and exposed as ``config.TapLdap``.
     """
 
     CONFIG_DIR: ClassVar[str] = "config"
 
-    class _TapLdapNamespace(BaseModel):
-        """Open, frozen namespace exposing every ``config/*.yaml`` domain."""
-
-        model_config = ConfigDict(extra="allow", frozen=True)
-
-    TapLdap: _TapLdapNamespace = _TapLdapNamespace()
+    @cached_property
+    def TapLdap(self) -> FlextTapLdapConfigModels.TapLdap:
+        """Validated TapLdap business-rule config (streams and their contracts)."""
+        root = FlextTapLdapConfigModels.Root.model_validate(
+            dict(self.model_extra or {}),
+        )
+        return root.TapLdap
 
 
 config: FlextTapLdapConfig = FlextTapLdapConfig.fetch_global()

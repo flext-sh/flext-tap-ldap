@@ -1,6 +1,4 @@
 TapLdap:
-  name: flext-tap-ldap
-  version: "0.12.0-dev"
   streams:
     - name: users
       filter: "(objectClass=inetOrgPerson)"

@@ -19,6 +19,10 @@ from flext_tap_ldap.__version__ import (
 
 if TYPE_CHECKING:
     from flext_ldap import d as d, e as e, h as h, r as r, s as s, x as x
+    from flext_tap_ldap._config import (
+        FlextTapLdapConfig as FlextTapLdapConfig,
+        config as config,
+    )
     from flext_tap_ldap._settings import (
         FlextTapLdapSettings as FlextTapLdapSettings,
         settings as settings,
@@ -44,6 +48,7 @@ if TYPE_CHECKING:
     )
 _LAZY_IMPORTS = build_lazy_import_map(
     {
+        "._config": ("FlextTapLdapConfig", "config"),
         "._settings": ("FlextTapLdapSettings", "settings"),
         ".api": (
             "FlextTapLdapService",
@@ -83,6 +88,7 @@ _LAZY_IMPORTS = build_lazy_import_map(
 
 
 __all__: tuple[str, ...] = (
+    "FlextTapLdapConfig",
     "FlextTapLdapConstants",
     "FlextTapLdapModels",
     "FlextTapLdapProtocols",
@@ -100,6 +106,7 @@ __all__: tuple[str, ...] = (
     "__version__",
     "__version_info__",
     "c",
+    "config",
     "d",
     "e",
     "h",
