@@ -21,12 +21,12 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = [
-    "flext-cli @ git+https://github.com/flext-sh/flext-cli.git@0.12.0-dev",
-    "flext-core @ git+https://github.com/flext-sh/flext-core.git@0.12.0-dev",
-    "flext-ldap @ git+https://github.com/flext-sh/flext-ldap.git@0.12.0-dev",
-    "flext-meltano @ git+https://github.com/flext-sh/flext-meltano.git@0.12.0-dev",
-    "pydantic-core>=2.46.3",
-    "pydantic>=2.13.3",
+  "flext-cli @ git+https://github.com/flext-sh/flext-cli.git@0.12.0-dev",
+  "flext-core @ git+https://github.com/flext-sh/flext-core.git@0.12.0-dev",
+  "flext-ldap @ git+https://github.com/flext-sh/flext-ldap.git@0.12.0-dev",
+  "flext-meltano @ git+https://github.com/flext-sh/flext-meltano.git@0.12.0-dev",
+  "pydantic-core>=2.46.3",
+  "pydantic>=2.13.3",
 ]
 description = "FLEXT Tap LDAP - Singer Tap for LDAP Directory Services"
 keywords = [ "data-extraction", "enterprise", "etl", "flext", "singer", "tap", "typed" ]
@@ -212,23 +212,22 @@ project-excludes = [
   "**/typings/**",
   "**/vendor/**",
   "**/venv/**",
-  ".flext-deps/**",
   ".venv/**",
   "typings/**",
   "vendor/**",
 ]
-project-includes = [ "src/**/*.py*", "tests/**/*.py*" ]
+project-includes = [
+  "examples/**/*.py*",
+  "src/**/*.py*",
+  "tests/**/*.py*",
+]
 python-interpreter-path = "../.venv/bin/python"
 python-version = "3.13"
 search-path = [
   ".",
-  # mro-f1fe (agent: kimi-sweep): removed stale search-path to migrated examples (legado/)
   "../flext-cli/src",
-  "../flext-core/examples",
-  "../flext-core/scripts",
   "../flext-core/src",
   "../flext-infra/src",
-  "../flext-infra/tmp_flow_test",
   "../flext-ldap/src",
   "../flext-ldif/src",
   "../flext-meltano/src",
@@ -709,6 +708,7 @@ split-on-trailing-comma = true
   "RUF067",
   "TC004",
 ]
+"**/_config.py" = [ "N802" ]
 "**/_constants/*.py" = [ "S105" ]
 "**/_utilities/parser.py" = [ "ARG004", "FBT001" ]
 "**/alert_manager*.py" = [ "S310" ]
@@ -723,7 +723,6 @@ split-on-trailing-comma = true
 "**/output.py" = [ "FBT001" ]
 "**/plugins/*.py" = [ "FBT001", "FBT002", "S404", "S603", "S607", "TID252" ]
 "**/protocol_impls/*.py" = [ "SLF001" ]
-"**/_config.py" = [ "N802" ]
 "**/providers/*.py" = [ "S106", "S107" ]
 "**/services/prompts.py" = [ "D102", "D107" ]
 "**/settings.py" = [ "ANN401", "FBT001", "SLF001" ]
