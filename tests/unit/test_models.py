@@ -11,13 +11,16 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import pytest
 from flext_tests import tm
 from pydantic import ValidationError
 
 from flext_tap_ldap import FlextTapLdapModels, c
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 _TapLdap = FlextTapLdapModels.TapLdap
 _Params = _TapLdap.LdapConnectionParams
