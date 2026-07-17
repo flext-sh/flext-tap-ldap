@@ -24,11 +24,10 @@ class FlextTapLdapExtractService(s):
     ) -> p.Result[m.Meltano.FetchResult]:
         """Return the records for ``request.stream_name`` as a typed result."""
         return (
-            self.ldap.connect(u.TapLdap.connection(request.config))
+            self.ldap
+            .connect(u.TapLdap.connection(request.config))
             .flat_map(
-                lambda _: u.TapLdap.stream_search(
-                    request.stream_name, request.config
-                ),
+                lambda _: u.TapLdap.stream_search(request.stream_name, request.config),
             )
             .flat_map(self._run_search)
             .map(lambda records: m.Meltano.FetchResult(records=records))

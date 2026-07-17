@@ -7,6 +7,7 @@ library while importing only ``c, t, p, m, u`` plus this ``s``.
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
+
 from __future__ import annotations
 
 from flext_ldap import ldap

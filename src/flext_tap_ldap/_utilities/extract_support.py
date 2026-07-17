@@ -43,11 +43,7 @@ class FlextTapLdapUtilitiesExtractSupport:
         ) -> p.Result[m.Ldap.SearchOptions]:
             """Resolve a stream's business rules into typed LDAP search options."""
             rule = next(
-                (
-                    item
-                    for item in config.TapLdap.streams
-                    if item.name == stream_name
-                ),
+                (item for item in config.TapLdap.streams if item.name == stream_name),
                 None,
             )
             if rule is None:
@@ -73,13 +69,9 @@ class FlextTapLdapUtilitiesExtractSupport:
             """Pack flext-ldap entries into Singer-native JSON records."""
             records: list[t.JsonMapping] = []
             for entry in entries:
-                dn_value: t.JsonValue = (
-                    entry.dn.value if entry.dn is not None else ""
-                )
+                dn_value: t.JsonValue = entry.dn.value if entry.dn is not None else ""
                 attributes: t.MappingKV[str, t.StrSequence] = (
-                    entry.attributes.attributes
-                    if entry.attributes is not None
-                    else {}
+                    entry.attributes.attributes if entry.attributes is not None else {}
                 )
                 record: dict[str, t.JsonValue] = {"dn": dn_value}
                 for key, value in attributes.items():
