@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tap_ldap import m, p, t, u
+from flext_tap_ldap import p, t, u
 from flext_tap_ldap.base import s
 
 
@@ -20,8 +20,8 @@ class FlextTapLdapExtractService(s):
 
     def fetch(
         self,
-        request: m.Meltano.FetchRequest,
-    ) -> p.Result[m.Meltano.FetchResult]:
+        request: p.Meltano.FetchRequest,
+    ) -> p.Result[p.Meltano.FetchResult]:
         """Return the records for ``request.stream_name`` as a typed result."""
         return (
             self.ldap
@@ -30,12 +30,12 @@ class FlextTapLdapExtractService(s):
                 lambda _: u.TapLdap.stream_search(request.stream_name, request.config),
             )
             .flat_map(self._run_search)
-            .map(lambda records: m.Meltano.FetchResult(records=records))
+            .map(lambda records: p.Meltano.FetchResult(records=records))
         )
 
     def _run_search(
         self,
-        options: m.Ldap.SearchOptions,
+        options: p.Ldap.SearchOptions,
     ) -> p.Result[t.SequenceOf[t.JsonMapping]]:
         """Run the search and pack entries into Singer records."""
         return self.ldap.search(options).map(
