@@ -2,7 +2,7 @@
 
 # flext-tap-ldap Documentation
 
-- Version: `0.12.0-dev`
+- Version: `0.20.0`
 - Project class: `integration`
 - Package: `flext_tap_ldap`
 - Description: FLEXT Tap LDAP - Singer Tap for LDAP Directory Services

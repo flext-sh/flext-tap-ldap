@@ -1,8 +1,10 @@
-"""FlextTapLdapConfig — frozen config singleton for flext-tap-ldap (ADR-005 §7).
+"""FlextTapLdapConfig — frozen config singleton for flext-tap-ldap.
 
-Model-less: business rules live in ``config/*.yaml`` under the ``TapLdap:`` key and
-are exposed through the open ``config.TapLdap`` namespace (``extra="allow"``), with
-no per-domain model. Access is ``config.TapLdap.<domain>[<key>...]``.
+Business-rule SSOT: the stream contracts (name, LDAP filter, attributes, Singer
+schema, primary keys) live in ``config/tap-ldap.yaml`` at the project root under
+the ``TapLdap`` key and are exposed through the open ``config.TapLdap`` namespace.
+Config holds the business rules; ``settings`` holds the adjustable runtime
+parameters (``.env`` / env vars / local settings / CLI).
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -10,21 +12,31 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict
+from functools import cached_property
+from typing import ClassVar
 
 from flext_meltano import FlextMeltanoConfig
-
-
-class _TapLdapNamespace(BaseModel):
-    """Open, frozen namespace exposing every ``config/*.yaml`` domain model-less."""
-
-    model_config = ConfigDict(extra="allow", frozen=True)
+from flext_tap_ldap._models.config import FlextTapLdapConfigModels
 
 
 class FlextTapLdapConfig(FlextMeltanoConfig):
-    """TapLdap config auto-loaded model-less from ``config/*.yaml``."""
+    """TapLdap config auto-loaded from the project-root ``config/*.yaml``.
 
-    TapLdap: _TapLdapNamespace = _TapLdapNamespace()
+    ``CONFIG_DIR`` is reset to the relative default so the loader anchors to this
+    project's own root ``config/`` instead of inheriting an ancestor's absolute
+    override. The model-less YAML slice is validated once into the typed config
+    models and exposed as ``config.TapLdap``.
+    """
+
+    CONFIG_DIR: ClassVar[str] = "config"
+
+    @cached_property
+    def TapLdap(self) -> FlextTapLdapConfigModels.TapLdap:
+        """Validated TapLdap business-rule config (streams and their contracts)."""
+        root = FlextTapLdapConfigModels.Root.model_validate(
+            dict(self.model_extra or {}),
+        )
+        return root.TapLdap
 
 
 config: FlextTapLdapConfig = FlextTapLdapConfig.fetch_global()

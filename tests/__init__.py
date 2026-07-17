@@ -43,22 +43,9 @@ if TYPE_CHECKING:
     )
     from tests.settings import TestsFlextTapLdapSettings as TestsFlextTapLdapSettings
     from tests.typings import TestsFlextTapLdapTypes as TestsFlextTapLdapTypes, t as t
-    from tests.unit.test_client import (
-        TestsFlextTapLdapClient as TestsFlextTapLdapClient,
-    )
-    from tests.unit.test_client_quick import (
-        TestsFlextTapLdapClientQuick as TestsFlextTapLdapClientQuick,
-    )
-    from tests.unit.test_ldif_processor import (
-        TestsFlextTapLdapLdifProcessor as TestsFlextTapLdapLdifProcessor,
-    )
-    from tests.unit.test_ldif_stream import (
-        TestsFlextTapLdapLdifStream as TestsFlextTapLdapLdifStream,
-    )
     from tests.unit.test_models import (
         TestsFlextTapLdapModelsUnit as TestsFlextTapLdapModelsUnit,
     )
-    from tests.unit.test_tap import TestsFlextTapLdapTap as TestsFlextTapLdapTap
     from tests.utilities import (
         TestsFlextTapLdapUtilities as TestsFlextTapLdapUtilities,
         u,
@@ -95,12 +82,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "t",
             ),
             ".unit": ("unit",),
-            ".unit.test_client": ("TestsFlextTapLdapClient",),
-            ".unit.test_client_quick": ("TestsFlextTapLdapClientQuick",),
-            ".unit.test_ldif_processor": ("TestsFlextTapLdapLdifProcessor",),
-            ".unit.test_ldif_stream": ("TestsFlextTapLdapLdifStream",),
             ".unit.test_models": ("TestsFlextTapLdapModelsUnit",),
-            ".unit.test_tap": ("TestsFlextTapLdapTap",),
             ".utilities": (
                 "TestsFlextTapLdapUtilities",
                 "u",

@@ -27,14 +27,15 @@ class FlextTapLdapSettings(FlextLdapSettings):
     )
 
     class _TapLdap(BaseModel):
-        """Namespaced tap-LDAP settings."""
+        """Tap-specific adjustable params (``settings.TapLdap.*``).
 
-        host: Annotated[str, Field(default="localhost", description="LDAP host")]
-        port: Annotated[
-            int, Field(default=389, ge=1, le=65535, description="LDAP port")
-        ]
-        use_ssl: Annotated[bool, Field(default=False, description="Use SSL")]
-        timeout: Annotated[int, Field(default=30, ge=1, description="Timeout (s)")]
+        All fields are set by ``.env`` / env vars / local settings / CLI / API and
+        parametrize the run. Connection params (host, port, bind_dn, bind_password,
+        use_ssl, timeout) are NOT redeclared here — they are reused from the parent
+        ``settings.Ldap.*`` via MRO and parametrized the same way.
+        """
+
+        base_dn: Annotated[str, Field(default="", description="Search base DN")]
         page_size: Annotated[int, Field(default=1000, ge=1, description="Page size")]
 
     if TYPE_CHECKING:

@@ -21,12 +21,12 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = [
-  "flext-cli",
-  "flext-core",
-  "flext-ldap",
-  "flext-meltano",
-  "pydantic-core>=2.46.3",
-  "pydantic>=2.13.3",
+    "flext-cli @ git+https://github.com/flext-sh/flext-cli.git@0.20.0-dev",
+    "flext-core @ git+https://github.com/flext-sh/flext-core.git@0.20.0-dev",
+    "flext-ldap @ git+https://github.com/flext-sh/flext-ldap.git@0.20.0-dev",
+    "flext-meltano @ git+https://github.com/flext-sh/flext-meltano.git@0.20.0-dev",
+    "pydantic-core>=2.46.3",
+    "pydantic>=2.13.3",
 ]
 description = "FLEXT Tap LDAP - Singer Tap for LDAP Directory Services"
 keywords = [ "data-extraction", "enterprise", "etl", "flext", "singer", "tap", "typed" ]
@@ -34,7 +34,7 @@ license = "MIT"
 name = "flext-tap-ldap"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
-version = "0.12.0"
+version = "0.20.0.dev0"
 
 [[project.authors]]
 email = "team@flext.sh"
@@ -121,8 +121,8 @@ dev = [
 ]
 
 [project.scripts]
-flext-tap-ldap = "flext_tap_ldap.utilities:FlextTapLdapUtilities.main"
-tap-ldap = "flext_tap_ldap.utilities:FlextTapLdapUtilities.main"
+flext-tap-ldap = "flext_tap_ldap.cli:main"
+tap-ldap = "flext_tap_ldap.cli:main"
 
 [project.urls]
 Documentation = "https://github.com/flext-sh/flext/blob/main/README.md"
@@ -151,6 +151,9 @@ pep621_dev_dependency_groups = [ "dev" ]
 
 [tool.hatch.build.targets.wheel]
 packages = [ "src/flext_tap_ldap" ]
+
+[tool.hatch.build.targets.wheel.force-include]
+config = "flext_tap_ldap/config"
 
 [tool.hatch.metadata]
 allow-direct-references = true
@@ -718,6 +721,7 @@ split-on-trailing-comma = true
 "**/output.py" = [ "FBT001" ]
 "**/plugins/*.py" = [ "FBT001", "FBT002", "S404", "S603", "S607", "TID252" ]
 "**/protocol_impls/*.py" = [ "SLF001" ]
+"**/_config.py" = [ "N802" ]
 "**/providers/*.py" = [ "S106", "S107" ]
 "**/services/prompts.py" = [ "D102", "D107" ]
 "**/settings.py" = [ "ANN401", "FBT001", "SLF001" ]
@@ -733,19 +737,6 @@ all = true
 in_place = true
 sort_first = [ "build-system", "dependency-groups", "project", "tool" ]
 
-[tool.uv.sources.flext-cli]
-workspace = true
-
-[tool.uv.sources.flext-core]
-workspace = true
-
-[tool.uv.sources.flext-ldap]
-workspace = true
-
-[tool.uv.sources.flext-meltano]
-workspace = true
-
-# [MANAGED] yamlfix
 [tool.yamlfix]
 explicit_start = false
 line_length = 88
