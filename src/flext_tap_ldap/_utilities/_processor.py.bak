@@ -1,0 +1,723 @@
+"""LDIF processing utilities absorbed into u.TapLdap namespace.
+
+Provides Entry, Processor, Validator, Transformer as inner classes
+of u.TapLdap via MRO mixin composition.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+
+"""
+
+from __future__ import annotations
+
+from collections.abc import (
+    Iterator,
+    Mapping,
+    MutableSequence,
+)
+from typing import TYPE_CHECKING, override
+
+from flext_ldif import ldif
+
+from flext_core import u
+from flext_ldap import u as ldap_u
+from flext_tap_ldap import c, m, p, r, t
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+
+class FlextTapLdapUtilitiesProcessorMixin:
+    """Mixin providing LDIF processing utilities for u.TapLdap namespace."""
+
+    logger = u.fetch_logger(__name__)
+
+    class TapLdap:
+        """Tap LDAP namespace — processor inner classes."""
+
+        class DistinguishedName(m.Ldif.DN):
+            """Distinguished name — real inheritance from m.Ldif.DN."""
+
+        class Entry:
+            """Testing convenience wrapper for m.Ldif.Entry.
+
+            Maintains the existing interface while delegating
+            all operations to the flext-ldif library implementation.
+            """
+
+            @override
+            def __init__(
+                self,
+                dn: str,
+                attributes: t.MappingKV[str, t.StrSequence] | None = None,
+            ) -> None:
+                """Initialize LDIF entry with testing convenience."""
+                self.dn = dn
+                self.attributes: t.MutableStrSequenceMapping = {
+                    k: list(v) for k, v in (attributes or {}).items()
+                }
+                self.change_type: str | None = None
+                self.controls: MutableSequence[str] = []
+                self._flext_entry = self._create_flext_entry()
+
+            @property
+            def validation_errors(self) -> MutableSequence[t.MutableStrMapping]:
+                """The validation errors for this entry."""
+                errors: MutableSequence[t.MutableStrMapping] = []
+                if not self.valid():
+                    errors.append({
+                        "code": "invalid_entry",
+                        "message": "Entry failed validation",
+                    })
+                return errors
+
+            def add_attribute(
+                self,
+                name: str,
+                value: str | MutableSequence[str],
+            ) -> None:
+                """Add an attribute to the entry."""
+                self.attributes.setdefault(name, [])
+                match value:
+                    case list() as value_list:
+                        self.attributes[name].extend(value_list)
+                    case str() as value_str:
+                        self.attributes[name].append(value_str)
+                    case _:
+                        self.attributes[name].extend(list(value))
+
+            def resolve_attribute_values(self, name: str) -> t.StrSequence:
+                """Return the attribute values by name (case-insensitive)."""
+                for attr_name, values in self.attributes.items():
+                    if attr_name.lower() == name.lower():
+                        return values
+                empty_values: MutableSequence[str] = []
+                return empty_values
+
+            def has_object_class(self, object_class: str) -> bool:
+                """Check if entry has specific object class."""
+                has_class: bool = ldap_u.Ldap.norm_in(
+                    object_class,
+                    self.resolve_attribute_values("objectClass"),
+                )
+                return has_class
+
+            def valid(self) -> bool:
+                """Check if the entry is valid using flext-ldif validation."""
+                api = ldif()
+                result = api.validate_entries([self._flext_entry])
+                return result.success and bool(
+                    result.value
+                    and result.value.valid
+                    and result.value.valid_entries > 0,
+                )
+
+            def parse_dn(self) -> t.JsonMapping:
+                """Parse DN into components using flext-ldif DN parsing."""
+                dn_obj = FlextTapLdapUtilitiesProcessorMixin.TapLdap.DistinguishedName(
+                    value=self.dn,
+                )
+                return {"dn": self.dn, "components": dn_obj.value}
+
+            def remove_attribute(self, name: str) -> None:
+                """Remove an attribute from the entry."""
+                if name in self.attributes:
+                    empty_attrs: MutableSequence[str] = []
+                    self.attributes[name] = empty_attrs
+
+            def to_dict(self) -> t.JsonMapping:
+                """Convert entry to dictionary format."""
+                entry_dict: t.MutableJsonMapping = {
+                    "dn": self.dn,
+                    "attributes": {
+                        key: list(values) for key, values in self.attributes.items()
+                    },
+                }
+                if self.change_type:
+                    entry_dict["change_type"] = self.change_type
+                if self.controls:
+                    entry_dict["controls"] = u.normalize_to_json_value(
+                        list(self.controls),
+                    )
+                return entry_dict
+
+            def update_attribute(
+                self,
+                name: str,
+                value: str | MutableSequence[str],
+            ) -> None:
+                """Update an attribute value, replacing existing values."""
+                match value:
+                    case list() as value_list:
+                        self.attributes[name] = value_list.copy()
+                    case str() as value_str:
+                        self.attributes[name] = [value_str]
+                    case _:
+                        self.attributes[name] = list(value)
+
+            def _entry_ldif_content(self) -> str:
+                """Render current entry state as LDIF text."""
+                lines = [f"dn: {self.dn}"]
+                for attr_name, attr_values in self.attributes.items():
+                    lines.extend(f"{attr_name}: {value}" for value in attr_values)
+                return "\n".join(lines) + "\n\n"
+
+            def _parsed_flext_entry(
+                self,
+                content: str,
+            ) -> m.Ldif.Entry:
+                """Parse LDIF text into a flext-ldif entry."""
+                api = ldif()
+                result: p.Result[m.Ldif.ParseResponse] = api.parse_ldif(content)
+                if not result.success or result.value is None:
+                    msg = f"Failed to parse LDIF entry {self.dn}: {result.error}"
+                    raise ValueError(msg)
+                if not result.value.entries:
+                    msg = f"LDIF entry parsed without entries: {self.dn}"
+                    raise ValueError(msg)
+                parsed_entry: m.Ldif.Entry = m.Ldif.Entry.model_validate(
+                    result.value.entries[0].model_dump(),
+                )
+                return parsed_entry
+
+            def _create_flext_entry(self) -> m.Ldif.Entry:
+                """Create m.Ldif.Entry from current data."""
+                return self._parsed_flext_entry(self._entry_ldif_content())
+
+            def flext_entry(self) -> m.Ldif.Entry:
+                """Return the canonical flext-ldif entry."""
+                return self._flext_entry
+
+        class Processor:
+            """LDIF file processor using flext-ldif library.
+
+            Provides testing convenience while delegating
+            all LDIF processing to the flext-ldif library.
+            """
+
+            def _to_ldif_entry(
+                self,
+                raw_value: t.JsonMapping,
+            ) -> m.Ldif.Entry | None:
+                """Validate and coerce value to LDIF entry model."""
+                try:
+                    entry: m.Ldif.Entry = m.Ldif.Entry.model_validate(raw_value)
+                    return entry
+                except c.ValidationError as exc:
+                    error_msg = f"Invalid LDIF entry: {exc}"
+                    if not self.ignore_errors:
+                        raise ValueError(error_msg) from exc
+                    self.errors.append(error_msg)
+                    return None
+
+            @override
+            def __init__(
+                self,
+                *,
+                ignore_errors: bool = True,
+                max_errors: int = 100,
+            ) -> None:
+                """Initialize the processor with a flext-ldif backend."""
+                self.ignore_errors = ignore_errors
+                self.max_errors = max_errors
+                self.errors: MutableSequence[str] = []
+                self.processed_entries = 0
+                self.skipped_entries = 0
+                self.entries: MutableSequence[
+                    FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry
+                ] = []
+                self.stats = {
+                    "total_entries": 0,
+                    "valid_entries": 0,
+                    "invalid_entries": 0,
+                }
+                self._api = ldif()
+
+            def filter_by_attribute_exists(
+                self,
+                attr_name: str,
+            ) -> t.SequenceOf[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
+                """Filter entries that have a specific attribute."""
+                return [
+                    entry
+                    for entry in self.entries
+                    if entry.resolve_attribute_values(attr_name)
+                ]
+
+            def filter_by_dn_contains(
+                self,
+                substring: str,
+            ) -> t.SequenceOf[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
+                """Filter entries by DN containing substring."""
+                return [entry for entry in self.entries if substring in entry.dn]
+
+            def filter_by_dn_pattern(
+                self,
+                dn_pattern: str,
+            ) -> t.SequenceOf[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
+                """Filter entries by DN pattern - entries under the pattern."""
+                return [
+                    entry
+                    for entry in self.entries
+                    if dn_pattern in entry.dn and entry.dn != dn_pattern
+                ]
+
+            def filter_by_objectclass(
+                self,
+                object_class: str,
+            ) -> t.SequenceOf[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
+                """Filter entries by object class."""
+                return [
+                    entry
+                    for entry in self.entries
+                    if entry.has_object_class(object_class)
+                ]
+
+            def statistics(self) -> t.JsonMapping:
+                """Return the parsing statistics."""
+                error_messages: t.JsonValueList = list(self.errors)
+                result: t.JsonDict = {
+                    "processed_entries": self.processed_entries,
+                    "skipped_entries": self.skipped_entries,
+                    "errors": len(self.errors),
+                    "error_messages": error_messages,
+                }
+                return result
+
+            def load_from_file(self, file_path: Path) -> p.Result[str]:
+                """Load LDIF entries from file and return as r."""
+                try:
+                    self.entries = list(self.parse_file(file_path))
+                    self._update_stats()
+                    return r[str].ok("LDIF file loaded successfully using flext-ldif")
+                except c.EXC_RUNTIME_TYPE as e:
+                    return r[str].fail(f"Failed to load LDIF file: {e}")
+
+            def load_from_string(
+                self,
+                content: str,
+                source_name: str = "string",
+            ) -> p.Result[str]:
+                """Load LDIF entries from string and return as r."""
+                try:
+                    self.entries = list(self.parse_content(content, source_name))
+                    self._update_stats()
+                    return r[str].ok(
+                        "LDIF content loaded successfully using flext-ldif",
+                    )
+                except c.EXC_RUNTIME_TYPE as e:
+                    return r[str].fail(f"Failed to load LDIF content: {e}")
+
+            def parse_content(
+                self,
+                content: str,
+                source_name: str = "content",
+            ) -> Iterator[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
+                """Parse LDIF content using flext-ldif and yield entries."""
+                FlextTapLdapUtilitiesProcessorMixin.logger.info(
+                    "Parsing LDIF content with flext-ldif from %s",
+                    source_name,
+                )
+                try:
+                    result: p.Result[m.Ldif.ParseResponse] = self._api.parse_ldif(
+                        content,
+                    )
+                except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+                    self._handle_content_parse_exception(source_name, e)
+                    return
+                if not result.success:
+                    self._handle_content_parse_failure(source_name, result.error)
+                    return
+                parsed_result = self._ensure_parse_result_has_entries(
+                    content,
+                    source_name,
+                    result,
+                )
+                yield from self._yield_entries_from_result(parsed_result)
+
+            def parse_file(
+                self,
+                file_path: Path,
+            ) -> Iterator[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
+                """Parse LDIF file using flext-ldif and yield entries."""
+                self._validate_file_exists(file_path)
+                FlextTapLdapUtilitiesProcessorMixin.logger.info(
+                    "Starting LDIF parsing with flext-ldif: %s",
+                    str(file_path),
+                )
+                try:
+                    content = self._read_file_content(file_path, c.DEFAULT_ENCODING)
+                    result = self._parse_ldif_content(content, file_path)
+                    yield from self._yield_entries_from_result(result)
+                except UnicodeDecodeError as e:
+                    self._handle_parsing_error(file_path, e, c.DEFAULT_ENCODING)
+
+            def to_singer_format(
+                self,
+                _stream_name: str,
+            ) -> t.SequenceOf[t.JsonMapping]:
+                """Convert LDIF entries to Singer record format."""
+                records: t.SequenceOf[t.JsonMapping] = [
+                    t.Cli.JSON_MAPPING_ADAPTER.validate_python({
+                        "type": "RECORD",
+                        "stream": _stream_name,
+                        "record": {
+                            "dn": entry.dn,
+                            **{
+                                key: list(values)
+                                for key, values in entry.attributes.items()
+                            },
+                        },
+                    })
+                    for entry in self.entries
+                ]
+                return records
+
+            def _convert_from_flext_entry(
+                self,
+                flext_entry: m.Ldif.Entry,
+            ) -> FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry:
+                """Convert m.Ldif.Entry to testing convenience Entry."""
+                dn = flext_entry.dn.value if flext_entry.dn else ""
+                attributes: t.MutableStrSequenceMapping = {}
+                if flext_entry.attributes and flext_entry.attributes.attributes:
+                    for (
+                        attr_name,
+                        attr_values,
+                    ) in flext_entry.attributes.attributes.items():
+                        attributes[attr_name] = list(attr_values)
+                return FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry(
+                    dn=dn,
+                    attributes=attributes,
+                )
+
+            def _handle_parsing_error(
+                self,
+                file_path: Path,
+                error: Exception,
+                _encoding: str,
+            ) -> None:
+                """Handle parsing errors based on ignore_errors setting."""
+                error_msg = f"Failed to parse LDIF file {file_path}: {error}"
+                if self.ignore_errors:
+                    FlextTapLdapUtilitiesProcessorMixin.logger.error(error_msg)
+                    self.errors.append(error_msg)
+                else:
+                    raise ValueError(error_msg) from error
+
+            def _handle_content_parse_failure(
+                self,
+                source_name: str,
+                error: str | None,
+            ) -> None:
+                """Handle parse result failures for in-memory LDIF content."""
+                error_msg = f"Failed to parse LDIF content from {source_name}: {error}"
+                if self.ignore_errors:
+                    FlextTapLdapUtilitiesProcessorMixin.logger.error(error_msg)
+                    self.errors.append(error_msg)
+                    return
+                self._raise_parse_error(error_msg)
+
+            def _handle_content_parse_exception(
+                self,
+                source_name: str,
+                error: Exception,
+            ) -> None:
+                """Handle parse exceptions for in-memory LDIF content."""
+                error_msg = f"Failed to parse LDIF content from {source_name}: {error}"
+                if self.ignore_errors:
+                    FlextTapLdapUtilitiesProcessorMixin.logger.exception(error_msg)
+                    self.errors.append(error_msg)
+                    return
+                raise ValueError(error_msg) from error
+
+            def _parse_ldif_content(
+                self,
+                content: str,
+                file_path: Path,
+            ) -> p.Result[m.Ldif.ParseResponse] | None:
+                """Parse LDIF content using flext-ldif API."""
+                result: p.Result[m.Ldif.ParseResponse] = self._api.parse_ldif(content)
+                if not result.success:
+                    error_msg = f"Failed to parse LDIF file {file_path}: {result.error}"
+                    if self.ignore_errors:
+                        FlextTapLdapUtilitiesProcessorMixin.logger.error(error_msg)
+                        self.errors.append(error_msg)
+                        return None
+                    raise ValueError(error_msg)
+                return self._ensure_parse_result_has_entries(
+                    content,
+                    str(file_path),
+                    result,
+                )
+
+            def _ensure_parse_result_has_entries(
+                self,
+                content: str,
+                source_name: str,
+                result: p.Result[m.Ldif.ParseResponse],
+            ) -> p.Result[m.Ldif.ParseResponse] | None:
+                """Reject non-empty LDIF content that parsed into no entries."""
+                if content.strip() and not result.value.entries:
+                    error_msg = f"LDIF content from {source_name} produced no entries"
+                    return self._handle_empty_parse_result(error_msg)
+                return result
+
+            def _handle_empty_parse_result(
+                self,
+                error_msg: str,
+            ) -> p.Result[m.Ldif.ParseResponse] | None:
+                """Handle parser success responses that carry no usable entries."""
+                if self.ignore_errors:
+                    FlextTapLdapUtilitiesProcessorMixin.logger.error(error_msg)
+                    self.errors.append(error_msg)
+                    return None
+                raise ValueError(error_msg)
+
+            def _raise_parse_error(self, message: str) -> None:
+                """Raise ValueError with the given message."""
+                raise ValueError(message)
+
+            def _read_file_content(
+                self,
+                file_path: Path,
+                encoding: str = c.DEFAULT_ENCODING,
+            ) -> str:
+                """Read file content with specified encoding."""
+                with file_path.open(encoding=encoding) as f:
+                    return f.read()
+
+            def _update_stats(self) -> None:
+                """Update statistics based on loaded entries."""
+                self.stats["total_entries"] = len(self.entries)
+                valid_count = 0
+                invalid_count = 0
+                for entry in self.entries:
+                    if entry.valid():
+                        valid_count += 1
+                    else:
+                        invalid_count += 1
+                self.stats["valid_entries"] = valid_count
+                self.stats["invalid_entries"] = invalid_count
+
+            def _validate_file_exists(self, file_path: Path) -> None:
+                """Validate that the file exists."""
+                if not file_path.exists():
+                    msg = f"LDIF file not found: {file_path}"
+                    raise ValueError(msg)
+
+            def _yield_entries_from_result(
+                self,
+                result: p.Result[m.Ldif.ParseResponse] | None,
+            ) -> Iterator[FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry]:
+                """Yield testing convenience entries from parse result."""
+                if result is not None:
+                    parse_response = result.unwrap_or(None)
+                    if parse_response is not None:
+                        for flext_entry in parse_response.entries:
+                            parsed_entry = self._to_ldif_entry(flext_entry.model_dump())
+                            if parsed_entry is None:
+                                self.skipped_entries += 1
+                                continue
+                            yield self._convert_from_flext_entry(parsed_entry)
+                            self.processed_entries += 1
+
+        class Validator:
+            """LDIF content validator using flext-ldif validation capabilities."""
+
+            @override
+            def __init__(self) -> None:
+                """Initialize validator with in-memory state and API client."""
+                self.validation_errors: MutableSequence[str] = []
+                self.warnings: MutableSequence[str] = []
+                self._api = ldif()
+
+            def validation_results(self) -> t.JsonMapping:
+                """Return the validation results."""
+                errors_payload: t.JsonValueList = list(self.validation_errors)
+                warnings_payload: t.JsonValueList = list(self.warnings)
+                result: t.JsonDict = {
+                    "errors": errors_payload,
+                    "warnings": warnings_payload,
+                    "valid": not self.validation_errors,
+                }
+                return result
+
+            def validate_entries(
+                self,
+                entries: t.SequenceOf[
+                    FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry
+                ],
+            ) -> t.JsonMapping:
+                """Validate a list of LDIF entries using flext-ldif."""
+                self.validation_errors.clear()
+                valid_count = 0
+                invalid_count = 0
+                for entry in entries:
+                    if self.validate_entry(entry):
+                        valid_count += 1
+                    else:
+                        invalid_count += 1
+                errors: MutableSequence[str] = list(self.validation_errors)
+                return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
+                    "total_entries": len(entries),
+                    "valid_entries": valid_count,
+                    "invalid_entries": invalid_count,
+                    "errors": errors,
+                })
+
+            def validate_entry(
+                self,
+                entry: FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry,
+            ) -> bool:
+                """Validate LDIF entry using flext-ldif validation."""
+                result = self._api.validate_entries([entry.flext_entry()])
+                if result.success and result.value and result.value.valid:
+                    return True
+                if result.value and result.value.errors:
+                    self.validation_errors.extend(result.value.errors)
+                else:
+                    self.validation_errors.append(
+                        f"Validation error for {entry.dn}: {result.error}",
+                    )
+                return False
+
+        class Transformer:
+            """Transform LDIF entries using flext-ldif transformation capabilities."""
+
+            @override
+            def __init__(
+                self,
+                transformation_rules: t.JsonMapping | None = None,
+            ) -> None:
+                """Initialize transformer with optional transformation rules."""
+                self.transformation_rules: t.JsonMapping = dict(
+                    transformation_rules or {},
+                )
+                self._api = ldif()
+
+            def apply_attribute_mappings(
+                self,
+                entry: FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry,
+                mappings: t.StrMapping,
+            ) -> FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry:
+                """Apply attribute name mappings to entry."""
+                new_attributes: t.MutableStrSequenceMapping = {}
+                for attr_name, values in entry.attributes.items():
+                    new_name = mappings.get(attr_name, attr_name)
+                    new_attributes[new_name] = list(values)
+                transformed_entry = FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry(
+                    entry.dn,
+                    new_attributes,
+                )
+                transformed_entry.change_type = entry.change_type
+                transformed_entry.controls = list(entry.controls)
+                return transformed_entry
+
+            def apply_schema_mappings(
+                self,
+                entry: FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry,
+                schema_mappings: t.JsonMapping,
+            ) -> FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry:
+                """Apply schema mappings to normalize output attributes."""
+                transformed_entry = FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry(
+                    entry.dn,
+                    {k: list(v) for k, v in entry.attributes.items()},
+                )
+                transformed_entry.change_type = entry.change_type
+                transformed_entry.controls = list(entry.controls)
+                for target_attr_key, mapping in schema_mappings.items():
+                    target_attr: str = target_attr_key
+                    source_attr: str | None = None
+                    default_values: MutableSequence[str] | None = None
+                    if isinstance(mapping, str):
+                        source_attr = mapping
+                    else:
+                        mapping_dict: t.JsonMapping = (
+                            dict(mapping) if isinstance(mapping, Mapping) else {}
+                        )
+                        source_raw: t.JsonValue | None = mapping_dict.get("source")
+                        if isinstance(source_raw, str):
+                            source_attr = source_raw
+                        default_raw: t.JsonValue | None = mapping_dict.get("default")
+                        if isinstance(default_raw, list):
+                            default_values = [str(value) for value in default_raw]
+                        elif default_raw is not None:
+                            default_values = [str(default_raw)]
+                    if source_attr is None:
+                        continue
+                    source_values = transformed_entry.attributes.get(source_attr)
+                    if source_values:
+                        transformed_entry.attributes[target_attr] = list(source_values)
+                        continue
+                    if default_values is not None:
+                        transformed_entry.attributes[target_attr] = default_values
+                return transformed_entry
+
+            def transform_entry(
+                self,
+                entry: FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry,
+            ) -> FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry:
+                """Transform LDIF entry using configured transformation rules."""
+                transformed = FlextTapLdapUtilitiesProcessorMixin.TapLdap.Entry(
+                    entry.dn,
+                    {k: list(v) for k, v in entry.attributes.items()},
+                )
+                transformed.change_type = entry.change_type
+                transformed.controls = list(entry.controls)
+                raw_schema_mappings: t.JsonValue | None = self.transformation_rules.get(
+                    "schema_mappings",
+                )
+                if isinstance(raw_schema_mappings, dict):
+                    schema_map: t.JsonMapping = raw_schema_mappings
+                    transformed = self.apply_schema_mappings(transformed, schema_map)
+                raw_mappings: t.JsonValue | None = self.transformation_rules.get(
+                    "attribute_mappings",
+                )
+                mappings: t.MutableStrMapping = {}
+                if isinstance(raw_mappings, dict):
+                    attr_map: t.JsonMapping = raw_mappings
+                    mappings.update({
+                        k: v for k, v in attr_map.items() if isinstance(v, str)
+                    })
+                if mappings:
+                    transformed = self.apply_attribute_mappings(transformed, mappings)
+                raw_value_mappings: t.JsonValue | None = self.transformation_rules.get(
+                    "attribute_value_mappings",
+                )
+                if isinstance(raw_value_mappings, dict):
+                    vm_dict: t.JsonMapping = raw_value_mappings
+                    for vm_key, vm_val in vm_dict.items():
+                        if not isinstance(vm_val, dict):
+                            continue
+                        val_map: t.JsonMapping = vm_val
+                        existing_values = transformed.attributes.get(vm_key)
+                        if existing_values is None:
+                            continue
+                        mapped_values: MutableSequence[str] = [
+                            str(val_map.get(value, value)) for value in existing_values
+                        ]
+                        transformed.attributes[vm_key] = mapped_values
+                raw_remove_attributes: t.JsonValue | None = (
+                    self.transformation_rules.get(
+                        "remove_attributes",
+                    )
+                )
+                if isinstance(raw_remove_attributes, list):
+                    remove_list: t.JsonList = raw_remove_attributes
+                    for rm_item in remove_list:
+                        transformed.attributes.pop(str(rm_item), None)
+                raw_add_attributes: t.JsonValue | None = self.transformation_rules.get(
+                    "add_attributes",
+                )
+                if isinstance(raw_add_attributes, dict):
+                    add_dict: t.JsonMapping = raw_add_attributes
+                    for add_key, add_val in add_dict.items():
+                        if isinstance(add_val, list):
+                            transformed.add_attribute(
+                                add_key,
+                                [str(item) for item in add_val],
+                            )
+                        else:
+                            transformed.add_attribute(add_key, str(add_val))
+                return transformed
