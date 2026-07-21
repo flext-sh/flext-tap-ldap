@@ -6,7 +6,7 @@ from typing import override
 
 from flext_tests import s as tests_s
 
-from flext_tap_ldap import m
+from flext_tap_ldap import m, p
 from tests.settings import TestsFlextTapLdapSettings
 
 
