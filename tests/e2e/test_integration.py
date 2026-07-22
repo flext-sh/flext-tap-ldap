@@ -12,6 +12,8 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import json
+
+import pytest
 from typing import TYPE_CHECKING
 
 from flext_tests import tm, u
@@ -23,6 +25,11 @@ if TYPE_CHECKING:
 
 class TestsFlextTapLdapIntegration:
     """Observable-contract tests for the real tap-ldap Singer CLI."""
+
+    # Singer discovery e2e: builds the full catalog against the real tap CLI,
+    # ~18s per discovery test (profiled), exceeding the global --timeout=10 under
+    # load. Class-level ceiling, not a suppression of a hang (proven to complete).
+    pytestmark = pytest.mark.timeout(60)
 
     @staticmethod
     def _discover_streams(tmp_path: Path) -> tuple[bool, list[t.JsonMapping]]:
