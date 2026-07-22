@@ -64,16 +64,11 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
             """Definition of a custom stream property."""
 
             type: Annotated[
-                str,
-                u.Field(
-                    description="Data type for the custom stream property",
-                ),
+                str, u.Field(description="Data type for the custom stream property")
             ] = "string"
             description: Annotated[
                 str | None,
-                u.Field(
-                    description="Optional description of the custom property",
-                ),
+                u.Field(description="Optional description of the custom property"),
             ] = None
 
         # ── Entities ─────────────────────────────────────────────────────────
@@ -84,59 +79,44 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
             host: t.NonEmptyStr = u.Field(description="LDAP server hostname")
             port: t.PortNumber = u.Field(description="LDAP server port")
             bind_dn: Annotated[
-                str | None,
-                u.Field(description="Bind DN for authentication"),
+                str | None, u.Field(description="Bind DN for authentication")
             ] = None
             bind_password: Annotated[
-                str | None,
-                u.Field(description="Bind password for authentication"),
+                str | None, u.Field(description="Bind password for authentication")
             ] = None
             base_dn: Annotated[
-                str | None,
-                u.Field(description="Base DN for search operations"),
+                str | None, u.Field(description="Base DN for search operations")
             ] = None
             use_ssl: bool = u.Field(description="Enable SSL")
             timeout_seconds: t.PositiveInt = u.Field(
-                description="Search timeout in seconds",
+                description="Search timeout in seconds"
             )
             page_size: t.PositiveInt = u.Field(
                 default=c.TapLdap.DEFAULT_PAGE_SIZE,
                 description="Page size for paged results",
             )
             max_retries: t.PositiveInt = u.Field(
-                default=3,
-                description="Maximum connection retries",
+                default=3, description="Maximum connection retries"
             )
 
         class LdapConnection(m.Entity):
             """LDAP connection entity with test status and error tracking."""
 
             host: t.NonEmptyStr = u.Field(
-                description="LDAP host address for this connection",
+                description="LDAP host address for this connection"
             )
-            port: t.PortNumber = u.Field(
-                description="LDAP port for this connection",
-            )
+            port: t.PortNumber = u.Field(description="LDAP port for this connection")
             bind_dn: Annotated[
-                str | None,
-                u.Field(
-                    description="Bind DN used by the connection",
-                ),
+                str | None, u.Field(description="Bind DN used by the connection")
             ] = None
             password: Annotated[
-                str | None,
-                u.Field(
-                    description="Bind password used by the connection",
-                ),
+                str | None, u.Field(description="Bind password used by the connection")
             ] = None
             use_ssl: Annotated[
-                bool,
-                u.Field(
-                    description="Whether the connection uses SSL/TLS",
-                ),
+                bool, u.Field(description="Whether the connection uses SSL/TLS")
             ] = False
             timeout: t.PositiveInt = u.Field(
-                description="Timeout in seconds for this LDAP connection",
+                description="Timeout in seconds for this LDAP connection"
             )
             id: str = u.Field(
                 default_factory=lambda: uuid4().hex,
@@ -144,22 +124,15 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
             )
             last_tested: Annotated[
                 datetime | None,
-                u.Field(
-                    description="Timestamp when the connection was last tested",
-                ),
+                u.Field(description="Timestamp when the connection was last tested"),
             ] = None
             last_error: Annotated[
                 str | None,
-                u.Field(
-                    description="Latest error message from connection testing",
-                ),
+                u.Field(description="Latest error message from connection testing"),
             ] = None
 
 
 # Runtime alias for simplified usage
 m = FlextTapLdapModels
 
-__all__: list[str] = [
-    "FlextTapLdapModels",
-    "m",
-]
+__all__: list[str] = ["FlextTapLdapModels", "m"]

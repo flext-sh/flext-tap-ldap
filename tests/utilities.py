@@ -14,11 +14,10 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING, ClassVar
 
-from flext_tests import FlextTestsUtilities
-
 from flext_core import FlextUtilities
 from flext_ldap.adapters._ldap3.wrappers import FlextLdapLdap3Wrappers
 from flext_tap_ldap import FlextTapLdapUtilities
+from flext_tests import FlextTestsUtilities
 from tests import c
 
 if TYPE_CHECKING:
@@ -68,8 +67,7 @@ class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
                 for candidate_dn, candidate_password in candidates:
                     try:
                         server = u_ldap.create_bare_server(
-                            "localhost",
-                            port=d.CONTAINER_PORT,
+                            "localhost", port=d.CONTAINER_PORT
                         )
                         test_conn = u_ldap.create_connection(
                             server,
@@ -87,10 +85,7 @@ class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
                             return (candidate_dn, candidate_password)
                     except (ConnectionError, OSError, ValueError):
                         continue
-                parent._resolved_admin_credentials[0] = (
-                    d.ADMIN_DN,
-                    d.ADMIN_PASSWORD,
-                )
+                parent._resolved_admin_credentials[0] = (d.ADMIN_DN, d.ADMIN_PASSWORD)
                 return (d.ADMIN_DN, d.ADMIN_PASSWORD)
 
 

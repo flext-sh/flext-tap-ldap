@@ -14,10 +14,10 @@ from __future__ import annotations
 from collections.abc import Callable
 
 import pytest
-from flext_tests import tm
 from pydantic import ValidationError
 
 from flext_tap_ldap import FlextTapLdapModels, c
+from flext_tests import tm
 
 _TapLdap = FlextTapLdapModels.TapLdap
 _Params = _TapLdap.LdapConnectionParams
@@ -38,26 +38,19 @@ class TestsFlextTapLdapModelsUnit:
 
     def test_custom_property_definition_accepts_explicit_values(self) -> None:
         definition = _TapLdap.CustomPropertyDefinition(
-            type="integer",
-            description="a numeric property",
+            type="integer", description="a numeric property"
         )
 
         tm.that(
             definition.model_dump(),
-            eq={
-                "type": "integer",
-                "description": "a numeric property",
-            },
+            eq={"type": "integer", "description": "a numeric property"},
         )
 
     # ── LdapConnectionParams: valid construction ─────────────────────────
 
     def test_connection_params_expose_supplied_and_default_fields(self) -> None:
         params = _TapLdap.LdapConnectionParams(
-            host="ldap.example.com",
-            port=636,
-            use_ssl=True,
-            timeout_seconds=30,
+            host="ldap.example.com", port=636, use_ssl=True, timeout_seconds=30
         )
 
         tm.that(params.host, eq="ldap.example.com")
@@ -73,15 +66,9 @@ class TestsFlextTapLdapModelsUnit:
         tm.that(params.max_retries, eq=3)
 
     @pytest.mark.parametrize("port", [1, 389, 65535])
-    def test_connection_params_accept_valid_port_boundaries(
-        self,
-        port: int,
-    ) -> None:
+    def test_connection_params_accept_valid_port_boundaries(self, port: int) -> None:
         params = _TapLdap.LdapConnectionParams(
-            host="h",
-            port=port,
-            use_ssl=False,
-            timeout_seconds=1,
+            host="h", port=port, use_ssl=False, timeout_seconds=1
         )
 
         tm.that(params.port, eq=port)
@@ -93,47 +80,31 @@ class TestsFlextTapLdapModelsUnit:
         [
             (
                 lambda: _TapLdap.LdapConnectionParams(
-                    host="",
-                    port=389,
-                    use_ssl=False,
-                    timeout_seconds=30,
+                    host="", port=389, use_ssl=False, timeout_seconds=30
                 ),
                 "host",
             ),
             (
                 lambda: _TapLdap.LdapConnectionParams(
-                    host="h",
-                    port=0,
-                    use_ssl=False,
-                    timeout_seconds=30,
+                    host="h", port=0, use_ssl=False, timeout_seconds=30
                 ),
                 "port",
             ),
             (
                 lambda: _TapLdap.LdapConnectionParams(
-                    host="h",
-                    port=70000,
-                    use_ssl=False,
-                    timeout_seconds=30,
+                    host="h", port=70000, use_ssl=False, timeout_seconds=30
                 ),
                 "port",
             ),
             (
                 lambda: _TapLdap.LdapConnectionParams(
-                    host="h",
-                    port=389,
-                    use_ssl=False,
-                    timeout_seconds=0,
+                    host="h", port=389, use_ssl=False, timeout_seconds=0
                 ),
                 "timeout_seconds",
             ),
             (
                 lambda: _TapLdap.LdapConnectionParams(
-                    host="h",
-                    port=389,
-                    use_ssl=False,
-                    timeout_seconds=30,
-                    page_size=0,
+                    host="h", port=389, use_ssl=False, timeout_seconds=30, page_size=0
                 ),
                 "page_size",
             ),
@@ -150,9 +121,7 @@ class TestsFlextTapLdapModelsUnit:
         ],
     )
     def test_connection_params_reject_out_of_contract_values(
-        self,
-        build: Callable[[], _Params],
-        invalid_field: str,
+        self, build: Callable[[], _Params], invalid_field: str
     ) -> None:
         with pytest.raises(ValidationError) as exc_info:
             build()
@@ -173,30 +142,19 @@ class TestsFlextTapLdapModelsUnit:
 
     # ── LdapConnectionParams: value semantics ────────────────────────────
 
-    def test_connection_params_are_value_objects_with_structural_equality(
-        self,
-    ) -> None:
+    def test_connection_params_are_value_objects_with_structural_equality(self) -> None:
         left = _TapLdap.LdapConnectionParams(
-            host="h",
-            port=389,
-            use_ssl=True,
-            timeout_seconds=30,
+            host="h", port=389, use_ssl=True, timeout_seconds=30
         )
         right = _TapLdap.LdapConnectionParams(
-            host="h",
-            port=389,
-            use_ssl=True,
-            timeout_seconds=30,
+            host="h", port=389, use_ssl=True, timeout_seconds=30
         )
 
         tm.that(left, eq=right)
 
     def test_connection_params_are_immutable(self) -> None:
         params = _TapLdap.LdapConnectionParams(
-            host="h",
-            port=389,
-            use_ssl=True,
-            timeout_seconds=30,
+            host="h", port=389, use_ssl=True, timeout_seconds=30
         )
 
         with pytest.raises(ValidationError):
@@ -213,8 +171,6 @@ class TestsFlextTapLdapModelsUnit:
             max_retries=5,
         )
 
-        rebuilt = _TapLdap.LdapConnectionParams.model_validate(
-            original.model_dump(),
-        )
+        rebuilt = _TapLdap.LdapConnectionParams.model_validate(original.model_dump())
 
         tm.that(rebuilt, eq=original)

@@ -24,7 +24,6 @@ if TYPE_CHECKING:
         tv as tv,
         x as x,
     )
-
     from tests.base import (
         TestsFlextTapLdapServiceBase as TestsFlextTapLdapServiceBase,
         s as s,
@@ -51,56 +50,22 @@ if TYPE_CHECKING:
         u,
     )
 _LAZY_IMPORTS = merge_lazy_imports(
-    (
-        ".e2e",
-        ".unit",
-    ),
-    build_lazy_import_map(
-        {
-            ".base": (
-                "TestsFlextTapLdapServiceBase",
-                "s",
-            ),
-            ".conftest": ("conftest",),
-            ".constants": (
-                "TestsFlextTapLdapConstants",
-                "c",
-            ),
-            ".e2e": ("e2e",),
-            ".e2e.test_integration": ("TestsFlextTapLdapIntegration",),
-            ".models": (
-                "TestsFlextTapLdapModels",
-                "m",
-            ),
-            ".protocols": (
-                "TestsFlextTapLdapProtocols",
-                "p",
-            ),
-            ".settings": ("TestsFlextTapLdapSettings",),
-            ".typings": (
-                "TestsFlextTapLdapTypes",
-                "t",
-            ),
-            ".unit": ("unit",),
-            ".unit.test_models": ("TestsFlextTapLdapModelsUnit",),
-            ".utilities": (
-                "TestsFlextTapLdapUtilities",
-                "u",
-            ),
-            "flext_tests": (
-                "d",
-                "e",
-                "h",
-                "r",
-                "td",
-                "tf",
-                "tk",
-                "tm",
-                "tv",
-                "x",
-            ),
-        },
-    ),
+    (".e2e", ".unit"),
+    build_lazy_import_map({
+        ".base": ("TestsFlextTapLdapServiceBase", "s"),
+        ".conftest": ("conftest",),
+        ".constants": ("TestsFlextTapLdapConstants", "c"),
+        ".e2e": ("e2e",),
+        ".e2e.test_integration": ("TestsFlextTapLdapIntegration",),
+        ".models": ("TestsFlextTapLdapModels", "m"),
+        ".protocols": ("TestsFlextTapLdapProtocols", "p"),
+        ".settings": ("TestsFlextTapLdapSettings",),
+        ".typings": ("TestsFlextTapLdapTypes", "t"),
+        ".unit": ("unit",),
+        ".unit.test_models": ("TestsFlextTapLdapModelsUnit",),
+        ".utilities": ("TestsFlextTapLdapUtilities", "u"),
+        "flext_tests": ("d", "e", "h", "r", "td", "tf", "tk", "tm", "tv", "x"),
+    }),
     exclude_names=(
         "cleanup_submodule_namespace",
         "install_lazy_exports",
@@ -124,9 +89,4 @@ _LAZY_IMPORTS = merge_lazy_imports(
 )
 
 
-install_lazy_exports(
-    __name__,
-    globals(),
-    _LAZY_IMPORTS,
-    publish_all=False,
-)
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, publish_all=False)

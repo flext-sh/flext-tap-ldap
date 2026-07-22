@@ -34,7 +34,7 @@ class FlextTapLdapConfig(FlextMeltanoConfig):
     def TapLdap(self) -> FlextTapLdapConfigModels.TapLdap:
         """Validated TapLdap business-rule config (streams and their contracts)."""
         root = FlextTapLdapConfigModels.Root.model_validate(
-            dict(self.model_extra or {}),
+            dict(self.model_extra or {})
         )
         return root.TapLdap
 

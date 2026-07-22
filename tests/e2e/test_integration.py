@@ -15,7 +15,6 @@ import json
 from typing import TYPE_CHECKING
 
 from flext_tests import tm, u
-
 from tests import c, t
 
 if TYPE_CHECKING:
@@ -33,7 +32,7 @@ class TestsFlextTapLdapIntegration:
                 "base_dn": c.Ldap.Tests.BASE_DN,
                 "host": c.Ldap.Tests.HOST,
                 "port": c.Ldap.Tests.PORT,
-            }),
+            })
         )
         result = u.Cli.capture(
             [
@@ -54,8 +53,7 @@ class TestsFlextTapLdapIntegration:
         return True, streams
 
     def test_discover_publishes_every_standard_ldap_stream(
-        self,
-        tmp_path: Path,
+        self, tmp_path: Path
     ) -> None:
         """Discovery advertises every standard LDAP stream at exit 0."""
         success, streams = self._discover_streams(tmp_path)
@@ -64,10 +62,7 @@ class TestsFlextTapLdapIntegration:
         for expected in c.Ldap.Tests.STANDARD_STREAMS:
             tm.that(stream_ids, has=expected)
 
-    def test_discover_streams_declare_dn_primary_key(
-        self,
-        tmp_path: Path,
-    ) -> None:
+    def test_discover_streams_declare_dn_primary_key(self, tmp_path: Path) -> None:
         """Each discovered stream declares the LDAP dn as its key property."""
         success, streams = self._discover_streams(tmp_path)
         tm.that(success, eq=True)
