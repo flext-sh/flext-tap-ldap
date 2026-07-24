@@ -47,5 +47,5 @@ def ldap_record_entries() -> list[dict[str, object]]:
             "cn": "John Doe",
             "mail": "jdoe@test.com",
             "objectClass": ["inetOrgPerson", "person"],
-        },
+        }
     ]

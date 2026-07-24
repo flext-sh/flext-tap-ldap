@@ -17,11 +17,7 @@ from flext_tap_ldap._utilities.extract_support import (
 )
 
 
-class FlextTapLdapUtilities(
-    FlextTapLdapUtilitiesExtractSupport,
-    u,
-    FlextLdapUtilities,
-):
+class FlextTapLdapUtilities(FlextTapLdapUtilitiesExtractSupport, u, FlextLdapUtilities):
     """Unified LDAP tap utility facade."""
 
     class TapLdap(FlextTapLdapUtilitiesExtractSupport.TapLdap):

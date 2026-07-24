@@ -21,9 +21,7 @@ class FlextTapLdapSettings(FlextLdapSettings):
     """Tap LDAP runtime settings; fields under ``settings.TapLdap.*``."""
 
     model_config = SettingsConfigDict(
-        env_prefix="FLEXT_TAP_LDAP_",
-        env_nested_delimiter="__",
-        extra="ignore",
+        env_prefix="FLEXT_TAP_LDAP_", env_nested_delimiter="__", extra="ignore"
     )
 
     class _TapLdap(BaseModel):
@@ -42,8 +40,7 @@ class FlextTapLdapSettings(FlextLdapSettings):
         TapLdap: _TapLdap
     else:
         TapLdap: _TapLdap = Field(
-            default_factory=_TapLdap,
-            description="Namespaced tap-LDAP settings.",
+            default_factory=_TapLdap, description="Namespaced tap-LDAP settings."
         )
 
 

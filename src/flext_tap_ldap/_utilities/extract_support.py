@@ -38,8 +38,7 @@ class FlextTapLdapUtilitiesExtractSupport:
 
         @staticmethod
         def stream_search(
-            stream_name: str,
-            source: t.JsonMapping,
+            stream_name: str, source: t.JsonMapping
         ) -> p.Result[p.Ldap.SearchOptions]:
             """Resolve a stream's business rules into typed LDAP search options."""
             rule = next(
@@ -54,7 +53,7 @@ class FlextTapLdapUtilitiesExtractSupport:
                     base_dn=base_dn,
                     filter_str=rule.filter,
                     attributes=list(rule.attributes),
-                ),
+                )
             )
 
         @staticmethod

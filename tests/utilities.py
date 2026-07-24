@@ -65,8 +65,7 @@ class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
                 for candidate_dn, candidate_password in candidates:
                     try:
                         server = u_ldap.create_bare_server(
-                            "localhost",
-                            port=d.CONTAINER_PORT,
+                            "localhost", port=d.CONTAINER_PORT
                         )
                         test_conn = u_ldap.create_connection(
                             server,
@@ -84,10 +83,7 @@ class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
                             return (candidate_dn, candidate_password)
                     except (ConnectionError, OSError, ValueError):
                         continue
-                parent._resolved_admin_credentials[0] = (
-                    d.ADMIN_DN,
-                    d.ADMIN_PASSWORD,
-                )
+                parent._resolved_admin_credentials[0] = (d.ADMIN_DN, d.ADMIN_PASSWORD)
                 return (d.ADMIN_DN, d.ADMIN_PASSWORD)
 
 

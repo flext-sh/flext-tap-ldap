@@ -41,7 +41,7 @@ class FlextTapLdapConfigModels:
         """Root flext-tap-ldap config validated from ``config/*.yaml``."""
 
         TapLdap: FlextTapLdapConfigModels.TapLdap = u.Field(
-            description="TapLdap business-rule config domain",
+            description="TapLdap business-rule config domain"
         )
 
 
