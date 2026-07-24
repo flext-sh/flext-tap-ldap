@@ -2,7 +2,7 @@
 
 Business-rule SSOT: the stream contracts (name, LDAP filter, attributes, Singer
 schema, primary keys) live in ``config/tap-ldap.yaml`` at the project root under
-the ``TapLdap`` key and are exposed through the open ``config.TapLdap`` namespace.
+the ``TapLdap`` key and are exposed through the open ``config.tap_ldap`` namespace.
 Config holds the business rules; ``settings`` holds the adjustable runtime
 parameters (``.env`` / env vars / local settings / CLI).
 
@@ -25,13 +25,13 @@ class FlextTapLdapConfig(FlextMeltanoConfig):
     ``CONFIG_DIR`` is reset to the relative default so the loader anchors to this
     project's own root ``config/`` instead of inheriting an ancestor's absolute
     override. The model-less YAML slice is validated once into the typed config
-    models and exposed as ``config.TapLdap``.
+    models and exposed as ``config.tap_ldap``.
     """
 
     CONFIG_DIR: ClassVar[str] = "config"
 
     @cached_property
-    def TapLdap(self) -> FlextTapLdapConfigModels.TapLdap:
+    def tap_ldap(self) -> FlextTapLdapConfigModels.TapLdap:
         """Validated TapLdap business-rule config (streams and their contracts)."""
         root = FlextTapLdapConfigModels.Root.model_validate(
             dict(self.model_extra or {})

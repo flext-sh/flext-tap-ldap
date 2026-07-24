@@ -2,7 +2,7 @@
 
 All the tap's non-trivial logic lives here as a ``_utilities`` mixin composed
 into the ``u`` facade; ``services/*`` stay thin orchestrators. Business rules are
-read from ``config.TapLdap`` and packed into flext-meltano transport models.
+read from ``config.tap_ldap`` and packed into flext-meltano transport models.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -28,7 +28,7 @@ class FlextTapLdapUtilitiesExtractSupport:
                     json_schema=rule.stream_schema,
                     primary_keys=rule.primary_keys,
                 )
-                for rule in config.TapLdap.streams
+                for rule in config.tap_ldap.streams
             ]
             return m.Meltano.TapSpec(
                 tap_name=c.TapLdap.TAP_NAME,
@@ -42,7 +42,7 @@ class FlextTapLdapUtilitiesExtractSupport:
         ) -> p.Result[m.Ldap.SearchOptions]:
             """Resolve a stream's business rules into typed LDAP search options."""
             rule = next(
-                (item for item in config.TapLdap.streams if item.name == stream_name),
+                (item for item in config.tap_ldap.streams if item.name == stream_name),
                 None,
             )
             if rule is None:

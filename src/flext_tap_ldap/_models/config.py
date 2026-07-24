@@ -3,7 +3,7 @@
 Frozen Pydantic shapes for the ``config/tap-ldap.yaml`` business-rule SSOT,
 reusing the flext-meltano ``m`` base models. The ``_config.py`` facade validates
 the model-less YAML slice into these classes and exposes the ready objects under
-``config.TapLdap``.
+``config.tap_ldap``.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT

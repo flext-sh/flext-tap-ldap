@@ -9,6 +9,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import os
 from typing import Final
 
 from flext_tap_ldap import FlextTapLdapConstants
@@ -31,16 +32,22 @@ class TestsFlextTapLdapConstants(FlextTestsConstants, FlextTapLdapConstants):
             PORT: Final[int] = 389
             BASE_DN: Final[str] = "dc=test,dc=com"
             BIND_DN: Final[str] = "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com"
-            BIND_PASSWORD: Final[str] = "test_password"
+            BIND_PASSWORD: Final[str] = os.getenv(
+                "FLEXT_TAP_LDAP_BIND_PASSWORD", "test_password"
+            )
             USE_TLS: Final[bool] = False
             PAGE_SIZE: Final[int] = 1000
             CONTAINER_PORT: Final[int] = 3390
             ADMIN_DN: Final[str] = "cn=admin,dc=flext,dc=local"
-            ADMIN_PASSWORD: Final[str] = "admin123"
+            ADMIN_PASSWORD: Final[str] = os.getenv(
+                "FLEXT_TAP_LDAP_ADMIN_PASSWORD", "admin123"
+            )
             LEGACY_ADMIN_DN: Final[str] = (
                 "cn=REDACTED_LDAP_BIND_PASSWORD,dc=flext,dc=local"
             )
-            LEGACY_ADMIN_PASSWORD: Final[str] = "REDACTED_LDAP_BIND_PASSWORD123"
+            LEGACY_ADMIN_PASSWORD: Final[str] = os.getenv(
+                "FLEXT_TAP_LDAP_LEGACY_ADMIN_PASSWORD", "REDACTED_LDAP_BIND_PASSWORD123"
+            )
             STANDARD_STREAMS: Final[tuple[str, ...]] = (
                 "users",
                 "groups",
