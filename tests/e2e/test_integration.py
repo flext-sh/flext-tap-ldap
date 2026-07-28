@@ -12,9 +12,9 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import json
+from typing import TYPE_CHECKING
 
 import pytest
-from typing import TYPE_CHECKING
 
 from flext_tests import tm, u
 from tests import c, t
