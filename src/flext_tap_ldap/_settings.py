@@ -11,10 +11,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Annotated
 
-from pydantic import BaseModel, Field
 from pydantic_settings import SettingsConfigDict
 
-from flext_ldap import FlextLdapSettings
+from flext_ldap import FlextLdapSettings, m
 
 
 class FlextTapLdapSettings(FlextLdapSettings):
@@ -24,7 +23,7 @@ class FlextTapLdapSettings(FlextLdapSettings):
         env_prefix="FLEXT_TAP_LDAP_", env_nested_delimiter="__", extra="ignore"
     )
 
-    class _TapLdap(BaseModel):
+    class _TapLdap(m.BaseModel):
         """Tap-specific adjustable params (``settings.TapLdap.*``).
 
         All fields are set by ``.env`` / env vars / local settings / CLI / API and
@@ -33,13 +32,13 @@ class FlextTapLdapSettings(FlextLdapSettings):
         ``settings.Ldap.*`` via MRO and parametrized the same way.
         """
 
-        base_dn: Annotated[str, Field(default="", description="Search base DN")]
-        page_size: Annotated[int, Field(default=1000, ge=1, description="Page size")]
+        base_dn: Annotated[str, m.Field(default="", description="Search base DN")]
+        page_size: Annotated[int, m.Field(default=1000, ge=1, description="Page size")]
 
     if TYPE_CHECKING:
         TapLdap: _TapLdap
     else:
-        TapLdap: _TapLdap = Field(
+        TapLdap: _TapLdap = m.Field(
             default_factory=_TapLdap, description="Namespaced tap-LDAP settings."
         )
 
