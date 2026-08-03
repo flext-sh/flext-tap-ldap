@@ -13,10 +13,9 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from flext_tests import FlextTestsModels
-
 from flext_tap_ldap import FlextTapLdapModels, t
-from tests.utilities import u
+from flext_tests import FlextTestsModels
+from tests import u
 
 
 class TestsFlextTapLdapModels(FlextTestsModels, FlextTapLdapModels):
@@ -52,7 +51,7 @@ class TestsFlextTapLdapModels(FlextTestsModels, FlextTapLdapModels):
 
                 @property
                 def connection_string(self) -> str:
-                    """Get LDAP connection string."""
+                    """The LDAP connection string."""
                     protocol = "ldaps" if self.use_ssl else "ldap"
                     return f"{protocol}://{self.host}:{self.port}"
 
@@ -92,8 +91,7 @@ class TestsFlextTapLdapModels(FlextTestsModels, FlextTapLdapModels):
                     str, u.Field(description="Object class filtered by the stream")
                 ]
                 replication_method: Annotated[
-                    str,
-                    u.Field(description="Replication method for the stream"),
+                    str, u.Field(description="Replication method for the stream")
                 ] = "FULL_TABLE"
                 is_selected: Annotated[
                     bool, u.Field(description="Whether the stream is selected for sync")
@@ -115,7 +113,7 @@ class TestsFlextTapLdapModels(FlextTestsModels, FlextTapLdapModels):
 
                 @property
                 def attribute_count(self) -> int:
-                    """Get number of attributes."""
+                    """The number of attributes."""
                     return len(self.attributes)
 
 

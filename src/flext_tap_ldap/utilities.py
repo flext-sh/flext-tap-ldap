@@ -1,31 +1,27 @@
-"""Tap LDAP utility facade."""
+"""Tap LDAP utilities facade — MRO of ``_utilities`` mixins and composed libs.
+
+Composes the tap's own ``_utilities`` helpers with the flext-meltano and
+flext-ldap utility facades. ``services/*`` and ``cli.py`` reach every helper
+through ``u.TapLdap.*``.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import u
-from flext_tap_ldap._utilities._processor import FlextTapLdapUtilitiesProcessorMixin
-from flext_tap_ldap._utilities.client_support import (
-    FlextTapLdapUtilitiesClientSupport,
-)
-from flext_tap_ldap._utilities.error_handling import (
-    FlextTapLdapUtilitiesErrorHandling,
+from flext_tap_ldap._utilities.extract_support import (
+    FlextTapLdapUtilitiesExtractSupport,
 )
 
 
-class FlextTapLdapUtilities(
-    FlextTapLdapUtilitiesProcessorMixin,
-    u,
-    FlextLdapUtilities,
-):
+class FlextTapLdapUtilities(FlextTapLdapUtilitiesExtractSupport, u, FlextLdapUtilities):
     """Unified LDAP tap utility facade."""
 
-    class TapLdap(
-        FlextTapLdapUtilitiesProcessorMixin.TapLdap,
-        FlextTapLdapUtilitiesClientSupport,
-        FlextTapLdapUtilitiesErrorHandling,
-    ):
-        """Tap LDAP namespace for cross-project access."""
+    class TapLdap(FlextTapLdapUtilitiesExtractSupport.TapLdap):
+        """Tap-LDAP helper namespace for cross-project access."""
 
 
 u = FlextTapLdapUtilities

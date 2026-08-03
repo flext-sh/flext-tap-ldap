@@ -24,8 +24,6 @@ class FlextTapLdapTypes(t, FlextLdapTypes):
     class TapLdap:
         """Tap-LDAP-specific type adapters (project slot namespace)."""
 
-        pass
-
 
 t = FlextTapLdapTypes
 __all__: list[str] = ["FlextTapLdapTypes", "t"]

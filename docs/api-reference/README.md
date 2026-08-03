@@ -19,7 +19,7 @@ This section is generated from public exports and real docstrings.
 
 ## Surface Summary
 
-- Primary facades: _none_
-- Generated module pages: `11`
+- Primary facades: `FlextTapLdapConfig`, `FlextTapLdapConstants`, `FlextTapLdapModels`, `FlextTapLdapProtocols`, `FlextTapLdapService`, `FlextTapLdapSettings` (+2 more)
+- Generated module pages: `7`
 
 - [Back to project docs](../index.md)

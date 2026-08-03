@@ -1,5 +1,5 @@
-# AUTO-GENERATED FILE — Regenerate with: make gen
-"""Utilities package."""
+# @generated AUTO-GENERATED FILE — Regenerate with: make gen
+"""Flext Tap Ldap. Utilities package."""
 
 from __future__ import annotations
 
@@ -8,27 +8,24 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_tap_ldap._utilities._processor import (
-        FlextTapLdapUtilitiesProcessorMixin as FlextTapLdapUtilitiesProcessorMixin,
+    from .extract_support import (
+        FlextTapLdapUtilitiesExtractSupport as FlextTapLdapUtilitiesExtractSupport,
     )
-    from flext_tap_ldap._utilities.client_support import (
-        FlextTapLdapUtilitiesClientSupport as FlextTapLdapUtilitiesClientSupport,
-    )
-    from flext_tap_ldap._utilities.error_handling import (
-        FlextTapLdapUtilitiesErrorHandling as FlextTapLdapUtilitiesErrorHandling,
-    )
+
+_LAZY_MODULES: dict[str, tuple[str, ...]] = {
+    ".extract_support": ("FlextTapLdapUtilitiesExtractSupport",)
+}
+
+
+_LAZY_ALIAS_GROUPS: dict[str, tuple[tuple[str, str], ...]] = {}
+
+
 _LAZY_IMPORTS = build_lazy_import_map(
-    {
-        "._processor": ("FlextTapLdapUtilitiesProcessorMixin",),
-        ".client_support": ("FlextTapLdapUtilitiesClientSupport",),
-        ".error_handling": ("FlextTapLdapUtilitiesErrorHandling",),
-    },
+    _LAZY_MODULES, alias_groups=_LAZY_ALIAS_GROUPS, sort_keys=False
 )
 
+_PUBLIC_EXPORTS: tuple[str, ...] = ("FlextTapLdapUtilitiesExtractSupport",)
 
-install_lazy_exports(
-    __name__,
-    globals(),
-    _LAZY_IMPORTS,
-    publish_all=False,
-)
+__all__: tuple[str, ...] = tuple(_PUBLIC_EXPORTS)
+
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, public_exports=__all__)

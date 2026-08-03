@@ -8,10 +8,13 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from enum import StrEnum, unique
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
 from flext_ldap import FlextLdapConstants
-from flext_meltano import c, t
+from flext_meltano import c
+
+if TYPE_CHECKING:
+    from flext_meltano import t
 
 
 class FlextTapLdapConstants(c, FlextLdapConstants):
@@ -36,6 +39,7 @@ class FlextTapLdapConstants(c, FlextLdapConstants):
 
         DEFAULT_PAGE_SIZE: Final[int] = 1000
         DEFAULT_SEARCH_TIMEOUT: Final[int] = FlextLdapConstants.Ldap.TIMEOUT
+        TAP_NAME: Final[str] = "tap-ldap"
 
         class Ldap:
             """LDAP tap-specific connection constants."""

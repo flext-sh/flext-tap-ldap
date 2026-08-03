@@ -6,13 +6,14 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tests import FlextTestsTypes
-
 from flext_tap_ldap import FlextTapLdapTypes
+from flext_tests import FlextTestsTypes
 
 
 class TestsFlextTapLdapTypes(FlextTestsTypes, FlextTapLdapTypes):
     """Test types combining TestsFlextTypes with flext-tap-ldap types."""
+
+    type Entry = dict[str, str | dict[str, list[str]]]
 
 
 t = TestsFlextTapLdapTypes
