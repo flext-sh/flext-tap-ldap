@@ -142,17 +142,7 @@ extra_checks = true
 follow_imports = "normal"
 ignore_missing_imports = true
 local_partial_types = true
-mypy_path = [
-  "src",
-  ".",
-  "../flext-cli/src",
-  "../flext-core/src",
-  "../flext-infra/src",
-  "../flext-ldap/src",
-  "../flext-ldif/src",
-  "../flext-meltano/src",
-  "../flext-tests/src",
-]
+mypy_path = ["src", "."]
 namespace_packages = true
 no_implicit_reexport = true
 plugins = ["pydantic.mypy"]
@@ -199,17 +189,7 @@ project-excludes = [
 ]
 project-includes = ["examples/**/*.py*", "src/**/*.py*", "tests/**/*.py*"]
 python-version = "3.13"
-search-path = [
-  "src",
-  ".",
-  "../flext-cli/src",
-  "../flext-core/src",
-  "../flext-infra/src",
-  "../flext-ldap/src",
-  "../flext-ldif/src",
-  "../flext-meltano/src",
-  "../flext-tests/src",
-]
+search-path = ["src", "."]
 use-ignore-files = false
 
 [tool.pyrefly.errors]
@@ -434,6 +414,7 @@ markers = [
   "edge_cases: edge case tests",
   "integration: integration tests",
   "performance: performance and benchmark tests",
+  "remote: tests requiring remote/external network services",
   "resilience: resilience tests",
   "slow: slow-running tests",
   "smoke: public-interface smoke tests",
