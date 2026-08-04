@@ -1,8 +1,12 @@
 <!-- AUTO-GENERATED — DO NOT EDIT MANUALLY -->
 
-# flext_tap_ldap.ldif_streams
+# flext_tap_ldap.tap
 
-::: flext_tap_ldap.ldif_streams
+<!-- TOC START -->
+- No sections found
+<!-- TOC END -->
+
+::: flext_tap_ldap.tap
     options:
       show_root_heading: true
       show_root_full_path: false
