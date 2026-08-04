@@ -33,10 +33,10 @@ class FlextTapLdapConfig(FlextMeltanoConfig):
     @cached_property
     def tap_ldap(self) -> FlextTapLdapConfigModels.TapLdap:
         """Validated TapLdap business-rule config (streams and their contracts)."""
-        root = FlextTapLdapConfigModels.Root.model_validate(
-            dict(self.model_extra or {})
-        )
-        return root.TapLdap
+        payload: dict[str, object] = dict(self.model_extra or {})
+        root = FlextTapLdapConfigModels.Root.model_validate(payload)
+        tap_ldap: FlextTapLdapConfigModels.TapLdap = root.TapLdap
+        return tap_ldap
 
 
 config: FlextTapLdapConfig = FlextTapLdapConfig.fetch_global()
