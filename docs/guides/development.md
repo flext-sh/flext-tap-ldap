@@ -165,9 +165,7 @@ def process_data(data: t.JsonMapping) -> p.Result[ProcessedData]:
 
 # ❌ WRONG - Missing type annotations
 def process_data(data):
-    return data
-```
-
+    return data```
 ### Railway-Oriented Programming
 
 ```python
@@ -189,9 +187,7 @@ def validate_and_process(data: dict) -> p.Result[ProcessedData]:
 def validate_and_process(data: dict) -> ProcessedData:
     if not data:
         raise ValueError("Data required")
-    return transform_data(data)
-```
-
+    return transform_data(data)```
 ### Unified Models Pattern
 
 ```python
@@ -215,9 +211,7 @@ class ApiRequest(m.BaseModel):
 
 
 class ApiResponse(m.BaseModel):
-    result
-```
-
+    result```
 ## Testing
 
 ### Running Tests
@@ -239,8 +233,6 @@ pytest --cov=src --cov-report=html
 
 ```python
 from __future__ import annotations
-import pytest
-from flext_core import FlextSettings
 
 
 class TestDataProcessing:
@@ -257,9 +249,7 @@ class TestDataProcessing:
         result = process_data(None)
 
         assert result.failure
-        assert "Data required" in result.failure()
-```
-
+        assert "Data required" in result.failure()```
 ## Quality Gates
 
 ### Pre-commit Hooks
@@ -310,7 +300,6 @@ from __future__ import annotations
 from flext_core import m, p, t
 
 # src/flext_newlib/__init__.py
-from flext_core import FlextSettings
 
 
 # Main API class
@@ -333,9 +322,7 @@ class FlextNewlibModels:
         data: t.JsonMapping
 
     class Response(m.BaseModel):
-        result: p.Result[t.JsonValue]
-```
-
+        result: p.Result[t.JsonValue]```
 ### 3. Add to Workspace
 
 ```bash
@@ -387,8 +374,7 @@ from flext_core import p, t
 
 
 def process_data(data: t.JsonMapping) -> p.Result[ProcessedData]:
-    """
-    Process data using the FLEXT pipeline.
+    """Process data using the FLEXT pipeline.
 
     Args:
         data: Input data dictionary
@@ -403,10 +389,9 @@ def process_data(data: t.JsonMapping) -> p.Result[ProcessedData]:
         >>> result = process_data({"key": "value"})
         >>> if result.success:
         ...     processed = result.unwrap()
-    """
-    # Implementation here
-```
 
+    """
+    # Implementation here```
 ### README Updates
 
 Update project README.md files when adding new features:
@@ -420,9 +405,7 @@ from flext_newlib import FlextNewlibSettings
 lib = FlextNewlib()
 result = lib.new_feature()
 
-settings = FlextNewlibSettings(new_setting="value")
-```
-
+settings = FlextNewlibSettings(new_setting="value")```
 ## Contributing
 
 ### Pull Request Process

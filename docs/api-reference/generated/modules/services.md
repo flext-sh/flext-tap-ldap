@@ -1,8 +1,12 @@
 <!-- AUTO-GENERATED — DO NOT EDIT MANUALLY -->
 
-# flext_tap_ldap.typings
+# flext_tap_ldap.services
 
-::: flext_tap_ldap.typings
+<!-- TOC START -->
+- No sections found
+<!-- TOC END -->
+
+::: flext_tap_ldap.services
     options:
       show_root_heading: true
       show_root_full_path: false

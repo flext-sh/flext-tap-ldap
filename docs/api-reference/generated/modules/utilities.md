@@ -2,6 +2,10 @@
 
 # flext_tap_ldap.utilities
 
+<!-- TOC START -->
+- No sections found
+<!-- TOC END -->
+
 ::: flext_tap_ldap.utilities
     options:
       show_root_heading: true
