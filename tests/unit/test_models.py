@@ -157,8 +157,7 @@ class TestsFlextTapLdapModelsUnit:
             host="h", port=389, use_ssl=True, timeout_seconds=30
         )
 
-        with pytest.raises(ValidationError):
-            setattr(params, "host", "other")
+        tm.rejects_assignment(params, "host", "other", expected=ValidationError)
 
     def test_connection_params_round_trip_through_model_dump(self) -> None:
         original = _TapLdap.LdapConnectionParams(
