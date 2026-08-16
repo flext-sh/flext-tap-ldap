@@ -30,9 +30,10 @@ class FlextTapLdapService(meltano.Tap):
     ) -> p.Meltano.SingerTapInstance:
         """Build the declarative Singer tap from config streams + a fetcher."""
         _ = settings
-        return self.build_declarative_tap(
+        tap: p.Meltano.SingerTapInstance = self.build_declarative_tap(
             u.TapLdap.tap_spec(), FlextTapLdapExtractService()
         )
+        return tap
 
 
 tap_ldap = FlextTapLdapService
