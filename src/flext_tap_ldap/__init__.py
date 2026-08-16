@@ -1,9 +1,11 @@
-# @generated AUTO-GENERATED FILE — Regenerate with: make gen
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """Flext Tap Ldap package."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+
+from types import MappingProxyType
 
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
@@ -17,61 +19,19 @@ from .__version__ import __version__ as __version__
 from .__version__ import __version_info__ as __version_info__
 
 if TYPE_CHECKING:
-    from flext_ldap import d as d
-    from flext_ldap import e as e
-    from flext_ldap import h as h
-    from flext_ldap import r as r
-    from flext_ldap import x as x
+    from flext_ldap import d, e, h, r, x
 
-    from ._config import FlextTapLdapConfig as FlextTapLdapConfig
-    from ._config import config as config
-    from ._settings import FlextTapLdapSettings as FlextTapLdapSettings
-    from ._settings import settings as settings
-    from .api import FlextTapLdapService as FlextTapLdapService
-    from .api import tap_ldap as tap_ldap
-    from .base import FlextTapLdapServiceBase as FlextTapLdapServiceBase
-
-    s: type[FlextTapLdapServiceBase]
-    from .cli import main as main
-    from .constants import FlextTapLdapConstants as FlextTapLdapConstants
-
-    c: type[FlextTapLdapConstants]
-    from .models import FlextTapLdapModels as FlextTapLdapModels
-
-    m: type[FlextTapLdapModels]
-    from .protocols import FlextTapLdapProtocols as FlextTapLdapProtocols
-
-    p: type[FlextTapLdapProtocols]
-    from .typings import FlextTapLdapTypes as FlextTapLdapTypes
-
-    t: type[FlextTapLdapTypes]
-    from .utilities import FlextTapLdapUtilities as FlextTapLdapUtilities
-
-    u: type[FlextTapLdapUtilities]
-
-_LAZY_MODULES: dict[str, tuple[str, ...]] = {
-    "._config": ("FlextTapLdapConfig", "config"),
-    "._settings": ("FlextTapLdapSettings", "settings"),
-    ".api": ("FlextTapLdapService", "tap_ldap"),
-    ".base": ("FlextTapLdapServiceBase", "s"),
-    ".cli": ("main",),
-    ".constants": ("FlextTapLdapConstants", "c"),
-    ".models": ("FlextTapLdapModels", "m"),
-    ".protocols": ("FlextTapLdapProtocols", "p"),
-    ".typings": ("FlextTapLdapTypes", "t"),
-    ".utilities": ("FlextTapLdapUtilities", "u"),
-    "flext_ldap": ("d", "e", "h", "r", "x"),
-}
-
-
-_LAZY_ALIAS_GROUPS: dict[str, tuple[tuple[str, str], ...]] = {}
-
-
-_LAZY_IMPORTS = build_lazy_import_map(
-    _LAZY_MODULES, alias_groups=_LAZY_ALIAS_GROUPS, sort_keys=False
-)
-
-_PUBLIC_EXPORTS: tuple[str, ...] = (
+    from ._config import FlextTapLdapConfig, config
+    from ._settings import FlextTapLdapSettings, settings
+    from .api import FlextTapLdapService, tap_ldap
+    from .base import FlextTapLdapServiceBase, FlextTapLdapServiceBase as s
+    from .cli import main
+    from .constants import FlextTapLdapConstants, FlextTapLdapConstants as c
+    from .models import FlextTapLdapModels, FlextTapLdapModels as m
+    from .protocols import FlextTapLdapProtocols, FlextTapLdapProtocols as p
+    from .typings import FlextTapLdapTypes, FlextTapLdapTypes as t
+    from .utilities import FlextTapLdapUtilities, FlextTapLdapUtilities as u
+__all__: tuple[str, ...] = (
     "FlextTapLdapConfig",
     "FlextTapLdapConstants",
     "FlextTapLdapModels",
@@ -106,6 +66,27 @@ _PUBLIC_EXPORTS: tuple[str, ...] = (
     "x",
 )
 
-__all__: tuple[str, ...] = tuple(_PUBLIC_EXPORTS)
-
-install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, public_exports=__all__)
+install_lazy_exports(
+    __name__,
+    globals(),
+    MappingProxyType(
+        build_lazy_import_map(
+            MappingProxyType({
+                "._config": ("FlextTapLdapConfig", "config"),
+                "._settings": ("FlextTapLdapSettings", "settings"),
+                ".api": ("FlextTapLdapService", "tap_ldap"),
+                ".base": ("FlextTapLdapServiceBase", "s"),
+                ".cli": ("main",),
+                ".constants": ("FlextTapLdapConstants", "c"),
+                ".models": ("FlextTapLdapModels", "m"),
+                ".protocols": ("FlextTapLdapProtocols", "p"),
+                ".typings": ("FlextTapLdapTypes", "t"),
+                ".utilities": ("FlextTapLdapUtilities", "u"),
+                "flext_ldap": ("d", "e", "h", "r", "x"),
+            }),
+            alias_groups=MappingProxyType({}),
+            sort_keys=False,
+        )
+    ),
+    public_exports=__all__,
+)
