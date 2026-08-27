@@ -131,7 +131,7 @@ class TestsFlextTapLdapModelsUnit:
 
     def test_connection_params_require_mandatory_fields(self) -> None:
         with pytest.raises(ValidationError) as exc_info:
-            _TapLdap.LdapConnectionParams(host="h")
+            _TapLdap.LdapConnectionParams.model_validate({"host": "h"})
 
         missing = {
             error["loc"][0]
