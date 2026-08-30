@@ -1,0 +1,4 @@
+version: 1
+workspace: flext-tap-ldap
+database: flext-tap-ldap
+issue_prefix: flext-tap-ldap
