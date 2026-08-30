@@ -27,7 +27,7 @@
   `FlextTapLdapServiceBase`, `FlextTapLdapSettings`, `FlextTapLdapTypes`,
   `FlextTapLdapUtilities`, `config` (+3 more)
 - Exported module shortcuts: _none_
-- Generated module pages: `8`
+- Generated module pages: `0`
 
 ## Next Pages
 
