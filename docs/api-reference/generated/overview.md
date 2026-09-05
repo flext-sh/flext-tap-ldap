@@ -18,16 +18,16 @@
 - Keywords: `data-extraction`, `enterprise`, `etl`, `flext`, `singer`, `tap`,
   `typed`
 - Main facades: `FlextTapLdapConfig`, `FlextTapLdapConstants`,
-  `FlextTapLdapModels`, `FlextTapLdapProtocols`, `FlextTapLdapService`,
-  `FlextTapLdapServiceBase`, `FlextTapLdapSettings`, `FlextTapLdapTypes` (+1
+  `FlextTapLdapExtractService`, `FlextTapLdapModels`, `FlextTapLdapProtocols`,
+  `FlextTapLdapService`, `FlextTapLdapServiceBase`, `FlextTapLdapSettings` (+2
   more)
 - Alias exports: `c`, `d`, `e`, `h`, `m`, `p`, `r`, `s`, `t`, `u`, `x`
 - Public symbol exports: `FlextTapLdapConfig`, `FlextTapLdapConstants`,
-  `FlextTapLdapModels`, `FlextTapLdapProtocols`, `FlextTapLdapService`,
-  `FlextTapLdapServiceBase`, `FlextTapLdapSettings`, `FlextTapLdapTypes`,
-  `FlextTapLdapUtilities`, `config` (+3 more)
-- Exported module shortcuts: _none_
-- Generated module pages: `0`
+  `FlextTapLdapExtractService`, `FlextTapLdapModels`, `FlextTapLdapProtocols`,
+  `FlextTapLdapService`, `FlextTapLdapServiceBase`, `FlextTapLdapSettings`,
+  `FlextTapLdapTypes`, `FlextTapLdapUtilities` (+4 more)
+- Exported module shortcuts: `services`
+- Generated module pages: `10`
 
 ## Next Pages
 
