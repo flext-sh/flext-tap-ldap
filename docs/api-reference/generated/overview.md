@@ -25,7 +25,7 @@
 - Public symbol exports: `FlextTapLdapConfig`, `FlextTapLdapConstants`,
   `FlextTapLdapExtractService`, `FlextTapLdapModels`, `FlextTapLdapProtocols`,
   `FlextTapLdapService`, `FlextTapLdapServiceBase`, `FlextTapLdapSettings`,
-  `FlextTapLdapTypes`, `FlextTapLdapUtilities` (+4 more)
+  `FlextTapLdapTypes`, `FlextTapLdapUtilities` (+3 more)
 - Exported module shortcuts: `services`
 - Generated module pages: `10`
 
