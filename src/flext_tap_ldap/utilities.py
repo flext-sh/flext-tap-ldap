@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import u
-from flext_tap_ldap._utilities.extract_support import (
+from ._utilities.extract_support import (
     FlextTapLdapUtilitiesExtractSupport,
 )
 
