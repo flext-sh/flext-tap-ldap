@@ -36,4 +36,6 @@ class FlextTapLdapService(meltano.Tap):
         return tap
 
 
-__all__: list[str] = ["FlextTapLdapService"]
+tap_ldap = FlextTapLdapService
+
+__all__: list[str] = ["FlextTapLdapService", "tap_ldap"]
