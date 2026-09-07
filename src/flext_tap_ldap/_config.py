@@ -16,6 +16,7 @@ from functools import cached_property
 from typing import ClassVar
 
 from flext_meltano import FlextMeltanoConfig
+
 from ._models.config import FlextTapLdapConfigModels
 
 
