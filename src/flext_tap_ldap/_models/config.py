@@ -38,7 +38,14 @@ class FlextTapLdapConfigModels:
         )
 
     class Root(m.FrozenModel):
-        """Root flext-tap-ldap config validated from ``config/*.yaml``."""
+        """Root flext-tap-ldap config validated from ``config/*.yaml``.
+
+        The ``config/`` directory is shared across domains (fleet tooling drops
+        sibling YAML files), so unknown top-level keys are tolerated; the
+        ``TapLdap`` branch itself stays strictly validated.
+        """
+
+        model_config = m.ConfigDict(extra="allow")
 
         TapLdap: FlextTapLdapConfigModels.TapLdap = u.Field(
             description="TapLdap business-rule config domain"
