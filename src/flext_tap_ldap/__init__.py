@@ -22,7 +22,7 @@ from .__version__ import (
 if TYPE_CHECKING:
     from flext_ldap import FlextLdapConstants, d, e, h, r, x
 
-    from . import services as services
+    from . import services
     from ._config import FlextTapLdapConfig, config
     from ._settings import FlextTapLdapSettings, settings
     from .api import FlextTapLdapService, tap_ldap

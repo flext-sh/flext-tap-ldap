@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from flext_tap_ldap import FlextTapLdapConstants
     from flext_tests import FlextTestsConstants, d, e, h, r, td, tf, tk, tm, tv, x
 
-    from . import e2e as e2e, unit as unit
+    from . import e2e, unit
     from .base import TestsFlextTapLdapServiceBase, TestsFlextTapLdapServiceBase as s
     from .constants import TestsFlextTapLdapConstants, TestsFlextTapLdapConstants as c
     from .models import TestsFlextTapLdapModels, TestsFlextTapLdapModels as m
