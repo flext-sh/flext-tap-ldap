@@ -20,9 +20,6 @@ from .__version__ import (
 )
 
 if TYPE_CHECKING:
-    from enum import StrEnum, unique
-    from typing import TYPE_CHECKING, Final
-
     from flext_ldap import FlextLdapConstants, d, e, h, r, x
 
     from . import services as services
@@ -38,8 +35,6 @@ if TYPE_CHECKING:
     from .typings import FlextTapLdapTypes, FlextTapLdapTypes as t
     from .utilities import FlextTapLdapUtilities, FlextTapLdapUtilities as u
 __all__: tuple[str, ...] = (
-    "TYPE_CHECKING",
-    "Final",
     "FlextLdapConstants",
     "FlextTapLdapConfig",
     "FlextTapLdapConstants",
@@ -51,7 +46,6 @@ __all__: tuple[str, ...] = (
     "FlextTapLdapSettings",
     "FlextTapLdapTypes",
     "FlextTapLdapUtilities",
-    "StrEnum",
     "__author__",
     "__author_email__",
     "__description__",
@@ -75,7 +69,6 @@ __all__: tuple[str, ...] = (
     "t",
     "tap_ldap",
     "u",
-    "unique",
     "x",
 )
 
@@ -94,9 +87,7 @@ _LAZY_IMPORTS = MappingProxyType(
             ".services.extract": ("FlextTapLdapExtractService",),
             ".typings": ("FlextTapLdapTypes", "t"),
             ".utilities": ("FlextTapLdapUtilities", "u"),
-            "enum": ("StrEnum", "unique"),
             "flext_ldap": ("FlextLdapConstants", "d", "e", "h", "r", "x"),
-            "typing": ("Final", "TYPE_CHECKING"),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,

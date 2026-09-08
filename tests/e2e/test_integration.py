@@ -11,7 +11,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING
 
 import pytest
@@ -33,13 +32,15 @@ class TestsFlextTapLdapIntegration:
     @staticmethod
     def _discover_streams(tmp_path: Path) -> tuple[bool, list[t.JsonMapping]]:
         config_path = tmp_path / "config.json"
-        config_path.write_text(
-            json.dumps({
+        write_result = u.Cli.json_write(
+            config_path,
+            {
                 "base_dn": c.Ldap.Tests.BASE_DN,
                 "host": c.Ldap.Tests.HOST,
                 "port": c.Ldap.Tests.PORT,
-            })
+            },
         )
+        tm.ok(write_result)
         result = u.Cli.capture(
             [
                 c.Ldap.Tests.CONSOLE_SCRIPT,
