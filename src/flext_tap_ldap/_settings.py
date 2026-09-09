@@ -11,9 +11,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Annotated
 
-from pydantic_settings import SettingsConfigDict
-
 from flext_ldap import FlextLdapSettings, m
+from pydantic_settings import SettingsConfigDict
 
 
 class FlextTapLdapSettings(FlextLdapSettings):

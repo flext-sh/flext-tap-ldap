@@ -13,8 +13,9 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from flext_tap_ldap import FlextTapLdapModels, t
 from flext_tests import FlextTestsModels
+
+from flext_tap_ldap import FlextTapLdapModels, t
 from tests import u
 
 

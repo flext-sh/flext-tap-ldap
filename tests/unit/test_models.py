@@ -14,10 +14,10 @@ from __future__ import annotations
 from collections.abc import Callable
 
 import pytest
+from flext_tests import tm
 from pydantic import ValidationError
 
 from flext_tap_ldap import FlextTapLdapModels, c
-from flext_tests import tm
 
 _TapLdap = FlextTapLdapModels.TapLdap
 _Params = _TapLdap.LdapConnectionParams
