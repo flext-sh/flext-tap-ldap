@@ -15,7 +15,7 @@ __all__: tuple[str, ...] = ("FlextTapLdapUtilitiesExtractSupport",)
 _LAZY_IMPORTS = MappingProxyType(
     build_lazy_import_map(
         MappingProxyType({
-            ".extract_support": ("FlextTapLdapUtilitiesExtractSupport",),
+            ".extract_support": ("FlextTapLdapUtilitiesExtractSupport",)
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,
