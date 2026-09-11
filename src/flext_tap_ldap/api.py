@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import Annotated, override
 
 from flext_meltano import meltano
+
 from flext_tap_ldap import c, p, t, u
 from flext_tap_ldap.services.extract import FlextTapLdapExtractService
 
@@ -36,6 +37,7 @@ class FlextTapLdapService(meltano.Tap):
         return tap
 
 
-tap_ldap = FlextTapLdapService
+tap_ldap: FlextTapLdapService = FlextTapLdapService.fetch_global()
+"""Process-wide FlextTapLdapService facade singleton resolved from the service container."""
 
 __all__: list[str] = ["FlextTapLdapService", "tap_ldap"]

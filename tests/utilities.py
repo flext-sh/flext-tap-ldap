@@ -14,10 +14,11 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING, ClassVar
 
-from flext_core import FlextUtilities
 from flext_ldap.adapters.ldap3 import FlextLdapLdap3Wrappers
-from flext_tap_ldap import FlextTapLdapUtilities
 from flext_tests import FlextTestsUtilities
+
+from flext_core import FlextUtilities
+from flext_tap_ldap import FlextTapLdapUtilities
 from tests import c
 
 if TYPE_CHECKING:

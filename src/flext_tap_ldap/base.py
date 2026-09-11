@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from flext_ldap import ldap
 from flext_meltano import s as meltano_service
+
 from flext_tap_ldap import p, u
 
 

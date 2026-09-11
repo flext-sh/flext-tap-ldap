@@ -6,8 +6,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tap_ldap import FlextTapLdapTypes
 from flext_tests import FlextTestsTypes
+
+from flext_tap_ldap import FlextTapLdapTypes
 
 
 class TestsFlextTapLdapTypes(FlextTestsTypes, FlextTapLdapTypes):

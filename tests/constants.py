@@ -12,8 +12,9 @@ from __future__ import annotations
 import os
 from typing import Final
 
-from flext_tap_ldap import FlextTapLdapConstants
 from flext_tests import FlextTestsConstants
+
+from flext_tap_ldap import FlextTapLdapConstants
 
 
 class TestsFlextTapLdapConstants(FlextTestsConstants, FlextTapLdapConstants):
