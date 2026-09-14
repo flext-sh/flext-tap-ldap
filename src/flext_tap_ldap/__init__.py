@@ -20,8 +20,7 @@ from .__version__ import (
 )
 
 if TYPE_CHECKING:
-    from flext_ldap import FlextLdapConstants
-    from flext_meltano import d, e, h, r, x
+    from flext_ldap import FlextLdapConstants, d, e, h, r, x
 
     from . import services
     from ._config import FlextTapLdapConfig, config
@@ -88,8 +87,7 @@ _LAZY_IMPORTS = MappingProxyType(
             ".services.extract": ("FlextTapLdapExtractService",),
             ".typings": ("FlextTapLdapTypes", "t"),
             ".utilities": ("FlextTapLdapUtilities", "u"),
-            "flext_ldap": ("FlextLdapConstants",),
-            "flext_meltano": ("d", "e", "h", "r", "x"),
+            "flext_ldap": ("FlextLdapConstants", "d", "e", "h", "r", "x"),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,
