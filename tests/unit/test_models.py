@@ -15,11 +15,10 @@ from collections.abc import Callable
 
 import pytest
 from flext_tests import tm
-from pydantic import ValidationError
 
-from flext_tap_ldap import FlextTapLdapModels, c
+from tests import m
 
-_TapLdap = FlextTapLdapModels.TapLdap
+_TapLdap = m.TapLdap
 _Params = _TapLdap.LdapConnectionParams
 
 __all__: list[str] = ["TestsFlextTapLdapModelsUnit"]
@@ -123,14 +122,14 @@ class TestsFlextTapLdapModelsUnit:
     def test_connection_params_reject_out_of_contract_values(
         self, build: Callable[[], _Params], invalid_field: str
     ) -> None:
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(m.ValidationError) as exc_info:
             build()
 
         offending = {error["loc"][0] for error in exc_info.value.errors()}
         tm.that(offending, has=invalid_field)
 
     def test_connection_params_require_mandatory_fields(self) -> None:
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(m.ValidationError) as exc_info:
             _TapLdap.LdapConnectionParams.model_validate({"host": "h"})
 
         missing = {
@@ -157,7 +156,7 @@ class TestsFlextTapLdapModelsUnit:
             host="h", port=389, use_ssl=True, timeout_seconds=30
         )
 
-        tm.rejects_assignment(params, "host", "other", expected=ValidationError)
+        tm.rejects_assignment(params, "host", "other", expected=m.ValidationError)
 
     def test_connection_params_round_trip_through_model_dump(self) -> None:
         original = _TapLdap.LdapConnectionParams(
