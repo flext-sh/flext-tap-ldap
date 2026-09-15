@@ -16,7 +16,7 @@ from collections.abc import Callable
 import pytest
 from flext_tests import tm
 
-from tests import m
+from tests import c, m
 
 _TapLdap = m.TapLdap
 _Params = _TapLdap.LdapConnectionParams
