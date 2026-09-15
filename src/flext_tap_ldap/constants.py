@@ -2,22 +2,19 @@
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
-
 """
 
 from __future__ import annotations
 
-from enum import StrEnum, unique
-from typing import TYPE_CHECKING, Final
-
 from flext_ldap import FlextLdapConstants
-from flext_meltano import c
+from flext_meltano import c as meltano_c
 
-if TYPE_CHECKING:
-    from flext_meltano import t
+from ._constants import FlextTapLdapConstants as _PrivateFlextTapLdapConstants
 
 
-class FlextTapLdapConstants(c, FlextLdapConstants):
+class FlextTapLdapConstants(
+    _PrivateFlextTapLdapConstants, FlextLdapConstants, meltano_c
+):
     """LDAP tap extraction-specific constants following FLEXT unified pattern.
 
     Inherits from FlextMeltanoConstants for universal constants, defines only
@@ -26,7 +23,7 @@ class FlextTapLdapConstants(c, FlextLdapConstants):
     Composes with FlextLdapConstants to avoid duplication and ensure consistency.
     """
 
-    class TapLdap:
+    class TapLdap(_PrivateFlextTapLdapConstants.TapLdap):
         """Tap LDAP namespace for cross-project access.
 
         LDAP-generic constants are inherited from c.Ldap via MRO:
@@ -37,41 +34,6 @@ class FlextTapLdapConstants(c, FlextLdapConstants):
         - c.DEFAULT_BATCH_SIZE (page size)
         """
 
-        DEFAULT_PAGE_SIZE: Final[int] = 1000
-        DEFAULT_SEARCH_TIMEOUT: Final[int] = FlextLdapConstants.Ldap.TIMEOUT
-        TAP_NAME: Final[str] = "tap-ldap"
-
-        class Ldap:
-            """LDAP tap-specific connection constants."""
-
-            MAX_PORT: Final[int] = 65535
-
-        class Replication:
-            """LDAP replication method constants."""
-
-            @unique
-            class Method(StrEnum):
-                """LDAP replication methods using StrEnum for type safety.
-
-                DRY Pattern:
-                    StrEnum is the single source of truth. Use Method.FULL_TABLE.value
-                    or Method.FULL_TABLE directly - no string duplication needed.
-                """
-
-                FULL_TABLE = "FULL_TABLE"
-                INCREMENTAL = "INCREMENTAL"
-
-        class Connection:
-            """LDAP tap connection configuration."""
-
-            DEFAULT_HOST: Final[str] = FlextLdapConstants.LOCALHOST
-            DEFAULT_BASE_DN: Final[str] = ""
-
-        class Search:
-            """LDAP search configuration."""
-
-            DEFAULT_SCOPE: Final[str] = "SUBTREE"
-
 
 c = FlextTapLdapConstants
-__all__: t.StrSequence = ("FlextTapLdapConstants", "c")
+__all__: list[str] = ["FlextTapLdapConstants", "c"]
