@@ -6,6 +6,7 @@
 > Project profile: `flext-tap-ldap`
 
 <!-- TOC START -->
+
 - [Ownership](#ownership)
 - [Required change shape](#required-change-shape)
 - [Canonical execution](#canonical-execution)

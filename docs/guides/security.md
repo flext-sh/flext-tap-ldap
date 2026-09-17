@@ -6,6 +6,7 @@
 > Project profile: `flext-tap-ldap`
 
 <!-- TOC START -->
+
 - [Dependabot vulnerability governance](#dependabot-vulnerability-governance)
 <!-- TOC END -->
 
