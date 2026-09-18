@@ -9,7 +9,7 @@
 <!-- AUTO-GENERATED — DO NOT EDIT MANUALLY -->
 
 - Package: `flext_tap_ldap`
-- Version: `0.12.0rc0`
+- Version: `0.12.0`
 - Description: FLEXT Tap LDAP - Singer Tap for LDAP Directory Services
 - Doc summary: Flext Tap Ldap package.
 - Classifiers: `Development Status :: 3 - Alpha`, `Intended Audience :: Developers`,
