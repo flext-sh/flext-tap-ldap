@@ -12,13 +12,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated
 
 from flext_ldap import FlextLdapSettings, m
-from pydantic_settings import SettingsConfigDict
 
 
 class FlextTapLdapSettings(FlextLdapSettings):
     """Tap LDAP runtime settings; fields under ``settings.TapLdap.*``."""
 
-    model_config = SettingsConfigDict(
+    model_config = m.SettingsConfigDict(
         env_prefix="FLEXT_TAP_LDAP_", env_nested_delimiter="__", extra="ignore"
     )
 
