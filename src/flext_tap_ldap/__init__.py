@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     from flext_meltano import c as meltano_c
 
     from . import services
+    from .__version__ import FlextTapLdapVersion
     from ._config import FlextTapLdapConfig, config
     from ._settings import FlextTapLdapSettings, settings
     from .api import FlextTapLdapService, tap_ldap
@@ -47,6 +48,7 @@ __all__: tuple[str, ...] = (
     "FlextTapLdapSettings",
     "FlextTapLdapTypes",
     "FlextTapLdapUtilities",
+    "FlextTapLdapVersion",
     "__author__",
     "__author_email__",
     "__description__",
@@ -77,6 +79,7 @@ __all__: tuple[str, ...] = (
 _LAZY_IMPORTS = MappingProxyType(
     build_lazy_import_map(
         MappingProxyType({
+            ".__version__": ("FlextTapLdapVersion",),
             "._config": ("FlextTapLdapConfig", "config"),
             "._settings": ("FlextTapLdapSettings", "settings"),
             ".api": ("FlextTapLdapService", "tap_ldap"),
