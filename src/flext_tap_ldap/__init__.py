@@ -20,7 +20,7 @@ from .__version__ import (
 )
 
 if TYPE_CHECKING:
-    from flext_ldap import d, e, h, r, x
+    from flext_core import d, e, h, r, x
     from flext_meltano import c as meltano_c
 
     from . import services
@@ -37,15 +37,42 @@ if TYPE_CHECKING:
     from .typings import FlextTapLdapTypes, FlextTapLdapTypes as t
     from .utilities import FlextTapLdapUtilities, FlextTapLdapUtilities as u
 __all__: tuple[str, ...] = (
-    "FlextTapLdapConfig", "FlextTapLdapConstants", "FlextTapLdapExtractService", "FlextTapLdapModels",
-    "FlextTapLdapProtocols", "FlextTapLdapService", "FlextTapLdapServiceBase", "FlextTapLdapSettings",
-    "FlextTapLdapTypes", "FlextTapLdapUtilities", "FlextTapLdapVersion", "__author__",
-    "__author_email__", "__description__", "__license__", "__title__",
-    "__url__", "__version__", "__version_info__", "c",
-    "config", "d", "e", "h",
-    "m", "main", "meltano_c", "p",
-    "r", "s", "services", "settings",
-    "t", "tap_ldap", "u", "x",
+    "FlextTapLdapConfig",
+    "FlextTapLdapConstants",
+    "FlextTapLdapExtractService",
+    "FlextTapLdapModels",
+    "FlextTapLdapProtocols",
+    "FlextTapLdapService",
+    "FlextTapLdapServiceBase",
+    "FlextTapLdapSettings",
+    "FlextTapLdapTypes",
+    "FlextTapLdapUtilities",
+    "FlextTapLdapVersion",
+    "__author__",
+    "__author_email__",
+    "__description__",
+    "__license__",
+    "__title__",
+    "__url__",
+    "__version__",
+    "__version_info__",
+    "c",
+    "config",
+    "d",
+    "e",
+    "h",
+    "m",
+    "main",
+    "meltano_c",
+    "p",
+    "r",
+    "s",
+    "services",
+    "settings",
+    "t",
+    "tap_ldap",
+    "u",
+    "x",
 )
 
 _LAZY_IMPORTS = MappingProxyType(
@@ -64,7 +91,7 @@ _LAZY_IMPORTS = MappingProxyType(
             ".services.extract": ("FlextTapLdapExtractService",),
             ".typings": ("FlextTapLdapTypes", "t"),
             ".utilities": ("FlextTapLdapUtilities", "u"),
-            "flext_ldap": ("d", "e", "h", "r", "x"),
+            "flext_core": ("d", "e", "h", "r", "x"),
         }),
         alias_groups=MappingProxyType({"flext_meltano": (("meltano_c", "c"),)}),
         sort_keys=False,
