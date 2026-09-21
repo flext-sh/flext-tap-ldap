@@ -13,9 +13,7 @@ if TYPE_CHECKING:
     from .base import FlextTapLdapConstantsBase
     from .config import FlextTapLdapConstantsConfig
 __all__: tuple[str, ...] = (
-    "FlextTapLdapConstantsApi",
-    "FlextTapLdapConstantsBase",
-    "FlextTapLdapConstantsConfig",
+    "FlextTapLdapConstantsApi", "FlextTapLdapConstantsBase", "FlextTapLdapConstantsConfig",
 )
 
 _LAZY_IMPORTS = MappingProxyType(
