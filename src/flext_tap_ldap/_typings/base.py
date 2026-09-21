@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from flext_ldap import FlextLdapTypes
+from flext_ldap import t
 from flext_meltano import t as meltano_t
 
 
-class FlextTapLdapTypesBase(meltano_t, FlextLdapTypes):
+class FlextTapLdapTypesBase(meltano_t, t):
     """Base typings for _typings family."""
 
 
