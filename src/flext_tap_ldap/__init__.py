@@ -20,9 +20,8 @@ from .__version__ import (
 )
 
 if TYPE_CHECKING:
-    from flext_meltano import c as meltano_c
-
     from flext_core import d, e, h, r, x
+    from flext_meltano import c as meltano_c
 
     from . import services
     from .__version__ import FlextTapLdapVersion
