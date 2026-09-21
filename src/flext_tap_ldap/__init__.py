@@ -20,8 +20,9 @@ from .__version__ import (
 )
 
 if TYPE_CHECKING:
-    from flext_ldap import FlextLdapConstants, d, e, h, r, x
     from flext_meltano import c as meltano_c
+
+    from flext_core import d, e, h, r, x
 
     from . import services
     from .__version__ import FlextTapLdapVersion
@@ -37,7 +38,6 @@ if TYPE_CHECKING:
     from .typings import FlextTapLdapTypes, FlextTapLdapTypes as t
     from .utilities import FlextTapLdapUtilities, FlextTapLdapUtilities as u
 __all__: tuple[str, ...] = (
-    "FlextLdapConstants",
     "FlextTapLdapConfig",
     "FlextTapLdapConstants",
     "FlextTapLdapExtractService",
@@ -92,7 +92,7 @@ _LAZY_IMPORTS = MappingProxyType(
             ".services.extract": ("FlextTapLdapExtractService",),
             ".typings": ("FlextTapLdapTypes", "t"),
             ".utilities": ("FlextTapLdapUtilities", "u"),
-            "flext_ldap": ("FlextLdapConstants", "d", "e", "h", "r", "x"),
+            "flext_core": ("d", "e", "h", "r", "x"),
         }),
         alias_groups=MappingProxyType({"flext_meltano": (("meltano_c", "c"),)}),
         sort_keys=False,
