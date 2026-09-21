@@ -12,8 +12,7 @@ if TYPE_CHECKING:
     from .base import FlextTapLdapUtilitiesBase
     from .extract_support import FlextTapLdapUtilitiesExtractSupport
 __all__: tuple[str, ...] = (
-    "FlextTapLdapUtilitiesBase",
-    "FlextTapLdapUtilitiesExtractSupport",
+    "FlextTapLdapUtilitiesBase", "FlextTapLdapUtilitiesExtractSupport",
 )
 
 _LAZY_IMPORTS = MappingProxyType(
