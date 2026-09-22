@@ -12,6 +12,18 @@ from .base import FlextTapLdapConstantsBase
 class FlextTapLdapConstantsConfig(FlextTapLdapConstantsBase):
     """LDAP tap configuration constants."""
 
+    class FlextTapLdapConfigValues:
+        """Scalar constants for the frozen config singleton.
+
+        Mixed into ``FlextTapLdapConfig`` so the values stay out of its
+        ``vars()`` while every ``Cls.NAME`` consumer path keeps resolving.
+        """
+
+        class Config:
+            """Config singleton scalar constants."""
+
+            CONFIG_DIR: Final[str] = "config"
+
     class TapLdap:
         """Tap LDAP namespace for cross-project access."""
 
@@ -45,17 +57,6 @@ class FlextTapLdapConstantsConfig(FlextTapLdapConstantsBase):
             DEFAULT_SCOPE: Final[str] = "SUBTREE"
 
 
-class FlextTapLdapConfigValues:
-    """Scalar constants for the frozen config singleton.
-
-    Mixed into ``FlextTapLdapConfig`` so the values stay out of its
-    ``vars()`` while every ``Cls.NAME`` consumer path keeps resolving.
-    """
-
-    class Config:
-        """Config singleton scalar constants."""
-
-        CONFIG_DIR: Final[str] = "config"
-
-
-__all__: list[str] = ["FlextTapLdapConfigValues", "FlextTapLdapConstantsConfig"]
+# One declared module owner: the constants facade class. The config-values
+# contract nests under it so the class-nesting contract sees a single owner.
+__all__: list[str] = ["FlextTapLdapConstantsConfig"]
