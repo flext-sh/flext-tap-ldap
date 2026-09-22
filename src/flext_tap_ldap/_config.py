@@ -13,16 +13,21 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from functools import cached_property
-from typing import ClassVar, Self
+from typing import Self
 
 from flext_meltano import FlextMeltanoConfig
 
 from flext_core import FlextSettings
 
+from ._constants.config import FlextTapLdapConfigValues
 from ._models.config import FlextTapLdapConfigModels
 
 
-class FlextTapLdapConfig(FlextSettings, FlextMeltanoConfig):
+class FlextTapLdapConfig(
+    FlextTapLdapConfigValues.Config,
+    FlextSettings,
+    FlextMeltanoConfig,
+):
     """TapLdap config auto-loaded from the project-root ``config/*.yaml``.
 
     ``CONFIG_DIR`` is reset to the relative default so the loader anchors to this
@@ -31,7 +36,9 @@ class FlextTapLdapConfig(FlextSettings, FlextMeltanoConfig):
     models and exposed as ``config.tap_ldap``.
 
     MRO carries ``FlextSettings`` FIRST (ENFORCE-042); the class stays a frozen,
-    YAML-validated config singleton.
+    YAML-validated config singleton. The plain ``_constants`` mixin base precedes
+    the model bases so its ``CONFIG_DIR`` override wins over the ancestor's
+    absolute value while staying out of this class's ``vars()``.
     """
 
     # ENFORCE-042 namespace-holder contract: ``FlextSettings`` contributes
@@ -51,7 +58,8 @@ class FlextTapLdapConfig(FlextSettings, FlextMeltanoConfig):
 
     __hash__ = object.__hash__
 
-    CONFIG_DIR: ClassVar[str] = "config"
+    # Scalar constants (CONFIG_DIR) come from the ``_constants`` mixin base so
+    # they stay out of this class's ``vars()``; the consumer path is identical.
 
     @cached_property
     def tap_ldap(self) -> FlextTapLdapConfigModels.TapLdap:
