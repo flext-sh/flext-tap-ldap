@@ -20,26 +20,23 @@ from .__version__ import (
 )
 
 if TYPE_CHECKING:
-    from flext_cli import cli
-    from flext_ldap import ldap
-    from flext_ldif import ldif
-    from flext_meltano import meltano
-    from pydantic_core import from_json, to_json, to_jsonable_python
+    from flext_meltano import c as meltano_c
 
-    from flext_core import core, d, e, h, lazy_attribute, r, x
+    from flext_core import d, e, h, r, x
 
     from . import services
+    from .__version__ import FlextTapLdapVersion
     from ._config import FlextTapLdapConfig, config
     from ._settings import FlextTapLdapSettings, settings
     from .api import FlextTapLdapService, tap_ldap
     from .base import FlextTapLdapServiceBase, FlextTapLdapServiceBase as s
     from .cli import main
-    from .constants import FlextTapLdapConstants, c
-    from .models import FlextTapLdapModels, m
-    from .protocols import FlextTapLdapProtocols, p
+    from .constants import FlextTapLdapConstants, FlextTapLdapConstants as c
+    from .models import FlextTapLdapModels, FlextTapLdapModels as m
+    from .protocols import FlextTapLdapProtocols, FlextTapLdapProtocols as p
     from .services.extract import FlextTapLdapExtractService
     from .typings import FlextTapLdapTypes, FlextTapLdapTypes as t
-    from .utilities import FlextTapLdapUtilities, u
+    from .utilities import FlextTapLdapUtilities, FlextTapLdapUtilities as u
 __all__: tuple[str, ...] = (
     "FlextTapLdapConfig",
     "FlextTapLdapConstants",
@@ -51,6 +48,7 @@ __all__: tuple[str, ...] = (
     "FlextTapLdapSettings",
     "FlextTapLdapTypes",
     "FlextTapLdapUtilities",
+    "FlextTapLdapVersion",
     "__author__",
     "__author_email__",
     "__description__",
@@ -60,19 +58,13 @@ __all__: tuple[str, ...] = (
     "__version__",
     "__version_info__",
     "c",
-    "cli",
     "config",
-    "core",
     "d",
     "e",
-    "from_json",
     "h",
-    "lazy_attribute",
-    "ldap",
-    "ldif",
     "m",
     "main",
-    "meltano",
+    "meltano_c",
     "p",
     "r",
     "s",
@@ -80,8 +72,6 @@ __all__: tuple[str, ...] = (
     "settings",
     "t",
     "tap_ldap",
-    "to_json",
-    "to_jsonable_python",
     "u",
     "x",
 )
@@ -89,6 +79,7 @@ __all__: tuple[str, ...] = (
 _LAZY_IMPORTS = MappingProxyType(
     build_lazy_import_map(
         MappingProxyType({
+            ".__version__": ("FlextTapLdapVersion",),
             "._config": ("FlextTapLdapConfig", "config"),
             "._settings": ("FlextTapLdapSettings", "settings"),
             ".api": ("FlextTapLdapService", "tap_ldap"),
@@ -101,14 +92,9 @@ _LAZY_IMPORTS = MappingProxyType(
             ".services.extract": ("FlextTapLdapExtractService",),
             ".typings": ("FlextTapLdapTypes", "t"),
             ".utilities": ("FlextTapLdapUtilities", "u"),
-            "flext_cli": ("cli",),
-            "flext_core": ("core", "d", "e", "h", "lazy_attribute", "r", "x"),
-            "flext_ldap": ("ldap",),
-            "flext_ldif": ("ldif",),
-            "flext_meltano": ("meltano",),
-            "pydantic_core": ("from_json", "to_json", "to_jsonable_python"),
+            "flext_core": ("d", "e", "h", "r", "x"),
         }),
-        alias_groups=MappingProxyType({}),
+        alias_groups=MappingProxyType({"flext_meltano": (("meltano_c", "c"),)}),
         sort_keys=False,
     )
 )
