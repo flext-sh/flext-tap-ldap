@@ -17,15 +17,11 @@ from typing import Self
 
 from flext_meltano import FlextMeltanoConfig
 
-from flext_core import FlextSettings
-
 from ._constants.config import FlextTapLdapConfigValues
 from ._models.config import FlextTapLdapConfigModels
 
 
-class FlextTapLdapConfig(
-    FlextTapLdapConfigValues.Config, FlextSettings, FlextMeltanoConfig
-):
+class FlextTapLdapConfig(FlextTapLdapConfigValues.Config, FlextMeltanoConfig):
     """TapLdap config auto-loaded from the project-root ``config/*.yaml``.
 
     ``CONFIG_DIR`` is reset to the relative default so the loader anchors to this
@@ -33,10 +29,11 @@ class FlextTapLdapConfig(
     override. The model-less YAML slice is validated once into the typed config
     models and exposed as ``config.tap_ldap``.
 
-    MRO carries ``FlextSettings`` FIRST (ENFORCE-042); the class stays a frozen,
-    YAML-validated config singleton. The plain ``_constants`` mixin base precedes
-    the model bases so its ``CONFIG_DIR`` override wins over the ancestor's
-    absolute value while staying out of this class's ``vars()``.
+    ``FlextMeltanoConfig`` already carries ``FlextSettings`` first (ENFORCE-042),
+    so the class stays a frozen, YAML-validated config singleton. The plain
+    ``_constants`` mixin base precedes the model bases so its ``CONFIG_DIR``
+    override wins over the ancestor's absolute value while staying out of this
+    class's ``vars()``.
     """
 
     # ENFORCE-042 namespace-holder contract: ``FlextSettings`` contributes
