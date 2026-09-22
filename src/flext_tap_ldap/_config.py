@@ -24,9 +24,7 @@ from ._models.config import FlextTapLdapConfigModels
 
 
 class FlextTapLdapConfig(
-    FlextTapLdapConfigValues.Config,
-    FlextSettings,
-    FlextMeltanoConfig,
+    FlextTapLdapConfigValues.Config, FlextSettings, FlextMeltanoConfig
 ):
     """TapLdap config auto-loaded from the project-root ``config/*.yaml``.
 
