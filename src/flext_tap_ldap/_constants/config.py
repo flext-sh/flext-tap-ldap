@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Final
+from typing import ClassVar, Final
 
 from flext_ldap import FlextLdapConstants
 
@@ -22,7 +22,11 @@ class FlextTapLdapConstantsConfig(FlextTapLdapConstantsBase):
         class Config:
             """Config singleton scalar constants."""
 
-            CONFIG_DIR: Final[str] = "config"
+            # ClassVar, not Final: this plain mixin is composed into the
+            # frozen pydantic config singleton, and pydantic 2.11 deprecates
+            # final-annotated attributes with defaults collected as fields —
+            # fatal under the fresh-import probe's -W error.
+            CONFIG_DIR: ClassVar[str] = "config"
 
     class TapLdap:
         """Tap LDAP namespace for cross-project access."""
