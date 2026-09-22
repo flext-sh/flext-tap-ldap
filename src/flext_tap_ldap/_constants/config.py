@@ -45,4 +45,17 @@ class FlextTapLdapConstantsConfig(FlextTapLdapConstantsBase):
             DEFAULT_SCOPE: Final[str] = "SUBTREE"
 
 
-__all__: list[str] = ["FlextTapLdapConstantsConfig"]
+class FlextTapLdapConfigValues:
+    """Scalar constants for the frozen config singleton.
+
+    Mixed into ``FlextTapLdapConfig`` so the values stay out of its
+    ``vars()`` while every ``Cls.NAME`` consumer path keeps resolving.
+    """
+
+    class Config:
+        """Config singleton scalar constants."""
+
+        CONFIG_DIR: Final[str] = "config"
+
+
+__all__: list[str] = ["FlextTapLdapConfigValues", "FlextTapLdapConstantsConfig"]
