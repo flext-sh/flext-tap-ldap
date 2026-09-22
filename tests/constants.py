@@ -10,11 +10,14 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import os
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
 from flext_tests import FlextTestsConstants
 
 from flext_tap_ldap import FlextTapLdapConstants
+
+if TYPE_CHECKING:
+    from . import t
 
 
 class TestsFlextTapLdapConstants(FlextTestsConstants, FlextTapLdapConstants):
@@ -49,13 +52,13 @@ class TestsFlextTapLdapConstants(FlextTestsConstants, FlextTapLdapConstants):
             LEGACY_ADMIN_PASSWORD: Final[str] = os.getenv(
                 "FLEXT_TAP_LDAP_LEGACY_ADMIN_PASSWORD", "REDACTED_LDAP_BIND_PASSWORD123"
             )
-            STANDARD_STREAMS: Final[tuple[str, ...]] = (
+            STANDARD_STREAMS: Final[t.VariadicTuple[str]] = (
                 "users",
                 "groups",
                 "organizational_units",
                 "schema",
             )
-            PRIMARY_KEY: Final[tuple[str, ...]] = ("dn",)
+            PRIMARY_KEY: Final[t.VariadicTuple[str]] = ("dn",)
             CONSOLE_SCRIPT: Final[str] = "tap-ldap"
             FLAG_CONFIG: Final[str] = "--config"
             FLAG_DISCOVER: Final[str] = "--discover"

@@ -29,7 +29,7 @@ This section is generated from public exports and real docstrings.
 
 - Primary facades: `FlextTapLdapConfig`, `FlextTapLdapConstants`,
   `FlextTapLdapExtractService`, `FlextTapLdapModels`, `FlextTapLdapProtocols`,
-  `FlextTapLdapService` (+4 more)
+  `FlextTapLdapService` (+5 more)
 - Generated module pages: `10`
 
 Back to [project docs](../index.md).

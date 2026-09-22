@@ -20,11 +20,7 @@ from .__version__ import (
 )
 
 if TYPE_CHECKING:
-    from flext_cli import cli
-    from flext_ldap import ldap
-    from flext_ldif import ldif
-    from flext_meltano import meltano
-    from pydantic_core import from_json, to_json, to_jsonable_python
+    from flext_meltano import c as meltano_c
 
     from flext_core import core, d, e, h, lazy_attribute, r, x
 
