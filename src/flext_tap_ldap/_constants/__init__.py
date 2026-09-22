@@ -11,9 +11,8 @@ from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 if TYPE_CHECKING:
     from .api import FlextTapLdapConstantsApi
     from .base import FlextTapLdapConstantsBase
-    from .config import FlextTapLdapConfigValues, FlextTapLdapConstantsConfig
+    from .config import FlextTapLdapConstantsConfig
 __all__: tuple[str, ...] = (
-    "FlextTapLdapConfigValues",
     "FlextTapLdapConstantsApi",
     "FlextTapLdapConstantsBase",
     "FlextTapLdapConstantsConfig",
@@ -24,7 +23,7 @@ _LAZY_IMPORTS = MappingProxyType(
         MappingProxyType({
             ".api": ("FlextTapLdapConstantsApi",),
             ".base": ("FlextTapLdapConstantsBase",),
-            ".config": ("FlextTapLdapConfigValues", "FlextTapLdapConstantsConfig"),
+            ".config": ("FlextTapLdapConstantsConfig",),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,
