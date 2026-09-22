@@ -17,11 +17,13 @@ from typing import Self
 
 from flext_meltano import FlextMeltanoConfig
 
-from ._constants.config import FlextTapLdapConfigValues
+from ._constants.config import FlextTapLdapConstantsConfig
 from ._models.config import FlextTapLdapConfigModels
 
 
-class FlextTapLdapConfig(FlextTapLdapConfigValues.Config, FlextMeltanoConfig):
+class FlextTapLdapConfig(
+    FlextTapLdapConstantsConfig.FlextTapLdapConfigValues.Config, FlextMeltanoConfig
+):
     """TapLdap config auto-loaded from the project-root ``config/*.yaml``.
 
     ``CONFIG_DIR`` is reset to the relative default so the loader anchors to this

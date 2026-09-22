@@ -11,7 +11,8 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_tap_ldap import t
-from flext_tap_ldap.api import FlextTapLdapService
+
+from .api import FlextTapLdapService
 
 
 def main(args: t.StrSequence | None = None) -> int:
