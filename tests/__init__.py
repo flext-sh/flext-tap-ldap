@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_ldap import adapters, ldap, ldif, servers
+    from flext_ldap import adapters, ldap, ldif
     from flext_meltano import meltano
     from flext_tests import (
         api,
@@ -74,7 +74,6 @@ __all__: tuple[str, ...] = (
     "p",
     "r",
     "s",
-    "servers",
     "services",
     "settings",
     "t",
@@ -101,7 +100,7 @@ _LAZY_IMPORTS = MappingProxyType(
             ".typings": ("TestsFlextTapLdapTypes", "t"),
             ".unit": ("unit",),
             ".utilities": ("TestsFlextTapLdapUtilities", "u"),
-            "flext_ldap": ("adapters", "ldap", "ldif", "servers"),
+            "flext_ldap": ("adapters", "ldap", "ldif"),
             "flext_meltano": ("meltano",),
             "flext_tap_ldap": ("main", "tap_ldap"),
             "flext_tests": (
