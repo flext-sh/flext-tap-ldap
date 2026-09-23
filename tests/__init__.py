@@ -40,6 +40,8 @@ if TYPE_CHECKING:
     from .settings import TestsFlextTapLdapSettings
     from .typings import TestsFlextTapLdapTypes, TestsFlextTapLdapTypes as t
     from .utilities import TestsFlextTapLdapUtilities, TestsFlextTapLdapUtilities as u
+
+
 __all__: tuple[str, ...] = (
     "TestsFlextTapLdapConstants",
     "TestsFlextTapLdapModels",

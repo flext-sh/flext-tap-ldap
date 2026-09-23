@@ -12,6 +12,8 @@ if TYPE_CHECKING:
     from .api import FlextTapLdapConstantsApi
     from .base import FlextTapLdapConstantsBase
     from .config import FlextTapLdapConstantsConfig
+
+
 __all__: tuple[str, ...] = (
     "FlextTapLdapConstantsApi",
     "FlextTapLdapConstantsBase",

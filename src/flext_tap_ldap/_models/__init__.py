@@ -11,6 +11,8 @@ from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 if TYPE_CHECKING:
     from .base import FlextTapLdapModelsBase
     from .config import FlextTapLdapConfigModels
+
+
 __all__: tuple[str, ...] = ("FlextTapLdapConfigModels", "FlextTapLdapModelsBase")
 
 _LAZY_IMPORTS = MappingProxyType(

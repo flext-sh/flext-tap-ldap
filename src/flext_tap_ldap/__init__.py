@@ -39,6 +39,8 @@ if TYPE_CHECKING:
     from .services.extract import FlextTapLdapExtractService
     from .typings import FlextTapLdapTypes, FlextTapLdapTypes as t
     from .utilities import FlextTapLdapUtilities, u
+
+
 __all__: tuple[str, ...] = (
     "FlextTapLdapConfig",
     "FlextTapLdapConstants",
