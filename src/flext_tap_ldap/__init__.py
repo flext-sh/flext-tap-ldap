@@ -20,33 +20,7 @@ from .__version__ import (
 )
 
 if TYPE_CHECKING:
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> origin/chore/regen-20260923
-    from flext_ldap import (
-        adapters,
-        cli,
-        core,
-        d,
-        e,
-        h,
-        lazy_attribute,
-        ldap,
-        ldif,
-        r,
-        servers,
-        x,
-    )
-<<<<<<< HEAD
-=======
-    from flext_cli import cli
-    from flext_ldap import ldap
-    from flext_ldif import ldif
->>>>>>> origin/chore/regen-20260923
-=======
->>>>>>> origin/chore/regen-20260923
-    from flext_meltano import meltano
+    from flext_ldap import d, e, h, r, x
 
     from . import services
     from ._config import FlextTapLdapConfig, config
@@ -81,24 +55,16 @@ __all__: tuple[str, ...] = (
     "__url__",
     "__version__",
     "__version_info__",
-    "adapters",
     "c",
-    "cli",
     "config",
-    "core",
     "d",
     "e",
     "h",
-    "lazy_attribute",
-    "ldap",
-    "ldif",
     "m",
     "main",
-    "meltano",
     "p",
     "r",
     "s",
-    "servers",
     "services",
     "settings",
     "t",
@@ -122,34 +88,7 @@ _LAZY_IMPORTS = MappingProxyType(
             ".services.extract": ("FlextTapLdapExtractService",),
             ".typings": ("FlextTapLdapTypes", "t"),
             ".utilities": ("FlextTapLdapUtilities", "u"),
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> origin/chore/regen-20260923
-            "flext_ldap": (
-                "adapters",
-                "cli",
-                "core",
-                "d",
-                "e",
-                "h",
-                "lazy_attribute",
-                "ldap",
-                "ldif",
-                "r",
-                "servers",
-                "x",
-            ),
-<<<<<<< HEAD
-=======
-            "flext_cli": ("cli",),
-            "flext_core": ("core", "d", "e", "h", "lazy_attribute", "r", "x"),
-            "flext_ldap": ("ldap",),
-            "flext_ldif": ("ldif",),
->>>>>>> origin/chore/regen-20260923
-=======
->>>>>>> origin/chore/regen-20260923
-            "flext_meltano": ("meltano",),
+            "flext_ldap": ("d", "e", "h", "r", "x"),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,
