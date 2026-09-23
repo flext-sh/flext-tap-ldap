@@ -31,6 +31,7 @@ if TYPE_CHECKING:
         ldap,
         ldif,
         r,
+        servers,
         x,
     )
     from flext_meltano import meltano
@@ -85,6 +86,7 @@ __all__: tuple[str, ...] = (
     "p",
     "r",
     "s",
+    "servers",
     "services",
     "settings",
     "t",
@@ -119,6 +121,7 @@ _LAZY_IMPORTS = MappingProxyType(
                 "ldap",
                 "ldif",
                 "r",
+                "servers",
                 "x",
             ),
             "flext_meltano": ("meltano",),
