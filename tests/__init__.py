@@ -10,30 +10,39 @@ from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
 <<<<<<< HEAD
+<<<<<<< HEAD
     from flext_ldap import adapters, ldap, ldif, servers
 =======
     from flext_cli import cli
     from flext_ldap import ldap
     from flext_ldif import ldif
 >>>>>>> origin/chore/regen-20260923
+=======
+    from flext_ldap import adapters, ldap, ldif, servers
+>>>>>>> origin/chore/regen-20260923
     from flext_meltano import meltano
     from flext_tests import (
-        active_rules,
         api,
+        cli,
         config,
-        discover_repository_root,
+        core,
+        d,
+        e,
+        h,
         install_local_packages,
+        lazy_attribute,
         load_infra_report,
+        r,
+        services,
         settings,
-        split_csv,
         td,
         tf,
         tk,
         tm,
         tv,
+        x,
     )
 
-    from flext_core import core, d, e, h, lazy_attribute, r, x
     from flext_tap_ldap import main, tap_ldap
 
     from . import e2e, unit
@@ -54,14 +63,13 @@ __all__: tuple[str, ...] = (
     "TestsFlextTapLdapSettings",
     "TestsFlextTapLdapTypes",
     "TestsFlextTapLdapUtilities",
-    "active_rules",
+    "adapters",
     "api",
     "c",
     "cli",
     "config",
     "core",
     "d",
-    "discover_repository_root",
     "e",
     "e2e",
     "h",
@@ -77,12 +85,16 @@ __all__: tuple[str, ...] = (
     "r",
     "s",
 <<<<<<< HEAD
+<<<<<<< HEAD
     "servers",
     "services",
 =======
 >>>>>>> origin/chore/regen-20260923
+=======
+    "servers",
+    "services",
+>>>>>>> origin/chore/regen-20260923
     "settings",
-    "split_csv",
     "t",
     "tap_ldap",
     "td",
@@ -108,6 +120,7 @@ _LAZY_IMPORTS = MappingProxyType(
             ".unit": ("unit",),
             ".utilities": ("TestsFlextTapLdapUtilities", "u"),
 <<<<<<< HEAD
+<<<<<<< HEAD
             "flext_ldap": ("adapters", "ldap", "ldif", "servers"),
 =======
             "flext_cli": ("cli",),
@@ -115,22 +128,31 @@ _LAZY_IMPORTS = MappingProxyType(
             "flext_ldap": ("ldap",),
             "flext_ldif": ("ldif",),
 >>>>>>> origin/chore/regen-20260923
+=======
+            "flext_ldap": ("adapters", "ldap", "ldif", "servers"),
+>>>>>>> origin/chore/regen-20260923
             "flext_meltano": ("meltano",),
             "flext_tap_ldap": ("main", "tap_ldap"),
             "flext_tests": (
-                "active_rules",
                 "api",
+                "cli",
                 "config",
-                "discover_repository_root",
+                "core",
+                "d",
+                "e",
+                "h",
                 "install_local_packages",
+                "lazy_attribute",
                 "load_infra_report",
+                "r",
+                "services",
                 "settings",
-                "split_csv",
                 "td",
                 "tf",
                 "tk",
                 "tm",
                 "tv",
+                "x",
             ),
         }),
         alias_groups=MappingProxyType({}),
