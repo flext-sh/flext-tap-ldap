@@ -20,10 +20,6 @@ from .__version__ import (
 )
 
 if TYPE_CHECKING:
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> origin/chore/regen-20260923
     from flext_ldap import (
         adapters,
         cli,
@@ -38,14 +34,6 @@ if TYPE_CHECKING:
         servers,
         x,
     )
-<<<<<<< HEAD
-=======
-    from flext_cli import cli
-    from flext_ldap import ldap
-    from flext_ldif import ldif
->>>>>>> origin/chore/regen-20260923
-=======
->>>>>>> origin/chore/regen-20260923
     from flext_meltano import meltano
 
     from . import services
@@ -122,10 +110,6 @@ _LAZY_IMPORTS = MappingProxyType(
             ".services.extract": ("FlextTapLdapExtractService",),
             ".typings": ("FlextTapLdapTypes", "t"),
             ".utilities": ("FlextTapLdapUtilities", "u"),
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> origin/chore/regen-20260923
             "flext_ldap": (
                 "adapters",
                 "cli",
@@ -140,15 +124,6 @@ _LAZY_IMPORTS = MappingProxyType(
                 "servers",
                 "x",
             ),
-<<<<<<< HEAD
-=======
-            "flext_cli": ("cli",),
-            "flext_core": ("core", "d", "e", "h", "lazy_attribute", "r", "x"),
-            "flext_ldap": ("ldap",),
-            "flext_ldif": ("ldif",),
->>>>>>> origin/chore/regen-20260923
-=======
->>>>>>> origin/chore/regen-20260923
             "flext_meltano": ("meltano",),
         }),
         alias_groups=MappingProxyType({}),
