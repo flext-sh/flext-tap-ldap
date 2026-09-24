@@ -9,28 +9,7 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_cli import cli
-    from flext_ldap import ldap
-    from flext_ldif import ldif
-    from flext_meltano import meltano
-    from flext_tests import (
-        active_rules,
-        api,
-        config,
-        discover_repository_root,
-        install_local_packages,
-        load_infra_report,
-        settings,
-        split_csv,
-        td,
-        tf,
-        tk,
-        tm,
-        tv,
-    )
-
-    from flext_core import core, d, e, h, lazy_attribute, r, x
-    from flext_tap_ldap import main, tap_ldap
+    from flext_tests import api, d, e, h, r, td, tf, tk, tm, tv, x
 
     from . import e2e, unit
     from .base import TestsFlextTapLdapServiceBase, TestsFlextTapLdapServiceBase as s
@@ -50,32 +29,17 @@ __all__: tuple[str, ...] = (
     "TestsFlextTapLdapSettings",
     "TestsFlextTapLdapTypes",
     "TestsFlextTapLdapUtilities",
-    "active_rules",
     "api",
     "c",
-    "cli",
-    "config",
-    "core",
     "d",
-    "discover_repository_root",
     "e",
     "e2e",
     "h",
-    "install_local_packages",
-    "lazy_attribute",
-    "ldap",
-    "ldif",
-    "load_infra_report",
     "m",
-    "main",
-    "meltano",
     "p",
     "r",
     "s",
-    "settings",
-    "split_csv",
     "t",
-    "tap_ldap",
     "td",
     "tf",
     "tk",
@@ -98,26 +62,18 @@ _LAZY_IMPORTS = MappingProxyType(
             ".typings": ("TestsFlextTapLdapTypes", "t"),
             ".unit": ("unit",),
             ".utilities": ("TestsFlextTapLdapUtilities", "u"),
-            "flext_cli": ("cli",),
-            "flext_core": ("core", "d", "e", "h", "lazy_attribute", "r", "x"),
-            "flext_ldap": ("ldap",),
-            "flext_ldif": ("ldif",),
-            "flext_meltano": ("meltano",),
-            "flext_tap_ldap": ("main", "tap_ldap"),
             "flext_tests": (
-                "active_rules",
                 "api",
-                "config",
-                "discover_repository_root",
-                "install_local_packages",
-                "load_infra_report",
-                "settings",
-                "split_csv",
+                "d",
+                "e",
+                "h",
+                "r",
                 "td",
                 "tf",
                 "tk",
                 "tm",
                 "tv",
+                "x",
             ),
         }),
         alias_groups=MappingProxyType({}),
