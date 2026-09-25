@@ -21,8 +21,6 @@ from tests import c, m
 _TapLdap = m.TapLdap
 _Params = _TapLdap.LdapConnectionParams
 
-__all__: list[str] = ["TestsFlextTapLdapModelsUnit"]
-
 
 class TestsFlextTapLdapModelsUnit:
     """Public-contract behavior for tap-LDAP models."""

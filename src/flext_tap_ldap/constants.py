@@ -6,13 +6,15 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_ldap import c
-from flext_meltano import c as meltano_c
+from flext_ldap import FlextLdapConstants
+from flext_meltano import FlextMeltanoConstants
 
 from ._constants import FlextTapLdapConstantsConfig as _PrivateFlextTapLdapConstants
 
 
-class FlextTapLdapConstants(_PrivateFlextTapLdapConstants, c, meltano_c):
+class FlextTapLdapConstants(
+    _PrivateFlextTapLdapConstants, FlextMeltanoConstants, FlextLdapConstants
+):
     """LDAP tap extraction-specific constants following FLEXT unified pattern.
 
     Inherits from FlextMeltanoConstants for universal constants, defines only

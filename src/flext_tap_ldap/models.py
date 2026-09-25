@@ -13,8 +13,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated
 from uuid import uuid4
 
-from flext_ldap import m
-from flext_meltano import m as _meltano_m, u
+from flext_ldap import FlextLdapModels
+from flext_meltano import FlextMeltanoModels, u
 
 from flext_tap_ldap import c, t
 
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from datetime import datetime
 
 
-class FlextTapLdapModels(_meltano_m, m):
+class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
     """Complete models for LDAP tap operations extending m.
 
     Provides standardized models for all LDAP tap domain entities including:
@@ -38,7 +38,7 @@ class FlextTapLdapModels(_meltano_m, m):
     class TapLdap:
         """Tap LDAP namespace for cross-project access."""
 
-        class CliRequest(m.Value):
+        class CliRequest(FlextMeltanoModels.Value):
             """Validated Singer-compatible root command parameters."""
 
             config_path: Annotated[
@@ -61,7 +61,7 @@ class FlextTapLdapModels(_meltano_m, m):
 
         # ── Config Parameter Objects ─────────────────────────────────────────
 
-        class CustomPropertyDefinition(m.BaseModel):
+        class CustomPropertyDefinition(FlextMeltanoModels.BaseModel):
             """Definition of a custom stream property."""
 
             type: Annotated[
@@ -74,7 +74,7 @@ class FlextTapLdapModels(_meltano_m, m):
 
         # ── Entities ─────────────────────────────────────────────────────────
 
-        class LdapConnectionParams(m.Value):
+        class LdapConnectionParams(FlextMeltanoModels.Value):
             """LDAP connection parameters for tap configuration."""
 
             host: t.NonEmptyStr = u.Field(description="LDAP server hostname")
@@ -100,7 +100,7 @@ class FlextTapLdapModels(_meltano_m, m):
                 default=3, description="Maximum connection retries"
             )
 
-        class LdapConnection(m.Entity):
+        class LdapConnection(FlextMeltanoModels.Entity):
             """LDAP connection entity with test status and error tracking."""
 
             host: t.NonEmptyStr = u.Field(
