@@ -11,12 +11,12 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_ldap import ldap
-from flext_meltano import s as meltano_service
+from flext_meltano import FlextMeltanoServiceBase
 
 from flext_tap_ldap import p, u
 
 
-class FlextTapLdapServiceBase(meltano_service):
+class FlextTapLdapServiceBase(FlextMeltanoServiceBase):
     """Tap-LDAP service base: meltano service runtime plus injected LDAP facade."""
 
     _ldap: p.Ldap.LdapClient = u.PrivateAttr(default_factory=lambda: ldap)

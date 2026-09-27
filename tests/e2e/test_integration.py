@@ -76,6 +76,3 @@ class TestsFlextTapLdapIntegration:
         for entry in streams:
             keys = t.Cli.JSON_LIST_ADAPTER.validate_python(entry["key_properties"])
             tm.that(list(keys), eq=list(c.Ldap.Tests.PRIMARY_KEY))
-
-
-__all__: list[str] = ["TestsFlextTapLdapIntegration"]
