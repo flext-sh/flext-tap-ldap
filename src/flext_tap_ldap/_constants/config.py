@@ -40,15 +40,6 @@ class FlextTapLdapConstantsConfig(FlextTapLdapConstantsBase):
 
             MAX_PORT: Final[int] = 65535
 
-        class Replication:
-            """LDAP replication method constants."""
-
-            class Method:
-                """LDAP replication methods."""
-
-                FULL_TABLE = "FULL_TABLE"
-                INCREMENTAL = "INCREMENTAL"
-
         class Connection:
             """LDAP tap connection configuration."""
 
