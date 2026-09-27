@@ -52,8 +52,8 @@ facade.
 ## Commands
 
 ```bash
-make check PROJECT=flext-tap-ldap
-make test PROJECT=flext-tap-ldap # tests/{unit,e2e}
+make check
+make test # tests/{unit,e2e}
 ```
 
 <!-- AIHUB-AGENTS-SCOPE-LOCAL-END -->
