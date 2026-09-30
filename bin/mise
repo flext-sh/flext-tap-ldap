@@ -11,8 +11,8 @@ __mise_bootstrap() {
     # ~/* and gain a second ${HOME} prefix.
     case ${mise_data_dir} in
       "~") mise_data_dir=${HOME} ;;
-      "~/"*) mise_data_dir=${HOME}/${mise_data_dir#\~/} ;;
-      *) : ;;
+      "~"*) mise_data_dir=${HOME}/${mise_data_dir#\~/} ;;
+      *) true ;;
     esac
     local cache_home="${XDG_CACHE_HOME:-${HOME}/.cache}/mise"
     # The generated Makefile exports MISE_VERSION from the committed pin file
