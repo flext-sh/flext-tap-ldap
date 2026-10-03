@@ -13,15 +13,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated
 from uuid import uuid4
 
-from flext_ldap import m
+from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels, u
+
 from flext_tap_ldap import c, t
 
 if TYPE_CHECKING:
     from datetime import datetime
 
 
-class FlextTapLdapModels(FlextMeltanoModels, m):
+class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
     """Complete models for LDAP tap operations extending m.
 
     Provides standardized models for all LDAP tap domain entities including:
@@ -37,7 +38,7 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
     class TapLdap:
         """Tap LDAP namespace for cross-project access."""
 
-        class CliRequest(m.Value):
+        class CliRequest(FlextMeltanoModels.Value):
             """Validated Singer-compatible root command parameters."""
 
             config_path: Annotated[
@@ -45,7 +46,7 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
                 u.Field(alias="config", description="Existing tap config file"),
             ]
             discover: Annotated[
-                bool, u.Field(description="Emit the discovered Singer catalog")
+                bool, u.Field(description="Emit the discovered Singer catalog"),
             ] = False
             catalog_path: Annotated[
                 t.FilePath | None,
@@ -60,11 +61,11 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
 
         # ── Config Parameter Objects ─────────────────────────────────────────
 
-        class CustomPropertyDefinition(m.BaseModel):
+        class CustomPropertyDefinition(FlextMeltanoModels.BaseModel):
             """Definition of a custom stream property."""
 
             type: Annotated[
-                str, u.Field(description="Data type for the custom stream property")
+                str, u.Field(description="Data type for the custom stream property"),
             ] = "string"
             description: Annotated[
                 str | None,
@@ -73,50 +74,50 @@ class FlextTapLdapModels(FlextMeltanoModels, m):
 
         # ── Entities ─────────────────────────────────────────────────────────
 
-        class LdapConnectionParams(m.Value):
+        class LdapConnectionParams(FlextMeltanoModels.Value):
             """LDAP connection parameters for tap configuration."""
 
             host: t.NonEmptyStr = u.Field(description="LDAP server hostname")
             port: t.PortNumber = u.Field(description="LDAP server port")
             bind_dn: Annotated[
-                str | None, u.Field(description="Bind DN for authentication")
+                str | None, u.Field(description="Bind DN for authentication"),
             ] = None
             bind_password: Annotated[
-                str | None, u.Field(description="Bind password for authentication")
+                str | None, u.Field(description="Bind password for authentication"),
             ] = None
             base_dn: Annotated[
-                str | None, u.Field(description="Base DN for search operations")
+                str | None, u.Field(description="Base DN for search operations"),
             ] = None
             use_ssl: bool = u.Field(description="Enable SSL")
             timeout_seconds: t.PositiveInt = u.Field(
-                description="Search timeout in seconds"
+                description="Search timeout in seconds",
             )
             page_size: t.PositiveInt = u.Field(
                 default=c.TapLdap.DEFAULT_PAGE_SIZE,
                 description="Page size for paged results",
             )
             max_retries: t.PositiveInt = u.Field(
-                default=3, description="Maximum connection retries"
+                default=3, description="Maximum connection retries",
             )
 
-        class LdapConnection(m.Entity):
+        class LdapConnection(FlextMeltanoModels.Entity):
             """LDAP connection entity with test status and error tracking."""
 
             host: t.NonEmptyStr = u.Field(
-                description="LDAP host address for this connection"
+                description="LDAP host address for this connection",
             )
             port: t.PortNumber = u.Field(description="LDAP port for this connection")
             bind_dn: Annotated[
-                str | None, u.Field(description="Bind DN used by the connection")
+                str | None, u.Field(description="Bind DN used by the connection"),
             ] = None
             password: Annotated[
-                str | None, u.Field(description="Bind password used by the connection")
+                str | None, u.Field(description="Bind password used by the connection"),
             ] = None
             use_ssl: Annotated[
-                bool, u.Field(description="Whether the connection uses SSL/TLS")
+                bool, u.Field(description="Whether the connection uses SSL/TLS"),
             ] = False
             timeout: t.PositiveInt = u.Field(
-                description="Timeout in seconds for this LDAP connection"
+                description="Timeout in seconds for this LDAP connection",
             )
             id: str = u.Field(
                 default_factory=lambda: uuid4().hex,

@@ -9,11 +9,15 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Final
+import os
+from typing import TYPE_CHECKING, ClassVar
 
 from flext_tests import FlextTestsConstants
 
 from flext_tap_ldap import FlextTapLdapConstants
+
+if TYPE_CHECKING:
+    from tests import t
 
 
 class TestsFlextTapLdapConstants(FlextTestsConstants, FlextTapLdapConstants):
@@ -28,30 +32,36 @@ class TestsFlextTapLdapConstants(FlextTestsConstants, FlextTapLdapConstants):
         class Tests(FlextTestsConstants.Tests):
             """LDAP test-specific constants."""
 
-            HOST: Final[str] = "test.ldap.com"
-            PORT: Final[int] = 389
-            BASE_DN: Final[str] = "dc=test,dc=com"
-            BIND_DN: Final[str] = "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com"
-            BIND_PASSWORD: Final[str] = "test_password"
-            USE_TLS: Final[bool] = False
-            PAGE_SIZE: Final[int] = 1000
-            CONTAINER_PORT: Final[int] = 3390
-            ADMIN_DN: Final[str] = "cn=admin,dc=flext,dc=local"
-            ADMIN_PASSWORD: Final[str] = "admin123"
-            LEGACY_ADMIN_DN: Final[str] = (
+            HOST: ClassVar[str] = "test.ldap.com"
+            PORT: ClassVar[int] = 389
+            BASE_DN: ClassVar[str] = "dc=test,dc=com"
+            BIND_DN: ClassVar[str] = "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com"
+            BIND_PASSWORD: ClassVar[str] = os.getenv(
+                "FLEXT_TAP_LDAP_BIND_PASSWORD", "test_password",
+            )
+            USE_TLS: ClassVar[bool] = False
+            PAGE_SIZE: ClassVar[int] = 1000
+            CONTAINER_PORT: ClassVar[int] = 3390
+            ADMIN_DN: ClassVar[str] = "cn=admin,dc=flext,dc=local"
+            ADMIN_PASSWORD: ClassVar[str] = os.getenv(
+                "FLEXT_TAP_LDAP_ADMIN_PASSWORD", "admin123",
+            )
+            LEGACY_ADMIN_DN: ClassVar[str] = (
                 "cn=REDACTED_LDAP_BIND_PASSWORD,dc=flext,dc=local"
             )
-            LEGACY_ADMIN_PASSWORD: Final[str] = "REDACTED_LDAP_BIND_PASSWORD123"
-            STANDARD_STREAMS: Final[tuple[str, ...]] = (
+            LEGACY_ADMIN_PASSWORD: ClassVar[str] = os.getenv(
+                "FLEXT_TAP_LDAP_LEGACY_ADMIN_PASSWORD", "REDACTED_LDAP_BIND_PASSWORD123",
+            )
+            STANDARD_STREAMS: ClassVar[t.VariadicTuple[str]] = (
                 "users",
                 "groups",
                 "organizational_units",
                 "schema",
             )
-            PRIMARY_KEY: Final[tuple[str, ...]] = ("dn",)
-            CONSOLE_SCRIPT: Final[str] = "tap-ldap"
-            FLAG_CONFIG: Final[str] = "--config"
-            FLAG_DISCOVER: Final[str] = "--discover"
+            PRIMARY_KEY: ClassVar[t.VariadicTuple[str]] = ("dn",)
+            CONSOLE_SCRIPT: ClassVar[str] = "tap-ldap"
+            FLAG_CONFIG: ClassVar[str] = "--config"
+            FLAG_DISCOVER: ClassVar[str] = "--discover"
 
 
 c = TestsFlextTapLdapConstants

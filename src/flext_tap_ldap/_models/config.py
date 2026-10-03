@@ -3,7 +3,7 @@
 Frozen Pydantic shapes for the ``config/tap-ldap.yaml`` business-rule SSOT,
 reusing the flext-meltano ``m`` base models. The ``_config.py`` facade validates
 the model-less YAML slice into these classes and exposes the ready objects under
-``config.TapLdap``.
+``config.tap_ldap``.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -27,18 +27,25 @@ class FlextTapLdapConfigModels:
             filter: str = u.Field(description="LDAP search filter")
             primary_keys: t.StrSequence = u.Field(description="Record primary keys")
             attributes: t.StrSequence = u.Field(
-                description="LDAP attributes to request"
+                description="LDAP attributes to request",
             )
             stream_schema: t.JsonMapping = u.Field(
-                alias="schema", description="Singer stream JSON schema"
+                alias="schema", description="Singer stream JSON schema",
             )
 
         streams: t.SequenceOf[StreamRule] = u.Field(
-            default=(), description="Declarative stream business rules"
+            default=(), description="Declarative stream business rules",
         )
 
     class Root(m.FrozenModel):
-        """Root flext-tap-ldap config validated from ``config/*.yaml``."""
+        """Root flext-tap-ldap config validated from ``config/*.yaml``.
+
+        The ``config/`` directory is shared across domains (fleet tooling drops
+        sibling YAML files), so unknown top-level keys are tolerated; the
+        ``TapLdap`` branch itself stays strictly validated.
+        """
+
+        model_config = m.ConfigDict(extra="allow")
 
         TapLdap: FlextTapLdapConfigModels.TapLdap = u.Field(
             description="TapLdap business-rule config domain"

@@ -13,10 +13,10 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_ldap import FlextLdapProtocols
-from flext_meltano import p as meltano_p
+from flext_meltano import FlextMeltanoProtocols
 
 
-class FlextTapLdapProtocols(meltano_p, FlextLdapProtocols):
+class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
     """Singer Tap LDAP protocols facade — composes Meltano + LDAP."""
 
 

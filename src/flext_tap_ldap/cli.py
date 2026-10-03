@@ -19,8 +19,14 @@ if TYPE_CHECKING:
 
 
 def main(args: t.StrSequence | None = None) -> int:
-    """Run the canonical tap-ldap Singer CLI."""
-    return FlextTapLdapService().cli_main(args)
+    """Run the canonical tap-ldap Singer CLI.
+
+    Returns:
+        The resulting ``int``.
+    """
+    # Why: mro-4p0t — meltano Tap.cli_main is int-typed; bind for mypy no-any-return.
+    exit_code: int = FlextTapLdapService().cli_main(args)
+    return exit_code
 
 
 __all__: list[str] = ["main"]

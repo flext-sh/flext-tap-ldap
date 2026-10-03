@@ -1,20 +1,15 @@
-"""FLEXT Tap LDAP Types — MRO composition of parent type namespaces.
+"""LDAP tap typings - public facade.
 
-All Singer protocol types are in ``t.Meltano.*``.
-All LDAP domain types are in ``FlextLdapTypes.Ldap.*``.
-This facade composes both via MRO — access as ``t.Meltano.*`` and ``t.Ldap.*``.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
+Copyright (c) 2026 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
 
-from flext_ldap import FlextLdapTypes
-from flext_meltano import t
+from flext_tap_ldap._typings.base import FlextTapLdapTypesBase
 
 
-class FlextTapLdapTypes(t, FlextLdapTypes):
+class FlextTapLdapTypes(FlextTapLdapTypesBase):
     """MRO facade composing Meltano + LDAP type namespaces.
 
     Access: ``t.Meltano.*`` (Singer protocol), ``t.Ldap.*`` (LDAP domain),

@@ -11,31 +11,35 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tap_ldap import p, t, u
+from flext_tap_ldap import m, p, t, u
 from flext_tap_ldap.base import s
 
 
 class FlextTapLdapExtractService(s):
     """Thin orchestrator: connect, search, and pack one stream's LDAP records."""
 
-    def fetch(self, request: p.Meltano.FetchRequest) -> p.Result[p.Meltano.FetchResult]:
+    def fetch(self, request: m.Meltano.FetchRequest) -> p.Result[m.Meltano.FetchResult]:
         """Return the records for ``request.stream_name`` as a typed result."""
         return (
             self.ldap
             .connect(u.TapLdap.connection(request.config))
             .flat_map(
-                lambda _: u.TapLdap.stream_search(request.stream_name, request.config)
+                lambda _: u.TapLdap.stream_search(request.stream_name, request.config),
             )
             .flat_map(self._run_search)
-            .map(lambda records: p.Meltano.FetchResult(records=records))
+            .map(lambda records: m.Meltano.FetchResult(records=records))
         )
 
     def _run_search(
-        self, options: p.Ldap.SearchOptions
+        self, options: m.Ldap.SearchOptions,
     ) -> p.Result[t.SequenceOf[t.JsonMapping]]:
-        """Run the search and pack entries into Singer records."""
+        """Run the search and pack entries into Singer records.
+
+        Returns:
+            The resulting ``p.Result[t.SequenceOf[t.JsonMapping]]``.
+        """
         return self.ldap.search(options).map(
-            lambda result: u.TapLdap.pack_entries(result.entries)
+            lambda result: u.TapLdap.pack_entries(result.entries),
         )
 
 
