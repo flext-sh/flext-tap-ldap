@@ -42,7 +42,8 @@ class FlextTapLdapUtilitiesExtractSupport:
 
         @staticmethod
         def stream_search(
-            stream_name: str, source: t.JsonMapping,
+            stream_name: str,
+            source: t.JsonMapping,
         ) -> p.Result[m.Ldap.SearchOptions]:
             """Resolve a stream's business rules into typed LDAP search options.
 
@@ -55,13 +56,13 @@ class FlextTapLdapUtilitiesExtractSupport:
             )
             if rule is None:
                 return r[m.Ldap.SearchOptions].fail(f"Unknown stream: {stream_name}")
-            base_dn = str(source.get("base_dn", settings.TapLdap.base_dn))
-            return r[m.Ldap.SearchOptions].ok(
-                m.Ldap.SearchOptions(
-                    base_dn=base_dn,
-                    filter_str=rule.filter,
-                    attributes=list(rule.attributes),
-                ),
+            return r[m.Ldap.SearchOptions].from_validation(
+                {
+                    "base_dn": source.get("base_dn", settings.TapLdap.base_dn),
+                    "filter_str": rule.filter,
+                    "attributes": list(rule.attributes),
+                },
+                m.Ldap.SearchOptions,
             )
 
         @staticmethod

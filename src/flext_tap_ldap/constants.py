@@ -15,7 +15,9 @@ from flext_tap_ldap._constants import (
 
 
 class FlextTapLdapConstants(
-    _PrivateFlextTapLdapConstants, FlextMeltanoConstants, FlextLdapConstants,
+    _PrivateFlextTapLdapConstants,
+    FlextMeltanoConstants,
+    FlextLdapConstants,
 ):
     """LDAP tap extraction-specific constants following FLEXT unified pattern.
 

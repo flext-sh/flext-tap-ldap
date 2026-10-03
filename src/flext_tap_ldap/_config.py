@@ -22,7 +22,8 @@ from flext_tap_ldap._models.config import FlextTapLdapConfigModels
 
 
 class FlextTapLdapConfig(
-    FlextTapLdapConstantsConfig.FlextTapLdapConfigValues.Config, FlextMeltanoConfig,
+    FlextTapLdapConstantsConfig.FlextTapLdapConfigValues.Config,
+    FlextMeltanoConfig,
 ):
     """TapLdap config auto-loaded from the project-root ``config/*.yaml``.
 
