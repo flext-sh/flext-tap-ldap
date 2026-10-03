@@ -48,7 +48,7 @@ class FlextTapLdapConfigModels:
         model_config = m.ConfigDict(extra="allow")
 
         TapLdap: FlextTapLdapConfigModels.TapLdap = u.Field(
-            description="TapLdap business-rule config domain",
+            description="TapLdap business-rule config domain"
         )
 
 
