@@ -1,8 +1,12 @@
-"""LDAP tap constants - API constants."""
+"""LDAP tap constants - API constants.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
-from .base import FlextTapLdapConstantsBase
+from flext_tap_ldap._constants.base import FlextTapLdapConstantsBase
 
 
 class FlextTapLdapConstantsApi(FlextTapLdapConstantsBase):

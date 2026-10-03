@@ -21,7 +21,11 @@ class FlextTapLdapUtilitiesExtractSupport:
 
         @staticmethod
         def tap_spec() -> m.Meltano.TapSpec:
-            """Build the Singer tap spec: config streams + settings config schema."""
+            """Build the Singer tap spec: config streams + settings config schema.
+
+            Returns:
+                The resulting ``m.Meltano.TapSpec``.
+            """
             streams = [
                 m.Meltano.StreamSpec(
                     name=rule.name,
@@ -38,9 +42,13 @@ class FlextTapLdapUtilitiesExtractSupport:
 
         @staticmethod
         def stream_search(
-            stream_name: str, source: t.JsonMapping
+            stream_name: str, source: t.JsonMapping,
         ) -> p.Result[m.Ldap.SearchOptions]:
-            """Resolve a stream's business rules into typed LDAP search options."""
+            """Resolve a stream's business rules into typed LDAP search options.
+
+            Returns:
+                The resulting ``p.Result[m.Ldap.SearchOptions]``.
+            """
             rule = next(
                 (item for item in config.tap_ldap.streams if item.name == stream_name),
                 None,
@@ -53,19 +61,27 @@ class FlextTapLdapUtilitiesExtractSupport:
                     base_dn=base_dn,
                     filter_str=rule.filter,
                     attributes=list(rule.attributes),
-                )
+                ),
             )
 
         @staticmethod
         def connection(source: t.JsonMapping) -> m.Ldap.ConnectionConfig:
-            """Build the LDAP connection config from the tap runtime config."""
+            """Build the LDAP connection config from the tap runtime config.
+
+            Returns:
+                The resulting ``m.Ldap.ConnectionConfig``.
+            """
             return m.Ldap.ConnectionConfig.model_validate(dict(source))
 
         @staticmethod
         def pack_entries(
             entries: t.SequenceOf[p.Ldif.Entry],
         ) -> t.SequenceOf[t.JsonMapping]:
-            """Pack flext-ldap entries into Singer-native JSON records."""
+            """Pack flext-ldap entries into Singer-native JSON records.
+
+            Returns:
+                The resulting ``t.SequenceOf[t.JsonMapping]``.
+            """
             records: list[t.JsonMapping] = []
             for entry in entries:
                 dn_value: t.JsonValue = entry.dn.value if entry.dn is not None else ""

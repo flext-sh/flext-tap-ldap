@@ -19,6 +19,11 @@ if TYPE_CHECKING:
 
 @pytest.fixture
 def ldap_connection_config() -> dict[str, object]:
+    """Provide ``ldap_connection_config``.
+
+    Returns:
+        The resulting ``dict[str, object]``.
+    """
     return {
         "host": c.Ldap.Tests.HOST,
         "port": c.Ldap.Tests.PORT,
@@ -35,6 +40,11 @@ def ldap_connection_config() -> dict[str, object]:
 def ldap_source_config(
     ldap_connection_config: dict[str, t.JsonValue],
 ) -> m.Meltano.DataSourceConfig:
+    """Provide ``ldap_source_config``.
+
+    Returns:
+        The resulting ``m.Meltano.DataSourceConfig``.
+    """
     return m.Meltano.DataSourceConfig(
         source_type="ldap",
         connection_config=ldap_connection_config,
@@ -45,6 +55,11 @@ def ldap_source_config(
 
 @pytest.fixture
 def ldap_record_entries() -> list[dict[str, object]]:
+    """Provide ``ldap_record_entries``.
+
+    Returns:
+        The resulting ``list[dict[str, object]]``.
+    """
     return [
         {
             "dn": "uid=jdoe,ou=users,dc=test,dc=com",
@@ -52,5 +67,5 @@ def ldap_record_entries() -> list[dict[str, object]]:
             "cn": "John Doe",
             "mail": "jdoe@test.com",
             "objectClass": ["inetOrgPerson", "person"],
-        }
+        },
     ]

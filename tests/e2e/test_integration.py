@@ -60,7 +60,7 @@ class TestsFlextTapLdapIntegration:
         return True, streams
 
     def test_discover_publishes_every_standard_ldap_stream(
-        self, tmp_path: Path
+        self, tmp_path: Path,
     ) -> None:
         """Discovery advertises every standard LDAP stream at exit 0."""
         success, streams = self._discover_streams(tmp_path)
