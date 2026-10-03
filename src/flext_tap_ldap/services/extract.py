@@ -31,7 +31,8 @@ class FlextTapLdapExtractService(s):
         )
 
     def _run_search(
-        self, options: m.Ldap.SearchOptions,
+        self,
+        options: m.Ldap.SearchOptions,
     ) -> p.Result[t.SequenceOf[t.JsonMapping]]:
         """Run the search and pack entries into Singer records.
 

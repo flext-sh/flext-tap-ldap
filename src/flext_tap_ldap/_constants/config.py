@@ -35,25 +35,8 @@ class FlextTapLdapConstantsConfig(FlextTapLdapConstantsBase):
     class TapLdap:
         """Tap LDAP namespace for cross-project access."""
 
-        DEFAULT_PAGE_SIZE: Final[int] = 1000
         DEFAULT_SEARCH_TIMEOUT: Final[int] = FlextLdapConstants.Ldap.TIMEOUT
         TAP_NAME: Final[str] = "tap-ldap"
-
-        class Ldap:
-            """LDAP tap-specific connection constants."""
-
-            MAX_PORT: Final[int] = 65535
-
-        class Connection:
-            """LDAP tap connection configuration."""
-
-            DEFAULT_HOST: Final[str] = FlextLdapConstants.LOCALHOST
-            DEFAULT_BASE_DN: Final[str] = ""
-
-        class Search:
-            """LDAP search configuration."""
-
-            DEFAULT_SCOPE: Final[str] = "SUBTREE"
 
 
 # One declared module owner: the constants facade class. The config-values
