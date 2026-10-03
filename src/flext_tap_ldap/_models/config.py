@@ -27,14 +27,14 @@ class FlextTapLdapConfigModels:
             filter: str = u.Field(description="LDAP search filter")
             primary_keys: t.StrSequence = u.Field(description="Record primary keys")
             attributes: t.StrSequence = u.Field(
-                description="LDAP attributes to request"
+                description="LDAP attributes to request",
             )
             stream_schema: t.JsonMapping = u.Field(
-                alias="schema", description="Singer stream JSON schema"
+                alias="schema", description="Singer stream JSON schema",
             )
 
         streams: t.SequenceOf[StreamRule] = u.Field(
-            default=(), description="Declarative stream business rules"
+            default=(), description="Declarative stream business rules",
         )
 
     class Root(m.FrozenModel):
@@ -48,7 +48,7 @@ class FlextTapLdapConfigModels:
         model_config = m.ConfigDict(extra="allow")
 
         TapLdap: FlextTapLdapConfigModels.TapLdap = u.Field(
-            description="TapLdap business-rule config domain"
+            description="TapLdap business-rule config domain",
         )
 
 

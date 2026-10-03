@@ -42,7 +42,11 @@ class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
 
         @classmethod
         def admin_credentials(cls) -> tuple[str, str]:
-            """Resolve LDAP admin credentials, trying env vars then known defaults."""
+            """Resolve LDAP admin credentials, trying env vars then known defaults.
+
+            Returns:
+                The resulting ``tuple[str, str]``.
+            """
             cached = cls._resolved_admin_credentials[0]
             if cached is not None:
                 return cached
@@ -88,7 +92,11 @@ class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
 
             @staticmethod
             def admin_credentials() -> tuple[str, str]:
-                """Resolve LDAP admin credentials, trying env vars then known defaults."""
+                """Resolve LDAP admin credentials, trying env vars then known defaults.
+
+                Returns:
+                    The resulting ``tuple[str, str]``.
+                """
                 return TestsFlextTapLdapUtilities.Ldap.admin_credentials()
 
 

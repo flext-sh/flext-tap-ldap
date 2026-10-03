@@ -17,12 +17,12 @@ from typing import Self
 
 from flext_meltano import FlextMeltanoConfig
 
-from ._constants.config import FlextTapLdapConstantsConfig
-from ._models.config import FlextTapLdapConfigModels
+from flext_tap_ldap._constants.config import FlextTapLdapConstantsConfig
+from flext_tap_ldap._models.config import FlextTapLdapConfigModels
 
 
 class FlextTapLdapConfig(
-    FlextTapLdapConstantsConfig.FlextTapLdapConfigValues.Config, FlextMeltanoConfig
+    FlextTapLdapConstantsConfig.FlextTapLdapConfigValues.Config, FlextMeltanoConfig,
 ):
     """TapLdap config auto-loaded from the project-root ``config/*.yaml``.
 

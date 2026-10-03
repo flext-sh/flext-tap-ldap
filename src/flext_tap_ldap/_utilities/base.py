@@ -1,4 +1,8 @@
-"""Base utilities for flext-tap-ldap private family."""
+"""Base utilities for flext-tap-ldap private family.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 

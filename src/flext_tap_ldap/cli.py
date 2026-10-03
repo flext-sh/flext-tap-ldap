@@ -11,12 +11,15 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_tap_ldap import t
-
-from .api import FlextTapLdapService
+from flext_tap_ldap.api import FlextTapLdapService
 
 
 def main(args: t.StrSequence | None = None) -> int:
-    """Run the canonical tap-ldap Singer CLI."""
+    """Run the canonical tap-ldap Singer CLI.
+
+    Returns:
+        The resulting ``int``.
+    """
     # Why: mro-4p0t — meltano Tap.cli_main is int-typed; bind for mypy no-any-return.
     exit_code: int = FlextTapLdapService().cli_main(args)
     return exit_code

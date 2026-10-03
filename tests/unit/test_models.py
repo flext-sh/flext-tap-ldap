@@ -27,15 +27,19 @@ class TestsFlextTapLdapModelsUnit:
 
     # ── CustomPropertyDefinition ─────────────────────────────────────────
 
-    def test_custom_property_definition_defaults_to_string_type(self) -> None:
+    @staticmethod
+    def test_custom_property_definition_defaults_to_string_type() -> None:
+        """Test custom property definition defaults to string type."""
         definition = _TapLdap.CustomPropertyDefinition()
 
         tm.that(definition.type, eq="string")
         tm.that(definition.description, none=True)
 
-    def test_custom_property_definition_accepts_explicit_values(self) -> None:
+    @staticmethod
+    def test_custom_property_definition_accepts_explicit_values() -> None:
+        """Test custom property definition accepts explicit values."""
         definition = _TapLdap.CustomPropertyDefinition(
-            type="integer", description="a numeric property"
+            type="integer", description="a numeric property",
         )
 
         tm.that(
@@ -45,9 +49,11 @@ class TestsFlextTapLdapModelsUnit:
 
     # ── LdapConnectionParams: valid construction ─────────────────────────
 
-    def test_connection_params_expose_supplied_and_default_fields(self) -> None:
+    @staticmethod
+    def test_connection_params_expose_supplied_and_default_fields() -> None:
+        """Test connection params expose supplied and default fields."""
         params = _TapLdap.LdapConnectionParams(
-            host="ldap.example.com", port=636, use_ssl=True, timeout_seconds=30
+            host="ldap.example.com", port=636, use_ssl=True, timeout_seconds=30,
         )
 
         tm.that(params.host, eq="ldap.example.com")
@@ -62,46 +68,49 @@ class TestsFlextTapLdapModelsUnit:
         tm.that(params.page_size, eq=c.TapLdap.DEFAULT_PAGE_SIZE)
         tm.that(params.max_retries, eq=3)
 
+    @staticmethod
     @pytest.mark.parametrize("port", [1, 389, 65535])
-    def test_connection_params_accept_valid_port_boundaries(self, port: int) -> None:
+    def test_connection_params_accept_valid_port_boundaries(port: int) -> None:
+        """Test connection params accept valid port boundaries."""
         params = _TapLdap.LdapConnectionParams(
-            host="h", port=port, use_ssl=False, timeout_seconds=1
+            host="h", port=port, use_ssl=False, timeout_seconds=1,
         )
 
         tm.that(params.port, eq=port)
 
     # ── LdapConnectionParams: validation contract ────────────────────────
 
+    @staticmethod
     @pytest.mark.parametrize(
         ("build", "invalid_field"),
         [
             (
                 lambda: _TapLdap.LdapConnectionParams(
-                    host="", port=389, use_ssl=False, timeout_seconds=30
+                    host="", port=389, use_ssl=False, timeout_seconds=30,
                 ),
                 "host",
             ),
             (
                 lambda: _TapLdap.LdapConnectionParams(
-                    host="h", port=0, use_ssl=False, timeout_seconds=30
+                    host="h", port=0, use_ssl=False, timeout_seconds=30,
                 ),
                 "port",
             ),
             (
                 lambda: _TapLdap.LdapConnectionParams(
-                    host="h", port=70000, use_ssl=False, timeout_seconds=30
+                    host="h", port=70000, use_ssl=False, timeout_seconds=30,
                 ),
                 "port",
             ),
             (
                 lambda: _TapLdap.LdapConnectionParams(
-                    host="h", port=389, use_ssl=False, timeout_seconds=0
+                    host="h", port=389, use_ssl=False, timeout_seconds=0,
                 ),
                 "timeout_seconds",
             ),
             (
                 lambda: _TapLdap.LdapConnectionParams(
-                    host="h", port=389, use_ssl=False, timeout_seconds=30, page_size=0
+                    host="h", port=389, use_ssl=False, timeout_seconds=30, page_size=0,
                 ),
                 "page_size",
             ),
@@ -118,15 +127,18 @@ class TestsFlextTapLdapModelsUnit:
         ],
     )
     def test_connection_params_reject_out_of_contract_values(
-        self, build: Callable[[], _Params], invalid_field: str
+        build: Callable[[], _Params], invalid_field: str,
     ) -> None:
+        """Test connection params reject out of contract values."""
         with pytest.raises(m.ValidationError) as exc_info:
             build()
 
         offending = {error["loc"][0] for error in exc_info.value.errors()}
         tm.that(offending, has=invalid_field)
 
-    def test_connection_params_require_mandatory_fields(self) -> None:
+    @staticmethod
+    def test_connection_params_require_mandatory_fields() -> None:
+        """Test connection params require mandatory fields."""
         with pytest.raises(m.ValidationError) as exc_info:
             _TapLdap.LdapConnectionParams.model_validate({"host": "h"})
 
@@ -139,24 +151,30 @@ class TestsFlextTapLdapModelsUnit:
 
     # ── LdapConnectionParams: value semantics ────────────────────────────
 
-    def test_connection_params_are_value_objects_with_structural_equality(self) -> None:
+    @staticmethod
+    def test_connection_params_are_value_objects_with_structural_equality() -> None:
+        """Test connection params are value objects with structural equality."""
         left = _TapLdap.LdapConnectionParams(
-            host="h", port=389, use_ssl=True, timeout_seconds=30
+            host="h", port=389, use_ssl=True, timeout_seconds=30,
         )
         right = _TapLdap.LdapConnectionParams(
-            host="h", port=389, use_ssl=True, timeout_seconds=30
+            host="h", port=389, use_ssl=True, timeout_seconds=30,
         )
 
         tm.that(left, eq=right)
 
-    def test_connection_params_are_immutable(self) -> None:
+    @staticmethod
+    def test_connection_params_are_immutable() -> None:
+        """Test connection params are immutable."""
         params = _TapLdap.LdapConnectionParams(
-            host="h", port=389, use_ssl=True, timeout_seconds=30
+            host="h", port=389, use_ssl=True, timeout_seconds=30,
         )
 
         tm.rejects_assignment(params, "host", "other", expected=m.ValidationError)
 
-    def test_connection_params_round_trip_through_model_dump(self) -> None:
+    @staticmethod
+    def test_connection_params_round_trip_through_model_dump() -> None:
+        """Test connection params round trip through model dump."""
         original = _TapLdap.LdapConnectionParams(
             host="dir.example.org",
             port=389,

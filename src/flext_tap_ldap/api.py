@@ -15,25 +15,28 @@ from typing import Annotated, override
 from flext_meltano import meltano
 
 from flext_tap_ldap import c, p, t, u
-
-from .services.extract import FlextTapLdapExtractService
+from flext_tap_ldap.services.extract import FlextTapLdapExtractService
 
 
 class FlextTapLdapService(meltano.Tap):
     """Declarative tap-ldap orchestrator built from config + settings SSOT."""
 
     tap_name: Annotated[
-        t.NonEmptyStr, u.Field(description="Canonical Singer tap identifier.")
+        t.NonEmptyStr, u.Field(description="Canonical Singer tap identifier."),
     ] = c.TapLdap.TAP_NAME
 
     @override
     def create_tap_instance(
-        self, settings: p.Settings | None = None
+        self, settings: p.Settings | None = None,
     ) -> p.Meltano.SingerTapInstance:
-        """Build the declarative Singer tap from config streams + a fetcher."""
+        """Build the declarative Singer tap from config streams + a fetcher.
+
+        Returns:
+            The resulting ``p.Meltano.SingerTapInstance``.
+        """
         _ = settings
         tap: p.Meltano.SingerTapInstance = self.build_declarative_tap(
-            u.TapLdap.tap_spec(), FlextTapLdapExtractService()
+            u.TapLdap.tap_spec(), FlextTapLdapExtractService(),
         )
         return tap
 

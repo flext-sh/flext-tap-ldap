@@ -1,39 +1,42 @@
 # AUTO-GENERATED FILE — Regenerate with: make gen
-"""Flext Tap Ldap package."""
+"""Flext Tap Ldap package.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from flext_core.lazy import build_lazy_import_map, install_lazy_exports
-
-from .__version__ import (
-    __author__ as __author__,
-    __author_email__ as __author_email__,
-    __description__ as __description__,
-    __license__ as __license__,
-    __title__ as __title__,
-    __url__ as __url__,
-    __version__ as __version__,
-    __version_info__ as __version_info__,
+from flext_core import build_lazy_import_map, install_lazy_exports
+from flext_tap_ldap.__version__ import (
+    __author__,
+    __author_email__,
+    __description__,
+    __license__,
+    __title__,
+    __url__,
+    __version__,
+    __version_info__,
 )
 
 if TYPE_CHECKING:
     from flext_meltano import d, e, h, r, x
 
-    from . import services
-    from ._config import FlextTapLdapConfig, config
-    from ._settings import FlextTapLdapSettings, settings
-    from .api import FlextTapLdapService, tap_ldap
-    from .base import FlextTapLdapServiceBase, FlextTapLdapServiceBase as s
-    from .cli import main
-    from .constants import FlextTapLdapConstants, FlextTapLdapConstants as c
-    from .models import FlextTapLdapModels, FlextTapLdapModels as m
-    from .protocols import FlextTapLdapProtocols, FlextTapLdapProtocols as p
-    from .services.extract import FlextTapLdapExtractService
-    from .typings import FlextTapLdapTypes, FlextTapLdapTypes as t
-    from .utilities import FlextTapLdapUtilities, FlextTapLdapUtilities as u
+    from flext_tap_ldap import services
+    from flext_tap_ldap._config import FlextTapLdapConfig, config
+    from flext_tap_ldap._settings import FlextTapLdapSettings, settings
+    from flext_tap_ldap.api import FlextTapLdapService, tap_ldap
+    from flext_tap_ldap.base import FlextTapLdapServiceBase, s
+    from flext_tap_ldap.cli import main
+    from flext_tap_ldap.constants import FlextTapLdapConstants, c
+    from flext_tap_ldap.models import FlextTapLdapModels, m
+    from flext_tap_ldap.protocols import FlextTapLdapProtocols, p
+    from flext_tap_ldap.services.extract import FlextTapLdapExtractService
+    from flext_tap_ldap.typings import FlextTapLdapTypes, t
+    from flext_tap_ldap.utilities import FlextTapLdapUtilities, u
 
 
 __all__: tuple[str, ...] = (
@@ -92,7 +95,7 @@ _LAZY_IMPORTS = MappingProxyType(
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,
-    )
+    ),
 )
 
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, public_exports=__all__)

@@ -1,8 +1,12 @@
-"""LDAP tap typings - public facade."""
+"""LDAP tap typings - public facade.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
-from ._typings.base import FlextTapLdapTypesBase
+from flext_tap_ldap._typings.base import FlextTapLdapTypesBase
 
 
 class FlextTapLdapTypes(FlextTapLdapTypesBase):
