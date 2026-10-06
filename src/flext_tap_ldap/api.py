@@ -45,6 +45,6 @@ class FlextTapLdapService(meltano.Tap):
 
 
 tap_ldap: FlextTapLdapService = FlextTapLdapService.fetch_global()
-"""Process-wide FlextTapLdapService facade singleton resolved from the service container."""
+"""Process-wide FlextTapLdapService facade singleton from the service container."""
 
 __all__: list[str] = ["FlextTapLdapService", "tap_ldap"]
