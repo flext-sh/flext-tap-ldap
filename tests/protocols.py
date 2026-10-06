@@ -1,6 +1,6 @@
 """Test protocols for flext-tap-ldap - uses p.TapLdap.* namespace pattern.
 
-This module provides test-specific protocols that extend the main flext-tap-ldap protocols.
+Provides test-specific protocols extending the main flext-tap-ldap protocols.
 Uses the unified namespace pattern p.TapLdap.* for test-only protocols.
 Combines TestsFlextProtocols functionality with project-specific test protocols.
 

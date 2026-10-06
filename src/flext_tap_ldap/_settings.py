@@ -45,6 +45,6 @@ class FlextTapLdapSettings(FlextLdapSettings):
 
 
 settings: FlextTapLdapSettings = FlextTapLdapSettings.fetch_global()
-"""Pre-instantiated project settings singleton — ``from flext_tap_ldap import settings``."""
+"""Pre-instantiated settings singleton — ``from flext_tap_ldap import settings``."""
 
 __all__: list[str] = ["FlextTapLdapSettings", "settings"]

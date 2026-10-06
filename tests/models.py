@@ -28,7 +28,7 @@ class TestsFlextTapLdapModels(FlextTestsModels, FlextTapLdapModels):
         class Tests:
             """Test models namespace for flext-tap-ldap tests.
 
-            Contains test-specific models that extend the main models with test-only features.
+            Contains test-specific models extending the main models.
             These models are only used in tests and not in production code.
             """
 
