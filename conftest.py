@@ -1,3 +1,4 @@
+# Copyright (c) 2026 FLEXT Team. All rights reserved.
 """Pytest bootstrap for flext-tap-ldap local package resolution."""
 
 from __future__ import annotations
