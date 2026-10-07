@@ -10,7 +10,7 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from flext_core import build_lazy_import_map, install_lazy_exports
+from flext_core import install_lazy_exports
 from flext_tap_ldap.__version__ import (
     __author__,
     __author_email__,
@@ -76,26 +76,36 @@ __all__: tuple[str, ...] = (
     "x",
 )
 
-_LAZY_IMPORTS = MappingProxyType(
-    build_lazy_import_map(
-        MappingProxyType({
-            "._config": ("FlextTapLdapConfig", "config"),
-            "._settings": ("FlextTapLdapSettings", "settings"),
-            ".api": ("FlextTapLdapService", "tap_ldap"),
-            ".base": ("FlextTapLdapServiceBase", "s"),
-            ".cli": ("main",),
-            ".constants": ("FlextTapLdapConstants", "c"),
-            ".models": ("FlextTapLdapModels", "m"),
-            ".protocols": ("FlextTapLdapProtocols", "p"),
-            ".services": ("services",),
-            ".services.extract": ("FlextTapLdapExtractService",),
-            ".typings": ("FlextTapLdapTypes", "t"),
-            ".utilities": ("FlextTapLdapUtilities", "u"),
-            "flext_meltano": ("d", "e", "h", "r", "x"),
-        }),
-        alias_groups=MappingProxyType({}),
-        sort_keys=False,
-    ),
+install_lazy_exports(
+    __name__,
+    globals(),
+    MappingProxyType({
+        "FlextTapLdapConfig": "._config",
+        "FlextTapLdapConstants": ".constants",
+        "FlextTapLdapExtractService": ".services.extract",
+        "FlextTapLdapModels": ".models",
+        "FlextTapLdapProtocols": ".protocols",
+        "FlextTapLdapService": ".api",
+        "FlextTapLdapServiceBase": ".base",
+        "FlextTapLdapSettings": "._settings",
+        "FlextTapLdapTypes": ".typings",
+        "FlextTapLdapUtilities": ".utilities",
+        "c": ".constants",
+        "config": "._config",
+        "d": "flext_meltano",
+        "e": "flext_meltano",
+        "h": "flext_meltano",
+        "m": ".models",
+        "main": ".cli",
+        "p": ".protocols",
+        "r": "flext_meltano",
+        "s": ".base",
+        "services": ".services",
+        "settings": "._settings",
+        "t": ".typings",
+        "tap_ldap": ".api",
+        "u": ".utilities",
+        "x": "flext_meltano",
+    }),
+    public_exports=__all__,
 )
-
-install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, public_exports=__all__)
