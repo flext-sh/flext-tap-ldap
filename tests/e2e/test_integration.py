@@ -48,7 +48,7 @@ class TestsFlextTapLdapIntegration:
                 str(config_path),
                 c.Ldap.Tests.FLAG_DISCOVER,
             ],
-            remove_env_keys=("PYTHONPATH",),
+            options=u.Cli.ProcessOptions(remove_env_keys=("PYTHONPATH",)),
         )
         if not result.success:
             return False, []
