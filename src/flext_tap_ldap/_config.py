@@ -1,8 +1,9 @@
 """FlextTapLdapConfig — frozen config singleton for flext-tap-ldap.
 
 Business-rule SSOT: the stream contracts (name, LDAP filter, attributes, Singer
-schema, primary keys) live in ``config/tap-ldap.yaml`` at the project root under
-the ``TapLdap`` key and are exposed through the open ``config.tap_ldap`` namespace.
+schema, primary keys) live in the packaged ``flext_tap_ldap/config/tap-ldap.yaml``
+under the ``TapLdap`` key and are exposed through the open ``config.tap_ldap``
+namespace.
 Config holds the business rules; ``settings`` holds the adjustable runtime
 parameters (``.env`` / env vars / local settings / CLI).
 
