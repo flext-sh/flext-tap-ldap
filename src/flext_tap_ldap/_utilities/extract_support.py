@@ -26,14 +26,14 @@ class FlextTapLdapUtilitiesExtractSupport:
             Returns:
                 The resulting ``m.Meltano.TapSpec``.
             """
-            streams = [
+            streams = tuple(
                 m.Meltano.StreamSpec(
                     name=rule.name,
                     json_schema=rule.stream_schema,
-                    primary_keys=rule.primary_keys,
+                    primary_keys=tuple(rule.primary_keys),
                 )
                 for rule in config.tap_ldap.streams
-            ]
+            )
             return m.Meltano.TapSpec(
                 tap_name=c.TapLdap.TAP_NAME,
                 config_jsonschema=type(settings).model_json_schema(),
