@@ -1,8 +1,9 @@
 """FlextTapLdapConfig — frozen config singleton for flext-tap-ldap.
 
 Business-rule SSOT: the stream contracts (name, LDAP filter, attributes, Singer
-schema, primary keys) live in ``config/tap-ldap.yaml`` at the project root under
-the ``TapLdap`` key and are exposed through the open ``config.tap_ldap`` namespace.
+schema, primary keys) live in the packaged ``flext_tap_ldap/config/tap-ldap.yaml``
+under the ``TapLdap`` key and are exposed through the open ``config.tap_ldap``
+namespace.
 Config holds the business rules; ``settings`` holds the adjustable runtime
 parameters (``.env`` / env vars / local settings / CLI).
 
@@ -49,9 +50,21 @@ class FlextTapLdapConfig(
         _ = args, kwargs
         return object.__new__(cls)
 
-    __eq__ = object.__eq__
+    def __eq__(self, other: object) -> bool:
+        """Identity equality per the frozen-config singleton contract.
 
-    __hash__ = object.__hash__
+        Returns:
+            The resulting ``bool``.
+        """
+        return object.__eq__(self, other)
+
+    def __hash__(self) -> int:
+        """Identity hash per the frozen-config singleton contract.
+
+        Returns:
+            The resulting ``int``.
+        """
+        return object.__hash__(self)
 
     # Scalar constants (CONFIG_DIR) come from the ``_constants`` mixin base so
     # they stay out of this class's ``vars()``; the consumer path is identical.

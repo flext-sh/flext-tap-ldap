@@ -27,7 +27,7 @@ class FlextTapLdapExtractService(s):
                 lambda _: u.TapLdap.stream_search(request.stream_name, request.config),
             )
             .flat_map(self._run_search)
-            .map(lambda records: m.Meltano.FetchResult(records=records))
+            .map(lambda records: m.Meltano.FetchResult(records=tuple(records)))
         )
 
     def _run_search(

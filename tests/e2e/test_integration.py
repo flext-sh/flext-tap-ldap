@@ -14,7 +14,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
-from flext_tests import tm, u
+from flext_tests import m, tm, u
 
 from tests import c, t
 
@@ -48,7 +48,7 @@ class TestsFlextTapLdapIntegration:
                 str(config_path),
                 c.Ldap.Tests.FLAG_DISCOVER,
             ],
-            options=u.Cli.ProcessOptions(remove_env_keys=("PYTHONPATH",)),
+            options=m.Cli.ProcessOptions(remove_env_keys=("PYTHONPATH",)),
         )
         if not result.success:
             return False, []
