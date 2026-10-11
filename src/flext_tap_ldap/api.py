@@ -12,13 +12,13 @@ from __future__ import annotations
 
 from typing import Annotated, override
 
-from flext_meltano import Tap
+from flext_meltano import FlextMeltanoTapServiceBase
 
 from flext_tap_ldap import c, p, t, u
 from flext_tap_ldap.services.extract import FlextTapLdapExtractService
 
 
-class FlextTapLdapService(Tap):
+class FlextTapLdapService(FlextMeltanoTapServiceBase):
     """Declarative tap-ldap orchestrator built from config + settings SSOT."""
 
     tap_name: Annotated[
