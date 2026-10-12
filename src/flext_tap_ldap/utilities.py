@@ -13,6 +13,7 @@ from __future__ import annotations
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 
+from flext_tap_ldap._utilities.base import FlextTapLdapUtilitiesBase
 from flext_tap_ldap._utilities.extract_support import (
     FlextTapLdapUtilitiesExtractSupport,
 )
@@ -25,7 +26,11 @@ class FlextTapLdapUtilities(
 ):
     """Unified LDAP tap utility facade."""
 
-    class TapLdap(FlextTapLdapUtilitiesExtractSupport.TapLdap):
+    class TapLdap(
+        FlextTapLdapUtilitiesExtractSupport.TapLdap,
+        FlextTapLdapUtilitiesBase,
+        FlextTapLdapUtilitiesExtractSupport,
+    ):
         """Tap-LDAP helper namespace for cross-project access."""
 
 

@@ -13,11 +13,14 @@ from __future__ import annotations
 from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
 
+from flext_tap_ldap._models.base import FlextTapLdapModelsBase
+from flext_tap_ldap._models.config import FlextTapLdapConfigModels
+
 
 class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
     """Models facade for the LDAP tap composed from flext-meltano and flext-ldap."""
 
-    class TapLdap:
+    class TapLdap(FlextTapLdapModelsBase, FlextTapLdapConfigModels):
         """Tap LDAP namespace for cross-project access."""
 
 
