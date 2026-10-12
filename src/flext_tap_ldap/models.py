@@ -13,8 +13,7 @@ from __future__ import annotations
 from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
 
-from flext_tap_ldap._models.base import FlextTapLdapModelsBase
-from flext_tap_ldap._models.config import FlextTapLdapConfigModels
+from flext_tap_ldap._models import FlextTapLdapConfigModels, FlextTapLdapModelsBase
 
 
 class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):

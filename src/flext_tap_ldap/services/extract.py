@@ -11,8 +11,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tap_ldap import m, p, t, u
-from flext_tap_ldap.base import s
+from flext_tap_ldap import m, p, s, t, u
 
 
 class FlextTapLdapExtractService(s):

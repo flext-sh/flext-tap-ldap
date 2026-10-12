@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tap_ldap._typings.base import FlextTapLdapTypesBase
+from flext_tap_ldap._typings import FlextTapLdapTypesBase
 
 
 class FlextTapLdapTypes(FlextTapLdapTypesBase):

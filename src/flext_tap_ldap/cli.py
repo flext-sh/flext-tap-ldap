@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from flext_tap_ldap.api import FlextTapLdapService
+from flext_tap_ldap import FlextTapLdapService
 
 if TYPE_CHECKING:
     from flext_tap_ldap import t

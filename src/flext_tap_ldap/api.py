@@ -15,7 +15,7 @@ from typing import Annotated, override
 from flext_meltano import FlextMeltanoTapServiceBase
 
 from flext_tap_ldap import c, p, t, u
-from flext_tap_ldap.services.extract import FlextTapLdapExtractService
+from flext_tap_ldap.services import FlextTapLdapExtractService
 
 
 class FlextTapLdapService(FlextMeltanoTapServiceBase):
