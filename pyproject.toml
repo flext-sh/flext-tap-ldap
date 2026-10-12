@@ -467,7 +467,7 @@ runtime-evaluated-base-classes = [
   "flext_meltano.m.FrozenModel",
   "flext_tap_ldap.FlextTapLdapModels.Entity",
   "flext_tap_ldap.FlextTapLdapSettings",
-  "flext_tap_ldap.base.s",
+  "flext_tap_ldap.s",
   "flext_tests.FlextTestsServiceBase",
   "flext_tests.FlextTestsSettings",
   "pydantic.BaseModel",

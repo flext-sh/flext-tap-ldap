@@ -10,12 +10,14 @@ from flext_ldap import FlextLdapConstants
 from flext_meltano import FlextMeltanoConstants
 
 from flext_tap_ldap._constants import (
-    FlextTapLdapConstantsConfig as _PrivateFlextTapLdapConstants,
+    FlextTapLdapConstantsApi,
+    FlextTapLdapConstantsBase,
+    FlextTapLdapConstantsConfig,
 )
 
 
 class FlextTapLdapConstants(
-    _PrivateFlextTapLdapConstants,
+    FlextTapLdapConstantsConfig,
     FlextMeltanoConstants,
     FlextLdapConstants,
 ):
@@ -27,7 +29,12 @@ class FlextTapLdapConstants(
     Composes with FlextLdapConstants to avoid duplication and ensure consistency.
     """
 
-    class TapLdap(_PrivateFlextTapLdapConstants.TapLdap):
+    class TapLdap(
+        FlextTapLdapConstantsConfig.TapLdap,
+        FlextTapLdapConstantsConfig,
+        FlextTapLdapConstantsApi,
+        FlextTapLdapConstantsBase,
+    ):
         """Tap LDAP namespace for cross-project access.
 
         LDAP-generic constants are inherited from c.Ldap via MRO:

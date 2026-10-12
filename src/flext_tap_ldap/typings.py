@@ -16,8 +16,12 @@ class FlextTapLdapTypes(FlextTapLdapTypesBase):
     ``t.TapLdap.*`` (tap-specific adapters), and all core ``t.*`` types via MRO.
     """
 
-    class TapLdap:
-        """Tap-LDAP-specific type adapters (project slot namespace)."""
+    class TapLdap(FlextTapLdapTypesBase):
+        """Tap-LDAP-specific type adapters (project slot namespace).
+
+        Composes the ``_typings`` family base so the namespace reaches every
+        class the family package declares.
+        """
 
 
 t = FlextTapLdapTypes

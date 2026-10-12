@@ -89,7 +89,7 @@ class FlextTapLdapUtilitiesExtractSupport:
                 attributes: t.MappingKV[str, t.StrSequence] = (
                     entry.attributes.attributes if entry.attributes is not None else {}
                 )
-                record: dict[str, t.JsonValue] = {"dn": dn_value}
+                record: t.JsonDict = {"dn": dn_value}
                 for key, value in attributes.items():
                     multiple: t.JsonValueList = list(value)
                     record[key] = value[0] if len(value) == 1 else multiple
