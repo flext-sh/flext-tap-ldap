@@ -6,6 +6,7 @@ to ``FlextTapLdapExtractService``. flext-meltano owns every ``singer_sdk`` detai
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
+
 """
 
 from __future__ import annotations
@@ -33,8 +34,12 @@ class FlextTapLdapService(FlextMeltanoTapServiceBase):
     ) -> p.Meltano.SingerTapInstance:
         """Build the declarative Singer tap from config streams + a fetcher.
 
+        Args:
+            settings: Unused; the tap is built from the config SSOT.
+
         Returns:
             The resulting ``p.Meltano.SingerTapInstance``.
+
         """
         _ = settings
         tap: p.Meltano.SingerTapInstance = self.build_declarative_tap(

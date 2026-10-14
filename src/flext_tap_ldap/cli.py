@@ -6,6 +6,7 @@ Dispatches the flat Singer CLI (``--config`` / ``--discover`` / ``--catalog`` /
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
+
 """
 
 from __future__ import annotations
@@ -21,8 +22,13 @@ if TYPE_CHECKING:
 def main(args: t.StrSequence | None = None) -> int:
     """Run the canonical tap-ldap Singer CLI.
 
+    Args:
+        args: Optional CLI arguments; ``None`` delegates argv handling to the
+            Singer CLI.
+
     Returns:
         The resulting ``int``.
+
     """
     # Why: mro-4p0t — meltano Tap.cli_main is int-typed; bind for mypy no-any-return.
     exit_code: int = FlextTapLdapService().cli_main(args)
