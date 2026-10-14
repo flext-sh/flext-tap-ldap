@@ -11,7 +11,7 @@ from flext_meltano import u as meltano_u
 
 
 class FlextTapLdapUtilitiesBase(meltano_u):
-    """Base utilities for _utilities family."""
+    """MRO root composing flext-meltano utilities into the ``_utilities`` family."""
 
 
 __all__: list[str] = ["FlextTapLdapUtilitiesBase"]

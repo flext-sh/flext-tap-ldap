@@ -12,7 +12,7 @@ from flext_meltano import t as meltano_t
 
 
 class FlextTapLdapTypesBase(meltano_t, t):
-    """Base typings for _typings family."""
+    """MRO root composing Meltano and LDAP typings into the ``_typings`` family."""
 
 
 __all__: list[str] = ["FlextTapLdapTypesBase"]

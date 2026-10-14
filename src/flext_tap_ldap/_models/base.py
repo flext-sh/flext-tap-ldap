@@ -11,7 +11,7 @@ from flext_meltano import m as meltano_m
 
 
 class FlextTapLdapModelsBase(meltano_m):
-    """Base models for _models family."""
+    """MRO root composing flext-meltano models into the ``_models`` family."""
 
     class ConfigNamespace(meltano_m.BaseModel):
         """Open, frozen namespace exposing every ``config/*.yaml`` domain."""

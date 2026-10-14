@@ -11,7 +11,7 @@ from flext_meltano import p as meltano_p
 
 
 class FlextTapLdapProtocolsBase(meltano_p):
-    """Base protocols for _protocols family."""
+    """MRO root composing flext-meltano protocols into the ``_protocols`` family."""
 
 
 __all__: list[str] = ["FlextTapLdapProtocolsBase"]

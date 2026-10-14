@@ -11,7 +11,7 @@ from flext_meltano import c as meltano_c
 
 
 class FlextTapLdapConstantsBase(meltano_c):
-    """Base constants for _constants family."""
+    """MRO root composing flext-meltano constants into the ``_constants`` family."""
 
 
 __all__: list[str] = ["FlextTapLdapConstantsBase"]
