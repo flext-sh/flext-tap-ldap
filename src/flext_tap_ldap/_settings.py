@@ -5,6 +5,7 @@ scalar types (env-settable).
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
+
 """
 
 from __future__ import annotations
@@ -32,8 +33,8 @@ class FlextTapLdapSettings(FlextLdapSettings):
         ``settings.Ldap.*`` via MRO and parametrized the same way.
         """
 
-        base_dn: Annotated[str, m.Field(default="", description="Search base DN")]
-        page_size: Annotated[int, m.Field(default=1000, ge=1, description="Page size")]
+        base_dn: Annotated[str, m.Field(description="Search base DN")] = ""
+        page_size: Annotated[int, m.Field(ge=1, description="Page size")] = 1000
 
     if TYPE_CHECKING:
         TapLdap: _TapLdap

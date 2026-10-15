@@ -2,11 +2,12 @@
 
 Copyright (c) 2026 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
+
 """
 
 from __future__ import annotations
 
-from flext_tap_ldap._constants.base import FlextTapLdapConstantsBase
+from flext_tap_ldap._constants import FlextTapLdapConstantsBase
 
 
 class FlextTapLdapConstantsApi(FlextTapLdapConstantsBase):

@@ -7,19 +7,27 @@ flext-ldap facade (``self.ldap``). Records are packed once into the typed
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
+
 """
 
 from __future__ import annotations
 
-from flext_tap_ldap import m, p, t, u
-from flext_tap_ldap.base import s
+from flext_tap_ldap import m, p, s, t, u
 
 
 class FlextTapLdapExtractService(s):
     """Thin orchestrator: connect, search, and pack one stream's LDAP records."""
 
     def fetch(self, request: m.Meltano.FetchRequest) -> p.Result[m.Meltano.FetchResult]:
-        """Return the records for ``request.stream_name`` as a typed result."""
+        """Return the records for ``request.stream_name`` as a typed result.
+
+        Args:
+            request: Fetch request naming the stream and carrying the tap config.
+
+        Returns:
+            The resulting ``p.Result[m.Meltano.FetchResult]``.
+
+        """
         return (
             self.ldap
             .connect(u.TapLdap.connection(request.config))
@@ -36,8 +44,12 @@ class FlextTapLdapExtractService(s):
     ) -> p.Result[t.SequenceOf[t.JsonMapping]]:
         """Run the search and pack entries into Singer records.
 
+        Args:
+            options: Typed LDAP search options resolved for the stream.
+
         Returns:
             The resulting ``p.Result[t.SequenceOf[t.JsonMapping]]``.
+
         """
         return self.ldap.search(options).map(
             lambda result: u.TapLdap.pack_entries(result.entries),

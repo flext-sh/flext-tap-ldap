@@ -14,8 +14,6 @@ from flext_tap_ldap import FlextTapLdapTypes
 class TestsFlextTapLdapTypes(FlextTestsTypes, FlextTapLdapTypes):
     """Test types combining TestsFlextTypes with flext-tap-ldap types."""
 
-    type Entry = dict[str, str | dict[str, list[str]]]
-
 
 t = TestsFlextTapLdapTypes
 __all__: list[str] = ["TestsFlextTapLdapTypes", "t"]
