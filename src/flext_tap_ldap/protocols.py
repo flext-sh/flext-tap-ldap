@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """FLEXT Tap LDAP Protocols — domain-specific LDAP tap protocol facade.
 
 The 5 inner ``TapLdap.*`` Protocol classes that previously lived here had
