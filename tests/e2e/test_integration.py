@@ -14,9 +14,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
-from flext_tests import m, tm, u
 
-from tests import c, t
+from tests import c, m, t, tm, u
 
 if TYPE_CHECKING:
     from pathlib import Path

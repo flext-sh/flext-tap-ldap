@@ -2,11 +2,12 @@
 
 Copyright (c) 2026 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
+
 """
 
 from __future__ import annotations
 
-from flext_tap_ldap._typings.base import FlextTapLdapTypesBase
+from flext_tap_ldap._typings import FlextTapLdapTypesBase
 
 
 class FlextTapLdapTypes(FlextTapLdapTypesBase):
@@ -16,8 +17,12 @@ class FlextTapLdapTypes(FlextTapLdapTypesBase):
     ``t.TapLdap.*`` (tap-specific adapters), and all core ``t.*`` types via MRO.
     """
 
-    class TapLdap:
-        """Tap-LDAP-specific type adapters (project slot namespace)."""
+    class TapLdap(FlextTapLdapTypesBase):
+        """Tap-LDAP-specific type adapters (project slot namespace).
+
+        Composes the ``_typings`` family base so the namespace reaches every
+        class the family package declares.
+        """
 
 
 t = FlextTapLdapTypes

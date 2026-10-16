@@ -7,6 +7,7 @@ the model-less YAML slice into these classes and exposes the ready objects under
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
+
 """
 
 from __future__ import annotations
@@ -45,6 +46,7 @@ class FlextTapLdapConfigModels:
         The ``config/`` directory is shared across domains (fleet tooling drops
         sibling YAML files), so unknown top-level keys are tolerated; the
         ``TapLdap`` branch itself stays strictly validated.
+
         """
 
         model_config = m.ConfigDict(extra="allow")

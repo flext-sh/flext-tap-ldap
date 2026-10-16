@@ -10,22 +10,31 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from flext_core import install_lazy_exports
-from flext_tap_ldap.__version__ import (
-    __author__,
-    __author_email__,
-    __description__,
-    __license__,
-    __title__,
-    __url__,
-    __version__,
-    __version_info__,
-)
+from flext_core.lazy import install_lazy_exports
+
+from flext_tap_ldap.__version__ import __version__
 
 if TYPE_CHECKING:
     from flext_meltano import d, e, h, r, x
 
-    from flext_tap_ldap import services
+    from flext_tap_ldap import (
+        _constants,
+        _models,
+        _protocols,
+        _typings,
+        _utilities,
+        services,
+    )
+    from flext_tap_ldap.__version__ import (
+        FlextTapLdapVersion,
+        __author__,
+        __author_email__,
+        __description__,
+        __license__,
+        __title__,
+        __url__,
+        __version_info__,
+    )
     from flext_tap_ldap._config import FlextTapLdapConfig, config
     from flext_tap_ldap._settings import FlextTapLdapSettings, settings
     from flext_tap_ldap.api import FlextTapLdapService, tap_ldap
@@ -34,7 +43,6 @@ if TYPE_CHECKING:
     from flext_tap_ldap.constants import FlextTapLdapConstants, c
     from flext_tap_ldap.models import FlextTapLdapModels, m
     from flext_tap_ldap.protocols import FlextTapLdapProtocols, p
-    from flext_tap_ldap.services.extract import FlextTapLdapExtractService
     from flext_tap_ldap.typings import FlextTapLdapTypes, t
     from flext_tap_ldap.utilities import FlextTapLdapUtilities, u
 
@@ -42,7 +50,6 @@ if TYPE_CHECKING:
 __all__: tuple[str, ...] = (
     "FlextTapLdapConfig",
     "FlextTapLdapConstants",
-    "FlextTapLdapExtractService",
     "FlextTapLdapModels",
     "FlextTapLdapProtocols",
     "FlextTapLdapService",
@@ -50,6 +57,7 @@ __all__: tuple[str, ...] = (
     "FlextTapLdapSettings",
     "FlextTapLdapTypes",
     "FlextTapLdapUtilities",
+    "FlextTapLdapVersion",
     "__author__",
     "__author_email__",
     "__description__",
@@ -58,6 +66,11 @@ __all__: tuple[str, ...] = (
     "__url__",
     "__version__",
     "__version_info__",
+    "_constants",
+    "_models",
+    "_protocols",
+    "_typings",
+    "_utilities",
     "c",
     "config",
     "d",
@@ -82,7 +95,6 @@ install_lazy_exports(
     MappingProxyType({
         "FlextTapLdapConfig": "._config",
         "FlextTapLdapConstants": ".constants",
-        "FlextTapLdapExtractService": ".services.extract",
         "FlextTapLdapModels": ".models",
         "FlextTapLdapProtocols": ".protocols",
         "FlextTapLdapService": ".api",
@@ -90,6 +102,19 @@ install_lazy_exports(
         "FlextTapLdapSettings": "._settings",
         "FlextTapLdapTypes": ".typings",
         "FlextTapLdapUtilities": ".utilities",
+        "FlextTapLdapVersion": ".__version__",
+        "__author__": ".__version__",
+        "__author_email__": ".__version__",
+        "__description__": ".__version__",
+        "__license__": ".__version__",
+        "__title__": ".__version__",
+        "__url__": ".__version__",
+        "__version_info__": ".__version__",
+        "_constants": "._constants",
+        "_models": "._models",
+        "_protocols": "._protocols",
+        "_typings": "._typings",
+        "_utilities": "._utilities",
         "c": ".constants",
         "config": "._config",
         "d": "flext_meltano",

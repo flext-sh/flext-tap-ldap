@@ -10,8 +10,7 @@ from typing import override
 
 from flext_tests import FlextTestsServiceBase
 
-from flext_tap_ldap import m
-from tests.settings import TestsFlextTapLdapSettings
+from tests import TestsFlextTapLdapSettings, m
 
 
 class TestsFlextTapLdapServiceBase(FlextTestsServiceBase):

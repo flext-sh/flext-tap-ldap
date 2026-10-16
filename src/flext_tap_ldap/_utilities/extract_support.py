@@ -6,6 +6,7 @@ read from ``config.tap_ldap`` and packed into flext-meltano transport models.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
+
 """
 
 from __future__ import annotations
@@ -25,6 +26,7 @@ class FlextTapLdapUtilitiesExtractSupport:
 
             Returns:
                 The resulting ``m.Meltano.TapSpec``.
+
             """
             streams = tuple(
                 m.Meltano.StreamSpec(
@@ -47,8 +49,13 @@ class FlextTapLdapUtilitiesExtractSupport:
         ) -> p.Result[m.Ldap.SearchOptions]:
             """Resolve a stream's business rules into typed LDAP search options.
 
+            Args:
+                stream_name: Singer stream name to resolve.
+                source: Tap runtime config mapping providing the base DN.
+
             Returns:
                 The resulting ``p.Result[m.Ldap.SearchOptions]``.
+
             """
             rule = next(
                 (item for item in config.tap_ldap.streams if item.name == stream_name),
@@ -69,8 +76,13 @@ class FlextTapLdapUtilitiesExtractSupport:
         def connection(source: t.JsonMapping) -> m.Ldap.ConnectionConfig:
             """Build the LDAP connection config from the tap runtime config.
 
+            Args:
+                source: Tap runtime config mapping validated into the
+                    connection model.
+
             Returns:
                 The resulting ``m.Ldap.ConnectionConfig``.
+
             """
             return m.Ldap.ConnectionConfig.model_validate(dict(source))
 
@@ -80,8 +92,12 @@ class FlextTapLdapUtilitiesExtractSupport:
         ) -> t.SequenceOf[t.JsonMapping]:
             """Pack flext-ldap entries into Singer-native JSON records.
 
+            Args:
+                entries: flext-ldap directory entries to convert.
+
             Returns:
                 The resulting ``t.SequenceOf[t.JsonMapping]``.
+
             """
             records: list[t.JsonMapping] = []
             for entry in entries:
@@ -89,7 +105,7 @@ class FlextTapLdapUtilitiesExtractSupport:
                 attributes: t.MappingKV[str, t.StrSequence] = (
                     entry.attributes.attributes if entry.attributes is not None else {}
                 )
-                record: dict[str, t.JsonValue] = {"dn": dn_value}
+                record: t.JsonDict = {"dn": dn_value}
                 for key, value in attributes.items():
                     multiple: t.JsonValueList = list(value)
                     record[key] = value[0] if len(value) == 1 else multiple
