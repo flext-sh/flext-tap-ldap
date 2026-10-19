@@ -51,10 +51,10 @@ class TestsFlextTapLdapIntegration:
         )
         if not result.success:
             return False, []
-        catalog = t.Cli.JSON_MAPPING_ADAPTER.validate_json(result.value)
+        catalog = u.Cli.JSON_MAPPING_ADAPTER.validate_json(result.value)
         streams = [
-            t.Cli.JSON_MAPPING_ADAPTER.validate_python(entry)
-            for entry in t.Cli.JSON_LIST_ADAPTER.validate_python(catalog["streams"])
+            u.Cli.JSON_MAPPING_ADAPTER.validate_python(entry)
+            for entry in u.Cli.JSON_LIST_ADAPTER.validate_python(catalog["streams"])
         ]
         return True, streams
 
@@ -74,5 +74,5 @@ class TestsFlextTapLdapIntegration:
         success, streams = self._discover_streams(tmp_path)
         tm.that(success, eq=True)
         for entry in streams:
-            keys = t.Cli.JSON_LIST_ADAPTER.validate_python(entry["key_properties"])
+            keys = u.Cli.JSON_LIST_ADAPTER.validate_python(entry["key_properties"])
             tm.that(list(keys), eq=list(c.Ldap.Tests.PRIMARY_KEY))
