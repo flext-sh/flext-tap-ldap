@@ -12,7 +12,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_meltano import m, t, u
+from flext_meltano import m, t
 
 
 class FlextTapLdapConfigModels:
@@ -24,18 +24,18 @@ class FlextTapLdapConfigModels:
         class StreamRule(m.FrozenModel):
             """One declarative stream business rule."""
 
-            name: str = u.Field(description="Singer stream name")
-            filter: str = u.Field(description="LDAP search filter")
-            primary_keys: t.StrSequence = u.Field(description="Record primary keys")
-            attributes: t.StrSequence = u.Field(
+            name: str = m.Field(description="Singer stream name")
+            filter: str = m.Field(description="LDAP search filter")
+            primary_keys: t.StrSequence = m.Field(description="Record primary keys")
+            attributes: t.StrSequence = m.Field(
                 description="LDAP attributes to request",
             )
-            stream_schema: t.JsonMapping = u.Field(
+            stream_schema: t.JsonMapping = m.Field(
                 alias="schema",
                 description="Singer stream JSON schema",
             )
 
-        streams: t.SequenceOf[StreamRule] = u.Field(
+        streams: t.SequenceOf[StreamRule] = m.Field(
             default=(),
             description="Declarative stream business rules",
         )
@@ -51,7 +51,7 @@ class FlextTapLdapConfigModels:
 
         model_config = m.ConfigDict(extra="allow")
 
-        TapLdap: FlextTapLdapConfigModels.TapLdap = u.Field(
+        TapLdap: FlextTapLdapConfigModels.TapLdap = m.Field(
             description="TapLdap business-rule config domain",
         )
 
