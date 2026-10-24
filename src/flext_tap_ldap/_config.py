@@ -20,7 +20,6 @@ from typing import Annotated
 
 from flext_meltano import FlextMeltanoConfig, m
 
-from flext_tap_ldap._models.base import FlextTapLdapModelsBase
 from flext_tap_ldap._models.config import FlextTapLdapConfigModels
 
 
@@ -34,11 +33,11 @@ class FlextTapLdapConfig(FlextMeltanoConfig):
     """
 
     TapLdap: Annotated[
-        FlextTapLdapModelsBase.ConfigNamespace,
+        m.Meltano.MeltanoNamespace,
         m.Field(
             description="Open namespace exposing ``config/*.yaml`` under ``TapLdap``.",
         ),
-    ] = FlextTapLdapModelsBase.ConfigNamespace()
+    ] = m.Meltano.MeltanoNamespace()
 
     @cached_property
     def tap_ldap(self) -> FlextTapLdapConfigModels.TapLdap:

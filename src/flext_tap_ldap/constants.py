@@ -18,7 +18,6 @@ from flext_tap_ldap._constants import (
 
 
 class FlextTapLdapConstants(
-    FlextTapLdapConstantsConfig,
     FlextMeltanoConstants,
     FlextLdapConstants,
 ):
@@ -31,7 +30,6 @@ class FlextTapLdapConstants(
     """
 
     class TapLdap(
-        FlextTapLdapConstantsConfig.TapLdap,
         FlextTapLdapConstantsConfig,
         FlextTapLdapConstantsApi,
         FlextTapLdapConstantsBase,

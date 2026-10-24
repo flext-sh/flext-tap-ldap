@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """FLEXT Tap LDAP models - tap-specific namespace only.
 
 Connection and search shapes come from the parent libraries (``m.Ldap.*`` from
@@ -13,8 +14,7 @@ from __future__ import annotations
 from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
 
-from flext_tap_ldap._models.base import FlextTapLdapModelsBase
-from flext_tap_ldap._models.config import FlextTapLdapConfigModels
+from flext_tap_ldap._models import FlextTapLdapConfigModels, FlextTapLdapModelsBase
 
 
 class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):

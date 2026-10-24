@@ -7,10 +7,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_meltano import c as meltano_c
 
-
-class FlextTapLdapConstantsBase(meltano_c):
+class FlextTapLdapConstantsBase:
     """MRO root composing flext-meltano constants into the ``_constants`` family."""
 
 

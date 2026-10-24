@@ -7,11 +7,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_ldap import t
-from flext_meltano import t as meltano_t
 
-
-class FlextTapLdapTypesBase(meltano_t, t):
+class FlextTapLdapTypesBase:
     """MRO root composing Meltano and LDAP typings into the ``_typings`` family."""
 
 
