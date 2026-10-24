@@ -7,10 +7,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from flext_ldap import FlextLdapTypes
+from flext_meltano import FlextMeltanoTypes
+
 from flext_tap_ldap._typings import FlextTapLdapTypesBase
 
 
-class FlextTapLdapTypes(FlextTapLdapTypesBase):
+class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
     """MRO facade composing Meltano + LDAP type namespaces.
 
     Access: ``t.Meltano.*`` (Singer protocol), ``t.Ldap.*`` (LDAP domain),
@@ -26,4 +29,5 @@ class FlextTapLdapTypes(FlextTapLdapTypesBase):
 
 
 t = FlextTapLdapTypes
+
 __all__: list[str] = ["FlextTapLdapTypes", "t"]

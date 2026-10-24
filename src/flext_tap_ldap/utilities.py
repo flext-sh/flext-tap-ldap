@@ -22,7 +22,6 @@ from flext_tap_ldap._utilities import (
 
 
 class FlextTapLdapUtilities(
-    FlextTapLdapUtilitiesExtractSupport,
     FlextMeltanoUtilities,
     FlextLdapUtilities,
 ):
@@ -31,7 +30,6 @@ class FlextTapLdapUtilities(
     class TapLdap(
         FlextTapLdapUtilitiesBase,
         FlextTapLdapUtilitiesExtractSupport,
-        FlextTapLdapUtilitiesExtractSupport.TapLdap,
     ):
         """Tap-LDAP helper namespace for cross-project access."""
 

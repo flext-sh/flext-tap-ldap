@@ -17,98 +17,95 @@ from flext_tap_ldap import c, config, m, p, r, settings, t
 class FlextTapLdapUtilitiesExtractSupport:
     """Extract helpers consumed by the tap services and CLI facade."""
 
-    class TapLdap:
-        """Tap-LDAP extract helper namespace."""
+    @staticmethod
+    def tap_spec() -> m.Meltano.TapSpec:
+        """Build the Singer tap spec: config streams + settings config schema.
 
-        @staticmethod
-        def tap_spec() -> m.Meltano.TapSpec:
-            """Build the Singer tap spec: config streams + settings config schema.
+        Returns:
+            The resulting ``m.Meltano.TapSpec``.
 
-            Returns:
-                The resulting ``m.Meltano.TapSpec``.
-
-            """
-            streams = tuple(
-                m.Meltano.StreamSpec(
-                    name=rule.name,
-                    json_schema=rule.stream_schema,
-                    primary_keys=tuple(rule.primary_keys),
-                )
-                for rule in config.tap_ldap.streams
+        """
+        streams = tuple(
+            m.Meltano.StreamSpec(
+                name=rule.name,
+                json_schema=rule.stream_schema,
+                primary_keys=tuple(rule.primary_keys),
             )
-            return m.Meltano.TapSpec(
-                tap_name=c.TapLdap.TAP_NAME,
-                config_jsonschema=type(settings).model_json_schema(),
-                streams=streams,
-            )
+            for rule in config.tap_ldap.streams
+        )
+        return m.Meltano.TapSpec(
+            tap_name=c.TapLdap.TAP_NAME,
+            config_jsonschema=type(settings).model_json_schema(),
+            streams=streams,
+        )
 
-        @staticmethod
-        def stream_search(
-            stream_name: str,
-            source: t.JsonMapping,
-        ) -> p.Result[m.Ldap.SearchOptions]:
-            """Resolve a stream's business rules into typed LDAP search options.
+    @staticmethod
+    def stream_search(
+        stream_name: str,
+        source: t.JsonMapping,
+    ) -> p.Result[m.Ldap.SearchOptions]:
+        """Resolve a stream's business rules into typed LDAP search options.
 
-            Args:
-                stream_name: Singer stream name to resolve.
-                source: Tap runtime config mapping providing the base DN.
+        Args:
+            stream_name: Singer stream name to resolve.
+            source: Tap runtime config mapping providing the base DN.
 
-            Returns:
-                The resulting ``p.Result[m.Ldap.SearchOptions]``.
+        Returns:
+            The resulting ``p.Result[m.Ldap.SearchOptions]``.
 
-            """
-            rule = next(
-                (item for item in config.tap_ldap.streams if item.name == stream_name),
-                None,
-            )
-            if rule is None:
-                return r[m.Ldap.SearchOptions].fail(f"Unknown stream: {stream_name}")
-            return r[m.Ldap.SearchOptions].from_validation(
-                {
-                    "base_dn": source.get("base_dn", settings.TapLdap.base_dn),
-                    "filter_str": rule.filter,
-                    "attributes": list(rule.attributes),
-                },
-                m.Ldap.SearchOptions,
-            )
+        """
+        rule = next(
+            (item for item in config.tap_ldap.streams if item.name == stream_name),
+            None,
+        )
+        if rule is None:
+            return r[m.Ldap.SearchOptions].fail(f"Unknown stream: {stream_name}")
+        return r[m.Ldap.SearchOptions].from_validation(
+            {
+                "base_dn": source.get("base_dn", settings.TapLdap.base_dn),
+                "filter_str": rule.filter,
+                "attributes": list(rule.attributes),
+            },
+            m.Ldap.SearchOptions,
+        )
 
-        @staticmethod
-        def connection(source: t.JsonMapping) -> m.Ldap.ConnectionConfig:
-            """Build the LDAP connection config from the tap runtime config.
+    @staticmethod
+    def connection(source: t.JsonMapping) -> m.Ldap.ConnectionConfig:
+        """Build the LDAP connection config from the tap runtime config.
 
-            Args:
-                source: Tap runtime config mapping validated into the
-                    connection model.
+        Args:
+            source: Tap runtime config mapping validated into the
+                connection model.
 
-            Returns:
-                The resulting ``m.Ldap.ConnectionConfig``.
+        Returns:
+            The resulting ``m.Ldap.ConnectionConfig``.
 
-            """
-            return m.Ldap.ConnectionConfig.model_validate(dict(source))
+        """
+        return m.Ldap.ConnectionConfig.model_validate(dict(source))
 
-        @staticmethod
-        def pack_entries(
-            entries: t.SequenceOf[p.Ldif.Entry],
-        ) -> t.SequenceOf[t.JsonMapping]:
-            """Pack flext-ldap entries into Singer-native JSON records.
+    @staticmethod
+    def pack_entries(
+        entries: t.SequenceOf[p.Ldif.Entry],
+    ) -> t.SequenceOf[t.JsonMapping]:
+        """Pack flext-ldap entries into Singer-native JSON records.
 
-            Args:
-                entries: flext-ldap directory entries to convert.
+        Args:
+            entries: flext-ldap directory entries to convert.
 
-            Returns:
-                The resulting ``t.SequenceOf[t.JsonMapping]``.
+        Returns:
+            The resulting ``t.SequenceOf[t.JsonMapping]``.
 
-            """
-            records: list[t.JsonMapping] = []
-            for entry in entries:
-                dn_value: t.JsonValue = entry.dn_str
-                attributes = entry.attributes_dict
-                record: t.JsonDict = {"dn": dn_value}
-                for key, value in attributes.items():
-                    multiple: t.JsonValueList = list(value)
-                    record[key] = value[0] if len(value) == 1 else multiple
-                records.append(record)
-            return records
+        """
+        records: list[t.JsonMapping] = []
+        for entry in entries:
+            dn_value: t.JsonValue = entry.dn_str
+            attributes = entry.attributes_dict
+            record: t.JsonDict = {"dn": dn_value}
+            for key, value in attributes.items():
+                multiple: t.JsonValueList = list(value)
+                record[key] = value[0] if len(value) == 1 else multiple
+            records.append(record)
+        return records
 
 
 __all__: list[str] = ["FlextTapLdapUtilitiesExtractSupport"]
