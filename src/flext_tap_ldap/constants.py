@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """FLEXT Tap LDAP Constants - LDAP tap extraction constants.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -30,8 +31,8 @@ class FlextTapLdapConstants(
     """
 
     class TapLdap(
-        FlextTapLdapConstantsConfig,
         FlextTapLdapConstantsApi,
+        FlextTapLdapConstantsConfig,
         FlextTapLdapConstantsBase,
     ):
         """Tap LDAP namespace for cross-project access.
