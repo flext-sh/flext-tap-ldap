@@ -1,12 +1,13 @@
 # AGENTS.md — flext-tap-ldap
 
-> **Parent workspace law** lives in [`../AGENTS.md`](../AGENTS.md) — read it first.
-> Universal engineering core: `~/.agents/UNIVERSAL_CORE.md`. Composition: global
-> skills + parent/root `AGENTS.md` + this scope delta. Do not re-embed universal law.
->
-> **Standalone / independent mode:** when `../AGENTS.md` does not resolve, pin the
-> parent raw `AGENTS.md` URL to the same branch/release as this package (never
-> `main`): <https://raw.githubusercontent.com/flext-sh/flext/0.12.0-dev/AGENTS.md>
+Read the branch-matched [FLEXT root](../AGENTS.md) and its local flext-law through
+that root's authority entry point. In standalone mode resolve the same branch or
+release; a coincidental parent instruction file does not establish FLEXT authority.
+This file adds only this package's domain delta. Command routing, architecture
+and universal execution stay with their parent owners.
+
+Embedded AI Hub or Beads generated blocks are retired delivery material, not
+active local rules. Their withdrawal remains the publisher's responsibility.
 
 <!-- AIHUB-AGENTS-SCOPE-LOCAL-BEGIN -->
 
@@ -18,44 +19,11 @@
 Singer **tap** (extractor) for LDAP directory services. Thin driver over `flext-meltano`
 (ADR-006), delegating extraction to `flext-ldap`.
 
-## Structure
-
-```text
-src/flext_tap_ldap/
-├── api.py            # FlextTapLdapService — builds a declarative meltano.Tap (TapSpec)
-├── base.py cli.py    # imports the meltano service layer
-├── services/         # FlextTapLdapExtractService (extraction)
-├── constants.py typings.py protocols.py models.py utilities.py   # AUTO-GENERATED facets
-└── _models/ _utilities/
-```
-
-## Code Map
-
-| Symbol                       | Kind  | Location    | Role                                        |
-| ---------------------------- | ----- | ----------- | ------------------------------------------- |
-| `FlextTapLdapService`        | class | `api.py`    | declarative `meltano.Tap`; builds `TapSpec` |
-| `FlextTapLdapExtractService` | class | `services/` | LDAP extraction (delegates to `flext-ldap`) |
-
-Extends the `flext-meltano` tap base; Singer SDK plumbing is owned by the meltano
-facade.
-
 ## Anti-Patterns / Gotchas
 
-- **`tap.py.bak` / `streams.py.bak` / `client.py.bak` are dead artifacts** — not active
-  entrypoints, do not treat them as source.
 - Acceptance = the tap's public CLI works end-to-end (Singer stream output).
 
 ## Conventions (specific to this package)
-
-- Config/settings canonical pattern: ADR-012.
-- Codemod governance (ast-grep + make mod): ADR-014.
-
-## Commands
-
-```bash
-make check
-make test # tests/{unit,e2e}
-```
 
 <!-- AIHUB-AGENTS-SCOPE-LOCAL-END -->
 
