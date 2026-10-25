@@ -23,5 +23,4 @@ class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
 
 p = FlextTapLdapProtocols
-
 __all__: list[str] = ["FlextTapLdapProtocols", "p"]

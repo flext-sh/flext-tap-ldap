@@ -30,5 +30,4 @@ class FlextTapLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
 
 
 t = FlextTapLdapTypes
-
 __all__: list[str] = ["FlextTapLdapTypes", "t"]

@@ -26,5 +26,4 @@ class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
 
 # Runtime alias for simplified usage
 m = FlextTapLdapModels
-
 __all__: list[str] = ["FlextTapLdapModels", "m"]
