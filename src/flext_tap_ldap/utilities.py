@@ -12,8 +12,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_ldap import FlextLdapUtilities
-from flext_meltano import FlextMeltanoUtilities
+from flext_ldap import u
+from flext_meltano import u as flext_meltano_u
 
 from flext_tap_ldap._utilities import (
     FlextTapLdapUtilitiesBase,
@@ -22,8 +22,8 @@ from flext_tap_ldap._utilities import (
 
 
 class FlextTapLdapUtilities(
-    FlextMeltanoUtilities,
-    FlextLdapUtilities,
+    flext_meltano_u,
+    u,
 ):
     """Unified LDAP tap utility facade."""
 

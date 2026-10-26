@@ -8,8 +8,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_ldap import FlextLdapConstants
-from flext_meltano import FlextMeltanoConstants
+from flext_ldap import c
+from flext_meltano import c as flext_meltano_c
 
 from flext_tap_ldap._constants import (
     FlextTapLdapConstantsApi,
@@ -19,8 +19,8 @@ from flext_tap_ldap._constants import (
 
 
 class FlextTapLdapConstants(
-    FlextMeltanoConstants,
-    FlextLdapConstants,
+    flext_meltano_c,
+    c,
 ):
     """LDAP tap extraction-specific constants following FLEXT unified pattern.
 
