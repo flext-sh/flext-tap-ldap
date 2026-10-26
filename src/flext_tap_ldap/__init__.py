@@ -13,7 +13,8 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_meltano import d, e, h, r, x
+    from flext_ldap import ldap, ldif
+    from flext_meltano import cli, d, e, h, meltano, r, x
 
     from flext_tap_ldap.__version__ import (
         FlextTapLdapVersion,
@@ -58,12 +59,16 @@ __all__: tuple[str, ...] = (
     "__version__",
     "__version_info__",
     "c",
+    "cli",
     "config",
     "d",
     "e",
     "h",
+    "ldap",
+    "ldif",
     "m",
     "main",
+    "meltano",
     "p",
     "r",
     "s",
@@ -96,12 +101,16 @@ install_lazy_exports(
         "__url__": ".__version__",
         "__version_info__": ".__version__",
         "c": ".constants",
+        "cli": "flext_meltano",
         "config": "._config",
         "d": "flext_meltano",
         "e": "flext_meltano",
         "h": "flext_meltano",
+        "ldap": "flext_ldap",
+        "ldif": "flext_ldap",
         "m": ".models",
         "main": ".cli",
+        "meltano": "flext_meltano",
         "p": ".protocols",
         "r": "flext_meltano",
         "s": ".base",

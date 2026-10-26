@@ -28,8 +28,8 @@ class FlextTapLdapUtilities(
     """Unified LDAP tap utility facade."""
 
     class TapLdap(
-        FlextTapLdapUtilitiesBase,
         FlextTapLdapUtilitiesExtractSupport,
+        FlextTapLdapUtilitiesBase,
     ):
         """Tap-LDAP helper namespace for cross-project access."""
 
