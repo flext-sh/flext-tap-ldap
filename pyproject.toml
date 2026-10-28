@@ -604,7 +604,7 @@ runtime-evaluated-base-classes = [
   "flext_meltano.FlextMeltanoTapServiceBase",
   "flext_meltano.m.BaseModel",
   "flext_meltano.m.FrozenModel",
-  "flext_tap_ldap.FlextTapLdapModels.Entity",
+  "flext_tap_ldap.FlextModelsTapLdap.Entity",
   "flext_tap_ldap.FlextTapLdapSettings",
   "flext_tap_ldap.s",
   "flext_tests.FlextTestsServiceBase",

@@ -33,16 +33,16 @@ if TYPE_CHECKING:
     from flext_tap_ldap.base import FlextTapLdapServiceBase, s
     from flext_tap_ldap.cli import main
     from flext_tap_ldap.constants import FlextTapLdapConstants, c
-    from flext_tap_ldap.models import FlextTapLdapModels, m
+    from flext_tap_ldap.models import FlextModelsTapLdap, m
     from flext_tap_ldap.protocols import FlextTapLdapProtocols, p
     from flext_tap_ldap.typings import FlextTapLdapTypes, t
     from flext_tap_ldap.utilities import FlextTapLdapUtilities, u
 
 
 __all__: tuple[str, ...] = (
+    "FlextModelsTapLdap",
     "FlextTapLdapConfig",
     "FlextTapLdapConstants",
-    "FlextTapLdapModels",
     "FlextTapLdapProtocols",
     "FlextTapLdapService",
     "FlextTapLdapServiceBase",
@@ -85,7 +85,7 @@ install_lazy_exports(
     MappingProxyType({
         "FlextTapLdapConfig": "._config",
         "FlextTapLdapConstants": ".constants",
-        "FlextTapLdapModels": ".models",
+        "FlextModelsTapLdap": ".models",
         "FlextTapLdapProtocols": ".protocols",
         "FlextTapLdapService": ".api",
         "FlextTapLdapServiceBase": ".base",

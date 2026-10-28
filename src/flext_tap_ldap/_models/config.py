@@ -15,7 +15,7 @@ from __future__ import annotations
 from flext_meltano import m, t
 
 
-class FlextTapLdapConfigModels:
+class FlextModelsTapLdapConfig:
     """Namespace of typed flext-tap-ldap config models."""
 
     class TapLdap(m.FrozenModel):
@@ -51,9 +51,9 @@ class FlextTapLdapConfigModels:
 
         model_config = m.ConfigDict(extra="allow")
 
-        TapLdap: FlextTapLdapConfigModels.TapLdap = m.Field(
+        TapLdap: FlextModelsTapLdapConfig.TapLdap = m.Field(
             description="TapLdap business-rule config domain",
         )
 
 
-__all__: list[str] = ["FlextTapLdapConfigModels"]
+__all__: list[str] = ["FlextModelsTapLdapConfig"]

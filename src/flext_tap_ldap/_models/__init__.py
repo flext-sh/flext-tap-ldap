@@ -13,18 +13,18 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_tap_ldap._models.base import FlextTapLdapModelsBase
-    from flext_tap_ldap._models.config import FlextTapLdapConfigModels
+    from flext_tap_ldap._models.base import FlextModelsTapLdapBase
+    from flext_tap_ldap._models.config import FlextModelsTapLdapConfig
 
 
-__all__: tuple[str, ...] = ("FlextTapLdapConfigModels", "FlextTapLdapModelsBase")
+__all__: tuple[str, ...] = ("FlextModelsTapLdapBase", "FlextModelsTapLdapConfig")
 
 install_lazy_exports(
     __name__,
     globals(),
     MappingProxyType({
-        "FlextTapLdapConfigModels": ".config",
-        "FlextTapLdapModelsBase": ".base",
+        "FlextModelsTapLdapConfig": ".config",
+        "FlextModelsTapLdapBase": ".base",
     }),
     public_exports=__all__,
 )

@@ -20,7 +20,7 @@ from typing import Annotated
 
 from flext_meltano import FlextMeltanoConfig, m
 
-from flext_tap_ldap._models.config import FlextTapLdapConfigModels
+from flext_tap_ldap._models.config import FlextModelsTapLdapConfig
 
 
 class FlextTapLdapConfig(FlextMeltanoConfig):
@@ -40,10 +40,10 @@ class FlextTapLdapConfig(FlextMeltanoConfig):
     ] = m.Meltano.MeltanoNamespace()
 
     @cached_property
-    def tap_ldap(self) -> FlextTapLdapConfigModels.TapLdap:
+    def tap_ldap(self) -> FlextModelsTapLdapConfig.TapLdap:
         """Validated TapLdap business-rule config (streams and their contracts)."""
         payload = self.TapLdap.model_dump()
-        return FlextTapLdapConfigModels.TapLdap.model_validate(payload)
+        return FlextModelsTapLdapConfig.TapLdap.model_validate(payload)
 
 
 config: FlextTapLdapConfig = FlextTapLdapConfig.fetch_global()
