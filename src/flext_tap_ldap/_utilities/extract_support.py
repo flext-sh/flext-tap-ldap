@@ -2,7 +2,8 @@
 
 All the tap's non-trivial logic lives here as a ``_utilities`` mixin composed
 into the ``u`` facade; ``services/*`` stay thin orchestrators. Business rules are
-read from ``config.tap_ldap`` and packed into flext-meltano transport models.
+read from the business rules under ``config.TapLdap`` (validated by
+``u.TapLdap.tap_ldap()``) and packed into flext-meltano transport models.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -11,11 +12,24 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from flext_tap_ldap import c, config, m, p, r, settings, t
 
 
 class FlextTapLdapUtilitiesExtractSupport:
     """Extract helpers consumed by the tap services and CLI facade."""
+
+    @staticmethod
+    def tap_ldap() -> m.TapLdap.TapLdap:
+        """Validated TapLdap business-rule config (streams and their contracts).
+
+        Returns:
+            The resulting ``m.TapLdap.TapLdap``.
+
+        """
+        payload: t.JsonMapping = config.TapLdap.model_dump()
+        return m.TapLdap.TapLdap.model_validate(dict(payload))
 
     @staticmethod
     def tap_spec() -> m.Meltano.TapSpec:
@@ -31,7 +45,7 @@ class FlextTapLdapUtilitiesExtractSupport:
                 json_schema=rule.stream_schema,
                 primary_keys=tuple(rule.primary_keys),
             )
-            for rule in config.tap_ldap.streams
+            for rule in FlextTapLdapUtilitiesExtractSupport.tap_ldap().streams
         )
         return m.Meltano.TapSpec(
             tap_name=c.TapLdap.TAP_NAME,
@@ -55,7 +69,11 @@ class FlextTapLdapUtilitiesExtractSupport:
 
         """
         rule = next(
-            (item for item in config.tap_ldap.streams if item.name == stream_name),
+            (
+                item
+                for item in FlextTapLdapUtilitiesExtractSupport.tap_ldap().streams
+                if item.name == stream_name
+            ),
             None,
         )
         if rule is None:
@@ -85,15 +103,15 @@ class FlextTapLdapUtilitiesExtractSupport:
 
     @staticmethod
     def pack_entries(
-        entries: t.SequenceOf[p.Ldif.Entry],
-    ) -> t.SequenceOf[t.JsonMapping]:
+        entries: Sequence[p.Ldif.Entry],
+    ) -> Sequence[t.JsonMapping]:
         """Pack flext-ldap entries into Singer-native JSON records.
 
         Args:
             entries: flext-ldap directory entries to convert.
 
         Returns:
-            The resulting ``t.SequenceOf[t.JsonMapping]``.
+            The resulting ``Sequence[t.JsonMapping]``.
 
         """
         records: list[t.JsonMapping] = []

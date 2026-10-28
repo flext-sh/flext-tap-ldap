@@ -1,9 +1,9 @@
 """flext-tap-ldap config models — typed business-rule shapes.
 
 Frozen Pydantic shapes for the ``config/tap-ldap.yaml`` business-rule SSOT,
-reusing the flext-meltano ``m`` base models. The ``_config.py`` facade validates
-the model-less YAML slice into these classes and exposes the ready objects under
-``config.tap_ldap``.
+reusing the flext-meltano ``m`` base models. The ``u`` family validates the
+model-less YAML slice into these classes and exposes the ready objects via
+``u.TapLdap.tap_ldap()``.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -11,6 +11,8 @@ SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
+
+from collections.abc import Sequence
 
 from flext_meltano import m, t
 
@@ -26,8 +28,8 @@ class FlextModelsTapLdapConfig:
 
             name: str = m.Field(description="Singer stream name")
             filter: str = m.Field(description="LDAP search filter")
-            primary_keys: t.StrSequence = m.Field(description="Record primary keys")
-            attributes: t.StrSequence = m.Field(
+            primary_keys: Sequence[str] = m.Field(description="Record primary keys")
+            attributes: Sequence[str] = m.Field(
                 description="LDAP attributes to request",
             )
             stream_schema: t.JsonMapping = m.Field(
@@ -35,7 +37,7 @@ class FlextModelsTapLdapConfig:
                 description="Singer stream JSON schema",
             )
 
-        streams: t.SequenceOf[StreamRule] = m.Field(
+        streams: Sequence[StreamRule] = m.Field(
             default=(),
             description="Declarative stream business rules",
         )

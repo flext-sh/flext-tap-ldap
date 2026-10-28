@@ -52,13 +52,13 @@ class TestsFlextTapLdapConstants(FlextTestsConstants, FlextTapLdapConstants):
                 "FLEXT_TAP_LDAP_LEGACY_ADMIN_PASSWORD",
                 "REDACTED_LDAP_BIND_PASSWORD123",
             )
-            STANDARD_STREAMS: ClassVar[tuple[str], ...] = (
+            STANDARD_STREAMS: ClassVar[tuple[str, ...]] = (
                 "users",
                 "groups",
                 "organizational_units",
                 "schema",
             )
-            PRIMARY_KEY: ClassVar[tuple[str], ...] = ("dn",)
+            PRIMARY_KEY: ClassVar[tuple[str, ...]] = ("dn",)
             CONSOLE_SCRIPT: ClassVar[str] = "tap-ldap"
             FLAG_CONFIG: ClassVar[str] = "--config"
             FLAG_DISCOVER: ClassVar[str] = "--discover"

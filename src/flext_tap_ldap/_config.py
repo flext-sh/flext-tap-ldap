@@ -3,8 +3,9 @@
 Business-rule SSOT: the stream contracts (name, LDAP filter, attributes, Singer
 schema, primary keys) live in the packaged ``flext_tap_ldap/config/tap-ldap.yaml``
 under the ``TapLdap:`` key and are exposed through the open ``config.TapLdap``
-namespace (``extra="allow"``).
-``config.tap_ldap`` is the validated typed view of that namespace.
+namespace (``extra="allow"``). The typed validated view of that namespace is
+built by the consumers in the ``u`` family (``u.TapLdap.tap_ldap()``) — config
+never imports the model layer (ADR-005 §2).
 Config holds the business rules; ``settings`` holds the adjustable runtime
 parameters (``.env`` / env vars / local settings / CLI).
 
@@ -15,12 +16,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from functools import cached_property
 from typing import Annotated
 
 from flext_meltano import FlextMeltanoConfig, m
-
-from flext_tap_ldap._models.config import FlextModelsTapLdapConfig
 
 
 class FlextTapLdapConfig(FlextMeltanoConfig):
@@ -28,8 +26,8 @@ class FlextTapLdapConfig(FlextMeltanoConfig):
 
     ``FlextMeltanoConfig`` already carries ``FlextSettings`` first (ENFORCE-042),
     so the class stays a frozen, YAML-validated config singleton. The YAML
-    ``TapLdap:`` slice is exposed as an open namespace and validated once into the
-    typed config models behind ``config.tap_ldap``.
+    ``TapLdap:`` slice is exposed as an open namespace; the typed validated
+    view lives behind ``u.TapLdap.tap_ldap()``.
     """
 
     TapLdap: Annotated[
@@ -38,12 +36,6 @@ class FlextTapLdapConfig(FlextMeltanoConfig):
             description="Open namespace exposing ``config/*.yaml`` under ``TapLdap``.",
         ),
     ] = m.Meltano.MeltanoNamespace()
-
-    @cached_property
-    def tap_ldap(self) -> FlextModelsTapLdapConfig.TapLdap:
-        """Validated TapLdap business-rule config (streams and their contracts)."""
-        payload = self.TapLdap.model_dump()
-        return FlextModelsTapLdapConfig.TapLdap.model_validate(payload)
 
 
 config: FlextTapLdapConfig = FlextTapLdapConfig.fetch_global()

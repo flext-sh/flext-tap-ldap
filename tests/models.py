@@ -11,6 +11,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Annotated
 
 from flext_tests import FlextTestsModels
@@ -69,7 +70,7 @@ class TestsFlextTapLdapModels(FlextTestsModels, FlextModelsTapLdap):
                     m.Field(description="LDAP search filter string"),
                 ]
                 attributes: Annotated[
-                    t.StrSequence | None,
+                    Sequence[str] | None,
                     m.Field(description="Attributes to retrieve in the search"),
                 ] = None
                 scope: Annotated[
