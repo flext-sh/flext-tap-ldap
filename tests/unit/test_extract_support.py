@@ -1,7 +1,7 @@
 """Behavioral tests for the tap-ldap extract-support helpers.
 
-Expected values are read from the ``u.TapLdap.tap_ldap()`` business-rule SSOT view, so the
-tests stay valid for any configured stream set.
+Expected values are read from the ``u.TapLdap.tap_ldap()`` business-rule
+SSOT view, so the tests stay valid for any configured stream set.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
