@@ -11,7 +11,7 @@ from typing import ClassVar, Final
 
 from flext_ldap import FlextLdapConstants
 
-from flext_tap_ldap._constants.base import FlextTapLdapConstantsBase
+from flext_tap_ldap._constants import FlextTapLdapConstantsBase
 
 
 class FlextTapLdapConstantsConfig(FlextTapLdapConstantsBase):

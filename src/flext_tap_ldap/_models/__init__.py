@@ -23,8 +23,8 @@ install_lazy_exports(
     __name__,
     globals(),
     MappingProxyType({
-        "FlextModelsTapLdapConfig": ".config",
         "FlextModelsTapLdapBase": ".base",
+        "FlextModelsTapLdapConfig": ".config",
     }),
     public_exports=__all__,
 )
