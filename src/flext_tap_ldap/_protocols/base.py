@@ -7,10 +7,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_meltano import p as meltano_p
 
-
-class FlextTapLdapProtocolsBase(meltano_p):
+class FlextTapLdapProtocolsBase:
     """MRO root composing flext-meltano protocols into the ``_protocols`` family."""
 
 

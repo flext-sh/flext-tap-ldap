@@ -12,6 +12,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from flext_tap_ldap import m, p, s, t, u
 
 
@@ -41,14 +43,14 @@ class FlextTapLdapExtractService(s):
     def _run_search(
         self,
         options: m.Ldap.SearchOptions,
-    ) -> p.Result[t.SequenceOf[t.JsonMapping]]:
+    ) -> p.Result[Sequence[t.JsonMapping]]:
         """Run the search and pack entries into Singer records.
 
         Args:
             options: Typed LDAP search options resolved for the stream.
 
         Returns:
-            The resulting ``p.Result[t.SequenceOf[t.JsonMapping]]``.
+            The resulting ``p.Result[Sequence[t.JsonMapping]]``.
 
         """
         return self.ldap.search(options).map(

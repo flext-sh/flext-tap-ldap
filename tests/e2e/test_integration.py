@@ -51,10 +51,10 @@ class TestsFlextTapLdapIntegration:
         )
         if not result.success:
             return False, []
-        catalog = t.Cli.JSON_MAPPING_ADAPTER.validate_json(result.value)
+        catalog = u.Cli.JSON_MAPPING_ADAPTER.validate_json(result.value)
         streams = [
-            t.Cli.JSON_MAPPING_ADAPTER.validate_python(entry)
-            for entry in t.Cli.JSON_LIST_ADAPTER.validate_python(catalog["streams"])
+            u.Cli.JSON_MAPPING_ADAPTER.validate_python(entry)
+            for entry in u.Cli.JSON_LIST_ADAPTER.validate_python(catalog["streams"])
         ]
         return True, streams
 
@@ -64,7 +64,7 @@ class TestsFlextTapLdapIntegration:
     ) -> None:
         """Discovery advertises every standard LDAP stream at exit 0."""
         success, streams = self._discover_streams(tmp_path)
-        tm.that(success, eq=True)
+        tm.ok(success)
         stream_ids = [str(entry["tap_stream_id"]) for entry in streams]
         for expected in c.Ldap.Tests.STANDARD_STREAMS:
             tm.that(stream_ids, has=expected)
@@ -72,7 +72,7 @@ class TestsFlextTapLdapIntegration:
     def test_discover_streams_declare_dn_primary_key(self, tmp_path: Path) -> None:
         """Each discovered stream declares the LDAP dn as its key property."""
         success, streams = self._discover_streams(tmp_path)
-        tm.that(success, eq=True)
+        tm.ok(success)
         for entry in streams:
-            keys = t.Cli.JSON_LIST_ADAPTER.validate_python(entry["key_properties"])
+            keys = u.Cli.JSON_LIST_ADAPTER.validate_python(entry["key_properties"])
             tm.that(list(keys), eq=list(c.Ldap.Tests.PRIMARY_KEY))

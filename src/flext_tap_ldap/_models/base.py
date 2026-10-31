@@ -7,16 +7,16 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_meltano import m as meltano_m
+from flext_meltano import m
 
 
-class FlextTapLdapModelsBase(meltano_m):
-    """MRO root composing flext-meltano models into the ``_models`` family."""
+class FlextModelsTapLdapBase:
+    """Base models for the flext-tap-ldap ``_models`` family."""
 
-    class ConfigNamespace(meltano_m.BaseModel):
+    class ConfigNamespace(m.BaseModel):
         """Open, frozen namespace exposing every ``config/*.yaml`` domain."""
 
-        model_config = meltano_m.ConfigDict(extra="allow", frozen=True)
+        model_config = m.ConfigDict(extra="allow", frozen=True)
 
 
-__all__: list[str] = ["FlextTapLdapModelsBase"]
+__all__: list[str] = ["FlextModelsTapLdapBase"]

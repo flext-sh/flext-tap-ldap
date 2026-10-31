@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """Tap LDAP utilities facade — MRO of ``_utilities`` mixins and composed libs.
 
 Composes the tap's own ``_utilities`` helpers with the flext-meltano and
@@ -11,30 +12,27 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_ldap import FlextLdapUtilities
-from flext_meltano import FlextMeltanoUtilities
+from flext_ldap import u as flext_ldap_u
+from flext_meltano import u as flext_meltano_u
 
-from flext_tap_ldap._utilities.base import FlextTapLdapUtilitiesBase
-from flext_tap_ldap._utilities.extract_support import (
+from flext_tap_ldap._utilities import (
+    FlextTapLdapUtilitiesBase,
     FlextTapLdapUtilitiesExtractSupport,
 )
 
 
 class FlextTapLdapUtilities(
-    FlextTapLdapUtilitiesExtractSupport,
-    FlextMeltanoUtilities,
-    FlextLdapUtilities,
+    flext_meltano_u,
+    flext_ldap_u,
 ):
     """Unified LDAP tap utility facade."""
 
     class TapLdap(
-        FlextTapLdapUtilitiesBase,
         FlextTapLdapUtilitiesExtractSupport,
-        FlextTapLdapUtilitiesExtractSupport.TapLdap,
+        FlextTapLdapUtilitiesBase,
     ):
         """Tap-LDAP helper namespace for cross-project access."""
 
 
 u = FlextTapLdapUtilities
-
 __all__: list[str] = ["FlextTapLdapUtilities", "u"]

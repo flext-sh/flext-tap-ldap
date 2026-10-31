@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """FLEXT Tap LDAP Protocols — domain-specific LDAP tap protocol facade.
 
 The 5 inner ``TapLdap.*`` Protocol classes that previously lived here had
@@ -13,14 +14,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_ldap import FlextLdapProtocols
-from flext_meltano import FlextMeltanoProtocols
+from flext_ldap import p as flext_ldap_p
+from flext_meltano import p as flext_meltano_p
 
 
-class FlextTapLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
+class FlextTapLdapProtocols(flext_meltano_p, flext_ldap_p):
     """Singer Tap LDAP protocols facade — composes Meltano + LDAP."""
 
 
 p = FlextTapLdapProtocols
-
 __all__: list[str] = ["FlextTapLdapProtocols", "p"]

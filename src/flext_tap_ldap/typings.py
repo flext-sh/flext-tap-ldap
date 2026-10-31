@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """LDAP tap typings - public facade.
 
 Copyright (c) 2026 FLEXT Team. All rights reserved.
@@ -7,10 +8,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from flext_ldap import t as flext_ldap_t
+from flext_meltano import t as flext_meltano_t
+
 from flext_tap_ldap._typings import FlextTapLdapTypesBase
 
 
-class FlextTapLdapTypes(FlextTapLdapTypesBase):
+class FlextTapLdapTypes(flext_meltano_t, flext_ldap_t):
     """MRO facade composing Meltano + LDAP type namespaces.
 
     Access: ``t.Meltano.*`` (Singer protocol), ``t.Ldap.*`` (LDAP domain),

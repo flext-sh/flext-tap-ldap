@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """FLEXT Tap LDAP models - tap-specific namespace only.
 
 Connection and search shapes come from the parent libraries (``m.Ldap.*`` from
@@ -10,21 +11,19 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_ldap import FlextLdapModels
-from flext_meltano import FlextMeltanoModels
+from flext_ldap import m as flext_ldap_m
+from flext_meltano import m as flext_meltano_m
 
-from flext_tap_ldap._models.base import FlextTapLdapModelsBase
-from flext_tap_ldap._models.config import FlextTapLdapConfigModels
+from flext_tap_ldap._models import FlextModelsTapLdapBase, FlextModelsTapLdapConfig
 
 
-class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
+class FlextModelsTapLdap(flext_meltano_m, flext_ldap_m):
     """Models facade for the LDAP tap composed from flext-meltano and flext-ldap."""
 
-    class TapLdap(FlextTapLdapModelsBase, FlextTapLdapConfigModels):
+    class TapLdap(FlextModelsTapLdapBase, FlextModelsTapLdapConfig):
         """Tap LDAP namespace for cross-project access."""
 
 
 # Runtime alias for simplified usage
-m = FlextTapLdapModels
-
-__all__: list[str] = ["FlextTapLdapModels", "m"]
+m = FlextModelsTapLdap
+__all__: list[str] = ["FlextModelsTapLdap", "m"]
