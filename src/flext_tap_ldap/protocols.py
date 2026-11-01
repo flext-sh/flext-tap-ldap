@@ -17,8 +17,20 @@ from __future__ import annotations
 from flext_ldap import p as flext_ldap_p
 from flext_meltano import p as flext_meltano_p
 
+from flext_tap_ldap._protocols import (
+    FlextTapLdapProtocolsBase,
+    FlextTapLdapProtocolsGeneratedModelsDomainEvent,
+    FlextTapLdapProtocolsGeneratedModelsEntity,
+)
 
-class FlextTapLdapProtocols(flext_meltano_p, flext_ldap_p):
+
+class FlextTapLdapProtocols(
+    flext_meltano_p,
+    flext_ldap_p,
+    FlextTapLdapProtocolsBase,
+    FlextTapLdapProtocolsGeneratedModelsDomainEvent,
+    FlextTapLdapProtocolsGeneratedModelsEntity,
+):
     """Singer Tap LDAP protocols facade — composes Meltano + LDAP."""
 
 
