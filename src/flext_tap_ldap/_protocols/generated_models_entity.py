@@ -8,17 +8,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
-
-if TYPE_CHECKING:
-    from collections.abc import MutableSequence as collections_abc_MutableSequence
-    from datetime import datetime as datetime_datetime
-
-    import pydantic
-
-    from flext_tap_ldap._protocols import (
-        FlextTapLdapProtocolsGeneratedModelsDomainEvent,
-    )
+from typing import Protocol, runtime_checkable
 
 
 class FlextTapLdapProtocolsGeneratedModelsEntity:
@@ -27,14 +17,6 @@ class FlextTapLdapProtocolsGeneratedModelsEntity:
     @runtime_checkable
     class Entity(Protocol):
         """Structural data contract projected from the owning model."""
-
-        version: pydantic.NonNegativeInt
-        unique_id: str
-        created_at: datetime_datetime
-        updated_at: datetime_datetime | None
-        domain_events: collections_abc_MutableSequence[
-            FlextTapLdapProtocolsGeneratedModelsDomainEvent.DomainEvent
-        ]
 
 
 __all__: list[str] = [
