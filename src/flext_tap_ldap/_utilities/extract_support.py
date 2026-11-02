@@ -21,7 +21,7 @@ class FlextTapLdapUtilitiesExtractSupport:
     """Extract helpers consumed by the tap services and CLI facade."""
 
     @staticmethod
-    def tap_ldap() -> m.TapLdap.TapLdap:
+    def tap_ldap() -> p.TapLdap.TapLdap:
         """Validated TapLdap business-rule config (streams and their contracts).
 
         Returns:
@@ -32,7 +32,7 @@ class FlextTapLdapUtilitiesExtractSupport:
         return m.TapLdap.TapLdap.model_validate(dict(payload))
 
     @staticmethod
-    def tap_spec() -> m.Meltano.TapSpec:
+    def tap_spec() -> p.Meltano.TapSpec:
         """Build the Singer tap spec: config streams + settings config schema.
 
         Returns:
@@ -57,7 +57,7 @@ class FlextTapLdapUtilitiesExtractSupport:
     def stream_search(
         stream_name: str,
         source: t.JsonMapping,
-    ) -> p.Result[m.Ldap.SearchOptions]:
+    ) -> p.Result[p.Ldap.SearchOptions]:
         """Resolve a stream's business rules into typed LDAP search options.
 
         Args:
@@ -65,7 +65,7 @@ class FlextTapLdapUtilitiesExtractSupport:
             source: Tap runtime config mapping providing the base DN.
 
         Returns:
-            The resulting ``p.Result[m.Ldap.SearchOptions]``.
+            The resulting ``p.Result[p.Ldap.SearchOptions]``.
 
         """
         rule = next(
@@ -77,8 +77,8 @@ class FlextTapLdapUtilitiesExtractSupport:
             None,
         )
         if rule is None:
-            return r[m.Ldap.SearchOptions].fail(f"Unknown stream: {stream_name}")
-        return r[m.Ldap.SearchOptions].from_validation(
+            return r[p.Ldap.SearchOptions].fail(f"Unknown stream: {stream_name}")
+        return r[p.Ldap.SearchOptions].from_validation(
             {
                 "base_dn": source.get("base_dn", settings.TapLdap.base_dn),
                 "filter_str": rule.filter,
@@ -88,7 +88,7 @@ class FlextTapLdapUtilitiesExtractSupport:
         )
 
     @staticmethod
-    def connection(source: t.JsonMapping) -> m.Ldap.ConnectionConfig:
+    def connection(source: t.JsonMapping) -> p.Ldap.ConnectionConfig:
         """Build the LDAP connection config from the tap runtime config.
 
         Args:
