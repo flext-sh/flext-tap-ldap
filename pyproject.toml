@@ -549,20 +549,9 @@ quote-style = "double"
 skip-magic-trailing-comma = false
 
 [tool.ruff.lint]
-extend-safe-fixes = [
-  "relative-imports",
-  "typing-only-first-party-import",
-  "camelcase-imported-as-lowercase",
-]
+extend-safe-fixes = ["relative-imports", "camelcase-imported-as-lowercase"]
 extend-select = ["missing-blank-line-after-last-section"]
-ignore = [
-  "missing-trailing-comma",
-  "non-empty-init-module",
-  "runtime-import-in-type-checking-block",
-  "typing-only-first-party-import",
-  "typing-only-standard-library-import",
-  "typing-only-third-party-import",
-]
+ignore = ["TC", "missing-trailing-comma", "non-empty-init-module"]
 select = ["ALL"]
 unfixable = [
   "multi-value-repeated-key-literal",
@@ -594,31 +583,11 @@ msg = "Use cli.render_table from flext_cli."
 [tool.ruff.lint.flake8-tidy-imports.banned-api.typer]
 msg = "Use cli.create_app_with_common_params / cli.register_command from flext_cli."
 
-[tool.ruff.lint.flake8-type-checking]
-runtime-evaluated-base-classes = [
-  "flext_ldap.FlextLdapSettings",
-  "flext_ldap.m.StrictModel",
-  "flext_meltano.FlextMeltanoConfig",
-  "flext_meltano.FlextMeltanoServiceBase",
-  "flext_meltano.FlextMeltanoTapServiceBase",
-  "flext_meltano.m.BaseModel",
-  "flext_meltano.m.FrozenModel",
-  "flext_tap_ldap.FlextModelsTapLdap.Entity",
-  "flext_tap_ldap.FlextTapLdapSettings",
-  "flext_tap_ldap.s",
-  "flext_tests.FlextTestsServiceBase",
-  "flext_tests.FlextTestsSettings",
-  "pydantic.BaseModel",
-]
-
 [tool.ruff.lint.isort]
 combine-as-imports = true
 force-single-line = false
 known-first-party = ["flext_tap_ldap"]
 split-on-trailing-comma = false
-
-[tool.ruff.lint.pep8-naming]
-ignore-names = ["Ldif"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

@@ -19,11 +19,11 @@
   Typed
 - Project class: `integration`
 - Keywords: `data-extraction`, `enterprise`, `etl`, `flext`, `singer`, `tap`, `typed`
-- Main facades: `FlextTapLdapConfig`, `FlextTapLdapConstants`, `FlextTapLdapProtocols`,
-  `FlextTapLdapService`, `FlextTapLdapServiceBase`, `FlextTapLdapSettings`,
-  `FlextTapLdapTypes`, `FlextTapLdapUtilities` (+1 more)
+- Main facades: `FlextTapLdapModels`, `FlextTapLdapConfig`, `FlextTapLdapConstants`,
+  `FlextTapLdapProtocols`, `FlextTapLdapService`, `FlextTapLdapServiceBase`,
+  `FlextTapLdapSettings`, `FlextTapLdapTypes` (+2 more)
 - Alias exports: `c`, `d`, `e`, `h`, `m`, `p`, `r`, `s`, `t`, `u`, `x`
-- Public symbol exports: `FlextModelsTapLdap`, `FlextTapLdapConfig`,
+- Public symbol exports: `FlextTapLdapModels`, `FlextTapLdapConfig`,
   `FlextTapLdapConstants`, `FlextTapLdapProtocols`, `FlextTapLdapService`,
   `FlextTapLdapServiceBase`, `FlextTapLdapSettings`, `FlextTapLdapTypes`,
   `FlextTapLdapUtilities`, `FlextTapLdapVersion` (+4 more)

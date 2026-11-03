@@ -7,7 +7,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 from flext_core.lazy import install_lazy_exports
@@ -32,16 +31,16 @@ if TYPE_CHECKING:
     from flext_tap_ldap.base import FlextTapLdapServiceBase, s
     from flext_tap_ldap.cli import main
     from flext_tap_ldap.constants import FlextTapLdapConstants, c
-    from flext_tap_ldap.models import FlextModelsTapLdap, m
+    from flext_tap_ldap.models import FlextTapLdapModels, m
     from flext_tap_ldap.protocols import FlextTapLdapProtocols, p
     from flext_tap_ldap.typings import FlextTapLdapTypes, t
     from flext_tap_ldap.utilities import FlextTapLdapUtilities, u
 
 
 __all__: tuple[str, ...] = (
-    "FlextModelsTapLdap",
     "FlextTapLdapConfig",
     "FlextTapLdapConstants",
+    "FlextTapLdapModels",
     "FlextTapLdapProtocols",
     "FlextTapLdapService",
     "FlextTapLdapServiceBase",
@@ -77,10 +76,10 @@ __all__: tuple[str, ...] = (
 install_lazy_exports(
     __name__,
     globals(),
-    MappingProxyType({
-        "FlextModelsTapLdap": ".models",
+    {
         "FlextTapLdapConfig": "._config",
         "FlextTapLdapConstants": ".constants",
+        "FlextTapLdapModels": ".models",
         "FlextTapLdapProtocols": ".protocols",
         "FlextTapLdapService": ".api",
         "FlextTapLdapServiceBase": ".base",
@@ -110,7 +109,7 @@ install_lazy_exports(
         "tap_ldap": ".api",
         "u": ".utilities",
         "x": "flext_meltano",
-    }),
+    },
     public_exports=__all__,
 )
 
