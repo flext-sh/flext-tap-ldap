@@ -16,7 +16,7 @@ class FlextTapLdapProtocolsBase:
     """MRO root composing flext-meltano protocols into the ``_protocols`` family."""
 
     @runtime_checkable
-    class ConfigNamespace(FlextMeltanoProtocols.Model, Protocol):
+    class ConfigNamespace(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
 

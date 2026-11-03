@@ -22,7 +22,7 @@ class FlextTapLdapProtocolsConfig:
     """Own the structural contracts declared by its model source."""
 
     @runtime_checkable
-    class TapLdap(FlextMeltanoProtocols.Model, Protocol):
+    class TapLdap(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
         @property
@@ -31,7 +31,7 @@ class FlextTapLdapProtocolsConfig:
             ...
 
     @runtime_checkable
-    class TapLdapStreamRule(FlextMeltanoProtocols.Model, Protocol):
+    class TapLdapStreamRule(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
         @property
@@ -60,7 +60,7 @@ class FlextTapLdapProtocolsConfig:
             ...
 
     @runtime_checkable
-    class Root(FlextMeltanoProtocols.Model, Protocol):
+    class Root(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
         TapLdap: FlextTapLdapProtocolsConfig.TapLdap
