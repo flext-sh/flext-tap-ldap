@@ -13,10 +13,12 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Sequence
+from typing import Annotated
 
 from flext_meltano import m
 
 from flext_tap_ldap import t
+from flext_tap_ldap._protocols import FlextTapLdapProtocolsConfig
 
 
 class FlextTapLdapModelsConfig:
@@ -44,7 +46,7 @@ class FlextTapLdapModelsConfig:
             description="Declarative stream business rules",
         )
 
-    class Root(m.FrozenModel):
+    class Root(m.BaseModel):
         """Root flext-tap-ldap config validated from ``config/*.yaml``.
 
         The ``config/`` directory is shared across domains (fleet tooling drops
@@ -53,9 +55,12 @@ class FlextTapLdapModelsConfig:
 
         """
 
-        model_config = m.ConfigDict(extra="allow")
+        model_config = m.ConfigDict(frozen=True, extra="allow")
 
-        TapLdap: FlextTapLdapModelsConfig.TapLdap = m.Field(
+        TapLdap: Annotated[
+            FlextTapLdapProtocolsConfig.TapLdap,
+            t.schema_for_model(FlextTapLdapModelsConfig.TapLdap),
+        ] = m.Field(
             description="TapLdap business-rule config domain",
         )
 

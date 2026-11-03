@@ -9,11 +9,13 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from flext_meltano import FlextMeltanoProtocols
 
-from flext_tap_ldap import t
+if TYPE_CHECKING:
+    from flext_tap_ldap import t
+    from flext_tap_ldap._protocols import FlextTapLdapProtocolsConfig
 
 
 class FlextTapLdapProtocolsConfig:
@@ -61,10 +63,7 @@ class FlextTapLdapProtocolsConfig:
     class Root(FlextMeltanoProtocols.Model, Protocol):
         """Structural data contract projected from the owning model."""
 
-        @property
-        def TapLdap(self) -> FlextTapLdapProtocolsConfig.TapLdap:
-            """TapLdap business-rule config domain."""
-            ...
+        TapLdap: FlextTapLdapProtocolsConfig.TapLdap
 
 
 __all__: list[str] = [
