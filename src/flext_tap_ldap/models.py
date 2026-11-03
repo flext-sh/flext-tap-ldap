@@ -14,16 +14,16 @@ from __future__ import annotations
 from flext_ldap import m as flext_ldap_m
 from flext_meltano import m as flext_meltano_m
 
-from flext_tap_ldap._models import FlextModelsTapLdapBase, FlextModelsTapLdapConfig
+from flext_tap_ldap._models import FlextTapLdapModelsBase, FlextTapLdapModelsConfig
 
 
-class FlextModelsTapLdap(flext_meltano_m, flext_ldap_m):
+class FlextTapLdapModels(flext_meltano_m, flext_ldap_m):
     """Models facade for the LDAP tap composed from flext-meltano and flext-ldap."""
 
-    class TapLdap(FlextModelsTapLdapBase, FlextModelsTapLdapConfig):
+    class TapLdap(FlextTapLdapModelsBase, FlextTapLdapModelsConfig):
         """Tap LDAP namespace for cross-project access."""
 
 
 # Runtime alias for simplified usage
-m = FlextModelsTapLdap
-__all__: list[str] = ["FlextModelsTapLdap", "m"]
+m = FlextTapLdapModels
+__all__: list[str] = ["FlextTapLdapModels", "m"]

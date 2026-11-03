@@ -19,6 +19,7 @@ from flext_meltano import p as flext_meltano_p
 
 from flext_tap_ldap._protocols import (
     FlextTapLdapProtocolsBase,
+    FlextTapLdapProtocolsConfig,
     FlextTapLdapProtocolsGeneratedModelsDomainEvent,
     FlextTapLdapProtocolsGeneratedModelsEntity,
 )
@@ -32,6 +33,14 @@ class FlextTapLdapProtocols(
     FlextTapLdapProtocolsGeneratedModelsEntity,
 ):
     """Singer Tap LDAP protocols facade — composes Meltano + LDAP."""
+
+    class TapLdap(
+        FlextTapLdapProtocolsBase,
+        FlextTapLdapProtocolsConfig,
+        FlextTapLdapProtocolsGeneratedModelsDomainEvent,
+        FlextTapLdapProtocolsGeneratedModelsEntity,
+    ):
+        """Tap LDAP protocol namespace."""
 
 
 p = FlextTapLdapProtocols

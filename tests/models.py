@@ -16,14 +16,14 @@ from typing import Annotated
 
 from flext_tests import FlextTestsModels
 
-from flext_tap_ldap import FlextModelsTapLdap
+from flext_tap_ldap import FlextTapLdapModels
 from tests import t
 
 
-class TestsFlextTapLdapModels(FlextTestsModels, FlextModelsTapLdap):
+class TestsFlextTapLdapModels(FlextTestsModels, FlextTapLdapModels):
     """Test models combining TestsFlextModels with flext-tap-ldap models."""
 
-    class TapLdap(FlextModelsTapLdap.TapLdap):
+    class TapLdap(FlextTapLdapModels.TapLdap):
         """TapLdap domain models extending project models."""
 
         class Tests:
@@ -33,7 +33,7 @@ class TestsFlextTapLdapModels(FlextTestsModels, FlextModelsTapLdap):
             These models are only used in tests and not in production code.
             """
 
-            class TestLdapConnection(FlextModelsTapLdap.Entity):
+            class TestLdapConnection(FlextTapLdapModels.Entity):
                 """Test model for LDAP database connections."""
 
                 host: Annotated[str, m.Field(description="LDAP server hostname")]
@@ -61,7 +61,7 @@ class TestsFlextTapLdapModels(FlextTestsModels, FlextModelsTapLdap):
                     protocol = "ldaps" if self.use_ssl else "ldap"
                     return f"{protocol}://{self.host}:{self.port}"
 
-            class TestLdapSearch(FlextModelsTapLdap.Entity):
+            class TestLdapSearch(FlextTapLdapModels.Entity):
                 """Test model for LDAP search operations."""
 
                 base_dn: Annotated[str, m.Field(description="Base DN for the search")]
@@ -88,7 +88,7 @@ class TestsFlextTapLdapModels(FlextTestsModels, FlextModelsTapLdap):
                     ),
                 ] = None
 
-            class TestLdapStream(FlextModelsTapLdap.Entity):
+            class TestLdapStream(FlextTapLdapModels.Entity):
                 """Test model for LDAP Singer streams."""
 
                 stream_name: Annotated[
@@ -109,7 +109,7 @@ class TestsFlextTapLdapModels(FlextTestsModels, FlextModelsTapLdap):
                     m.Field(description="Whether the stream is selected for sync"),
                 ] = True
 
-            class TestLdapEntry(FlextModelsTapLdap.Entity):
+            class TestLdapEntry(FlextTapLdapModels.Entity):
                 """Test model for LDAP directory entries."""
 
                 dn: Annotated[

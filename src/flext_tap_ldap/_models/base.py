@@ -10,7 +10,7 @@ from __future__ import annotations
 from flext_meltano import m
 
 
-class FlextModelsTapLdapBase:
+class FlextTapLdapModelsBase:
     """Base models for the flext-tap-ldap ``_models`` family."""
 
     class ConfigNamespace(m.BaseModel):
@@ -19,4 +19,4 @@ class FlextModelsTapLdapBase:
         model_config = m.ConfigDict(extra="allow", frozen=True)
 
 
-__all__: list[str] = ["FlextModelsTapLdapBase"]
+__all__: list[str] = ["FlextTapLdapModelsBase"]
