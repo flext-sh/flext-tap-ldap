@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import ClassVar, Final
 
-from flext_ldap import FlextLdapConstants
+from flext_ldap import c
 
 from flext_tap_ldap._constants import FlextTapLdapConstantsBase
 
@@ -23,7 +23,7 @@ class FlextTapLdapConstantsConfig(FlextTapLdapConstantsBase):
     # fatal under the fresh-import probe's -W error.
     CONFIG_DIR: ClassVar[str] = "config"
 
-    DEFAULT_SEARCH_TIMEOUT: Final[int] = FlextLdapConstants.Ldap.TIMEOUT
+    DEFAULT_SEARCH_TIMEOUT: Final[int] = c.Ldap.TIMEOUT
     TAP_NAME: Final[str] = "tap-ldap"
 
 

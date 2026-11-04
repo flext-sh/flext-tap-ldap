@@ -11,7 +11,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-from flext_meltano import FlextMeltanoProtocols
+from flext_meltano import p
 
 if TYPE_CHECKING:
     from flext_tap_ldap import t
@@ -22,7 +22,7 @@ class FlextTapLdapProtocolsConfig:
     """Own the structural contracts declared by its model source."""
 
     @runtime_checkable
-    class TapLdap(FlextMeltanoProtocols.BaseModel, Protocol):
+    class TapLdap(p.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
         @property
@@ -31,7 +31,7 @@ class FlextTapLdapProtocolsConfig:
             ...
 
     @runtime_checkable
-    class TapLdapStreamRule(FlextMeltanoProtocols.BaseModel, Protocol):
+    class TapLdapStreamRule(p.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
         @property
@@ -60,7 +60,7 @@ class FlextTapLdapProtocolsConfig:
             ...
 
     @runtime_checkable
-    class Root(FlextMeltanoProtocols.BaseModel, Protocol):
+    class Root(p.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
         TapLdap: FlextTapLdapProtocolsConfig.TapLdap

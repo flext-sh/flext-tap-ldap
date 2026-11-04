@@ -17,8 +17,7 @@ from typing import Annotated
 
 from flext_meltano import m
 
-from flext_tap_ldap import t
-from flext_tap_ldap._protocols import FlextTapLdapProtocolsConfig
+from flext_tap_ldap import p, t
 
 
 class FlextTapLdapModelsConfig:
@@ -58,7 +57,7 @@ class FlextTapLdapModelsConfig:
         model_config = m.ConfigDict(frozen=True, extra="allow")
 
         TapLdap: Annotated[
-            FlextTapLdapProtocolsConfig.TapLdap,
+            p.TapLdap.TapLdap,
             t.schema_for_model(FlextTapLdapModelsConfig.TapLdap),
         ] = m.Field(
             description="TapLdap business-rule config domain",
