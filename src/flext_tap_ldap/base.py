@@ -14,8 +14,7 @@ from __future__ import annotations
 from flext_ldap import ldap
 from flext_meltano import FlextMeltanoServiceBase
 
-from flext_tap_ldap.models import m
-from flext_tap_ldap.protocols import p
+from flext_tap_ldap import m, p
 
 
 class FlextTapLdapServiceBase(FlextMeltanoServiceBase):

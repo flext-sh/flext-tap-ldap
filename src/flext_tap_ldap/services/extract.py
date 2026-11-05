@@ -14,11 +14,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from flext_tap_ldap.models import m
-from flext_tap_ldap.protocols import p
-from flext_tap_ldap.service import s
-from flext_tap_ldap.typings import t
-from flext_tap_ldap.utilities import u
+from flext_tap_ldap import m, p, s, t, u
 
 
 class FlextTapLdapExtractService(s):
