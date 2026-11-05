@@ -13,8 +13,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import pytest
-
 from tests import c, m, t, tm, u
 
 if TYPE_CHECKING:
@@ -26,7 +24,7 @@ class TestsFlextTapLdapIntegration:
 
     # Singer discovery builds the full catalog against the real tap CLI and
     # therefore uses the config-owned slow-item budget.
-    pytestmark = pytest.mark.slow
+    pytestmark = c.Tests.MARK.slow
 
     @staticmethod
     def _discover_streams(tmp_path: Path) -> tuple[bool, list[t.JsonMapping]]:
