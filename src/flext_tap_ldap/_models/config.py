@@ -17,7 +17,8 @@ from typing import Annotated
 
 from flext_meltano import m
 
-from flext_tap_ldap import p, t
+from flext_tap_ldap.protocols import p
+from flext_tap_ldap.typings import t
 
 
 class FlextTapLdapModelsConfig:
