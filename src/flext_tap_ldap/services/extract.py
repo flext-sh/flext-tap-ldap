@@ -12,20 +12,22 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from flext_tap_ldap import m, p, s, t, u
 
 
 class FlextTapLdapExtractService(s):
     """Thin orchestrator: connect, search, and pack one stream's LDAP records."""
 
-    def fetch(self, request: m.Meltano.FetchRequest) -> p.Result[m.Meltano.FetchResult]:
+    def fetch(self, request: p.Meltano.FetchRequest) -> p.Result[p.Meltano.FetchResult]:
         """Return the records for ``request.stream_name`` as a typed result.
 
         Args:
             request: Fetch request naming the stream and carrying the tap config.
 
         Returns:
-            The resulting ``p.Result[m.Meltano.FetchResult]``.
+            The resulting ``p.Result[p.Meltano.FetchResult]``.
 
         """
         return (
@@ -40,15 +42,15 @@ class FlextTapLdapExtractService(s):
 
     def _run_search(
         self,
-        options: m.Ldap.SearchOptions,
-    ) -> p.Result[t.SequenceOf[t.JsonMapping]]:
+        options: p.Ldap.SearchOptions,
+    ) -> p.Result[Sequence[t.JsonMapping]]:
         """Run the search and pack entries into Singer records.
 
         Args:
             options: Typed LDAP search options resolved for the stream.
 
         Returns:
-            The resulting ``p.Result[t.SequenceOf[t.JsonMapping]]``.
+            The resulting ``p.Result[Sequence[t.JsonMapping]]``.
 
         """
         return self.ldap.search(options).map(

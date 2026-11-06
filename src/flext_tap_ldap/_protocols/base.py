@@ -7,11 +7,17 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_meltano import p as meltano_p
+from typing import Protocol, runtime_checkable
+
+from flext_meltano import p
 
 
-class FlextTapLdapProtocolsBase(meltano_p):
+class FlextTapLdapProtocolsBase:
     """MRO root composing flext-meltano protocols into the ``_protocols`` family."""
+
+    @runtime_checkable
+    class ConfigNamespace(p.BaseModel, Protocol):
+        """Structural data contract projected from the owning model."""
 
 
 __all__: list[str] = ["FlextTapLdapProtocolsBase"]

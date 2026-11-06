@@ -24,7 +24,7 @@ class FlextTapLdapSettings(FlextLdapSettings):
         extra="ignore",
     )
 
-    class _TapLdap(m.BaseModel):
+    class _TapLdap(m.StrictModel):
         """Tap-specific adjustable params (``settings.TapLdap.*``).
 
         All fields are set by ``.env`` / env vars / local settings / CLI / API and
