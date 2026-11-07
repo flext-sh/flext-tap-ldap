@@ -9,14 +9,14 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from flext_meltano import p
+from flext_meltano import FlextMeltanoProtocols
 
 
 class FlextTapLdapProtocolsBase:
     """MRO root composing flext-meltano protocols into the ``_protocols`` family."""
 
     @runtime_checkable
-    class ConfigNamespace(p.BaseModel, Protocol):
+    class ConfigNamespace(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
 
