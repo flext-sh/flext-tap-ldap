@@ -11,13 +11,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_ldap import m as flext_ldap_m
-from flext_meltano import m as flext_meltano_m
+from flext_ldap import FlextLdapModels
+from flext_meltano import FlextMeltanoModels
 
 from flext_tap_ldap._models import FlextTapLdapModelsBase, FlextTapLdapModelsConfig
 
 
-class FlextTapLdapModels(flext_meltano_m, flext_ldap_m):
+class FlextTapLdapModels(FlextMeltanoModels, FlextLdapModels):
     """Models facade for the LDAP tap composed from flext-meltano and flext-ldap."""
 
     class TapLdap(FlextTapLdapModelsBase, FlextTapLdapModelsConfig):
