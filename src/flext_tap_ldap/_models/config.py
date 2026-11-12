@@ -13,11 +13,10 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Annotated
 
 from flext_meltano import m
 
-from flext_tap_ldap import p, t
+from flext_tap_ldap import t
 
 
 class FlextTapLdapModelsConfig:
@@ -56,10 +55,7 @@ class FlextTapLdapModelsConfig:
 
         model_config = m.ConfigDict(frozen=True, extra="allow")
 
-        TapLdap: Annotated[
-            p.TapLdap.TapLdap,
-            t.schema_for_model(FlextTapLdapModelsConfig.TapLdap),
-        ] = m.Field(
+        TapLdap: FlextTapLdapModelsConfig.TapLdap = m.Field(
             description="TapLdap business-rule config domain",
         )
 
