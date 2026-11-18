@@ -18,4 +18,4 @@ updates:
     labels: [dependencies, python]
     cooldown:
       default-days: 10
-      exclude: ["flext-core", "flext-infra", "flext-ldap", "flext-meltano", "flext-tests"]
+      exclude: ["flext-core", "flext-ldap", "flext-meltano", "soupsieve"]

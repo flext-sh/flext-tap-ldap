@@ -41,4 +41,10 @@ install_lazy_exports(
         "FlextTapLdapProtocolsGeneratedModelsEntity": ".generated_models_entity",
     },
     public_exports=__all__,
+    deferred_members=(
+        "FlextTapLdapProtocolsBase",
+        "FlextTapLdapProtocolsConfig",
+        "FlextTapLdapProtocolsGeneratedModelsDomainEvent",
+        "FlextTapLdapProtocolsGeneratedModelsEntity",
+    ),
 )
