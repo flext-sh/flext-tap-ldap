@@ -23,4 +23,8 @@ install_lazy_exports(
     globals(),
     {"FlextTapLdapModelsBase": ".base", "FlextTapLdapModelsConfig": ".config"},
     public_exports=__all__,
+    deferred_members=(
+        "FlextTapLdapModelsBase",
+        "FlextTapLdapModelsConfig",
+    ),
 )

@@ -32,4 +32,8 @@ install_lazy_exports(
         "FlextTapLdapConstantsConfig": ".config",
     },
     public_exports=__all__,
+    deferred_members=(
+        "FlextTapLdapConstantsApi",
+        "FlextTapLdapConstantsConfig",
+    ),
 )

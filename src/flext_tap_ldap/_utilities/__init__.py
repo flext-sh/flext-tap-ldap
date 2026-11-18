@@ -31,4 +31,5 @@ install_lazy_exports(
         "FlextTapLdapUtilitiesExtractSupport": ".extract_support",
     },
     public_exports=__all__,
+    deferred_members=("FlextTapLdapUtilitiesExtractSupport",),
 )
