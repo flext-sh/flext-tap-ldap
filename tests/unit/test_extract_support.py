@@ -33,13 +33,13 @@ class TestsFlextTapLdapExtractSupport:
     @staticmethod
     def test_stream_search_resolves_configured_rule() -> None:
         """A configured stream resolves into its filter, attributes and base DN."""
-        source = {"base_dn": c.Ldap.Tests.BASE_DN}
+        source = {"base_dn": c.Tests.BASE_DN}
         for rule in u.TapLdap.tap_ldap().streams:
             options = tm.ok(u.TapLdap.stream_search(rule.name, source))
 
             tm.that(options.filter_str, eq=rule.filter)
             tm.that(list(options.attributes or ()), eq=list(rule.attributes))
-            tm.that(options.base_dn, eq=c.Ldap.Tests.BASE_DN)
+            tm.that(options.base_dn, eq=c.Tests.BASE_DN)
 
     @staticmethod
     def test_stream_search_fails_without_base_dn() -> None:

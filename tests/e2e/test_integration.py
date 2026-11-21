@@ -3,7 +3,7 @@
 Runs the REAL installed console script through the flext-cli SSOT runner
 (``u.Cli.capture``) and asserts the observable stdout catalog, exactly as an
 orchestrator invokes the tap. All fixed data comes from the shared
-``c.Ldap.Tests`` constants.
+``c.Tests`` constants.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -32,18 +32,18 @@ class TestsFlextTapLdapIntegration:
         write_result = u.Cli.json_write(
             config_path,
             {
-                "base_dn": c.Ldap.Tests.BASE_DN,
-                "host": c.Ldap.Tests.HOST,
-                "port": c.Ldap.Tests.PORT,
+                "base_dn": c.Tests.BASE_DN,
+                "host": c.Tests.HOST,
+                "port": c.Tests.PORT,
             },
         )
         tm.ok(write_result)
         result = u.Cli.capture(
             [
-                c.Ldap.Tests.CONSOLE_SCRIPT,
-                c.Ldap.Tests.FLAG_CONFIG,
+                c.Tests.CONSOLE_SCRIPT,
+                c.Tests.FLAG_CONFIG,
                 str(config_path),
-                c.Ldap.Tests.FLAG_DISCOVER,
+                c.Tests.FLAG_DISCOVER,
             ],
             options=m.Cli.ProcessOptions(remove_env_keys=("PYTHONPATH",)),
         )
@@ -64,7 +64,7 @@ class TestsFlextTapLdapIntegration:
         success, streams = self._discover_streams(tmp_path)
         tm.ok(success)
         stream_ids = [str(entry["tap_stream_id"]) for entry in streams]
-        for expected in c.Ldap.Tests.STANDARD_STREAMS:
+        for expected in c.Tests.STANDARD_STREAMS:
             tm.that(stream_ids, has=expected)
 
     def test_discover_streams_declare_dn_primary_key(self, tmp_path: Path) -> None:
@@ -73,4 +73,4 @@ class TestsFlextTapLdapIntegration:
         tm.ok(success)
         for entry in streams:
             keys = u.Cli.JSON_LIST_ADAPTER.validate_python(entry["key_properties"])
-            tm.that(list(keys), eq=list(c.Ldap.Tests.PRIMARY_KEY))
+            tm.that(list(keys), eq=list(c.Tests.PRIMARY_KEY))

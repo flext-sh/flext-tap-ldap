@@ -11,17 +11,14 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsUtilities
 
-from flext_tap_ldap import FlextTapLdapUtilities
+from tests import FlextTapLdapUtilities
 
 
 class TestsFlextTapLdapUtilities(FlextTestsUtilities, FlextTapLdapUtilities):
     """Test utilities combining TestsFlextUtilities with flext-tap-ldap utilities."""
 
-    class TapLdap(FlextTapLdapUtilities.TapLdap):
-        """TapLdap test utilities namespace."""
-
-        class Tests:
-            """Internal tests declarations."""
+    class Tests(FlextTestsUtilities.Tests):
+        """Internal tests declarations."""
 
 
 u = TestsFlextTapLdapUtilities

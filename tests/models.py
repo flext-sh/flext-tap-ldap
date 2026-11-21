@@ -1,7 +1,7 @@
-"""Test models for flext-tap-ldap - uses m.TapLdap.Tests.* namespace pattern.
+"""Test models for flext-tap-ldap - uses m.Tests.* namespace pattern.
 
 This module provides test-specific models that extend the main flext-tap-ldap models.
-Uses the unified namespace pattern m.TapLdap.Tests.* for test-only objects.
+Uses the unified namespace pattern m.Tests.* for test-only objects.
 Combines TestsFlextModels functionality with project-specific test models.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -16,119 +16,115 @@ from typing import Annotated
 
 from flext_tests import FlextTestsModels
 
-from flext_tap_ldap import FlextTapLdapModels
-from tests import t
+from tests import FlextTapLdapModels, t
 
 
 class TestsFlextTapLdapModels(FlextTestsModels, FlextTapLdapModels):
     """Test models combining TestsFlextModels with flext-tap-ldap models."""
 
-    class TapLdap(FlextTapLdapModels.TapLdap):
-        """TapLdap domain models extending project models."""
+    class Tests(FlextTestsModels.Tests):
+        """Test models namespace for flext-tap-ldap tests.
 
-        class Tests:
-            """Test models namespace for flext-tap-ldap tests.
+        Contains test-specific models extending the main models.
+        These models are only used in tests and not in production code.
+        """
 
-            Contains test-specific models extending the main models.
-            These models are only used in tests and not in production code.
-            """
+        class TestLdapConnection(FlextTapLdapModels.Entity):
+            """Test model for LDAP database connections."""
 
-            class TestLdapConnection(FlextTapLdapModels.Entity):
-                """Test model for LDAP database connections."""
+            host: Annotated[str, m.Field(description="LDAP server hostname")]
+            port: Annotated[int, m.Field(description="LDAP server port")]
+            base_dn: Annotated[
+                str,
+                m.Field(description="Base DN for LDAP searches"),
+            ]
+            bind_dn: Annotated[
+                str | None,
+                m.Field(description="Bind DN for authentication"),
+            ] = None
+            bind_password: Annotated[
+                str | None,
+                m.Field(description="Password for bind DN"),
+            ] = None
+            use_ssl: Annotated[
+                bool,
+                m.Field(description="Whether to use SSL/TLS"),
+            ] = False
 
-                host: Annotated[str, m.Field(description="LDAP server hostname")]
-                port: Annotated[int, m.Field(description="LDAP server port")]
-                base_dn: Annotated[
-                    str,
-                    m.Field(description="Base DN for LDAP searches"),
-                ]
-                bind_dn: Annotated[
-                    str | None,
-                    m.Field(description="Bind DN for authentication"),
-                ] = None
-                bind_password: Annotated[
-                    str | None,
-                    m.Field(description="Password for bind DN"),
-                ] = None
-                use_ssl: Annotated[
-                    bool,
-                    m.Field(description="Whether to use SSL/TLS"),
-                ] = False
+            @property
+            def connection_string(self) -> str:
+                """The LDAP connection string."""
+                protocol = "ldaps" if self.use_ssl else "ldap"
+                return f"{protocol}://{self.host}:{self.port}"
 
-                @property
-                def connection_string(self) -> str:
-                    """The LDAP connection string."""
-                    protocol = "ldaps" if self.use_ssl else "ldap"
-                    return f"{protocol}://{self.host}:{self.port}"
+        class TestLdapSearch(FlextTapLdapModels.Entity):
+            """Test model for LDAP search operations."""
 
-            class TestLdapSearch(FlextTapLdapModels.Entity):
-                """Test model for LDAP search operations."""
+            base_dn: Annotated[str, m.Field(description="Base DN for the search")]
+            filter_str: Annotated[
+                str,
+                m.Field(description="LDAP search filter string"),
+            ]
+            attributes: Annotated[
+                Sequence[str] | None,
+                m.Field(description="Attributes to retrieve in the search"),
+            ] = None
+            scope: Annotated[
+                str,
+                m.Field(description="Search scope (BASE, ONELEVEL, SUBTREE)"),
+            ] = "SUBTREE"
+            size_limit: Annotated[
+                int | None,
+                m.Field(description="Maximum number of entries to return"),
+            ] = None
+            time_limit: Annotated[
+                int | None,
+                m.Field(
+                    description="Maximum time allowed for the search in seconds",
+                ),
+            ] = None
 
-                base_dn: Annotated[str, m.Field(description="Base DN for the search")]
-                filter_str: Annotated[
-                    str,
-                    m.Field(description="LDAP search filter string"),
-                ]
-                attributes: Annotated[
-                    Sequence[str] | None,
-                    m.Field(description="Attributes to retrieve in the search"),
-                ] = None
-                scope: Annotated[
-                    str,
-                    m.Field(description="Search scope (BASE, ONELEVEL, SUBTREE)"),
-                ] = "SUBTREE"
-                size_limit: Annotated[
-                    int | None,
-                    m.Field(description="Maximum number of entries to return"),
-                ] = None
-                time_limit: Annotated[
-                    int | None,
-                    m.Field(
-                        description="Maximum time allowed for the search in seconds",
-                    ),
-                ] = None
+        class TestLdapStream(FlextTapLdapModels.Entity):
+            """Test model for LDAP Singer streams."""
 
-            class TestLdapStream(FlextTapLdapModels.Entity):
-                """Test model for LDAP Singer streams."""
+            stream_name: Annotated[
+                str,
+                m.Field(description="Name of the Singer stream"),
+            ]
+            base_dn: Annotated[str, m.Field(description="Base DN for the stream")]
+            object_class: Annotated[
+                str,
+                m.Field(description="Object class filtered by the stream"),
+            ]
+            replication_method: Annotated[
+                str,
+                m.Field(description="Replication method for the stream"),
+            ] = "FULL_TABLE"
+            is_selected: Annotated[
+                bool,
+                m.Field(description="Whether the stream is selected for sync"),
+            ] = True
 
-                stream_name: Annotated[
-                    str,
-                    m.Field(description="Name of the Singer stream"),
-                ]
-                base_dn: Annotated[str, m.Field(description="Base DN for the stream")]
-                object_class: Annotated[
-                    str,
-                    m.Field(description="Object class filtered by the stream"),
-                ]
-                replication_method: Annotated[
-                    str,
-                    m.Field(description="Replication method for the stream"),
-                ] = "FULL_TABLE"
-                is_selected: Annotated[
-                    bool,
-                    m.Field(description="Whether the stream is selected for sync"),
-                ] = True
+        class TestLdapEntry(FlextTapLdapModels.Entity):
+            """Test model for LDAP directory entries."""
 
-            class TestLdapEntry(FlextTapLdapModels.Entity):
-                """Test model for LDAP directory entries."""
+            dn: Annotated[
+                str,
+                m.Field(description="Distinguished name of the entry"),
+            ]
+            attributes: Annotated[
+                t.StrSequenceMapping,
+                m.Field(description="Attributes mapped to their values"),
+            ]
+            object_class: Annotated[
+                str,
+                m.Field(description="Object class of the entry"),
+            ]
 
-                dn: Annotated[
-                    str,
-                    m.Field(description="Distinguished name of the entry"),
-                ]
-                attributes: Annotated[
-                    t.StrSequenceMapping,
-                    m.Field(description="Attributes mapped to their values"),
-                ]
-                object_class: Annotated[
-                    str,
-                    m.Field(description="Object class of the entry"),
-                ]
-
-                @property
-                def attribute_count(self) -> int:
-                    """The number of attributes."""
-                    return len(self.attributes)
+            @property
+            def attribute_count(self) -> int:
+                """The number of attributes."""
+                return len(self.attributes)
 
 
 m = TestsFlextTapLdapModels
