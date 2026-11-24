@@ -14,37 +14,17 @@ from flext_core.lazy import install_lazy_exports
 if TYPE_CHECKING:
     from flext_tap_ldap._protocols.base import FlextTapLdapProtocolsBase
     from flext_tap_ldap._protocols.config import FlextTapLdapProtocolsConfig
-    from flext_tap_ldap._protocols.generated_models_domainevent import (
-        FlextTapLdapProtocolsGeneratedModelsDomainEvent,
-    )
-    from flext_tap_ldap._protocols.generated_models_entity import (
-        FlextTapLdapProtocolsGeneratedModelsEntity,
-    )
 
 
-__all__: tuple[str, ...] = (
-    "FlextTapLdapProtocolsBase",
-    "FlextTapLdapProtocolsConfig",
-    "FlextTapLdapProtocolsGeneratedModelsDomainEvent",
-    "FlextTapLdapProtocolsGeneratedModelsEntity",
-)
+__all__: tuple[str, ...] = ("FlextTapLdapProtocolsBase", "FlextTapLdapProtocolsConfig")
 
 install_lazy_exports(
     __name__,
     globals(),
-    {
-        "FlextTapLdapProtocolsBase": ".base",
-        "FlextTapLdapProtocolsConfig": ".config",
-        "FlextTapLdapProtocolsGeneratedModelsDomainEvent": (
-            ".generated_models_domainevent"
-        ),
-        "FlextTapLdapProtocolsGeneratedModelsEntity": ".generated_models_entity",
-    },
+    {"FlextTapLdapProtocolsBase": ".base", "FlextTapLdapProtocolsConfig": ".config"},
     public_exports=__all__,
     deferred_members=(
         "FlextTapLdapProtocolsBase",
         "FlextTapLdapProtocolsConfig",
-        "FlextTapLdapProtocolsGeneratedModelsDomainEvent",
-        "FlextTapLdapProtocolsGeneratedModelsEntity",
     ),
 )

@@ -30,6 +30,7 @@ if TYPE_CHECKING:
         settings,
         tap_ldap,
     )
+    from flext_tap_ldap.services import FlextTapLdapExtractService
     from tests.base import TestsFlextTapLdapServiceBase, s
     from tests.constants import TestsFlextTapLdapConstants, c
     from tests.models import TestsFlextTapLdapModels, m
@@ -42,6 +43,7 @@ if TYPE_CHECKING:
 __all__: tuple[str, ...] = (
     "FlextTapLdapConfig",
     "FlextTapLdapConstants",
+    "FlextTapLdapExtractService",
     "FlextTapLdapModels",
     "FlextTapLdapProtocols",
     "FlextTapLdapService",
@@ -85,6 +87,7 @@ install_lazy_exports(
     {
         "FlextTapLdapConfig": "flext_tap_ldap",
         "FlextTapLdapConstants": "flext_tap_ldap",
+        "FlextTapLdapExtractService": "flext_tap_ldap.services",
         "FlextTapLdapModels": "flext_tap_ldap",
         "FlextTapLdapProtocols": "flext_tap_ldap",
         "FlextTapLdapService": "flext_tap_ldap",
