@@ -1,0 +1,1 @@
+{"id":"exports--flext_tap_ldap._constants","language":"Python","rule":{"regex":"^(?:FlextTapLdapConstantsApi|FlextTapLdapConstantsBase|FlextTapLdapConstantsConfig)$"}}

@@ -1,0 +1,1 @@
+{"id":"exports--flext_tap_ldap._protocols","language":"Python","rule":{"regex":"^(?:FlextTapLdapProtocolsBase|FlextTapLdapProtocolsConfig|FlextTapLdapProtocolsGeneratedModelsDomainEvent|FlextTapLdapProtocolsGeneratedModelsEntity)$"}}

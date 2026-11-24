@@ -1,0 +1,100 @@
+{
+  "entries": [],
+  "schema_version": 5,
+  "inputs": {
+    "states": []
+  },
+  "native_artifacts": [
+    {
+      "path": "/home/marlonsc/flext/worktrees/flext-ejwc0.1/flext-tap-ldap/.reports/refactor/native/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "parent_device": 68,
+      "parent_inode": 1420189376,
+      "mode": 420,
+      "device": 68,
+      "inode": 1420190242,
+      "link_count": 1,
+      "file_attributes": null,
+      "reparse_tag": null,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "version_key": [
+        68,
+        1420190242,
+        33188,
+        1,
+        1000,
+        1000,
+        0,
+        1795148282379285617,
+        1795148282513284884,
+        0,
+        0
+      ]
+    }
+  ],
+  "command": "scan",
+  "root": "/home/marlonsc/flext/worktrees/flext-ejwc0.1/flext-tap-ldap",
+  "scope": [
+    "conftest.py",
+    "src/flext_tap_ldap/__init__.py",
+    "src/flext_tap_ldap/__version__.py",
+    "src/flext_tap_ldap/_config.py",
+    "src/flext_tap_ldap/_constants/__init__.py",
+    "src/flext_tap_ldap/_constants/api.py",
+    "src/flext_tap_ldap/_constants/base.py",
+    "src/flext_tap_ldap/_constants/config.py",
+    "src/flext_tap_ldap/_models/__init__.py",
+    "src/flext_tap_ldap/_models/base.py",
+    "src/flext_tap_ldap/_models/config.py",
+    "src/flext_tap_ldap/_protocols/__init__.py",
+    "src/flext_tap_ldap/_protocols/base.py",
+    "src/flext_tap_ldap/_protocols/config.py",
+    "src/flext_tap_ldap/_protocols/generated_models_domainevent.py",
+    "src/flext_tap_ldap/_protocols/generated_models_entity.py",
+    "src/flext_tap_ldap/_settings.py",
+    "src/flext_tap_ldap/_typings/__init__.py",
+    "src/flext_tap_ldap/_typings/base.py",
+    "src/flext_tap_ldap/_utilities/__init__.py",
+    "src/flext_tap_ldap/_utilities/base.py",
+    "src/flext_tap_ldap/_utilities/extract_support.py",
+    "src/flext_tap_ldap/api.py",
+    "src/flext_tap_ldap/base.py",
+    "src/flext_tap_ldap/cli.py",
+    "src/flext_tap_ldap/constants.py",
+    "src/flext_tap_ldap/models.py",
+    "src/flext_tap_ldap/protocols.py",
+    "src/flext_tap_ldap/services/__init__.py",
+    "src/flext_tap_ldap/services/extract.py",
+    "src/flext_tap_ldap/typings.py",
+    "src/flext_tap_ldap/utilities.py",
+    "tests/__init__.py",
+    "tests/base.py",
+    "tests/conftest.py",
+    "tests/constants.py",
+    "tests/e2e/__init__.py",
+    "tests/e2e/conftest.py",
+    "tests/e2e/test_integration.py",
+    "tests/models.py",
+    "tests/protocols.py",
+    "tests/settings.py",
+    "tests/typings.py",
+    "tests/unit/__init__.py",
+    "tests/unit/test_extract_support.py",
+    "tests/utilities.py"
+  ],
+  "totals_by_class": {
+    "actionable": 0,
+    "detection_only": 0,
+    "non_actionable_with_fix": 0,
+    "deferred_source_drift": 0
+  },
+  "totals_by_repository": {
+    "flext-tap-ldap": 0
+  },
+  "totals_by_rule": {
+    "ban-core-tests-namespace-declaration": 0,
+    "ban-core-tests-namespace-declaration-bare": 0,
+    "ban-core-tests-namespace-declaration-mixed": 0,
+    "ban-core-tests-namespace-reference": 0
+  }
+}

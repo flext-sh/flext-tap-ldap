@@ -1,0 +1,1 @@
+{"id":"exports--flext_tap_ldap._utilities","language":"Python","rule":{"regex":"^(?:FlextTapLdapUtilitiesBase|FlextTapLdapUtilitiesExtractSupport)$"}}

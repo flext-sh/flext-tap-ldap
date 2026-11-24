@@ -1,0 +1,1 @@
+{"id":"protocol-model-path","language":"Python","rule":{"regex":"^(?:p|m)\\.(?:BaseModel|FrozenModel|Ldap\\.Ldap|SettingsConfigDict|StrictModel|TapLdap\\.TapLdap)$"}}
